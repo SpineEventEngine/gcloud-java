@@ -1,0 +1,70 @@
+project.ext {
+    PROTOBUF_VERSION = '3.0.0-beta-1';
+    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.7.0'
+    }
+}
+
+allprojects {
+
+    apply plugin: 'java';
+    apply plugin: 'maven';
+    group = 'com.spine3.gae-java';
+    version = '0.1';
+}
+
+subprojects {
+
+    apply plugin: 'java';
+    apply plugin: 'com.google.protobuf';
+
+    sourceCompatibility = 1.7;
+    targetCompatibility = 1.7;
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+
+        // TODO:2015-11-19:alexander.litus: change local dependency to Maven central repository dependency
+        // Spine
+        compile group: 'org.spine3', name: 'core-java', version: '0.1', changing: true
+
+        // Guava
+        compile group: 'com.google.guava', name: 'guava', version: '19.0-rc2'
+
+        // Findbugs
+        compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
+
+        // SLF4J
+        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
+        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.12'
+
+        // Protobuf
+        compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
+        compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: project.PROTOBUF_VERSION
+
+        // JUnit
+        testCompile(group: 'junit', name: 'junit', version: '4.12') {
+            exclude(module: 'hamcrest-core')
+        }
+        testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+    }
+
+    protobuf {
+        generatedFilesBaseDir = "$projectDir/generated"
+        protoc {
+            artifact = project.PROTOBUF_DEPENDENCY
+        }
+    }
+}
