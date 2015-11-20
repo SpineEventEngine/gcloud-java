@@ -1,0 +1,4 @@
+rootProject.name = 'gae-java'
+
+include ':gcd'
+project(':gcd').projectDir = "$rootDir/gcd" as File
