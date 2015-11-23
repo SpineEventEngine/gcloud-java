@@ -5,7 +5,8 @@ repositories {
 
 dependencies {
 
-    // TODO:2015-11-19:alexander.litus: change local dependencies to Maven central repository dependency
+    // TODO:2015-11-19:alexander.litus: change Spine local dependencies to Maven central repository dependencies
+    // when Spine can be used for evaluation in real projects.
     // Spine tests and sample
     compile group: 'org.spine3', name: 'core-java', version: project.SPINE_VERSION, changing: true, classifier: 'test'
     compile group: 'org.spine3', name: 'core-java-sample', version: project.SPINE_VERSION, changing: true

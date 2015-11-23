@@ -51,7 +51,8 @@ subprojects {
 
     dependencies {
 
-        // TODO:2015-11-19:alexander.litus: change local dependency to Maven central repository dependency
+        // TODO:2015-11-19:alexander.litus: change Spine local dependency to Maven central repository dependency
+        // when Spine can be used for evaluation in real projects.
         // Spine
         compile group: 'org.spine3', name: 'core-java', version: project.SPINE_VERSION, changing: true
 
