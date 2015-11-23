@@ -21,6 +21,7 @@
 package org.spine3.sample.gae;
 
 import org.spine3.sample.Application;
+import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
 
 /**
@@ -28,8 +29,17 @@ import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings({"UtilityClassWithoutPrivateConstructor", "UtilityClass"})
-public class ApplicationOnDatastore {
+public class ApplicationOnDatastore extends Application {
+
+    /**
+     * Creates a new sample with the specified storage factory.
+     *
+     * @param storageFactory factory used to create and set up storages.
+     */
+    @SuppressWarnings("TypeMayBeWeakened") // not in this case
+    public ApplicationOnDatastore(DatastoreStorageFactory storageFactory) {
+        super(storageFactory);
+    }
 
     /**
      * The entry point of the sample.
@@ -39,7 +49,7 @@ public class ApplicationOnDatastore {
      */
     public static void main(String[] args) {
         final LocalDatastoreStorageFactory storageFactory = LocalDatastoreStorageFactory.getDefaultInstance();
-        final Application app = new Application(storageFactory);
+        final ApplicationOnDatastore app = new ApplicationOnDatastore(storageFactory);
         app.execute();
     }
 }
