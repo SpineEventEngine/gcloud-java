@@ -20,26 +20,15 @@
 
 package org.spine3.sample.gae;
 
-import org.spine3.sample.Application;
-import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
+import org.junit.Test;
 
-/**
- * A sample application showing basic usage of Spine framework running on GAE local Datastore.
- *
- * @author Alexander Litus
- */
-@SuppressWarnings({"UtilityClassWithoutPrivateConstructor", "UtilityClass"})
-public class DatastoreApplication {
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class ApplicationOnDatastoreShould {
 
-    /**
-     * The entry point of the sample.
-     *
-     * See instructions on configuring local Datastore environment on this page:
-     * https://github.com/SpineEventEngine/gae-java/wiki/Configuring-Local-Datastore-Environment
-     */
-    public static void main(String[] args) {
-        final LocalDatastoreStorageFactory storageFactory = LocalDatastoreStorageFactory.getDefaultInstance();
-        final Application app = new Application(storageFactory);
-        app.execute();
+    private static final String[] ARGS = new String[0];
+
+    @Test
+    public void execute() {
+        ApplicationOnDatastore.main(ARGS);
     }
 }
