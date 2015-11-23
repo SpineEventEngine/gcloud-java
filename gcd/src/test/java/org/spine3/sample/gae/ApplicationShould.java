@@ -23,12 +23,12 @@ package org.spine3.sample.gae;
 import org.junit.Test;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ApplicationOnDatastoreShould {
+public class ApplicationShould {
 
     private static final String[] ARGS = new String[0];
 
     @Test
     public void execute() {
-        ApplicationOnDatastore.main(ARGS);
+        Application.main(ARGS);
     }
 }
