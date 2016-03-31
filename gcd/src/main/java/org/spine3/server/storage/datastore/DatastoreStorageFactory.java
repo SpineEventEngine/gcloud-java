@@ -33,6 +33,9 @@ import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * Creates storages based on GAE {@link Datastore}.
+ *
+ * @author Alexander Litus
+ * @author Mikhail Mikhaylov
  */
 public class DatastoreStorageFactory implements StorageFactory {
 
@@ -65,8 +68,10 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> aClass) {
-        // TODO:2016-03-29:mikhail.mikhaylov: Implement.
-        return null;
+        // TODO:2016-03-31:mikhail.mikhaylov: We re-create instances here just as for InMemoryStorages. This behavior should change.
+        final DsEntityStorage<I> entityStorage = (DsEntityStorage<I>) createEntityStorage(aClass);
+        final DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastore);
+        return DsProjectionStorage.newInstance(entityStorage, propertyStorage);
     }
 
     @Override
