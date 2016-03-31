@@ -23,13 +23,13 @@ package org.spine3.server.storage.datastore;
 import com.google.api.services.datastore.client.Datastore;
 import com.google.api.services.datastore.client.DatastoreOptions;
 import com.google.protobuf.Message;
-import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.*;
 
 import static com.google.protobuf.Descriptors.Descriptor;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
-import static org.spine3.util.Classes.getGenericParameterType;
+import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * Creates storages based on GAE {@link Datastore}.
@@ -63,29 +63,27 @@ public class DatastoreStorageFactory implements StorageFactory {
         return DsEventStorage.newInstance(datastore);
     }
 
-    /**
-     * NOTE: the parameter is not used.
-     */
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
-        return DsAggregateStorage.newInstance(datastore);
+    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> aClass) {
+        // TODO:2016-03-29:mikhail.mikhaylov: Implement.
+        return null;
     }
 
     @Override
-    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-
+    public <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
         return DsEntityStorage.newInstance(descriptor, datastore);
     }
 
     @Override
-    public void setUp() {
-        // NOP
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> ignored) {
+        return DsAggregateStorage.newInstance(datastore);
     }
 
     @Override
-    public void tearDown() {
+    public void close() throws Exception {
+        // TODO:2016-03-29:mikhail.mikhaylov: Check if it's really a NOP case.
         // NOP
     }
 }

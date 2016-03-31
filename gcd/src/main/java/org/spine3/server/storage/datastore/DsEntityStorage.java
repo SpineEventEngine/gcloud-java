@@ -20,18 +20,20 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
-import org.spine3.TypeName;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.type.TypeName;
+
+import javax.annotation.Nullable;
 
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
-import static org.spine3.util.Identifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 
 /**
  * {@link EntityStorage} implementation based on Google App Engine Datastore.
@@ -40,12 +42,12 @@ import static org.spine3.util.Identifiers.idToString;
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
-class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+class DsEntityStorage<I> extends EntityStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeName typeName;
 
-    protected static <I, M extends Message> DsEntityStorage<I, M> newInstance(Descriptor descriptor, DatastoreWrapper datastore) {
+    protected static <I, M extends Message> DsEntityStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore) {
         return new DsEntityStorage<>(descriptor, datastore);
     }
 
@@ -60,32 +62,32 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         this.datastore = datastore;
     }
 
+    @Nullable
     @Override
-    public M read(I id) {
-
-        final String idString = idToString(id);
+    protected EntityStorageRecord readInternal(I i) {
+        final String idString = idToString(i);
         final Key.Builder key = createKey(idString);
         final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
 
         final LookupResponse response = datastore.lookup(request);
 
         if (response == null || response.getFoundCount() == 0) {
-            return getEmptyMessage();
+            return getEmptyRecord();
         }
+
         final EntityResult entity = response.getFound(0);
-        final M result = entityToMessage(entity, typeName.toTypeUrl());
+        final EntityStorageRecord result = entityToMessage(entity, typeName.toTypeUrl());
         return result;
     }
 
     @Override
-    public void write(I id, M message) {
+    protected void writeInternal(I i, EntityStorageRecord entityStorageRecord) {
+        checkNotNull(i, "Id is null.");
+        checkNotNull(entityStorageRecord, "Message is null.");
 
-        checkNotNull(id, "Id is null.");
-        checkNotNull(message, "Message is null.");
-
-        final String idString = idToString(id);
+        final String idString = idToString(i);
         final Key.Builder key = createKey(idString);
-        final Entity.Builder entity = messageToEntity(message, key);
+        final Entity.Builder entity = messageToEntity(entityStorageRecord, key);
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
         datastore.commit(mutation);
     }
@@ -94,9 +96,8 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         return makeKey(typeName.nameOnly(), idString);
     }
 
-    private M getEmptyMessage() {
-        @SuppressWarnings("unchecked") // cast is save because Any is Message
-        final M empty = (M) Any.getDefaultInstance();
+    private static EntityStorageRecord getEmptyRecord() {
+        final EntityStorageRecord empty = EntityStorageRecord.getDefaultInstance();
         return empty;
     }
 }

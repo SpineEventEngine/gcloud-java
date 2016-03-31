@@ -1,6 +1,6 @@
 project.ext {
-    SPINE_VERSION = '0.1';
-    PROTOBUF_VERSION = '3.0.0-beta-1';
+    SPINE_VERSION = '0.2';
+    PROTOBUF_VERSION = '3.0.0-beta-2';
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
 }
@@ -54,7 +54,7 @@ subprojects {
         // TODO:2015-11-19:alexander.litus: change Spine local dependency to Maven central repository dependency
         // when Spine can be used for evaluation in real projects.
         // Spine
-        compile group: 'org.spine3', name: 'core-java', version: project.SPINE_VERSION, changing: true
+        compile group: 'org.spine3', name: 'server', version: project.SPINE_VERSION, changing: true
 
         // Guava
         compile group: 'com.google.guava', name: 'guava', version: '19.0-rc2'

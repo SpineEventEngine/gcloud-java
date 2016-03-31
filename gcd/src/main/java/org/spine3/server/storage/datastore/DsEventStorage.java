@@ -20,19 +20,23 @@
 
 package org.spine3.server.storage.datastore;
 
-import org.spine3.base.EventRecord;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
+import org.spine3.base.Event;
+import org.spine3.base.EventId;
+import org.spine3.server.event.EventStreamQuery;
+import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.server.storage.EventStorageRecord;
+import org.spine3.type.TypeName;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.api.services.datastore.DatastoreV1.*;
-import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.ASCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
-import static org.spine3.TypeName.toTypeUrl;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
-import static org.spine3.util.Events.toEventRecordsIterator;
 
 /**
  * Storage for event records based on Google Cloud Datastore.
@@ -44,8 +48,8 @@ import static org.spine3.util.Events.toEventRecordsIterator;
 class DsEventStorage extends EventStorage {
 
     private final DatastoreWrapper datastore;
-    private static final String KIND = EventStoreRecord.class.getName();
-    private static final String TYPE_URL = toTypeUrl(EventStoreRecord.getDescriptor());
+    private static final String KIND = EventStorageRecord.class.getName();
+    private static final String TYPE_URL = TypeName.of(EntityStorageRecord.getDescriptor()).toTypeUrl();
 
     protected static DsEventStorage newInstance(DatastoreWrapper datastore) {
         return new DsEventStorage(datastore);
@@ -56,18 +60,18 @@ class DsEventStorage extends EventStorage {
     }
 
     @Override
-    public Iterator<EventRecord> allEvents() {
+    public Iterator<Event> iterator(EventStreamQuery eventStreamQuery) {
 
-        final Query.Builder query = makeQuery(ASCENDING, KIND);
+        final Query.Builder query = makeQuery(eventStreamQuery, KIND);
         final List<EntityResult> entityResults = datastore.runQuery(query);
-        final List<EventStoreRecord> records = entitiesToMessages(entityResults, TYPE_URL);
-        final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
+        final List<EventStorageRecord> records = entitiesToMessages(entityResults, TYPE_URL);
+        // TODO:2016-03-30:mikhail.mikhaylov: Should use some pagination for data, because now we load ALL of it here
+        final Iterator<Event> iterator = Iterators.transform(records.iterator(), TO_EVENT);
         return iterator;
     }
 
     @Override
-    protected void write(EventStoreRecord record) {
-
+    protected void writeInternal(EventStorageRecord record) {
         final Key.Builder key = makeKey(KIND, record.getEventId());
         final Entity.Builder entity = messageToEntity(record, key);
         entity.addProperty(makeTimestampProperty(record.getTimestamp()));
@@ -76,8 +80,20 @@ class DsEventStorage extends EventStorage {
         datastore.commit(mutation);
     }
 
+    @Nullable
     @Override
-    protected void releaseResources() {
-        // NOP
+    protected EventStorageRecord readInternal(EventId eventId) {
+        return null;
     }
+
+    private static final Function<EventStorageRecord, Event> TO_EVENT = new Function<EventStorageRecord, Event>() {
+        @Override
+        public Event apply(@Nullable EventStorageRecord input) {
+            if (input == null) {
+                return Event.getDefaultInstance();
+            }
+            final Event result = toEvent(input);
+            return result;
+        }
+    };
 }

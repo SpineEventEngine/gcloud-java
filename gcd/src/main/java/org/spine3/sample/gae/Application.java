@@ -28,7 +28,7 @@ import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
  *
  * @author Alexander Litus
  */
-public class Application extends org.spine3.sample.Application {
+public class Application extends org.spine3.examples.aggregate.server.Application {
 
     /**
      * Creates a new sample with the specified storage factory.
@@ -48,7 +48,9 @@ public class Application extends org.spine3.sample.Application {
      */
     public static void main(String[] args) {
         final LocalDatastoreStorageFactory storageFactory = LocalDatastoreStorageFactory.getDefaultInstance();
+//        storageFactory.setUp();
         final Application app = new Application(storageFactory);
         app.execute();
+//        storageFactory.tearDown();
     }
 }

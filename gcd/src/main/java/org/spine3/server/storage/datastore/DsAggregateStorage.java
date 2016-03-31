@@ -20,9 +20,9 @@
 
 package org.spine3.server.storage.datastore;
 
-import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.type.TypeName;
 
 import java.util.Iterator;
 import java.util.List;
@@ -31,9 +31,8 @@ import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
-import static org.spine3.TypeName.toTypeUrl;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
-import static org.spine3.util.Identifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -44,12 +43,14 @@ import static org.spine3.util.Identifiers.idToString;
  */
 class DsAggregateStorage<I> extends AggregateStorage<I> {
 
+    private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
+
     private static final String KIND = AggregateStorageRecord.class.getName();
-    private static final String TYPE_URL = toTypeUrl(AggregateStorageRecord.getDescriptor());
+    private static final String TYPE_URL = TypeName.of(AggregateStorageRecord.getDescriptor()).toTypeUrl();
 
     private final DatastoreWrapper datastore;
 
-    protected static <I> DsAggregateStorage<I> newInstance(DatastoreWrapper datastore) {
+    /* package */ static <I> DsAggregateStorage<I> newInstance(DatastoreWrapper datastore) {
         return new DsAggregateStorage<>(datastore);
     }
 
@@ -58,10 +59,10 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void write(AggregateStorageRecord record) {
+    protected void writeInternal(I id, AggregateStorageRecord record) {
 
-        final Value.Builder idValue = makeValue(record.getAggregateId());
-        final Property.Builder idProperty = makeProperty(AggregateId.PROPERTY_NAME, idValue);
+        final Value.Builder idValue = makeValue(idToString(id));
+        final Property.Builder idProperty = makeProperty(AGGREGATE_ID_PROPERTY_NAME, idValue);
         final Entity.Builder entity = messageToEntity(record, makeKey(KIND));
         entity.addProperty(idProperty);
         entity.addProperty(makeTimestampProperty(record.getTimestamp()));
@@ -74,17 +75,13 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
 
         final String idString = idToString(id);
-        final Filter.Builder idFilter = makeFilter(AggregateId.PROPERTY_NAME, EQUAL, makeValue(idString));
+        final Filter.Builder idFilter = makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL,
+                makeValue(idString));
         final Query.Builder query = makeQuery(DESCENDING, KIND);
         query.setFilter(idFilter).build();
 
         final List<EntityResult> entityResults = datastore.runQuery(query);
         final List<AggregateStorageRecord> records = entitiesToMessages(entityResults, TYPE_URL);
         return records.iterator();
-    }
-
-    @Override
-    protected void releaseResources() {
-        // NOP
     }
 }

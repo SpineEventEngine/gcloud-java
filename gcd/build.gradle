@@ -8,9 +8,10 @@ dependencies {
     // TODO:2015-11-19:alexander.litus: change Spine local dependencies to Maven central repository dependencies
     // when Spine can be used for evaluation in real projects.
     // Spine tests and sample
-    compile group: 'org.spine3', name: 'core-java', version: project.SPINE_VERSION, changing: true, classifier: 'test'
-    compile group: 'org.spine3', name: 'core-java-sample', version: project.SPINE_VERSION, changing: true
+    compile group: 'org.spine3', name: 'client', version: project.SPINE_VERSION, changing: true
+    compile group: 'org.spine3', name: 'server', version: project.SPINE_VERSION, changing: true
+    compile group: 'org.spine3', name: 'examples', version: project.SPINE_VERSION, changing: true
 
     // Google Cloud Datastore
-    compile group: 'com.google.apis', name: 'google-api-services-datastore-protobuf', version: 'v1beta2-rev1-3.0.2'
+    compile group: 'com.google.apis', name: 'google-api-services-datastore-protobuf', version: 'v1beta2-rev1-4.0.0'
 }

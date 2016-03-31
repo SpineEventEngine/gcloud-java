@@ -20,11 +20,19 @@
 
 package org.spine3.server.storage.datastore;
 
+import org.spine3.base.CommandId;
+import org.spine3.base.CommandStatus;
+import org.spine3.base.Error;
+import org.spine3.base.Failure;
 import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.CommandStoreRecord;
+import org.spine3.server.storage.CommandStorageRecord;
+import org.spine3.type.TypeName;
 
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.makeTimestampProperty;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 
@@ -40,9 +48,11 @@ class DsCommandStorage extends CommandStorage {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String COMMAND_ID_PROPERTY_NAME = "commandId";
 
-    private static final String KIND = CommandStoreRecord.class.getName();
+    private static final String KIND = CommandStorageRecord.class.getName();
 
     private final DatastoreWrapper datastore;
+
+    private final TypeName typeName;
 
     protected static CommandStorage newInstance(DatastoreWrapper datastore) {
         return new DsCommandStorage(datastore);
@@ -50,11 +60,65 @@ class DsCommandStorage extends CommandStorage {
 
     private DsCommandStorage(DatastoreWrapper datastore) {
         this.datastore = datastore;
+        typeName = TypeName.of(CommandStorageRecord.getDescriptor());
     }
 
     @Override
-    protected void write(CommandStoreRecord record) {
+    public void setOkStatus(CommandId commandId) {
+        checkNotNull(commandId);
 
+        final CommandStorageRecord updatedRecord = read(commandId)
+                .toBuilder()
+                .setStatus(CommandStatus.OK)
+                .build();
+        write(commandId, updatedRecord);
+    }
+
+    @Override
+    public void updateStatus(CommandId commandId, Error error) {
+        checkNotNull(commandId);
+        checkNotNull(error);
+
+        final CommandStorageRecord updatedRecord = read(commandId)
+                .toBuilder()
+                .setStatus(CommandStatus.FAILURE)
+                .setError(error)
+                .build();
+        write(commandId, updatedRecord);
+    }
+
+    @Override
+    public void updateStatus(CommandId commandId, Failure failure) {
+        checkNotNull(commandId);
+        checkNotNull(failure);
+
+        final CommandStorageRecord updatedRecord = read(commandId)
+                .toBuilder()
+                .setStatus(CommandStatus.FAILURE)
+                .setFailure(failure)
+                .build();
+        write(commandId, updatedRecord);
+    }
+
+    @Override
+    public CommandStorageRecord read(CommandId commandId) {
+        final String idString = idToString(commandId);
+        final Key.Builder key = createKey(idString);
+        final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
+
+        final LookupResponse response = datastore.lookup(request);
+
+        if (response == null || response.getFoundCount() == 0) {
+            return CommandStorageRecord.getDefaultInstance();
+        }
+
+        final EntityResult entity = response.getFound(0);
+        final CommandStorageRecord result = entityToMessage(entity, typeName.toTypeUrl());
+        return result;
+    }
+
+    @Override
+    public void write(CommandId commandId, CommandStorageRecord record) {
         final Value.Builder id = makeValue(record.getCommandId());
         final Property.Builder idProperty = makeProperty(COMMAND_ID_PROPERTY_NAME, id);
         final Entity.Builder entity = messageToEntity(record, makeKey(KIND));
@@ -63,5 +127,9 @@ class DsCommandStorage extends CommandStorage {
 
         final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
         datastore.commit(mutation);
+    }
+
+    private Key.Builder createKey(String idString) {
+        return makeKey(typeName.nameOnly(), idString);
     }
 }

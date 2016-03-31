@@ -29,6 +29,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
+import org.spine3.server.event.EventStreamQuery;
+import org.spine3.server.storage.EntityStorageRecord;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -176,6 +178,13 @@ class DatastoreWrapper {
         query.addKindBuilder().setName(entityKind);
         query.addOrder(makeOrder(TIMESTAMP_PROPERTY_NAME, sortDirection));
         return query;
+    }
+
+    protected static Query.Builder makeQuery(EventStreamQuery eventStreamQuery, String entityKind) {
+        // TODO:2016-03-30:mikhail.mikhaylov: Implement.
+
+
+        return makeQuery(Direction.ASCENDING, entityKind);
     }
 
     /**
