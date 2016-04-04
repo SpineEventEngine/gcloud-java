@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
@@ -36,6 +37,7 @@ import java.util.List;
 
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
+import static com.google.common.collect.Iterators.filter;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
 
 /**
@@ -61,13 +63,19 @@ class DsEventStorage extends EventStorage {
 
     @Override
     public Iterator<Event> iterator(EventStreamQuery eventStreamQuery) {
+        // TODO:2016-03-30:mikhail.mikhaylov: Should use some pagination for data, because now we load ALL of it here.
+        // Also, query optmization is required.
 
-        final Query.Builder query = makeQuery(eventStreamQuery, KIND);
+        final Predicate<Event> matchesQuery = new MatchesStreamQuery(eventStreamQuery);
+
+        final Query.Builder query = makeQuery(PropertyOrder.Direction.DESCENDING, KIND);
         final List<EntityResult> entityResults = datastore.runQuery(query);
         final List<EventStorageRecord> records = entitiesToMessages(entityResults, TYPE_URL);
-        // TODO:2016-03-30:mikhail.mikhaylov: Should use some pagination for data, because now we load ALL of it here
         final Iterator<Event> iterator = Iterators.transform(records.iterator(), TO_EVENT);
-        return iterator;
+
+        final Iterator<Event> result = filter(iterator, matchesQuery);
+
+        return result;
     }
 
     @Override

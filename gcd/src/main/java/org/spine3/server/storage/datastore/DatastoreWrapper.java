@@ -180,13 +180,6 @@ class DatastoreWrapper {
         return query;
     }
 
-    protected static Query.Builder makeQuery(EventStreamQuery eventStreamQuery, String entityKind) {
-        // TODO:2016-03-30:mikhail.mikhaylov: Implement.
-
-
-        return makeQuery(Direction.ASCENDING, entityKind);
-    }
-
     /**
      * Converts the given {@link Message} to the {@link Entity.Builder}.
      *
