@@ -29,11 +29,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
-import org.spine3.server.event.EventStreamQuery;
-import org.spine3.server.storage.EntityStorageRecord;
 
 import javax.annotation.Nullable;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.google.api.services.datastore.DatastoreV1.CommitRequest.Mode.NON_TRANSACTIONAL;
@@ -49,6 +48,7 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
  * The Google App Engine Cloud {@link Datastore} wrapper.
  *
  * @author Alexander Litus
+ * @author Mikhail Mikhaylov
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
@@ -129,6 +129,10 @@ class DatastoreWrapper {
         return runQueryRequest(queryRequest);
     }
 
+    protected Iterator<EntityResult> runQueryForIterator(Query query) {
+        return new PagingDatastoreIterator(query, this);
+    }
+
     /**
      * Runs the {@link Query} got from the given builder.
      *
@@ -153,6 +157,25 @@ class DatastoreWrapper {
             entityResults = newArrayList();
         }
         return entityResults;
+    }
+
+    /**
+     * Runs the given {@link Query} and returns {@link QueryResultBatch} to provide user with cursor.
+     *
+     * @param query the query to run.
+     * @return query result batch.
+     */
+    @Nullable
+    /* package */ QueryResultBatch runQueryForBatch(Query query) {
+        final RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
+        QueryResultBatch batch = null;
+        try {
+            batch = datastore.runQuery(queryRequest).getBatch();
+        } catch (DatastoreException e) {
+            propagate(e);
+        }
+
+        return batch;
     }
 
     /**
@@ -184,7 +207,7 @@ class DatastoreWrapper {
      * Converts the given {@link Message} to the {@link Entity.Builder}.
      *
      * @param message the message to convert
-     * @param key the entity key to set
+     * @param key     the entity key to set
      * @return the {@link Entity.Builder} with the given key and property created from the serialized message
      */
     protected static Entity.Builder messageToEntity(Message message, Key.Builder key) {
@@ -198,7 +221,7 @@ class DatastoreWrapper {
     /**
      * Converts the given {@link EntityResultOrBuilder} to the {@link Message}.
      *
-     * @param entity the entity to convert
+     * @param entity  the entity to convert
      * @param typeUrl the type url of the message
      * @return the deserialized message
      * @see Any#getTypeUrl()
@@ -231,7 +254,7 @@ class DatastoreWrapper {
      * Converts the given {@link EntityResult} list to the {@link Message} list.
      *
      * @param entities the entities to convert
-     * @param typeUrl the type url of the messages
+     * @param typeUrl  the type url of the messages
      * @return the deserialized messages
      * @see Any#getTypeUrl()
      */

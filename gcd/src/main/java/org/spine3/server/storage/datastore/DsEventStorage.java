@@ -33,11 +33,11 @@ import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
-import java.util.List;
 
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
 import static com.google.common.collect.Iterators.filter;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
 
 /**
@@ -53,7 +53,7 @@ class DsEventStorage extends EventStorage {
     private static final String KIND = EventStorageRecord.class.getName();
     private static final String TYPE_URL = TypeName.of(EntityStorageRecord.getDescriptor()).toTypeUrl();
 
-    protected static DsEventStorage newInstance(DatastoreWrapper datastore) {
+    /* package */ static DsEventStorage newInstance(DatastoreWrapper datastore) {
         return new DsEventStorage(datastore);
     }
 
@@ -63,17 +63,15 @@ class DsEventStorage extends EventStorage {
 
     @Override
     public Iterator<Event> iterator(EventStreamQuery eventStreamQuery) {
-        // TODO:2016-03-30:mikhail.mikhaylov: Should use some pagination for data, because now we load ALL of it here.
-        // Also, query optmization is required.
+        // TODO:2016-04-04:mikhail.mikhaylov: Use proper query instead of filter.
 
         final Predicate<Event> matchesQuery = new MatchesStreamQuery(eventStreamQuery);
 
         final Query.Builder query = makeQuery(PropertyOrder.Direction.DESCENDING, KIND);
-        final List<EntityResult> entityResults = datastore.runQuery(query);
-        final List<EventStorageRecord> records = entitiesToMessages(entityResults, TYPE_URL);
-        final Iterator<Event> iterator = Iterators.transform(records.iterator(), TO_EVENT);
+        final Iterator<EntityResult> iterator = datastore.runQueryForIterator(query.build());
+        final Iterator<Event> transformedIterator = Iterators.transform(iterator, ENTITY_TO_EVENT);
 
-        final Iterator<Event> result = filter(iterator, matchesQuery);
+        final Iterator<Event> result = filter(transformedIterator, matchesQuery);
 
         return result;
     }
@@ -91,16 +89,30 @@ class DsEventStorage extends EventStorage {
     @Nullable
     @Override
     protected EventStorageRecord readInternal(EventId eventId) {
-        return null;
+        final String idString = idToString(eventId);
+        final Key.Builder key = makeKey(KIND, idString);
+        final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
+
+        final LookupResponse response = datastore.lookup(request);
+
+        if (response == null || response.getFoundCount() == 0) {
+            return EventStorageRecord.getDefaultInstance();
+        }
+
+        final EntityResult entity = response.getFound(0);
+        final EventStorageRecord result = entityToMessage(entity, TYPE_URL);
+        return result;
     }
 
-    private static final Function<EventStorageRecord, Event> TO_EVENT = new Function<EventStorageRecord, Event>() {
+    private static final Function<EntityResult, Event> ENTITY_TO_EVENT = new Function<EntityResult, Event>() {
+        @Nullable
         @Override
-        public Event apply(@Nullable EventStorageRecord input) {
-            if (input == null) {
+        public Event apply(@Nullable EntityResult entityResult) {
+            if (entityResult == null) {
                 return Event.getDefaultInstance();
             }
-            final Event result = toEvent(input);
+            final EventStorageRecord message = entityToMessage(entityResult, TYPE_URL);
+            final Event result = toEvent(message);
             return result;
         }
     };
