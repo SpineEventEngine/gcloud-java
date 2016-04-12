@@ -20,11 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.datastore.client.*;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
@@ -45,7 +41,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static final String OPTION_TESTING_MODE = "--testing";
 
-    public static final String VAR_NAME_GCD_HOME = "GCD_HOME";
+    private static final String VAR_NAME_GCD_HOME = "GCD_HOME";
 
     private static final String GCD_HOME_PATH = retrieveGcdHome();
 
@@ -104,7 +100,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * Documentation</a> ("testing" option)
      */
     public void setUp() {
-//        if (false) // TODO:2015-11-12:alexander.litus: Remove the condition when issues specified above are fixed
+        if (false) // TODO:2015-11-12:alexander.litus: Remove the condition when issues specified above are fixed
         try {
             localDatastore.start(GCD_HOME_PATH, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
         } catch (LocalDevelopmentDatastoreException e) {
@@ -121,7 +117,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      */
     public void tearDown() {
         clear();
-//        if (false) // TODO:2015-11-12:alexander.litus: remove the condition when issues specified in setUp method javadoc are fixed
+        if (false) // TODO:2015-11-12:alexander.litus: remove the condition when issues specified in setUp method javadoc are fixed
         try {
             localDatastore.stop();
         } catch (LocalDevelopmentDatastoreException e) {
@@ -134,7 +130,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * @throws RuntimeException if {@link LocalDevelopmentDatastore#clear()} throws LocalDevelopmentDatastoreException.
      */
-    public void clear() {
+    /* package */ void clear() {
         try {
             localDatastore.clear();
         } catch (LocalDevelopmentDatastoreException e) {

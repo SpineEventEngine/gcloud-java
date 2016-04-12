@@ -32,9 +32,8 @@ import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.makeTimestampProperty;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
+import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
  * Storage for command records based on Google Cloud Datastore.
@@ -45,16 +44,11 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
  */
 class DsCommandStorage extends CommandStorage {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static final String COMMAND_ID_PROPERTY_NAME = "commandId";
-
-    private static final String KIND = CommandStorageRecord.class.getName();
-
     private final DatastoreWrapper datastore;
 
     private final TypeName typeName;
 
-    protected static CommandStorage newInstance(DatastoreWrapper datastore) {
+    /* package */ static CommandStorage newInstance(DatastoreWrapper datastore) {
         return new DsCommandStorage(datastore);
     }
 
@@ -81,7 +75,7 @@ class DsCommandStorage extends CommandStorage {
 
         final CommandStorageRecord updatedRecord = read(commandId)
                 .toBuilder()
-                .setStatus(CommandStatus.FAILURE)
+                .setStatus(CommandStatus.ERROR)
                 .setError(error)
                 .build();
         write(commandId, updatedRecord);
@@ -102,6 +96,9 @@ class DsCommandStorage extends CommandStorage {
 
     @Override
     public CommandStorageRecord read(CommandId commandId) {
+        checkNotClosed();
+        checkNotDefault(commandId);
+
         final String idString = idToString(commandId);
         final Key.Builder key = createKey(idString);
         final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
@@ -119,13 +116,19 @@ class DsCommandStorage extends CommandStorage {
 
     @Override
     public void write(CommandId commandId, CommandStorageRecord record) {
-        final Value.Builder id = makeValue(record.getCommandId());
-        final Property.Builder idProperty = makeProperty(COMMAND_ID_PROPERTY_NAME, id);
-        final Entity.Builder entity = messageToEntity(record, makeKey(KIND));
-        entity.addProperty(idProperty);
-        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
+        checkNotClosed();
+        checkNotDefault(commandId);
+        checkNotDefault(record);
 
-        final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
+        final String idString = idToString(commandId);
+
+        final Key.Builder key = createKey(idString);
+
+        final Entity.Builder entity = messageToEntity(record, key);
+        entity.addProperty(DatastoreProperties.makeTimestampProperty(record.getTimestamp()));
+        entity.addProperty(DatastoreProperties.makeTimestampNanosProperty(record.getTimestamp()));
+
+        final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
         datastore.commit(mutation);
     }
 

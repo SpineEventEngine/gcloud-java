@@ -1,5 +1,20 @@
+buildscript {
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 repositories {
     mavenLocal()
+    maven {
+        url {
+            'http://maven.teamdev.com/repository/spine'
+        }
+    }
     mavenCentral()
 }
 
@@ -14,4 +29,7 @@ dependencies {
 
     // Google Cloud Datastore
     compile group: 'com.google.apis', name: 'google-api-services-datastore-protobuf', version: 'v1beta2-rev1-4.0.0'
+
+    testCompile group: 'org.spine3', name: 'server', version: "${project.SPINE_VERSION}-test", changing: true
+    testCompile group: 'org.spine3', name: 'server-test', version: "${project.SPINE_VERSION}", changing: true
 }

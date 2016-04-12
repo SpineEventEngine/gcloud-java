@@ -24,12 +24,9 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.spine3.base.CommandRequest;
-import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.storage.CommandStorageShould;
 import org.spine3.test.project.ProjectId;
-
-import static org.spine3.testdata.TestCommandRequestFactory.createProject;
 
 /**
  * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
@@ -38,11 +35,9 @@ import static org.spine3.testdata.TestCommandRequestFactory.createProject;
  * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class DsCommandStorageShould {
+public class DsCommandStorageShould extends CommandStorageShould {
 
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
-
-    private static final CommandStorage STORAGE =  DATASTORE_FACTORY.createCommandStorage();
 
     private static final ProjectId ID = ProjectId.newBuilder().setId("projectId").build();
 
@@ -65,13 +60,11 @@ public class DsCommandStorageShould {
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_store_null() {
 
-        STORAGE.store(null, null);
+        getStorage().store(null);
     }
 
-    @Test
-    public void store_command() {
-
-        final CommandRequest commandRequest = createProject();
-        STORAGE.store(AggregateId.of(ID), commandRequest);
+    @Override
+    protected CommandStorage getStorage() {
+        return DATASTORE_FACTORY.createCommandStorage();
     }
 }

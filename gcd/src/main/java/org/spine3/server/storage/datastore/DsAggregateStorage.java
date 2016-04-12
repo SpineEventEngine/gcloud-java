@@ -31,6 +31,7 @@ import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
 import static org.spine3.base.Identifiers.idToString;
 
@@ -65,7 +66,8 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         final Property.Builder idProperty = makeProperty(AGGREGATE_ID_PROPERTY_NAME, idValue);
         final Entity.Builder entity = messageToEntity(record, makeKey(KIND));
         entity.addProperty(idProperty);
-        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
+        entity.addProperty(DatastoreProperties.makeTimestampProperty(record.getTimestamp()));
+        entity.addProperty(DatastoreProperties.makeTimestampNanosProperty(record.getTimestamp()));
 
         final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
         datastore.commit(mutation);
@@ -73,11 +75,12 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
+        checkNotNull(id);
 
         final String idString = idToString(id);
         final Filter.Builder idFilter = makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL,
                 makeValue(idString));
-        final Query.Builder query = makeQuery(DESCENDING, KIND);
+        final Query.Builder query = DatastoreQueries.makeQuery(DESCENDING, KIND);
         query.setFilter(idFilter).build();
 
         final List<EntityResult> entityResults = datastore.runQuery(query);

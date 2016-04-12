@@ -20,10 +20,12 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageShould;
 import org.spine3.test.project.ProjectId;
@@ -40,14 +42,6 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
 
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
 
-    @SuppressWarnings("ConstantConditions") // passing null because this parameter isn't used in this implementation
-    private static final AggregateStorage<ProjectId> STORAGE = DATASTORE_FACTORY.createAggregateStorage(null);
-
-    public DsAggregateStorageShould() {
-        super(STORAGE);
-    }
-
-
     @BeforeClass
     public static void setUpClass() {
         DATASTORE_FACTORY.setUp();
@@ -63,8 +57,14 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         DATASTORE_FACTORY.tearDown();
     }
 
-    @Test
-    public void have_empty_release_resources_method() {
-        ((DsAggregateStorage) STORAGE).releaseResources();
+    @SuppressWarnings("ConstantConditions") // passing null because this parameter isn't used in this implementation
+    @Override
+    protected AggregateStorage<ProjectId> getStorage() {
+        return DATASTORE_FACTORY.createAggregateStorage(null);
+    }
+
+    @Override
+    protected <Id> AggregateStorage<Id> getStorage(Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aClass) {
+        return DATASTORE_FACTORY.createAggregateStorage(aClass);
     }
 }

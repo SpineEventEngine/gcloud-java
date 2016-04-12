@@ -45,7 +45,7 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
 
     private final DatastoreWrapper datastore;
 
-    public static DsPropertyStorage newInstance(DatastoreWrapper datastore) {
+    /* package */ static DsPropertyStorage newInstance(DatastoreWrapper datastore) {
         return new DsPropertyStorage(datastore);
     }
 
@@ -53,7 +53,7 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
         this.datastore = datastore;
     }
 
-    public <V extends Message> void write(String propertyId, V value) {
+    /* package */ <V extends Message> void write(String propertyId, V value) {
         checkNotNull(propertyId, "Property Id is null.");
         checkNotNull(value, "Property value is null.");
 
@@ -64,7 +64,7 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
     }
 
     @Nullable
-    public <V extends Message> V read(String propertyId) {
+    /* package */ <V extends Message> V read(String propertyId) {
         final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
         final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
 

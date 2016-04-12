@@ -48,11 +48,11 @@ public class DatastoreStorageFactory implements StorageFactory {
      * @param datastore the {@link Datastore} implementation to use.
      * @see DatastoreOptions
      */
-    public static DatastoreStorageFactory newInstance(Datastore datastore) {
+    /* package */ static DatastoreStorageFactory newInstance(Datastore datastore) {
         return new DatastoreStorageFactory(datastore);
     }
 
-    protected DatastoreStorageFactory(Datastore datastore) {
+    /* package */ DatastoreStorageFactory(Datastore datastore) {
         this.datastore = new DatastoreWrapper(datastore);
     }
 
@@ -89,6 +89,6 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public void close() throws Exception {
         // TODO:2016-03-29:mikhail.mikhaylov: Check if it's really a NOP case.
-        // NOP
+        // Maybe release storages?
     }
 }

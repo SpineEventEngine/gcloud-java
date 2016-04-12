@@ -21,7 +21,6 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Descriptors.Descriptor;
-import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.type.TypeName;
@@ -46,8 +45,9 @@ class DsEntityStorage<I> extends EntityStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeName typeName;
+    private final TypeName entityStorageRecordTypeName = TypeName.of(EntityStorageRecord.getDescriptor());
 
-    protected static <I, M extends Message> DsEntityStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore) {
+    /* package */ static <I> DsEntityStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore) {
         return new DsEntityStorage<>(descriptor, datastore);
     }
 
@@ -76,7 +76,8 @@ class DsEntityStorage<I> extends EntityStorage<I> {
         }
 
         final EntityResult entity = response.getFound(0);
-        final EntityStorageRecord result = entityToMessage(entity, typeName.toTypeUrl());
+
+        final EntityStorageRecord result = entityToMessage(entity, entityStorageRecordTypeName.toTypeUrl());
         return result;
     }
 
@@ -88,7 +89,7 @@ class DsEntityStorage<I> extends EntityStorage<I> {
         final String idString = idToString(i);
         final Key.Builder key = createKey(idString);
         final Entity.Builder entity = messageToEntity(entityStorageRecord, key);
-        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
+        final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
         datastore.commit(mutation);
     }
 

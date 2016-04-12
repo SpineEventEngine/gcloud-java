@@ -32,6 +32,7 @@ import javax.annotation.Nullable;
 /* package */ class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     // TODO:2016-03-31:mikhail.mikhaylov: Find a way to reserve this id or store timestamps in some other way.
+    // TODO:2016-04-12:mikhail.mikhaylov: Check if we need this property for each storage instance.
     private static final String LAST_EVENT_TIMESTAMP_ID = "Datastore-event-timestamp";
 
     private final DsEntityStorage<I> entityStorage;

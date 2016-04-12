@@ -37,7 +37,7 @@ import static com.google.common.collect.Lists.newLinkedList;
  */
 /* package */ class PagingDatastoreIterator implements Iterator<DatastoreV1.EntityResult> {
 
-    private static final int ITERATOR_BASE_PAGE_SIZE = 3;
+    private static final int ITERATOR_BASE_PAGE_SIZE = 10;
 
     private final DatastoreV1.Query baseQuery;
     private final int pageSize;
@@ -52,6 +52,7 @@ import static com.google.common.collect.Lists.newLinkedList;
         this(query, ITERATOR_BASE_PAGE_SIZE, datastoreWrapper);
     }
 
+    // TODO:2016-04-12:mikhail.mikhaylov: Instantiate iterator ONLY using this constructor (with pageSize).
     private PagingDatastoreIterator(DatastoreV1.Query query, int pageSize, DatastoreWrapper datastoreWrapper) {
         this.baseQuery = query;
         this.pageSize = pageSize;
@@ -60,6 +61,9 @@ import static com.google.common.collect.Lists.newLinkedList;
 
     @Override
     public boolean hasNext() {
+        if (page.isEmpty()) {
+            loadData();
+        }
         return page.size() > 0 || !Objects.equals(endCursor, ByteString.EMPTY);
     }
 
@@ -82,6 +86,7 @@ import static com.google.common.collect.Lists.newLinkedList;
         throw new UnsupportedOperationException("Removing elements is not supported");
     }
 
+    //TODO:2016-04-08:mikhail.mikhaylov: Check if there is a way to reduce the number of calls.
     private void loadData() {
         final DatastoreV1.Query.Builder queryBuilder = DatastoreV1.Query.newBuilder(baseQuery);
         if (endCursor == null) {
@@ -98,6 +103,7 @@ import static com.google.common.collect.Lists.newLinkedList;
             page.addAll(resultBatch.getEntityResultList());
         }
 
-        endCursor = resultBatch == null ? ByteString.EMPTY : resultBatch.getEndCursor();
+        //noinspection ConstantConditions // NPE is checked above
+        endCursor = page.isEmpty() ? ByteString.EMPTY : resultBatch.getEndCursor();
     }
 }
