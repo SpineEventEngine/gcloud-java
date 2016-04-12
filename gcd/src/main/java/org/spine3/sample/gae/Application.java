@@ -36,7 +36,7 @@ public class Application extends org.spine3.examples.aggregate.server.Applicatio
      * @param storageFactory factory used to create and set up storages.
      */
     @SuppressWarnings("TypeMayBeWeakened") // not in this case
-    public Application(DatastoreStorageFactory storageFactory) {
+    private Application(DatastoreStorageFactory storageFactory) {
         super(storageFactory);
     }
 
