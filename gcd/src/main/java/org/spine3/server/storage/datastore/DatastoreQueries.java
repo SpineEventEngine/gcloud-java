@@ -64,15 +64,17 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
      * @see com.google.protobuf.Timestamp
      * @see DatastoreV1.Query
      */
-    /* package */ static DatastoreV1.Query.Builder makeQuery(DatastoreV1.PropertyOrder.Direction sortDirection, String entityKind) {
+    /* package */
+    static DatastoreV1.Query.Builder makeQuery(DatastoreV1.PropertyOrder.Direction sortDirection, String entityKind) {
         final DatastoreV1.Query.Builder query = DatastoreV1.Query.newBuilder();
         query.addKindBuilder().setName(entityKind);
         query.addOrder(makeOrder(TIMESTAMP_NANOS_PROPERTY_NAME, sortDirection));
         return query;
     }
 
-    /* package */ static DatastoreV1.Query.Builder makeQuery(DatastoreV1.PropertyOrder.Direction sortDirection, String entityKind,
-                                                         EventStreamQueryOrBuilder queryPredicate) {
+    /* package */
+    static DatastoreV1.Query.Builder makeQuery(DatastoreV1.PropertyOrder.Direction sortDirection, String entityKind,
+                                               EventStreamQueryOrBuilder queryPredicate) {
         final DatastoreV1.Query.Builder query = DatastoreV1.Query.newBuilder();
 
         query.addKindBuilder().setName(entityKind);
@@ -107,34 +109,29 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         return query;
     }
 
-    // TODO:2016-04-12:mikhail.mikhaylov: Refactor.
     private static Collection<DatastoreV1.Filter> convertEventFilters(Iterable<EventFilter> eventFilters) {
         final Collection<DatastoreV1.Filter> filters = new ArrayList<>();
 
         for (EventFilter eventFilter : eventFilters) {
-
-            final DatastoreV1.Filter aggregateIdFilter = convertAggregateIdFilter(eventFilter);
-            if (!aggregateIdFilter.equals(DatastoreV1.Filter.getDefaultInstance())) {
-                filters.add(aggregateIdFilter);
-            }
-
-            final DatastoreV1.Filter contextFieldFilter = convertContextFieldFilter(eventFilter);
-            if (!contextFieldFilter.equals(DatastoreV1.Filter.getDefaultInstance())) {
-                filters.add(contextFieldFilter);
-            }
-
-            final DatastoreV1.Filter eventFieldFilter = convertEventFieldFilter(eventFilter);
-            if (!eventFieldFilter.equals(DatastoreV1.Filter.getDefaultInstance())) {
-                filters.add(eventFieldFilter);
-            }
-
-            final DatastoreV1.Filter eventTypeFilter = convertEventTypeFilter(eventFilter);
-            if (!eventTypeFilter.equals(DatastoreV1.Filter.getDefaultInstance())) {
-                filters.add(eventTypeFilter);
-            }
+            addIfNotDefault(filters, convertAggregateIdFilter(eventFilter));
+            addIfNotDefault(filters, convertContextFieldFilter(eventFilter));
+            addIfNotDefault(filters, convertEventFieldFilter(eventFilter));
+            addIfNotDefault(filters, convertEventTypeFilter(eventFilter));
         }
 
         return filters;
+    }
+
+    /**
+     * Adds filter to filters collection. Skips adding if filter is default instance.
+     *
+     * @param filters mutable filter collection
+     * @param newFilter filter to add
+     */
+    private static void addIfNotDefault(Collection<DatastoreV1.Filter> filters, DatastoreV1.Filter newFilter) {
+        if (!DatastoreV1.Filter.getDefaultInstance().equals(newFilter)) {
+            filters.add(newFilter);
+        }
     }
 
     private static DatastoreV1.Filter convertAggregateIdFilter(EventFilterOrBuilder eventFilter) {
