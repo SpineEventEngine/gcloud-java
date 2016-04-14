@@ -77,6 +77,9 @@ class DsEventStorage extends EventStorage {
         entity.addProperty(DatastoreProperties.makeAggregateIdProperty(record.getContext().getProducerId()));
         entity.addProperty(DatastoreProperties.makeEventTypeProperty(record.getEventType()));
 
+        entity.addAllProperty(DatastoreProperties.makeEventContextProperties(record.getContext()));
+        entity.addAllProperty(DatastoreProperties.makeEventFieldProperties(record));
+
         final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
         datastore.commit(mutation);
     }

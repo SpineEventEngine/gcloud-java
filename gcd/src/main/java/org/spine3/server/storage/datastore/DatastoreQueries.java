@@ -21,7 +21,11 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.api.services.datastore.DatastoreV1;
+import com.google.api.services.datastore.DatastoreV1.CompositeFilter;
+import com.google.api.services.datastore.DatastoreV1.Filter;
+import com.google.api.services.datastore.DatastoreV1.PropertyFilter;
 import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.base.FieldFilter;
@@ -40,6 +44,7 @@ import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Opera
 import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.GREATER_THAN;
 import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.LESS_THAN;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeOrder;
+import static com.google.api.services.datastore.client.DatastoreHelper.makeProperty;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeValue;
 import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_ID_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.DatastoreProperties.EVENT_TYPE_PROPERTY_NAME;
@@ -80,10 +85,10 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         query.addKindBuilder().setName(entityKind);
         query.addOrder(makeOrder(TIMESTAMP_NANOS_PROPERTY_NAME, sortDirection));
 
-        final DatastoreV1.Filter.Builder beforeFilter = makeFilter(queryPredicate.getBefore(), LESS_THAN);
-        final DatastoreV1.Filter.Builder afterFilter = makeFilter(queryPredicate.getAfter(), GREATER_THAN);
+        final Filter.Builder beforeFilter = makeFilter(queryPredicate.getBefore(), LESS_THAN);
+        final Filter.Builder afterFilter = makeFilter(queryPredicate.getAfter(), GREATER_THAN);
 
-        final List<DatastoreV1.Filter> filters = new ArrayList<>();
+        final List<Filter> filters = new ArrayList<>();
         if (beforeFilter != null) {
             filters.add(beforeFilter.build());
         }
@@ -96,21 +101,21 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         if (filters.size() == 1) {
             query.setFilter(filters.get(0));
         } else if (filters.size() > 1) {
-            final DatastoreV1.CompositeFilter.Builder compositeFilter = DatastoreV1.CompositeFilter.newBuilder();
-            compositeFilter.setOperator(DatastoreV1.CompositeFilter.Operator.AND);
+            final CompositeFilter.Builder compositeFilter = CompositeFilter.newBuilder();
+            compositeFilter.setOperator(CompositeFilter.Operator.AND);
 
-            for (DatastoreV1.Filter filter : filters) {
+            for (Filter filter : filters) {
                 compositeFilter.addFilter(filter);
             }
 
-            query.setFilter(DatastoreV1.Filter.newBuilder().setCompositeFilter(compositeFilter.build()));
+            query.setFilter(Filter.newBuilder().setCompositeFilter(compositeFilter.build()));
         }
 
         return query;
     }
 
-    private static Collection<DatastoreV1.Filter> convertEventFilters(Iterable<EventFilter> eventFilters) {
-        final Collection<DatastoreV1.Filter> filters = new ArrayList<>();
+    private static Collection<Filter> convertEventFilters(Iterable<EventFilter> eventFilters) {
+        final Collection<Filter> filters = new ArrayList<>();
 
         for (EventFilter eventFilter : eventFilters) {
             addIfNotDefault(filters, convertAggregateIdFilter(eventFilter));
@@ -125,62 +130,108 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
     /**
      * Adds filter to filters collection. Skips adding if filter is default instance.
      *
-     * @param filters mutable filter collection
+     * @param filters   mutable filter collection
      * @param newFilter filter to add
      */
-    private static void addIfNotDefault(Collection<DatastoreV1.Filter> filters, DatastoreV1.Filter newFilter) {
-        if (!DatastoreV1.Filter.getDefaultInstance().equals(newFilter)) {
+    private static void addIfNotDefault(Collection<Filter> filters, Filter newFilter) {
+        if (!Filter.getDefaultInstance().equals(newFilter)) {
             filters.add(newFilter);
         }
     }
 
-    private static DatastoreV1.Filter convertAggregateIdFilter(EventFilterOrBuilder eventFilter) {
+    private static Filter convertAggregateIdFilter(EventFilterOrBuilder eventFilter) {
         final List<Any> aggregateIds = eventFilter.getAggregateIdList();
-        final List<DatastoreV1.Filter> filters = new ArrayList<>();
+        final List<Filter> filters = new ArrayList<>();
 
         for (Any aggregateId : aggregateIds) {
-            filters.add(DatastoreV1.Filter.newBuilder().setPropertyFilter(DatastoreV1.PropertyFilter.newBuilder()
+            filters.add(Filter.newBuilder().setPropertyFilter(PropertyFilter.newBuilder()
                     .setProperty(DatastoreV1.PropertyReference.newBuilder().setName(AGGREGATE_ID_PROPERTY_NAME))
                     .setOperator(EQUAL)
                     .setValue(DatastoreV1.Value.newBuilder().setStringValue(Messages.toText(aggregateId)))).build());
         }
 
         if (filters.isEmpty()) {
-            return DatastoreV1.Filter.getDefaultInstance();
+            return Filter.getDefaultInstance();
         }
 
         if (filters.size() == 1) {
             return filters.get(0);
         }
 
-        final DatastoreV1.CompositeFilter.Builder compositeFilter = DatastoreV1.CompositeFilter.newBuilder();
+        final CompositeFilter.Builder compositeFilter = CompositeFilter.newBuilder();
         compositeFilter.addAllFilter(filters);
-        return DatastoreV1.Filter.newBuilder().setCompositeFilter(compositeFilter).build();
+        return Filter.newBuilder().setCompositeFilter(compositeFilter).build();
     }
 
-    // TODO:2016-04-11:mikhail.mikhaylov: Implement.
-    private static DatastoreV1.Filter convertContextFieldFilter(EventFilterOrBuilder eventFilter) {
-        List<FieldFilter> contextFieldFilters = eventFilter.getContextFieldFilterList();
+    // TODO:2016-04-13:mikhail.mikhaylov: Refactor.
+    private static Filter convertContextFieldFilter(EventFilterOrBuilder eventFilter) {
+        final List<FieldFilter> contextFieldFilters = eventFilter.getContextFieldFilterList();
 
-        return DatastoreV1.Filter.getDefaultInstance();
+        if (contextFieldFilters.isEmpty()) {
+            return Filter.getDefaultInstance();
+        }
+
+        final CompositeFilter.Builder resultFilter = CompositeFilter.newBuilder();
+        resultFilter.setOperator(CompositeFilter.Operator.AND);
+
+        for (FieldFilter fieldFilter : contextFieldFilters) {
+            final FieldMask field = fieldFilter.getField();
+            final List<Any> values = fieldFilter.getValueList();
+
+            final CompositeFilter.Builder filter = CompositeFilter.newBuilder();
+            for (Any value : values) {
+                final PropertyFilter valueFilter = PropertyFilter.newBuilder()
+                        .setOperator(EQUAL)
+                        .setProperty(DatastoreProperties.makeContextFieldPropertyReference(field))
+                        .setValue(makeValue(Messages.toText(value))).build();
+                filter.addFilter(Filter.newBuilder().setPropertyFilter(valueFilter));
+            }
+
+            resultFilter.addFilter(Filter.newBuilder().setCompositeFilter(filter));
+        }
+
+        return Filter.newBuilder().setCompositeFilter(resultFilter).build();
     }
 
-    // TODO:2016-04-11:mikhail.mikhaylov: Implement.
-    private static DatastoreV1.Filter convertEventFieldFilter(EventFilterOrBuilder eventFilter) {
+    // TODO:2016-04-13:mikhail.mikhaylov: Refactor.
+    private static Filter convertEventFieldFilter(EventFilterOrBuilder eventFilter) {
         final List<FieldFilter> eventFieldFilters = eventFilter.getEventFieldFilterList();
 
-        return DatastoreV1.Filter.getDefaultInstance();
+        if (eventFieldFilters.isEmpty()) {
+            return Filter.getDefaultInstance();
+        }
+
+        final CompositeFilter.Builder resultFilter = CompositeFilter.newBuilder();
+        resultFilter.setOperator(CompositeFilter.Operator.AND);
+
+        for (FieldFilter fieldFilter : eventFieldFilters) {
+            final FieldMask field = fieldFilter.getField();
+            final List<Any> values = fieldFilter.getValueList();
+
+            final CompositeFilter.Builder filter = CompositeFilter.newBuilder();
+            for (Any value : values) {
+                final PropertyFilter valueFilter = PropertyFilter.newBuilder()
+                        .setOperator(EQUAL)
+                        .setProperty(DatastoreProperties.makeEventFieldPropertyReference(field))
+                        .setValue(makeValue(Messages.toText(value))).build();
+                filter.addFilter(Filter.newBuilder().setPropertyFilter(valueFilter));
+            }
+
+            resultFilter.addFilter(Filter.newBuilder().setCompositeFilter(filter));
+        }
+
+        return Filter.getDefaultInstance();
     }
 
-    private static DatastoreV1.Filter convertEventTypeFilter(EventFilterOrBuilder eventFilter) {
+    private static Filter convertEventTypeFilter(EventFilterOrBuilder eventFilter) {
         final String eventType = eventFilter.getEventType();
 
         if (eventType.isEmpty()) {
-            return DatastoreV1.Filter.getDefaultInstance();
+            return Filter.getDefaultInstance();
         }
 
-        final DatastoreV1.Filter.Builder filter = DatastoreV1.Filter.newBuilder();
-        filter.setPropertyFilter(DatastoreV1.PropertyFilter.newBuilder()
+        final Filter.Builder filter = Filter.newBuilder();
+        filter.setPropertyFilter(PropertyFilter.newBuilder()
                 .setProperty(DatastoreV1.PropertyReference.newBuilder().setName(EVENT_TYPE_PROPERTY_NAME))
                 .setOperator(EQUAL)
                 .setValue(DatastoreV1.Value.newBuilder().setStringValue(eventType)));
@@ -189,12 +240,12 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
     }
 
     @Nullable
-    private static DatastoreV1.Filter.Builder makeFilter(TimestampOrBuilder timestamp,
-                                                         DatastoreV1.PropertyFilter.Operator operator) {
-        DatastoreV1.Filter.Builder filter = null;
+    private static Filter.Builder makeFilter(TimestampOrBuilder timestamp,
+                                             PropertyFilter.Operator operator) {
+        Filter.Builder filter = null;
         if (!timestamp.equals(Timestamp.getDefaultInstance())) {
-            filter = DatastoreV1.Filter.newBuilder().setPropertyFilter(
-                    DatastoreV1.PropertyFilter.newBuilder()
+            filter = Filter.newBuilder().setPropertyFilter(
+                    PropertyFilter.newBuilder()
                             .setOperator(operator)
                             .setProperty(DatastoreV1.PropertyReference
                                     .newBuilder().setName(TIMESTAMP_NANOS_PROPERTY_NAME))
