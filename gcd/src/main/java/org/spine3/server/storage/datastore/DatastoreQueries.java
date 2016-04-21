@@ -24,11 +24,13 @@ import com.google.api.services.datastore.DatastoreV1;
 import com.google.api.services.datastore.DatastoreV1.CompositeFilter;
 import com.google.api.services.datastore.DatastoreV1.Filter;
 import com.google.api.services.datastore.DatastoreV1.PropertyFilter;
+import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.base.FieldFilter;
+import org.spine3.base.FieldFilterOrBuilder;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.event.EventFilter;
@@ -44,7 +46,6 @@ import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Opera
 import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.GREATER_THAN;
 import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.LESS_THAN;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeOrder;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeProperty;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeValue;
 import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_ID_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.DatastoreProperties.EVENT_TYPE_PROPERTY_NAME;
@@ -163,7 +164,6 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         return Filter.newBuilder().setCompositeFilter(compositeFilter).build();
     }
 
-    // TODO:2016-04-13:mikhail.mikhaylov: Refactor.
     private static Filter convertContextFieldFilter(EventFilterOrBuilder eventFilter) {
         final List<FieldFilter> contextFieldFilters = eventFilter.getContextFieldFilterList();
 
@@ -175,25 +175,12 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         resultFilter.setOperator(CompositeFilter.Operator.AND);
 
         for (FieldFilter fieldFilter : contextFieldFilters) {
-            final FieldMask field = fieldFilter.getField();
-            final List<Any> values = fieldFilter.getValueList();
-
-            final CompositeFilter.Builder filter = CompositeFilter.newBuilder();
-            for (Any value : values) {
-                final PropertyFilter valueFilter = PropertyFilter.newBuilder()
-                        .setOperator(EQUAL)
-                        .setProperty(DatastoreProperties.makeContextFieldPropertyReference(field))
-                        .setValue(makeValue(Messages.toText(value))).build();
-                filter.addFilter(Filter.newBuilder().setPropertyFilter(valueFilter));
-            }
-
-            resultFilter.addFilter(Filter.newBuilder().setCompositeFilter(filter));
+            resultFilter.addFilter(convertFieldFilter(fieldFilter, CONTEXT_FIELD_TO_PROPERTY));
         }
 
         return Filter.newBuilder().setCompositeFilter(resultFilter).build();
     }
 
-    // TODO:2016-04-13:mikhail.mikhaylov: Refactor.
     private static Filter convertEventFieldFilter(EventFilterOrBuilder eventFilter) {
         final List<FieldFilter> eventFieldFilters = eventFilter.getEventFieldFilterList();
 
@@ -205,19 +192,7 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         resultFilter.setOperator(CompositeFilter.Operator.AND);
 
         for (FieldFilter fieldFilter : eventFieldFilters) {
-            final FieldMask field = fieldFilter.getField();
-            final List<Any> values = fieldFilter.getValueList();
-
-            final CompositeFilter.Builder filter = CompositeFilter.newBuilder();
-            for (Any value : values) {
-                final PropertyFilter valueFilter = PropertyFilter.newBuilder()
-                        .setOperator(EQUAL)
-                        .setProperty(DatastoreProperties.makeEventFieldPropertyReference(field))
-                        .setValue(makeValue(Messages.toText(value))).build();
-                filter.addFilter(Filter.newBuilder().setPropertyFilter(valueFilter));
-            }
-
-            resultFilter.addFilter(Filter.newBuilder().setCompositeFilter(filter));
+            resultFilter.addFilter(convertFieldFilter(fieldFilter, EVENT_FIELD_TO_PROPERTY));
         }
 
         return Filter.getDefaultInstance();
@@ -239,6 +214,24 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         return filter.build();
     }
 
+    private static Filter.Builder convertFieldFilter(FieldFilterOrBuilder fieldFilter,
+                                                     Function<FieldMask, DatastoreV1.PropertyReference>
+                                                             conversionFunction) {
+        final FieldMask field = fieldFilter.getField();
+        final List<Any> values = fieldFilter.getValueList();
+
+        final CompositeFilter.Builder filter = CompositeFilter.newBuilder();
+        for (Any value : values) {
+            final PropertyFilter valueFilter = PropertyFilter.newBuilder()
+                    .setOperator(EQUAL)
+                    .setProperty(conversionFunction.apply(field))
+                    .setValue(makeValue(Messages.toText(value))).build();
+            filter.addFilter(Filter.newBuilder().setPropertyFilter(valueFilter));
+        }
+
+        return Filter.newBuilder().setCompositeFilter(filter);
+    }
+
     @Nullable
     private static Filter.Builder makeFilter(TimestampOrBuilder timestamp,
                                              PropertyFilter.Operator operator) {
@@ -254,4 +247,26 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         }
         return filter;
     }
+
+    private static final Function<FieldMask, DatastoreV1.PropertyReference> EVENT_FIELD_TO_PROPERTY = new Function<FieldMask, DatastoreV1.PropertyReference>() {
+        @Nullable
+        @Override
+        public DatastoreV1.PropertyReference apply(@Nullable FieldMask fieldMask) {
+            if (fieldMask == null) {
+                return null;
+            }
+            return DatastoreProperties.makeEventFieldPropertyReference(fieldMask);
+        }
+    };
+
+    private static final Function<FieldMask, DatastoreV1.PropertyReference> CONTEXT_FIELD_TO_PROPERTY = new Function<FieldMask, DatastoreV1.PropertyReference>() {
+        @Nullable
+        @Override
+        public DatastoreV1.PropertyReference apply(@Nullable FieldMask fieldMask) {
+            if (fieldMask == null) {
+                return null;
+            }
+            return DatastoreProperties.makeEventFieldPropertyReference(fieldMask);
+        }
+    };
 }
