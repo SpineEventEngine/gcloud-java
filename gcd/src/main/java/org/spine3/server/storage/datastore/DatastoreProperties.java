@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.base.EventContextOrBuilder;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.server.storage.EventStorageRecordOrBuilder;
 
 import java.util.ArrayList;

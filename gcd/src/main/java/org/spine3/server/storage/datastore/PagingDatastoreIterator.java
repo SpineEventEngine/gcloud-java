@@ -37,7 +37,7 @@ import static com.google.common.collect.Lists.newLinkedList;
  */
 /* package */ class PagingDatastoreIterator implements Iterator<DatastoreV1.EntityResult> {
 
-    private static final int ITERATOR_BASE_PAGE_SIZE = 10;
+    private static final int DEFAULT_ITERATOR_PAGE_SIZE = 10;
 
     private final DatastoreV1.Query baseQuery;
     private final int pageSize;
@@ -49,11 +49,11 @@ import static com.google.common.collect.Lists.newLinkedList;
 
     @SuppressWarnings("PublicConstructorInNonPublicClass")
     /* package */ PagingDatastoreIterator(DatastoreV1.Query query, DatastoreWrapper datastoreWrapper) {
-        this(query, ITERATOR_BASE_PAGE_SIZE, datastoreWrapper);
+        this(query, DEFAULT_ITERATOR_PAGE_SIZE, datastoreWrapper);
     }
 
     // TODO:2016-04-12:mikhail.mikhaylov: Instantiate iterator ONLY using this constructor (with pageSize).
-    private PagingDatastoreIterator(DatastoreV1.Query query, int pageSize, DatastoreWrapper datastoreWrapper) {
+    /* package */ PagingDatastoreIterator(DatastoreV1.Query query, int pageSize, DatastoreWrapper datastoreWrapper) {
         this.baseQuery = query;
         this.pageSize = pageSize;
         this.datastoreWrapper = datastoreWrapper;

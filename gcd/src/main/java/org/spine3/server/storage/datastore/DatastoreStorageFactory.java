@@ -68,10 +68,9 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> aClass) {
-        // TODO:2016-03-31:mikhail.mikhaylov: We re-create instances here just as for InMemoryStorages. This behavior should change.
         final DsEntityStorage<I> entityStorage = (DsEntityStorage<I>) createEntityStorage(aClass);
         final DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastore);
-        return DsProjectionStorage.newInstance(entityStorage, propertyStorage);
+        return DsProjectionStorage.newInstance(entityStorage, propertyStorage, aClass);
     }
 
     @Override
@@ -86,9 +85,9 @@ public class DatastoreStorageFactory implements StorageFactory {
         return DsAggregateStorage.newInstance(datastore);
     }
 
+    @SuppressWarnings("ProhibitedExceptionDeclared")
     @Override
     public void close() throws Exception {
-        // TODO:2016-03-29:mikhail.mikhaylov: Check if it's really a NOP case.
-        // Maybe release storages?
+        // NOP
     }
 }

@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Timestamp;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.ProjectionStorage;
 
@@ -31,33 +32,39 @@ import javax.annotation.Nullable;
  */
 /* package */ class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
-    // TODO:2016-03-31:mikhail.mikhaylov: Find a way to reserve this id or store timestamps in some other way.
-    // TODO:2016-04-12:mikhail.mikhaylov: Check if we need this property for each storage instance.
-    private static final String LAST_EVENT_TIMESTAMP_ID = "Datastore-event-timestamp";
+    private static final String LAST_EVENT_TIMESTAMP_ID = "Datastore-event-timestamp-";
 
     private final DsEntityStorage<I> entityStorage;
     private final DsPropertyStorage propertyStorage;
 
+    private final String lastTimestampId;
+
     /* package */
     static <I> DsProjectionStorage<I> newInstance(DsEntityStorage<I> entityStorage,
-                                                  DsPropertyStorage propertyStorage) {
-        return new DsProjectionStorage<>(entityStorage, propertyStorage);
+                                                  DsPropertyStorage propertyStorage,
+                                                  Class<? extends Entity<I, ?>> projectionClass) {
+        return new DsProjectionStorage<>(entityStorage, propertyStorage, projectionClass);
     }
 
-    private DsProjectionStorage(DsEntityStorage<I> entityStorage, DsPropertyStorage propertyStorage) {
+    private DsProjectionStorage(DsEntityStorage<I> entityStorage,
+                                DsPropertyStorage propertyStorage,
+                                Class<? extends Entity<I, ?>> projectionClass) {
         this.entityStorage = entityStorage;
         this.propertyStorage = propertyStorage;
+
+        // TODO:2016-04-21:mikhail.mikhaylov: We should use proto class name instead of java's one.
+        lastTimestampId = LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName();
     }
 
     @Override
     public void writeLastHandledEventTime(Timestamp timestamp) {
-        propertyStorage.write(LAST_EVENT_TIMESTAMP_ID, timestamp);
+        propertyStorage.write(lastTimestampId, timestamp);
     }
 
     @Nullable
     @Override
     public Timestamp readLastHandledEventTime() {
-        return propertyStorage.read(LAST_EVENT_TIMESTAMP_ID);
+        return propertyStorage.read(lastTimestampId);
     }
 
     @Override

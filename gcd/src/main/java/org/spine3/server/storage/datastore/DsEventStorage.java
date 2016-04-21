@@ -61,7 +61,8 @@ class DsEventStorage extends EventStorage {
     @Override
     public Iterator<Event> iterator(EventStreamQuery eventStreamQuery) {
 
-        final Query.Builder query = DatastoreQueries.makeQuery(PropertyOrder.Direction.ASCENDING, KIND, eventStreamQuery);
+        final Query.Builder query = DatastoreQueries
+                .makeQuery(PropertyOrder.Direction.ASCENDING, KIND, eventStreamQuery);
         final Iterator<EntityResult> iterator = datastore.runQueryForIterator(query.build());
         final Iterator<Event> transformedIterator = Iterators.transform(iterator, ENTITY_TO_EVENT);
 
