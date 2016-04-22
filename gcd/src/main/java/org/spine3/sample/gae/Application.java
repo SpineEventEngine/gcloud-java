@@ -48,9 +48,9 @@ public class Application extends org.spine3.examples.aggregate.server.Applicatio
      */
     public static void main(String[] args) {
         final LocalDatastoreStorageFactory storageFactory = LocalDatastoreStorageFactory.getDefaultInstance();
-//        storageFactory.setUp();
+        storageFactory.setUp();
         final Application app = new Application(storageFactory);
         app.execute();
-//        storageFactory.tearDown();
+        storageFactory.tearDown();
     }
 }

@@ -52,6 +52,8 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.EVENT_TYPE
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 
 /**
+ * Utility class, which simplifies usage of datastore queries.
+ *
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
@@ -70,17 +72,29 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
      * @see com.google.protobuf.Timestamp
      * @see DatastoreV1.Query
      */
-    /* package */
-    static DatastoreV1.Query.Builder makeQuery(DatastoreV1.PropertyOrder.Direction sortDirection, String entityKind) {
+    /* package */ static DatastoreV1.Query.Builder makeQuery(DatastoreV1.PropertyOrder.Direction sortDirection, String entityKind) {
         final DatastoreV1.Query.Builder query = DatastoreV1.Query.newBuilder();
         query.addKindBuilder().setName(entityKind);
         query.addOrder(makeOrder(TIMESTAMP_NANOS_PROPERTY_NAME, sortDirection));
         return query;
     }
 
-    /* package */
-    static DatastoreV1.Query.Builder makeQuery(DatastoreV1.PropertyOrder.Direction sortDirection, String entityKind,
-                                               EventStreamQueryOrBuilder queryPredicate) {
+    /**
+     * Builds a query with the given {@code Entity} kind, the {@code Timestamp} sort direction and
+     * {@code EventStreamQuery} predicate.
+     *
+     * @param sortDirection     the {@code Timestamp} sort direction
+     * @param entityKind        the {@code Entity} kind
+     * @param queryPredicate    the {@code EventStreamQuery} predicate, which specifies additional parameters
+     * @return a new {@code Query} instance.
+     * @see DatastoreV1.Entity
+     * @see com.google.protobuf.Timestamp
+     * @see DatastoreV1.Query
+     */
+    /* package */ static DatastoreV1.Query.Builder makeQuery(
+            DatastoreV1.PropertyOrder.Direction sortDirection,
+            String entityKind,
+            EventStreamQueryOrBuilder queryPredicate) {
         final DatastoreV1.Query.Builder query = DatastoreV1.Query.newBuilder();
 
         query.addKindBuilder().setName(entityKind);
@@ -266,7 +280,7 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
             if (fieldMask == null) {
                 return null;
             }
-            return DatastoreProperties.makeEventFieldPropertyReference(fieldMask);
+            return DatastoreProperties.makeContextFieldPropertyReference(fieldMask);
         }
     };
 }

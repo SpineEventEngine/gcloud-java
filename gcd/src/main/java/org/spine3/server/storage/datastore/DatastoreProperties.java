@@ -39,6 +39,8 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
 
 /**
+ * Utility class, which simplifies creation of datastore properties.
+ *
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
@@ -59,36 +61,51 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     private static final String CONTEXT_COMMAND_CONTEXT_PROPERTY_NAME = "context_command_context";
     private static final String CONTEXT_VERSION = "context_version";
 
-
     private DatastoreProperties() {
     }
 
     /**
-     * Makes a property from the given timestamp using {@link org.spine3.protobuf.Timestamps#convertToDate(TimestampOrBuilder)}.
+     * Makes a property from the given timestamp using
+     * {@link org.spine3.protobuf.Timestamps#convertToDate(TimestampOrBuilder)}.
      */
-    /* package */
-    static DatastoreV1.Property.Builder makeTimestampProperty(TimestampOrBuilder timestamp) {
+    /* package */ static DatastoreV1.Property.Builder makeTimestampProperty(TimestampOrBuilder timestamp) {
         final Date date = convertToDate(timestamp);
         return makeProperty(TIMESTAMP_PROPERTY_NAME, makeValue(date));
     }
 
-    /* package */
-    static DatastoreV1.Property.Builder makeTimestampNanosProperty(TimestampOrBuilder timestamp) {
+    /**
+     * Makes a property from the given timestamp using
+     * {@link org.spine3.protobuf.Timestamps#convertToNanos(TimestampOrBuilder)}.
+     */
+    /* package */ static DatastoreV1.Property.Builder makeTimestampNanosProperty(TimestampOrBuilder timestamp) {
         final long nanos = convertToNanos(timestamp);
         return makeProperty(TIMESTAMP_NANOS_PROPERTY_NAME, makeValue(nanos));
     }
 
-    /* package */
-    static DatastoreV1.Property.Builder makeAggregateIdProperty(Message aggregateId) {
+    /**
+     * Makes AggregateId property from given {@link Message} value.
+     *
+     * @return {@link com.google.api.services.datastore.DatastoreV1.Property.Builder}
+     */
+    /* package */ static DatastoreV1.Property.Builder makeAggregateIdProperty(Message aggregateId) {
         final String propertyValue = Messages.toText(aggregateId);
         return makeProperty(AGGREGATE_ID_PROPERTY_NAME, makeValue(propertyValue));
     }
 
-    /* package */
-    static DatastoreV1.Property.Builder makeEventTypeProperty(String eventType) {
+    /**
+     * Makes EventType property from given String value.
+     *
+     * @return {@link com.google.api.services.datastore.DatastoreV1.Property.Builder}
+     */
+    /* package */ static DatastoreV1.Property.Builder makeEventTypeProperty(String eventType) {
         return makeProperty(EVENT_TYPE_PROPERTY_NAME, makeValue(eventType));
     }
 
+    /**
+     * Makes Property, based on context {@link FieldMask}.
+     *
+     * @return {@link com.google.api.services.datastore.DatastoreV1.Property.Builder}
+     */
     @SuppressWarnings("TypeMayBeWeakened") // No need to do this
     /* package */ static DatastoreV1.PropertyReference makeContextFieldPropertyReference(FieldMask field) {
         final String fieldPath = field.getPaths(0);
@@ -97,6 +114,11 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
         return makePropertyReference(propertyName).build();
     }
 
+    /**
+     * Makes Property, based on event's {@link FieldMask}.
+     *
+     * @return {@link com.google.api.services.datastore.DatastoreV1.Property.Builder}
+     */
     @SuppressWarnings("TypeMayBeWeakened") // No need to do this
     /* package */ static DatastoreV1.PropertyReference makeEventFieldPropertyReference(FieldMask field) {
         final String fieldPath = field.getPaths(0);
@@ -108,8 +130,11 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
         return CONTEXT_FIELD_PROPERTY_PREFIX_NAME + contextFieldName;
     }
 
-    /* package */
-    static Iterable<? extends DatastoreV1.Property> makeEventContextProperties(
+    /**
+     * Converts {@link org.spine3.base.EventContext} or it's builder to a set of Properties, which are
+     * ready to add to datastore entity.
+     */
+    /* package */ static Iterable<? extends DatastoreV1.Property> makeEventContextProperties(
             EventContextOrBuilder context) {
         final Collection<DatastoreV1.Property> properties = new ArrayList<>();
         properties.add(makeProperty(CONTEXT_EVENT_ID_PROPERTY_NAME,
@@ -125,8 +150,11 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
         return properties;
     }
 
-    /* package */
-    static Iterable<? extends DatastoreV1.Property> makeEventFieldProperties(EventStorageRecordOrBuilder event) {
+    /**
+     * Converts {@link org.spine3.base.Event}'s fields to a set of Properties, which are
+     * ready to add to datastore entity.
+     */
+    /* package */ static Iterable<? extends DatastoreV1.Property> makeEventFieldProperties(EventStorageRecordOrBuilder event) {
         final Collection<DatastoreV1.Property> properties = new ArrayList<>();
 
         // We do not re-save timestamp
