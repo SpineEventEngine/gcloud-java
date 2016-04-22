@@ -1,8 +1,8 @@
 project.ext {
-    SPINE_VERSION = '0.2';
+    SPINE_VERSION = '0.3-SNAPSHOT';
     PROTOBUF_VERSION = '3.0.0-beta-2';
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
-    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
+    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine-snapshots';
 }
 
 final String CREDENTIALS_LOCATION = 'credentials.properties';
@@ -45,8 +45,11 @@ subprojects {
     targetCompatibility = 1.7;
 
     repositories {
-        mavenLocal()
         mavenCentral()
+        maven {
+            url = 'http://maven.teamdev.com/repository/spine-snapshots'
+        }
+        mavenLocal()
     }
 
     dependencies {

@@ -59,7 +59,7 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
 
         final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
         final Entity.Builder entity = messageToEntity(Messages.toAny(value), key);
-        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
+        final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
         datastore.commit(mutation);
     }
 

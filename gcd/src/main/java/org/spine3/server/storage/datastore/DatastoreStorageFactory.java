@@ -44,11 +44,12 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final DatastoreWrapper datastore;
 
     /**
-     * @return creates new factory instance.
      * @param datastore the {@link Datastore} implementation to use.
+     * @return creates new factory instance.
      * @see DatastoreOptions
      */
-    /* package */ static DatastoreStorageFactory newInstance(Datastore datastore) {
+    /* package */
+    static DatastoreStorageFactory newInstance(Datastore datastore) {
         return new DatastoreStorageFactory(datastore);
     }
 
@@ -82,7 +83,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> ignored) {
-        return DsAggregateStorage.newInstance(datastore);
+        return DsAggregateStorage.newInstance(datastore, DsPropertyStorage.newInstance(datastore));
     }
 
     @SuppressWarnings("ProhibitedExceptionDeclared")

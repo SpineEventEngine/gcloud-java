@@ -20,6 +20,9 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.Message;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.type.TypeName;
@@ -45,22 +48,47 @@ import static org.spine3.base.Identifiers.idToString;
 class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
+    private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
 
     private static final String KIND = AggregateStorageRecord.class.getName();
     private static final String TYPE_URL = TypeName.of(AggregateStorageRecord.getDescriptor()).toTypeUrl();
 
     private final DatastoreWrapper datastore;
+    private final DsPropertyStorage propertyStorage;
 
-    /* package */ static <I> DsAggregateStorage<I> newInstance(DatastoreWrapper datastore) {
-        return new DsAggregateStorage<>(datastore);
+    /* package */
+    static <I> DsAggregateStorage<I> newInstance(DatastoreWrapper datastore,
+                                                 DsPropertyStorage propertyStorage) {
+        return new DsAggregateStorage<>(datastore, propertyStorage);
     }
 
-    private DsAggregateStorage(DatastoreWrapper datastore) {
+    private DsAggregateStorage(DatastoreWrapper datastore, DsPropertyStorage propertyStorage) {
         this.datastore = datastore;
+        this.propertyStorage = propertyStorage;
+    }
+
+    @Override
+    public int readEventCountAfterLastSnapshot(I id) {
+        checkNotClosed();
+        checkNotNull(id);
+
+        final String datastoreId = generateDatastoreId(id);
+        final Int32Value count = propertyStorage.read(datastoreId);
+        return count != null ? count.getValue() : 0;
+    }
+
+    @Override
+    public void writeEventCountAfterLastSnapshot(I id, int eventCount) {
+        checkNotClosed();
+        checkNotNull(id);
+
+        final String datastoreId = generateDatastoreId(id);
+        propertyStorage.write(datastoreId, Int32Value.newBuilder().setValue(eventCount).build());
     }
 
     @Override
     protected void writeInternal(I id, AggregateStorageRecord record) {
+        checkNotNull(id);
 
         final Value.Builder idValue = makeValue(idToString(id));
         final Property.Builder idProperty = makeProperty(AGGREGATE_ID_PROPERTY_NAME, idValue);
@@ -87,4 +115,11 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         final List<AggregateStorageRecord> records = entitiesToMessages(entityResults, TYPE_URL);
         return records.iterator();
     }
+
+    private String generateDatastoreId(I id) {
+        final String stringId;
+        stringId = Message.class.isAssignableFrom(id.getClass()) ? Messages.toText((Message) id) : id.toString();
+        return EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
+    }
+
 }

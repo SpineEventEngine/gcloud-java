@@ -64,7 +64,11 @@ import javax.annotation.Nullable;
     @Nullable
     @Override
     public Timestamp readLastHandledEventTime() {
-        return propertyStorage.read(lastTimestampId);
+        final Timestamp readTimestamp = propertyStorage.read(lastTimestampId);
+        if (Timestamp.getDefaultInstance().equals(readTimestamp)) {
+            return null;
+        }
+        return readTimestamp;
     }
 
     @Override
