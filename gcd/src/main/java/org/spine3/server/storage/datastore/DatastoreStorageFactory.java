@@ -23,6 +23,7 @@ package org.spine3.server.storage.datastore;
 import com.google.api.services.datastore.client.Datastore;
 import com.google.api.services.datastore.client.DatastoreOptions;
 import com.google.protobuf.Message;
+import com.google.protobuf.Option;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.*;
@@ -42,6 +43,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
 
     private final DatastoreWrapper datastore;
+    private final Options options;
 
     /**
      * @param datastore the {@link Datastore} implementation to use.
@@ -53,7 +55,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     /* package */ DatastoreStorageFactory(Datastore datastore) {
-        this.datastore = new DatastoreWrapper(datastore);
+        options = new Options();
+        this.datastore = new DatastoreWrapper(datastore, options);
     }
 
     @Override
@@ -89,5 +92,30 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public void close() throws Exception {
         // NOP
+    }
+
+    public Options getOptions() {
+        return options;
+    }
+
+    @SuppressWarnings("WeakerAccess") // We provide it as API
+    public static class Options {
+        private Options() {}
+
+        private static final int DEFAULT_PAGE_SIZE = 10;
+
+        private int pageSize = DEFAULT_PAGE_SIZE;
+
+        public void setEventIteratorPageSize(int pageSize) {
+            if (pageSize < 1) {
+                throw new IllegalArgumentException("Events page can not contain less than one event.");
+            }
+
+            this.pageSize = pageSize;
+        }
+
+        public int getEventIteratorPageSize() {
+            return pageSize;
+        }
     }
 }

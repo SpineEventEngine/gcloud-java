@@ -56,8 +56,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;
 
-    /* package */
-    static <I> DsAggregateStorage<I> newInstance(DatastoreWrapper datastore,
+    /* package */ static <I> DsAggregateStorage<I> newInstance(DatastoreWrapper datastore,
                                                  DsPropertyStorage propertyStorage) {
         return new DsAggregateStorage<>(datastore, propertyStorage);
     }
@@ -121,5 +120,4 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         stringId = Message.class.isAssignableFrom(id.getClass()) ? Messages.toText((Message) id) : id.toString();
         return EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
     }
-
 }

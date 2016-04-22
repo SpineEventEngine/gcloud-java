@@ -50,14 +50,16 @@ class DatastoreWrapper {
     private static final String VALUE_PROPERTY_NAME = "value";
 
     private final Datastore datastore;
+    private final DatastoreStorageFactory.Options datastoreOptions;
 
     /**
      * Creates a new storage instance.
      *
      * @param datastore the datastore implementation to use.
      */
-    /* package */ DatastoreWrapper(Datastore datastore) {
+    /* package */ DatastoreWrapper(Datastore datastore, DatastoreStorageFactory.Options datastoreOptions) {
         this.datastore = datastore;
+        this.datastoreOptions = datastoreOptions;
     }
 
     /**
@@ -121,7 +123,7 @@ class DatastoreWrapper {
     }
 
     /* package */ Iterator<EntityResult> runQueryForIterator(Query query) {
-        return new PagingDatastoreIterator(query, this);
+        return new PagingDatastoreIterator(query, this, datastoreOptions.getEventIteratorPageSize());
     }
 
     /**
