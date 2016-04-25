@@ -115,11 +115,13 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final List<EntityResult> entityResults = datastore.runQuery(query);
         final List<AggregateStorageRecord> records = entitiesToMessages(entityResults, TYPE_URL);
-        return records.iterator();
+        final Iterator<AggregateStorageRecord> recordsIterator = records.iterator();
+        return recordsIterator;
     }
 
     private String generateDatastoreId(I id) {
         final String stringId = Identifiers.idToString(id);
-        return EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
+        final String datastoreid = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
+        return datastoreid;
     }
 }
