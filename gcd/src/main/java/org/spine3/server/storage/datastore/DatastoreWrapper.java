@@ -45,7 +45,7 @@ import static org.spine3.protobuf.Messages.toAny;
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
-class DatastoreWrapper {
+/* package */ class DatastoreWrapper {
 
     private static final String VALUE_PROPERTY_NAME = "value";
 
@@ -87,8 +87,7 @@ class DatastoreWrapper {
      * @param mutation the mutation to commit.
      * @throws RuntimeException if {@link Datastore#commit(CommitRequest)} throws a {@link DatastoreException}
      */
-    @SuppressWarnings("TypeMayBeWeakened")
-    // no, it cannot
+    @SuppressWarnings("TypeMayBeWeakened") // no, it cannot
     /* package */ void commit(Mutation.Builder mutation) {
         commit(mutation.build());
     }
