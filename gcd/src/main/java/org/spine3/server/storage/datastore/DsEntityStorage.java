@@ -72,7 +72,7 @@ class DsEntityStorage<I> extends EntityStorage<I> {
         final LookupResponse response = datastore.lookup(request);
 
         if (response == null || response.getFoundCount() == 0) {
-            return getEmptyRecord();
+            return EntityStorageRecord.getDefaultInstance();
         }
 
         final EntityResult entity = response.getFound(0);
@@ -95,10 +95,5 @@ class DsEntityStorage<I> extends EntityStorage<I> {
 
     private Key.Builder createKey(String idString) {
         return makeKey(typeName.nameOnly(), idString);
-    }
-
-    private static EntityStorageRecord getEmptyRecord() {
-        final EntityStorageRecord empty = EntityStorageRecord.getDefaultInstance();
-        return empty;
     }
 }
