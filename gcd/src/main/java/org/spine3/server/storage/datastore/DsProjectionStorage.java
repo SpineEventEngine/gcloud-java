@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
  */
 /* package */ class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
-    private static final String LAST_EVENT_TIMESTAMP_ID = "Datastore-event-timestamp-";
+    private static final String LAST_EVENT_TIMESTAMP_ID = "datastore_event_timestamp_";
 
     private final DsEntityStorage<I> entityStorage;
     private final DsPropertyStorage propertyStorage;
