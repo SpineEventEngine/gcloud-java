@@ -177,8 +177,7 @@ import static org.spine3.protobuf.Messages.toAny;
      * @param key     the entity key to set
      * @return the {@link Entity.Builder} with the given key and property created from the serialized message
      */
-    /* package */
-    static Entity.Builder messageToEntity(Message message, Key.Builder key) {
+    /* package */ static Entity.Builder messageToEntity(Message message, Key.Builder key) {
         final ByteString serializedMessage = toAny(message).getValue();
         final Entity.Builder entity = Entity.newBuilder()
                 .setKey(key)
@@ -194,8 +193,7 @@ import static org.spine3.protobuf.Messages.toAny;
      * @return the deserialized message
      * @see Any#getTypeUrl()
      */
-    /* package */
-    static <M extends Message> M entityToMessage(@Nullable EntityResultOrBuilder entity, String typeUrl) {
+    /* package */ static <M extends Message> M entityToMessage(@Nullable EntityResultOrBuilder entity, String typeUrl) {
 
         if (entity == null) {
             @SuppressWarnings("unchecked") // cast is safe because Any is Message
@@ -227,8 +225,7 @@ import static org.spine3.protobuf.Messages.toAny;
      * @return the deserialized messages
      * @see Any#getTypeUrl()
      */
-    /* package */
-    static <M extends Message> List<M> entitiesToMessages(List<EntityResult> entities, final String typeUrl) {
+    /* package */ static <M extends Message> List<M> entitiesToMessages(List<EntityResult> entities, final String typeUrl) {
 
         final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
             @Override
