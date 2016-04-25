@@ -73,7 +73,11 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final String datastoreId = generateDatastoreId(id);
         final Int32Value count = propertyStorage.read(datastoreId);
-        return count != null ? count.getValue() : 0;
+        if (count == null) {
+            return 0;
+        }
+        final int countValue = count.getValue();
+        return countValue;
     }
 
     @Override
