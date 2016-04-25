@@ -21,8 +21,7 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Int32Value;
-import com.google.protobuf.Message;
-import org.spine3.protobuf.Messages;
+import org.spine3.base.Identifiers;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.type.TypeName;
@@ -120,8 +119,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     private String generateDatastoreId(I id) {
-        final String stringId;
-        stringId = Message.class.isAssignableFrom(id.getClass()) ? Messages.toText((Message) id) : id.toString();
+        final String stringId = Identifiers.idToString(id);
         return EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
     }
 }
