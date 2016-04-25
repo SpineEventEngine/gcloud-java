@@ -47,7 +47,7 @@ subprojects {
     repositories {
         mavenCentral()
         maven {
-            url = 'http://maven.teamdev.com/repository/spine-snapshots'
+            url = "$MAVEN_REPOSITORY_URL"
         }
         mavenLocal()
     }
@@ -56,8 +56,6 @@ subprojects {
 
         // TODO:2015-11-19:alexander.litus: change Spine local dependency to Maven central repository dependency
         // when Spine can be used for evaluation in real projects.
-        // Spine
-        compile group: 'org.spine3', name: 'server', version: project.SPINE_VERSION, changing: true
 
         // Guava
         compile group: 'com.google.guava', name: 'guava', version: '19.0-rc2'
