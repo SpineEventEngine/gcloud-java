@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.api.services.datastore.DatastoreV1.*;
+import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.ASCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
@@ -62,7 +63,7 @@ class DsEventStorage extends EventStorage {
     public Iterator<Event> iterator(EventStreamQuery eventStreamQuery) {
 
         final Query.Builder query = DatastoreQueries
-                .makeQuery(PropertyOrder.Direction.ASCENDING, KIND, eventStreamQuery);
+                .makeQuery(ASCENDING, KIND, eventStreamQuery);
         final Iterator<EntityResult> iterator = datastore.runQueryForIterator(query.build());
         final Iterator<Event> transformedIterator = Iterators.transform(iterator, ENTITY_TO_EVENT);
 
