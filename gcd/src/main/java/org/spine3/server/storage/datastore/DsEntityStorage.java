@@ -64,8 +64,8 @@ class DsEntityStorage<I> extends EntityStorage<I> {
 
     @Nullable
     @Override
-    protected EntityStorageRecord readInternal(I i) {
-        final String idString = idToString(i);
+    protected EntityStorageRecord readInternal(I id) {
+        final String idString = idToString(id);
         final Key.Builder key = createKey(idString);
         final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
 
@@ -82,11 +82,11 @@ class DsEntityStorage<I> extends EntityStorage<I> {
     }
 
     @Override
-    protected void writeInternal(I i, EntityStorageRecord entityStorageRecord) {
-        checkNotNull(i, "Id is null.");
+    protected void writeInternal(I id, EntityStorageRecord entityStorageRecord) {
+        checkNotNull(id, "Id is null.");
         checkNotNull(entityStorageRecord, "Message is null.");
 
-        final String idString = idToString(i);
+        final String idString = idToString(id);
         final Key.Builder key = createKey(idString);
         final Entity.Builder entity = messageToEntity(entityStorageRecord, key);
         final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
