@@ -40,7 +40,7 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
  */
 /* package */ class DsPropertyStorage {
 
-    private static final String PROPERTIES_KIND = "Properties-Kind";
+    private static final String PROPERTIES_KIND = "properties_kind";
     private static final String ANY_TYPE_URL = TypeName.of(Any.getDescriptor()).toTypeUrl();
 
     private final DatastoreWrapper datastore;
@@ -54,8 +54,8 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
     }
 
     /* package */ <V extends Message> void write(String propertyId, V value) {
-        checkNotNull(propertyId, "Property Id is null.");
-        checkNotNull(value, "Property value is null.");
+        checkNotNull(propertyId);
+        checkNotNull(value);
 
         final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
         final Entity.Builder entity = messageToEntity(Messages.toAny(value), key);
