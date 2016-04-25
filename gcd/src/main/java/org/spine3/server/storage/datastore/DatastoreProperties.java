@@ -58,7 +58,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
 
     private static final String CONTEXT_EVENT_ID_PROPERTY_NAME = "context_event_id";
     private static final String CONTEXT_TIMESTAMP_PROPERTY_NAME = "context_timestamp";
-    private static final String CONTEXT_COMMAND_CONTEXT_PROPERTY_NAME = "context_command_context";
+    private static final String CONTEXT_OF_COMMAND_PROPERTY_NAME = "context_of_command";
     private static final String CONTEXT_VERSION = "context_version";
 
     private DatastoreProperties() {
@@ -142,7 +142,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
         properties.add(makeProperty(CONTEXT_TIMESTAMP_PROPERTY_NAME,
                 makeValue(convertToNanos(context.getTimestamp()))).build());
         // We do not re-save producer id
-        properties.add(makeProperty(CONTEXT_COMMAND_CONTEXT_PROPERTY_NAME,
+        properties.add(makeProperty(CONTEXT_OF_COMMAND_PROPERTY_NAME,
                 makeValue(Messages.toText(context.getCommandContext()))).build());
         properties.add(makeProperty(CONTEXT_VERSION,
                 makeValue(context.getVersion())).build());
