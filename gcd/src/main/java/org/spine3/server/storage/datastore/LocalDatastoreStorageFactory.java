@@ -52,10 +52,8 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     /**
      * Returns a default factory instance. A {@link LocalDevelopmentDatastore} is created with default {@link DatastoreOptions}:
-     * <ul>
-     * <li>Dataset name: {@code spine-local-dataset}</li>
-     * <li>Host: {@code http://localhost:8080}</li>
-     * </ul>
+     * Dataset name: {@code spine-local-dataset}
+     * Host: {@code http://localhost:8080}
      */
     public static LocalDatastoreStorageFactory getDefaultInstance() {
         return DefaultInstanceSingleton.INSTANCE.value;
@@ -80,16 +78,10 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * Intended to start the local Datastore server in testing mode.
      * <p>
      * NOTE: does nothing for now because of several issues:
-     * <ul>
-     * <li>
      * This <a href="https://github.com/GoogleCloudPlatform/google-cloud-datastore/commit/a077c5b4d6fa2826fd6c376b692686894b719fd9">commit</a>
      * seems to fix the first issue, but there is no release with this fix available yet.
-     * </li>
-     * <li>
      * Also fails to start on Windows:
      * <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">issue</a>.
-     * </li>
-     * </ul>
      * <p>
      * Until these issues are not fixed, it is required to start the local Datastore Server manually.
      * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
