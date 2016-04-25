@@ -37,7 +37,7 @@ import org.spine3.testdata.TestEntity;
  * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
  * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
-public class DsEntityStorageShould extends EntityStorageShould {
+public class DsEntityStorageShould extends EntityStorageShould<String> {
 
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
 
@@ -64,12 +64,12 @@ public class DsEntityStorageShould extends EntityStorageShould {
     }
 
     @Override
-    protected Object newId() {
+    protected String newId() {
         return Identifiers.newUuid();
     }
 
     @Override
-    protected EntityStorage getStorage(Class aClass) {
-        return DATASTORE_FACTORY.createEntityStorage(aClass);
+    protected <I> EntityStorage<I> getStorage(Class<? extends Entity<I, ?>> entityClass) {
+        return DATASTORE_FACTORY.createEntityStorage(entityClass);
     }
 }
