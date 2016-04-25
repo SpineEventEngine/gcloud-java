@@ -24,6 +24,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.validate.Validate;
 
 import javax.annotation.Nullable;
 
@@ -65,7 +66,7 @@ import javax.annotation.Nullable;
     @Override
     public Timestamp readLastHandledEventTime() {
         final Timestamp readTimestamp = propertyStorage.read(lastTimestampId);
-        if (Timestamp.getDefaultInstance().equals(readTimestamp)) {
+        if ((readTimestamp == null) || Validate.isDefault(readTimestamp)) {
             return null;
         }
         return readTimestamp;
