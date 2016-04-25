@@ -50,7 +50,8 @@ public class DatastoreStorageFactory implements StorageFactory {
      * @return creates new factory instance.
      * @see DatastoreOptions
      */
-    /* package */ static DatastoreStorageFactory newInstance(Datastore datastore) {
+    @SuppressWarnings("WeakerAccess") // Part of API
+    public static DatastoreStorageFactory newInstance(Datastore datastore) {
         return new DatastoreStorageFactory(datastore);
     }
 
