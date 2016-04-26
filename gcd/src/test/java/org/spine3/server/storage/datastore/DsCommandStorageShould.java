@@ -56,13 +56,6 @@ public class DsCommandStorageShould extends CommandStorageShould {
         DATASTORE_FACTORY.tearDown();
     }
 
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_store_null() {
-
-        getStorage().store(null);
-    }
-
     @Override
     protected CommandStorage getStorage() {
         return DATASTORE_FACTORY.createCommandStorage();
