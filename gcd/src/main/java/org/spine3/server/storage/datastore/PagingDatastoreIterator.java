@@ -57,7 +57,8 @@ import static com.google.common.collect.Lists.newLinkedList;
             loadData();
         }
         final int pageSize = page.size();
-        return pageSize > 0 || !Objects.equals(endCursor, ByteString.EMPTY);
+        final boolean result = pageSize > 0 || !Objects.equals(endCursor, ByteString.EMPTY);
+        return result;
     }
 
     @Override
