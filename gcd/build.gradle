@@ -10,8 +10,6 @@ configurations.all {
 
 dependencies {
 
-    // TODO:2015-11-19:alexander.litus: change Spine local dependencies to Maven central repository dependencies
-    // when Spine can be used for evaluation in real projects.
     // Spine tests and sample
     compile group: 'org.spine3', name: 'client', version: project.SPINE_VERSION, changing: true
     compile group: 'org.spine3', name: 'server', version: project.SPINE_VERSION, changing: true
