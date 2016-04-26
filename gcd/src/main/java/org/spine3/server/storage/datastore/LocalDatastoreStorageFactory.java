@@ -52,8 +52,10 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     /**
      * Returns a default factory instance. A {@link LocalDevelopmentDatastore} is created with default {@link DatastoreOptions}:
-     * Dataset name: {@code spine-local-dataset}
-     * Host: {@code http://localhost:8080}
+     *
+     * <p>Dataset name: {@code spine-local-dataset}
+     *
+     * <p>Host: {@code http://localhost:8080}
      */
     public static LocalDatastoreStorageFactory getDefaultInstance() {
         return DefaultInstanceSingleton.INSTANCE.value;
