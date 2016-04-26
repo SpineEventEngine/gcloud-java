@@ -23,13 +23,14 @@ package org.spine3.server.storage.datastore;
 import com.google.api.services.datastore.client.Datastore;
 import com.google.api.services.datastore.client.DatastoreFactory;
 import com.google.api.services.datastore.client.DatastoreOptions;
+import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.*;
-import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
+import org.spine3.testdata.*;
 
 import static org.junit.Assert.assertNotNull;
-import static org.spine3.server.aggregate.AggregateShould.ProjectAggregate;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreStorageFactoryShould {
@@ -44,7 +45,7 @@ public class DatastoreStorageFactoryShould {
 
     @Test
     public void create_entity_storage_using_class_parameter() {
-        final EntityStorage<ProjectId, Project> storage = FACTORY.createEntityStorage(ProjectAggregate.class);
+        final EntityStorage<String> storage = FACTORY.createEntityStorage(TestEntity.class);
         assertNotNull(storage);
     }
 
@@ -65,5 +66,12 @@ public class DatastoreStorageFactoryShould {
     public void create_aggregate_storage_not_using_class_parameter() {
         final AggregateStorage<AggregateStorageRecord> storage = FACTORY.createAggregateStorage(null);
         assertNotNull(storage);
+    }
+
+    private static class TestEntity extends Entity<String, StringValue> {
+
+        private TestEntity(String id) {
+            super(id);
+        }
     }
 }

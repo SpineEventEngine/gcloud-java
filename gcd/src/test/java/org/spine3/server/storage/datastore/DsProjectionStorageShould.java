@@ -21,43 +21,37 @@
 package org.spine3.server.storage.datastore;
 
 import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.CommandStorageShould;
-import org.spine3.test.project.ProjectId;
+import org.junit.Before;
+import org.spine3.base.Identifiers;
+import org.spine3.server.projection.Projection;
+import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.ProjectionStorageShould;
+import org.spine3.test.project.Project;
 
 /**
- * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
- * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
- * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
- * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
+ * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class DsCommandStorageShould extends CommandStorageShould {
-
+public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
-
-    private static final ProjectId ID = ProjectId.newBuilder().setId("projectId").build();
-
-    @BeforeClass
-    public static void setUpClass() {
-        DATASTORE_FACTORY.setUp();
-    }
 
     @After
     public void tearDownTest() {
         DATASTORE_FACTORY.clear();
     }
 
-    @AfterClass
-    public static void tearDownClass() {
-        DATASTORE_FACTORY.tearDown();
+    @Override
+    protected ProjectionStorage<String> getStorage() {
+        return DATASTORE_FACTORY.createProjectionStorage(TestProjection.class);
     }
 
     @Override
-    protected CommandStorage getStorage() {
-        return DATASTORE_FACTORY.createCommandStorage();
+    protected String newId() {
+        return Identifiers.newUuid();
+    }
+
+    private static class TestProjection extends Projection<String, Project> {
+        private TestProjection(String id) {
+            super(id);
+        }
     }
 }

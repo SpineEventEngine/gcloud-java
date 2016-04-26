@@ -20,12 +20,24 @@
 
 package org.spine3.server.storage.datastore;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
+import org.junit.*;
+import org.spine3.base.Event;
+import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
+import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.server.storage.EventStorageShould;
+import org.spine3.testdata.TestEventStorageRecordFactory;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
@@ -38,10 +50,9 @@ public class DsEventStorageShould extends EventStorageShould {
 
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
 
-    private static final EventStorage STORAGE = DATASTORE_FACTORY.createEventStorage();
-
-    public DsEventStorageShould() {
-        super(STORAGE);
+    @Override
+    protected EventStorage getStorage() {
+        return DATASTORE_FACTORY.createEventStorage();
     }
 
     @BeforeClass
@@ -57,10 +68,5 @@ public class DsEventStorageShould extends EventStorageShould {
     @AfterClass
     public static void tearDownClass() {
         DATASTORE_FACTORY.tearDown();
-    }
-
-    @Test
-    public void have_empty_release_resources_method() {
-        ((DsEventStorage) STORAGE).releaseResources();
     }
 }

@@ -23,34 +23,41 @@ package org.spine3.server.storage.datastore;
 import com.google.api.services.datastore.client.Datastore;
 import com.google.api.services.datastore.client.DatastoreOptions;
 import com.google.protobuf.Message;
-import org.spine3.server.Entity;
+import com.google.protobuf.Option;
 import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.*;
 
 import static com.google.protobuf.Descriptors.Descriptor;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
-import static org.spine3.util.Classes.getGenericParameterType;
+import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * Creates storages based on GAE {@link Datastore}.
+ *
+ * @author Alexander Litus
+ * @author Mikhail Mikhaylov
  */
 public class DatastoreStorageFactory implements StorageFactory {
 
     private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
 
     private final DatastoreWrapper datastore;
+    private final Options options;
 
     /**
-     * @return creates new factory instance.
      * @param datastore the {@link Datastore} implementation to use.
+     * @return creates new factory instance.
      * @see DatastoreOptions
      */
+    @SuppressWarnings("WeakerAccess") // Part of API
     public static DatastoreStorageFactory newInstance(Datastore datastore) {
         return new DatastoreStorageFactory(datastore);
     }
 
-    protected DatastoreStorageFactory(Datastore datastore) {
-        this.datastore = new DatastoreWrapper(datastore);
+    /* package */ DatastoreStorageFactory(Datastore datastore) {
+        options = new Options();
+        this.datastore = new DatastoreWrapper(datastore, options);
     }
 
     @Override
@@ -63,29 +70,53 @@ public class DatastoreStorageFactory implements StorageFactory {
         return DsEventStorage.newInstance(datastore);
     }
 
-    /**
-     * NOTE: the parameter is not used.
-     */
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
-        return DsAggregateStorage.newInstance(datastore);
+    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> aClass) {
+        final DsEntityStorage<I> entityStorage = (DsEntityStorage<I>) createEntityStorage(aClass);
+        final DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastore);
+        return DsProjectionStorage.newInstance(entityStorage, propertyStorage, aClass);
     }
 
     @Override
-    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-
+    public <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
         return DsEntityStorage.newInstance(descriptor, datastore);
     }
 
     @Override
-    public void setUp() {
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> ignored) {
+        return DsAggregateStorage.newInstance(datastore, DsPropertyStorage.newInstance(datastore));
+    }
+
+    @SuppressWarnings("ProhibitedExceptionDeclared")
+    @Override
+    public void close() throws Exception {
         // NOP
     }
 
-    @Override
-    public void tearDown() {
-        // NOP
+    public Options getOptions() {
+        return options;
+    }
+
+    @SuppressWarnings("WeakerAccess") // We provide it as API
+    public static class Options {
+        private Options() {}
+
+        private static final int DEFAULT_PAGE_SIZE = 10;
+
+        private int pageSize = DEFAULT_PAGE_SIZE;
+
+        public void setEventIteratorPageSize(int pageSize) {
+            if (pageSize < 1) {
+                throw new IllegalArgumentException("Events page can not contain less than one event.");
+            }
+
+            this.pageSize = pageSize;
+        }
+
+        public int getEventIteratorPageSize() {
+            return pageSize;
+        }
     }
 }

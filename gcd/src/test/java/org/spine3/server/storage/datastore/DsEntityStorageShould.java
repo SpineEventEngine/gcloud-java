@@ -20,13 +20,16 @@
 
 package org.spine3.server.storage.datastore;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.*;
+import org.spine3.base.Identifiers;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.EntityStorageShould;
+import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
-
+import org.spine3.testdata.TestAggregateIdFactory;
+import org.spine3.testdata.TestEntity;
 
 /**
  * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
@@ -34,15 +37,9 @@ import org.spine3.test.project.ProjectId;
  * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
  * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
-public class DsEntityStorageShould extends EntityStorageShould {
+public class DsEntityStorageShould extends EntityStorageShould<String> {
 
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
-
-    private static final EntityStorage<String, ProjectId> STORAGE = DATASTORE_FACTORY.createEntityStorage(TestEntity.class);
-
-    public DsEntityStorageShould() {
-        super(STORAGE);
-    }
 
     @BeforeClass
     public static void setUpClass() {
@@ -57,5 +54,21 @@ public class DsEntityStorageShould extends EntityStorageShould {
     @AfterClass
     public static void tearDownClass() {
         DATASTORE_FACTORY.tearDown();
+    }
+
+
+    @Override
+    protected EntityStorage<String> getStorage() {
+        return DATASTORE_FACTORY.createEntityStorage(TestEntity.class);
+    }
+
+    @Override
+    protected String newId() {
+        return Identifiers.newUuid();
+    }
+
+    @Override
+    protected <I> EntityStorage<I> getStorage(Class<? extends Entity<I, ?>> entityClass) {
+        return DATASTORE_FACTORY.createEntityStorage(entityClass);
     }
 }

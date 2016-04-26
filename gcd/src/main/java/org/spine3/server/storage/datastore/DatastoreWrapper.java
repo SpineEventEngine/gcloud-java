@@ -21,18 +21,13 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.api.services.datastore.DatastoreV1.*;
-import com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction;
 import com.google.api.services.datastore.client.Datastore;
 import com.google.api.services.datastore.client.DatastoreException;
 import com.google.common.base.Function;
-import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
-import com.google.protobuf.TimestampOrBuilder;
+import com.google.protobuf.*;
 
 import javax.annotation.Nullable;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.google.api.services.datastore.DatastoreV1.CommitRequest.Mode.NON_TRANSACTIONAL;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
@@ -41,31 +36,30 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.protobuf.Timestamps.convertToDate;
 
 /**
  * The Google App Engine Cloud {@link Datastore} wrapper.
  *
  * @author Alexander Litus
+ * @author Mikhail Mikhaylov
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
-class DatastoreWrapper {
+/* package */ class DatastoreWrapper {
 
     private static final String VALUE_PROPERTY_NAME = "value";
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
-
     private final Datastore datastore;
+    private final DatastoreStorageFactory.Options datastoreOptions;
 
     /**
      * Creates a new storage instance.
      *
      * @param datastore the datastore implementation to use.
      */
-    protected DatastoreWrapper(Datastore datastore) {
+    /* package */ DatastoreWrapper(Datastore datastore, DatastoreStorageFactory.Options datastoreOptions) {
         this.datastore = datastore;
+        this.datastoreOptions = datastoreOptions;
     }
 
     /**
@@ -74,7 +68,7 @@ class DatastoreWrapper {
      * @param mutation the mutation to commit.
      * @throws RuntimeException if {@link Datastore#commit(CommitRequest)} throws a {@link DatastoreException}
      */
-    protected void commit(Mutation mutation) {
+    private void commit(Mutation mutation) {
 
         final CommitRequest commitRequest = CommitRequest.newBuilder()
                 .setMode(NON_TRANSACTIONAL)
@@ -94,7 +88,7 @@ class DatastoreWrapper {
      * @throws RuntimeException if {@link Datastore#commit(CommitRequest)} throws a {@link DatastoreException}
      */
     @SuppressWarnings("TypeMayBeWeakened") // no, it cannot
-    protected void commit(Mutation.Builder mutation) {
+    /* package */ void commit(Mutation.Builder mutation) {
         commit(mutation.build());
     }
 
@@ -105,7 +99,7 @@ class DatastoreWrapper {
      * @return the {@link LookupResponse} received
      * @throws RuntimeException if {@link Datastore#lookup(LookupRequest)} throws a {@link DatastoreException}
      */
-    protected LookupResponse lookup(LookupRequest request) {
+    /* package */ LookupResponse lookup(LookupRequest request) {
         LookupResponse response = null;
         try {
             response = datastore.lookup(request);
@@ -122,9 +116,13 @@ class DatastoreWrapper {
      * @return the {@link EntityResult} list received or an empty list
      * @throws RuntimeException if {@link Datastore#lookup(LookupRequest)} throws a {@link DatastoreException}
      */
-    protected List<EntityResult> runQuery(Query query) {
+    private List<EntityResult> runQuery(Query query) {
         final RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
         return runQueryRequest(queryRequest);
+    }
+
+    /* package */ Iterator<EntityResult> runQueryForIterator(Query query) {
+        return new PagingDatastoreIterator(query, this, datastoreOptions.getEventIteratorPageSize());
     }
 
     /**
@@ -134,13 +132,13 @@ class DatastoreWrapper {
      * @return the {@link EntityResult} list received or an empty list
      * @throws RuntimeException if {@link Datastore#lookup(LookupRequest)} throws a {@link DatastoreException}
      */
-    @SuppressWarnings("TypeMayBeWeakened") // no, it cannot
-    protected List<EntityResult> runQuery(Query.Builder query) {
+    @SuppressWarnings("TypeMayBeWeakened")
+    // no, it cannot
+    /* package */ List<EntityResult> runQuery(Query.Builder query) {
         return runQuery(query.build());
     }
 
     private List<EntityResult> runQueryRequest(RunQueryRequest queryRequest) {
-
         List<EntityResult> entityResults = newArrayList();
         try {
             entityResults = datastore.runQuery(queryRequest).getBatch().getEntityResultList();
@@ -154,38 +152,32 @@ class DatastoreWrapper {
     }
 
     /**
-     * Makes a property from the given timestamp using {@link org.spine3.protobuf.Timestamps#convertToDate(TimestampOrBuilder)}.
-     */
-    protected static Property.Builder makeTimestampProperty(TimestampOrBuilder timestamp) {
-        final Date date = convertToDate(timestamp);
-        return makeProperty(TIMESTAMP_PROPERTY_NAME, makeValue(date));
-    }
-
-    /**
-     * Builds a query with the given {@code Entity} kind and the {@code Timestamp} sort direction.
+     * Runs the given {@link Query} and returns {@link QueryResultBatch} to provide user with cursor.
      *
-     * @param sortDirection the {@code Timestamp} sort direction
-     * @param entityKind    the {@code Entity} kind
-     * @return a new {@code Query} instance.
-     * @see Entity
-     * @see com.google.protobuf.Timestamp
-     * @see Query
+     * @param query the query to run.
+     * @return query result batch.
      */
-    protected static Query.Builder makeQuery(Direction sortDirection, String entityKind) {
-        final Query.Builder query = Query.newBuilder();
-        query.addKindBuilder().setName(entityKind);
-        query.addOrder(makeOrder(TIMESTAMP_PROPERTY_NAME, sortDirection));
-        return query;
+    @Nullable
+    /* package */ QueryResultBatch runQueryForBatch(Query query) {
+        final RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
+        QueryResultBatch batch = null;
+        try {
+            batch = datastore.runQuery(queryRequest).getBatch();
+        } catch (DatastoreException e) {
+            propagate(e);
+        }
+
+        return batch;
     }
 
     /**
      * Converts the given {@link Message} to the {@link Entity.Builder}.
      *
      * @param message the message to convert
-     * @param key the entity key to set
+     * @param key     the entity key to set
      * @return the {@link Entity.Builder} with the given key and property created from the serialized message
      */
-    protected static Entity.Builder messageToEntity(Message message, Key.Builder key) {
+    /* package */ static Entity.Builder messageToEntity(Message message, Key.Builder key) {
         final ByteString serializedMessage = toAny(message).getValue();
         final Entity.Builder entity = Entity.newBuilder()
                 .setKey(key)
@@ -196,12 +188,12 @@ class DatastoreWrapper {
     /**
      * Converts the given {@link EntityResultOrBuilder} to the {@link Message}.
      *
-     * @param entity the entity to convert
+     * @param entity  the entity to convert
      * @param typeUrl the type url of the message
      * @return the deserialized message
      * @see Any#getTypeUrl()
      */
-    protected static <M extends Message> M entityToMessage(@Nullable EntityResultOrBuilder entity, String typeUrl) {
+    /* package */ static <M extends Message> M entityToMessage(@Nullable EntityResultOrBuilder entity, String typeUrl) {
 
         if (entity == null) {
             @SuppressWarnings("unchecked") // cast is safe because Any is Message
@@ -229,11 +221,11 @@ class DatastoreWrapper {
      * Converts the given {@link EntityResult} list to the {@link Message} list.
      *
      * @param entities the entities to convert
-     * @param typeUrl the type url of the messages
+     * @param typeUrl  the type url of the messages
      * @return the deserialized messages
      * @see Any#getTypeUrl()
      */
-    protected static <M extends Message> List<M> entitiesToMessages(List<EntityResult> entities, final String typeUrl) {
+    /* package */ static <M extends Message> List<M> entitiesToMessages(List<EntityResult> entities, final String typeUrl) {
 
         final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
             @Override

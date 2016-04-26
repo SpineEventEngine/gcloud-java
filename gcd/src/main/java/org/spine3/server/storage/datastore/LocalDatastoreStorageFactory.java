@@ -20,10 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.client.DatastoreOptions;
-import com.google.api.services.datastore.client.LocalDevelopmentDatastore;
-import com.google.api.services.datastore.client.LocalDevelopmentDatastoreException;
-import com.google.api.services.datastore.client.LocalDevelopmentDatastoreFactory;
+import com.google.api.services.datastore.client.*;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
@@ -34,7 +31,7 @@ import static com.google.common.base.Throwables.propagate;
 @SuppressWarnings("CallToSystemGetenv")
 public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
-    private static final String DEFAULT_DATASET_NAME = "spine-local-dataset";
+    private static final String DEFAULT_DATASET_NAME = "spine";
     private static final String DEFAULT_HOST = "http://localhost:8080";
 
     private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = new DatastoreOptions.Builder()
@@ -44,21 +41,21 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static final String OPTION_TESTING_MODE = "--testing";
 
-    public static final String VAR_NAME_GCD_HOME = "GCD_HOME";
+    private static final String VAR_NAME_GCD_HOME = "GCD_HOME";
 
     private static final String GCD_HOME_PATH = retrieveGcdHome();
 
     private static final String ENVIRONMENT_NOT_CONFIGURED_MESSAGE = VAR_NAME_GCD_HOME + " environment variable is not configured. " +
-                    "See https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment";
+            "See https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment";
 
     private final LocalDevelopmentDatastore localDatastore;
 
     /**
      * Returns a default factory instance. A {@link LocalDevelopmentDatastore} is created with default {@link DatastoreOptions}:
-     * <ul>
-     *     <li>Dataset name: {@code spine-local-dataset}</li>
-     *     <li>Host: {@code http://localhost:8080}</li>
-     * </ul>
+     *
+     * <p>Dataset name: {@code spine-local-dataset}
+     *
+     * <p>Host: {@code http://localhost:8080}
      */
     public static LocalDatastoreStorageFactory getDefaultInstance() {
         return DefaultInstanceSingleton.INSTANCE.value;
@@ -66,6 +63,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     /**
      * Creates a new factory instance.
+     *
      * @param options {@link DatastoreOptions} used to create a {@link LocalDevelopmentDatastore}
      */
     public static LocalDatastoreStorageFactory newInstance(DatastoreOptions options) {
@@ -82,16 +80,10 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * Intended to start the local Datastore server in testing mode.
      * <p>
      * NOTE: does nothing for now because of several issues:
-     * <ul>
-     *     <li>
-     *         This <a href="https://github.com/GoogleCloudPlatform/google-cloud-datastore/commit/a077c5b4d6fa2826fd6c376b692686894b719fd9">commit</a>
-     *         seems to fix the first issue, but there is no release with this fix available yet.
-     *     </li>
-     *     <li>
-     *         Also fails to start on Windows:
-     *         <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">issue</a>.
-     *     </li>
-     * </ul>
+     * This <a href="https://github.com/GoogleCloudPlatform/google-cloud-datastore/commit/a077c5b4d6fa2826fd6c376b692686894b719fd9">commit</a>
+     * seems to fix the first issue, but there is no release with this fix available yet.
+     * Also fails to start on Windows:
+     * <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">issue</a>.
      * <p>
      * Until these issues are not fixed, it is required to start the local Datastore Server manually.
      * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
@@ -101,9 +93,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * @see <a href="https://cloud.google.com/DATASTORE/docs/tools/devserver#local_development_server_command-line_arguments">
      * Documentation</a> ("testing" option)
      */
-    @Override
     public void setUp() {
-        super.setUp();
         if (false) // TODO:2015-11-12:alexander.litus: Remove the condition when issues specified above are fixed
         try {
             localDatastore.start(GCD_HOME_PATH, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
@@ -119,9 +109,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * @throws RuntimeException if {@link LocalDevelopmentDatastore#stop()} throws LocalDevelopmentDatastoreException.
      */
-    @Override
     public void tearDown() {
-        super.tearDown();
         clear();
         if (false) // TODO:2015-11-12:alexander.litus: remove the condition when issues specified in setUp method javadoc are fixed
         try {
@@ -136,7 +124,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * @throws RuntimeException if {@link LocalDevelopmentDatastore#clear()} throws LocalDevelopmentDatastoreException.
      */
-    public void clear() {
+    /* package */ void clear() {
         try {
             localDatastore.clear();
         } catch (LocalDevelopmentDatastoreException e) {
