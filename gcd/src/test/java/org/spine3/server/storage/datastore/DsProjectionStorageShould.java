@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import org.junit.After;
 import org.junit.Before;
 import org.spine3.base.Identifiers;
 import org.spine3.server.projection.Projection;
@@ -33,9 +34,8 @@ import org.spine3.test.project.Project;
 public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
 
-    // As we have should_return_null_if_no_event_time_in_storage, we have to clean datastore before every test
-    @Before
-    public void cleanup() {
+    @After
+    public void tearDownTest() {
         DATASTORE_FACTORY.clear();
     }
 

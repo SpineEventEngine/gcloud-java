@@ -41,7 +41,6 @@ public class DsEntityStorageShould extends EntityStorageShould<String> {
 
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
 
-
     @BeforeClass
     public static void setUpClass() {
         DATASTORE_FACTORY.setUp();
