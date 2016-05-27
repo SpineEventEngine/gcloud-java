@@ -39,7 +39,7 @@ dependencies {
 }
 
 protobuf {
-    generatedFilesBaseDir = "$projectDir/src"
+    generatedFilesBaseDir = "$projectDir/generated"
     protoc {
         artifact = "com.google.protobuf:protoc:3.0.0-beta-2"
     }
