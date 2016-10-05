@@ -21,11 +21,14 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Descriptors.Descriptor;
-import org.spine3.server.storage.EntityStorage;
+import com.google.protobuf.FieldMask;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
+
+import java.util.Map;
 
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
@@ -35,17 +38,17 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
 import static org.spine3.base.Identifiers.idToString;
 
 /**
- * {@link EntityStorage} implementation based on Google App Engine Datastore.
+ * {@link RecordStorage} implementation based on Google App Engine Datastore.
  *
  * @author Alexander Litus
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
-class DsEntityStorage<I> extends EntityStorage<I> {
+class DsEntityStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
-    private final TypeName typeName;
-    private final TypeName entityStorageRecordTypeName = TypeName.of(EntityStorageRecord.getDescriptor());
+    private final TypeUrl typeName;
+    private final TypeUrl entityStorageRecordTypeName = TypeUrl.of(EntityStorageRecord.getDescriptor());
 
     /* package */ static <I> DsEntityStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore) {
         return new DsEntityStorage<>(descriptor, datastore);
@@ -58,7 +61,8 @@ class DsEntityStorage<I> extends EntityStorage<I> {
      * @param datastore  the datastore implementation to use.
      */
     private DsEntityStorage(Descriptor descriptor, DatastoreWrapper datastore) {
-        this.typeName = TypeName.of(descriptor);
+        super(false); // TODO:05-10-16:dmytro.dashenkov: Implement multitenancy.
+        this.typeName = TypeUrl.of(descriptor);
         this.datastore = datastore;
     }
 
@@ -77,8 +81,30 @@ class DsEntityStorage<I> extends EntityStorage<I> {
 
         final EntityResult entity = response.getFound(0);
 
-        final EntityStorageRecord result = entityToMessage(entity, entityStorageRecordTypeName.toTypeUrl());
+        final EntityStorageRecord result = entityToMessage(entity, entityStorageRecordTypeName.value());
         return result;
+    }
+
+    // TODO:05-10-16:dmytro.dashenkov: Implement.
+
+    @Override
+    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
+        return null;
+    }
+
+    @Override
+    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids, FieldMask fieldMask) {
+        return null;
+    }
+
+    @Override
+    protected Map<I, EntityStorageRecord> readAllInternal() {
+        return null;
+    }
+
+    @Override
+    protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
+        return null;
     }
 
     @Override
@@ -94,6 +120,6 @@ class DsEntityStorage<I> extends EntityStorage<I> {
     }
 
     private Key.Builder createKey(String idString) {
-        return makeKey(typeName.nameOnly(), idString);
+        return makeKey(typeName.getSimpleName(), idString);
     }
 }

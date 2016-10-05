@@ -58,7 +58,7 @@ public class DsEntityStorageShould extends EntityStorageShould<String> {
 
 
     @Override
-    protected EntityStorage<String> getStorage() {
+    protected RecordStorage<String> getStorage() {
         return DATASTORE_FACTORY.createEntityStorage(TestEntity.class);
     }
 
@@ -68,7 +68,7 @@ public class DsEntityStorageShould extends EntityStorageShould<String> {
     }
 
     @Override
-    protected <I> EntityStorage<I> getStorage(Class<? extends Entity<I, ?>> entityClass) {
+    protected <I> RecordStorage<I> getStorage(Class<? extends Entity<I, ?>> entityClass) {
         return DATASTORE_FACTORY.createEntityStorage(entityClass);
     }
 }

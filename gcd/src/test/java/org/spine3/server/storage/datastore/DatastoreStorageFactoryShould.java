@@ -45,7 +45,7 @@ public class DatastoreStorageFactoryShould {
 
     @Test
     public void create_entity_storage_using_class_parameter() {
-        final EntityStorage<String> storage = FACTORY.createEntityStorage(TestEntity.class);
+        final RecordStorage<String> storage = FACTORY.createEntityStorage(TestEntity.class);
         assertNotNull(storage);
     }
 

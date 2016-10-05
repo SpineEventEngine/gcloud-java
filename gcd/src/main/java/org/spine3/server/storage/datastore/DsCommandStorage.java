@@ -26,7 +26,9 @@ import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
+
+import java.util.Iterator;
 
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
@@ -46,15 +48,21 @@ class DsCommandStorage extends CommandStorage {
 
     private final DatastoreWrapper datastore;
 
-    private final TypeName typeName;
+    private final TypeUrl typeUrl;
 
     /* package */ static CommandStorage newInstance(DatastoreWrapper datastore) {
         return new DsCommandStorage(datastore);
     }
 
     private DsCommandStorage(DatastoreWrapper datastore) {
+        super(false); // TODO:05-10-16:dmytro.dashenkov: Implement multitenancy.
         this.datastore = datastore;
-        typeName = TypeName.of(CommandStorageRecord.getDescriptor());
+        typeUrl = TypeUrl.of(CommandStorageRecord.getDescriptor());
+    }
+
+    @Override
+    protected Iterator<CommandStorageRecord> read(CommandStatus status) {
+        return null; // TODO:05-10-16:dmytro.dashenkov: Implement.
     }
 
     @Override
@@ -110,7 +118,7 @@ class DsCommandStorage extends CommandStorage {
         }
 
         final EntityResult entity = response.getFound(0);
-        final CommandStorageRecord result = entityToMessage(entity, typeName.toTypeUrl());
+        final CommandStorageRecord result = entityToMessage(entity, typeUrl.value());
         return result;
     }
 
@@ -133,6 +141,6 @@ class DsCommandStorage extends CommandStorage {
     }
 
     private Key.Builder createKey(String idString) {
-        return makeKey(typeName.nameOnly(), idString);
+        return makeKey(typeUrl.getSimpleName(), idString);
     }
 }

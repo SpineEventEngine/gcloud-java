@@ -27,7 +27,7 @@ import org.spine3.base.EventId;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -49,13 +49,14 @@ class DsEventStorage extends EventStorage {
 
     private final DatastoreWrapper datastore;
     private static final String KIND = EventStorageRecord.class.getName();
-    private static final String TYPE_URL = TypeName.of(EventStorageRecord.getDescriptor()).toTypeUrl();
+    private static final String TYPE_URL = TypeUrl.of(EventStorageRecord.getDescriptor()).value();
 
     /* package */ static DsEventStorage newInstance(DatastoreWrapper datastore) {
         return new DsEventStorage(datastore);
     }
 
     private DsEventStorage(DatastoreWrapper datastore) {
+        super(false); // TODO:05-10-16:dmytro.dashenkov: Implement multitenancy.
         this.datastore = datastore;
     }
 

@@ -24,7 +24,7 @@ import com.google.protobuf.Int32Value;
 import org.spine3.base.Identifiers;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import java.util.Iterator;
 import java.util.List;
@@ -50,7 +50,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
 
     private static final String KIND = AggregateStorageRecord.class.getName();
-    private static final String TYPE_URL = TypeName.of(AggregateStorageRecord.getDescriptor()).toTypeUrl();
+    private static final String TYPE_URL = TypeUrl.of(AggregateStorageRecord.getDescriptor()).value();
 
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;
@@ -61,6 +61,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     private DsAggregateStorage(DatastoreWrapper datastore, DsPropertyStorage propertyStorage) {
+        super(false); // TODO:05-10-16:dmytro.dashenkov: Implement multitenancy.
         this.datastore = datastore;
         this.propertyStorage = propertyStorage;
     }

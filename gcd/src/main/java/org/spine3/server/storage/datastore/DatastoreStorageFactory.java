@@ -23,7 +23,6 @@ package org.spine3.server.storage.datastore;
 import com.google.api.services.datastore.client.Datastore;
 import com.google.api.services.datastore.client.DatastoreOptions;
 import com.google.protobuf.Message;
-import com.google.protobuf.Option;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.*;
@@ -61,6 +60,11 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     @Override
+    public boolean isMultitenant() {
+        return false; // TODO:05-10-16:dmytro.dashenkov: Implement.
+    }
+
+    @Override
     public CommandStorage createCommandStorage() {
         return DsCommandStorage.newInstance(datastore);
     }
@@ -71,14 +75,19 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     @Override
+    public StandStorage createStandStorage() {
+        return null; // TODO:05-10-16:dmytro.dashenkov: Implement.
+    }
+
+    @Override
     public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> aClass) {
-        final DsEntityStorage<I> entityStorage = (DsEntityStorage<I>) createEntityStorage(aClass);
+        final DsEntityStorage<I> entityStorage = (DsEntityStorage<I>) createRecordStorage(aClass);
         final DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastore);
         return DsProjectionStorage.newInstance(entityStorage, propertyStorage, aClass);
     }
 
     @Override
-    public <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> entityClass) {
+    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
         return DsEntityStorage.newInstance(descriptor, datastore);

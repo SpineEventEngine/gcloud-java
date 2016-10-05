@@ -25,7 +25,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.CommandStorageShould;
 import org.spine3.test.project.ProjectId;
 
 /**

@@ -28,7 +28,7 @@ import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
  *
  * @author Alexander Litus
  */
-public class Application extends org.spine3.examples.aggregate.server.Application {
+public class Application /*extends org.spine3.examples.aggregate.server.Application*/ {
 
     /**
      * Iterator page size determines, how many events does iterator load from storage per request.
@@ -42,7 +42,7 @@ public class Application extends org.spine3.examples.aggregate.server.Applicatio
      */
     @SuppressWarnings("TypeMayBeWeakened") // not in this case
     private Application(DatastoreStorageFactory storageFactory) {
-        super(storageFactory);
+        //super(storageFactory);
     }
 
     /**
@@ -55,8 +55,8 @@ public class Application extends org.spine3.examples.aggregate.server.Applicatio
         final LocalDatastoreStorageFactory storageFactory = LocalDatastoreStorageFactory.getDefaultInstance();
         storageFactory.getOptions().setEventIteratorPageSize(ITERATOR_PAGE_SIZE);
         storageFactory.setUp();
-        final Application app = new Application(storageFactory);
-        app.execute();
+        //final Application app = new Application(storageFactory);
+        //app.execute();
         storageFactory.tearDown();
     }
 }

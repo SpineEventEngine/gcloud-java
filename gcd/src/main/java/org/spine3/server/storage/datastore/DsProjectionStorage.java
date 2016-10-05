@@ -20,13 +20,16 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.validate.Validate;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 /**
  * @author Mikhail Mikhaylov
@@ -50,6 +53,7 @@ import javax.annotation.Nullable;
     private DsProjectionStorage(DsEntityStorage<I> entityStorage,
                                 DsPropertyStorage propertyStorage,
                                 Class<? extends Entity<I, ?>> projectionClass) {
+        super(false); // TODO:05-10-16:dmytro.dashenkov: Implement multitenancy.
         this.entityStorage = entityStorage;
         this.propertyStorage = propertyStorage;
 
@@ -72,8 +76,30 @@ import javax.annotation.Nullable;
         return readTimestamp;
     }
 
+    // TODO:05-10-16:dmytro.dashenkov: Implement.
+
     @Override
-    public EntityStorage<I> getEntityStorage() {
+    public RecordStorage<I> getRecordStorage() {
         return entityStorage;
+    }
+
+    @Override
+    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
+        return null;
+    }
+
+    @Override
+    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids, FieldMask fieldMask) {
+        return null;
+    }
+
+    @Override
+    protected Map<I, EntityStorageRecord> readAllInternal() {
+        return null;
+    }
+
+    @Override
+    protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
+        return null;
     }
 }

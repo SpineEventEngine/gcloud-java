@@ -1,8 +1,8 @@
 project.ext {
-    SPINE_VERSION = '0.3-SNAPSHOT';
-    PROTOBUF_VERSION = '3.0.0-beta-2';
+    SPINE_VERSION = '0.6.0-SNAPSHOT';
+    PROTOBUF_VERSION = '3.0.0';
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
-    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine-snapshots';
+    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
 }
 
 final String CREDENTIALS_LOCATION = 'credentials.properties';
@@ -13,7 +13,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.7.0'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.0'
     }
 }
 
@@ -56,16 +56,19 @@ subprojects {
 
         // TODO:2015-11-19:alexander.litus: change Spine local dependency to Maven central repository dependency
         // when Spine can be used for evaluation in real projects.
+        // Spine
+        compile group: 'org.spine3', name: 'server', version: project.SPINE_VERSION, changing: true
+        compile group: 'org.spine3', name: 'client', version: project.SPINE_VERSION, changing: true
 
         // Guava
-        compile group: 'com.google.guava', name: 'guava', version: '19.0-rc2'
+        compile group: 'com.google.guava', name: 'guava', version: '19.0'
 
         // Findbugs
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
 
         // SLF4J
-        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
-        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.12'
+        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
+        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.21'
 
         // Protobuf
         compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION

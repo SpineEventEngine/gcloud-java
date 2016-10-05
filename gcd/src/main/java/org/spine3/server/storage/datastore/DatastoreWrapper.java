@@ -24,18 +24,21 @@ import com.google.api.services.datastore.DatastoreV1.*;
 import com.google.api.services.datastore.client.Datastore;
 import com.google.api.services.datastore.client.DatastoreException;
 import com.google.common.base.Function;
-import com.google.protobuf.*;
+import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
+import org.spine3.protobuf.AnyPacker;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 
 import static com.google.api.services.datastore.DatastoreV1.CommitRequest.Mode.NON_TRANSACTIONAL;
-import static com.google.api.services.datastore.client.DatastoreHelper.*;
+import static com.google.api.services.datastore.client.DatastoreHelper.makeProperty;
+import static com.google.api.services.datastore.client.DatastoreHelper.makeValue;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
-import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.protobuf.Messages.toAny;
 
 /**
  * The Google App Engine Cloud {@link Datastore} wrapper.
@@ -87,7 +90,8 @@ import static org.spine3.protobuf.Messages.toAny;
      * @param mutation the mutation to commit.
      * @throws RuntimeException if {@link Datastore#commit(CommitRequest)} throws a {@link DatastoreException}
      */
-    @SuppressWarnings("TypeMayBeWeakened") // no, it cannot
+    @SuppressWarnings("TypeMayBeWeakened")
+    // no, it cannot
     /* package */ void commit(Mutation.Builder mutation) {
         commit(mutation.build());
     }
@@ -177,13 +181,15 @@ import static org.spine3.protobuf.Messages.toAny;
      * @param key     the entity key to set
      * @return the {@link Entity.Builder} with the given key and property created from the serialized message
      */
-    /* package */ static Entity.Builder messageToEntity(Message message, Key.Builder key) {
-        final ByteString serializedMessage = toAny(message).getValue();
+    /* package */
+    static Entity.Builder messageToEntity(Message message, Key.Builder key) {
+        final ByteString serializedMessage = AnyPacker.pack(message).getValue();
         final Entity.Builder entity = Entity.newBuilder()
                 .setKey(key)
                 .addProperty(makeProperty(VALUE_PROPERTY_NAME, makeValue(serializedMessage)));
         return entity;
     }
+
 
     /**
      * Converts the given {@link EntityResultOrBuilder} to the {@link Message}.
@@ -193,7 +199,8 @@ import static org.spine3.protobuf.Messages.toAny;
      * @return the deserialized message
      * @see Any#getTypeUrl()
      */
-    /* package */ static <M extends Message> M entityToMessage(@Nullable EntityResultOrBuilder entity, String typeUrl) {
+    /* package */
+    static <M extends Message> M entityToMessage(@Nullable EntityResultOrBuilder entity, String typeUrl) {
 
         if (entity == null) {
             @SuppressWarnings("unchecked") // cast is safe because Any is Message
@@ -213,7 +220,7 @@ import static org.spine3.protobuf.Messages.toAny;
 
         any.setTypeUrl(typeUrl);
 
-        final M result = fromAny(any.build());
+        final M result = AnyPacker.unpack(any.build());
         return result;
     }
 
@@ -225,7 +232,8 @@ import static org.spine3.protobuf.Messages.toAny;
      * @return the deserialized messages
      * @see Any#getTypeUrl()
      */
-    /* package */ static <M extends Message> List<M> entitiesToMessages(List<EntityResult> entities, final String typeUrl) {
+    /* package */
+    static <M extends Message> List<M> entitiesToMessages(List<EntityResult> entities, final String typeUrl) {
 
         final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
             @Override

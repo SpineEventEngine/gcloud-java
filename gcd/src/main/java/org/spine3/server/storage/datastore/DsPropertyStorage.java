@@ -22,8 +22,8 @@ package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.Messages;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
 
@@ -41,7 +41,7 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
 /* package */ class DsPropertyStorage {
 
     private static final String PROPERTIES_KIND = "properties_kind";
-    private static final String ANY_TYPE_URL = TypeName.of(Any.getDescriptor()).toTypeUrl();
+    private static final String ANY_TYPE_URL = TypeUrl.of(Any.getDescriptor()).value();
 
     private final DatastoreWrapper datastore;
 
@@ -58,7 +58,7 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
         checkNotNull(value);
 
         final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
-        final Entity.Builder entity = messageToEntity(Messages.toAny(value), key);
+        final Entity.Builder entity = messageToEntity(AnyPacker.pack(value), key);
         final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
         datastore.commit(mutation);
     }
@@ -76,6 +76,6 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
 
         final EntityResult entity = response.getFound(0);
         final Any anyResult = entityToMessage(entity, ANY_TYPE_URL);
-        return Messages.fromAny(anyResult);
+        return AnyPacker.unpack(anyResult);
     }
 }
