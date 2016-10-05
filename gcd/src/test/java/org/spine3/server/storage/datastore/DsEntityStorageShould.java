@@ -20,16 +20,14 @@
 
 package org.spine3.server.storage.datastore;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.spine3.base.Identifiers;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.EntityStorage;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.EntityStorageShould;
-import org.spine3.test.project.Project;
-import org.spine3.test.project.ProjectId;
-import org.spine3.testdata.TestAggregateIdFactory;
-import org.spine3.testdata.TestEntity;
+import org.spine3.server.storage.RecordStorage;
+import org.spine3.test.aggregate.Project;
 
 /**
  * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
@@ -59,7 +57,7 @@ public class DsEntityStorageShould extends EntityStorageShould<String> {
 
     @Override
     protected RecordStorage<String> getStorage() {
-        return DATASTORE_FACTORY.createEntityStorage(TestEntity.class);
+        return DATASTORE_FACTORY.createRecordStorage(TestEntity.class);
     }
 
     @Override
@@ -69,6 +67,19 @@ public class DsEntityStorageShould extends EntityStorageShould<String> {
 
     @Override
     protected <I> RecordStorage<I> getStorage(Class<? extends Entity<I, ?>> entityClass) {
-        return DATASTORE_FACTORY.createEntityStorage(entityClass);
+        return DATASTORE_FACTORY.createRecordStorage(entityClass);
+    }
+
+    private static class TestEntity extends Entity<String, Project> {
+
+        /**
+         * Creates a new instance.
+         *
+         * @param id the ID for the new instance
+         * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
+         */
+        private TestEntity(String id) {
+            super(id);
+        }
     }
 }

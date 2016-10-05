@@ -21,12 +21,11 @@
 package org.spine3.server.storage.datastore;
 
 import org.junit.After;
-import org.junit.Before;
 import org.spine3.base.Identifiers;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.ProjectionStorageShould;
-import org.spine3.test.project.Project;
+import org.spine3.test.projection.Project;
 
 /**
  * @author Mikhail Mikhaylov

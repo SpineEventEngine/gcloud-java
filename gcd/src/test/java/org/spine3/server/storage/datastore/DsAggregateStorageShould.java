@@ -24,11 +24,10 @@ import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageShould;
-import org.spine3.test.project.ProjectId;
+import org.spine3.test.storage.ProjectId;
 
 
 /**

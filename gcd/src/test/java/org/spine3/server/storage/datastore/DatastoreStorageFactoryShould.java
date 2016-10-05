@@ -27,8 +27,6 @@ import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.*;
-import org.spine3.test.project.ProjectId;
-import org.spine3.testdata.*;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -45,7 +43,7 @@ public class DatastoreStorageFactoryShould {
 
     @Test
     public void create_entity_storage_using_class_parameter() {
-        final RecordStorage<String> storage = FACTORY.createEntityStorage(TestEntity.class);
+        final RecordStorage<String> storage = FACTORY.createRecordStorage(TestEntity.class);
         assertNotNull(storage);
     }
 

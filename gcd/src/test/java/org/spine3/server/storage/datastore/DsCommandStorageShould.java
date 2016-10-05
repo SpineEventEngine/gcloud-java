@@ -23,9 +23,9 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.spine3.server.storage.CommandStorage;
-import org.spine3.test.project.ProjectId;
+import org.spine3.server.storage.CommandStorageShould;
+
 
 /**
  * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
@@ -37,8 +37,6 @@ import org.spine3.test.project.ProjectId;
 public class DsCommandStorageShould extends CommandStorageShould {
 
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
-
-    private static final ProjectId ID = ProjectId.newBuilder().setId("projectId").build();
 
     @BeforeClass
     public static void setUpClass() {
