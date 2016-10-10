@@ -20,6 +20,7 @@
 
 package org.spine3.sample.gae;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -27,6 +28,7 @@ public class ApplicationShould {
 
     private static final String[] ARGS = new String[0];
 
+    @Ignore
     @Test
     public void execute() {
         Application.main(ARGS);

@@ -22,9 +22,9 @@ package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Int32Value;
 import org.spine3.base.Identifiers;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
-import org.spine3.protobuf.TypeUrl;
 
 import java.util.Iterator;
 import java.util.List;
@@ -34,8 +34,9 @@ import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Opera
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.entitiesToMessages;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.

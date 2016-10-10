@@ -22,20 +22,19 @@ package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
-import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
-
 import java.util.Map;
 
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
-import static org.spine3.base.Identifiers.idToString;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
