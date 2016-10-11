@@ -20,8 +20,11 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.DatastoreV1;
+import com.google.datastore.v1.EntityResult;
+import com.google.datastore.v1.Query;
+import com.google.datastore.v1.QueryResultBatch;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Int32Value;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -35,17 +38,17 @@ import static com.google.common.collect.Lists.newLinkedList;
  *
  * @author Mikhail Mikhaylov
  */
-/* package */ class PagingDatastoreIterator implements Iterator<DatastoreV1.EntityResult> {
+/* package */ class PagingDatastoreIterator implements Iterator<EntityResult> {
 
-    private final DatastoreV1.Query baseQuery;
+    private final Query baseQuery;
     private final int pageSize;
     private ByteString endCursor = null;
 
     private final DatastoreWrapper datastoreWrapper;
 
-    private LinkedList<DatastoreV1.EntityResult> page = new LinkedList<>();
+    private LinkedList<EntityResult> page = new LinkedList<>();
 
-    /* package */ PagingDatastoreIterator(DatastoreV1.Query query, DatastoreWrapper datastoreWrapper, int pageSize) {
+    /* package */ PagingDatastoreIterator(Query query, DatastoreWrapper datastoreWrapper, int pageSize) {
         this.baseQuery = query;
         this.pageSize = pageSize;
         this.datastoreWrapper = datastoreWrapper;
@@ -62,7 +65,7 @@ import static com.google.common.collect.Lists.newLinkedList;
     }
 
     @Override
-    public DatastoreV1.EntityResult next() {
+    public EntityResult next() {
         if (!hasNext()) {
             //noinspection NewExceptionWithoutArguments
             throw new NoSuchElementException();
@@ -71,7 +74,7 @@ import static com.google.common.collect.Lists.newLinkedList;
             loadData();
         }
 
-        final DatastoreV1.EntityResult result = page.poll();
+        final EntityResult result = page.poll();
         return result;
     }
 
@@ -82,19 +85,22 @@ import static com.google.common.collect.Lists.newLinkedList;
 
     //TODO:2016-04-08:mikhail.mikhaylov: Check if there is a way to reduce the number of calls.
     private void loadData() {
-        final DatastoreV1.Query.Builder queryBuilder = DatastoreV1.Query.newBuilder(baseQuery);
+        final Query.Builder queryBuilder = Query.newBuilder(baseQuery);
         if (endCursor == null) {
             queryBuilder.setStartCursor(queryBuilder.getStartCursor());
         } else if (!endCursor.equals(ByteString.EMPTY)) {
             queryBuilder.setStartCursor(endCursor);
         }
 
-        queryBuilder.setLimit(pageSize);
+        final Int32Value pagerSizeValue = Int32Value.newBuilder()
+                                                    .setValue(pageSize)
+                                                    .build();
+        queryBuilder.setLimit(pagerSizeValue);
 
-        final DatastoreV1.QueryResultBatch resultBatch = datastoreWrapper.runQueryForBatch(queryBuilder.build());
+        final QueryResultBatch resultBatch = datastoreWrapper.runQueryForBatch(queryBuilder.build());
         page = newLinkedList();
         if (resultBatch != null) {
-            page.addAll(resultBatch.getEntityResultList());
+            page.addAll(resultBatch.getEntityResultsList());
         }
 
         //noinspection ConstantConditions // NPE is checked above

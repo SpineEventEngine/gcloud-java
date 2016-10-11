@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.datastore.v1.*;
 import com.google.protobuf.Int32Value;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.TypeUrl;
@@ -29,11 +30,12 @@ import org.spine3.server.storage.AggregateStorageRecord;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.google.api.services.datastore.DatastoreV1.*;
-import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
-import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
-import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.datastore.v1.PropertyFilter.Operator.EQUAL;
+import static com.google.datastore.v1.PropertyOrder.Direction.DESCENDING;
+import static com.google.datastore.v1.client.DatastoreHelper.makeFilter;
+import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
+import static com.google.datastore.v1.client.DatastoreHelper.makeValue;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.entitiesToMessages;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
@@ -95,13 +97,12 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final Value.Builder idValue = makeValue(idToString(id));
-        final Property.Builder idProperty = makeProperty(AGGREGATE_ID_PROPERTY_NAME, idValue);
         final Entity.Builder entity = messageToEntity(record, makeKey(KIND));
-        entity.addProperty(idProperty);
-        entity.addProperty(DatastoreProperties.makeTimestampProperty(record.getTimestamp()));
-        entity.addProperty(DatastoreProperties.makeTimestampNanosProperty(record.getTimestamp()));
+        entity.putProperties(AGGREGATE_ID_PROPERTY_NAME, idValue.build());
+        DatastoreProperties.addTimestampProperty(record.getTimestamp(), entity);
+        DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), entity);
 
-        final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
+        final Mutation.Builder mutation = Mutation.newBuilder().setInsert(entity);
         datastore.commit(mutation);
     }
 

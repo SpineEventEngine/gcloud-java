@@ -22,21 +22,22 @@ package org.spine3.server.storage.datastore;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
+import com.google.datastore.v1.*;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
-import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
 
-import static com.google.api.services.datastore.DatastoreV1.*;
-import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.ASCENDING;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
+import static com.google.datastore.v1.PropertyOrder.Direction.ASCENDING;
+import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 
 /**
  * Storage for event records based on Google Cloud Datastore.
@@ -75,15 +76,15 @@ class DsEventStorage extends EventStorage {
     protected void writeInternal(EventStorageRecord record) {
         final Key.Builder key = makeKey(KIND, record.getEventId());
         final Entity.Builder entity = messageToEntity(record, key);
-        entity.addProperty(DatastoreProperties.makeTimestampProperty(record.getTimestamp()));
-        entity.addProperty(DatastoreProperties.makeTimestampNanosProperty(record.getTimestamp()));
-        entity.addProperty(DatastoreProperties.makeAggregateIdProperty(record.getContext().getProducerId()));
-        entity.addProperty(DatastoreProperties.makeEventTypeProperty(record.getEventType()));
+        DatastoreProperties.addTimestampProperty(record.getTimestamp(), entity);
+        DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), entity);
+        DatastoreProperties.addAggregateIdProperty(record.getContext().getProducerId(), entity);
+        DatastoreProperties.addEventTypeProperty(record.getEventType(), entity);
 
-        entity.addAllProperty(DatastoreProperties.makeEventContextProperties(record.getContext()));
-        entity.addAllProperty(DatastoreProperties.makeEventFieldProperties(record));
+        DatastoreProperties.makeEventContextProperties(record.getContext(), entity);
+        DatastoreProperties.makeEventFieldProperties(record, entity);
 
-        final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
+        final Mutation.Builder mutation = Mutation.newBuilder().setInsert(entity); // TODO:11-10-16:dmytro.dashenkov: Check update case.
         datastore.commit(mutation);
     }
 
@@ -92,7 +93,7 @@ class DsEventStorage extends EventStorage {
     protected EventStorageRecord readInternal(EventId eventId) {
         final String idString = idToString(eventId);
         final Key.Builder key = makeKey(KIND, idString);
-        final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
+        final LookupRequest request = LookupRequest.newBuilder().addKeys(key).build();
 
         final LookupResponse response = datastore.lookup(request);
 

@@ -20,11 +20,8 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.DatastoreV1;
-import com.google.api.services.datastore.DatastoreV1.CompositeFilter;
-import com.google.api.services.datastore.DatastoreV1.Filter;
-import com.google.api.services.datastore.DatastoreV1.PropertyFilter;
 import com.google.common.base.Function;
+import com.google.datastore.v1.*;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
@@ -42,14 +39,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
-import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.GREATER_THAN;
-import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.LESS_THAN;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeOrder;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeValue;
-import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_ID_PROPERTY_NAME;
-import static org.spine3.server.storage.datastore.DatastoreProperties.EVENT_TYPE_PROPERTY_NAME;
-import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
+import static com.google.datastore.v1.PropertyFilter.Operator.EQUAL;
+import static com.google.datastore.v1.PropertyFilter.Operator.GREATER_THAN;
+import static com.google.datastore.v1.PropertyFilter.Operator.LESS_THAN;
+import static com.google.datastore.v1.client.DatastoreHelper.makeOrder;
+import static com.google.datastore.v1.client.DatastoreHelper.makeValue;
+import static org.spine3.server.storage.datastore.DatastoreProperties.*;
 
 /**
  * Utility class, which simplifies usage of datastore queries.
@@ -68,12 +63,12 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
      * @param sortDirection the {@code Timestamp} sort direction
      * @param entityKind    the {@code Entity} kind
      * @return a new {@code Query} instance.
-     * @see DatastoreV1.Entity
+     * @see Entity
      * @see com.google.protobuf.Timestamp
-     * @see DatastoreV1.Query
+     * @see Query
      */
-    /* package */ static DatastoreV1.Query.Builder makeQuery(DatastoreV1.PropertyOrder.Direction sortDirection, String entityKind) {
-        final DatastoreV1.Query.Builder query = DatastoreV1.Query.newBuilder();
+    /* package */ static Query.Builder makeQuery(PropertyOrder.Direction sortDirection, String entityKind) {
+        final Query.Builder query = Query.newBuilder();
         query.addKindBuilder().setName(entityKind);
         query.addOrder(makeOrder(TIMESTAMP_NANOS_PROPERTY_NAME, sortDirection));
         return query;
@@ -87,15 +82,15 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
      * @param entityKind        the {@code Entity} kind
      * @param queryPredicate    the {@code EventStreamQuery} predicate, which specifies additional parameters
      * @return a new {@code Query} instance.
-     * @see DatastoreV1.Entity
+     * @see Entity
      * @see com.google.protobuf.Timestamp
-     * @see DatastoreV1.Query
+     * @see Query
      */
-    /* package */ static DatastoreV1.Query.Builder makeQuery(
-            DatastoreV1.PropertyOrder.Direction sortDirection,
+    /* package */ static Query.Builder makeQuery(
+            PropertyOrder.Direction sortDirection,
             String entityKind,
             EventStreamQueryOrBuilder queryPredicate) {
-        final DatastoreV1.Query.Builder query = DatastoreV1.Query.newBuilder();
+        final Query.Builder query = Query.newBuilder();
 
         query.addKindBuilder().setName(entityKind);
         query.addOrder(makeOrder(TIMESTAMP_NANOS_PROPERTY_NAME, sortDirection));
@@ -117,10 +112,10 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
             query.setFilter(filters.get(0));
         } else if (filters.size() > 1) {
             final CompositeFilter.Builder compositeFilter = CompositeFilter.newBuilder();
-            compositeFilter.setOperator(CompositeFilter.Operator.AND);
+            compositeFilter.setOp(CompositeFilter.Operator.AND);
 
             for (Filter filter : filters) {
-                compositeFilter.addFilter(filter);
+                compositeFilter.addFilters(filter);
             }
 
             query.setFilter(Filter.newBuilder().setCompositeFilter(compositeFilter.build()));
@@ -160,9 +155,9 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
 
         for (Any aggregateId : aggregateIds) {
             filters.add(Filter.newBuilder().setPropertyFilter(PropertyFilter.newBuilder()
-                    .setProperty(DatastoreV1.PropertyReference.newBuilder().setName(AGGREGATE_ID_PROPERTY_NAME))
-                    .setOperator(EQUAL)
-                    .setValue(DatastoreV1.Value.newBuilder().setStringValue(Messages.toText(aggregateId)))).build());
+                    .setProperty(PropertyReference.newBuilder().setName(AGGREGATE_ID_PROPERTY_NAME))
+                    .setOp(EQUAL)
+                    .setValue(Value.newBuilder().setStringValue(Messages.toText(aggregateId)))).build());
         }
 
         if (filters.isEmpty()) {
@@ -174,7 +169,7 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         }
 
         final CompositeFilter.Builder compositeFilter = CompositeFilter.newBuilder();
-        compositeFilter.addAllFilter(filters);
+        compositeFilter.addAllFilters(filters);
         return Filter.newBuilder().setCompositeFilter(compositeFilter).build();
     }
 
@@ -186,10 +181,10 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         }
 
         final CompositeFilter.Builder resultFilter = CompositeFilter.newBuilder();
-        resultFilter.setOperator(CompositeFilter.Operator.AND);
+        resultFilter.setOp(CompositeFilter.Operator.AND);
 
         for (FieldFilter fieldFilter : contextFieldFilters) {
-            resultFilter.addFilter(convertFieldFilter(fieldFilter, CONTEXT_FIELD_TO_PROPERTY));
+            resultFilter.addFilters(convertFieldFilter(fieldFilter, CONTEXT_FIELD_TO_PROPERTY));
         }
 
         return Filter.newBuilder().setCompositeFilter(resultFilter).build();
@@ -203,10 +198,10 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         }
 
         final CompositeFilter.Builder resultFilter = CompositeFilter.newBuilder();
-        resultFilter.setOperator(CompositeFilter.Operator.AND);
+        resultFilter.setOp(CompositeFilter.Operator.AND);
 
         for (FieldFilter fieldFilter : eventFieldFilters) {
-            resultFilter.addFilter(convertFieldFilter(fieldFilter, EVENT_FIELD_TO_PROPERTY));
+            resultFilter.addFilters(convertFieldFilter(fieldFilter, EVENT_FIELD_TO_PROPERTY));
         }
 
         return Filter.getDefaultInstance();
@@ -221,15 +216,15 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
 
         final Filter.Builder filter = Filter.newBuilder();
         filter.setPropertyFilter(PropertyFilter.newBuilder()
-                .setProperty(DatastoreV1.PropertyReference.newBuilder().setName(EVENT_TYPE_PROPERTY_NAME))
-                .setOperator(EQUAL)
-                .setValue(DatastoreV1.Value.newBuilder().setStringValue(eventType)));
+                .setProperty(PropertyReference.newBuilder().setName(EVENT_TYPE_PROPERTY_NAME))
+                .setOp(EQUAL)
+                .setValue(Value.newBuilder().setStringValue(eventType)));
 
         return filter.build();
     }
 
     private static Filter.Builder convertFieldFilter(FieldFilterOrBuilder fieldFilter,
-                                                     Function<FieldMask, DatastoreV1.PropertyReference>
+                                                     Function<FieldMask, PropertyReference>
                                                              conversionFunction) {
         final FieldMask field = fieldFilter.getField();
         final List<Any> values = fieldFilter.getValueList();
@@ -237,10 +232,10 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         final CompositeFilter.Builder filter = CompositeFilter.newBuilder();
         for (Any value : values) {
             final PropertyFilter valueFilter = PropertyFilter.newBuilder()
-                    .setOperator(EQUAL)
+                    .setOp(EQUAL)
                     .setProperty(conversionFunction.apply(field))
                     .setValue(makeValue(Messages.toText(value))).build();
-            filter.addFilter(Filter.newBuilder().setPropertyFilter(valueFilter));
+            filter.addFilters(Filter.newBuilder().setPropertyFilter(valueFilter));
         }
 
         return Filter.newBuilder().setCompositeFilter(filter);
@@ -253,8 +248,8 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         if (!timestamp.equals(Timestamp.getDefaultInstance())) {
             filter = Filter.newBuilder().setPropertyFilter(
                     PropertyFilter.newBuilder()
-                            .setOperator(operator)
-                            .setProperty(DatastoreV1.PropertyReference
+                            .setOp(operator)
+                            .setProperty(PropertyReference
                                     .newBuilder().setName(TIMESTAMP_NANOS_PROPERTY_NAME))
                             .setValue(makeValue(Timestamps.convertToNanos(timestamp)))
                             .build());
@@ -262,10 +257,10 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         return filter;
     }
 
-    private static final Function<FieldMask, DatastoreV1.PropertyReference> EVENT_FIELD_TO_PROPERTY = new Function<FieldMask, DatastoreV1.PropertyReference>() {
+    private static final Function<FieldMask, PropertyReference> EVENT_FIELD_TO_PROPERTY = new Function<FieldMask, PropertyReference>() {
         @Nullable
         @Override
-        public DatastoreV1.PropertyReference apply(@Nullable FieldMask fieldMask) {
+        public PropertyReference apply(@Nullable FieldMask fieldMask) {
             if (fieldMask == null) {
                 return null;
             }
@@ -273,10 +268,10 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
         }
     };
 
-    private static final Function<FieldMask, DatastoreV1.PropertyReference> CONTEXT_FIELD_TO_PROPERTY = new Function<FieldMask, DatastoreV1.PropertyReference>() {
+    private static final Function<FieldMask, PropertyReference> CONTEXT_FIELD_TO_PROPERTY = new Function<FieldMask, PropertyReference>() {
         @Nullable
         @Override
-        public DatastoreV1.PropertyReference apply(@Nullable FieldMask fieldMask) {
+        public PropertyReference apply(@Nullable FieldMask fieldMask) {
             if (fieldMask == null) {
                 return null;
             }

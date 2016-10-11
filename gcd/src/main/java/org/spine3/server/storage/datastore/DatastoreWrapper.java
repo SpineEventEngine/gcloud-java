@@ -20,10 +20,11 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.DatastoreV1.*;
-import com.google.api.services.datastore.client.Datastore;
-import com.google.api.services.datastore.client.DatastoreException;
+
 import com.google.common.base.Function;
+import com.google.datastore.v1.*;
+import com.google.datastore.v1.client.Datastore;
+import com.google.datastore.v1.client.DatastoreException;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -32,13 +33,13 @@ import org.spine3.protobuf.AnyPacker;
 import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-import static com.google.api.services.datastore.DatastoreV1.CommitRequest.Mode.NON_TRANSACTIONAL;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeProperty;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeValue;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
+import static com.google.datastore.v1.CommitRequest.Mode.NON_TRANSACTIONAL;
+import static com.google.datastore.v1.client.DatastoreHelper.makeValue;
 
 /**
  * The Google App Engine Cloud {@link Datastore} wrapper.
@@ -54,6 +55,7 @@ import static com.google.common.collect.Lists.transform;
 
     private final Datastore datastore;
     private final DatastoreStorageFactory.Options datastoreOptions;
+
 
     /**
      * Creates a new storage instance.
@@ -75,7 +77,7 @@ import static com.google.common.collect.Lists.transform;
 
         final CommitRequest commitRequest = CommitRequest.newBuilder()
                 .setMode(NON_TRANSACTIONAL)
-                .setMutation(mutation)
+                .addMutations(mutation)
                 .build();
         try {
             datastore.commit(commitRequest);
@@ -145,7 +147,7 @@ import static com.google.common.collect.Lists.transform;
     private List<EntityResult> runQueryRequest(RunQueryRequest queryRequest) {
         List<EntityResult> entityResults = newArrayList();
         try {
-            entityResults = datastore.runQuery(queryRequest).getBatch().getEntityResultList();
+            entityResults = datastore.runQuery(queryRequest).getBatch().getEntityResultsList();
         } catch (DatastoreException e) {
             propagate(e);
         }
@@ -181,12 +183,11 @@ import static com.google.common.collect.Lists.transform;
      * @param key     the entity key to set
      * @return the {@link Entity.Builder} with the given key and property created from the serialized message
      */
-    /* package */
-    static Entity.Builder messageToEntity(Message message, Key.Builder key) {
+    /* package */ static Entity.Builder messageToEntity(Message message, Key.Builder key) {
         final ByteString serializedMessage = AnyPacker.pack(message).getValue();
         final Entity.Builder entity = Entity.newBuilder()
                 .setKey(key)
-                .addProperty(makeProperty(VALUE_PROPERTY_NAME, makeValue(serializedMessage)));
+                .putProperties(VALUE_PROPERTY_NAME, makeValue(serializedMessage).build());
         return entity;
     }
 
@@ -210,10 +211,10 @@ import static com.google.common.collect.Lists.transform;
 
         final Any.Builder any = Any.newBuilder();
 
-        final List<Property> properties = entity.getEntity().getPropertyList();
+        final Map<String, Value> properties = entity.getEntity().getPropertiesMap();
 
-        for (Property property : properties) {
-            if (property.getName().equals(VALUE_PROPERTY_NAME)) {
+        for (Map.Entry<String, Value> property : properties.entrySet()) {
+            if (property.getKey().equals(VALUE_PROPERTY_NAME)) {
                 any.setValue(property.getValue().getBlobValue());
             }
         }

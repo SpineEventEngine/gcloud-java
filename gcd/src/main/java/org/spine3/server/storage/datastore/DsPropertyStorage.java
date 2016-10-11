@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.datastore.v1.*;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
@@ -27,10 +28,9 @@ import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
 
-import static com.google.api.services.datastore.DatastoreV1.*;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 
 /**
@@ -59,14 +59,14 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
 
         final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
         final Entity.Builder entity = messageToEntity(AnyPacker.pack(value), key);
-        final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
+        final Mutation.Builder mutation = Mutation.newBuilder().setInsert(entity); // TODO:11-10-16:dmytro.dashenkov: Check update case.
         datastore.commit(mutation);
     }
 
     @Nullable
     /* package */ <V extends Message> V read(String propertyId) {
         final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
-        final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
+        final LookupRequest request = LookupRequest.newBuilder().addKeys(key).build();
 
         final LookupResponse response = datastore.lookup(request);
 

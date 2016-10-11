@@ -20,21 +20,22 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.datastore.v1.*;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
-import org.spine3.protobuf.TypeUrl;
 
 import java.util.Iterator;
 
-import static com.google.api.services.datastore.DatastoreV1.*;
-import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
@@ -109,7 +110,7 @@ class DsCommandStorage extends CommandStorage {
 
         final String idString = idToString(commandId);
         final Key.Builder key = createKey(idString);
-        final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
+        final LookupRequest request = LookupRequest.newBuilder().addKeys(key).build();
 
         final LookupResponse response = datastore.lookup(request);
 
@@ -133,10 +134,10 @@ class DsCommandStorage extends CommandStorage {
         final Key.Builder key = createKey(idString);
 
         final Entity.Builder entity = messageToEntity(record, key);
-        entity.addProperty(DatastoreProperties.makeTimestampProperty(record.getTimestamp()));
-        entity.addProperty(DatastoreProperties.makeTimestampNanosProperty(record.getTimestamp()));
+        DatastoreProperties.addTimestampProperty(record.getTimestamp(), entity);
+        DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), entity);
 
-        final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
+        final Mutation.Builder mutation = Mutation.newBuilder().setInsert(entity); // TODO:11-10-16:dmytro.dashenkov: Check update case.
         datastore.commit(mutation);
     }
 

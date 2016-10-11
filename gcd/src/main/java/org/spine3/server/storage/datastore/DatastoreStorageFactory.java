@@ -20,8 +20,8 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.client.Datastore;
-import com.google.api.services.datastore.client.DatastoreOptions;
+import com.google.datastore.v1.client.Datastore;
+import com.google.datastore.v1.client.DatastoreOptions;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.entity.Entity;

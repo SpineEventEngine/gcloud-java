@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.datastore.v1.*;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import org.spine3.protobuf.TypeUrl;
@@ -29,9 +30,8 @@ import org.spine3.server.storage.RecordStorage;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-import static com.google.api.services.datastore.DatastoreV1.*;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
@@ -49,7 +49,8 @@ class DsEntityStorage<I> extends RecordStorage<I> {
     private final TypeUrl typeName;
     private final TypeUrl entityStorageRecordTypeName = TypeUrl.of(EntityStorageRecord.getDescriptor());
 
-    /* package */ static <I> DsEntityStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore) {
+    /* package */
+    static <I> DsEntityStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore) {
         return new DsEntityStorage<>(descriptor, datastore);
     }
 
@@ -70,7 +71,9 @@ class DsEntityStorage<I> extends RecordStorage<I> {
     protected EntityStorageRecord readInternal(I id) {
         final String idString = idToString(id);
         final Key.Builder key = createKey(idString);
-        final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
+        final LookupRequest request = LookupRequest.newBuilder()
+                .addKeys(key)
+                .build();
 
         final LookupResponse response = datastore.lookup(request);
 
@@ -114,7 +117,8 @@ class DsEntityStorage<I> extends RecordStorage<I> {
         final String idString = idToString(id);
         final Key.Builder key = createKey(idString);
         final Entity.Builder entity = messageToEntity(entityStorageRecord, key);
-        final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
+        final Mutation.Builder mutation = Mutation.newBuilder()
+                .setInsert(entity);
         datastore.commit(mutation);
     }
 

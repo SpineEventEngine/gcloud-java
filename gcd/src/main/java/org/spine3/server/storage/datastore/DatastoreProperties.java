@@ -20,8 +20,10 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.DatastoreV1.Property;
-import com.google.api.services.datastore.DatastoreV1.PropertyReference;
+import com.google.api.Property;
+import com.google.datastore.v1.Entity;
+import com.google.datastore.v1.PropertyReference;
+import com.google.datastore.v1.Value;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
@@ -29,13 +31,12 @@ import org.spine3.base.EventContextOrBuilder;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EventStorageRecordOrBuilder;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import static com.google.api.services.datastore.client.DatastoreHelper.makeProperty;
-import static com.google.api.services.datastore.client.DatastoreHelper.makePropertyReference;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeValue;
+import static com.google.datastore.v1.client.DatastoreHelper.makePropertyReference;
+import static com.google.datastore.v1.client.DatastoreHelper.makeValue;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
 
@@ -69,18 +70,20 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      * Makes a property from the given timestamp using
      * {@link org.spine3.protobuf.Timestamps#convertToDate(TimestampOrBuilder)}.
      */
-    /* package */ static Property.Builder makeTimestampProperty(TimestampOrBuilder timestamp) {
+    /* package */
+    static void addTimestampProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final Date date = convertToDate(timestamp);
-        return makeProperty(TIMESTAMP_PROPERTY_NAME, makeValue(date));
+        entity.putProperties(TIMESTAMP_PROPERTY_NAME, makeValue(date).build());
     }
 
     /**
      * Makes a property from the given timestamp using
      * {@link org.spine3.protobuf.Timestamps#convertToNanos(TimestampOrBuilder)}.
      */
-    /* package */ static Property.Builder makeTimestampNanosProperty(TimestampOrBuilder timestamp) {
+    /* package */
+    static void addTimestampNanosProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final long nanos = convertToNanos(timestamp);
-        return makeProperty(TIMESTAMP_NANOS_PROPERTY_NAME, makeValue(nanos));
+        entity.putProperties(TIMESTAMP_NANOS_PROPERTY_NAME, makeValue(nanos).build());
     }
 
     /**
@@ -88,9 +91,10 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      *
      * @return {@link Property.Builder}
      */
-    /* package */ static Property.Builder makeAggregateIdProperty(Message aggregateId) {
+    /* package */
+    static void addAggregateIdProperty(Message aggregateId, Entity.Builder entity) {
         final String propertyValue = Messages.toText(aggregateId);
-        return makeProperty(AGGREGATE_ID_PROPERTY_NAME, makeValue(propertyValue));
+        entity.putProperties(AGGREGATE_ID_PROPERTY_NAME, makeValue(propertyValue).build());
     }
 
     /**
@@ -98,8 +102,9 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      *
      * @return {@link Property.Builder}
      */
-    /* package */ static Property.Builder makeEventTypeProperty(String eventType) {
-        return makeProperty(EVENT_TYPE_PROPERTY_NAME, makeValue(eventType));
+    /* package */
+    static void addEventTypeProperty(String eventType, Entity.Builder entity) {
+        entity.putProperties(EVENT_TYPE_PROPERTY_NAME, makeValue(eventType).build());
     }
 
     /**
@@ -135,34 +140,33 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      * Converts {@link org.spine3.base.EventContext} or it's builder to a set of Properties, which are
      * ready to add to datastore entity.
      */
-    /* package */ static Iterable<? extends Property> makeEventContextProperties(
-            EventContextOrBuilder context) {
-        final Collection<Property> properties = new ArrayList<>();
-        properties.add(makeProperty(CONTEXT_EVENT_ID_PROPERTY_NAME,
-                makeValue(Messages.toText(context.getEventId()))).build());
-        properties.add(makeProperty(CONTEXT_TIMESTAMP_PROPERTY_NAME,
-                makeValue(convertToNanos(context.getTimestamp()))).build());
+    /* package */
+    static void makeEventContextProperties(EventContextOrBuilder context,
+                                           Entity.Builder builder) {
+        final Map<String, Value> properties = new HashMap<>();
+        properties.put(CONTEXT_EVENT_ID_PROPERTY_NAME, makeValue(Messages.toText(context.getEventId())).build());
+        properties.put(CONTEXT_TIMESTAMP_PROPERTY_NAME, makeValue(convertToNanos(context.getTimestamp())).build());
         // We do not re-save producer id
-        properties.add(makeProperty(CONTEXT_OF_COMMAND_PROPERTY_NAME,
-                makeValue(Messages.toText(context.getCommandContext()))).build());
-        properties.add(makeProperty(CONTEXT_VERSION,
-                makeValue(context.getVersion())).build());
-        // We do not save attributes
-        return properties;
+        properties.put(CONTEXT_OF_COMMAND_PROPERTY_NAME, makeValue(Messages.toText(context.getCommandContext())).build());
+        properties.put(CONTEXT_VERSION, makeValue(context.getVersion()).build());
+
+        builder.putAllProperties(properties);
     }
 
     /**
      * Converts {@link org.spine3.base.Event}'s fields to a set of Properties, which are
      * ready to add to datastore entity.
      */
-    /* package */ static Iterable<? extends Property> makeEventFieldProperties(EventStorageRecordOrBuilder event) {
-        final Collection<Property> properties = new ArrayList<>();
+    /* package */
+    static void makeEventFieldProperties(EventStorageRecordOrBuilder event,
+                                         Entity.Builder builder) {
+        final Map<String, Value> properties = new HashMap<>();
 
         // We do not re-save timestamp
         // We do not re-save event type
-        properties.add(makeProperty(EVENT_ID_PROPERTY_NAME, makeValue(event.getEventId())).build());
-        properties.add(makeProperty(PRODUCER_ID_PROPERTY_NAME, makeValue(event.getProducerId())).build());
+        properties.put(EVENT_ID_PROPERTY_NAME, makeValue(event.getEventId()).build());
+        properties.put(PRODUCER_ID_PROPERTY_NAME, makeValue(event.getProducerId()).build());
 
-        return properties;
+        builder.putAllProperties(properties);
     }
 }
