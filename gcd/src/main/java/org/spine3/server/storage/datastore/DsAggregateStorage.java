@@ -33,9 +33,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.datastore.v1.PropertyFilter.Operator.EQUAL;
 import static com.google.datastore.v1.PropertyOrder.Direction.DESCENDING;
-import static com.google.datastore.v1.client.DatastoreHelper.makeFilter;
-import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
-import static com.google.datastore.v1.client.DatastoreHelper.makeValue;
+import static com.google.datastore.v1.client.DatastoreHelper.*;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.entitiesToMessages;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
@@ -58,13 +56,16 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;
 
-    /* package */ static <I> DsAggregateStorage<I> newInstance(DatastoreWrapper datastore,
-                                                 DsPropertyStorage propertyStorage) {
-        return new DsAggregateStorage<>(datastore, propertyStorage);
+    /* package */
+    static <I> DsAggregateStorage<I> newInstance(
+            DatastoreWrapper datastore,
+            DsPropertyStorage propertyStorage,
+            boolean multitenant) {
+        return new DsAggregateStorage<>(datastore, propertyStorage, multitenant);
     }
 
-    private DsAggregateStorage(DatastoreWrapper datastore, DsPropertyStorage propertyStorage) {
-        super(false); // TODO:05-10-16:dmytro.dashenkov: Implement multitenancy.
+    private DsAggregateStorage(DatastoreWrapper datastore, DsPropertyStorage propertyStorage, boolean multitenant) {
+        super(multitenant);
         this.datastore = datastore;
         this.propertyStorage = propertyStorage;
     }

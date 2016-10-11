@@ -52,12 +52,12 @@ class DsEventStorage extends EventStorage {
     private static final String KIND = EventStorageRecord.class.getName();
     private static final String TYPE_URL = TypeUrl.of(EventStorageRecord.getDescriptor()).value();
 
-    /* package */ static DsEventStorage newInstance(DatastoreWrapper datastore) {
-        return new DsEventStorage(datastore);
+    /* package */ static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+        return new DsEventStorage(datastore, multitenant);
     }
 
-    private DsEventStorage(DatastoreWrapper datastore) {
-        super(false); // TODO:05-10-16:dmytro.dashenkov: Implement multitenancy.
+    private DsEventStorage(DatastoreWrapper datastore, boolean multitenant) {
+        super(multitenant);
         this.datastore = datastore;
     }
 

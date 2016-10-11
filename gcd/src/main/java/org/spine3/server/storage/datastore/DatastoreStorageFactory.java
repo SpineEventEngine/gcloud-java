@@ -43,35 +43,53 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private final DatastoreWrapper datastore;
     private final Options options;
+    private final boolean multitenant;
 
     /**
+     * Creates new instance of {@code DatastoreStorageFactory}.
+     * <p>Same as calling {@link #newInstance(Datastore, boolean)} with {@code false} second argument.
+     *
      * @param datastore the {@link Datastore} implementation to use.
      * @return creates new factory instance.
      * @see DatastoreOptions
      */
     @SuppressWarnings("WeakerAccess") // Part of API
     public static DatastoreStorageFactory newInstance(Datastore datastore) {
-        return new DatastoreStorageFactory(datastore);
+        return new DatastoreStorageFactory(datastore, false);
     }
 
-    /* package */ DatastoreStorageFactory(Datastore datastore) {
-        options = new Options();
+    /**
+     * Creates new instance of {@code DatastoreStorageFactory}.
+     *
+     * @param datastore   the {@link Datastore} implementation to use.
+     * @param multitenant shows if storage factory is configured to serve a multitenant application
+     * @return creates new factory instance.
+     * @see DatastoreOptions
+     */
+    @SuppressWarnings("WeakerAccess") // Part of API
+    public static DatastoreStorageFactory newInstance(Datastore datastore, boolean multitenant) {
+        return new DatastoreStorageFactory(datastore, multitenant);
+    }
+
+    /* package */ DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
+        this.options = new Options();
+        this.multitenant = multitenant;
         this.datastore = new DatastoreWrapper(datastore, options);
     }
 
     @Override
     public boolean isMultitenant() {
-        return false; // TODO:05-10-16:dmytro.dashenkov: Implement.
+        return multitenant;
     }
 
     @Override
     public CommandStorage createCommandStorage() {
-        return DsCommandStorage.newInstance(datastore);
+        return DsCommandStorage.newInstance(datastore, multitenant);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        return DsEventStorage.newInstance(datastore);
+        return DsEventStorage.newInstance(datastore, multitenant);
     }
 
     @Override
@@ -83,19 +101,19 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> aClass) {
         final DsEntityStorage<I> entityStorage = (DsEntityStorage<I>) createRecordStorage(aClass);
         final DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastore);
-        return DsProjectionStorage.newInstance(entityStorage, propertyStorage, aClass);
+        return DsProjectionStorage.newInstance(entityStorage, propertyStorage, aClass, multitenant);
     }
 
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
-        return DsEntityStorage.newInstance(descriptor, datastore);
+        return DsEntityStorage.newInstance(descriptor, datastore, multitenant);
     }
 
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> ignored) {
-        return DsAggregateStorage.newInstance(datastore, DsPropertyStorage.newInstance(datastore));
+        return DsAggregateStorage.newInstance(datastore, DsPropertyStorage.newInstance(datastore), multitenant);
     }
 
     @SuppressWarnings("ProhibitedExceptionDeclared")
@@ -110,7 +128,8 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @SuppressWarnings("WeakerAccess") // We provide it as API
     public static class Options {
-        private Options() {}
+        private Options() {
+        }
 
         private static final int DEFAULT_PAGE_SIZE = 10;
 

@@ -46,14 +46,16 @@ import java.util.Map;
     /* package */
     static <I> DsProjectionStorage<I> newInstance(DsEntityStorage<I> entityStorage,
                                                   DsPropertyStorage propertyStorage,
-                                                  Class<? extends Entity<I, ?>> projectionClass) {
-        return new DsProjectionStorage<>(entityStorage, propertyStorage, projectionClass);
+                                                  Class<? extends Entity<I, ?>> projectionClass,
+                                                  boolean multitenant) {
+        return new DsProjectionStorage<>(entityStorage, propertyStorage, projectionClass, multitenant);
     }
 
     private DsProjectionStorage(DsEntityStorage<I> entityStorage,
                                 DsPropertyStorage propertyStorage,
-                                Class<? extends Entity<I, ?>> projectionClass) {
-        super(false); // TODO:05-10-16:dmytro.dashenkov: Implement multitenancy.
+                                Class<? extends Entity<I, ?>> projectionClass,
+                                boolean multitenant) {
+        super(multitenant);
         this.entityStorage = entityStorage;
         this.propertyStorage = propertyStorage;
 

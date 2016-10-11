@@ -74,7 +74,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private LocalDatastoreStorageFactory(Datastore datastore) {
-        super(datastore);
+        super(datastore, false);
         localDatastore = datastore;
     }
 

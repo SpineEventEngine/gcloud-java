@@ -50,8 +50,8 @@ class DsEntityStorage<I> extends RecordStorage<I> {
     private final TypeUrl entityStorageRecordTypeName = TypeUrl.of(EntityStorageRecord.getDescriptor());
 
     /* package */
-    static <I> DsEntityStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore) {
-        return new DsEntityStorage<>(descriptor, datastore);
+    static <I> DsEntityStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
+        return new DsEntityStorage<>(descriptor, datastore, multitenant);
     }
 
     /**
@@ -60,8 +60,8 @@ class DsEntityStorage<I> extends RecordStorage<I> {
      * @param descriptor the descriptor of the type of messages to save to the storage.
      * @param datastore  the datastore implementation to use.
      */
-    private DsEntityStorage(Descriptor descriptor, DatastoreWrapper datastore) {
-        super(false); // TODO:05-10-16:dmytro.dashenkov: Implement multitenancy.
+    private DsEntityStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
+        super(multitenant);
         this.typeName = TypeUrl.of(descriptor);
         this.datastore = datastore;
     }

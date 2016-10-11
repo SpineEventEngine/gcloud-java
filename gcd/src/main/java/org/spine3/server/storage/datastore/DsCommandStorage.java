@@ -51,12 +51,12 @@ class DsCommandStorage extends CommandStorage {
 
     private final TypeUrl typeUrl;
 
-    /* package */ static CommandStorage newInstance(DatastoreWrapper datastore) {
-        return new DsCommandStorage(datastore);
+    /* package */ static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+        return new DsCommandStorage(datastore, multitenant);
     }
 
-    private DsCommandStorage(DatastoreWrapper datastore) {
-        super(false); // TODO:05-10-16:dmytro.dashenkov: Implement multitenancy.
+    private DsCommandStorage(DatastoreWrapper datastore, boolean multitenant) {
+        super(multitenant);
         this.datastore = datastore;
         typeUrl = TypeUrl.of(CommandStorageRecord.getDescriptor());
     }
