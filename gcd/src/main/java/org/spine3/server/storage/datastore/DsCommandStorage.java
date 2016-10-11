@@ -29,6 +29,7 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
 
+import java.util.Collections;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -63,7 +64,7 @@ class DsCommandStorage extends CommandStorage {
 
     @Override
     protected Iterator<CommandStorageRecord> read(CommandStatus status) {
-        return null; // TODO:05-10-16:dmytro.dashenkov: Implement.
+        return Collections.<CommandStorageRecord>emptyList().iterator(); // TODO:05-10-16:dmytro.dashenkov: Implement.
     }
 
     @Override
