@@ -3,6 +3,8 @@ project.ext {
     PROTOBUF_VERSION = '3.0.0';
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
+
+    IS_WINDOWS = org.gradle.internal.os.OperatingSystem.current().isWindows()
 }
 
 final String CREDENTIALS_LOCATION = 'credentials.properties';
@@ -121,10 +123,32 @@ subprojects {
     }
 }
 
+task startDatastore {
+    description "Starts local in-memory datastore using scripts form ./script folder."
+    group "Build Setup"
+}
+
+startDatastore << {
+    final String sctiptExtension;
+    final String pathPrefix;
+    if (IS_WINDOWS) {
+        sctiptExtension = ".bat"
+        pathPrefix = ""
+    } else {
+        sctiptExtension = ".sh"
+        pathPrefix = "."
+    }
+
+    // Run with enviroment
+    "$pathPrefix/script/start-datastore$sctiptExtension".execute()
+}
+
+tasks["check"].dependsOn startDatastore
+
 task readPublishingCredentials << {
     if (repositoryUserName == null || repositoryUserPassword == null) {
         throw new InvalidUserDataException("Please set up valid credentials. " +
-                "Credentials should be set in ${CREDENTIALS_LOCATION} file in the project\'s root.");
+                "Credentials should be set in ${CREDENTIALS_LOCATION} file in the project's root.");
     }
     println "Publishing build as ${repositoryUserName}";
 }
