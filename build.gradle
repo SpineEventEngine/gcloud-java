@@ -128,22 +128,32 @@ task startDatastore {
     group "Build Setup"
 }
 
+task stopDatastore {
+    description "Stops local running datastore."
+    group "Build"
+}
+
 startDatastore << {
-    final String sctiptExtension;
+    final String scriptExtension;
     final String pathPrefix;
     if (IS_WINDOWS) {
-        sctiptExtension = ".bat"
+        scriptExtension = ".bat"
         pathPrefix = ""
     } else {
-        sctiptExtension = ".sh"
+        scriptExtension = ".sh"
         pathPrefix = "."
     }
 
-    // Run with enviroment
-    "$pathPrefix/script/start-datastore$sctiptExtension".execute()
+    // Run with environment
+    "$pathPrefix/script/start-datastore$scriptExtension".execute()
+}
+
+stopDatastore << {
+
 }
 
 tasks["check"].dependsOn startDatastore
+tasks["check"].finalizedBy stopDatastore
 
 task readPublishingCredentials << {
     if (repositoryUserName == null || repositoryUserPassword == null) {
