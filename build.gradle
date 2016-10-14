@@ -150,7 +150,7 @@ startDatastore << {
 
 stopDatastore << {
     // Kills all processes running on localhost:8080
-    "kill \$(lsof -i:8080)".execute()
+    "kill -9 \$(lsof -i:8080)".execute()
     // TODO:14-10-16:dmytro.dashenkov: Fix this task (command is working but task does not bring expected result).
 }
 

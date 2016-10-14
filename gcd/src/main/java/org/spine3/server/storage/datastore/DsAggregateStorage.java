@@ -94,7 +94,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void writeInternal(I id, AggregateStorageRecord record) {
+    protected void writeRecord(I id, AggregateStorageRecord record) {
         checkNotNull(id);
 
         final Value.Builder idValue = makeValue(idToString(id));

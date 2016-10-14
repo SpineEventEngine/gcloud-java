@@ -20,7 +20,9 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.datastore.v1.*;
 import com.google.datastore.v1.client.Datastore;
+import com.google.datastore.v1.client.DatastoreException;
 import com.google.datastore.v1.client.DatastoreFactory;
 import com.google.datastore.v1.client.DatastoreOptions;
 
@@ -28,7 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Creates storages based on the local Google {@link LocalDevelopmentDatastore}.
+ * Creates storages based on the local Google {@link Datastore}.
  */
 @SuppressWarnings("CallToSystemGetenv")
 public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
@@ -127,9 +129,10 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * @throws RuntimeException if {@link Datastore#clear()} throws LocalDevelopmentDatastoreException.
      */
     /* package */ void clear() {
-//        try {
-//            localDatastore.clear();
-//        } catch (LocalDevelopmentDatastoreException e) { // TODO:11-10-16:dmytro.dashenkov: Resolve.
+//        try { // TODO:14-10-16:dmytro.dashenkov: Resolve.
+//            final GqlQuery query = GqlQuery.newBuilder().setQueryString("DELETE FROM " + DEFAULT_DATASET_NAME + ";").build();
+//            localDatastore.runQuery(RunQueryRequest.newBuilder().setProjectId(DEFAULT_DATASET_NAME).setGqlQuery(query).build());
+//        } catch (DatastoreException e) {
 //            propagate(e);
 //        }
     }

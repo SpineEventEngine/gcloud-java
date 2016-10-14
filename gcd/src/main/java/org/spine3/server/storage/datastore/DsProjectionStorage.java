@@ -77,31 +77,31 @@ import java.util.Map;
         }
         return readTimestamp;
     }
-
-    // TODO:05-10-16:dmytro.dashenkov: Implement.
-
+    
     @Override
     public RecordStorage<I> getRecordStorage() {
         return entityStorage;
     }
 
+    // TODO:14-10-16:dmytro.dashenkov: Check if impl is sufficient.
+    
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
-        return null;
+    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
+        return getRecordStorage().readMultiple(ids);
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids, FieldMask fieldMask) {
-        return null;
+    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
+        return getRecordStorage().readMultiple(ids, fieldMask);
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllInternal() {
-        return null;
+    protected Map<I, EntityStorageRecord> readAllRecords() {
+        return getRecordStorage().readAll();
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
-        return null;
+    protected Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
+        return getRecordStorage().readAll(fieldMask);
     }
 }

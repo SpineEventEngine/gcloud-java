@@ -68,7 +68,7 @@ class DsEntityStorage<I> extends RecordStorage<I> {
 
     @Nullable
     @Override
-    protected EntityStorageRecord readInternal(I id) {
+    protected EntityStorageRecord readRecord(I id) {
         final String idString = idToString(id);
         final Key.Builder key = createKey(idString);
         final LookupRequest request = LookupRequest.newBuilder()
@@ -90,27 +90,27 @@ class DsEntityStorage<I> extends RecordStorage<I> {
     // TODO:05-10-16:dmytro.dashenkov: Implement.
 
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
+    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
         return null;
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids, FieldMask fieldMask) {
+    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
         return null;
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllInternal() {
+    protected Map<I, EntityStorageRecord> readAllRecords() {
         return null;
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
+    protected Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
         return null;
     }
 
     @Override
-    protected void writeInternal(I id, EntityStorageRecord entityStorageRecord) {
+    protected void writeRecord(I id, EntityStorageRecord entityStorageRecord) {
         checkNotNull(id, "Id is null.");
         checkNotNull(entityStorageRecord, "Message is null.");
 
