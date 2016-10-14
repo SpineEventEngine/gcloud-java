@@ -17,9 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 /**
- * @author Dmytro Dashenkov
+ * This package contains Google Cloud Datastore implementation of storages.
+ *
+ * @see org.spine3.server.storage.AbstractStorage
  */
 @ParametersAreNonnullByDefault
 package org.spine3.server.storage.datastore;
