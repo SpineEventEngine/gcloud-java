@@ -35,11 +35,18 @@ import java.util.Map;
  */
 /*package*/ class DsStandStorage extends StandStorage {
 
-    // TODO:14-10-16:dmytro.dashenkov: Implement.
+    private final DsRecordStorage<AggregateStateId> recordStorage;
 
-    protected DsStandStorage(boolean multitenant) {
-        super(multitenant);
+    /*package*/ static StandStorage newInstance(boolean multitenant, DsRecordStorage<AggregateStateId> recordStorage) {
+        return new DsStandStorage(multitenant, recordStorage);
     }
+
+    private DsStandStorage(boolean multitenant, DsRecordStorage<AggregateStateId> recordStorage) {
+        super(multitenant);
+        this.recordStorage = recordStorage;
+    }
+
+    // TODO:14-10-16:dmytro.dashenkov: Implement.
 
     @Override
     public ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type) {
@@ -54,31 +61,31 @@ import java.util.Map;
     @Nullable
     @Override
     protected EntityStorageRecord readRecord(AggregateStateId id) {
-        return null;
+        return recordStorage.read(id);
     }
 
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
-        return null;
+        return recordStorage.readMultiple(ids);
     }
 
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
-        return null;
+        return recordStorage.readMultiple(ids, fieldMask);
     }
 
     @Override
     protected Map<AggregateStateId, EntityStorageRecord> readAllRecords() {
-        return null;
+        return recordStorage.readAll();
     }
 
     @Override
     protected Map<AggregateStateId, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
-        return null;
+        return recordStorage.readAll(fieldMask);
     }
 
     @Override
     protected void writeRecord(AggregateStateId id, EntityStorageRecord record) {
-
+        recordStorage.write(id, record);
     }
 }

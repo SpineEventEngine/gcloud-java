@@ -25,6 +25,7 @@ import com.google.datastore.v1.client.DatastoreOptions;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.*;
 
 import static com.google.protobuf.Descriptors.Descriptor;
@@ -94,12 +95,14 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public StandStorage createStandStorage() {
-        return null; // TODO:05-10-16:dmytro.dashenkov: Implement.
+        final DsRecordStorage<AggregateStateId> recordStorage
+                = (DsRecordStorage<AggregateStateId>) createRecordStorage(StandStorageRecord.class);
+        return DsStandStorage.newInstance(multitenant, recordStorage);
     }
 
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> aClass) {
-        final DsEntityStorage<I> entityStorage = (DsEntityStorage<I>) createRecordStorage(aClass);
+        final DsRecordStorage<I> entityStorage = (DsRecordStorage<I>) createRecordStorage(aClass);
         final DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastore);
         return DsProjectionStorage.newInstance(entityStorage, propertyStorage, aClass, multitenant);
     }
@@ -108,7 +111,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
-        return DsEntityStorage.newInstance(descriptor, datastore, multitenant);
+        return DsRecordStorage.newInstance(descriptor, datastore, multitenant);
     }
 
     @Override
@@ -145,6 +148,19 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         public int getEventIteratorPageSize() {
             return pageSize;
+        }
+    }
+
+    private static class StandStorageRecord extends Entity<AggregateStateId, EntityStorageRecord> {
+
+        /**
+         * Creates a new instance.
+         *
+         * @param id the ID for the new instance
+         * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
+         */
+        private StandStorageRecord(AggregateStateId id) {
+            super(id);
         }
     }
 }

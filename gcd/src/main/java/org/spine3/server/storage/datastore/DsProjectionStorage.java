@@ -38,20 +38,20 @@ import java.util.Map;
 
     private static final String LAST_EVENT_TIMESTAMP_ID = "datastore_event_timestamp_";
 
-    private final DsEntityStorage<I> entityStorage;
+    private final DsRecordStorage<I> entityStorage;
     private final DsPropertyStorage propertyStorage;
 
     private final String lastTimestampId;
 
     /* package */
-    static <I> DsProjectionStorage<I> newInstance(DsEntityStorage<I> entityStorage,
+    static <I> DsProjectionStorage<I> newInstance(DsRecordStorage<I> entityStorage,
                                                   DsPropertyStorage propertyStorage,
                                                   Class<? extends Entity<I, ?>> projectionClass,
                                                   boolean multitenant) {
         return new DsProjectionStorage<>(entityStorage, propertyStorage, projectionClass, multitenant);
     }
 
-    private DsProjectionStorage(DsEntityStorage<I> entityStorage,
+    private DsProjectionStorage(DsRecordStorage<I> entityStorage,
                                 DsPropertyStorage propertyStorage,
                                 Class<? extends Entity<I, ?>> projectionClass,
                                 boolean multitenant) {

@@ -43,15 +43,15 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
-class DsEntityStorage<I> extends RecordStorage<I> {
+class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeName;
     private final TypeUrl entityStorageRecordTypeName = TypeUrl.of(EntityStorageRecord.getDescriptor());
 
     /* package */
-    static <I> DsEntityStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
-        return new DsEntityStorage<>(descriptor, datastore, multitenant);
+    static <I> DsRecordStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
+        return new DsRecordStorage<>(descriptor, datastore, multitenant);
     }
 
     /**
@@ -60,7 +60,7 @@ class DsEntityStorage<I> extends RecordStorage<I> {
      * @param descriptor the descriptor of the type of messages to save to the storage.
      * @param datastore  the datastore implementation to use.
      */
-    private DsEntityStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
+    private DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
         super(multitenant);
         this.typeName = TypeUrl.of(descriptor);
         this.datastore = datastore;
