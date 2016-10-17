@@ -138,8 +138,7 @@ class DsCommandStorage extends CommandStorage {
         DatastoreProperties.addTimestampProperty(record.getTimestamp(), entity);
         DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), entity);
 
-        final Mutation.Builder mutation = Mutation.newBuilder().setInsert(entity); // TODO:11-10-16:dmytro.dashenkov: Check update case.
-        datastore.commit(mutation);
+        WriteOperations.createOrUpdate(entity.build(), datastore);
     }
 
     private Key.Builder createKey(String idString) {

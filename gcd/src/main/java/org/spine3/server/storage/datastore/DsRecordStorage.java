@@ -117,9 +117,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         final String idString = idToString(id);
         final Key.Builder key = createKey(idString);
         final Entity.Builder entity = messageToEntity(entityStorageRecord, key);
-        final Mutation.Builder mutation = Mutation.newBuilder()
-                .setInsert(entity);
-        datastore.commit(mutation);
+        WriteOperations.createOrUpdate(entity.build(), datastore);
     }
 
     private Key.Builder createKey(String idString) {

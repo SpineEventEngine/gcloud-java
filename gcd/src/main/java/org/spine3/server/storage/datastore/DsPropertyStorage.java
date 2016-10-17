@@ -45,7 +45,8 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
 
     private final DatastoreWrapper datastore;
 
-    /* package */ static DsPropertyStorage newInstance(DatastoreWrapper datastore) {
+    /* package */
+    static DsPropertyStorage newInstance(DatastoreWrapper datastore) {
         return new DsPropertyStorage(datastore);
     }
 
@@ -59,8 +60,7 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
 
         final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
         final Entity.Builder entity = messageToEntity(AnyPacker.pack(value), key);
-        final Mutation.Builder mutation = Mutation.newBuilder().setInsert(entity); // TODO:11-10-16:dmytro.dashenkov: Check update case.
-        datastore.commit(mutation);
+        WriteOperations.createOrUpdate(entity.build(), datastore);
     }
 
     @Nullable

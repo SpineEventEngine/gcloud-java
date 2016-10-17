@@ -84,8 +84,7 @@ class DsEventStorage extends EventStorage {
         DatastoreProperties.makeEventContextProperties(record.getContext(), entity);
         DatastoreProperties.makeEventFieldProperties(record, entity);
 
-        final Mutation.Builder mutation = Mutation.newBuilder().setInsert(entity); // TODO:11-10-16:dmytro.dashenkov: Check update case.
-        datastore.commit(mutation);
+        WriteOperations.createOrUpdate(entity.build(), datastore);
     }
 
     @Nullable
