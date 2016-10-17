@@ -42,7 +42,6 @@ import com.google.rpc.Code;
                 throw e;
             }
         }
-
     }
 
     private static Mutation.Builder getCreateMutation(Entity entity) {
