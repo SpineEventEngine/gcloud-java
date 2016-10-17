@@ -28,9 +28,9 @@ import com.google.rpc.Code;
 /**
  * @author Dmytro Dashenkov
  */
-public class WriteOperations {
+/*package*/ class WriteOperations {
 
-    public static void createOrUpdate(Entity data, DatastoreWrapper datastore) {
+    /*package*/ static void createOrUpdate(Entity data, DatastoreWrapper datastore) {
         Mutation.Builder mutation = getCreateMutation(data);
         try {
             datastore.commit(mutation);
