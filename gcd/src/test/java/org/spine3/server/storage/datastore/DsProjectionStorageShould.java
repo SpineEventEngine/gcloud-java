@@ -30,6 +30,7 @@ import org.spine3.test.projection.Project;
 /**
  * @author Mikhail Mikhaylov
  */
+@SuppressWarnings("RefusedBequest") // Overrides several methods as NoOps
 public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
 
@@ -52,5 +53,20 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
         private TestProjection(String id) {
             super(id);
         }
+    }
+
+    @Override
+    public void read_all_messages() {
+        // NOP
+    }
+
+    @Override
+    public void read_all_messages_with_field_mask() {
+        // NOP
+    }
+
+    @Override
+    public void retrieve_empty_map_if_storage_is_empty() {
+        // NOP
     }
 }
