@@ -22,7 +22,6 @@ package org.spine3.server.storage.datastore.newapi;
 
 import com.google.cloud.datastore.*;
 import com.google.common.collect.Lists;
-import org.spine3.SPI;
 import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 
 import java.util.List;
@@ -32,7 +31,6 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * @author Dmytro Dashenkov
  */
-@SPI
 public class DatastoreWrapper {
 
     private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should be active.";
@@ -40,10 +38,12 @@ public class DatastoreWrapper {
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
+    private KeyFactory keyFactory;
 
     private DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
-        this.actor = this.datastore;
+        this.actor = datastore;
+        this.keyFactory = datastore.newKeyFactory();
     }
 
     public static DatastoreWrapper newInstance(Datastore datastore, DatastoreStorageFactory.Options options) {
@@ -86,22 +86,26 @@ public class DatastoreWrapper {
         actor.delete(keys);
     }
 
-    void startTransaction() {
+    public void startTransaction() {
         checkState(!isTransactionActive(), NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction = datastore.newTransaction();
         actor = activeTransaction;
     }
 
-    void commitTransaction() {
+    public void commitTransaction() {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.commit();
         actor = datastore;
     }
 
-    void rollbackTransaction() {
+    public void rollbackTransaction() {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.rollback();
         actor = datastore;
+    }
+
+    public KeyFactory getKeyFactory() {
+        return keyFactory;
     }
 
     private boolean isTransactionActive() {
