@@ -83,7 +83,7 @@ class DsEventStorage extends EventStorage {
         DatastoreProperties.makeEventContextProperties(record.getContext(), entity);
         DatastoreProperties.makeEventFieldProperties(record, entity);
 
-        WriteOperations.createOrUpdate(entity.build(), datastore);
+        datastore.createOrUpdate(entity.build());
     }
 
     @Nullable

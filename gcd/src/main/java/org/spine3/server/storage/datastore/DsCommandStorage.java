@@ -179,7 +179,7 @@ class DsCommandStorage extends CommandStorage {
         DatastoreProperties.addTimestampProperty(record.getTimestamp(), entity);
         DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), entity);
 
-        WriteOperations.createOrUpdate(entity.build(), datastore);
+        datastore.createOrUpdate(entity.build());
     }
 
     private Key.Builder createKey(String idString) {

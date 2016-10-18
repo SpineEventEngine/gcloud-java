@@ -51,15 +51,15 @@ public class DatastoreWrapper {
     }
 
 
-    void create(Entity entity) {
+    public void create(Entity entity) {
         actor.put(entity);
     }
 
-    void update(Entity entity) {
+    public void update(Entity entity) {
         actor.update(entity);
     }
 
-    void createOrUpdate(Entity entity) {
+    public void createOrUpdate(Entity entity) {
         try {
             create(entity);
         } catch (DatastoreException ignored) {
@@ -67,22 +67,22 @@ public class DatastoreWrapper {
         }
     }
 
-    Entity read(Key key) {
+    public Entity read(Key key) {
         return datastore.get(key);
     }
 
     // TODO:18-10-16:dmytro.dashenkov: Check datastore#fetch usage.
-    List<Entity> read(Iterable<Key> keys) {
+    public List<Entity> read(Iterable<Key> keys) {
         return Lists.newArrayList(datastore.get(keys));
     }
 
     @SuppressWarnings("unchecked")
-    List<Entity> read(Query query) {
+    public List<Entity> read(Query query) {
         final QueryResults results = actor.run(query);
         return Lists.newArrayList(results);
     }
 
-    void delete(Key... keys) {
+    public void delete(Key... keys) {
         actor.delete(keys);
     }
 

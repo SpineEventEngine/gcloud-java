@@ -59,7 +59,7 @@ import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
 
         final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
         final Entity.Builder entity = messageToEntity(AnyPacker.pack(value), key);
-        WriteOperations.createOrUpdate(entity.build(), datastore);
+        datastore.createOrUpdate(entity.build());
     }
 
     @Nullable
