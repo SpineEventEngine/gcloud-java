@@ -20,24 +20,26 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.datastore.v1.*;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.protobuf.Int32Value;
 import org.spine3.base.Identifiers;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
-import org.spine3.server.storage.datastore.oldapi.DatastoreWrapper;
+import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
+import org.spine3.server.storage.datastore.newapi.Entities;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.datastore.v1.PropertyFilter.Operator.EQUAL;
-import static com.google.datastore.v1.PropertyOrder.Direction.DESCENDING;
-import static com.google.datastore.v1.client.DatastoreHelper.*;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.server.storage.datastore.oldapi.DatastoreWrapper.entitiesToMessages;
-import static org.spine3.server.storage.datastore.oldapi.DatastoreWrapper.messageToEntity;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -52,7 +54,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
 
     private static final String KIND = AggregateStorageRecord.class.getName();
-    private static final String TYPE_URL = TypeUrl.of(AggregateStorageRecord.getDescriptor()).value();
+    private static final TypeUrl TYPE_URL = TypeUrl.of(AggregateStorageRecord.getDescriptor());
 
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;
@@ -98,14 +100,10 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected void writeRecord(I id, AggregateStorageRecord record) {
         checkNotNull(id);
 
-        final Value.Builder idValue = makeValue(idToString(id));
-        final Entity.Builder entity = messageToEntity(record, makeKey(KIND));
-        entity.putProperties(AGGREGATE_ID_PROPERTY_NAME, idValue.build());
-        DatastoreProperties.addTimestampProperty(record.getTimestamp(), entity);
-        DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), entity);
-
-        final Mutation.Builder mutation = Mutation.newBuilder().setInsert(entity);
-        datastore.commit(mutation);
+        final String stringId = idToString(id);
+        final Key key = datastore.getKeyFactory().newKey(stringId);
+        final Entity entity = Entities.messageToEntity(record, key);
+        datastore.createOrUpdate(entity);
     }
 
     @Override
@@ -113,15 +111,23 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String idString = idToString(id);
-        final Filter.Builder idFilter = makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL,
-                makeValue(idString));
-        final Query.Builder query = DatastoreQueries.makeQuery(DESCENDING, KIND);
-        query.setFilter(idFilter).build();
+        final Query<?> query = Query.entityQueryBuilder()
+                .kind(KIND)
+                .filter(StructuredQuery.PropertyFilter.eq(AGGREGATE_ID_PROPERTY_NAME, idString))
+                .build();
+        final List<Entity> eventEntities = datastore.read(query);
+        if (eventEntities.isEmpty()) {
+            return Collections.emptyIterator();
+        }
 
-        final List<EntityResult> entityResults = datastore.runQuery(query);
-        final List<AggregateStorageRecord> records = entitiesToMessages(entityResults, TYPE_URL);
-        final Iterator<AggregateStorageRecord> recordsIterator = records.iterator();
-        return recordsIterator;
+        final List<AggregateStorageRecord> records = Entities.entitiesToMessages(eventEntities, TYPE_URL);
+        Collections.sort(records, new Comparator<AggregateStorageRecord>() {
+            @Override
+            public int compare(AggregateStorageRecord o1, AggregateStorageRecord o2) {
+                return Timestamps.compare(o1.getTimestamp(), o2.getTimestamp());
+            }
+        });
+        return records.iterator();
     }
 
     private String generateDatastoreId(I id) {
