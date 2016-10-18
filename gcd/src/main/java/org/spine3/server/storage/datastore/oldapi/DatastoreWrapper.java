@@ -51,7 +51,6 @@ import static com.google.datastore.v1.client.DatastoreHelper.makeValue;
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
-@SPI
 /* package */ class DatastoreWrapper {
 
     private static final String VALUE_PROPERTY_NAME = "value";
