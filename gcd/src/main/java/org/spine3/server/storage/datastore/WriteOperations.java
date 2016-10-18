@@ -56,6 +56,7 @@ import com.google.rpc.Code;
         return mutation;
     }
 
+    // TODO:18-10-16:dmytro.dashenkov: Fix bad naming.
     private static boolean shouldBeUpdateOperation(RuntimeException e) {
         final boolean isDatastoreException = e.getCause() instanceof DatastoreException;
 

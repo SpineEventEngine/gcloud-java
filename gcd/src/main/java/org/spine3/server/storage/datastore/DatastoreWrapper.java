@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.datastore;
 
-
 import com.google.common.base.Function;
 import com.google.datastore.v1.*;
 import com.google.datastore.v1.client.Datastore;
