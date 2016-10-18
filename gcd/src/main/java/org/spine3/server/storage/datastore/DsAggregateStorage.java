@@ -26,6 +26,7 @@ import org.spine3.base.Identifiers;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.server.storage.datastore.oldapi.DatastoreWrapper;
 
 import java.util.Iterator;
 import java.util.List;
@@ -35,8 +36,8 @@ import static com.google.datastore.v1.PropertyFilter.Operator.EQUAL;
 import static com.google.datastore.v1.PropertyOrder.Direction.DESCENDING;
 import static com.google.datastore.v1.client.DatastoreHelper.*;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.entitiesToMessages;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
+import static org.spine3.server.storage.datastore.oldapi.DatastoreWrapper.entitiesToMessages;
+import static org.spine3.server.storage.datastore.oldapi.DatastoreWrapper.messageToEntity;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.

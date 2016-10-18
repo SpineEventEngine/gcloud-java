@@ -30,6 +30,7 @@ import org.spine3.base.Failure;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
+import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -39,8 +40,6 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 import static org.spine3.validate.Validate.checkNotDefault;
 
 /**

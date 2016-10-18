@@ -20,15 +20,16 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.datastore.v1.client.Datastore;
-import com.google.datastore.v1.client.DatastoreOptions;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.*;
+import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 
-import static com.google.protobuf.Descriptors.Descriptor;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
@@ -75,7 +76,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     /* package */ DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
         this.options = new Options();
         this.multitenant = multitenant;
-        this.datastore = new DatastoreWrapper(datastore, options);
+        this.datastore = DatastoreWrapper.newInstance(datastore, options);
     }
 
     @Override
@@ -110,7 +111,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
-        final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
+        final Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getClassDescriptor(messageClass);
         return DsRecordStorage.newInstance(descriptor, datastore, multitenant);
     }
 

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore;
+package org.spine3.server.storage.datastore.oldapi;
 
 import com.google.common.base.Function;
 import com.google.datastore.v1.*;
@@ -27,7 +27,11 @@ import com.google.datastore.v1.client.DatastoreException;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import org.spine3.SPI;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.storage.datastore.DatastoreStorageFactory;
+import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
+import org.spine3.server.storage.datastore.PagingDatastoreIterator;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -48,6 +52,7 @@ import static com.google.datastore.v1.client.DatastoreHelper.makeValue;
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
+@SPI
 /* package */ class DatastoreWrapper {
 
     private static final String VALUE_PROPERTY_NAME = "value";

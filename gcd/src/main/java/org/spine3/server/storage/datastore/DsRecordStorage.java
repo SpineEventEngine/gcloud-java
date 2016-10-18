@@ -36,6 +36,7 @@ import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -45,8 +46,6 @@ import java.util.*;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.

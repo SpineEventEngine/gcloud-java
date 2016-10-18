@@ -25,6 +25,7 @@ import com.google.datastore.v1.Query;
 import com.google.datastore.v1.QueryResultBatch;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Int32Value;
+import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 
 import java.util.Iterator;
 import java.util.LinkedList;

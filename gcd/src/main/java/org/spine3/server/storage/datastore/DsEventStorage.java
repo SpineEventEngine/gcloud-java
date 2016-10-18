@@ -29,6 +29,7 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
+import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -36,8 +37,6 @@ import java.util.Iterator;
 import static com.google.datastore.v1.PropertyOrder.Direction.ASCENDING;
 import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 
 /**
  * Storage for event records based on Google Cloud Datastore.

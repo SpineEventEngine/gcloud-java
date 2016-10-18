@@ -22,6 +22,8 @@ package org.spine3.server.storage.datastore.newapi;
 
 import com.google.cloud.datastore.*;
 import com.google.common.collect.Lists;
+import org.spine3.SPI;
+import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 
 import java.util.List;
 
@@ -30,6 +32,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * @author Dmytro Dashenkov
  */
+@SPI
 public class DatastoreWrapper {
 
     private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should be active.";
@@ -38,10 +41,15 @@ public class DatastoreWrapper {
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
 
-    /*package*/ DatastoreWrapper(Datastore datastore) {
+    private DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
         this.actor = this.datastore;
     }
+
+    public static DatastoreWrapper newInstance(Datastore datastore, DatastoreStorageFactory.Options options) {
+        return new DatastoreWrapper(datastore);
+    }
+
 
     void create(Entity entity) {
         actor.put(entity);

@@ -24,6 +24,7 @@ import com.google.datastore.v1.Entity;
 import com.google.datastore.v1.Mutation;
 import com.google.datastore.v1.client.DatastoreException;
 import com.google.rpc.Code;
+import org.spine3.server.storage.datastore.oldapi.DatastoreWrapper;
 
 /**
  * @author Dmytro Dashenkov
