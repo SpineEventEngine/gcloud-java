@@ -20,10 +20,12 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
-import com.google.datastore.v1.*;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
@@ -37,6 +39,7 @@ import org.spine3.server.reflect.Classes;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
+import org.spine3.server.storage.datastore.newapi.Entities;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -44,7 +47,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
 import static org.spine3.base.Identifiers.idToString;
 
 /**
@@ -60,6 +62,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     private final TypeUrl typeUrl;
     private final TypeUrl entityStorageRecordTypeUrl = TypeUrl.of(EntityStorageRecord.getDescriptor());
 
+    private static final String VERSION_KEY = "version";
     private static final int ID_GENERIC_TYPE_NUMBER = 0;
 
     /* package */
@@ -67,22 +70,21 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         return new DsRecordStorage<>(descriptor, datastore, multitenant);
     }
 
-    private final Function<EntityResult, EntityStorageRecord> recordFromEntity = new Function<EntityResult, EntityStorageRecord>() {
+    private final Function<Entity, EntityStorageRecord> recordFromEntity = new Function<Entity, EntityStorageRecord>() {
         @Nullable
         @Override
-        public EntityStorageRecord apply(@Nullable EntityResult input) {
+        public EntityStorageRecord apply(@Nullable Entity input) {
             if (input == null) {
                 return null;
             }
 
-
-            final Message state = entityToMessage(input, typeUrl.value());
+            final Message state = Entities.entityToMessage(input, typeUrl);
             final Any wrappedState = AnyPacker.pack(state);
 
             @SuppressWarnings("NumericCastThatLosesPrecision")
             final EntityStorageRecord record = EntityStorageRecord.newBuilder()
                     .setState(wrappedState)
-                    .setVersion((int) input.getVersion())
+                    .setVersion((int) input.getLong(VERSION_KEY)) // TODO:18-10-16:dmytro.dashenkov: Invalid request.
                     .build();
             return record;
         }
@@ -104,20 +106,14 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected EntityStorageRecord readRecord(I id) {
         final String idString = idToString(id);
-        final Key.Builder key = createKey(idString);
-        final LookupRequest request = LookupRequest.newBuilder()
-                .addKeys(key)
-                .build();
 
-        final LookupResponse response = datastore.lookup(request);
+        final Entity response = datastore.read(datastore.getKeyFactory().newKey(idString));
 
-        if (response == null || response.getFoundCount() == 0) {
+        if (response == null) {
             return EntityStorageRecord.getDefaultInstance();
         }
 
-        final EntityResult entity = response.getFound(0);
-
-        final EntityStorageRecord result = entityToMessage(entity, entityStorageRecordTypeUrl.value());
+        final EntityStorageRecord result = Entities.entityToMessage(response, entityStorageRecordTypeUrl);
         return result;
     }
 
@@ -128,22 +124,22 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids, final FieldMask fieldMask) {
-        final Function<EntityResult, EntityStorageRecord> transformer = new Function<EntityResult, EntityStorageRecord>() {
+        final Function<Entity, EntityStorageRecord> transformer = new Function<Entity, EntityStorageRecord>() {
             @Nullable
             @Override
-            public EntityStorageRecord apply(@Nullable EntityResult input) {
+            public EntityStorageRecord apply(@Nullable Entity input) {
                 if (input == null) {
                     return null;
                 }
 
-                final Message state = entityToMessage(input, typeUrl.value());
+                final Message state = Entities.entityToMessage(input, typeUrl);
                 final Message maskedState = FieldMasks.applyMask(fieldMask, state, typeUrl);
                 final Any wrappedState = AnyPacker.pack(maskedState);
 
                 @SuppressWarnings("NumericCastThatLosesPrecision")
                 final EntityStorageRecord record = EntityStorageRecord.newBuilder()
                         .setState(wrappedState)
-                        .setVersion((int) input.getVersion())
+                        .setVersion((int) input.getLong(VERSION_KEY))
                         .build();
                 return record;
             }
@@ -181,36 +177,28 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
     private Iterable<EntityStorageRecord> lookup(
             Iterable<I> ids,
-            Function<EntityResult, EntityStorageRecord> transformer) {
+            Function<Entity, EntityStorageRecord> transformer) {
 
         final Collection<Key> keys = new LinkedList<>();
         for (I id : ids) {
             final String stringKey = idToString(id);
-            final Key key = createKey(stringKey).build();
+            final Key key = createKey(stringKey);
             keys.add(key);
         }
 
-        final LookupRequest request = LookupRequest.newBuilder()
-                .addAllKeys(keys)
-                .build();
-
-        final LookupResponse response = datastore.lookup(request);
-        final Collection<EntityResult> results = response.getFoundList();
+        final List<Entity> results = datastore.read(keys);
         final Collection<EntityStorageRecord> records = Collections2.transform(results, transformer);
 
         return Collections.unmodifiableCollection(records);
     }
 
-    private Map<I, EntityStorageRecord> queryAll(Function<EntityResult, Pair<I, EntityStorageRecord>> transformer) {
-        final KindExpression kind = KindExpression.newBuilder()
-                .setName(typeUrl.getSimpleName())
-                .build();
-        final Query.Builder query = Query.newBuilder()
-                .addKind(kind);
-        final List<EntityResult> results = datastore.runQuery(query);
+    private Map<I, EntityStorageRecord> queryAll(Function<Entity, Pair<I, EntityStorageRecord>> transformer, FieldMask fieldMask) {
+        final String sql = "SELECT * FROM " + typeUrl.getTypeName(); // TODO:18-10-16:dmytro.dashenkov: Check correct table name.
+        final Query<?> query = Query.gqlQueryBuilder(sql).build();
+        final List<Entity> results = datastore.read(query);
 
         final ImmutableMap.Builder<I, EntityStorageRecord> records = new ImmutableMap.Builder<>();
-        for (EntityResult entity : results) {
+        for (Entity entity : results) {
             final Pair<I, EntityStorageRecord> recordPair = transformer.apply(entity);
             checkNotNull(recordPair, "Datastore may not contain null records.");
             records.put(recordPair.getKey(), recordPair.getValue());
@@ -225,13 +213,13 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         checkNotNull(entityStorageRecord, "Message is null.");
 
         final String idString = idToString(id);
-        final Key.Builder key = createKey(idString);
-        final Entity.Builder entity = messageToEntity(entityStorageRecord, key);
-        datastore.createOrUpdate(entity.build());
+        final Key key = createKey(idString);
+        final Entity entity = Entities.messageToEntity(entityStorageRecord, key);
+        datastore.createOrUpdate(entity);
     }
 
-    private Key.Builder createKey(String idString) {
-        return makeKey(typeUrl.getSimpleName(), idString);
+    private Key createKey(String idString) {
+        return datastore.getKeyFactory().newKey(idString);
     }
 
     @Nullable
