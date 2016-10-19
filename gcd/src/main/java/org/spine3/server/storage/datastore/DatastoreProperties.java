@@ -21,15 +21,14 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.api.Property;
-import com.google.datastore.v1.Entity;
-import com.google.datastore.v1.PropertyReference;
-import com.google.datastore.v1.Value;
+import com.google.cloud.datastore.*;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.base.EventContextOrBuilder;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EventStorageRecordOrBuilder;
+import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -73,7 +72,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     /* package */
     static void addTimestampProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final Date date = convertToDate(timestamp);
-        entity.putProperties(TIMESTAMP_PROPERTY_NAME, makeValue(date).build());
+        entity.set(TIMESTAMP_PROPERTY_NAME, DateTime.copyFrom(date));
     }
 
     /**
@@ -83,7 +82,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     /* package */
     static void addTimestampNanosProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final long nanos = convertToNanos(timestamp);
-        entity.putProperties(TIMESTAMP_NANOS_PROPERTY_NAME, makeValue(nanos).build());
+        entity.set(TIMESTAMP_NANOS_PROPERTY_NAME, nanos);
     }
 
     /**
@@ -94,7 +93,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     /* package */
     static void addAggregateIdProperty(Message aggregateId, Entity.Builder entity) {
         final String propertyValue = Messages.toText(aggregateId);
-        entity.putProperties(AGGREGATE_ID_PROPERTY_NAME, makeValue(propertyValue).build());
+        entity.set(AGGREGATE_ID_PROPERTY_NAME, propertyValue);
     }
 
     /**
@@ -104,7 +103,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      */
     /* package */
     static void addEventTypeProperty(String eventType, Entity.Builder entity) {
-        entity.putProperties(EVENT_TYPE_PROPERTY_NAME, makeValue(eventType).build());
+        entity.set(EVENT_TYPE_PROPERTY_NAME, eventType);
     }
 
     /**

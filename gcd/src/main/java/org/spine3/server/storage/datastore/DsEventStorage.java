@@ -20,9 +20,13 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery.Filter;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
-import com.google.datastore.v1.*;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.TypeUrl;
@@ -34,9 +38,12 @@ import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 import javax.annotation.Nullable;
 import java.util.Iterator;
 
-import static com.google.datastore.v1.PropertyOrder.Direction.ASCENDING;
-import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
+import static com.google.cloud.datastore.StructuredQuery.CompositeFilter;
+import static com.google.cloud.datastore.StructuredQuery.OrderBy;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
+import static org.spine3.server.storage.datastore.newapi.Entities.entityToMessage;
+import static org.spine3.server.storage.datastore.newapi.Entities.messageToEntity;
 
 /**
  * Storage for event records based on Google Cloud Datastore.
@@ -49,9 +56,10 @@ class DsEventStorage extends EventStorage {
 
     private final DatastoreWrapper datastore;
     private static final String KIND = EventStorageRecord.class.getName();
-    private static final String TYPE_URL = TypeUrl.of(EventStorageRecord.getDescriptor()).value();
+    private static final TypeUrl TYPE_URL = TypeUrl.of(EventStorageRecord.getDescriptor());
 
-    /* package */ static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+    /* package */
+    static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsEventStorage(datastore, multitenant);
     }
 
@@ -62,10 +70,19 @@ class DsEventStorage extends EventStorage {
 
     @Override
     public Iterator<Event> iterator(EventStreamQuery eventStreamQuery) {
-
-        final Query.Builder query = DatastoreQueries
-                .makeQuery(ASCENDING, KIND, eventStreamQuery);
-        final Iterator<EntityResult> iterator = datastore.runQueryForIterator(query.build());
+        final Filter afterFilter = PropertyFilter.gt(
+                TIMESTAMP_NANOS_PROPERTY_NAME,
+                eventStreamQuery.getAfter().getNanos());
+        final Filter beforeFilter = PropertyFilter.lt(
+                TIMESTAMP_NANOS_PROPERTY_NAME,
+                eventStreamQuery.getBefore().getNanos());
+        final Filter boundsFilter = CompositeFilter.and(afterFilter, beforeFilter);
+        final Query query = Query.entityQueryBuilder()
+                .kind(KIND)
+                .orderBy(OrderBy.asc(TIMESTAMP_NANOS_PROPERTY_NAME))
+                .filter(boundsFilter)
+                .build();
+        final Iterator<com.google.cloud.datastore.Entity> iterator = datastore.read(query).iterator();
         final Iterator<Event> transformedIterator = Iterators.transform(iterator, ENTITY_TO_EVENT);
 
         return transformedIterator;
@@ -73,41 +90,40 @@ class DsEventStorage extends EventStorage {
 
     @Override
     protected void writeRecord(EventStorageRecord record) {
-        final Key.Builder key = makeKey(KIND, record.getEventId());
-        final Entity.Builder entity = messageToEntity(record, key);
-        DatastoreProperties.addTimestampProperty(record.getTimestamp(), entity);
-        DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), entity);
-        DatastoreProperties.addAggregateIdProperty(record.getContext().getProducerId(), entity);
-        DatastoreProperties.addEventTypeProperty(record.getEventType(), entity);
+        final Key key = datastore.getKeyFactory().newKey(record.getEventId());
+        final Entity entity = messageToEntity(record, key);
+        final Entity.Builder builder = Entity.builder(entity);
+        DatastoreProperties.addTimestampProperty(record.getTimestamp(), builder);
+        DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), builder);
+        DatastoreProperties.addAggregateIdProperty(record.getContext().getProducerId(), builder);
+        DatastoreProperties.addEventTypeProperty(record.getEventType(), builder);
 
-        DatastoreProperties.makeEventContextProperties(record.getContext(), entity);
-        DatastoreProperties.makeEventFieldProperties(record, entity);
+        DatastoreProperties.makeEventContextProperties(record.getContext(), builder);
+        DatastoreProperties.makeEventFieldProperties(record, builder);
 
-        datastore.createOrUpdate(entity.build());
+        datastore.createOrUpdate(builder.build());
     }
 
     @Nullable
     @Override
     protected EventStorageRecord readRecord(EventId eventId) {
         final String idString = idToString(eventId);
-        final Key.Builder key = makeKey(KIND, idString);
-        final LookupRequest request = LookupRequest.newBuilder().addKeys(key).build();
+        final Key key = datastore.getKeyFactory().newKey(idString);
 
-        final LookupResponse response = datastore.lookup(request);
+        final Entity response = datastore.read(key);
 
-        if (response == null || response.getFoundCount() == 0) {
+        if (response == null) {
             return null;
         }
 
-        final EntityResult entity = response.getFound(0);
-        final EventStorageRecord result = entityToMessage(entity, TYPE_URL);
+        final EventStorageRecord result = entityToMessage(response, TYPE_URL);
         return result;
     }
 
-    private static final Function<EntityResult, Event> ENTITY_TO_EVENT = new Function<EntityResult, Event>() {
+    private static final Function<Entity, Event> ENTITY_TO_EVENT = new Function<Entity, Event>() {
         @Nullable
         @Override
-        public Event apply(@Nullable EntityResult entityResult) {
+        public Event apply(@Nullable Entity entityResult) {
             if (entityResult == null) {
                 return Event.getDefaultInstance();
             }

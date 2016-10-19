@@ -38,7 +38,7 @@ public class DatastoreWrapper {
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
-    private KeyFactory keyFactory;
+    private final KeyFactory keyFactory;
 
     private DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
