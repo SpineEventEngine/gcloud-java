@@ -21,9 +21,12 @@
 package org.spine3.server.storage.datastore.newapi;
 
 import com.google.cloud.datastore.*;
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
-import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -40,12 +43,12 @@ public class DatastoreWrapper {
     private DatastoreReaderWriter actor;
     private KeyFactory keyFactory;
 
-    private DatastoreWrapper(Datastore datastore) {
+    protected DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
         this.actor = datastore;
     }
 
-    public static DatastoreWrapper newInstance(Datastore datastore, DatastoreStorageFactory.Options options) {
+    public static DatastoreWrapper wrap(Datastore datastore) {
         return new DatastoreWrapper(datastore);
     }
 
@@ -83,6 +86,25 @@ public class DatastoreWrapper {
 
     public void delete(Key... keys) {
         actor.delete(keys);
+    }
+
+    public void dropTable(String table) {
+        final String sql = String.format("SELECT * FROM %s;", table);
+        final Query query = Query.gqlQueryBuilder(sql).build();
+        final List<Entity> entities = read(query);
+        final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
+            @Nullable
+            @Override
+            public Key apply(@Nullable Entity input) {
+                if (input == null) {
+                    return null;
+                }
+
+                return input.key();
+            }
+        });
+
+        delete((Key[]) keys.toArray());
     }
 
     public void startTransaction() {

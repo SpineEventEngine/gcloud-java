@@ -76,7 +76,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     /* package */ DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
         this.options = new Options();
         this.multitenant = multitenant;
-        this.datastore = DatastoreWrapper.newInstance(datastore, options);
+        this.datastore = DatastoreWrapper.wrap(datastore);
     }
 
     @Override

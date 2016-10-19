@@ -22,6 +22,7 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import org.spine3.server.storage.datastore.newapi.TestDatastoreWrapper;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
@@ -49,8 +50,6 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     private static final String ENVIRONMENT_NOT_CONFIGURED_MESSAGE = VAR_NAME_GCD_HOME + " environment variable is not configured. " +
             "See https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment";
 
-    private final Datastore localDatastore;
-
     /**
      * Returns a default factory instance. A {@link Datastore} is created with default {@link DatastoreOptions}:
      *
@@ -74,7 +73,6 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private LocalDatastoreStorageFactory(Datastore datastore) {
         super(datastore, false);
-        localDatastore = datastore;
     }
 
     /**
@@ -122,16 +120,12 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     /**
      * Clears all data in the local Datastore.
-     *
+     * // TODO:19-10-16:dmytro.dashenkov: Fix javadocs.
      * @throws RuntimeException if {@link Datastore#clear()} throws LocalDevelopmentDatastoreException.
      */
     /* package */ void clear() {
-//        try { // TODO:14-10-16:dmytro.dashenkov: Resolve.
-//            final GqlQuery query = GqlQuery.newBuilder().setQueryString("DELETE FROM " + DEFAULT_DATASET_NAME + ";").build();
-//            localDatastore.runQuery(RunQueryRequest.newBuilder().setProjectId(DEFAULT_DATASET_NAME).setGqlQuery(query).build());
-//        } catch (DatastoreException e) {
-//            propagate(e);
-//        }
+        final TestDatastoreWrapper datastore = TestDatastoreWrapper.wrap(DefaultDatastoreSingleton.INSTANCE.value);
+        datastore.dropAllTables();
     }
 
     private static String retrieveGcdHome() {
