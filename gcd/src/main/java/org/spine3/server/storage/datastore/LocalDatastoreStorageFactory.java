@@ -20,11 +20,8 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.datastore.v1.*;
-import com.google.datastore.v1.client.Datastore;
-import com.google.datastore.v1.client.DatastoreException;
-import com.google.datastore.v1.client.DatastoreFactory;
-import com.google.datastore.v1.client.DatastoreOptions;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
@@ -38,9 +35,9 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     private static final String DEFAULT_DATASET_NAME = "spine-dev";
     private static final String DEFAULT_HOST = "localhost:8080";
 
-    private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = new DatastoreOptions.Builder()
+    private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = DatastoreOptions.builder()
             .projectId(DEFAULT_DATASET_NAME)
-            .localHost(DEFAULT_HOST)
+            .host(DEFAULT_HOST)
             .build();
 
     private static final String OPTION_TESTING_MODE = "--testing";
@@ -71,7 +68,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * @param options {@link DatastoreOptions} used to create a {@link Datastore}
      */
     public static LocalDatastoreStorageFactory newInstance(DatastoreOptions options) {
-        final Datastore datastore = DatastoreFactory.get().create(options);
+        final Datastore datastore = options.service();
         return new LocalDatastoreStorageFactory(datastore);
     }
 
@@ -152,6 +149,6 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     private enum DefaultDatastoreSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Datastore value = DatastoreFactory.get().create(DEFAULT_LOCAL_OPTIONS);
+        private final Datastore value = DEFAULT_LOCAL_OPTIONS.service();
     }
 }

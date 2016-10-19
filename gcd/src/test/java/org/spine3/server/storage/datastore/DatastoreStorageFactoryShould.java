@@ -20,9 +20,8 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.datastore.v1.client.Datastore;
-import com.google.datastore.v1.client.DatastoreFactory;
-import com.google.datastore.v1.client.DatastoreOptions;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.entity.Entity;
@@ -33,11 +32,11 @@ import static org.junit.Assert.assertNotNull;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreStorageFactoryShould {
 
-    private static final DatastoreOptions DUMMY_OPTIONS = new DatastoreOptions.Builder()
+    private static final DatastoreOptions DUMMY_OPTIONS = DatastoreOptions.builder()
             .projectId("dummy-dataset")
             .build();
 
-    private static final Datastore DATASTORE = DatastoreFactory.get().create(DUMMY_OPTIONS);
+    private static final Datastore DATASTORE = DUMMY_OPTIONS.service();
 
     private static final StorageFactory FACTORY = DatastoreStorageFactory.newInstance(DATASTORE);
 
