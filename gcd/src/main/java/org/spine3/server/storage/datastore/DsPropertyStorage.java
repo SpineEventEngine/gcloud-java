@@ -20,7 +20,8 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.datastore.v1.*;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
@@ -30,7 +31,8 @@ import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
+import static org.spine3.server.storage.datastore.newapi.Entities.entityToMessage;
+import static org.spine3.server.storage.datastore.newapi.Entities.messageToEntity;
 
 /**
  * Special Storage type for storing and retrieving global properties with unique keys.
@@ -39,8 +41,7 @@ import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
  */
 /* package */ class DsPropertyStorage {
 
-    private static final String PROPERTIES_KIND = "properties_kind";
-    private static final String ANY_TYPE_URL = TypeUrl.of(Any.getDescriptor()).value();
+    private static final TypeUrl ANY_TYPE_URL = TypeUrl.of(Any.getDescriptor());
 
     private final DatastoreWrapper datastore;
 
@@ -57,24 +58,22 @@ import static com.google.datastore.v1.client.DatastoreHelper.makeKey;
         checkNotNull(propertyId);
         checkNotNull(value);
 
-        final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
-        final Entity.Builder entity = messageToEntity(AnyPacker.pack(value), key);
-        datastore.createOrUpdate(entity.build());
+        final Key key = datastore.getKeyFactory().newKey(propertyId);
+        final Entity entity = messageToEntity(AnyPacker.pack(value), key);
+        datastore.createOrUpdate(entity);
     }
 
     @Nullable
     /* package */ <V extends Message> V read(String propertyId) {
-        final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
-        final LookupRequest request = LookupRequest.newBuilder().addKeys(key).build();
+        final Key key = datastore.getKeyFactory().newKey(propertyId);
 
-        final LookupResponse response = datastore.lookup(request);
+        final Entity response = datastore.read(key);
 
-        if (response == null || response.getFoundCount() == 0) {
+        if (response == null) {
             return null;
         }
 
-        final EntityResult entity = response.getFound(0);
-        final Any anyResult = entityToMessage(entity, ANY_TYPE_URL);
+        final Any anyResult = entityToMessage(response, ANY_TYPE_URL);
         return AnyPacker.unpack(anyResult);
     }
 }
