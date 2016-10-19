@@ -21,21 +21,16 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.api.Property;
-import com.google.cloud.datastore.*;
-import com.google.protobuf.FieldMask;
+import com.google.cloud.datastore.DateTime;
+import com.google.cloud.datastore.Entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.base.EventContextOrBuilder;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EventStorageRecordOrBuilder;
-import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-import static com.google.datastore.v1.client.DatastoreHelper.makePropertyReference;
-import static com.google.datastore.v1.client.DatastoreHelper.makeValue;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
 
@@ -106,31 +101,6 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
         entity.set(EVENT_TYPE_PROPERTY_NAME, eventType);
     }
 
-    /**
-     * Makes Property, based on context {@link FieldMask}.
-     *
-     * @return {@link Property.Builder}
-     */
-    @SuppressWarnings("TypeMayBeWeakened") // No need to do this
-    /* package */ static PropertyReference makeContextFieldPropertyReference(FieldMask field) {
-        final String fieldPath = field.getPaths(0);
-        final String propertyName = getContextFieldPropertyName(fieldPath);
-
-        return makePropertyReference(propertyName).build();
-    }
-
-    /**
-     * Makes Property, based on event's {@link FieldMask}.
-     *
-     * @return {@link Property.Builder}
-     */
-    @SuppressWarnings("TypeMayBeWeakened") // No need to do this
-    /* package */ static PropertyReference makeEventFieldPropertyReference(FieldMask field) {
-        final String fieldPath = field.getPaths(0);
-
-        return makePropertyReference(fieldPath).build();
-    }
-
     private static String getContextFieldPropertyName(String contextFieldName) {
         return CONTEXT_FIELD_PROPERTY_PREFIX_NAME + contextFieldName;
     }
@@ -142,14 +112,11 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     /* package */
     static void makeEventContextProperties(EventContextOrBuilder context,
                                            Entity.Builder builder) {
-        final Map<String, Value> properties = new HashMap<>();
-        properties.put(CONTEXT_EVENT_ID_PROPERTY_NAME, makeValue(Messages.toText(context.getEventId())).build());
-        properties.put(CONTEXT_TIMESTAMP_PROPERTY_NAME, makeValue(convertToNanos(context.getTimestamp())).build());
+        builder.set(CONTEXT_EVENT_ID_PROPERTY_NAME, Messages.toText(context.getEventId()));
+        builder.set(CONTEXT_TIMESTAMP_PROPERTY_NAME, convertToNanos(context.getTimestamp()));
         // We do not re-save producer id
-        properties.put(CONTEXT_OF_COMMAND_PROPERTY_NAME, makeValue(Messages.toText(context.getCommandContext())).build());
-        properties.put(CONTEXT_VERSION, makeValue(context.getVersion()).build());
-
-        builder.putAllProperties(properties);
+        builder.set(CONTEXT_OF_COMMAND_PROPERTY_NAME, Messages.toText(context.getCommandContext()));
+        builder.set(CONTEXT_VERSION, context.getVersion());
     }
 
     /**
@@ -159,13 +126,9 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     /* package */
     static void makeEventFieldProperties(EventStorageRecordOrBuilder event,
                                          Entity.Builder builder) {
-        final Map<String, Value> properties = new HashMap<>();
-
         // We do not re-save timestamp
         // We do not re-save event type
-        properties.put(EVENT_ID_PROPERTY_NAME, makeValue(event.getEventId()).build());
-        properties.put(PRODUCER_ID_PROPERTY_NAME, makeValue(event.getProducerId()).build());
-
-        builder.putAllProperties(properties);
+        builder.set(EVENT_ID_PROPERTY_NAME, event.getEventId());
+        builder.set(PRODUCER_ID_PROPERTY_NAME, event.getProducerId());
     }
 }
