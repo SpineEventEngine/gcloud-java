@@ -102,7 +102,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String stringId = idToString(id);
-        final Key key = datastore.getKeyFactory(KIND).newKey(stringId);
+        final Key key = datastore.getKeyFactory(KIND).newKey(record.getEventId());
         final Entity incompleteEntity = Entities.messageToEntity(record, key);
         final Entity.Builder builder = Entity.builder(incompleteEntity);
         builder.set(AGGREGATE_ID_PROPERTY_NAME, stringId);
@@ -128,7 +128,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         Collections.sort(records, new Comparator<AggregateStorageRecord>() {
             @Override
             public int compare(AggregateStorageRecord o1, AggregateStorageRecord o2) {
-                return Timestamps.compare(o1.getTimestamp(), o2.getTimestamp());
+                return Timestamps.compare(o2.getTimestamp(), o1.getTimestamp());
             }
         });
         return records.iterator();
