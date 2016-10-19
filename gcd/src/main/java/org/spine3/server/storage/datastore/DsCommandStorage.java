@@ -155,7 +155,7 @@ class DsCommandStorage extends CommandStorage {
         checkNotDefault(commandId);
 
         final String idString = idToString(commandId);
-        final Key key = datastore.getKeyFactory().newKey(idString);
+        final Key key = datastore.getKeyFactory(TYPE_URL.getTypeName()).newKey(idString);
         final Entity entity = datastore.read(key);
 
         if (entity == null) {
@@ -198,6 +198,6 @@ class DsCommandStorage extends CommandStorage {
     }
 
     private Key createKey(String idString) {
-        return datastore.getKeyFactory().newKey(idString);
+        return datastore.getKeyFactory(TYPE_URL.getSimpleName()).newKey(idString);
     }
 }

@@ -107,7 +107,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     protected EntityStorageRecord readRecord(I id) {
         final String idString = idToString(id);
 
-        final Entity response = datastore.read(datastore.getKeyFactory().newKey(idString));
+        final Entity response = datastore.read(datastore.getKeyFactory(typeUrl.getTypeName()).newKey(idString));
 
         if (response == null) {
             return EntityStorageRecord.getDefaultInstance();
@@ -139,7 +139,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                 @SuppressWarnings("NumericCastThatLosesPrecision")
                 final EntityStorageRecord record = EntityStorageRecord.newBuilder()
                         .setState(wrappedState)
-                        .setVersion((int) input.getLong(VERSION_KEY))
+                        .setVersion((int) input.getLong(VERSION_KEY)) // TODO:19-10-16:dmytro.dashenkov: Invalid request.
                         .build();
                 return record;
             }
@@ -219,7 +219,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Key createKey(String idString) {
-        return datastore.getKeyFactory().newKey(idString);
+        return datastore.getKeyFactory(typeUrl.getTypeName()).newKey(idString);
     }
 
     @Nullable

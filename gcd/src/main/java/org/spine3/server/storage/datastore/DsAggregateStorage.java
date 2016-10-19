@@ -24,6 +24,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Timestamps;
@@ -101,7 +102,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String stringId = idToString(id);
-        final Key key = datastore.getKeyFactory().newKey(stringId);
+        final Key key = datastore.getKeyFactory(KIND).newKey(stringId);
         final Entity entity = Entities.messageToEntity(record, key);
         datastore.createOrUpdate(entity);
     }
@@ -120,7 +121,8 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
             return Collections.emptyIterator();
         }
 
-        final List<AggregateStorageRecord> records = Entities.entitiesToMessages(eventEntities, TYPE_URL);
+        final List<AggregateStorageRecord> immutableResult = Entities.entitiesToMessages(eventEntities, TYPE_URL);
+        final List<AggregateStorageRecord> records = Lists.newArrayList(immutableResult);
         Collections.sort(records, new Comparator<AggregateStorageRecord>() {
             @Override
             public int compare(AggregateStorageRecord o1, AggregateStorageRecord o2) {

@@ -58,14 +58,14 @@ import static org.spine3.server.storage.datastore.newapi.Entities.messageToEntit
         checkNotNull(propertyId);
         checkNotNull(value);
 
-        final Key key = datastore.getKeyFactory().newKey(propertyId);
+        final Key key = datastore.getKeyFactory(ANY_TYPE_URL.getTypeName()).newKey(propertyId);
         final Entity entity = messageToEntity(AnyPacker.pack(value), key);
         datastore.createOrUpdate(entity);
     }
 
     @Nullable
     /* package */ <V extends Message> V read(String propertyId) {
-        final Key key = datastore.getKeyFactory().newKey(propertyId);
+        final Key key = datastore.getKeyFactory(ANY_TYPE_URL.getTypeName()).newKey(propertyId);
 
         final Entity response = datastore.read(key);
 

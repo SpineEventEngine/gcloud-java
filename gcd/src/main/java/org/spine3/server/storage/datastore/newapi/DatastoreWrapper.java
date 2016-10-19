@@ -38,12 +38,11 @@ public class DatastoreWrapper {
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
-    private final KeyFactory keyFactory;
+    private KeyFactory keyFactory;
 
     private DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
         this.actor = datastore;
-        this.keyFactory = datastore.newKeyFactory();
     }
 
     public static DatastoreWrapper newInstance(Datastore datastore, DatastoreStorageFactory.Options options) {
@@ -104,8 +103,17 @@ public class DatastoreWrapper {
         actor = datastore;
     }
 
-    public KeyFactory getKeyFactory() {
+    public KeyFactory getKeyFactory(String kind) {
+        if (keyFactory == null) {
+            initKeyFactory(kind);
+        }
+
         return keyFactory;
+    }
+
+    private void initKeyFactory(String kind) {
+        final KeyFactory incomplete = datastore.newKeyFactory();
+        keyFactory = incomplete.kind(kind);
     }
 
     private boolean isTransactionActive() {

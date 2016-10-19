@@ -90,7 +90,7 @@ class DsEventStorage extends EventStorage {
 
     @Override
     protected void writeRecord(EventStorageRecord record) {
-        final Key key = datastore.getKeyFactory().newKey(record.getEventId());
+        final Key key = datastore.getKeyFactory(KIND).newKey(record.getEventId());
         final Entity entity = messageToEntity(record, key);
         final Entity.Builder builder = Entity.builder(entity);
         DatastoreProperties.addTimestampProperty(record.getTimestamp(), builder);
@@ -108,7 +108,7 @@ class DsEventStorage extends EventStorage {
     @Override
     protected EventStorageRecord readRecord(EventId eventId) {
         final String idString = idToString(eventId);
-        final Key key = datastore.getKeyFactory().newKey(idString);
+        final Key key = datastore.getKeyFactory(TYPE_URL.getSimpleName()).newKey(idString);
 
         final Entity response = datastore.read(key);
 
