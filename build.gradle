@@ -148,17 +148,13 @@ startDatastore << {
     "$pathPrefix/script/start-datastore$scriptExtension".execute()
 }
 
-stopDatastore << { // TODO:19-10-16:dmytro.dashenkov: rignttask.finalizedBy stopDatastore.
+stopDatastore << {
     // Kills all processes running on localhost:8080
-    print("Stop datastore called")
     "kill -9 \$(lsof -i:8080)".execute()
-    // TODO:14-10-16:dmytro.dashenkov: Fix this task (command is working but task does not bring expected result).
 }
 
 tasks["check"].dependsOn startDatastore
-tasks["check"].doLast {
-    stopDatastore.execute()
-}
+startDatastore.dependsOn stopDatastore
 
 
 task readPublishingCredentials << {
