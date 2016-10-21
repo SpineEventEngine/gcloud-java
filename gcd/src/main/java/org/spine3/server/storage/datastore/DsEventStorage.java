@@ -21,7 +21,6 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.GqlQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
@@ -47,6 +46,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import static com.google.cloud.datastore.StructuredQuery.CompositeFilter;
+import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.newapi.Entities.entityToMessage;
@@ -137,20 +138,13 @@ class DsEventStorage extends EventStorage {
         final long upper = query.hasBefore()
                 ? Timestamps.convertToNanos(query.getBefore())
                 : Long.MAX_VALUE;
-
-        final StringBuilder sql = new StringBuilder(SQL_INITIAL_LENGTH);
-        sql.append("SELECT * FROM ")
-                .append(TYPE_URL.getSimpleName())
-                .append(" WHERE ")
-                .append(TIMESTAMP_NANOS_PROPERTY_NAME)
-                .append(" > @1")
-                .append(" AND ")
-                .append(TIMESTAMP_NANOS_PROPERTY_NAME)
-                .append(" < @2");
-        final GqlQuery.Builder gqlQuery = Query.gqlQueryBuilder(sql.toString())
-                .addBinding(lower)
-                .addBinding(upper);
-        return gqlQuery.build();
+        final PropertyFilter greaterThen = PropertyFilter.gt(TIMESTAMP_NANOS_PROPERTY_NAME, lower);
+        final PropertyFilter lessThen = PropertyFilter.lt(TIMESTAMP_NANOS_PROPERTY_NAME, upper);
+        final CompositeFilter filter = CompositeFilter.and(greaterThen, lessThen);
+        return Query.entityQueryBuilder()
+                .kind(KIND)
+                .filter(filter)
+                .build();
     }
 
     @Override
