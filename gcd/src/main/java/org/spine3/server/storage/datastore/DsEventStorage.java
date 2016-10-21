@@ -189,19 +189,22 @@ class DsEventStorage extends EventStorage {
             this.aggregateIds = aggregateIds;
         }
 
+        @SuppressWarnings("MethodWithMoreThanThreeNegations")
         @Override
         public boolean apply(@Nullable Event event) {
             if (event == null) {
                 return false;
             }
 
-            final Any eventAny = event.getMessage();
-            final Message eventMessage = AnyPacker.unpack(eventAny);
-            final String eventType = eventMessage.getDescriptorForType().getFullName();
+            if (!eventTypes.isEmpty()) {
+                final Any eventAny = event.getMessage();
+                final Message eventMessage = AnyPacker.unpack(eventAny);
+                final String eventType = eventMessage.getDescriptorForType().getFullName();
 
-            final boolean typeMatches = eventTypes.contains(eventType);
-            if (!typeMatches) {
-                return false;
+                final boolean typeMatches = eventTypes.contains(eventType);
+                if (!typeMatches) {
+                    return false;
+                }
             }
 
             if (!aggregateIds.isEmpty()) {
