@@ -20,12 +20,13 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.Property;
 import com.google.cloud.datastore.DateTime;
 import com.google.cloud.datastore.Entity;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.base.EventContextOrBuilder;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EventStorageRecordOrBuilder;
 
@@ -70,6 +71,13 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
         entity.set(TIMESTAMP_PROPERTY_NAME, DateTime.copyFrom(date));
     }
 
+    static Timestamp getTimestampProperty(Entity entity) {
+        final DateTime dateTime = entity.getDateTime(TIMESTAMP_PROPERTY_NAME);
+        final Timestamp timestamp = Timestamp.newBuilder()
+                .build();
+        return timestamp;
+    }
+
     /**
      * Makes a property from the given timestamp using
      * {@link org.spine3.protobuf.Timestamps#convertToNanos(TimestampOrBuilder)}.
@@ -82,19 +90,15 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
 
     /**
      * Makes AggregateId property from given {@link Message} value.
-     *
-     * @return {@link Property.Builder}
      */
     /* package */
-    static void addAggregateIdProperty(Message aggregateId, Entity.Builder entity) {
-        final String propertyValue = Messages.toText(aggregateId);
+    static void addAggregateIdProperty(Object aggregateId, Entity.Builder entity) {
+        final String propertyValue = Identifiers.idToString(aggregateId);
         entity.set(AGGREGATE_ID_PROPERTY_NAME, propertyValue);
     }
 
     /**
      * Makes EventType property from given String value.
-     *
-     * @return {@link Property.Builder}
      */
     /* package */
     static void addEventTypeProperty(String eventType, Entity.Builder entity) {

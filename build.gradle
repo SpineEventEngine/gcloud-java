@@ -151,6 +151,7 @@ startDatastore << {
 stopDatastore << {
     // Kills all processes running on localhost:8080
     "kill -9 \$(lsof -i:8080)".execute()
+    sleep(1000)
 }
 
 tasks["check"].dependsOn startDatastore

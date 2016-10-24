@@ -26,11 +26,8 @@ import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Any;
+import com.google.protobuf.*;
 import com.google.protobuf.Descriptors.Descriptor;
-import com.google.protobuf.FieldMask;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
 import javafx.util.Pair;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
@@ -60,17 +57,17 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
-    private final TypeUrl entityStorageRecordTypeUrl = TypeUrl.of(EntityStorageRecord.getDescriptor());
 
     private static final String VERSION_KEY = "version";
     private static final int ID_GENERIC_TYPE_NUMBER = 0;
+    private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityStorageRecord.class);
 
     /* package */
     static <I> DsRecordStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
         return new DsRecordStorage<>(descriptor, datastore, multitenant);
     }
 
-    private final Function<Entity, EntityStorageRecord> recordFromEntity = new Function<Entity, EntityStorageRecord>() {
+    private static final Function<Entity, EntityStorageRecord> recordFromEntity = new Function<Entity, EntityStorageRecord>() {
         @Nullable
         @Override
         public EntityStorageRecord apply(@Nullable Entity input) {
@@ -78,14 +75,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                 return null;
             }
 
-            final Message state = Entities.entityToMessage(input, typeUrl);
-            final Any wrappedState = AnyPacker.pack(state);
-
-            @SuppressWarnings("NumericCastThatLosesPrecision")
-            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
-                    .setState(wrappedState)
-                    .setVersion((int) input.getLong(VERSION_KEY)) // TODO:18-10-16:dmytro.dashenkov: Invalid request.
-                    .build();
+            final EntityStorageRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
             return record;
         }
     };
@@ -107,14 +97,13 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     protected EntityStorageRecord readRecord(I id) {
         final String idString = idToString(id);
 
-        final Entity response = datastore.read(datastore.getKeyFactory(typeUrl.getTypeName()).newKey(idString));
+        final Entity response = datastore.read(datastore.getKeyFactory(typeUrl.getSimpleName()).newKey(idString));
 
         if (response == null) {
             return EntityStorageRecord.getDefaultInstance();
         }
 
-        final EntityStorageRecord result = Entities.entityToMessage(response, entityStorageRecordTypeUrl);
-        return result;
+        return Entities.entityToMessage(response, RECORD_TYPE_URL);
     }
 
     @Override
@@ -132,14 +121,13 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                     return null;
                 }
 
-                final Message state = Entities.entityToMessage(input, typeUrl);
+                final EntityStorageRecord readRecord = Entities.entityToMessage(input, RECORD_TYPE_URL);
+                final Message state = AnyPacker.unpack(readRecord.getState());
                 final Message maskedState = FieldMasks.applyMask(fieldMask, state, typeUrl);
                 final Any wrappedState = AnyPacker.pack(maskedState);
 
-                @SuppressWarnings("NumericCastThatLosesPrecision")
-                final EntityStorageRecord record = EntityStorageRecord.newBuilder()
+                final EntityStorageRecord record = EntityStorageRecord.newBuilder(readRecord)
                         .setState(wrappedState)
-                        .setVersion((int) input.getLong(VERSION_KEY)) // TODO:19-10-16:dmytro.dashenkov: Invalid request.
                         .build();
                 return record;
             }
@@ -221,7 +209,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Key createKey(String idString) {
-        return datastore.getKeyFactory(typeUrl.getTypeName()).newKey(idString);
+        return datastore.getKeyFactory(typeUrl.getSimpleName()).newKey(idString);
     }
 
     @Nullable

@@ -75,7 +75,7 @@ public class DatastoreWrapper {
 
     // TODO:18-10-16:dmytro.dashenkov: Check datastore#fetch usage.
     public List<Entity> read(Iterable<Key> keys) {
-        return Lists.newArrayList(datastore.get(keys));
+        return Lists.newArrayList(datastore.fetch(keys));
     }
 
     @SuppressWarnings("unchecked")
