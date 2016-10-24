@@ -122,7 +122,7 @@ class DsEventStorage extends EventStorage {
         final Query query = toTimestampQuery(eventStreamQuery);
 
         final Collection<Entity> entities = datastore.read(query);
-        // TODO:21-10-16:dmytro.dashenkov: Not optimal. Should first filter then transform.
+        // Transform and filter order does not matter since both operations are performed lazily
         Collection<Event> events = Collections2.transform(entities, ENTITY_TO_EVENT);
         events = Collections2.filter(events, eventPredicate(eventStreamQuery));
 
