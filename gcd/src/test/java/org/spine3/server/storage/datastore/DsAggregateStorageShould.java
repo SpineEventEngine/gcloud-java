@@ -27,6 +27,7 @@ import org.junit.BeforeClass;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageShould;
+import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 
 
@@ -65,5 +66,19 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     @Override
     protected <Id> AggregateStorage<Id> getStorage(Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aClass) {
         return DATASTORE_FACTORY.createAggregateStorage(aClass);
+    }
+
+    @SuppressWarnings("RefusedBequest")
+    @Override // Override method with the same behavior to change ID value
+    public void write_and_read_event_by_Long_id() {
+        final AggregateStorage storage = getStorage(TestAggregateWithIdLong.class);
+        final long id = 42L;
+        this.writeAndReadEventTest(id, storage);
+    }
+
+    private static class TestAggregateWithIdLong extends Aggregate<Long, Project, org.spine3.test.storage.Project.Builder> {
+        private TestAggregateWithIdLong(Long id) {
+            super(id);
+        }
     }
 }

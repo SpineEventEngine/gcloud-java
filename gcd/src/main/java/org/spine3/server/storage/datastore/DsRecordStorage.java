@@ -193,7 +193,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Map<I, EntityStorageRecord> queryAll(Function<Entity, Pair<I, EntityStorageRecord>> transformer, FieldMask fieldMask) {
-        final String sql = "SELECT * FROM " + typeUrl.getSimpleName(); // TODO:18-10-16:dmytro.dashenkov: Check correct table name.
+        final String sql = "SELECT * FROM " + typeUrl.getSimpleName();
         final Query<?> query = Query.gqlQueryBuilder(sql).build();
         final List<Entity> results = datastore.read(query);
 

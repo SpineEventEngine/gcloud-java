@@ -128,7 +128,6 @@ class DsEventStorage extends EventStorage {
 
         final Iterator<Event> iterator = events.iterator();
         return iterator;
-
     }
 
     @SuppressWarnings({"MethodWithMoreThanThreeNegations", "ValueOfIncrementOrDecrementUsed", "DuplicateStringLiteralInspection"})
