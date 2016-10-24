@@ -38,6 +38,12 @@ public class DsEventStorageShould extends EventStorageShould {
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
 
     @Override
+    public void tearDownEventStorageTest() {
+        super.tearDownEventStorageTest();
+        DATASTORE_FACTORY.clear();
+    }
+
+    @Override
     protected EventStorage getStorage() {
         return DATASTORE_FACTORY.createEventStorage();
     }

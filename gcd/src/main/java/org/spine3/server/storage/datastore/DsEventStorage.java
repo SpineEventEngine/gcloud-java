@@ -65,7 +65,6 @@ class DsEventStorage extends EventStorage {
     private final DatastoreWrapper datastore;
     private static final String KIND = EventStorageRecord.class.getName();
     private static final TypeUrl TYPE_URL = TypeUrl.of(EventStorageRecord.getDescriptor());
-    private static final int SQL_INITIAL_LENGTH = 128;
 
     private static final Function<Entity, Event> ENTITY_TO_EVENT = new Function<Entity, Event>() {
         @Nullable

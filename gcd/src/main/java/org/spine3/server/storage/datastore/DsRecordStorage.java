@@ -214,8 +214,10 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
         final String idString = idToString(id);
         final Key key = createKey(idString);
-        final Entity entity = Entities.messageToEntity(entityStorageRecord, key);
-        datastore.createOrUpdate(entity);
+        final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
+        final Entity.Builder entity = Entity.builder(incompleteEntity);
+        entity.set(VERSION_KEY, entityStorageRecord.getVersion());
+        datastore.createOrUpdate(entity.build());
     }
 
     private Key createKey(String idString) {

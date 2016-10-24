@@ -20,10 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.StructuredQuery;
+import com.google.cloud.datastore.*;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import org.spine3.base.Identifiers;
@@ -53,6 +50,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
     private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
+    private static final String SNAPSHOT = "SNAPSHOT";
 
     private static final String KIND = AggregateStorageRecord.class.getName();
     private static final TypeUrl TYPE_URL = TypeUrl.of(AggregateStorageRecord.getDescriptor());
@@ -102,7 +100,13 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String stringId = idToString(id);
-        final Key key = datastore.getKeyFactory(KIND).newKey(record.getEventId());
+        final KeyFactory keyFactory = datastore.getKeyFactory(KIND);
+        String eventId = record.getEventId();
+        if (eventId.isEmpty()) {
+            // Snapshots have no Event IDs.
+            eventId = SNAPSHOT + stringId;
+        }
+        final Key key = keyFactory.newKey(eventId);
         final Entity incompleteEntity = Entities.messageToEntity(record, key);
         final Entity.Builder builder = Entity.builder(incompleteEntity);
         builder.set(AGGREGATE_ID_PROPERTY_NAME, stringId);
