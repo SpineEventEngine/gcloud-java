@@ -50,8 +50,6 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     private static final String ENVIRONMENT_NOT_CONFIGURED_MESSAGE = VAR_NAME_GCD_HOME + " environment variable is not configured. " +
             "See https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment";
 
-    private final TestDatastoreWrapper wrapper;
-
     /**
      * Returns a default factory instance. A {@link Datastore} is created with default {@link DatastoreOptions}:
      *
@@ -75,7 +73,13 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private LocalDatastoreStorageFactory(Datastore datastore) {
         super(datastore, false);
-        wrapper = TestDatastoreWrapper.wrap(datastore);
+    }
+
+    @SuppressWarnings("RefusedBequest")
+    @Override
+    protected void initDatastoreWrapper(Datastore datastore) {
+        checkState(this.datastore == null, "Datastore is already inited.");
+        this.datastore = TestDatastoreWrapper.wrap(datastore);
     }
 
     /**
@@ -127,7 +131,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * @throws RuntimeException if {@link Datastore#clear()} throws LocalDevelopmentDatastoreException.
      */
     /* package */ void clear() {
-        wrapper.dropAllTables();
+        ((TestDatastoreWrapper) datastore).dropAllTables();
     }
 
     private static String retrieveGcdHome() {

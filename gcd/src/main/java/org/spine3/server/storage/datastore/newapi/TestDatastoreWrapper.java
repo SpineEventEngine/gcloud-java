@@ -31,7 +31,7 @@ import java.util.LinkedList;
  */
 public class TestDatastoreWrapper extends DatastoreWrapper {
 
-    private final Collection<String> kindsCache = new LinkedList<>();
+    private static final Collection<String> kindsCache = new LinkedList<>();
 
     private TestDatastoreWrapper(Datastore datastore) {
         super(datastore);

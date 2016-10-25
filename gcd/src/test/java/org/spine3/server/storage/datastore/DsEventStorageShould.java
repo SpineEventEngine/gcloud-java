@@ -55,7 +55,7 @@ public class DsEventStorageShould extends EventStorageShould {
 
     @After
     public void tearDownTest() {
-        DATASTORE_FACTORY.clear();
+        DATASTORE_FACTORY.tearDown();
     }
 
     @AfterClass

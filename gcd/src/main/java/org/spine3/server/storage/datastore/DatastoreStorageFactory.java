@@ -30,6 +30,7 @@ import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.*;
 import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
@@ -43,7 +44,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
 
-    private final DatastoreWrapper datastore;
+    protected DatastoreWrapper datastore;
     private final Options options;
     private final boolean multitenant;
 
@@ -73,9 +74,15 @@ public class DatastoreStorageFactory implements StorageFactory {
         return new DatastoreStorageFactory(datastore, multitenant);
     }
 
+    @SuppressWarnings("OverridableMethodCallDuringObjectConstruction")
     /* package */ DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
         this.options = new Options();
         this.multitenant = multitenant;
+        initDatastoreWrapper(datastore);
+    }
+
+    protected void initDatastoreWrapper(Datastore datastore) {
+        checkState(this.datastore == null, "Datastore is already inited");
         this.datastore = DatastoreWrapper.wrap(datastore);
     }
 

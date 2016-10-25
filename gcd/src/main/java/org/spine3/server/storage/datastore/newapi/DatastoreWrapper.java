@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -80,7 +81,7 @@ public class DatastoreWrapper {
 
     @SuppressWarnings("unchecked")
     public List<Entity> read(Query query) {
-        final QueryResults results = actor.run(query);
+        final Iterator results = actor.run(query);
         return Lists.newArrayList(results);
     }
 
@@ -89,8 +90,7 @@ public class DatastoreWrapper {
     }
 
     public void dropTable(String table) {
-        final String sql = String.format("SELECT * FROM %s;", table);
-        final Query query = Query.gqlQueryBuilder(sql).build();
+        final Query query = Query.entityQueryBuilder().kind(table).build();
         final List<Entity> entities = read(query);
         final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
             @Nullable
@@ -104,7 +104,10 @@ public class DatastoreWrapper {
             }
         });
 
-        delete((Key[]) keys.toArray());
+        final Key[] keysArray = new Key[keys.size()];
+        keys.toArray(keysArray);
+
+        delete(keysArray);
     }
 
     public void startTransaction() {
