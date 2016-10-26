@@ -27,7 +27,6 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.*;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -104,8 +103,8 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public StandStorage createStandStorage() {
-        final DsRecordStorage<AggregateStateId> recordStorage
-                = (DsRecordStorage<AggregateStateId>) createRecordStorage(StandStorageRecord.class);
+        final DsRecordStorage<String> recordStorage
+                = (DsRecordStorage<String>) createRecordStorage(StandStorageRecord.class);
         return DsStandStorage.newInstance(multitenant, recordStorage);
     }
 
@@ -168,7 +167,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
     }
 
-    private static class StandStorageRecord extends Entity<AggregateStateId, EntityStorageRecord> {
+    private static class StandStorageRecord extends Entity<String, EntityStorageRecord> {
 
         /**
          * Creates a new instance.
@@ -176,7 +175,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          * @param id the ID for the new instance
          * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
          */
-        private StandStorageRecord(AggregateStateId id) {
+        private StandStorageRecord(String id) {
             super(id);
         }
     }

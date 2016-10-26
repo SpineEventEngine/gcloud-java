@@ -26,8 +26,11 @@ import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.*;
+import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
 import javafx.util.Pair;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
@@ -40,8 +43,9 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.logging.Logger;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 import static org.spine3.base.Identifiers.idToString;
 
 /**
@@ -59,6 +63,22 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     private static final String VERSION_KEY = "version";
     private static final int ID_GENERIC_TYPE_NUMBER = 0;
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityStorageRecord.class);
+    private static final Logger LOG = Logger.getLogger(DsRecordStorage.class.getCanonicalName());
+    @SuppressWarnings("HardcodedLineSeparator")
+    private static final String REFLECTIVE_ERROR_MESSAGE_PATTERN
+            = "Reflective operation error trying to parse %s instance from string \"%s\"\n";
+    @SuppressWarnings("HardcodedLineSeparator")
+    private static final String PROTO_PARSING_ERROR_MESSAGE = "Could not parse an Any from byte array: \n";
+    private static final String ID_CONVERTION_ERROR_MESSAGE
+            = "Entity had ID of an invalid type; could not parse ID from String. Note: custom convection is not supported. See Identifiers#idToString";
+    private static final String WRONG_ID_TYPE_ERROR_MESSAGE
+            = "Only String, numeric and Proto-message identifiers are allowed in GAE storage implementation";
+    private static final int STRING_BUILDER_INITIAL_CAPACITY = 128;
+    private static final String TYPE_PREFIX = "TYPE::";
+    private static final String SERIALIZED_MESSAGE_BYTES_DIVIDER = "-";
+    private static final String SERIALIZED_MESSAGE_BYTES_POSTFIX = "::END";
+    private static final String SERIALIZED_MESSAGE_DIVIDER = "::::";
+    private static final String WRONG_OR_BROKEN_MESSAGE_ID = "Passed ID is wrong or broken.";
 
     /* package */
     static <I> DsRecordStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
@@ -95,7 +115,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     protected EntityStorageRecord readRecord(I id) {
         final String idString = idToString(id);
 
-        final Entity response = datastore.read(datastore.getKeyFactory(typeUrl.getSimpleName()).newKey(idString));
+        final Entity response = datastore.read(datastore.getKeyFactory(RECORD_TYPE_URL.getSimpleName()).newKey(idString));
 
         if (response == null) {
             return EntityStorageRecord.getDefaultInstance();
@@ -136,29 +156,37 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Map<I, EntityStorageRecord> readAllRecords() {
-        throw unsupported();
-//        final Function<EntityResult, Pair<I, EntityStorageRecord>> mapper
-//                = new Function<EntityResult, Pair<I, EntityStorageRecord>>() {
-//            @Nullable
-//            @Override
-//            public Pair<I, EntityStorageRecord> apply(@Nullable EntityResult input) {
-//                if (input == null) {
-//                    return null;
-//                }
-//
-//                final Any packedId = Any.parseFrom(input.getEntity().)
-//                final EntityStorageRecord record = recordFromEntity.apply(input);
-//
-//                return new Pair<>(null, record);
-//            }
-//        };
-//
-//        return queryAll(mapper);
+        return readAllRecords(FieldMask.getDefaultInstance());
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
-        throw unsupported();
+    protected Map<I, EntityStorageRecord> readAllRecords(final FieldMask fieldMask) {
+        final Function<Entity, Pair<I, EntityStorageRecord>> mapper
+                = new Function<Entity, Pair<I, EntityStorageRecord>>() {
+            @Nullable
+            @Override
+            public Pair<I, EntityStorageRecord> apply(@Nullable Entity input) {
+                if (input == null) {
+                    return null;
+                }
+                // Retrieve ID
+                final I id = idFromString(input.key().name());
+                checkState(id != null, ID_CONVERTION_ERROR_MESSAGE);
+
+                // Retrieve record
+                EntityStorageRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
+                final Any packedState = record.getState();
+                Message state = AnyPacker.unpack(packedState);
+                state = FieldMasks.applyMask(fieldMask, state, typeUrl);
+                record = EntityStorageRecord.newBuilder(record)
+                        .setState(AnyPacker.pack(state))
+                        .build();
+
+                return new Pair<>(id, record);
+            }
+        };
+
+        return queryAll(mapper, FieldMask.getDefaultInstance());
     }
 
     private Iterable<EntityStorageRecord> lookup(
@@ -167,8 +195,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
         final Collection<Key> keys = new LinkedList<>();
         for (I id : ids) {
-            final String stringKey = idToString(id);
-            final Key key = createKey(stringKey);
+            final Key key = createKey(id);
             keys.add(key);
         }
 
@@ -179,7 +206,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Map<I, EntityStorageRecord> queryAll(Function<Entity, Pair<I, EntityStorageRecord>> transformer, FieldMask fieldMask) {
-        final String sql = "SELECT * FROM " + typeUrl.getSimpleName();
+        final String sql = "SELECT * FROM " + RECORD_TYPE_URL.getSimpleName();
         final Query<?> query = Query.gqlQueryBuilder(sql).build();
         final List<Entity> results = datastore.read(query);
 
@@ -198,16 +225,64 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         checkNotNull(id, "ID is null.");
         checkNotNull(entityStorageRecord, "Message is null.");
 
-        final String idString = idToString(id);
-        final Key key = createKey(idString);
+        final Key key = createKey(id);
         final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
         final Entity.Builder entity = Entity.builder(incompleteEntity);
         entity.set(VERSION_KEY, entityStorageRecord.getVersion());
         datastore.createOrUpdate(entity.build());
     }
 
-    private Key createKey(String idString) {
-        return datastore.getKeyFactory(typeUrl.getSimpleName()).newKey(idString);
+    private Key createKey(I id) {
+        final String idString;
+        if (id instanceof String) {
+            idString = (String) id;
+        } else if (id.getClass().isPrimitive()) {
+            idString = id.toString();
+        } else {
+            checkArgument(id instanceof Message, WRONG_ID_TYPE_ERROR_MESSAGE);
+
+            final Message message = (Message) id;
+            final StringBuilder idBuilder = new StringBuilder(STRING_BUILDER_INITIAL_CAPACITY);
+            idBuilder
+                    .append(TYPE_PREFIX)
+                    .append(message.getDescriptorForType().getFullName())
+                    .append("");
+            final byte[] serializedMessage = message.toByteArray();
+            for (byte b : serializedMessage) {
+                idBuilder.append(b).append(SERIALIZED_MESSAGE_BYTES_DIVIDER);
+            }
+            idBuilder.append(SERIALIZED_MESSAGE_BYTES_POSTFIX);
+
+            idString = idBuilder.toString();
+        }
+        return datastore.getKeyFactory(RECORD_TYPE_URL.getSimpleName()).newKey(idString);
+    }
+
+    private static Message protoIdFromString(String stringId) {
+        checkArgument(stringId.startsWith(TYPE_PREFIX), WRONG_OR_BROKEN_MESSAGE_ID);
+        checkArgument(stringId.endsWith(SERIALIZED_MESSAGE_BYTES_POSTFIX), WRONG_OR_BROKEN_MESSAGE_ID);
+
+        final String bytesString = stringId.substring(
+                stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER),
+                stringId.lastIndexOf(SERIALIZED_MESSAGE_BYTES_POSTFIX));
+        final String[] separateStringBytes = bytesString.split(SERIALIZED_MESSAGE_BYTES_DIVIDER);
+        final byte[] messageBytes = new byte[separateStringBytes.length];
+        for (int i = 0; i < messageBytes.length; i++) {
+            final byte oneByte = Byte.parseByte(separateStringBytes[i]);
+            messageBytes[i] = oneByte;
+        }
+
+        final String typeName = stringId.substring(
+                stringId.indexOf(TYPE_PREFIX),
+                stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER));
+
+        final ByteString byteString = ByteString.copyFrom(messageBytes);
+        final Any wrappedId = Any.newBuilder()
+                .setValue(byteString)
+                .setTypeUrl(typeName)
+                .build();
+        final Message id = AnyPacker.unpack(wrappedId);
+        return id;
     }
 
     @Nullable
@@ -221,29 +296,17 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                 final Method parser = idClass.getDeclaredMethod("parse" + typeName, String.class);
                 id = (I) parser.invoke(null, stringId);
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                // TODO:17-10-16:dmytro.dashenkov: Log.
                 // Never happen
+                LOG.warning(String.format(REFLECTIVE_ERROR_MESSAGE_PATTERN, typeName, stringId));
                 return null;
             }
         } else if (idClass.equals(String.class)) { // String ID
             id = (I) stringId;
         } else { // Proto Message ID
-            final Any packed;
-            try {
-                packed = Any.parseFrom(stringId.getBytes());
-                id = AnyPacker.unpack(packed);
-            } catch (InvalidProtocolBufferException e) {
-                // TODO:17-10-16:dmytro.dashenkov: Log.
-                return null;
-            }
+            id = (I) protoIdFromString(stringId);
         }
 
         return id;
-    }
-
-    private static RuntimeException unsupported() {
-        return new UnsupportedOperationException(
-                "Read-all operations are not supported on Google Cloud Datastore implementation.");
     }
 
     private Class<I> getIdClass() {
