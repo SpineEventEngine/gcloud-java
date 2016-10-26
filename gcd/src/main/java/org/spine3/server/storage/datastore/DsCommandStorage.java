@@ -20,8 +20,13 @@
 
 package org.spine3.server.storage.datastore;
 
+
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery.Filter;
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
@@ -32,10 +37,15 @@ import org.spine3.server.storage.CommandStorageRecord;
 import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 import org.spine3.server.storage.datastore.newapi.Entities;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Iterator;
 
+import static com.google.cloud.datastore.StructuredQuery.*;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
+import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.newapi.Entities.messageToEntity;
 import static org.spine3.validate.Validate.checkNotDefault;
 
@@ -48,12 +58,21 @@ import static org.spine3.validate.Validate.checkNotDefault;
  */
 class DsCommandStorage extends CommandStorage {
 
-    private static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
-    private static final String TIMESTAMP_NANOS_PROPERTY_NAME = "timestamp_nanos";
+    private static final TypeUrl TYPE_URL = TypeUrl.of(CommandStorageRecord.getDescriptor());
+    private static final String COMMAND_STATUS_PRORPERTY_NAME = "command_status";
 
     private final DatastoreWrapper datastore;
 
-    private static final TypeUrl TYPE_URL = TypeUrl.of(CommandStorageRecord.getDescriptor());
+    private static final Function<Entity, CommandStorageRecord> RECORD_MAPPER = new Function<Entity, CommandStorageRecord>() {
+        @Nullable
+        @Override
+        public CommandStorageRecord apply(@Nullable Entity input) {
+            checkNotNull(input);
+            final CommandStorageRecord record = Entities.entityToMessage(input, TYPE_URL);
+            // TODO:18-10-16:dmytro.dashenkov: Add timestamp properties.
+            return record;
+        }
+    };
 
     /* package */ static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsCommandStorage(datastore, multitenant);
@@ -66,50 +85,14 @@ class DsCommandStorage extends CommandStorage {
 
     @Override
     protected Iterator<CommandStorageRecord> read(CommandStatus status) {
-        throw unsupported();
-//        final String statusPropertyValue = CommandStorageRecord.getDescriptor()
-//                .getFields()
-//                .get(CommandStorageRecord.STATUS_FIELD_NUMBER - 1)
-//                .getName();
-//        final PropertyReference statusPropertyRef = PropertyReference.newBuilder()
-//                .setName(statusPropertyValue)
-//                .build();
-//        final Value statusVal = Value.newBuilder()
-//                .setStringValue(status.toString())
-//                .build();
-//        final PropertyFilter propertyFilter = PropertyFilter.newBuilder()
-//                .setProperty(statusPropertyRef)
-//                .setOp(PropertyFilter.Operator.EQUAL)
-//                .setValue(statusVal)
-//                .build();
-//        final Filter statusFilter = Filter.newBuilder()
-//                .setPropertyFilter(propertyFilter)
-//                .build();
-//        final KindExpression kind = KindExpression.newBuilder()
-//                .setName(typeUrl.value())
-//                .build();
-//        final Query.Builder query = Query.newBuilder()
-//                .setFilter(statusFilter)
-//                .addKind(kind);
-//        final List<EntityResult> queryResult = datastore.runQuery(query);
-//        final Collection<CommandStorageRecord> records = Collections2.transform(
-//                queryResult,
-//                new Function<EntityResult, CommandStorageRecord>() {
-//                    @Nullable
-//                    @Override
-//                    public CommandStorageRecord apply(@Nullable EntityResult input) {
-//                        if (input == null) {
-//                            return null;
-//                        }
-//                        return entityToMessage(input, typeUrl.value());
-//                    }
-//                });
-//
-//        return records.iterator();
-    }
-
-    private static RuntimeException unsupported() {
-        throw new UnsupportedOperationException("By status read is not supported for Google Cloud Datastore implementation");
+        final Filter filter = PropertyFilter.eq(COMMAND_STATUS_PRORPERTY_NAME, status.ordinal());
+        final Query query = Query.entityQueryBuilder()
+                .kind(TYPE_URL.getSimpleName())
+                .filter(filter)
+                .build();
+        final Collection<Entity> entities = datastore.read(query);
+        final Collection<CommandStorageRecord> records = Collections2.transform(entities, RECORD_MAPPER);
+        return records.iterator();
     }
 
     @Override
@@ -161,22 +144,8 @@ class DsCommandStorage extends CommandStorage {
         if (entity == null) {
             return CommandStorageRecord.getDefaultInstance();
         }
-        // TODO:18-10-16:dmytro.dashenkov: Add timestamp properties.
-        final CommandStorageRecord record = Entities.entityToMessage(entity, TYPE_URL);
+        final CommandStorageRecord record = RECORD_MAPPER.apply(entity);
         return record;
-
-//        final Key.Builder key = createKey(idString);
-//        final LookupRequest request = LookupRequest.newBuilder().addKeys(key).build();
-//
-//        final LookupResponse response = datastore.lookup(request);
-//
-//        if (response == null || response.getFoundCount() == 0) {
-//            return CommandStorageRecord.getDefaultInstance();
-//        }
-//
-//        final EntityResult entity = response.getFound(0);
-//        final CommandStorageRecord result = entityToMessage(entity, typeUrl.value());
-//        return result;
     }
 
     @Override
@@ -193,6 +162,7 @@ class DsCommandStorage extends CommandStorage {
         entity = Entity.builder(entity)
                 .set(TIMESTAMP_PROPERTY_NAME, record.getTimestamp().getSeconds())
                 .set(TIMESTAMP_NANOS_PROPERTY_NAME, record.getTimestamp().getNanos())
+                .set(COMMAND_STATUS_PRORPERTY_NAME, record.getStatus().ordinal())
                 .build();
         datastore.createOrUpdate(entity);
     }

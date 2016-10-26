@@ -42,7 +42,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
 @SuppressWarnings("UtilityClass")
 /* package */ class DatastoreProperties {
 
-    private static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
+    /* package */ static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
     /* package */ static final String TIMESTAMP_NANOS_PROPERTY_NAME = "timestamp_nanos";
 
     /* package */ static final String AGGREGATE_ID_PROPERTY_NAME = "aggregate_id";
