@@ -31,6 +31,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.TypeUrl;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
@@ -51,8 +52,17 @@ import static com.google.common.base.Throwables.propagate;
     private Entities() {
     }
 
+    /**
+     * Retrieves a message of given type, assignable from {@code Message}, from an {@link Entity}.
+     * <p>If passed {@link Entity} is {@code null}, a default instance for given type is returned.
+     *
+     * @param entity source {@link Entity} to get message form.
+     * @param type   {@link TypeUrl} of required message.
+     * @param <M>    required message type.
+     * @return message contained in the {@link Entity}.
+     */
     @SuppressWarnings("unchecked")
-    /*package*/ static <M extends Message> M entityToMessage(Entity entity, TypeUrl type) {
+    /*package*/ static <M extends Message> M entityToMessage(@Nullable Entity entity, TypeUrl type) {
         if (entity == null) {
             return defaultMessage(type);
         }
@@ -67,9 +77,19 @@ import static com.google.common.base.Throwables.propagate;
         return AnyPacker.unpack(wrapped);
     }
 
+    /**
+     * Retrieves a {@link List} of message of given type, assignable from {@code Message},
+     * from a collection of {@link Entity Entities}.
+     * <p>If passed {@link Entity} is {@code null}, a default instance for given type is returned.
+     *
+     * @param entities a collection of the source {@link Entity Entities} to get message form.
+     * @param type     {@link TypeUrl} of required message.
+     * @param <M>      required message type.
+     * @return message contained in the {@link Entity}.
+     */
     @SuppressWarnings("unchecked")
     /*package*/ static <M extends Message> List<M> entitiesToMessages(Collection<Entity> entities, TypeUrl type) {
-        if (entities == null || entities.isEmpty()) {
+        if (entities.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -96,6 +116,14 @@ import static com.google.common.base.Throwables.propagate;
         return messages.build();
     }
 
+    /**
+     * Generates an {@link Entity} with given {@link Key} and from given proto {@code Message}
+     *
+     * @param message source of data to be put into the {@link Entity}.
+     * @param key     instance of {@link Key} to be assigned to the {@link Entity}.
+     * @return new instance of {@link Entity} containing serialized proto message.
+     */
+    @SuppressWarnings("ConstantConditions")
     /*package*/ static Entity messageToEntity(Message message, Key key) {
         checkArgument(message != null, "Message must not be null");
         checkArgument(key != null, "Key must not be null");

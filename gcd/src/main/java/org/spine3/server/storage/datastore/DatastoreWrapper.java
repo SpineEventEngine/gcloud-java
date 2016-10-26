@@ -31,16 +31,19 @@ import java.util.*;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
+ * Represents a wrapper above GAE {@link Datastore}.
+ * <p>Provides API for datastore to be used in storages.
+ *
  * @author Dmytro Dashenkov
  */
 /*package*/ class DatastoreWrapper {
 
     private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should be active.";
     private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should NOT be active.";
+    private static final Map<String, KeyFactory> keyFactories = new HashMap<>();
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
-    private Map<String, KeyFactory> keyFactories = new HashMap<>();
 
     /*package*/ DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
@@ -119,6 +122,7 @@ import static com.google.common.base.Preconditions.checkState;
 
     /**
      * Queries the datastore with given arguments.
+     *
      * @param query {@link Query} to execue upon the datastore.
      * @return results fo the query packed in a {@link List}.
      * @see DatastoreReader#run(Query)
@@ -131,6 +135,7 @@ import static com.google.common.base.Preconditions.checkState;
 
     /**
      * Deletes all existing {@link Entity Entities} with given keys.
+     *
      * @param keys {@link Key Keys} of the {@link Entity Entities} to delete. May be nonexistent.
      */
     /*package*/ void delete(Key... keys) {
@@ -139,6 +144,7 @@ import static com.google.common.base.Preconditions.checkState;
 
     /**
      * Deletes all existing {@link Entities} of given kind.
+     *
      * @param table Kind (a.k.a. type, table, etc.) of the records to delete.
      */
     /*package*/ void dropTable(String table) {
@@ -162,26 +168,66 @@ import static com.google.common.base.Preconditions.checkState;
         delete(keysArray);
     }
 
-    public void startTransaction() {
+    /**
+     * Starts a transaction.
+     * <p>Since this method is called and until one of {@link #commitTransaction()} or {@link #rollbackTransaction()}
+     * is called all CRUD operations on datastore performed trough current instance of {@code DatastoreWrapper} become
+     * transactional.
+     *
+     * @throws IllegalStateException if a transaction is already started on this instance of {@code DatastoreWrapper}.
+     * @see #isTransactionActive()
+     */
+    /*package*/ void startTransaction() throws IllegalStateException {
         checkState(!isTransactionActive(), NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction = datastore.newTransaction();
         actor = activeTransaction;
     }
 
-    public void commitTransaction() {
+    /**
+     * Commits a transaction.
+     * <p>All transactional operations are being performed.
+     * <p>All next operations become non-transactional until {@link #startTransaction()} is called again
+     *
+     * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}.
+     * @see #isTransactionActive()
+     */
+    /*package*/ void commitTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.commit();
         actor = datastore;
     }
 
-    public void rollbackTransaction() {
+    /**
+     * Rollback a transaction.
+     * <p>All transactional operations are not performed.
+     * <p>All next operations become non-transactional until {@link #startTransaction()} is called again
+     *
+     * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}.
+     * @see #isTransactionActive()
+     */
+    /*package*/ void rollbackTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.rollback();
         actor = datastore;
     }
 
+    /**
+     * Checks whether there is an active transaction on this instance of {@code DatastoreWrapper}.
+     *
+     * @return {@code true} if there is an active transaction, {@code false} otherwise.
+     */
+    /*package*/ boolean isTransactionActive() {
+        return activeTransaction != null && activeTransaction.active();
+    }
 
-    public KeyFactory getKeyFactory(String kind) {
+    /**
+     * Retrieves an instance of {@link KeyFactory} unique for given Kind of data.
+     * <p>Retrievved instances are the same across all instances of {@code DatastoreWrapper}.
+     *
+     * @param kind kind of {@link Entity} to generate keys for.
+     * @return an instance of {@link KeyFactory} for given kind.
+     */
+    /*package*/ KeyFactory getKeyFactory(String kind) {
         KeyFactory keyFactory = keyFactories.get(kind);
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
@@ -195,9 +241,5 @@ import static com.google.common.base.Preconditions.checkState;
                 .kind(kind);
         keyFactories.put(kind, keyFactory);
         return keyFactory;
-    }
-
-    private boolean isTransactionActive() {
-        return activeTransaction != null && activeTransaction.active();
     }
 }

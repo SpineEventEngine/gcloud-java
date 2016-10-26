@@ -67,8 +67,8 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     @SuppressWarnings("RefusedBequest")
     @Override
     protected void initDatastoreWrapper(Datastore datastore) {
-        checkState(this.datastore == null, "Datastore is already inited.");
-        this.datastore = LocalDatastoreWrapper.wrap(datastore);
+        checkState(this.getDatastore() == null, "Datastore is already inited.");
+        this.setDatastore(LocalDatastoreWrapper.wrap(datastore));
     }
 
     /**
@@ -97,7 +97,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * @see #tearDown()
      */
     /* package */ void clear() {
-        ((LocalDatastoreWrapper) datastore).dropAllTables();
+        ((LocalDatastoreWrapper) getDatastore()).dropAllTables();
     }
 
     private enum DefaultInstanceSingleton {
