@@ -26,9 +26,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -42,26 +40,53 @@ import static com.google.common.base.Preconditions.checkState;
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
-    private KeyFactory keyFactory;
+    private Map<String, KeyFactory> keyFactories = new HashMap<>();
 
     /*package*/ DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
         this.actor = datastore;
     }
 
-    /*package*/ static DatastoreWrapper wrap(Datastore datastore) {
+    /**
+     * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
+     *
+     * @param datastore {@link Datastore} to wrap.
+     * @return new instance of {@code DatastoreWrapper}
+     */
+    /*package*/
+    static DatastoreWrapper wrap(Datastore datastore) {
         return new DatastoreWrapper(datastore);
     }
 
-
-    /*package*/ void create(Entity entity) {
+    /**
+     * Writes new {@link Entity} into the datastore.
+     *
+     * @param entity new {@link Entity} to put into datastore
+     * @throws DatastoreException if an {@link Entity} with such {@link Key} already exists.
+     * @see DatastoreWriter#put(FullEntity)
+     */
+    /*package*/ void create(Entity entity) throws DatastoreException {
         actor.put(entity);
     }
 
-    /*package*/ void update(Entity entity) {
+    /**
+     * Modifies an {@link Entity} in the datastore.
+     *
+     * @param entity the {@link Entity} to update.
+     * @throws DatastoreException if the {@link Entity} with such {@link Key} does not exist.
+     * @see DatastoreWriter#update(Entity...)
+     */
+    /*package*/ void update(Entity entity) throws DatastoreException {
         actor.update(entity);
     }
 
+    /**
+     * Writes an {@link Entity} to the datastore or modifies an existing one.
+     *
+     * @param entity the {@link Entity} to write or update.
+     * @see DatastoreWrapper#create(Entity)
+     * @see DatastoreWrapper#update(Entity)
+     */
     /*package*/ void createOrUpdate(Entity entity) {
         try {
             create(entity);
@@ -70,25 +95,52 @@ import static com.google.common.base.Preconditions.checkState;
         }
     }
 
+    /**
+     * Retrieves an {@link Entity} with given key from datastore.
+     *
+     * @param key {@link Key} to search for.
+     * @return the {@link Entity} or {@code null} if there is no such a key.
+     * @see DatastoreReader#get(Key)
+     */
     /*package*/ Entity read(Key key) {
         return datastore.get(key);
     }
 
-    // TODO:18-10-16:dmytro.dashenkov: Check datastore#fetch usage.
+    /**
+     * Retrieves an {@link Entity} for each of the given keys.
+     *
+     * @param keys {@link Key Keys} to search for.
+     * @return A list of found entities in the order of keys (including {@code null} values for nonexistent keys).
+     * @see DatastoreReader#fetch(Key...)
+     */
     /*package*/ List<Entity> read(Iterable<Key> keys) {
         return Lists.newArrayList(datastore.fetch(keys));
     }
 
+    /**
+     * Queries the datastore with given arguments.
+     * @param query {@link Query} to execue upon the datastore.
+     * @return results fo the query packed in a {@link List}.
+     * @see DatastoreReader#run(Query)
+     */
     @SuppressWarnings("unchecked")
     /*package*/ List<Entity> read(Query query) {
         final Iterator results = actor.run(query);
         return Lists.newArrayList(results);
     }
 
+    /**
+     * Deletes all existing {@link Entity Entities} with given keys.
+     * @param keys {@link Key Keys} of the {@link Entity Entities} to delete. May be nonexistent.
+     */
     /*package*/ void delete(Key... keys) {
         actor.delete(keys);
     }
 
+    /**
+     * Deletes all existing {@link Entities} of given kind.
+     * @param table Kind (a.k.a. type, table, etc.) of the records to delete.
+     */
     /*package*/ void dropTable(String table) {
         final Query query = Query.entityQueryBuilder().kind(table).build();
         final List<Entity> entities = read(query);
@@ -128,17 +180,21 @@ import static com.google.common.base.Preconditions.checkState;
         actor = datastore;
     }
 
+
     public KeyFactory getKeyFactory(String kind) {
+        KeyFactory keyFactory = keyFactories.get(kind);
         if (keyFactory == null) {
-            initKeyFactory(kind);
+            keyFactory = initKeyFactory(kind);
         }
 
         return keyFactory;
     }
 
-    private void initKeyFactory(String kind) {
-        final KeyFactory incomplete = datastore.newKeyFactory();
-        keyFactory = incomplete.kind(kind);
+    private KeyFactory initKeyFactory(String kind) {
+        final KeyFactory keyFactory = datastore.newKeyFactory()
+                .kind(kind);
+        keyFactories.put(kind, keyFactory);
+        return keyFactory;
     }
 
     private boolean isTransactionActive() {

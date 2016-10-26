@@ -29,16 +29,16 @@ import java.util.LinkedList;
 /**
  * @author Dmytro Dashenkov
  */
-/*package*/ class TestDatastoreWrapper extends DatastoreWrapper {
+/*package*/ class LocalDatastoreWrapper extends DatastoreWrapper {
 
     private static final Collection<String> kindsCache = new LinkedList<>();
 
-    private TestDatastoreWrapper(Datastore datastore) {
+    private LocalDatastoreWrapper(Datastore datastore) {
         super(datastore);
     }
 
-    public static TestDatastoreWrapper wrap(Datastore datastore) {
-        return new TestDatastoreWrapper(datastore);
+    public static LocalDatastoreWrapper wrap(Datastore datastore) {
+        return new LocalDatastoreWrapper(datastore);
     }
 
     @Override
@@ -47,6 +47,9 @@ import java.util.LinkedList;
         return super.getKeyFactory(kind);
     }
 
+    /**
+     * Deletes all records from the datastore.
+     */
     /*package*/ void dropAllTables() {
         for (String kind : kindsCache) {
             dropTable(kind);

@@ -24,7 +24,6 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.propagate;
 
 /**
  * Creates storages based on the local Google {@link Datastore}.
@@ -39,15 +38,6 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
             .projectId(DEFAULT_DATASET_NAME)
             .host(DEFAULT_HOST)
             .build();
-
-    private static final String OPTION_TESTING_MODE = "--testing";
-
-    private static final String VAR_NAME_GCD_HOME = "GCD_HOME";
-
-    private static final String GCD_HOME_PATH = retrieveGcdHome();
-
-    private static final String ENVIRONMENT_NOT_CONFIGURED_MESSAGE = VAR_NAME_GCD_HOME + " environment variable is not configured. " +
-            "See https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment";
 
     /**
      * Returns a default factory instance. A {@link Datastore} is created with default {@link DatastoreOptions}:
@@ -78,65 +68,36 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     @Override
     protected void initDatastoreWrapper(Datastore datastore) {
         checkState(this.datastore == null, "Datastore is already inited.");
-        this.datastore = TestDatastoreWrapper.wrap(datastore);
+        this.datastore = LocalDatastoreWrapper.wrap(datastore);
     }
 
     /**
-     * Intended to start the local Datastore server in testing mode.
-     * <p>
-     * NOTE: does nothing for now because of several issues:
-     * This <a href="https://github.com/GoogleCloudPlatform/google-cloud-datastore/commit/a077c5b4d6fa2826fd6c376b692686894b719fd9">commit</a>
-     * seems to fix the first issue, but there is no release with this fix available yet.
-     * Also fails to start on Windows:
-     * <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">issue</a>.
-     * <p>
-     * Until these issues are not fixed, it is required to start the local Datastore Server manually.
-     * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
-     *
-     * @throws RuntimeException if {@link Datastore#start(String, String, String...)}
-     *                          throws LocalDevelopmentDatastoreException.
-     * @see <a href="https://cloud.google.com/DATASTORE/docs/tools/devserver#local_development_server_command-line_arguments">
-     * Documentation</a> ("testing" option)
+     * Performs operations on setting up local datastore.
+     * <p>General usage is testing.
+     * <p>By default is a NoOp, but can be overridden.
      */
     public void setUp() {
-        if (false) // TODO:2015-11-12:alexander.litus: Remove the condition when issues specified above are fixed
-        try {
-            //localDatastore.start(GCD_HOME_PATH, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE); // TODO:11-10-16:dmytro.dashenkov: Resolve.
-        } catch (RuntimeException e) { // DatastoreException
-            propagate(e);
-        }
+
     }
 
     /**
      * Clears all data in the local Datastore.
-     * <p>
-     * NOTE: does not stop the server because of several issues. See {@link #setUp()} method doc for details.
+     * <p>May be effectively the same as {@link #clear()}.
      *
-     * @throws RuntimeException if {@link Datastore#stop()} throws LocalDevelopmentDatastoreException.
+     * <p>NOTE: does not stop the server but just deletes all records.
+     * <p>Equivalent to dropping all tables in an SQL-base storage.
      */
     public void tearDown() {
         clear();
-        if (false) // TODO:2015-11-12:alexander.litus: remove the condition when issues specified in setUp method javadoc are fixed
-        try {
-            //localDatastore.stop(); // TODO:11-10-16:dmytro.dashenkov: Resolve.
-        } catch (RuntimeException e) { // DatastoreException
-            propagate(e);
-        }
     }
 
     /**
      * Clears all data in the local Datastore.
-     * // TODO:19-10-16:dmytro.dashenkov: Fix javadocs.
-     * @throws RuntimeException if {@link Datastore#clear()} throws LocalDevelopmentDatastoreException.
+     *
+     * @see #tearDown()
      */
     /* package */ void clear() {
-        ((TestDatastoreWrapper) datastore).dropAllTables();
-    }
-
-    private static String retrieveGcdHome() {
-        final String gcdHome = System.getenv(VAR_NAME_GCD_HOME);
-        checkState(gcdHome != null, ENVIRONMENT_NOT_CONFIGURED_MESSAGE);
-        return gcdHome;
+        ((LocalDatastoreWrapper) datastore).dropAllTables();
     }
 
     private enum DefaultInstanceSingleton {

@@ -22,6 +22,7 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
@@ -80,6 +81,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         initDatastoreWrapper(datastore);
     }
 
+    @VisibleForTesting
     protected void initDatastoreWrapper(Datastore datastore) {
         checkState(this.datastore == null, "Datastore is already inited");
         this.datastore = DatastoreWrapper.wrap(datastore);
