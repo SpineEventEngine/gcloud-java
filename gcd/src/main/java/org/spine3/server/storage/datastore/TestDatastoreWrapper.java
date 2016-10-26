@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.newapi;
+package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.KeyFactory;
@@ -29,7 +29,7 @@ import java.util.LinkedList;
 /**
  * @author Dmytro Dashenkov
  */
-public class TestDatastoreWrapper extends DatastoreWrapper {
+/*package*/ class TestDatastoreWrapper extends DatastoreWrapper {
 
     private static final Collection<String> kindsCache = new LinkedList<>();
 
@@ -47,7 +47,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
         return super.getKeyFactory(kind);
     }
 
-    public void dropAllTables() {
+    /*package*/ void dropAllTables() {
         for (String kind : kindsCache) {
             dropTable(kind);
         }

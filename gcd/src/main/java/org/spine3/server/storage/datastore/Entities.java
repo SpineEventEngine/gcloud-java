@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.newapi;
+package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.Entity;
@@ -44,7 +44,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")
-public class Entities {
+/*package*/ class Entities {
 
     private static final String VALUE_PROPERTY_NAME = "value";
 
@@ -52,7 +52,7 @@ public class Entities {
     }
 
     @SuppressWarnings("unchecked")
-    public static <M extends Message> M entityToMessage(Entity entity, TypeUrl type) {
+    /*package*/ static <M extends Message> M entityToMessage(Entity entity, TypeUrl type) {
         if (entity == null) {
             return defaultMessage(type);
         }
@@ -68,7 +68,7 @@ public class Entities {
     }
 
     @SuppressWarnings("unchecked")
-    public static <M extends Message> List<M> entitiesToMessages(Collection<Entity> entities, TypeUrl type) {
+    /*package*/ static <M extends Message> List<M> entitiesToMessages(Collection<Entity> entities, TypeUrl type) {
         if (entities == null || entities.isEmpty()) {
             return Collections.emptyList();
         }
@@ -96,7 +96,7 @@ public class Entities {
         return messages.build();
     }
 
-    public static Entity messageToEntity(Message message, Key key) {
+    /*package*/ static Entity messageToEntity(Message message, Key key) {
         checkArgument(message != null, "Message must not be null");
         checkArgument(key != null, "Key must not be null");
 

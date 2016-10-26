@@ -35,8 +35,6 @@ import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
-import org.spine3.server.storage.datastore.newapi.Entities;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

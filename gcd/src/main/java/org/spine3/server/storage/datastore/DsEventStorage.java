@@ -40,7 +40,6 @@ import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.event.EventStreamQueryOrBuilder;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
-import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -51,8 +50,8 @@ import static com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
-import static org.spine3.server.storage.datastore.newapi.Entities.entityToMessage;
-import static org.spine3.server.storage.datastore.newapi.Entities.messageToEntity;
+import static org.spine3.server.storage.datastore.Entities.entityToMessage;
+import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 
 /**
  * Storage for event records based on Google Cloud Datastore.

@@ -28,7 +28,6 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.*;
-import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.Messages.getClassDescriptor;

@@ -26,13 +26,12 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
 
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.datastore.newapi.Entities.entityToMessage;
-import static org.spine3.server.storage.datastore.newapi.Entities.messageToEntity;
+import static org.spine3.server.storage.datastore.Entities.entityToMessage;
+import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 
 /**
  * Special Storage type for storing and retrieving global properties with unique keys.

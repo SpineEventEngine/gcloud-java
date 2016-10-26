@@ -22,7 +22,6 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
-import org.spine3.server.storage.datastore.newapi.TestDatastoreWrapper;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;

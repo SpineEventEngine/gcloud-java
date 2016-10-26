@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.newapi;
+package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.*;
 import com.google.common.base.Function;
@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * @author Dmytro Dashenkov
  */
-public class DatastoreWrapper {
+/*package*/ class DatastoreWrapper {
 
     private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should be active.";
     private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should NOT be active.";
@@ -44,25 +44,25 @@ public class DatastoreWrapper {
     private DatastoreReaderWriter actor;
     private KeyFactory keyFactory;
 
-    protected DatastoreWrapper(Datastore datastore) {
+    /*package*/ DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
         this.actor = datastore;
     }
 
-    public static DatastoreWrapper wrap(Datastore datastore) {
+    /*package*/ static DatastoreWrapper wrap(Datastore datastore) {
         return new DatastoreWrapper(datastore);
     }
 
 
-    public void create(Entity entity) {
+    /*package*/ void create(Entity entity) {
         actor.put(entity);
     }
 
-    public void update(Entity entity) {
+    /*package*/ void update(Entity entity) {
         actor.update(entity);
     }
 
-    public void createOrUpdate(Entity entity) {
+    /*package*/ void createOrUpdate(Entity entity) {
         try {
             create(entity);
         } catch (DatastoreException ignored) {
@@ -70,26 +70,26 @@ public class DatastoreWrapper {
         }
     }
 
-    public Entity read(Key key) {
+    /*package*/ Entity read(Key key) {
         return datastore.get(key);
     }
 
     // TODO:18-10-16:dmytro.dashenkov: Check datastore#fetch usage.
-    public List<Entity> read(Iterable<Key> keys) {
+    /*package*/ List<Entity> read(Iterable<Key> keys) {
         return Lists.newArrayList(datastore.fetch(keys));
     }
 
     @SuppressWarnings("unchecked")
-    public List<Entity> read(Query query) {
+    /*package*/ List<Entity> read(Query query) {
         final Iterator results = actor.run(query);
         return Lists.newArrayList(results);
     }
 
-    public void delete(Key... keys) {
+    /*package*/ void delete(Key... keys) {
         actor.delete(keys);
     }
 
-    public void dropTable(String table) {
+    /*package*/ void dropTable(String table) {
         final Query query = Query.entityQueryBuilder().kind(table).build();
         final List<Entity> entities = read(query);
         final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {

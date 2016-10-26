@@ -34,8 +34,6 @@ import org.spine3.base.Failure;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
-import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
-import org.spine3.server.storage.datastore.newapi.Entities;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -46,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_PROPERTY_NAME;
-import static org.spine3.server.storage.datastore.newapi.Entities.messageToEntity;
+import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 import static org.spine3.validate.Validate.checkNotDefault;
 
 /**

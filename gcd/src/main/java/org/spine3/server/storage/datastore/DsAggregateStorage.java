@@ -28,8 +28,6 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
-import org.spine3.server.storage.datastore.newapi.DatastoreWrapper;
-import org.spine3.server.storage.datastore.newapi.Entities;
 
 import java.util.Collections;
 import java.util.Comparator;
