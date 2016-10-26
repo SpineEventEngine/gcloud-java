@@ -23,7 +23,6 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.datastore.DateTime;
 import com.google.cloud.datastore.Entity;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.base.EventContextOrBuilder;
 import org.spine3.base.Identifiers;
@@ -69,13 +68,6 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     static void addTimestampProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final Date date = convertToDate(timestamp);
         entity.set(TIMESTAMP_PROPERTY_NAME, DateTime.copyFrom(date));
-    }
-
-    static Timestamp getTimestampProperty(Entity entity) {
-        final DateTime dateTime = entity.getDateTime(TIMESTAMP_PROPERTY_NAME);
-        final Timestamp timestamp = Timestamp.newBuilder()
-                .build();
-        return timestamp;
     }
 
     /**

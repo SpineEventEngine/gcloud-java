@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
@@ -30,8 +31,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventFilter;
@@ -64,18 +65,17 @@ class DsEventStorage extends EventStorage {
 
     private final DatastoreWrapper datastore;
     private static final String KIND = EventStorageRecord.class.getName();
-    private static final TypeUrl TYPE_URL = TypeUrl.of(EventStorageRecord.getDescriptor());
+    private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EventStorageRecord.getDescriptor());
 
-    private static final Function<Entity, Event> ENTITY_TO_EVENT = new Function<Entity, Event>() {
+    private static final Function<Entity, EventStorageRecord> ENTITY_TO_EVENT_RECORD = new Function<Entity, EventStorageRecord>() {
         @Nullable
         @Override
-        public Event apply(@Nullable Entity entityResult) {
+        public EventStorageRecord apply(@Nullable Entity entityResult) {
             if (entityResult == null) {
-                return Event.getDefaultInstance();
+                return EventStorageRecord.getDefaultInstance();
             }
-            final EventStorageRecord message = entityToMessage(entityResult, TYPE_URL);
-            final Event result = toEvent(message);
-            return result;
+            final EventStorageRecord message = entityToMessage(entityResult, RECORD_TYPE_URL);
+            return message;
         }
     };
 
@@ -87,8 +87,7 @@ class DsEventStorage extends EventStorage {
                 return null;
             }
 
-            final Message messageId = AnyPacker.unpack(input);
-            return Messages.toText(messageId);
+            return Identifiers.idToString(input);
         }
     };
 
@@ -102,17 +101,18 @@ class DsEventStorage extends EventStorage {
         this.datastore = datastore;
     }
 
-    private static Predicate<Event> eventPredicate(EventStreamQuery query) {
+    private static Predicate<EventStorageRecord> eventPredicate(EventStreamQuery query) {
         final Collection<String> eventTypes = new HashSet<>(query.getFilterCount());
         final Collection<String> aggregateIds = new HashSet<>(query.getFilterCount());
 
         for (EventFilter filter : query.getFilterList()) {
             final Collection<String> stringIds = Collections2.transform(filter.getAggregateIdList(), ID_TRANSFORMER);
             aggregateIds.addAll(stringIds);
-            eventTypes.add(filter.getEventType());
+            final String type = filter.getEventType();
+            if (!Strings.isNullOrEmpty(type)) {
+                eventTypes.add(type);
+            }
         }
-
-        // TODO:21-10-16:dmytro.dashenkov: Field filters (for both context and message).
 
         return new EventPredicate(eventTypes, aggregateIds);
     }
@@ -123,11 +123,11 @@ class DsEventStorage extends EventStorage {
 
         final Collection<Entity> entities = datastore.read(query);
         // Transform and filter order does not matter since both operations are performed lazily
-        Collection<Event> events = Collections2.transform(entities, ENTITY_TO_EVENT);
+        Collection<EventStorageRecord> events = Collections2.transform(entities, ENTITY_TO_EVENT_RECORD);
         events = Collections2.filter(events, eventPredicate(eventStreamQuery));
 
-        final Iterator<Event> iterator = events.iterator();
-        return iterator;
+        final Iterator<EventStorageRecord> iterator = events.iterator();
+        return toEventIterator(iterator);
     }
 
     @SuppressWarnings({"MethodWithMoreThanThreeNegations", "ValueOfIncrementOrDecrementUsed", "DuplicateStringLiteralInspection"})
@@ -152,7 +152,8 @@ class DsEventStorage extends EventStorage {
         final Entity.Builder builder = Entity.builder(entity);
         DatastoreProperties.addTimestampProperty(record.getTimestamp(), builder);
         DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), builder);
-        DatastoreProperties.addAggregateIdProperty(record.getContext().getProducerId(), builder);
+        final Message aggregateId = AnyPacker.unpack(record.getContext().getProducerId());
+        DatastoreProperties.addAggregateIdProperty(aggregateId, builder);
         DatastoreProperties.addEventTypeProperty(record.getEventType(), builder);
 
         DatastoreProperties.makeEventContextProperties(record.getContext(), builder);
@@ -165,7 +166,7 @@ class DsEventStorage extends EventStorage {
     @Override
     protected EventStorageRecord readRecord(EventId eventId) {
         final String idString = idToString(eventId);
-        final Key key = datastore.getKeyFactory(TYPE_URL.getSimpleName()).newKey(idString);
+        final Key key = datastore.getKeyFactory(KIND).newKey(idString);
 
         final Entity response = datastore.read(key);
 
@@ -173,11 +174,11 @@ class DsEventStorage extends EventStorage {
             return null;
         }
 
-        final EventStorageRecord result = entityToMessage(response, TYPE_URL);
+        final EventStorageRecord result = entityToMessage(response, RECORD_TYPE_URL);
         return result;
     }
 
-    private static class EventPredicate implements Predicate<Event> {
+    private static class EventPredicate implements Predicate<EventStorageRecord> {
 
         private final Collection<String> eventTypes;
         private final Collection<String> aggregateIds;
@@ -189,7 +190,7 @@ class DsEventStorage extends EventStorage {
 
         @SuppressWarnings("MethodWithMoreThanThreeNegations")
         @Override
-        public boolean apply(@Nullable Event event) {
+        public boolean apply(@Nullable EventStorageRecord event) {
             if (event == null) {
                 return false;
             }
@@ -207,14 +208,15 @@ class DsEventStorage extends EventStorage {
 
             if (!aggregateIds.isEmpty()) {
                 final Any aggregateIdAny = event.getContext().getProducerId();
-                final Message aggregateId = AnyPacker.unpack(aggregateIdAny);
-                final String aggregateIdString = Messages.toText(aggregateId);
+                final String aggregateIdString = Identifiers.idToString(aggregateIdAny);
 
                 final boolean idMatches = aggregateIds.contains(aggregateIdString);
                 if (!idMatches) {
                     return false;
                 }
             }
+
+            // TODO:21-10-16:dmytro.dashenkov: Field filters (for both context and message).
 
             return true;
         }
