@@ -336,7 +336,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
             try {
                 Long.parseLong(stringId);
                 return (Class<I>) Long.class;
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ignored) {
                 return (Class<I>) String.class;
             }
         }

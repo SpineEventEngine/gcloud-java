@@ -24,7 +24,6 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import org.spine3.base.CommandId;
@@ -67,7 +66,6 @@ class DsCommandStorage extends CommandStorage {
         public CommandStorageRecord apply(@Nullable Entity input) {
             checkNotNull(input);
             final CommandStorageRecord record = Entities.entityToMessage(input, TYPE_URL);
-            // TODO:18-10-16:dmytro.dashenkov: Add timestamp properties.
             return record;
         }
     };

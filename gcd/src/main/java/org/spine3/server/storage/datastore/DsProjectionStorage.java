@@ -83,8 +83,6 @@ import java.util.Map;
         return entityStorage;
     }
 
-    // TODO:14-10-16:dmytro.dashenkov: Check if impl is sufficient.
-    
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
         return getRecordStorage().readMultiple(ids);
