@@ -37,9 +37,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 /**
  * @author Dmytro Dashenkov
@@ -154,7 +152,6 @@ import static com.google.common.base.Preconditions.checkState;
             public AggregateStateId apply(@Nullable String input) {
                 checkNotNull(input, "String ID must not be null.");
                 checkArgument(!input.isEmpty(), "String ID must not be empty.");
-
 
                 return AggregateStateId.of(input, withType);// TODO:26-10-16:dmytro.dashenkov: Implement.
             }

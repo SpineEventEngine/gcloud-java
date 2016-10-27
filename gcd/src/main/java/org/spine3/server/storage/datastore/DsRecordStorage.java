@@ -46,7 +46,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static com.google.common.base.Preconditions.*;
-import static org.spine3.base.Identifiers.idToString;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -113,9 +112,9 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     @Nullable
     @Override
     protected EntityStorageRecord readRecord(I id) {
-        final String idString = idToString(id);
+        final Key key = createKey(id);
 
-        final Entity response = datastore.read(datastore.getKeyFactory(RECORD_TYPE_URL.getSimpleName()).newKey(idString));
+        final Entity response = datastore.read(key);
 
         if (response == null) {
             return EntityStorageRecord.getDefaultInstance();
@@ -234,11 +233,11 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
     private Key createKey(I id) {
         final String idString;
-        if (id instanceof String) {
+        if (id instanceof String) { // String ID
             idString = (String) id;
-        } else if (id.getClass().isPrimitive()) {
+        } else if (isNumber(id.getClass())) { // Numeric ID
             idString = id.toString();
-        } else {
+        } else { // Proto-Message ID
             checkArgument(id instanceof Message, WRONG_ID_TYPE_ERROR_MESSAGE);
 
             final Message message = (Message) id;
@@ -256,6 +255,12 @@ class DsRecordStorage<I> extends RecordStorage<I> {
             idString = idBuilder.toString();
         }
         return datastore.getKeyFactory(RECORD_TYPE_URL.getSimpleName()).newKey(idString);
+    }
+
+    private static boolean isNumber(Class<?> clss) {
+        return clss.isPrimitive()
+                || clss.isAssignableFrom(Integer.class)
+                || clss.isAssignableFrom(Long.class);
     }
 
     private static Message protoIdFromString(String stringId) {
@@ -290,7 +295,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     private I idFromString(String stringId) {
         final Class<I> idClass = getIdClass();
         final I id;
-        if (idClass.isPrimitive()) { // Numeric ID
+        if (isNumber(idClass)) { // Numeric ID
             final String typeName = idClass.getSimpleName();
             try {
                 final Method parser = idClass.getDeclaredMethod("parse" + typeName, String.class);

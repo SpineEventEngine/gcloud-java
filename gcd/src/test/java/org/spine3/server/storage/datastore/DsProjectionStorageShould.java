@@ -54,24 +54,4 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
             super(id);
         }
     }
-
-    @Override
-    public void read_all_messages() {
-        // NOP
-    }
-
-    @Override
-    public void read_all_messages_with_field_mask() {
-        // NOP
-    }
-
-    @Override
-    public void retrieve_empty_map_if_storage_is_empty() {
-        // NOP
-    }
-
-    @Override
-    public void return_null_if_no_event_time_in_storage() {
-        // NOP
-    }
 }
