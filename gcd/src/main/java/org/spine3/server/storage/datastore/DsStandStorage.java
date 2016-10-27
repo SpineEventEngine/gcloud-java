@@ -151,7 +151,8 @@ import static com.google.common.base.Preconditions.*;
                 checkNotNull(input, "String ID must not be null.");
                 checkArgument(!input.isEmpty(), "String ID must not be empty.");
 
-                return AggregateStateId.of(input, withType);// TODO:26-10-16:dmytro.dashenkov: Implement.
+                // TODO:26-10-16:dmytro.dashenkov: Limitation: omly String ids ae supported by stand storage for now.
+                return AggregateStateId.of(input, withType);
             }
         };
     }
