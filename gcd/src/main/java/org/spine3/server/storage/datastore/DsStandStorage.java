@@ -23,6 +23,7 @@ package org.spine3.server.storage.datastore;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.*;
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.KnownTypes;
@@ -146,7 +147,8 @@ import static com.google.common.base.Preconditions.*;
         return reverseIdTransformer(null);
     }
 
-    private static Function<String, AggregateStateId> reverseIdTransformer(final TypeUrl withType) {
+    private static Function<String, AggregateStateId> reverseIdTransformer(@Nullable final TypeUrl withType) {
+        final TypeUrl type = withType != null ? withType : TypeUrl.of(Any.class);
         return new Function<String, AggregateStateId>() {
             @Override
             public AggregateStateId apply(@Nullable String input) {
@@ -154,7 +156,7 @@ import static com.google.common.base.Preconditions.*;
                 checkArgument(!input.isEmpty(), "String ID must not be empty.");
 
                 // TODO:26-10-16:dmytro.dashenkov: Limitation: omly String ids ae supported by stand storage for now.
-                return AggregateStateId.of(input, withType);
+                return AggregateStateId.of(input, type);
             }
         };
     }

@@ -27,7 +27,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -35,17 +34,14 @@ import javafx.util.Pair;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.FieldMasks;
-import org.spine3.server.reflect.Classes;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
-import java.util.logging.Logger;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -61,24 +57,9 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     private final TypeUrl typeUrl;
 
     private static final String VERSION_KEY = "version";
-    private static final int ID_GENERIC_TYPE_NUMBER = 0;
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityStorageRecord.class);
-    private static final Logger LOG = Logger.getLogger(DsRecordStorage.class.getCanonicalName());
-    @SuppressWarnings("HardcodedLineSeparator")
-    private static final String REFLECTIVE_ERROR_MESSAGE_PATTERN
-            = "Reflective operation error trying to parse %s instance from string \"%s\"\n";
-    @SuppressWarnings("HardcodedLineSeparator")
-    private static final String PROTO_PARSING_ERROR_MESSAGE = "Could not parse an Any from byte array: \n";
     private static final String ID_CONVERTION_ERROR_MESSAGE
             = "Entity had ID of an invalid type; could not parse ID from String. Note: custom convection is not supported. See Identifiers#idToString.";
-    private static final String WRONG_ID_TYPE_ERROR_MESSAGE
-            = "Only String, numeric and Proto-message identifiers are allowed in GAE storage implementation.";
-    private static final int STRING_BUILDER_INITIAL_CAPACITY = 128;
-    private static final String TYPE_PREFIX = "TYPE::";
-    private static final String SERIALIZED_MESSAGE_BYTES_DIVIDER = "-";
-    private static final String SERIALIZED_MESSAGE_BYTES_POSTFIX = "::END";
-    private static final String SERIALIZED_MESSAGE_DIVIDER = "::::";
-    private static final String WRONG_OR_BROKEN_MESSAGE_ID = "Passed proto ID %s is wrong or broken.";
 
     /* package */
     static <I> DsRecordStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
@@ -114,7 +95,6 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected EntityStorageRecord readRecord(I id) {
         final Key key = createKey(id);
-
         final Entity response = datastore.read(key);
 
         if (response == null) {
@@ -170,7 +150,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                     return null;
                 }
                 // Retrieve ID
-                final I id = idFromString(input.key().name());
+                final I id = IdTransformer.idFromString(input.key().name(), this.getClass());
                 checkState(id != null, ID_CONVERTION_ERROR_MESSAGE);
 
                 // Retrieve record
@@ -239,107 +219,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Key createKey(I id) {
-        final String idString;
-        if (id instanceof String) { // String ID
-            idString = (String) id;
-        } else if (isNumber(id.getClass())) { // Numeric ID
-            idString = id.toString();
-        } else { // Proto-Message ID
-            checkArgument(id instanceof Message, WRONG_ID_TYPE_ERROR_MESSAGE);
-
-            final Message message = (Message) id;
-            final StringBuilder idBuilder = new StringBuilder(STRING_BUILDER_INITIAL_CAPACITY);
-            idBuilder
-                    .append(TYPE_PREFIX)
-                    .append(message.getDescriptorForType().getFullName())
-                    .append("");
-            final byte[] serializedMessage = message.toByteArray();
-            for (byte b : serializedMessage) {
-                idBuilder.append(b).append(SERIALIZED_MESSAGE_BYTES_DIVIDER);
-            }
-            idBuilder.append(SERIALIZED_MESSAGE_BYTES_POSTFIX);
-
-            idString = idBuilder.toString();
-        }
+        final String idString = IdTransformer.idToString(id);
         return datastore.getKeyFactory(RECORD_TYPE_URL.getSimpleName()).newKey(idString);
-    }
-
-    private static boolean isNumber(Class<?> clss) {
-        return clss.isPrimitive()
-                || clss.isAssignableFrom(Integer.class)
-                || clss.isAssignableFrom(Long.class);
-    }
-
-    private static Message protoIdFromString(String stringId) {
-        checkArgument(stringId.startsWith(TYPE_PREFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
-        checkArgument(stringId.endsWith(SERIALIZED_MESSAGE_BYTES_POSTFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
-
-        final String bytesString = stringId.substring(
-                stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER),
-                stringId.lastIndexOf(SERIALIZED_MESSAGE_BYTES_POSTFIX));
-        final String[] separateStringBytes = bytesString.split(SERIALIZED_MESSAGE_BYTES_DIVIDER);
-        final byte[] messageBytes = new byte[separateStringBytes.length];
-        for (int i = 0; i < messageBytes.length; i++) {
-            final byte oneByte = Byte.parseByte(separateStringBytes[i]);
-            messageBytes[i] = oneByte;
-        }
-
-        final String typeName = stringId.substring(
-                stringId.indexOf(TYPE_PREFIX),
-                stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER));
-
-        final ByteString byteString = ByteString.copyFrom(messageBytes);
-        final Any wrappedId = Any.newBuilder()
-                .setValue(byteString)
-                .setTypeUrl(typeName)
-                .build();
-        final Message id = AnyPacker.unpack(wrappedId);
-        return id;
-    }
-
-    @Nullable
-    @SuppressWarnings("unchecked")
-    private I idFromString(String stringId) {
-        final Class<I> idClass = getIdClass(stringId);
-        final I id;
-        if (isNumber(idClass)) { // Numeric ID
-            final String typeName = idClass.getSimpleName();
-            try {
-                final Method parser = idClass.getDeclaredMethod("parse" + typeName, String.class);
-                id = (I) parser.invoke(null, stringId);
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                // Never happen
-                LOG.warning(String.format(REFLECTIVE_ERROR_MESSAGE_PATTERN, typeName, stringId));
-                return null;
-            }
-        } else if (idClass.isAssignableFrom(String.class)) { // String ID
-            id = (I) stringId;
-        } else { // Proto Message ID
-            id = (I) protoIdFromString(stringId);
-        }
-
-        return id;
-    }
-
-    private Class<I> getIdClass(String stringId) {
-        try {
-            return Classes.getGenericParameterType(this.getClass(), ID_GENERIC_TYPE_NUMBER);
-        } catch (ClassCastException e) { // If the class can't be defined we try to apply com.google.protobuf.Message
-            return tryAllSupportedClasses(stringId);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private Class<I> tryAllSupportedClasses(String stringId) {
-        if (stringId.startsWith(TYPE_PREFIX)) {
-            return (Class<I>) Message.class;
-        } else {
-            try {
-                Long.parseLong(stringId);
-                return (Class<I>) Long.class;
-            } catch (NumberFormatException ignored) {
-                return (Class<I>) String.class;
-            }
-        }
     }
 }
