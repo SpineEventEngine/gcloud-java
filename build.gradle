@@ -128,11 +128,6 @@ task startDatastore {
     group "Build Setup"
 }
 
-task stopDatastore {
-    description "Stops local running datastore."
-    group "Build"
-}
-
 startDatastore << {
     final String scriptExtension;
     final String pathPrefix;
