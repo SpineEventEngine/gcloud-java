@@ -69,15 +69,15 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     @SuppressWarnings("HardcodedLineSeparator")
     private static final String PROTO_PARSING_ERROR_MESSAGE = "Could not parse an Any from byte array: \n";
     private static final String ID_CONVERTION_ERROR_MESSAGE
-            = "Entity had ID of an invalid type; could not parse ID from String. Note: custom convection is not supported. See Identifiers#idToString";
+            = "Entity had ID of an invalid type; could not parse ID from String. Note: custom convection is not supported. See Identifiers#idToString.";
     private static final String WRONG_ID_TYPE_ERROR_MESSAGE
-            = "Only String, numeric and Proto-message identifiers are allowed in GAE storage implementation";
+            = "Only String, numeric and Proto-message identifiers are allowed in GAE storage implementation.";
     private static final int STRING_BUILDER_INITIAL_CAPACITY = 128;
     private static final String TYPE_PREFIX = "TYPE::";
     private static final String SERIALIZED_MESSAGE_BYTES_DIVIDER = "-";
     private static final String SERIALIZED_MESSAGE_BYTES_POSTFIX = "::END";
     private static final String SERIALIZED_MESSAGE_DIVIDER = "::::";
-    private static final String WRONG_OR_BROKEN_MESSAGE_ID = "Passed ID is wrong or broken.";
+    private static final String WRONG_OR_BROKEN_MESSAGE_ID = "Passed proto ID %s is wrong or broken.";
 
     /* package */
     static <I> DsRecordStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
@@ -264,8 +264,8 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private static Message protoIdFromString(String stringId) {
-        checkArgument(stringId.startsWith(TYPE_PREFIX), WRONG_OR_BROKEN_MESSAGE_ID);
-        checkArgument(stringId.endsWith(SERIALIZED_MESSAGE_BYTES_POSTFIX), WRONG_OR_BROKEN_MESSAGE_ID);
+        checkArgument(stringId.startsWith(TYPE_PREFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
+        checkArgument(stringId.endsWith(SERIALIZED_MESSAGE_BYTES_POSTFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
 
         final String bytesString = stringId.substring(
                 stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER),
@@ -293,7 +293,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     @Nullable
     @SuppressWarnings("unchecked")
     private I idFromString(String stringId) {
-        final Class<I> idClass = getIdClass();
+        final Class<I> idClass = getIdClass(stringId);
         final I id;
         if (isNumber(idClass)) { // Numeric ID
             final String typeName = idClass.getSimpleName();
@@ -305,7 +305,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                 LOG.warning(String.format(REFLECTIVE_ERROR_MESSAGE_PATTERN, typeName, stringId));
                 return null;
             }
-        } else if (idClass.equals(String.class)) { // String ID
+        } else if (idClass.isAssignableFrom(String.class)) { // String ID
             id = (I) stringId;
         } else { // Proto Message ID
             id = (I) protoIdFromString(stringId);
@@ -314,30 +314,25 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         return id;
     }
 
-    private Class<I> getIdClass() {
+    private Class<I> getIdClass(String stringId) {
         try {
             return Classes.getGenericParameterType(this.getClass(), ID_GENERIC_TYPE_NUMBER);
         } catch (ClassCastException e) { // If the class can't be defined we try to apply com.google.protobuf.Message
-            return tryAllSupportedClasses();
+            return tryAllSupportedClasses(stringId);
         }
     }
 
-    @SuppressWarnings({"BreakStatement", "unchecked"})
-    private Class<I> tryAllSupportedClasses() {
-        Class<I> idClass = null;
-        final Collection<Class> possibleClasses = new HashSet<>();
-        possibleClasses.add(Number.class);
-        possibleClasses.add(String.class);
-        possibleClasses.add(Message.class);
-
-        for (Class cls : possibleClasses) {
+    @SuppressWarnings("unchecked")
+    private Class<I> tryAllSupportedClasses(String stringId) {
+        if (stringId.startsWith(TYPE_PREFIX)) {
+            return (Class<I>) Message.class;
+        } else {
             try {
-                idClass = (Class<I>) cls;
-                break;
-            } catch (ClassCastException ignored) { }
+                Long.parseLong(stringId);
+                return (Class<I>) Long.class;
+            } catch (NumberFormatException e) {
+                return (Class<I>) String.class;
+            }
         }
-
-        checkNotNull(idClass, WRONG_ID_TYPE_ERROR_MESSAGE);
-        return idClass;
     }
 }
