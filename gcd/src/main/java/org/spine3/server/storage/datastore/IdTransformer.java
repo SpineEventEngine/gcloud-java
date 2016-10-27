@@ -35,6 +35,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("UtilityClass")
 /*package*/ class IdTransformer {
 
     @SuppressWarnings("HardcodedLineSeparator")
@@ -48,9 +49,14 @@ import static com.google.common.base.Preconditions.checkArgument;
     private static final String SERIALIZED_MESSAGE_BYTES_POSTFIX = "::END";
     private static final String SERIALIZED_MESSAGE_DIVIDER = "::::";
     private static final String WRONG_OR_BROKEN_MESSAGE_ID = "Passed proto ID %s is wrong or broken.";
+    private static final String UNABLE_TO_DETECT_GENERIC_TYPE = "Unable to detect generic type of ID: ";
     private static final Logger LOG = Logger.getLogger(IdTransformer.class.getName());
 
-    /*package*/ static String idToString(Object id) {
+    private IdTransformer() {
+    }
+
+    /*package*/
+    static String idToString(Object id) {
         final String idString;
         if (id instanceof String) { // String ID
             idString = (String) id;
@@ -77,7 +83,8 @@ import static com.google.common.base.Preconditions.checkArgument;
         return idString;
     }
 
-    /*package*/ @SuppressWarnings("unchecked")
+    /*package*/
+    @SuppressWarnings("unchecked")
     static <I> I idFromString(String stringId, Class parametrizedClass) {
         final Class<I> idClass = getIdClass(stringId, parametrizedClass);
         final I id;
@@ -104,11 +111,12 @@ import static com.google.common.base.Preconditions.checkArgument;
         try {
             return Classes.getGenericParameterType(parametrizedClass, 0);
         } catch (ClassCastException e) {
+            LOG.warning(UNABLE_TO_DETECT_GENERIC_TYPE + e.toString());
             return tryAllSupportedClasses(stringId);
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
     private static <I> Class<I> tryAllSupportedClasses(String stringId) {
         if (stringId.startsWith(TYPE_PREFIX)) {
             return (Class<I>) Message.class;
