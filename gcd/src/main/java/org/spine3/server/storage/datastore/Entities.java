@@ -42,6 +42,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 
 /**
+ * Utility class for converting {@link Message proto messages} into {@link Entity Entities} and vise versa.
+ *
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")

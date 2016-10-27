@@ -38,7 +38,8 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
 
-import static com.google.cloud.datastore.StructuredQuery.*;
+import static com.google.cloud.datastore.StructuredQuery.Filter;
+import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
@@ -50,6 +51,7 @@ import static org.spine3.validate.Validate.checkNotDefault;
  * Storage for command records based on Google Cloud Datastore.
  *
  * @author Alexander Litus
+ * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
@@ -70,7 +72,8 @@ class DsCommandStorage extends CommandStorage {
         }
     };
 
-    /* package */ static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+    /* package */
+    static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsCommandStorage(datastore, multitenant);
     }
 

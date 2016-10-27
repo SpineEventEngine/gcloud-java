@@ -41,6 +41,7 @@ import static org.spine3.base.Identifiers.idToString;
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
  *
  * @author Alexander Litus
+ * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */

@@ -38,6 +38,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
  * Utility class, which simplifies creation of datastore properties.
  *
  * @author Mikhail Mikhaylov
+ * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")
 /* package */ class DatastoreProperties {

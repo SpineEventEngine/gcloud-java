@@ -40,6 +40,8 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.*;
 
 /**
+ * GAE datastore implementation of {@link StandStorage}.
+ *
  * @author Dmytro Dashenkov
  */
 /*package*/ class DsStandStorage extends StandStorage {

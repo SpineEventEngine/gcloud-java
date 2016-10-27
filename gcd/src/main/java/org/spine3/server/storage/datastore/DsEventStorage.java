@@ -57,6 +57,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
  * Storage for event records based on Google Cloud Datastore.
  *
  * @author Alexander Litus
+ * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */

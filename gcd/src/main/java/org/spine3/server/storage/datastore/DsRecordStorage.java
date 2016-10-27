@@ -51,6 +51,7 @@ import static com.google.common.base.Preconditions.*;
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
  *
  * @author Alexander Litus
+ * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */

@@ -27,7 +27,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 /**
+ * Custom extension of the {@link DatastoreWrapper} aimed on testing purposes.
+ *
  * @author Dmytro Dashenkov
+ * @see LocalDatastoreStorageFactory
  */
 /*package*/ class LocalDatastoreWrapper extends DatastoreWrapper {
 
