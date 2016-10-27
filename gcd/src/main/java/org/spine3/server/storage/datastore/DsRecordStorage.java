@@ -315,6 +315,29 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Class<I> getIdClass() {
-        return Classes.getGenericParameterType(this.getClass(), ID_GENERIC_TYPE_NUMBER);
+        try {
+            return Classes.getGenericParameterType(this.getClass(), ID_GENERIC_TYPE_NUMBER);
+        } catch (ClassCastException e) { // If the class can't be defined we try to apply com.google.protobuf.Message
+            return tryAllSupportedClasses();
+        }
+    }
+
+    @SuppressWarnings({"BreakStatement", "unchecked"})
+    private Class<I> tryAllSupportedClasses() {
+        Class<I> idClass = null;
+        final Collection<Class> possibleClasses = new HashSet<>();
+        possibleClasses.add(Number.class);
+        possibleClasses.add(String.class);
+        possibleClasses.add(Message.class);
+
+        for (Class cls : possibleClasses) {
+            try {
+                idClass = (Class<I>) cls;
+                break;
+            } catch (ClassCastException ignored) { }
+        }
+
+        checkNotNull(idClass, WRONG_ID_TYPE_ERROR_MESSAGE);
+        return idClass;
     }
 }
