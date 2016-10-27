@@ -20,11 +20,16 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.common.io.BaseEncoding;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import com.sun.istack.internal.Nullable;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.KnownTypes;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.reflect.Classes;
+import org.spine3.type.ClassName;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,19 +49,19 @@ import static com.google.common.base.Preconditions.checkArgument;
     private static final String WRONG_ID_TYPE_ERROR_MESSAGE
             = "Only String, numeric and Proto-message identifiers are allowed in GAE storage implementation.";
     private static final int STRING_BUILDER_INITIAL_CAPACITY = 128;
-    private static final String TYPE_PREFIX = "TYPE::";
+    private static final String TYPE_PREFIX = "TYPE:";
     private static final String SERIALIZED_MESSAGE_BYTES_DIVIDER = "-";
-    private static final String SERIALIZED_MESSAGE_BYTES_POSTFIX = "::END";
-    private static final String SERIALIZED_MESSAGE_DIVIDER = "::::";
+    private static final String SERIALIZED_MESSAGE_BYTES_POSTFIX = ":END";
+    private static final String SERIALIZED_MESSAGE_DIVIDER = "::";
     private static final String WRONG_OR_BROKEN_MESSAGE_ID = "Passed proto ID %s is wrong or broken.";
     private static final String UNABLE_TO_DETECT_GENERIC_TYPE = "Unable to detect generic type of ID: ";
     private static final Logger LOG = Logger.getLogger(IdTransformer.class.getName());
+    private static final int SERIALIZED_BYTES_REDIX = 16;
 
     private IdTransformer() {
     }
 
-    /*package*/
-    static String idToString(Object id) {
+    /*package*/ static String idToString(Object id) {
         final String idString;
         if (id instanceof String) { // String ID
             idString = (String) id;
@@ -67,13 +72,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 
             final Message message = (Message) id;
             final StringBuilder idBuilder = new StringBuilder(STRING_BUILDER_INITIAL_CAPACITY);
+            final TypeUrl typeUrl = KnownTypes.getTypeUrl(ClassName.of(id.getClass().getCanonicalName()));
+            final String prefixedTypeUrl = typeUrl.getPrefix() + '/' + typeUrl.getTypeName();
             idBuilder
                     .append(TYPE_PREFIX)
-                    .append(message.getDescriptorForType().getFullName())
-                    .append("");
+                    .append(prefixedTypeUrl)
+                    .append(SERIALIZED_MESSAGE_DIVIDER);
             final byte[] serializedMessage = message.toByteArray();
             for (byte b : serializedMessage) {
-                idBuilder.append(b).append(SERIALIZED_MESSAGE_BYTES_DIVIDER);
+                final String stringByte = BaseEncoding.base16().encode(new byte[]{b});
+                idBuilder.append(stringByte).append(SERIALIZED_MESSAGE_BYTES_DIVIDER);
             }
             idBuilder.append(SERIALIZED_MESSAGE_BYTES_POSTFIX);
 
@@ -83,9 +91,8 @@ import static com.google.common.base.Preconditions.checkArgument;
         return idString;
     }
 
-    /*package*/
     @SuppressWarnings("unchecked")
-    static <I> I idFromString(String stringId, Class parametrizedClass) {
+    /*package*/ static <I> I idFromString(String stringId, @Nullable Class parametrizedClass) {
         final Class<I> idClass = getIdClass(stringId, parametrizedClass);
         final I id;
         if (isNumber(idClass)) { // Numeric ID
@@ -107,7 +114,12 @@ import static com.google.common.base.Preconditions.checkArgument;
         return id;
     }
 
-    private static <I> Class<I> getIdClass(String stringId, Class parametrizedClass) {
+    @SuppressWarnings("ConstantConditions") // Nullable argument parametrizedClass
+    private static <I> Class<I> getIdClass(String stringId, @Nullable Class parametrizedClass) {
+        if (parametrizedClass == null) {
+            return tryAllSupportedClasses(stringId);
+        }
+
         try {
             return Classes.getGenericParameterType(parametrizedClass, 0);
         } catch (ClassCastException e) {
@@ -118,7 +130,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
     @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
     private static <I> Class<I> tryAllSupportedClasses(String stringId) {
-        if (stringId.startsWith(TYPE_PREFIX)) {
+        if (stringId.startsWith(TYPE_PREFIX) && stringId.endsWith(SERIALIZED_MESSAGE_BYTES_POSTFIX)) {
             return (Class<I>) Message.class;
         } else {
             try {
@@ -134,19 +146,19 @@ import static com.google.common.base.Preconditions.checkArgument;
         checkArgument(stringId.startsWith(TYPE_PREFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
         checkArgument(stringId.endsWith(SERIALIZED_MESSAGE_BYTES_POSTFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
 
-        final String bytesString = stringId.substring(
-                stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER),
-                stringId.lastIndexOf(SERIALIZED_MESSAGE_BYTES_POSTFIX));
+        final int dataStartIndex = stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER) + SERIALIZED_MESSAGE_DIVIDER.length();
+        final int dataEndIndex = stringId.lastIndexOf(SERIALIZED_MESSAGE_BYTES_POSTFIX);
+        final String bytesString = stringId.substring(dataStartIndex, dataEndIndex);
         final String[] separateStringBytes = bytesString.split(SERIALIZED_MESSAGE_BYTES_DIVIDER);
         final byte[] messageBytes = new byte[separateStringBytes.length];
         for (int i = 0; i < messageBytes.length; i++) {
-            final byte oneByte = Byte.parseByte(separateStringBytes[i]);
+            final byte oneByte = Byte.parseByte(separateStringBytes[i], SERIALIZED_BYTES_REDIX);
             messageBytes[i] = oneByte;
         }
 
-        final String typeName = stringId.substring(
-                stringId.indexOf(TYPE_PREFIX),
-                stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER));
+        final int typeStartIndex = stringId.indexOf(TYPE_PREFIX) + TYPE_PREFIX.length();
+        final int typeEndIndex = stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER);
+        final String typeName = stringId.substring(typeStartIndex, typeEndIndex);
 
         final ByteString byteString = ByteString.copyFrom(messageBytes);
         final Any wrappedId = Any.newBuilder()

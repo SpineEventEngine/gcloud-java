@@ -25,7 +25,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.*;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import org.spine3.base.Identifiers;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
@@ -52,7 +51,7 @@ import static com.google.common.base.Preconditions.*;
         public String apply(@Nullable AggregateStateId input) {
             checkNotNull(input);
             final Object id = input.getAggregateId();
-            return Identifiers.idToString(id);
+            return IdTransformer.idToString(id);
         }
     };
 
@@ -116,7 +115,7 @@ import static com.google.common.base.Preconditions.*;
     @Override
     protected Map<AggregateStateId, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
         final Map<String, EntityStorageRecord> readRecords = recordStorage.readAllRecords(fieldMask);
-        final Collection<String> sourceIds = readRecords.keySet();
+        final Collection sourceIds = readRecords.keySet();
         final Collection<AggregateStateId> ids = Collections2.transform(sourceIds, reverseIdTransformer());
 
         final Collection<EntityStorageRecord> recordValues = readRecords.values();
@@ -143,19 +142,17 @@ import static com.google.common.base.Preconditions.*;
         return stringIds;
     }
 
-    private static Function<String, AggregateStateId> reverseIdTransformer() {
+    private static Function<Object, AggregateStateId> reverseIdTransformer() {
         return reverseIdTransformer(null);
     }
 
-    private static Function<String, AggregateStateId> reverseIdTransformer(@Nullable final TypeUrl withType) {
+    private static Function<Object, AggregateStateId> reverseIdTransformer(@Nullable final TypeUrl withType) {
         final TypeUrl type = withType != null ? withType : TypeUrl.of(Any.class);
-        return new Function<String, AggregateStateId>() {
+        return new Function<Object, AggregateStateId>() {
             @Override
-            public AggregateStateId apply(@Nullable String input) {
+            public AggregateStateId apply(@Nullable Object input) {
                 checkNotNull(input, "String ID must not be null.");
-                checkArgument(!input.isEmpty(), "String ID must not be empty.");
 
-                // TODO:26-10-16:dmytro.dashenkov: Limitation: omly String ids ae supported by stand storage for now.
                 return AggregateStateId.of(input, type);
             }
         };
