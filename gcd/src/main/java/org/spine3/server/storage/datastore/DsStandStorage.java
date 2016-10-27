@@ -65,8 +65,6 @@ import static com.google.common.base.Preconditions.*;
         this.recordStorage = recordStorage;
     }
 
-    // TODO:14-10-16:dmytro.dashenkov: Implement.
-
     @Override
     public ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type) {
         final Map<?, EntityStorageRecord> records = recordStorage.readAll();

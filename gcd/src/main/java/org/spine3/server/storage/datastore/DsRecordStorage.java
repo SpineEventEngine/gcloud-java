@@ -213,7 +213,13 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         for (Entity entity : results) {
             final Pair<I, EntityStorageRecord> recordPair = transformer.apply(entity);
             checkNotNull(recordPair, "Datastore may not contain null records.");
-            records.put(recordPair.getKey(), recordPair.getValue());
+            final EntityStorageRecord fullRecord = recordPair.getValue();
+            final Message fullState = AnyPacker.unpack(fullRecord.getState());
+            final Message maskedState = FieldMasks.applyMask(fieldMask, fullState, typeUrl);
+            final EntityStorageRecord maskedRecord = EntityStorageRecord.newBuilder(fullRecord)
+                    .setState(AnyPacker.pack(maskedState))
+                    .build();
+            records.put(recordPair.getKey(), maskedRecord);
         }
 
         return records.build();
