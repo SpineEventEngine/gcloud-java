@@ -64,6 +64,7 @@ subprojects {
         compile group: 'org.spine3', name: 'server', version: project.SPINE_VERSION, changing: true
         compile group: 'org.spine3', name: 'client', version: project.SPINE_VERSION, changing: true
         compile group: 'org.spine3', name: 'testutil', version: project.SPINE_VERSION, changing: true
+        compile group: 'org.spine3', name: 'examples', version: "0.2", changing: true
 
         // Guava
         compile group: 'com.google.guava', name: 'guava', version: '19.0'

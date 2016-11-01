@@ -29,6 +29,8 @@ import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
  * @author Alexander Litus
  */
 public class Application /*extends org.spine3.examples.aggregate.server.Application*/ {
+    // TODO:01-11-16:dmytro.dashenkov: Uncomment code in this class and reenable test ApplictionShoud#execute when
+    // examples repo is updated to Spine v0.6.0 and published to Maven.
 
     /**
      * Iterator page size determines, how many events does iterator load from storage per request.
