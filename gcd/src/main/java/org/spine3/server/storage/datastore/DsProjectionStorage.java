@@ -24,14 +24,16 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.validate.Validate;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
+ * GAE Datastore implementation of the {@link ProjectionStorage}.
+ *
  * @author Mikhail Mikhaylov
  */
 /* package */ class DsProjectionStorage<I> extends ProjectionStorage<I> {
@@ -43,8 +45,7 @@ import java.util.Map;
 
     private final String lastTimestampId;
 
-    /* package */
-    static <I> DsProjectionStorage<I> newInstance(DsRecordStorage<I> entityStorage,
+    /* package */static <I> DsProjectionStorage<I> newInstance(DsRecordStorage<I> entityStorage,
                                                   DsPropertyStorage propertyStorage,
                                                   Class<? extends Entity<I, ?>> projectionClass,
                                                   boolean multitenant) {
@@ -77,7 +78,7 @@ import java.util.Map;
         }
         return readTimestamp;
     }
-    
+
     @Override
     public RecordStorage<I> getRecordStorage() {
         return entityStorage;

@@ -76,7 +76,8 @@ import static com.google.common.base.Throwables.propagate;
                 .setValue(valueBytes)
                 .setTypeUrl(type.value())
                 .build();
-        return AnyPacker.unpack(wrapped);
+        final M result = AnyPacker.unpack(wrapped);
+        return result;
     }
 
     /**

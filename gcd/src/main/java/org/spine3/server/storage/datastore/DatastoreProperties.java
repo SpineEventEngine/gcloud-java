@@ -75,8 +75,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      * Makes a property from the given timestamp using
      * {@link org.spine3.protobuf.Timestamps#convertToNanos(TimestampOrBuilder)}.
      */
-    /* package */
-    static void addTimestampNanosProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
+    /* package */ static void addTimestampNanosProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final long nanos = convertToNanos(timestamp);
         entity.set(TIMESTAMP_NANOS_PROPERTY_NAME, nanos);
     }
@@ -84,8 +83,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     /**
      * Makes AggregateId property from given {@link Message} value.
      */
-    /* package */
-    static void addAggregateIdProperty(Object aggregateId, Entity.Builder entity) {
+    /* package */ static void addAggregateIdProperty(Object aggregateId, Entity.Builder entity) {
         final String propertyValue = Identifiers.idToString(aggregateId);
         entity.set(AGGREGATE_ID_PROPERTY_NAME, propertyValue);
     }
@@ -93,8 +91,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     /**
      * Makes EventType property from given String value.
      */
-    /* package */
-    static void addEventTypeProperty(String eventType, Entity.Builder entity) {
+    /* package */ static void addEventTypeProperty(String eventType, Entity.Builder entity) {
         entity.set(EVENT_TYPE_PROPERTY_NAME, eventType);
     }
 
@@ -106,8 +103,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      * Converts {@link org.spine3.base.EventContext} or it's builder to a set of Properties, which are
      * ready to add to datastore entity.
      */
-    /* package */
-    static void makeEventContextProperties(EventContextOrBuilder context,
+    /* package */ static void makeEventContextProperties(EventContextOrBuilder context,
                                            Entity.Builder builder) {
         builder.set(CONTEXT_EVENT_ID_PROPERTY_NAME, Messages.toText(context.getEventId()));
         builder.set(CONTEXT_TIMESTAMP_PROPERTY_NAME, convertToNanos(context.getTimestamp()));
@@ -120,8 +116,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      * Converts {@link org.spine3.base.Event}'s fields to a set of Properties, which are
      * ready to add to datastore entity.
      */
-    /* package */
-    static void makeEventFieldProperties(EventStorageRecordOrBuilder event,
+    /* package */ static void makeEventFieldProperties(EventStorageRecordOrBuilder event,
                                          Entity.Builder builder) {
         // We do not re-save timestamp
         // We do not re-save event type

@@ -145,7 +145,6 @@ startDatastore << {
     "$pathPrefix/script/start-datastore$scriptExtension".execute()
 }
 
-
 tasks["check"].dependsOn startDatastore
 
 task readPublishingCredentials << {

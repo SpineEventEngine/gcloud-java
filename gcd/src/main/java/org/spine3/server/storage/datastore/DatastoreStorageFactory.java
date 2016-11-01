@@ -52,7 +52,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      * <p>Same as calling {@link #newInstance(Datastore, boolean)} with {@code false} second argument.
      *
      * @param datastore the {@link Datastore} implementation to use.
-     * @return creates new factory instance.
+     * @return new instance of the {@code DatastoreStorageFactory}.
      * @see DatastoreOptions
      */
     @SuppressWarnings("WeakerAccess") // Part of API

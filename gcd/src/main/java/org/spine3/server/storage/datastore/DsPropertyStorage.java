@@ -73,6 +73,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
         }
 
         final Any anyResult = entityToMessage(response, ANY_TYPE_URL);
-        return AnyPacker.unpack(anyResult);
+        final V result = AnyPacker.unpack(anyResult);
+        return result;
     }
 }
