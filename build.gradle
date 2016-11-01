@@ -3,6 +3,7 @@ project.ext {
     PROTOBUF_VERSION = '3.0.0';
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
+    MAVEN_SNAPSHOT_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine-snapshots';
 
     IS_WINDOWS = org.gradle.internal.os.OperatingSystem.current().isWindows()
 }
@@ -51,12 +52,13 @@ subprojects {
         maven {
             url = "$MAVEN_REPOSITORY_URL"
         }
+        maven {
+            url = "$MAVEN_SNAPSHOT_REPOSITORY_URL"
+        }
         mavenLocal()
     }
 
     dependencies {
-
-        // TODO:2015-11-19:alexander.litus: change Spine local dependency to Maven central repository dependency
         // when Spine can be used for evaluation in real projects.
         // Spine
         compile group: 'org.spine3', name: 'server', version: project.SPINE_VERSION, changing: true
