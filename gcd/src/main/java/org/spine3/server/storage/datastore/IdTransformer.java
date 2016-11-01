@@ -24,13 +24,13 @@ import com.google.common.io.BaseEncoding;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import com.sun.istack.internal.Nullable;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.reflect.Classes;
 import org.spine3.type.ClassName;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
