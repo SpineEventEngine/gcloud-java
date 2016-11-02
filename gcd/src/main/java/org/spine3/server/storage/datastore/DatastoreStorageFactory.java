@@ -162,6 +162,7 @@ public class DatastoreStorageFactory implements StorageFactory {
             this.pageSize = pageSize;
         }
 
+        @SuppressWarnings("unused") // Part of API
         public int getEventIteratorPageSize() {
             return pageSize;
         }
