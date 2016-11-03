@@ -28,7 +28,7 @@ public class ApplicationShould {
 
     private static final String[] ARGS = new String[0];
 
-    @Ignore
+    @Ignore // Ignored until `Application is fixed`
     @Test
     public void execute() {
         Application.main(ARGS);

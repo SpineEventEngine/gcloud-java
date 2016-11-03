@@ -73,9 +73,9 @@ import static com.google.common.base.Throwables.propagate;
         final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
         final Any wrapped = Any.newBuilder()
-                .setValue(valueBytes)
-                .setTypeUrl(type.value())
-                .build();
+                               .setValue(valueBytes)
+                               .setTypeUrl(type.value())
+                               .build();
         final M result = AnyPacker.unpack(wrapped);
         return result;
     }
@@ -109,9 +109,9 @@ import static com.google.common.base.Throwables.propagate;
             final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
             final Any wrapped = Any.newBuilder()
-                    .setValue(valueBytes)
-                    .setTypeUrl(typeName)
-                    .build();
+                                   .setValue(valueBytes)
+                                   .setTypeUrl(typeName)
+                                   .build();
             final M message = AnyPacker.unpack(wrapped);
             messages.add(message);
         }
@@ -135,8 +135,8 @@ import static com.google.common.base.Throwables.propagate;
         final byte[] messageBytes = wrapped.getValue().toByteArray();
         final Blob valueBlob = Blob.copyFrom(messageBytes);
         final Entity entity = Entity.builder(key)
-                .set(VALUE_PROPERTY_NAME, valueBlob)
-                .build();
+                                    .set(VALUE_PROPERTY_NAME, valueBlob)
+                                    .build();
         return entity;
     }
 

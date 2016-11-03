@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.datastore;
 
-
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
@@ -72,8 +71,7 @@ class DsCommandStorage extends CommandStorage {
         }
     };
 
-    /* package */
-    static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+    /* package */ static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsCommandStorage(datastore, multitenant);
     }
 
@@ -86,9 +84,9 @@ class DsCommandStorage extends CommandStorage {
     protected Iterator<CommandStorageRecord> read(CommandStatus status) {
         final Filter filter = PropertyFilter.eq(COMMAND_STATUS_PRORPERTY_NAME, status.ordinal());
         final Query query = Query.entityQueryBuilder()
-                .kind(TYPE_URL.getSimpleName())
-                .filter(filter)
-                .build();
+                                 .kind(TYPE_URL.getSimpleName())
+                                 .filter(filter)
+                                 .build();
         final Collection<Entity> entities = datastore.read(query);
         final Collection<CommandStorageRecord> records = Collections2.transform(entities, RECORD_MAPPER);
         return records.iterator();
@@ -159,14 +157,18 @@ class DsCommandStorage extends CommandStorage {
 
         Entity entity = messageToEntity(record, key);
         entity = Entity.builder(entity)
-                .set(TIMESTAMP_PROPERTY_NAME, record.getTimestamp().getSeconds())
-                .set(TIMESTAMP_NANOS_PROPERTY_NAME, record.getTimestamp().getNanos())
-                .set(COMMAND_STATUS_PRORPERTY_NAME, record.getStatus().ordinal())
-                .build();
+                       .set(TIMESTAMP_PROPERTY_NAME, record.getTimestamp()
+                                                           .getSeconds())
+                       .set(TIMESTAMP_NANOS_PROPERTY_NAME, record.getTimestamp()
+                                                                 .getNanos())
+                       .set(COMMAND_STATUS_PRORPERTY_NAME, record.getStatus()
+                                                                 .ordinal())
+                       .build();
         datastore.createOrUpdate(entity);
     }
 
     private Key createKey(String idString) {
-        return datastore.getKeyFactory(TYPE_URL.getSimpleName()).newKey(idString);
+        return datastore.getKeyFactory(TYPE_URL.getSimpleName())
+                        .newKey(idString);
     }
 }

@@ -20,7 +20,11 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import org.spine3.base.Identifiers;
@@ -91,7 +95,9 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String datastoreId = generateDatastoreId(id);
-        propertyStorage.write(datastoreId, Int32Value.newBuilder().setValue(eventCount).build());
+        propertyStorage.write(datastoreId, Int32Value.newBuilder()
+                                                     .setValue(eventCount)
+                                                     .build());
     }
 
     @Override
@@ -118,9 +124,9 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final String idString = idToString(id);
         final Query<?> query = Query.entityQueryBuilder()
-                .kind(KIND)
-                .filter(StructuredQuery.PropertyFilter.eq(AGGREGATE_ID_PROPERTY_NAME, idString))
-                .build();
+                                    .kind(KIND)
+                                    .filter(StructuredQuery.PropertyFilter.eq(AGGREGATE_ID_PROPERTY_NAME, idString))
+                                    .build();
         final List<Entity> eventEntities = datastore.read(query);
         if (eventEntities.isEmpty()) {
             return Collections.emptyIterator();

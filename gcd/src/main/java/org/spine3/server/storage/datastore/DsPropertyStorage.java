@@ -44,8 +44,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 
     private final DatastoreWrapper datastore;
 
-    /* package */
-    static DsPropertyStorage newInstance(DatastoreWrapper datastore) {
+    /* package */ static DsPropertyStorage newInstance(DatastoreWrapper datastore) {
         return new DsPropertyStorage(datastore);
     }
 

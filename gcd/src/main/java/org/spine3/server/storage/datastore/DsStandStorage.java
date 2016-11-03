@@ -22,7 +22,11 @@ package org.spine3.server.storage.datastore;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.*;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import org.spine3.protobuf.KnownTypes;
@@ -37,7 +41,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * GAE datastore implementation of {@link StandStorage}.
@@ -57,8 +62,7 @@ import static com.google.common.base.Preconditions.*;
 
     private final DsRecordStorage<String> recordStorage;
 
-    /*package*/
-    static StandStorage newInstance(boolean multitenant, DsRecordStorage<String> recordStorage) {
+    /*package*/ static StandStorage newInstance(boolean multitenant, DsRecordStorage<String> recordStorage) {
         return new DsStandStorage(multitenant, recordStorage);
     }
 
@@ -152,8 +156,8 @@ import static com.google.common.base.Preconditions.*;
             @Override
             public AggregateStateId apply(@Nullable Object input) {
                 checkNotNull(input, "String ID must not be null.");
-
-                return AggregateStateId.of(input, type);
+                final AggregateStateId id = AggregateStateId.of(input, type);
+                return id;
             }
         };
     }
@@ -165,7 +169,8 @@ import static com.google.common.base.Preconditions.*;
                 if (input == null) {
                     return false;
                 }
-                final String classnameString = input.getDescriptorForType().getFullName();
+                final String classnameString = input.getDescriptorForType()
+                                                    .getFullName();
                 final ClassName typeName = ClassName.of(classnameString);
                 final TypeUrl recordType = KnownTypes.getTypeUrl(typeName);
 
