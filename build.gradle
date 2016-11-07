@@ -35,7 +35,7 @@ allprojects {
     apply plugin: 'java';
     apply plugin: 'maven';
     group = 'org.spine3.gae-java';
-    version = '0.1';
+    version = '0.2';
 }
 
 subprojects {
