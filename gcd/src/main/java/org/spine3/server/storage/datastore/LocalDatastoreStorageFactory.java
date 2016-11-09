@@ -40,9 +40,9 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     private static final String DEFAULT_DATASET_NAME = "spine-dev";
     private static final String DEFAULT_HOST = "localhost:8080";
 
-    private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = DatastoreOptions.builder()
-                                                                                  .projectId(DEFAULT_DATASET_NAME)
-                                                                                  .host(DEFAULT_HOST)
+    private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = DatastoreOptions.newBuilder()
+                                                                                  .setProjectId(DEFAULT_DATASET_NAME)
+                                                                                  .setHost(DEFAULT_HOST)
                                                                                   .build();
 
     private static final DatastoreOptions TESTING_OPTIONS = generateTestOptions();
@@ -152,7 +152,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     private enum DefaultDatastoreSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Datastore value = DEFAULT_LOCAL_OPTIONS.service();
+        private final Datastore value = DEFAULT_LOCAL_OPTIONS.getService();
     }
 
     private enum TestingDatastoreSingleton {

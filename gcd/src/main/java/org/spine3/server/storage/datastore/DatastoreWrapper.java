@@ -238,7 +238,7 @@ import static com.google.common.base.Preconditions.checkState;
 
     private KeyFactory initKeyFactory(String kind) {
         final KeyFactory keyFactory = datastore.newKeyFactory()
-                .kind(kind);
+                .setKind(kind);
         keyFactories.put(kind, keyFactory);
         return keyFactory;
     }
