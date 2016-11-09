@@ -7,7 +7,7 @@ project.ext {
 
     IS_WINDOWS = org.gradle.internal.os.OperatingSystem.current().isWindows()
 
-    publishPlugin = "$rootDir/scripts/publish.gradle"
+    publishPlugin = "$rootDir/script/publish.gradle"
     credentialsPropertyFile = 'credentials.properties'
     projectsToPublish = ['gcd']
 }
@@ -103,18 +103,9 @@ subprojects {
         classifier "sources"
     }
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                groupId = "${group}"
-                artifactId = "${project.name}"
-                version = "${project.version}"
-
-                from components.java
-
-                artifact sourceJar;
-            }
-        }
+    task testOutputJar(type: Jar) {
+        from sourceSets.test.output
+        classifier "test"
     }
 
     publishing {
@@ -152,20 +143,4 @@ startDatastore << {
 
 tasks["check"].dependsOn startDatastore
 
-task readPublishingCredentials << {
-    if (repositoryUserName == null || repositoryUserPassword == null) {
-        throw new InvalidUserDataException("Please set up valid credentials. " +
-                "Credentials should be set in ${CREDENTIALS_LOCATION} file in the project's root.");
-    }
-    println "Publishing build as ${repositoryUserName}";
-}
-
-task publish << {}
-
-subprojects.each { final project ->
-    final Set<Task> credentialsTasks = getTasksByName("readPublishingCredentials", false);
-    project.getTasksByName("publish", false).each { final task ->
-        task.dependsOn credentialsTasks;
-    }
-    publish.dependsOn project.getTasksByName("publish", false);
-}
+apply from: publishPlugin
