@@ -20,8 +20,14 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.cloud.AuthCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -35,19 +41,47 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     private static final String DEFAULT_HOST = "localhost:8080";
 
     private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = DatastoreOptions.builder()
-            .projectId(DEFAULT_DATASET_NAME)
-            .host(DEFAULT_HOST)
-            .build();
+                                                                                  .projectId(DEFAULT_DATASET_NAME)
+                                                                                  .host(DEFAULT_HOST)
+                                                                                  .build();
+
+    private static final DatastoreOptions TESTING_OPTIONS = generateTestOptions();
+
+    private static DatastoreOptions generateTestOptions() {
+        try {
+            final File json = new File("./resources/spine-dev-62685282c0b9.json");
+            final BufferedInputStream jsonCredentialsStream = new BufferedInputStream(
+                    new FileInputStream(json)
+            );
+
+            final AuthCredentials credentials =
+                    AuthCredentials.createForJson(jsonCredentialsStream);
+            return DatastoreOptions.newBuilder()
+                                   .setAuthCredentials(credentials)
+                                   .build();
+        } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Returns a default factory instance. A {@link Datastore} is created with default {@link DatastoreOptions}:
      *
-     * <p>Dataset name: {@code spine-local-dataset}
+     * <p>Dataset name: {@code spine-dev}
      *
-     * <p>Host: {@code http://localhost:8080}
+     * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
      */
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
     public static LocalDatastoreStorageFactory getDefaultInstance() {
-        return DefaultInstanceSingleton.INSTANCE.value;
+        final boolean onCi = "true".equals(System.getenv("CI"));
+        final String message = onCi
+                               ? "Running on CI. Connecting to remote Google Cloud Datastore"
+                               : "Running on local machine. Connecting to a local Datastore emulator";
+        System.out.println(message);
+
+        return onCi
+               ? TestingInstanceSingleton.INSTANCE.value
+               : DefaultInstanceSingleton.INSTANCE.value;
     }
 
     /**
@@ -106,9 +140,21 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
         private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory(DefaultDatastoreSingleton.INSTANCE.value);
     }
 
+    private enum TestingInstanceSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory(TestingDatastoreSingleton.INSTANCE.value);
+    }
+
     private enum DefaultDatastoreSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Datastore value = DEFAULT_LOCAL_OPTIONS.service();
+    }
+
+    private enum TestingDatastoreSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Datastore value = TESTING_OPTIONS.getService();
     }
 }

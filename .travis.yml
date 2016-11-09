@@ -1,5 +1,6 @@
 language: java
 
+#// TODO:09-11-16:dmytro.dashenkov: Configure javafx dependencies and change to oraclejdk7.
 jdk:
   - oraclejdk8
 

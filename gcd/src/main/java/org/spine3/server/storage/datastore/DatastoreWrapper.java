@@ -148,7 +148,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @param table Kind (a.k.a. type, table, etc.) of the records to delete.
      */
     /*package*/ void dropTable(String table) {
-        final Query query = Query.entityQueryBuilder().kind(table).build();
+        final Query query = Query.newEntityQueryBuilder().setKind(table).build();
         final List<Entity> entities = read(query);
         final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
             @Nullable

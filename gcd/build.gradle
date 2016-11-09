@@ -20,7 +20,7 @@ dependencies {
 
     // Google Cloud Datastore
     //compile group: 'com.google.api-client', name: 'google-api-client-protobuf', version: '1.22.0'
-    compile 'com.google.cloud:google-cloud-datastore:0.4.0'
+    compile 'com.google.cloud:google-cloud-datastore:0.5.1'
 
     testCompile group: 'org.spine3', name: 'server', version: project.SPINE_VERSION, changing: true, classifier: 'test'
     testCompile group: 'org.spine3', name: 'client', version: project.SPINE_VERSION, changing: true, classifier: 'test'
