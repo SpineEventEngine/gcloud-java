@@ -25,6 +25,7 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -48,10 +49,15 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static DatastoreOptions generateTestOptions() {
         try {
-            return DatastoreOptions.builder()
-                                   .projectId(DEFAULT_DATASET_NAME)
-                                   .authCredentials(AuthCredentials.createForJson(
-                                           new BufferedInputStream(new FileInputStream("./resources/spine-dev-4d860a20c740.json"))))
+            final File json = new File("./resources/spine-dev-62685282c0b9.json");
+            final BufferedInputStream jsonCredentialsStream = new BufferedInputStream(
+                    new FileInputStream(json)
+            );
+
+            final AuthCredentials credentials =
+                    AuthCredentials.createForJson(jsonCredentialsStream);
+            return DatastoreOptions.newBuilder()
+                                   .setAuthCredentials(credentials)
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
             throw new RuntimeException(e);
@@ -67,7 +73,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      */
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     public static LocalDatastoreStorageFactory getDefaultInstance() {
-        final boolean onCi = "true".equals(System.getenv("CI"));
+        final boolean onCi = true;//"true".equals(System.getenv("CI"));
         final String message = onCi
                                ? "Running on CI. Connecting to remote Google Cloud Datastore"
                                : "Running on local machine. Connecting to a local Datastore emulator";
@@ -149,6 +155,6 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     private enum TestingDatastoreSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Datastore value = TESTING_OPTIONS.service();
+        private final Datastore value = TESTING_OPTIONS.getService();
     }
 }
