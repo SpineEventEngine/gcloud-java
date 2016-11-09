@@ -1,4 +1,7 @@
-language: groovy
+language: java
+
+jdk:
+  - oraclejdk7
 
 before_install:
   - chmod +x gradlew
