@@ -11,5 +11,5 @@ script:
   - ./gradlew assemble
 
 after_success:
-  - chmod +x ./scripts/publish_artifacts.sh
-  - ./scripts/publish_artifacts.sh
+  - chmod +x ./script/publish_artifacts.sh
+  - ./script/publish_artifacts.sh
