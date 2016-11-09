@@ -1,0 +1,12 @@
+language: groovy
+
+before_install:
+  - chmod +x gradlew
+
+#TODO:09-11-16:dmytro.dashenkov: Change to ./gradlew assemble as soon as tests can be run.
+script:
+  - ./gradlew assemble
+
+after_success:
+  - chmod +x ./scripts/publish_artifacts.sh
+  - ./scripts/publish_artifacts.sh
