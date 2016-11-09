@@ -49,7 +49,10 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static DatastoreOptions generateTestOptions() {
         try {
-            final File json = new File("./resources/spine-dev-62685282c0b9.json");
+            File json = new File("./resources/spine-dev-62685282c0b9.json");
+            if (!json.exists()) {
+                json = new File("./spine-dev-62685282c0b9.json");
+            }
             final BufferedInputStream jsonCredentialsStream = new BufferedInputStream(
                     new FileInputStream(json)
             );
