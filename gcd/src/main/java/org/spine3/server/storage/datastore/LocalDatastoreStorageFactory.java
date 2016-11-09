@@ -51,7 +51,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
             return DatastoreOptions.builder()
                                    .projectId(DEFAULT_DATASET_NAME)
                                    .authCredentials(AuthCredentials.createForJson(
-                                           new BufferedInputStream(new FileInputStream("./spine-dev-4d860a20c740.json"))))
+                                           new BufferedInputStream(new FileInputStream("./resources/spine-dev-4d860a20c740.json"))))
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
             throw new RuntimeException(e);
