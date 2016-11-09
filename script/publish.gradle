@@ -57,9 +57,7 @@ projectsToPublish.each {
             publications {
                 mavenJava(MavenPublication) {
                     groupId = "${group}"
-                    // We have only one subproject in this repo.
-                    assert currentProject.name == 'gcd'
-                    artifactId = "gae-java"
+                    artifactId = "${currentProject.artifactId}"
                     version = "${currentProject.version}"
 
                     from components.java
