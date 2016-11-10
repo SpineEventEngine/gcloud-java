@@ -20,13 +20,27 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreException;
+import com.google.cloud.datastore.DatastoreReader;
+import com.google.cloud.datastore.DatastoreReaderWriter;
+import com.google.cloud.datastore.DatastoreWriter;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.FullEntity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.Transaction;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -105,8 +119,12 @@ import static com.google.common.base.Preconditions.checkState;
      * @return the {@link Entity} or {@code null} if there is no such a key.
      * @see DatastoreReader#get(Key)
      */
+    @SuppressWarnings("ReturnOfNull")
     /*package*/ Entity read(Key key) {
-        return datastore.get(key);
+        final List<Entity> singleton = datastore.fetch(key);
+        return singleton.isEmpty()
+               ? null
+               : singleton.get(0);
     }
 
     /**
@@ -148,7 +166,9 @@ import static com.google.common.base.Preconditions.checkState;
      * @param table Kind (a.k.a. type, table, etc.) of the records to delete.
      */
     /*package*/ void dropTable(String table) {
-        final Query query = Query.newEntityQueryBuilder().setKind(table).build();
+        final Query query = Query.newEntityQueryBuilder()
+                                 .setKind(table)
+                                 .build();
         final List<Entity> entities = read(query);
         final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
             @Nullable
@@ -238,7 +258,7 @@ import static com.google.common.base.Preconditions.checkState;
 
     private KeyFactory initKeyFactory(String kind) {
         final KeyFactory keyFactory = datastore.newKeyFactory()
-                .setKind(kind);
+                                               .setKind(kind);
         keyFactories.put(kind, keyFactory);
         return keyFactory;
     }
