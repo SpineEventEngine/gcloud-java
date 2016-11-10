@@ -8,4 +8,4 @@ before_script:
   - chmod +x ./gradlew
 
 script:
-  - ./gradlew build --debug
+  - ./gradlew check --debug
