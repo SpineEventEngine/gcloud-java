@@ -70,8 +70,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @param datastore {@link Datastore} to wrap.
      * @return new instance of {@code DatastoreWrapper}
      */
-    /*package*/
-    static DatastoreWrapper wrap(Datastore datastore) {
+    /*package*/ static DatastoreWrapper wrap(Datastore datastore) {
         return new DatastoreWrapper(datastore);
     }
 
@@ -120,11 +119,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @see DatastoreReader#get(Key)
      */
     @SuppressWarnings("ReturnOfNull")
-    /*package*/ Entity read(Key key) {
-//        final List<Entity> singleton = datastore.fetch(key);
-//        return singleton.isEmpty()
-//               ? null
-//               : singleton.get(0);
+    /*package*/ Entity read(Key key) {;
         return datastore.get(key);
     }
 
@@ -136,7 +131,6 @@ import static com.google.common.base.Preconditions.checkState;
      * @see DatastoreReader#fetch(Key...)
      */
     /*package*/ List<Entity> read(Iterable<Key> keys) {
-        //return Lists.newArrayList(datastore.fetch(keys));
         return Lists.newArrayList(datastore.get(keys));
     }
 

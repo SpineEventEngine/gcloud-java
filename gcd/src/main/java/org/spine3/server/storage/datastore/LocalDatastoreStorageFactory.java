@@ -56,6 +56,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
             return DatastoreOptions.newBuilder()
                                    .setProjectId(DEFAULT_DATASET_NAME)
                                    .setAuthCredentials(credentials)
+                                   .setReadTimeout(0) // For infinite timeout.
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
             throw new RuntimeException(e);

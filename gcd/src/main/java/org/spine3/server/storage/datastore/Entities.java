@@ -134,7 +134,7 @@ import static com.google.common.base.Throwables.propagate;
         final Any wrapped = AnyPacker.pack(message);
         final byte[] messageBytes = wrapped.getValue().toByteArray();
         final Blob valueBlob = Blob.copyFrom(messageBytes);
-        final Entity entity = Entity.builder(key)
+        final Entity entity = Entity.newBuilder(key)
                                     .set(VALUE_PROPERTY_NAME, valueBlob)
                                     .build();
         return entity;
