@@ -121,10 +121,11 @@ import static com.google.common.base.Preconditions.checkState;
      */
     @SuppressWarnings("ReturnOfNull")
     /*package*/ Entity read(Key key) {
-        final List<Entity> singleton = datastore.fetch(key);
-        return singleton.isEmpty()
-               ? null
-               : singleton.get(0);
+//        final List<Entity> singleton = datastore.fetch(key);
+//        return singleton.isEmpty()
+//               ? null
+//               : singleton.get(0);
+        return datastore.get(key);
     }
 
     /**
@@ -135,7 +136,8 @@ import static com.google.common.base.Preconditions.checkState;
      * @see DatastoreReader#fetch(Key...)
      */
     /*package*/ List<Entity> read(Iterable<Key> keys) {
-        return Lists.newArrayList(datastore.fetch(keys));
+        //return Lists.newArrayList(datastore.fetch(keys));
+        return Lists.newArrayList(datastore.get(keys));
     }
 
     /**
