@@ -47,7 +47,7 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     static {
         final LocalDatastoreStorageFactory factory;
         try {
-            final Class dummy = LocalDatastoreStorageFactory.class;
+            final Class dummy = Class.forName(LocalDatastoreStorageFactory.class.getCanonicalName());
             factory = LocalDatastoreStorageFactory.getDefaultInstance();
             DATASTORE_FACTORY = factory;
         } catch (Throwable e) {
