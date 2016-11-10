@@ -82,7 +82,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @VisibleForTesting
     protected void initDatastoreWrapper(Datastore datastore) {
-        checkState(this.getDatastore() == null, "Datastore is already inited");
+        checkState(this.getDatastore() == null, "Datastore is already init");
         this.setDatastore(DatastoreWrapper.wrap(datastore));
     }
 

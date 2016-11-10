@@ -25,9 +25,8 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -49,13 +48,8 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static DatastoreOptions generateTestOptions() {
         try {
-            File json = new File("./resources/spine-dev-62685282c0b9.json");
-            if (!json.exists()) {
-                json = new File("./spine-dev-62685282c0b9.json");
-            }
-            final BufferedInputStream jsonCredentialsStream = new BufferedInputStream(
-                    new FileInputStream(json)
-            );
+            final InputStream is = LocalDatastoreStorageFactory.class.getResourceAsStream("/spine-dev-62685282c0b9.json");
+            final BufferedInputStream jsonCredentialsStream = new BufferedInputStream(is);
 
             final AuthCredentials credentials =
                     AuthCredentials.createForJson(jsonCredentialsStream);
