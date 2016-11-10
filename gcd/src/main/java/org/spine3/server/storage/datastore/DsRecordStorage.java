@@ -150,7 +150,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                     return null;
                 }
                 // Retrieve ID
-                final I id = IdTransformer.idFromString(input.key().name(), this.getClass());
+                final I id = IdTransformer.idFromString(input.key().name(), null);
                 checkState(id != null, ID_CONVERTION_ERROR_MESSAGE);
 
                 // Retrieve record
