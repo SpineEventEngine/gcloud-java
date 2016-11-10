@@ -38,6 +38,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static final String DEFAULT_DATASET_NAME = "spine-dev";
     private static final String DEFAULT_HOST = "localhost:8080";
+    private static final String CREDENTIALS_FILE_PATH = "/spine-dev-62685282c0b9.json";
 
     private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = DatastoreOptions.newBuilder()
                                                                                   .setProjectId(DEFAULT_DATASET_NAME)
@@ -48,7 +49,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static DatastoreOptions generateTestOptions() {
         try {
-            final InputStream is = LocalDatastoreStorageFactory.class.getResourceAsStream("/spine-dev-62685282c0b9.json");
+            final InputStream is = LocalDatastoreStorageFactory.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
             final BufferedInputStream jsonCredentialsStream = new BufferedInputStream(is);
 
             final AuthCredentials credentials =
@@ -56,7 +57,8 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
             return DatastoreOptions.newBuilder()
                                    .setProjectId(DEFAULT_DATASET_NAME)
                                    .setAuthCredentials(credentials)
-                                   .setReadTimeout(0) // For infinite timeout.
+                                   .setConnectTimeout(100000)
+                                   .setReadTimeout(100000)
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
             throw new RuntimeException(e);
