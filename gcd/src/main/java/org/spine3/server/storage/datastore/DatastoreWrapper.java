@@ -20,27 +20,13 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreException;
-import com.google.cloud.datastore.DatastoreReader;
-import com.google.cloud.datastore.DatastoreReaderWriter;
-import com.google.cloud.datastore.DatastoreWriter;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.FullEntity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.Transaction;
+import com.google.cloud.datastore.*;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -54,14 +40,40 @@ import static com.google.common.base.Preconditions.checkState;
 
     private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should be active.";
     private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should NOT be active.";
+
+    // Default time to wait before each read operation to ensure the data is consistent.
+    // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
+    private static final int CONSISTENCY_AWAIT_TIME_MS = 100;
+
     private static final Map<String, KeyFactory> keyFactories = new HashMap<>();
+
+    /**
+     * Determines if the wrapper tries to enforce strongly consistent reads after writes.
+     *
+     * <p>Once set to {@code true}, forces this wrapper to wait before each operation to ensure the data is consistent
+     * at the Cloud Datastore.
+     *
+     * <p>NOTE: to be used only in tests; allows to resolve errors in sequential write-read operations. Therefore
+     * this flag is {@code false} by default.
+     *
+     * @see #wrap(Datastore, boolean)
+     * @see #waitForConsistency()
+     * @see #CONSISTENCY_AWAIT_TIME_MS
+     */
+    private final boolean shouldWaitForConsistency;
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
 
-    /*package*/ DatastoreWrapper(Datastore datastore) {
+    /*package*/ DatastoreWrapper(Datastore datastore,
+                                 @SuppressWarnings("MethodParameterNamingConvention") boolean shouldWaitForConsistency) {
         this.datastore = datastore;
         this.actor = datastore;
+        this.shouldWaitForConsistency = shouldWaitForConsistency;
+    }
+
+    /*package*/ DatastoreWrapper(Datastore datastore) {
+        this(datastore, false);
     }
 
     /**
@@ -70,8 +82,21 @@ import static com.google.common.base.Preconditions.checkState;
      * @param datastore {@link Datastore} to wrap.
      * @return new instance of {@code DatastoreWrapper}
      */
-    /*package*/ static DatastoreWrapper wrap(Datastore datastore) {
-        return new DatastoreWrapper(datastore);
+    /*package*/
+    static DatastoreWrapper wrap(Datastore datastore) {
+        return wrap(datastore, false);
+    }
+
+    /**
+     * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
+     *
+     * @param datastore          {@link Datastore} to wrap.
+     * @param waitForConsistency wait before read operations to ensure data became consistent.
+     * @return new instance of {@code DatastoreWrapper}
+     */
+    /*package*/
+    static DatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
+        return new DatastoreWrapper(datastore, waitForConsistency);
     }
 
     /**
@@ -119,7 +144,8 @@ import static com.google.common.base.Preconditions.checkState;
      * @see DatastoreReader#get(Key)
      */
     @SuppressWarnings("ReturnOfNull")
-    /*package*/ Entity read(Key key) {;
+    /*package*/ Entity read(Key key) {
+        waitForConsistency();
         return datastore.get(key);
     }
 
@@ -131,6 +157,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @see DatastoreReader#fetch(Key...)
      */
     /*package*/ List<Entity> read(Iterable<Key> keys) {
+        waitForConsistency();
         return Lists.newArrayList(datastore.get(keys));
     }
 
@@ -143,6 +170,7 @@ import static com.google.common.base.Preconditions.checkState;
      */
     @SuppressWarnings("unchecked")
     /*package*/ List<Entity> read(Query query) {
+        waitForConsistency();
         final Iterator results = actor.run(query);
         return Lists.newArrayList(results);
     }
@@ -163,8 +191,8 @@ import static com.google.common.base.Preconditions.checkState;
      */
     /*package*/ void dropTable(String table) {
         final Query query = Query.newEntityQueryBuilder()
-                                 .setKind(table)
-                                 .build();
+                .setKind(table)
+                .build();
         final List<Entity> entities = read(query);
         final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
             @Nullable
@@ -238,7 +266,7 @@ import static com.google.common.base.Preconditions.checkState;
 
     /**
      * Retrieves an instance of {@link KeyFactory} unique for given Kind of data.
-     * <p>Retrievved instances are the same across all instances of {@code DatastoreWrapper}.
+     * <p>Retrieved instances are the same across all instances of {@code DatastoreWrapper}.
      *
      * @param kind kind of {@link Entity} to generate keys for.
      * @return an instance of {@link KeyFactory} for given kind.
@@ -252,9 +280,19 @@ import static com.google.common.base.Preconditions.checkState;
         return keyFactory;
     }
 
+    private void waitForConsistency() {
+        if (shouldWaitForConsistency) {
+            try {
+                Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     private KeyFactory initKeyFactory(String kind) {
         final KeyFactory keyFactory = datastore.newKeyFactory()
-                                               .setKind(kind);
+                .setKind(kind);
         keyFactories.put(kind, keyFactory);
         return keyFactory;
     }

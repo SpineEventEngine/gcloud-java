@@ -50,10 +50,10 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     private static DatastoreOptions generateTestOptions() {
         try {
             final InputStream is = LocalDatastoreStorageFactory.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-            final BufferedInputStream jsonCredentialsStream = new BufferedInputStream(is);
+            final BufferedInputStream bufferedStream = new BufferedInputStream(is);
 
             final AuthCredentials credentials =
-                    AuthCredentials.createForJson(jsonCredentialsStream);
+                    AuthCredentials.createForJson(bufferedStream);
             return DatastoreOptions.newBuilder()
                                    .setProjectId(DEFAULT_DATASET_NAME)
                                    .setAuthCredentials(credentials)
@@ -74,7 +74,8 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      */
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     public static LocalDatastoreStorageFactory getDefaultInstance() {
-        final boolean onCi = true;//"true".equals(System.getenv("CI"));
+        //final boolean onCi = true;
+        final boolean onCi = "true".equals(System.getenv("CI"));
         final String message = onCi
                                ? "Running on CI. Connecting to remote Google Cloud Datastore"
                                : "Running on local machine. Connecting to a local Datastore emulator";
@@ -96,14 +97,18 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private LocalDatastoreStorageFactory(Datastore datastore) {
-        super(datastore, false);
+        this(datastore, false);
+    }
+
+    private LocalDatastoreStorageFactory(Datastore datastore, boolean waitForConsistency) {
+        super(datastore, false, waitForConsistency);
     }
 
     @SuppressWarnings("RefusedBequest")
     @Override
-    protected void initDatastoreWrapper(Datastore datastore) {
+    protected void initDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
         checkState(this.getDatastore() == null, "Datastore is already inited.");
-        this.setDatastore(LocalDatastoreWrapper.wrap(datastore));
+        this.setDatastore(LocalDatastoreWrapper.wrap(datastore, waitForConsistency));
     }
 
     /**
@@ -138,13 +143,15 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     private enum DefaultInstanceSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory(DefaultDatastoreSingleton.INSTANCE.value);
+        private final LocalDatastoreStorageFactory value =
+                new LocalDatastoreStorageFactory(DefaultDatastoreSingleton.INSTANCE.value);
     }
 
     private enum TestingInstanceSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory(TestingDatastoreSingleton.INSTANCE.value);
+        private final LocalDatastoreStorageFactory value =
+                new LocalDatastoreStorageFactory(TestingDatastoreSingleton.INSTANCE.value, true);
     }
 
     private enum DefaultDatastoreSingleton {

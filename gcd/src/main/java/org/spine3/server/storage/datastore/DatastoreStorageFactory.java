@@ -57,7 +57,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @SuppressWarnings("WeakerAccess") // Part of API
     public static DatastoreStorageFactory newInstance(Datastore datastore) {
-        return new DatastoreStorageFactory(datastore, false);
+        return new DatastoreStorageFactory(datastore, false, false);
     }
 
     /**
@@ -70,20 +70,21 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @SuppressWarnings("WeakerAccess") // Part of API
     public static DatastoreStorageFactory newInstance(Datastore datastore, boolean multitenant) {
-        return new DatastoreStorageFactory(datastore, multitenant);
+        return new DatastoreStorageFactory(datastore, multitenant, false);
     }
 
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"}) // Used for testing
-    /* package */ DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
+    /* package */ DatastoreStorageFactory(Datastore datastore, boolean multitenant, boolean waitForConsistency) {
         this.options = new Options();
         this.multitenant = multitenant;
-        initDatastoreWrapper(datastore);
+        initDatastoreWrapper(datastore, waitForConsistency);
     }
 
     @VisibleForTesting
-    protected void initDatastoreWrapper(Datastore datastore) {
+    protected void initDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
         checkState(this.getDatastore() == null, "Datastore is already init");
-        this.setDatastore(DatastoreWrapper.wrap(datastore));
+        final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore, waitForConsistency);
+        this.setDatastore(wrapped);
     }
 
     @Override

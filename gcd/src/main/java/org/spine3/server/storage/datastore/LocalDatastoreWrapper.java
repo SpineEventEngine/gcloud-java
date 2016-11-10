@@ -36,12 +36,20 @@ import java.util.LinkedList;
 
     private static final Collection<String> kindsCache = new LinkedList<>();
 
+    private LocalDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
+        super(datastore, waitForConsistency);
+    }
+
     private LocalDatastoreWrapper(Datastore datastore) {
-        super(datastore);
+        this(datastore, false);
     }
 
     public static LocalDatastoreWrapper wrap(Datastore datastore) {
         return new LocalDatastoreWrapper(datastore);
+    }
+
+    public static LocalDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
+        return new LocalDatastoreWrapper(datastore, waitForConsistency);
     }
 
     @Override
