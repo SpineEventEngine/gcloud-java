@@ -54,6 +54,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
             final AuthCredentials credentials =
                     AuthCredentials.createForJson(jsonCredentialsStream);
             return DatastoreOptions.newBuilder()
+                                   .setProjectId(DEFAULT_DATASET_NAME)
                                    .setAuthCredentials(credentials)
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
