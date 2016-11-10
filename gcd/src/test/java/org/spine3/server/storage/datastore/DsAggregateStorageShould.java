@@ -49,7 +49,7 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         try {
             factory = LocalDatastoreStorageFactory.getDefaultInstance();
             DATASTORE_FACTORY = factory;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log().error("Failed to initialize local datastore factory", e);
             throw new RuntimeException(e);
         }
