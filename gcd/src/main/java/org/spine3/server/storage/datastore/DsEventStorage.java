@@ -31,6 +31,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
+import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
@@ -67,7 +68,8 @@ class DsEventStorage extends EventStorage {
     private static final String KIND = EventStorageRecord.class.getName();
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EventStorageRecord.getDescriptor());
 
-    private static final Function<Entity, EventStorageRecord> ENTITY_TO_EVENT_RECORD = new Function<Entity, EventStorageRecord>() {
+    private static final Function<Entity, EventStorageRecord> ENTITY_TO_EVENT_RECORD
+            = new Function<Entity, EventStorageRecord>() {
         @Nullable
         @Override
         public EventStorageRecord apply(@Nullable Entity entityResult) {
@@ -101,8 +103,11 @@ class DsEventStorage extends EventStorage {
     }
 
     private static Predicate<EventStorageRecord> eventPredicate(EventStreamQuery query) {
+        // The set sizes are not guaranteed but are approximately right in most cases
         final Collection<String> eventTypes = new HashSet<>(query.getFilterCount());
         final Collection<String> aggregateIds = new HashSet<>(query.getFilterCount());
+        final Collection<FieldFilter> eventFilters = new HashSet<>(query.getFilterCount());
+        final Collection<FieldFilter> contextFilters = new HashSet<>(query.getFilterCount());
 
         for (EventFilter filter : query.getFilterList()) {
             final Collection<String> stringIds = Collections2.transform(filter.getAggregateIdList(), ID_TRANSFORMER);
@@ -111,9 +116,12 @@ class DsEventStorage extends EventStorage {
             if (!Strings.isNullOrEmpty(type)) {
                 eventTypes.add(type);
             }
+
+            eventFilters.addAll(filter.getEventFieldFilterList());
+            contextFilters.addAll(filter.getContextFieldFilterList());
         }
 
-        return new EventPredicate(eventTypes, aggregateIds);
+        return new EventPredicate(eventTypes, aggregateIds, eventFilters, contextFilters);
     }
 
     @Override
@@ -181,10 +189,17 @@ class DsEventStorage extends EventStorage {
 
         private final Collection<String> eventTypes;
         private final Collection<String> aggregateIds;
+        private final Collection<FieldFilter> eventFieldFilters;
+        private final Collection<FieldFilter> contextFieldFilters;
 
-        private EventPredicate(Collection<String> eventTypes, Collection<String> aggregateIds) {
+        private EventPredicate(Collection<String> eventTypes,
+                               Collection<String> aggregateIds,
+                               Collection<FieldFilter> eventFieldFilters,
+                               Collection<FieldFilter> contextFieldFilters) {
             this.eventTypes = eventTypes;
             this.aggregateIds = aggregateIds;
+            this.eventFieldFilters = eventFieldFilters;
+            this.contextFieldFilters = contextFieldFilters;
         }
 
         @SuppressWarnings("MethodWithMoreThanThreeNegations")
