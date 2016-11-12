@@ -42,14 +42,12 @@ import org.spine3.test.storage.ProjectId;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsAggregateStorageShould extends AggregateStorageShould {
 
-    private static LocalDatastoreStorageFactory DATASTORE_FACTORY;
+    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY;
 
+    // Guarantees any stacktrace to be informative
     static {
-        final LocalDatastoreStorageFactory factory;
         try {
-            final Class dummy = Class.forName(LocalDatastoreStorageFactory.class.getCanonicalName());
-            factory = LocalDatastoreStorageFactory.getDefaultInstance();
-            DATASTORE_FACTORY = factory;
+            DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
         } catch (Throwable e) {
             log().error("Failed to initialize local datastore factory", e);
             throw new RuntimeException(e);

@@ -202,7 +202,7 @@ import static com.google.common.base.Preconditions.checkState;
                     return null;
                 }
 
-                return input.key();
+                return input.getKey();
             }
         });
 
@@ -261,7 +261,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @return {@code true} if there is an active transaction, {@code false} otherwise.
      */
     /*package*/ boolean isTransactionActive() {
-        return activeTransaction != null && activeTransaction.active();
+        return activeTransaction != null && activeTransaction.isActive();
     }
 
     /**

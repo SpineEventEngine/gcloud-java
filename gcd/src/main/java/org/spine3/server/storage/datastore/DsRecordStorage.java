@@ -150,7 +150,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                     return null;
                 }
                 // Retrieve ID
-                final I id = IdTransformer.idFromString(input.key().name(), null);
+                final I id = IdTransformer.idFromString(input.getKey().getName(), null);
                 checkState(id != null, ID_CONVERTION_ERROR_MESSAGE);
 
                 // Retrieve record
@@ -187,7 +187,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
     private Map<I, EntityStorageRecord> queryAll(Function<Entity, Pair<I, EntityStorageRecord>> transformer, FieldMask fieldMask) {
         final String sql = "SELECT * FROM " + RECORD_TYPE_URL.getSimpleName();
-        final Query<?> query = Query.gqlQueryBuilder(sql).build();
+        final Query<?> query = Query.newGqlQueryBuilder(sql).build();
         final List<Entity> results = datastore.read(query);
 
         final ImmutableMap.Builder<I, EntityStorageRecord> records = new ImmutableMap.Builder<>();
@@ -213,7 +213,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
         final Key key = createKey(id);
         final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
-        final Entity.Builder entity = Entity.builder(incompleteEntity);
+        final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
         entity.set(VERSION_KEY, entityStorageRecord.getVersion());
         datastore.createOrUpdate(entity.build());
     }

@@ -119,7 +119,7 @@ import static com.google.common.base.Preconditions.checkState;
     @Override
     protected Map<AggregateStateId, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
         final Map<String, EntityStorageRecord> readRecords = recordStorage.readAllRecords(fieldMask);
-        final Collection sourceIds = readRecords.keySet();
+        final Collection<String> sourceIds = readRecords.keySet();
         final Collection<AggregateStateId> ids = Collections2.transform(sourceIds, reverseIdTransformer());
 
         final Collection<EntityStorageRecord> recordValues = readRecords.values();

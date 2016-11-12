@@ -138,9 +138,9 @@ class DsEventStorage extends EventStorage {
         final PropertyFilter greaterThen = PropertyFilter.gt(TIMESTAMP_NANOS_PROPERTY_NAME, lower);
         final PropertyFilter lessThen = PropertyFilter.lt(TIMESTAMP_NANOS_PROPERTY_NAME, upper);
         final CompositeFilter filter = CompositeFilter.and(greaterThen, lessThen);
-        return Query.entityQueryBuilder()
-                .kind(KIND)
-                .filter(filter)
+        return Query.newEntityQueryBuilder()
+                .setKind(KIND)
+                .setFilter(filter)
                 .build();
     }
 
@@ -148,7 +148,7 @@ class DsEventStorage extends EventStorage {
     protected void writeRecord(EventStorageRecord record) {
         final Key key = datastore.getKeyFactory(KIND).newKey(record.getEventId());
         final Entity entity = messageToEntity(record, key);
-        final Entity.Builder builder = Entity.builder(entity);
+        final Entity.Builder builder = Entity.newBuilder(entity);
         DatastoreProperties.addTimestampProperty(record.getTimestamp(), builder);
         DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), builder);
         final Message aggregateId = AnyPacker.unpack(record.getContext().getProducerId());

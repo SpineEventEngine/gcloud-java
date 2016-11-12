@@ -57,8 +57,6 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
             return DatastoreOptions.newBuilder()
                                    .setProjectId(DEFAULT_DATASET_NAME)
                                    .setAuthCredentials(credentials)
-                                   .setConnectTimeout(-1)
-                                   .setReadTimeout(-1)
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
             throw new RuntimeException(e);
@@ -92,7 +90,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * @param options {@link DatastoreOptions} used to create a {@link Datastore}
      */
     public static LocalDatastoreStorageFactory newInstance(DatastoreOptions options) {
-        final Datastore datastore = options.service();
+        final Datastore datastore = options.getService();
         return new LocalDatastoreStorageFactory(datastore);
     }
 
@@ -116,6 +114,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * <p>General usage is testing.
      * <p>By default is a NoOp, but can be overridden.
      */
+    @SuppressWarnings("EmptyMethod")
     public void setUp() {
 
     }

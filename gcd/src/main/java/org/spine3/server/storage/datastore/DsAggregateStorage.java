@@ -112,7 +112,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         }
         final Key key = keyFactory.newKey(eventId);
         final Entity incompleteEntity = Entities.messageToEntity(record, key);
-        final Entity.Builder builder = Entity.builder(incompleteEntity);
+        final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
         builder.set(AGGREGATE_ID_PROPERTY_NAME, stringId);
         datastore.createOrUpdate(builder.build());
     }
