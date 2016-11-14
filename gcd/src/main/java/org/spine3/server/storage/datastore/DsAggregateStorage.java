@@ -61,8 +61,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;
 
-    /* package */
-    static <I> DsAggregateStorage<I> newInstance(
+    /* package */ static <I> DsAggregateStorage<I> newInstance(
             DatastoreWrapper datastore,
             DsPropertyStorage propertyStorage,
             boolean multitenant) {
@@ -113,7 +112,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         }
         final Key key = keyFactory.newKey(eventId);
         final Entity incompleteEntity = Entities.messageToEntity(record, key);
-        final Entity.Builder builder = Entity.builder(incompleteEntity);
+        final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
         builder.set(AGGREGATE_ID_PROPERTY_NAME, stringId);
         datastore.createOrUpdate(builder.build());
     }
@@ -123,9 +122,9 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String idString = idToString(id);
-        final Query<?> query = Query.entityQueryBuilder()
-                                    .kind(KIND)
-                                    .filter(StructuredQuery.PropertyFilter.eq(AGGREGATE_ID_PROPERTY_NAME, idString))
+        final Query<?> query = Query.newEntityQueryBuilder()
+                                    .setKind(KIND)
+                                    .setFilter(StructuredQuery.PropertyFilter.eq(AGGREGATE_ID_PROPERTY_NAME, idString))
                                     .build();
         final List<Entity> eventEntities = datastore.read(query);
         if (eventEntities.isEmpty()) {

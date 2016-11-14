@@ -25,9 +25,8 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -35,28 +34,28 @@ import static com.google.common.base.Preconditions.checkState;
  * Creates storages based on the local Google {@link Datastore}.
  */
 @SuppressWarnings("CallToSystemGetenv")
-public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
+public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static final String DEFAULT_DATASET_NAME = "spine-dev";
     private static final String DEFAULT_HOST = "localhost:8080";
+    private static final String CREDENTIALS_FILE_PATH = "/spine-dev-62685282c0b9.json";
 
-    private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = DatastoreOptions.builder()
-                                                                                  .projectId(DEFAULT_DATASET_NAME)
-                                                                                  .host(DEFAULT_HOST)
+    private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = DatastoreOptions.newBuilder()
+                                                                                  .setProjectId(DEFAULT_DATASET_NAME)
+                                                                                  .setHost(DEFAULT_HOST)
                                                                                   .build();
 
     private static final DatastoreOptions TESTING_OPTIONS = generateTestOptions();
 
     private static DatastoreOptions generateTestOptions() {
         try {
-            final File json = new File("./resources/spine-dev-62685282c0b9.json");
-            final BufferedInputStream jsonCredentialsStream = new BufferedInputStream(
-                    new FileInputStream(json)
-            );
+            final InputStream is = TestDatastoreStorageFactory.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+            final BufferedInputStream bufferedStream = new BufferedInputStream(is);
 
             final AuthCredentials credentials =
-                    AuthCredentials.createForJson(jsonCredentialsStream);
+                    AuthCredentials.createForJson(bufferedStream);
             return DatastoreOptions.newBuilder()
+                                   .setProjectId(DEFAULT_DATASET_NAME)
                                    .setAuthCredentials(credentials)
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
@@ -72,7 +71,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
      */
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
-    public static LocalDatastoreStorageFactory getDefaultInstance() {
+    public static TestDatastoreStorageFactory getDefaultInstance() {
         final boolean onCi = "true".equals(System.getenv("CI"));
         final String message = onCi
                                ? "Running on CI. Connecting to remote Google Cloud Datastore"
@@ -89,12 +88,12 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * @param options {@link DatastoreOptions} used to create a {@link Datastore}
      */
-    public static LocalDatastoreStorageFactory newInstance(DatastoreOptions options) {
-        final Datastore datastore = options.service();
-        return new LocalDatastoreStorageFactory(datastore);
+    public static TestDatastoreStorageFactory newInstance(DatastoreOptions options) {
+        final Datastore datastore = options.getService();
+        return new TestDatastoreStorageFactory(datastore);
     }
 
-    private LocalDatastoreStorageFactory(Datastore datastore) {
+    private TestDatastoreStorageFactory(Datastore datastore) {
         super(datastore, false);
     }
 
@@ -102,7 +101,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     @Override
     protected void initDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already inited.");
-        this.setDatastore(LocalDatastoreWrapper.wrap(datastore));
+        this.setDatastore(TestDatastoreWrapper.wrap(datastore));
     }
 
     /**
@@ -110,6 +109,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * <p>General usage is testing.
      * <p>By default is a NoOp, but can be overridden.
      */
+    @SuppressWarnings("EmptyMethod")
     public void setUp() {
 
     }
@@ -131,25 +131,27 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * @see #tearDown()
      */
     /* package */ void clear() {
-        ((LocalDatastoreWrapper) getDatastore()).dropAllTables();
+        ((TestDatastoreWrapper) getDatastore()).dropAllTables();
     }
 
     private enum DefaultInstanceSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory(DefaultDatastoreSingleton.INSTANCE.value);
+        private final TestDatastoreStorageFactory value =
+                new TestDatastoreStorageFactory(DefaultDatastoreSingleton.INSTANCE.value);
     }
 
     private enum TestingInstanceSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory(TestingDatastoreSingleton.INSTANCE.value);
+        private final TestDatastoreStorageFactory value =
+                new TestDatastoreStorageFactory(TestingDatastoreSingleton.INSTANCE.value);
     }
 
     private enum DefaultDatastoreSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Datastore value = DEFAULT_LOCAL_OPTIONS.service();
+        private final Datastore value = DEFAULT_LOCAL_OPTIONS.getService();
     }
 
     private enum TestingDatastoreSingleton {

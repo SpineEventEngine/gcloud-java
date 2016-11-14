@@ -40,7 +40,9 @@ import static com.google.common.base.Preconditions.checkState;
 
     private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should be active.";
     private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should NOT be active.";
+
     private static final Map<String, KeyFactory> keyFactories = new HashMap<>();
+
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
@@ -53,11 +55,10 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
      *
-     * @param datastore {@link Datastore} to wrap.
+     * @param datastore          {@link Datastore} to wrap.
      * @return new instance of {@code DatastoreWrapper}
      */
-    /*package*/
-    static DatastoreWrapper wrap(Datastore datastore) {
+    /*package*/ static DatastoreWrapper wrap(Datastore datastore) {
         return new DatastoreWrapper(datastore);
     }
 
@@ -105,6 +106,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @return the {@link Entity} or {@code null} if there is no such a key.
      * @see DatastoreReader#get(Key)
      */
+    @SuppressWarnings("ReturnOfNull")
     /*package*/ Entity read(Key key) {
         return datastore.get(key);
     }
@@ -117,7 +119,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @see DatastoreReader#fetch(Key...)
      */
     /*package*/ List<Entity> read(Iterable<Key> keys) {
-        return Lists.newArrayList(datastore.fetch(keys));
+        return Lists.newArrayList(datastore.get(keys));
     }
 
     /**
@@ -148,7 +150,9 @@ import static com.google.common.base.Preconditions.checkState;
      * @param table Kind (a.k.a. type, table, etc.) of the records to delete.
      */
     /*package*/ void dropTable(String table) {
-        final Query query = Query.newEntityQueryBuilder().setKind(table).build();
+        final Query query = Query.newEntityQueryBuilder()
+                .setKind(table)
+                .build();
         final List<Entity> entities = read(query);
         final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
             @Nullable
@@ -158,7 +162,7 @@ import static com.google.common.base.Preconditions.checkState;
                     return null;
                 }
 
-                return input.key();
+                return input.getKey();
             }
         });
 
@@ -217,12 +221,12 @@ import static com.google.common.base.Preconditions.checkState;
      * @return {@code true} if there is an active transaction, {@code false} otherwise.
      */
     /*package*/ boolean isTransactionActive() {
-        return activeTransaction != null && activeTransaction.active();
+        return activeTransaction != null && activeTransaction.isActive();
     }
 
     /**
      * Retrieves an instance of {@link KeyFactory} unique for given Kind of data.
-     * <p>Retrievved instances are the same across all instances of {@code DatastoreWrapper}.
+     * <p>Retrieved instances are the same across all instances of {@code DatastoreWrapper}.
      *
      * @param kind kind of {@link Entity} to generate keys for.
      * @return an instance of {@link KeyFactory} for given kind.
@@ -238,7 +242,7 @@ import static com.google.common.base.Preconditions.checkState;
 
     private KeyFactory initKeyFactory(String kind) {
         final KeyFactory keyFactory = datastore.newKeyFactory()
-                .kind(kind);
+                .setKind(kind);
         keyFactories.put(kind, keyFactory);
         return keyFactory;
     }

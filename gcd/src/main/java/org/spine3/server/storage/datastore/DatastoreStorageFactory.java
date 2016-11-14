@@ -73,8 +73,8 @@ public class DatastoreStorageFactory implements StorageFactory {
         return new DatastoreStorageFactory(datastore, multitenant);
     }
 
-    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"}) // Used for testing
-    /* package */ DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
+    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"}) // Overriding used for testing
+    /* package */DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
         this.options = new Options();
         this.multitenant = multitenant;
         initDatastoreWrapper(datastore);
@@ -82,8 +82,9 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @VisibleForTesting
     protected void initDatastoreWrapper(Datastore datastore) {
-        checkState(this.getDatastore() == null, "Datastore is already inited");
-        this.setDatastore(DatastoreWrapper.wrap(datastore));
+        checkState(this.getDatastore() == null, "Datastore is already init");
+        final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore);
+        this.setDatastore(wrapped);
     }
 
     @Override

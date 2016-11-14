@@ -21,33 +21,68 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.Query;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Custom extension of the {@link DatastoreWrapper} aimed on testing purposes.
  *
  * @author Dmytro Dashenkov
- * @see LocalDatastoreStorageFactory
+ * @see TestDatastoreStorageFactory
  */
-/*package*/ class LocalDatastoreWrapper extends DatastoreWrapper {
+/*package*/ class TestDatastoreWrapper extends DatastoreWrapper {
+
+    // Default time to wait before each read operation to ensure the data is consistent.
+    // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
+    private static final int CONSISTENCY_AWAIT_TIME_MS = 2000;
 
     private static final Collection<String> kindsCache = new LinkedList<>();
 
-    private LocalDatastoreWrapper(Datastore datastore) {
+    private TestDatastoreWrapper(Datastore datastore) {
         super(datastore);
     }
 
-    public static LocalDatastoreWrapper wrap(Datastore datastore) {
-        return new LocalDatastoreWrapper(datastore);
+    public static TestDatastoreWrapper wrap(Datastore datastore) {
+        return new TestDatastoreWrapper(datastore);
     }
 
     @Override
     public KeyFactory getKeyFactory(String kind) {
         kindsCache.add(kind);
         return super.getKeyFactory(kind);
+    }
+
+    @Override
+    Entity read(Key key) {
+        waitForConsistency();
+        return super.read(key);
+    }
+
+    @Override
+    List<Entity> read(Iterable<Key> keys) {
+        waitForConsistency();
+        return super.read(keys);
+    }
+
+    @Override
+    List<Entity> read(Query query) {
+        waitForConsistency();
+        return super.read(query);
+    }
+
+    private static void waitForConsistency() {
+        try {
+            Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     /**

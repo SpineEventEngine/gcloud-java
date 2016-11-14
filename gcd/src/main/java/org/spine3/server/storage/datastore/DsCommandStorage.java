@@ -83,9 +83,9 @@ class DsCommandStorage extends CommandStorage {
     @Override
     protected Iterator<CommandStorageRecord> read(CommandStatus status) {
         final Filter filter = PropertyFilter.eq(COMMAND_STATUS_PRORPERTY_NAME, status.ordinal());
-        final Query query = Query.entityQueryBuilder()
-                                 .kind(TYPE_URL.getSimpleName())
-                                 .filter(filter)
+        final Query query = Query.newEntityQueryBuilder()
+                                 .setKind(TYPE_URL.getSimpleName())
+                                 .setFilter(filter)
                                  .build();
         final Collection<Entity> entities = datastore.read(query);
         final Collection<CommandStorageRecord> records = Collections2.transform(entities, RECORD_MAPPER);
@@ -156,7 +156,7 @@ class DsCommandStorage extends CommandStorage {
         final Key key = createKey(idString);
 
         Entity entity = messageToEntity(record, key);
-        entity = Entity.builder(entity)
+        entity = Entity.newBuilder(entity)
                        .set(TIMESTAMP_PROPERTY_NAME, record.getTimestamp()
                                                            .getSeconds())
                        .set(TIMESTAMP_NANOS_PROPERTY_NAME, record.getTimestamp()

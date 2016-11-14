@@ -35,7 +35,7 @@ import org.spine3.server.storage.EventStorageShould;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsEventStorageShould extends EventStorageShould {
 
-    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
 
     @Override
     public void tearDownEventStorageTest() {

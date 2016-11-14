@@ -24,6 +24,8 @@ import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageShould;
@@ -40,7 +42,17 @@ import org.spine3.test.storage.ProjectId;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsAggregateStorageShould extends AggregateStorageShould {
 
-    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory DATASTORE_FACTORY;
+
+    // Guarantees any stacktrace to be informative
+    static {
+        try {
+            DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
+        } catch (Throwable e) {
+            log().error("Failed to initialize local datastore factory", e);
+            throw new RuntimeException(e);
+        }
+    }
 
     @BeforeClass
     public static void setUpClass() {
@@ -80,5 +92,15 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(DsAggregateStorageShould.class);
     }
 }

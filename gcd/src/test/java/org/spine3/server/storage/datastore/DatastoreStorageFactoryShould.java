@@ -32,11 +32,11 @@ import static org.junit.Assert.assertNotNull;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreStorageFactoryShould {
 
-    private static final DatastoreOptions DUMMY_OPTIONS = DatastoreOptions.builder()
-            .projectId("dummy-dataset")
+    private static final DatastoreOptions DUMMY_OPTIONS = DatastoreOptions.newBuilder()
+            .setProjectId("dummy-dataset")
             .build();
 
-    private static final Datastore DATASTORE = DUMMY_OPTIONS.service();
+    private static final Datastore DATASTORE = DUMMY_OPTIONS.getService();
 
     private static final StorageFactory FACTORY = DatastoreStorageFactory.newInstance(DATASTORE);
 
