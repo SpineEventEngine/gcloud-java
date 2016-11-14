@@ -80,7 +80,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
         return onCi
                ? TestingInstanceSingleton.INSTANCE.value
-               : DefaultInstanceSingleton.INSTANCE.value;
+               : LocalInstanceSingleton.INSTANCE.value;
     }
 
     /**
@@ -134,7 +134,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         ((TestDatastoreWrapper) getDatastore()).dropAllTables();
     }
 
-    private enum DefaultInstanceSingleton {
+    private enum LocalInstanceSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final TestDatastoreStorageFactory value =

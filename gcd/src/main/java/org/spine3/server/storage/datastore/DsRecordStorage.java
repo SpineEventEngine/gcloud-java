@@ -30,7 +30,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import javafx.util.Pair;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.FieldMasks;
@@ -38,7 +37,11 @@ import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -49,7 +52,6 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Alexander Litus
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
- * @see LocalDatastoreStorageFactory
  */
 class DsRecordStorage<I> extends RecordStorage<I> {
 
@@ -61,8 +63,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     private static final String ID_CONVERTION_ERROR_MESSAGE
             = "Entity had ID of an invalid type; could not parse ID from String. Note: custom convection is not supported. See Identifiers#idToString.";
 
-    /* package */
-    static <I> DsRecordStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
+    /* package */ static <I> DsRecordStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
         return new DsRecordStorage<>(descriptor, datastore, multitenant);
     }
 
@@ -125,8 +126,8 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                 final Any wrappedState = AnyPacker.pack(maskedState);
 
                 final EntityStorageRecord record = EntityStorageRecord.newBuilder(readRecord)
-                        .setState(wrappedState)
-                        .build();
+                                                                      .setState(wrappedState)
+                                                                      .build();
                 return record;
             }
         };
@@ -141,16 +142,17 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Map<I, EntityStorageRecord> readAllRecords(final FieldMask fieldMask) {
-        final Function<Entity, Pair<I, EntityStorageRecord>> mapper
-                = new Function<Entity, Pair<I, EntityStorageRecord>>() {
+        final Function<Entity, IdRecordPair<I>> mapper
+                = new Function<Entity, IdRecordPair<I>>() {
             @Nullable
             @Override
-            public Pair<I, EntityStorageRecord> apply(@Nullable Entity input) {
+            public IdRecordPair<I> apply(@Nullable Entity input) {
                 if (input == null) {
                     return null;
                 }
                 // Retrieve ID
-                final I id = IdTransformer.idFromString(input.getKey().getName(), null);
+                final I id = IdTransformer.idFromString(input.getKey()
+                                                             .getName(), null);
                 checkState(id != null, ID_CONVERTION_ERROR_MESSAGE);
 
                 // Retrieve record
@@ -159,10 +161,10 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                 Message state = AnyPacker.unpack(packedState);
                 state = FieldMasks.applyMask(fieldMask, state, typeUrl);
                 record = EntityStorageRecord.newBuilder(record)
-                        .setState(AnyPacker.pack(state))
-                        .build();
+                                            .setState(AnyPacker.pack(state))
+                                            .build();
 
-                return new Pair<>(id, record);
+                return new IdRecordPair<>(id, record);
             }
         };
 
@@ -185,22 +187,23 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         return Collections.unmodifiableCollection(records);
     }
 
-    private Map<I, EntityStorageRecord> queryAll(Function<Entity, Pair<I, EntityStorageRecord>> transformer, FieldMask fieldMask) {
+    private Map<I, EntityStorageRecord> queryAll(Function<Entity, IdRecordPair<I>> transformer, FieldMask fieldMask) {
         final String sql = "SELECT * FROM " + RECORD_TYPE_URL.getSimpleName();
-        final Query<?> query = Query.newGqlQueryBuilder(sql).build();
+        final Query<?> query = Query.newGqlQueryBuilder(sql)
+                                    .build();
         final List<Entity> results = datastore.read(query);
 
         final ImmutableMap.Builder<I, EntityStorageRecord> records = new ImmutableMap.Builder<>();
         for (Entity entity : results) {
-            final Pair<I, EntityStorageRecord> recordPair = transformer.apply(entity);
+            final IdRecordPair<I> recordPair = transformer.apply(entity);
             checkNotNull(recordPair, "Datastore may not contain null records.");
-            final EntityStorageRecord fullRecord = recordPair.getValue();
+            final EntityStorageRecord fullRecord = recordPair.getRecord();
             final Message fullState = AnyPacker.unpack(fullRecord.getState());
             final Message maskedState = FieldMasks.applyMask(fieldMask, fullState, typeUrl);
             final EntityStorageRecord maskedRecord = EntityStorageRecord.newBuilder(fullRecord)
-                    .setState(AnyPacker.pack(maskedState))
-                    .build();
-            records.put(recordPair.getKey(), maskedRecord);
+                                                                        .setState(AnyPacker.pack(maskedState))
+                                                                        .build();
+            records.put(recordPair.getId(), maskedRecord);
         }
 
         return records.build();
@@ -220,6 +223,26 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
     private Key createKey(I id) {
         final String idString = IdTransformer.idToString(id);
-        return datastore.getKeyFactory(RECORD_TYPE_URL.getSimpleName()).newKey(idString);
+        return datastore.getKeyFactory(RECORD_TYPE_URL.getSimpleName())
+                        .newKey(idString);
+    }
+
+    private static class IdRecordPair<I> {
+
+        private final I id;
+        private final EntityStorageRecord record;
+
+        private IdRecordPair(I id, EntityStorageRecord record) {
+            this.id = id;
+            this.record = record;
+        }
+
+        public I getId() {
+            return id;
+        }
+
+        public EntityStorageRecord getRecord() {
+            return record;
+        }
     }
 }
