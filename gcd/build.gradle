@@ -1,3 +1,7 @@
+ext {
+    artifactId = 'gae-java'
+}
+
 buildscript {
     configurations.all {
         resolutionStrategy.cacheChangingModulesFor 0, 'seconds'

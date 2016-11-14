@@ -1,11 +1,15 @@
 project.ext {
-    SPINE_VERSION = '0.6.2-SNAPSHOT';
+    SPINE_VERSION = '0.6.0';
     PROTOBUF_VERSION = '3.0.0';
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
     MAVEN_SNAPSHOT_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine-snapshots';
 
     IS_WINDOWS = org.gradle.internal.os.OperatingSystem.current().isWindows()
+
+    publishPlugin = "$rootDir/script/publish.gradle"
+    credentialsPropertyFile = 'credentials.properties'
+    projectsToPublish = ['gcd']
 }
 
 final String CREDENTIALS_LOCATION = 'credentials.properties';
@@ -34,8 +38,8 @@ allprojects {
 
     apply plugin: 'java';
     apply plugin: 'maven';
-    group = 'org.spine3.gae-java';
-    version = '0.2';
+    group = 'org.spine3';
+    version = project.SPINE_VERSION;
 }
 
 subprojects {
@@ -99,18 +103,9 @@ subprojects {
         classifier "sources"
     }
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                groupId = "${group}"
-                artifactId = "${project.name}"
-                version = "${project.version}"
-
-                from components.java
-
-                artifact sourceJar;
-            }
-        }
+    task testOutputJar(type: Jar) {
+        from sourceSets.test.output
+        classifier "test"
     }
 
     publishing {
@@ -142,26 +137,10 @@ startDatastore << {
         pathPrefix = "."
     }
 
-    // Run with environment
+    // Run datastore emulator
     "$pathPrefix/script/start-datastore$scriptExtension".execute()
 }
 
 tasks["check"].dependsOn startDatastore
 
-task readPublishingCredentials << {
-    if (repositoryUserName == null || repositoryUserPassword == null) {
-        throw new InvalidUserDataException("Please set up valid credentials. " +
-                "Credentials should be set in ${CREDENTIALS_LOCATION} file in the project's root.");
-    }
-    println "Publishing build as ${repositoryUserName}";
-}
-
-task publish << {}
-
-subprojects.each { final project ->
-    final Set<Task> credentialsTasks = getTasksByName("readPublishingCredentials", false);
-    project.getTasksByName("publish", false).each { final task ->
-        task.dependsOn credentialsTasks;
-    }
-    publish.dependsOn project.getTasksByName("publish", false);
-}
+apply from: publishPlugin
