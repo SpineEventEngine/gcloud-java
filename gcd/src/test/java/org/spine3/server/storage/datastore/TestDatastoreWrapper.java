@@ -25,6 +25,8 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -44,12 +46,15 @@ import java.util.List;
 
     private static final Collection<String> kindsCache = new LinkedList<>();
 
-    private TestDatastoreWrapper(Datastore datastore) {
+    private final boolean waitForConsistency;
+
+    private TestDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
         super(datastore);
+        this.waitForConsistency = waitForConsistency;
     }
 
-    public static TestDatastoreWrapper wrap(Datastore datastore) {
-        return new TestDatastoreWrapper(datastore);
+    /*package*/ static TestDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
+        return new TestDatastoreWrapper(datastore, waitForConsistency);
     }
 
     @Override
@@ -76,23 +81,38 @@ import java.util.List;
         return super.read(query);
     }
 
-    private static void waitForConsistency() {
+    private void waitForConsistency() {
+        if (!waitForConsistency) {
+            log().info("Wait for consistency is not required.");
+            return;
+        }
+        log().info("Waiting for data consistency to establish.");
         try {
             Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     /**
      * Deletes all records from the datastore.
      */
     /*package*/ void dropAllTables() {
+        log().info("Dropping all tables");
         for (String kind : kindsCache) {
             dropTable(kind);
         }
 
         kindsCache.clear();
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(TestDatastoreStorageFactory.class);
     }
 }

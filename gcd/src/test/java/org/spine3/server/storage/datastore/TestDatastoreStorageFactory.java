@@ -23,6 +23,8 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.AuthCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -44,6 +46,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
                                                                                   .setProjectId(DEFAULT_DATASET_NAME)
                                                                                   .setHost(DEFAULT_HOST)
                                                                                   .build();
+    private static boolean runsOnCi = false;
 
     private static final DatastoreOptions TESTING_OPTIONS = generateTestOptions();
 
@@ -76,8 +79,8 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         final String message = onCi
                                ? "Running on CI. Connecting to remote Google Cloud Datastore"
                                : "Running on local machine. Connecting to a local Datastore emulator";
-        System.out.println(message);
-
+        log().info(message);
+        runsOnCi = onCi;
         return onCi
                ? TestingInstanceSingleton.INSTANCE.value
                : LocalInstanceSingleton.INSTANCE.value;
@@ -101,7 +104,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     @Override
     protected void initDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already inited.");
-        this.setDatastore(TestDatastoreWrapper.wrap(datastore));
+        this.setDatastore(TestDatastoreWrapper.wrap(datastore, runsOnCi));
     }
 
     /**
@@ -158,5 +161,15 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Datastore value = TESTING_OPTIONS.getService();
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(TestDatastoreStorageFactory.class);
     }
 }
