@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
@@ -31,7 +30,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
-import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
@@ -42,13 +40,14 @@ import org.spine3.server.event.EventStreamQueryOrBuilder;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
@@ -93,7 +92,8 @@ class DsEventStorage extends EventStorage {
         }
     };
 
-    /* package */ static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+    /* package */
+    static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsEventStorage(datastore, multitenant);
     }
 
@@ -102,26 +102,9 @@ class DsEventStorage extends EventStorage {
         this.datastore = datastore;
     }
 
-    private static Predicate<EventStorageRecord> eventPredicate(EventStreamQuery query) {
-        // The set sizes are not guaranteed but are approximately right in most cases
-        final Collection<String> eventTypes = new HashSet<>(query.getFilterCount());
-        final Collection<String> aggregateIds = new HashSet<>(query.getFilterCount());
-        final Collection<FieldFilter> eventFilters = new HashSet<>(query.getFilterCount());
-        final Collection<FieldFilter> contextFilters = new HashSet<>(query.getFilterCount());
-
-        for (EventFilter filter : query.getFilterList()) {
-            final Collection<String> stringIds = Collections2.transform(filter.getAggregateIdList(), ID_TRANSFORMER);
-            aggregateIds.addAll(stringIds);
-            final String type = filter.getEventType();
-            if (!Strings.isNullOrEmpty(type)) {
-                eventTypes.add(type);
-            }
-
-            eventFilters.addAll(filter.getEventFieldFilterList());
-            contextFilters.addAll(filter.getContextFieldFilterList());
-        }
-
-        return new EventPredicate(eventTypes, aggregateIds, eventFilters, contextFilters);
+    private static Predicate<EventStorageRecord> eventPredicate(
+            @SuppressWarnings("TypeMayBeWeakened") EventStreamQuery query) {
+        return new EventPredicate(query.getFilterList());
     }
 
     @Override
@@ -141,25 +124,27 @@ class DsEventStorage extends EventStorage {
     private static Query toTimestampQuery(EventStreamQueryOrBuilder query) {
         final long lower = Timestamps.convertToNanos(query.getAfter());
         final long upper = query.hasBefore()
-                ? Timestamps.convertToNanos(query.getBefore())
-                : Long.MAX_VALUE;
+                           ? Timestamps.convertToNanos(query.getBefore())
+                           : Long.MAX_VALUE;
         final PropertyFilter greaterThen = PropertyFilter.gt(TIMESTAMP_NANOS_PROPERTY_NAME, lower);
         final PropertyFilter lessThen = PropertyFilter.lt(TIMESTAMP_NANOS_PROPERTY_NAME, upper);
         final CompositeFilter filter = CompositeFilter.and(greaterThen, lessThen);
         return Query.newEntityQueryBuilder()
-                .setKind(KIND)
-                .setFilter(filter)
-                .build();
+                    .setKind(KIND)
+                    .setFilter(filter)
+                    .build();
     }
 
     @Override
     protected void writeRecord(EventStorageRecord record) {
-        final Key key = datastore.getKeyFactory(KIND).newKey(record.getEventId());
+        final Key key = datastore.getKeyFactory(KIND)
+                                 .newKey(record.getEventId());
         final Entity entity = messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(entity);
         DatastoreProperties.addTimestampProperty(record.getTimestamp(), builder);
         DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), builder);
-        final Message aggregateId = AnyPacker.unpack(record.getContext().getProducerId());
+        final Message aggregateId = AnyPacker.unpack(record.getContext()
+                                                           .getProducerId());
         DatastoreProperties.addAggregateIdProperty(aggregateId, builder);
         DatastoreProperties.addEventTypeProperty(record.getEventType(), builder);
 
@@ -173,7 +158,8 @@ class DsEventStorage extends EventStorage {
     @Override
     protected EventStorageRecord readRecord(EventId eventId) {
         final String idString = idToString(eventId);
-        final Key key = datastore.getKeyFactory(KIND).newKey(idString);
+        final Key key = datastore.getKeyFactory(KIND)
+                                 .newKey(idString);
 
         final Entity response = datastore.read(key);
 
@@ -187,19 +173,10 @@ class DsEventStorage extends EventStorage {
 
     private static class EventPredicate implements Predicate<EventStorageRecord> {
 
-        private final Collection<String> eventTypes;
-        private final Collection<String> aggregateIds;
-        private final Collection<FieldFilter> eventFieldFilters;
-        private final Collection<FieldFilter> contextFieldFilters;
+        private final Collection<EventFilter> eventFilters;
 
-        private EventPredicate(Collection<String> eventTypes,
-                               Collection<String> aggregateIds,
-                               Collection<FieldFilter> eventFieldFilters,
-                               Collection<FieldFilter> contextFieldFilters) {
-            this.eventTypes = eventTypes;
-            this.aggregateIds = aggregateIds;
-            this.eventFieldFilters = eventFieldFilters;
-            this.contextFieldFilters = contextFieldFilters;
+        private EventPredicate(Collection<EventFilter> eventFilters) {
+            this.eventFilters = eventFilters;
         }
 
         @SuppressWarnings("MethodWithMoreThanThreeNegations")
@@ -209,30 +186,65 @@ class DsEventStorage extends EventStorage {
                 return false;
             }
 
-            if (!eventTypes.isEmpty()) {
-                final Any eventAny = event.getMessage();
-                final Message eventMessage = AnyPacker.unpack(eventAny);
-                final String eventType = eventMessage.getDescriptorForType().getFullName();
+            if (eventFilters.isEmpty()) {
+                return true;
+            }
 
-                final boolean typeMatches = eventTypes.contains(eventType);
-                if (!typeMatches) {
-                    return false;
+            for (EventFilter filter : eventFilters) {
+                final EventFilterChecker predicate = new EventFilterChecker(filter);
+                if (predicate.isDefault()) {
+                    continue;
+                }
+                final boolean matches = predicate.apply(event);
+                if (matches) {
+                    return true;
                 }
             }
 
-            if (!aggregateIds.isEmpty()) {
-                final Any aggregateIdAny = event.getContext().getProducerId();
-                final String aggregateIdString = Identifiers.idToString(aggregateIdAny);
+            return false;
+        }
+    }
 
-                final boolean idMatches = aggregateIds.contains(aggregateIdString);
-                if (!idMatches) {
-                    return false;
-                }
+    private static class EventFilterChecker implements Predicate<EventStorageRecord> {
+
+        // TODO:21-10-16:dmytro.dashenkov: Field filters (for both context and message).
+
+        private final String eventType;
+        private final Collection<String> aggregateIds;
+
+        private EventFilterChecker(@SuppressWarnings("TypeMayBeWeakened") EventFilter eventFilter) {
+            this.eventType = checkNotNull(eventFilter.getEventType());
+            this.aggregateIds = Collections2.transform(eventFilter.getAggregateIdList(), ID_TRANSFORMER);
+        }
+
+        private boolean isDefault() {
+            return eventType.trim().isEmpty() && aggregateIds.isEmpty();
+        }
+
+        @SuppressWarnings("NullableProblems") // Defined as nullable, parameter `event` is actually non null.
+        @Override
+        public boolean apply(@Nonnull EventStorageRecord event) {
+            if (eventType.trim()
+                         .isEmpty() && aggregateIds.isEmpty()) {
+                return true;
             }
 
-            // TODO:21-10-16:dmytro.dashenkov: Field filters (for both context and message).
+            final Any eventWrapped = event.getMessage();
+            final Message eventMessage = AnyPacker.unpack(eventWrapped);
+            final String actualType = eventMessage.getDescriptorForType()
+                                                  .getFullName();
+            if (!eventType.isEmpty() && !eventType.equals(actualType)) {
+                return false;
+            }
 
-            return true;
+            if (aggregateIds.isEmpty()) {
+                return true;
+            }
+
+            final String aggregateId = event.getProducerId();
+
+            final boolean idMatches = aggregateIds.contains(aggregateId);
+            return idMatches;
         }
     }
 }
