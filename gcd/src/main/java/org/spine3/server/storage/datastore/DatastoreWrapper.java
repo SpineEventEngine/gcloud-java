@@ -247,6 +247,11 @@ import static com.google.common.base.Preconditions.checkState;
         return keyFactory;
     }
 
+    /* package */ Key allocateKey(IncompleteKey key) {
+        final Key result = datastore.allocateId(key);
+        return result;
+    }
+
     private KeyFactory initKeyFactory(String kind) {
         final KeyFactory keyFactory = datastore.newKeyFactory()
                 .setKind(kind);

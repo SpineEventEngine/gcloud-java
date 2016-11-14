@@ -108,7 +108,13 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
             // Snapshots have no Event IDs.
             eventId = SNAPSHOT + stringId;
         }
-        final Key key = keyFactory.newKey(eventId);
+
+        // TODO[alex.tymchenko]: Experimental. Trying to resolve test issues by letting Datastore to assign keys.
+//        final Key key = keyFactory.newKey(eventId);       // legacy approach;
+
+        final IncompleteKey incompleteKey = keyFactory.newKey();
+        final Key key = datastore.allocateKey(incompleteKey);
+
         final Entity incompleteEntity = Entities.messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
         builder.set(AGGREGATE_ID_PROPERTY_NAME, stringId);
