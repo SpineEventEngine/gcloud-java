@@ -21,9 +21,12 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -131,8 +134,12 @@ import static com.google.common.base.Preconditions.checkState;
      */
     @SuppressWarnings("unchecked")
     /*package*/ List<Entity> read(Query query) {
-        final Iterator results = actor.run(query);
-        return Lists.newArrayList(results);
+        // TODO[alex.tymchenko]: remove the logging from before merging the PR.
+        log().debug(" --- Executing query: " + query);
+        final QueryResults queryResults = actor.run(query);
+        final ArrayList resultList = Lists.newArrayList(queryResults);
+        log().debug(" -------- Result set size is " + resultList.size());
+        return resultList;
     }
 
     /**
@@ -245,5 +252,15 @@ import static com.google.common.base.Preconditions.checkState;
                 .setKind(kind);
         keyFactories.put(kind, keyFactory);
         return keyFactory;
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(DatastoreWrapper.class);
     }
 }

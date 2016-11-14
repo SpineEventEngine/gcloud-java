@@ -20,13 +20,11 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.StructuredQuery;
+import com.google.cloud.datastore.*;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
@@ -133,6 +131,9 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final List<AggregateStorageRecord> immutableResult = Entities.entitiesToMessages(eventEntities, TYPE_URL);
         final List<AggregateStorageRecord> records = Lists.newArrayList(immutableResult);
+
+        // TODO[alex.tymchenko]: remove the logging from before merging the PR.
+        log().debug("[History backwards] Original results before sorting are: " + records);
         Collections.sort(records, new Comparator<AggregateStorageRecord>() {
             @Override
             public int compare(AggregateStorageRecord o1, AggregateStorageRecord o2) {
@@ -146,5 +147,15 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         final String stringId = Identifiers.idToString(id);
         final String datastoreid = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
         return datastoreid;
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(DsAggregateStorage.class);
     }
 }
