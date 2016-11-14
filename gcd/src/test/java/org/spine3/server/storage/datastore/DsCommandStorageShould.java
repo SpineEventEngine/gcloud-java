@@ -36,7 +36,7 @@ import org.spine3.server.storage.CommandStorageShould;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsCommandStorageShould extends CommandStorageShould {
 
-    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
 
     @BeforeClass
     public static void setUpClass() {

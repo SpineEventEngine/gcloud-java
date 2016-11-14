@@ -34,9 +34,9 @@ import java.util.List;
  * Custom extension of the {@link DatastoreWrapper} aimed on testing purposes.
  *
  * @author Dmytro Dashenkov
- * @see LocalDatastoreStorageFactory
+ * @see TestDatastoreStorageFactory
  */
-/*package*/ class LocalDatastoreWrapper extends DatastoreWrapper {
+/*package*/ class TestDatastoreWrapper extends DatastoreWrapper {
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
@@ -44,12 +44,12 @@ import java.util.List;
 
     private static final Collection<String> kindsCache = new LinkedList<>();
 
-    private LocalDatastoreWrapper(Datastore datastore) {
+    private TestDatastoreWrapper(Datastore datastore) {
         super(datastore);
     }
 
-    public static LocalDatastoreWrapper wrap(Datastore datastore) {
-        return new LocalDatastoreWrapper(datastore);
+    public static TestDatastoreWrapper wrap(Datastore datastore) {
+        return new TestDatastoreWrapper(datastore);
     }
 
     @Override

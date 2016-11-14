@@ -32,7 +32,7 @@ import org.spine3.test.projection.Project;
  */
 @SuppressWarnings("RefusedBequest") // Overrides several methods as NoOps
 public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
-    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
 
     @After
     public void tearDownTest() {

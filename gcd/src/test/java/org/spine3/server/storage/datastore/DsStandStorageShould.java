@@ -30,8 +30,8 @@ import org.spine3.server.storage.StandStorageShould;
  */
 public class DsStandStorageShould extends StandStorageShould {
 
-    private static final LocalDatastoreStorageFactory LOCAL_DATASTORE_STORAGE_FACTORY
-            = LocalDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory LOCAL_DATASTORE_STORAGE_FACTORY
+            = TestDatastoreStorageFactory.getDefaultInstance();
 
     @Before
     public void setUp() throws Exception {
