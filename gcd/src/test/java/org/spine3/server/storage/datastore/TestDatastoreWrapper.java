@@ -42,7 +42,7 @@ import java.util.List;
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
-    private static final int CONSISTENCY_AWAIT_TIME_MS = 2000;
+    private static final int CONSISTENCY_AWAIT_TIME_MS = 3000;
 
     private static final Collection<String> kindsCache = new LinkedList<>();
 
@@ -113,6 +113,6 @@ import java.util.List;
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(TestDatastoreStorageFactory.class);
+        private final Logger value = LoggerFactory.getLogger(TestDatastoreWrapper.class);
     }
 }
