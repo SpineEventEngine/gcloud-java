@@ -73,7 +73,10 @@ import static com.google.common.base.Preconditions.checkState;
      * @see DatastoreWriter#put(FullEntity)
      */
     /*package*/ void create(Entity entity) throws DatastoreException {
-        actor.put(entity);
+        final Entity result = actor.put(entity);
+        // TODO[alex.tymchenko]: Experimental. Remove the logging before merging this PR.
+        log().info(" +++ Saved an entity to the Datastore. \n +      Original = " + entity +
+                ". \n +      Resulting: " + result);
     }
 
     /**
