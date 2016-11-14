@@ -72,7 +72,6 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      */
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     public static LocalDatastoreStorageFactory getDefaultInstance() {
-        //final boolean onCi = true;
         final boolean onCi = "true".equals(System.getenv("CI"));
         final String message = onCi
                                ? "Running on CI. Connecting to remote Google Cloud Datastore"

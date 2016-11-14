@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkState;
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
-    private static final int CONSISTENCY_AWAIT_TIME_MS = 1000;
+    private static final int CONSISTENCY_AWAIT_TIME_MS = 2000;
 
     private static final Map<String, KeyFactory> keyFactories = new HashMap<>();
 
