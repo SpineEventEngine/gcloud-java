@@ -103,7 +103,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     @SuppressWarnings("RefusedBequest")
     @Override
     protected void initDatastoreWrapper(Datastore datastore) {
-        checkState(this.getDatastore() == null, "Datastore is already inited.");
+        checkState(this.getDatastore() == null, "Datastore is already initialized.");
         this.setDatastore(TestDatastoreWrapper.wrap(datastore, runsOnCi));
     }
 
