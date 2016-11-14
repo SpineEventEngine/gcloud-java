@@ -135,10 +135,10 @@ import static com.google.common.base.Preconditions.checkState;
     @SuppressWarnings("unchecked")
     /*package*/ List<Entity> read(Query query) {
         // TODO[alex.tymchenko]: remove the logging from before merging the PR.
-        log().debug(" --- Executing query: " + query);
+        log().info(" --- Executing query: " + query);
         final QueryResults queryResults = actor.run(query);
         final ArrayList resultList = Lists.newArrayList(queryResults);
-        log().debug(" -------- Result set size is " + resultList.size());
+        log().info(" -------- Result set size is " + resultList.size());
         return resultList;
     }
 

@@ -133,7 +133,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         final List<AggregateStorageRecord> records = Lists.newArrayList(immutableResult);
 
         // TODO[alex.tymchenko]: remove the logging from before merging the PR.
-        log().debug("[History backwards] Original results before sorting are: " + records);
+        log().info("[History backwards] Original results before sorting are: " + records);
         Collections.sort(records, new Comparator<AggregateStorageRecord>() {
             @Override
             public int compare(AggregateStorageRecord o1, AggregateStorageRecord o2) {
