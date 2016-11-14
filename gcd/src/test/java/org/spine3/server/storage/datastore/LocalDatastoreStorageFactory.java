@@ -94,18 +94,14 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private LocalDatastoreStorageFactory(Datastore datastore) {
-        this(datastore, false);
-    }
-
-    private LocalDatastoreStorageFactory(Datastore datastore, boolean waitForConsistency) {
-        super(datastore, false, waitForConsistency);
+        super(datastore, false);
     }
 
     @SuppressWarnings("RefusedBequest")
     @Override
-    protected void initDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
+    protected void initDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already inited.");
-        this.setDatastore(LocalDatastoreWrapper.wrap(datastore, waitForConsistency));
+        this.setDatastore(LocalDatastoreWrapper.wrap(datastore));
     }
 
     /**
@@ -149,7 +145,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final LocalDatastoreStorageFactory value =
-                new LocalDatastoreStorageFactory(TestingDatastoreSingleton.INSTANCE.value, true);
+                new LocalDatastoreStorageFactory(TestingDatastoreSingleton.INSTANCE.value);
     }
 
     private enum DefaultDatastoreSingleton {

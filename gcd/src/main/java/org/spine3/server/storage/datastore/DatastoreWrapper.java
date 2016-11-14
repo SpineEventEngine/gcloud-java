@@ -41,62 +41,25 @@ import static com.google.common.base.Preconditions.checkState;
     private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should be active.";
     private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should NOT be active.";
 
-    // Default time to wait before each read operation to ensure the data is consistent.
-    // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
-    private static final int CONSISTENCY_AWAIT_TIME_MS = 2000;
-
     private static final Map<String, KeyFactory> keyFactories = new HashMap<>();
 
-    /**
-     * Determines if the wrapper tries to enforce strongly consistent reads after writes.
-     *
-     * <p>Once set to {@code true}, forces this wrapper to wait before each operation to ensure the data is consistent
-     * at the Cloud Datastore.
-     *
-     * <p>NOTE: to be used only in tests; allows to resolve errors in sequential write-read operations. Therefore
-     * this flag is {@code false} by default.
-     *
-     * @see #wrap(Datastore, boolean)
-     * @see #waitForConsistency()
-     * @see #CONSISTENCY_AWAIT_TIME_MS
-     */
-    private final boolean shouldWaitForConsistency;
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
 
-    /*package*/ DatastoreWrapper(Datastore datastore,
-                                 @SuppressWarnings("MethodParameterNamingConvention") boolean shouldWaitForConsistency) {
+    /*package*/ DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
         this.actor = datastore;
-        this.shouldWaitForConsistency = shouldWaitForConsistency;
-    }
-
-    /*package*/ DatastoreWrapper(Datastore datastore) {
-        this(datastore, false);
-    }
-
-    /**
-     * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
-     *
-     * @param datastore {@link Datastore} to wrap.
-     * @return new instance of {@code DatastoreWrapper}
-     */
-    /*package*/
-    static DatastoreWrapper wrap(Datastore datastore) {
-        return wrap(datastore, false);
     }
 
     /**
      * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
      *
      * @param datastore          {@link Datastore} to wrap.
-     * @param waitForConsistency wait before read operations to ensure data became consistent.
      * @return new instance of {@code DatastoreWrapper}
      */
-    /*package*/
-    static DatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
-        return new DatastoreWrapper(datastore, waitForConsistency);
+    /*package*/ static DatastoreWrapper wrap(Datastore datastore) {
+        return new DatastoreWrapper(datastore);
     }
 
     /**
@@ -145,7 +108,6 @@ import static com.google.common.base.Preconditions.checkState;
      */
     @SuppressWarnings("ReturnOfNull")
     /*package*/ Entity read(Key key) {
-        waitForConsistency();
         return datastore.get(key);
     }
 
@@ -157,7 +119,6 @@ import static com.google.common.base.Preconditions.checkState;
      * @see DatastoreReader#fetch(Key...)
      */
     /*package*/ List<Entity> read(Iterable<Key> keys) {
-        waitForConsistency();
         return Lists.newArrayList(datastore.get(keys));
     }
 
@@ -170,7 +131,6 @@ import static com.google.common.base.Preconditions.checkState;
      */
     @SuppressWarnings("unchecked")
     /*package*/ List<Entity> read(Query query) {
-        waitForConsistency();
         final Iterator results = actor.run(query);
         return Lists.newArrayList(results);
     }
@@ -278,16 +238,6 @@ import static com.google.common.base.Preconditions.checkState;
         }
 
         return keyFactory;
-    }
-
-    private void waitForConsistency() {
-        if (shouldWaitForConsistency) {
-            try {
-                Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     private KeyFactory initKeyFactory(String kind) {

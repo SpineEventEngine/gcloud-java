@@ -57,7 +57,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @SuppressWarnings("WeakerAccess") // Part of API
     public static DatastoreStorageFactory newInstance(Datastore datastore) {
-        return new DatastoreStorageFactory(datastore, false, false);
+        return new DatastoreStorageFactory(datastore, false);
     }
 
     /**
@@ -70,20 +70,20 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @SuppressWarnings("WeakerAccess") // Part of API
     public static DatastoreStorageFactory newInstance(Datastore datastore, boolean multitenant) {
-        return new DatastoreStorageFactory(datastore, multitenant, false);
+        return new DatastoreStorageFactory(datastore, multitenant);
     }
 
-    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"}) // Used for testing
-    /* package */ DatastoreStorageFactory(Datastore datastore, boolean multitenant, boolean waitForConsistency) {
+    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"}) // Overriding used for testing
+    /* package */DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
         this.options = new Options();
         this.multitenant = multitenant;
-        initDatastoreWrapper(datastore, waitForConsistency);
+        initDatastoreWrapper(datastore);
     }
 
     @VisibleForTesting
-    protected void initDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
+    protected void initDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already init");
-        final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore, waitForConsistency);
+        final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore);
         this.setDatastore(wrapped);
     }
 
