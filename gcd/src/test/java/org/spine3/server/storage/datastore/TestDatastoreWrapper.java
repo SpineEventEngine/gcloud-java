@@ -42,7 +42,9 @@ import java.util.List;
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
-    private static final int CONSISTENCY_AWAIT_TIME_MS = 3000;
+    private static final int CONSISTENCY_AWAIT_TIME_MS = 100;
+
+    private static final int CONSISTENCY_AWAIT_ITERATIONS = 30;
 
     private static final Collection<String> kindsCache = new LinkedList<>();
 
@@ -87,10 +89,13 @@ import java.util.List;
             return;
         }
         log().info("Waiting for data consistency to establish.");
-        try {
-            Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+
+        for(int awaitCycle = 0; awaitCycle < CONSISTENCY_AWAIT_ITERATIONS; awaitCycle++) {
+            try {
+                Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

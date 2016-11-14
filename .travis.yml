@@ -7,7 +7,7 @@ before_install:
   - chmod +x gradlew
 
 script:
-  - ./gradlew build --info
+  - ./gradlew build --debug
 
 after_success:
   - chmod +x ./script/publish_artifacts.sh
