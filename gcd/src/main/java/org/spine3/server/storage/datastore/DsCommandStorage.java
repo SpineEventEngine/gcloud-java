@@ -168,7 +168,8 @@ class DsCommandStorage extends CommandStorage {
     }
 
     private Key createKey(String idString) {
+        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
         return datastore.getKeyFactory(TYPE_URL.getSimpleName())
-                        .newKey(idString);
+                        .newKey(idString.hashCode());
     }
 }

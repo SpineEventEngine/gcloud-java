@@ -223,8 +223,9 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
     private Key createKey(I id) {
         final String idString = IdTransformer.idToString(id);
+        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
         return datastore.getKeyFactory(RECORD_TYPE_URL.getSimpleName())
-                        .newKey(idString);
+                        .newKey(idString.hashCode());
     }
 
     private static class IdRecordPair<I> {
