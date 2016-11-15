@@ -20,9 +20,9 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
