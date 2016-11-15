@@ -56,14 +56,16 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
         checkNotNull(propertyId);
         checkNotNull(value);
 
-        final Key key = datastore.getKeyFactory(ANY_TYPE_URL.getTypeName()).newKey(propertyId);
+        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
+        final Key key = datastore.getKeyFactory(ANY_TYPE_URL.getTypeName()).newKey(propertyId.hashCode());
         final Entity entity = messageToEntity(AnyPacker.pack(value), key);
         datastore.createOrUpdate(entity);
     }
 
     @Nullable
     /* package */ <V extends Message> V read(String propertyId) {
-        final Key key = datastore.getKeyFactory(ANY_TYPE_URL.getTypeName()).newKey(propertyId);
+        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
+        final Key key = datastore.getKeyFactory(ANY_TYPE_URL.getTypeName()).newKey(propertyId.hashCode());
 
         final Entity response = datastore.read(key);
 

@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
@@ -92,8 +93,7 @@ class DsEventStorage extends EventStorage {
         }
     };
 
-    /* package */
-    static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+    /* package */ static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsEventStorage(datastore, multitenant);
     }
 
@@ -137,14 +137,17 @@ class DsEventStorage extends EventStorage {
 
     @Override
     protected void writeRecord(EventStorageRecord record) {
-        final Key key = datastore.getKeyFactory(KIND)
-                                 .newKey(record.getEventId());
+
+
+        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
+        final KeyFactory keyFactory = datastore.getKeyFactory(KIND);
+        final Key key = keyFactory.newKey(record.getEventId().hashCode());
+
         final Entity entity = messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(entity);
         DatastoreProperties.addTimestampProperty(record.getTimestamp(), builder);
         DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), builder);
-        final Message aggregateId = AnyPacker.unpack(record.getContext()
-                                                           .getProducerId());
+        final Message aggregateId = AnyPacker.unpack(record.getContext().getProducerId());
         DatastoreProperties.addAggregateIdProperty(aggregateId, builder);
         DatastoreProperties.addEventTypeProperty(record.getEventType(), builder);
 
@@ -158,8 +161,8 @@ class DsEventStorage extends EventStorage {
     @Override
     protected EventStorageRecord readRecord(EventId eventId) {
         final String idString = idToString(eventId);
-        final Key key = datastore.getKeyFactory(KIND)
-                                 .newKey(idString);
+        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
+        final Key key = datastore.getKeyFactory(KIND).newKey(idString.hashCode());
 
         final Entity response = datastore.read(key);
 
