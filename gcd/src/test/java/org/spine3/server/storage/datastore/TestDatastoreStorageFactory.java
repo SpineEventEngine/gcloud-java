@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkState;
  * Creates storages based on the local Google {@link Datastore}.
  */
 @SuppressWarnings("CallToSystemGetenv")
-public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
+/* package */ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static final String DEFAULT_DATASET_NAME = "spine-dev";
     private static final String DEFAULT_HOST = "localhost:8080";
@@ -46,6 +46,10 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
                                                                                   .setProjectId(DEFAULT_DATASET_NAME)
                                                                                   .setHost(DEFAULT_HOST)
                                                                                   .build();
+
+    // Set in the static context upon initialization,
+    // used in class method context to avoid ambiguous calls to {@code System.getenv()}.
+    @SuppressWarnings("StaticNonFinalField")
     private static boolean runsOnCi = false;
 
     private static final DatastoreOptions TESTING_OPTIONS = generateTestOptions();
@@ -72,7 +76,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
      */
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
-    public static TestDatastoreStorageFactory getDefaultInstance() {
+    /* package */ static TestDatastoreStorageFactory getDefaultInstance() {
         final boolean onCi = "true".equals(System.getenv("CI"));
         final String message = onCi
                                ? "Running on CI. Connecting to remote Google Cloud Datastore"
@@ -82,16 +86,6 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         return onCi
                ? TestingInstanceSingleton.INSTANCE.value
                : LocalInstanceSingleton.INSTANCE.value;
-    }
-
-    /**
-     * Creates a new factory instance.
-     *
-     * @param options {@link DatastoreOptions} used to create a {@link Datastore}
-     */
-    public static TestDatastoreStorageFactory newInstance(DatastoreOptions options) {
-        final Datastore datastore = options.getService();
-        return new TestDatastoreStorageFactory(datastore);
     }
 
     private TestDatastoreStorageFactory(Datastore datastore) {

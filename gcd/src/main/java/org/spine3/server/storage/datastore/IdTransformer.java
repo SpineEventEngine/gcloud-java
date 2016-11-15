@@ -70,6 +70,7 @@ import static com.google.common.base.Preconditions.checkArgument;
         } else { // Proto-Message ID
             checkArgument(id instanceof Message, WRONG_ID_TYPE_ERROR_MESSAGE);
 
+            @SuppressWarnings("TypeMayBeWeakened")
             final Message message = (Message) id;
             final StringBuilder idBuilder = new StringBuilder(STRING_BUILDER_INITIAL_CAPACITY);
             final TypeUrl typeUrl = KnownTypes.getTypeUrl(ClassName.of(id.getClass().getCanonicalName()));
@@ -121,7 +122,9 @@ import static com.google.common.base.Preconditions.checkArgument;
         }
 
         try {
-            return Classes.getGenericParameterType(parametrizedClass, 0);
+            @SuppressWarnings("unchecked")  // cast should be safe, since the convention.
+            final Class<I> result = Classes.getGenericParameterType(parametrizedClass, 0);
+            return result;
         } catch (ClassCastException e) {
             LOG.warning(UNABLE_TO_DETECT_GENERIC_TYPE + e.toString());
             return tryAllSupportedClasses(stringId);
