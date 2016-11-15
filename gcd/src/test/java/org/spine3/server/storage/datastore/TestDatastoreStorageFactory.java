@@ -20,7 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.AuthCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import org.slf4j.Logger;
@@ -55,11 +55,9 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
             final InputStream is = TestDatastoreStorageFactory.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
             final BufferedInputStream bufferedStream = new BufferedInputStream(is);
 
-            final AuthCredentials credentials =
-                    AuthCredentials.createForJson(bufferedStream);
+            final ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(bufferedStream);
             return DatastoreOptions.newBuilder()
-                                   .setProjectId(DEFAULT_DATASET_NAME)
-                                   .setAuthCredentials(credentials)
+                                   .setProjectId(DEFAULT_DATASET_NAME).setCredentials(credentials)
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
             throw new RuntimeException(e);
