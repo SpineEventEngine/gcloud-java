@@ -44,7 +44,7 @@ import java.util.List;
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
     private static final int CONSISTENCY_AWAIT_TIME_MS = 100;
 
-    private static final int CONSISTENCY_AWAIT_ITERATIONS = 30;
+    private static final int CONSISTENCY_AWAIT_ITERATIONS = 5;
 
     private static final Collection<String> kindsCache = new LinkedList<>();
 
