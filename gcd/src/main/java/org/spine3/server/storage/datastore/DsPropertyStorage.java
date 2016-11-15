@@ -41,6 +41,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 /* package */ class DsPropertyStorage {
 
     private static final TypeUrl ANY_TYPE_URL = TypeUrl.of(Any.getDescriptor());
+    private static final String KIND = ANY_TYPE_URL.getTypeName();
 
     private final DatastoreWrapper datastore;
 
@@ -56,16 +57,15 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
         checkNotNull(propertyId);
         checkNotNull(value);
 
-        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
-        final Key key = datastore.getKeyFactory(ANY_TYPE_URL.getTypeName()).newKey(propertyId.hashCode());
+        final Key key = Keys.generateForKindWithName(datastore, KIND, propertyId);
+
         final Entity entity = messageToEntity(AnyPacker.pack(value), key);
         datastore.createOrUpdate(entity);
     }
 
     @Nullable
     /* package */ <V extends Message> V read(String propertyId) {
-        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
-        final Key key = datastore.getKeyFactory(ANY_TYPE_URL.getTypeName()).newKey(propertyId.hashCode());
+        final Key key = datastore.getKeyFactory(KIND).newKey(propertyId);
 
         final Entity response = datastore.read(key);
 

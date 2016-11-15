@@ -22,6 +22,7 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
@@ -60,6 +61,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
     private static final String VERSION_KEY = "version";
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityStorageRecord.class);
+    private static final String KIND = RECORD_TYPE_URL.getSimpleName();
     private static final String ID_CONVERTION_ERROR_MESSAGE
             = "Entity had ID of an invalid type; could not parse ID from String. Note: custom convection is not supported. See Identifiers#idToString.";
 
@@ -95,7 +97,9 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     @Nullable
     @Override
     protected EntityStorageRecord readRecord(I id) {
-        final Key key = createKey(id);
+        final String idString = IdTransformer.idToString(id);
+        final Key key1 = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Key key = key1;
         final Entity response = datastore.read(key);
 
         if (response == null) {
@@ -176,8 +180,10 @@ class DsRecordStorage<I> extends RecordStorage<I> {
             Function<Entity, EntityStorageRecord> transformer) {
 
         final Collection<Key> keys = new LinkedList<>();
+        final KeyFactory keyFactory = datastore.getKeyFactory(KIND);
         for (I id : ids) {
-            final Key key = createKey(id);
+            final String idString = IdTransformer.idToString(id);
+            final Key key = keyFactory.newKey(idString);
             keys.add(key);
         }
 
@@ -214,18 +220,12 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         checkNotNull(id, "ID is null.");
         checkNotNull(entityStorageRecord, "Message is null.");
 
-        final Key key = createKey(id);
+        final String idString = IdTransformer.idToString(id);
+        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
         final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
         final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
         entity.set(VERSION_KEY, entityStorageRecord.getVersion());
         datastore.createOrUpdate(entity.build());
-    }
-
-    private Key createKey(I id) {
-        final String idString = IdTransformer.idToString(id);
-        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
-        return datastore.getKeyFactory(RECORD_TYPE_URL.getSimpleName())
-                        .newKey(idString.hashCode());
     }
 
     private static class IdRecordPair<I> {

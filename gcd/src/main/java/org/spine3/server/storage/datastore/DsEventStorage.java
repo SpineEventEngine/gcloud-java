@@ -137,20 +137,17 @@ class DsEventStorage extends EventStorage {
 
     @Override
     protected void writeRecord(EventStorageRecord record) {
-
-
-        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
-        final KeyFactory keyFactory = datastore.getKeyFactory(KIND);
-        final Key key = keyFactory.newKey(record.getEventId().hashCode());
+        final Key key = Keys.generateForKindWithName(datastore, KIND, record.getEventId());
 
         final Entity entity = messageToEntity(record, key);
+
         final Entity.Builder builder = Entity.newBuilder(entity);
         DatastoreProperties.addTimestampProperty(record.getTimestamp(), builder);
         DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), builder);
+
         final Message aggregateId = AnyPacker.unpack(record.getContext().getProducerId());
         DatastoreProperties.addAggregateIdProperty(aggregateId, builder);
         DatastoreProperties.addEventTypeProperty(record.getEventType(), builder);
-
         DatastoreProperties.makeEventContextProperties(record.getContext(), builder);
         DatastoreProperties.makeEventFieldProperties(record, builder);
 
@@ -161,8 +158,7 @@ class DsEventStorage extends EventStorage {
     @Override
     protected EventStorageRecord readRecord(EventId eventId) {
         final String idString = idToString(eventId);
-        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
-        final Key key = datastore.getKeyFactory(KIND).newKey(idString.hashCode());
+        final Key key = datastore.getKeyFactory(KIND).newKey(idString);
 
         final Entity response = datastore.read(key);
 

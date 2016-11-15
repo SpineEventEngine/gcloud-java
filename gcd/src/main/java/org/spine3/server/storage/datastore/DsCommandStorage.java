@@ -20,9 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.*;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import org.spine3.base.CommandId;
@@ -57,6 +55,7 @@ import static org.spine3.validate.Validate.checkNotDefault;
 class DsCommandStorage extends CommandStorage {
 
     private static final TypeUrl TYPE_URL = TypeUrl.of(CommandStorageRecord.getDescriptor());
+    private static final String KIND = TYPE_URL.getSimpleName();
     private static final String COMMAND_STATUS_PRORPERTY_NAME = "command_status";
 
     private final DatastoreWrapper datastore;
@@ -135,7 +134,7 @@ class DsCommandStorage extends CommandStorage {
         checkNotDefault(commandId);
 
         final String idString = idToString(commandId);
-        final Key key = createKey(idString);
+        final Key key = datastore.getKeyFactory(KIND).newKey(idString);
         final Entity entity = datastore.read(key);
 
         if (entity == null) {
@@ -153,7 +152,7 @@ class DsCommandStorage extends CommandStorage {
 
         final String idString = idToString(commandId);
 
-        final Key key = createKey(idString);
+        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
 
         Entity entity = messageToEntity(record, key);
         entity = Entity.newBuilder(entity)
@@ -167,9 +166,4 @@ class DsCommandStorage extends CommandStorage {
         datastore.createOrUpdate(entity);
     }
 
-    private Key createKey(String idString) {
-        // TODO[alex.tymchenko]: Experimental. Try to use numeric keys basing on hashCode().
-        return datastore.getKeyFactory(TYPE_URL.getSimpleName())
-                        .newKey(idString.hashCode());
-    }
 }

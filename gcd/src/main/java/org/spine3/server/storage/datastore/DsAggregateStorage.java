@@ -109,11 +109,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
             eventId = SNAPSHOT + stringId;
         }
 
-        // TODO[alex.tymchenko]: Experimental. Try to use Datastore-allocated key.
-//        final Key key = keyFactory.newKey(eventId.hashCode());
-        final IncompleteKey incompleteKey = keyFactory.newKey();
-        final Key key = datastore.allocateKey(incompleteKey);
-
+        final Key key = Keys.generateForKindWithName(datastore, KIND, eventId);
         final Entity incompleteEntity = Entities.messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
         builder.set(AGGREGATE_ID_PROPERTY_NAME, stringId);
