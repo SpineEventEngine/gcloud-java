@@ -22,7 +22,6 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -158,8 +157,7 @@ class DsEventStorage extends EventStorage {
     @Override
     protected EventStorageRecord readRecord(EventId eventId) {
         final String idString = idToString(eventId);
-        final Key key = datastore.getKeyFactory(KIND).newKey(idString);
-
+        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
         final Entity response = datastore.read(key);
 
         if (response == null) {

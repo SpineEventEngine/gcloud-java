@@ -134,7 +134,7 @@ class DsCommandStorage extends CommandStorage {
         checkNotDefault(commandId);
 
         final String idString = idToString(commandId);
-        final Key key = datastore.getKeyFactory(KIND).newKey(idString);
+        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
         final Entity entity = datastore.read(key);
 
         if (entity == null) {

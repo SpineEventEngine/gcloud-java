@@ -22,7 +22,6 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
@@ -98,8 +97,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected EntityStorageRecord readRecord(I id) {
         final String idString = IdTransformer.idToString(id);
-        final Key key1 = Keys.generateForKindWithName(datastore, KIND, idString);
-        final Key key = key1;
+        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
         final Entity response = datastore.read(key);
 
         if (response == null) {
@@ -180,10 +178,9 @@ class DsRecordStorage<I> extends RecordStorage<I> {
             Function<Entity, EntityStorageRecord> transformer) {
 
         final Collection<Key> keys = new LinkedList<>();
-        final KeyFactory keyFactory = datastore.getKeyFactory(KIND);
         for (I id : ids) {
             final String idString = IdTransformer.idToString(id);
-            final Key key = keyFactory.newKey(idString);
+            final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
             keys.add(key);
         }
 

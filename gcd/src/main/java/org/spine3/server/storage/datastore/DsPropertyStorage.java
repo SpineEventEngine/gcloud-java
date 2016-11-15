@@ -65,8 +65,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 
     @Nullable
     /* package */ <V extends Message> V read(String propertyId) {
-        final Key key = datastore.getKeyFactory(KIND).newKey(propertyId);
-
+        final Key key = Keys.generateForKindWithName(datastore, KIND, propertyId);
         final Entity response = datastore.read(key);
 
         if (response == null) {

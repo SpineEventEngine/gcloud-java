@@ -35,12 +35,9 @@ import com.google.cloud.datastore.KeyFactory;
 
     private Keys() {}
 
-    // TODO[alex.tymchenko]: Experimental. Trying to use Datastore-allocated key ID along with manually set key name.
     /* package */ static Key generateForKindWithName(DatastoreWrapper datastore, String kind, String keyName) {
         final KeyFactory keyFactory = datastore.getKeyFactory(kind);
-        final IncompleteKey incompleteKey = keyFactory.newKey();
-        final Key keyWithId = datastore.allocateKey(incompleteKey);
-        final Key key = Key.newBuilder(keyWithId).setName(keyName).build();
+        final Key key = keyFactory.newKey(keyName);
 
         return key;
     }
