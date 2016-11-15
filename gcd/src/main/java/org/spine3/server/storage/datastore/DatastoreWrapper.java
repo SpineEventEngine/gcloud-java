@@ -73,10 +73,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @see DatastoreWriter#put(FullEntity)
      */
     /*package*/ void create(Entity entity) throws DatastoreException {
-        final Entity result = actor.put(entity);
-        // TODO[alex.tymchenko]: Experimental. Remove the logging before merging this PR.
-        log().info(" +++ Saved an entity to the Datastore. \n +      Original = " + entity +
-                ". \n +      Resulting: " + result);
+        actor.put(entity);
     }
 
     /**
@@ -137,12 +134,8 @@ import static com.google.common.base.Preconditions.checkState;
      */
     @SuppressWarnings("unchecked")
     /*package*/ List<Entity> read(Query query) {
-        // TODO[alex.tymchenko]: remove the logging from before merging the PR.
-        log().info(" --- Executing query: " + query);
         final QueryResults queryResults = actor.run(query);
-        final ArrayList resultList = Lists.newArrayList(queryResults);
-        log().info(" -------- Result set size is " + resultList.size());
-        return resultList;
+        return Lists.newArrayList(queryResults);
     }
 
     /**
