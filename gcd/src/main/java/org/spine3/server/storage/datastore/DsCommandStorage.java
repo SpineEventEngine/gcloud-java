@@ -50,7 +50,6 @@ import static org.spine3.validate.Validate.checkNotDefault;
  * @author Alexander Litus
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
- * @see LocalDatastoreStorageFactory
  */
 class DsCommandStorage extends CommandStorage {
 

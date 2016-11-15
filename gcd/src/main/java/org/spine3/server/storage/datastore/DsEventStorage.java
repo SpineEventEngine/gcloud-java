@@ -59,7 +59,6 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
  * @author Alexander Litus
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
- * @see LocalDatastoreStorageFactory
  */
 class DsEventStorage extends EventStorage {
 

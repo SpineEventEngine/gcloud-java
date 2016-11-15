@@ -45,7 +45,6 @@ import static org.spine3.base.Identifiers.idToString;
  * @author Alexander Litus
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
- * @see LocalDatastoreStorageFactory
  */
 class DsAggregateStorage<I> extends AggregateStorage<I> {
 
