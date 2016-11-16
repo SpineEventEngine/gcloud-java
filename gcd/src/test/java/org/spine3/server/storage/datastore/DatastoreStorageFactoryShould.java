@@ -28,6 +28,7 @@ import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.*;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreStorageFactoryShould {
@@ -39,6 +40,15 @@ public class DatastoreStorageFactoryShould {
     private static final Datastore DATASTORE = DUMMY_OPTIONS.getService();
 
     private static final StorageFactory FACTORY = DatastoreStorageFactory.newInstance(DATASTORE);
+
+    @Test
+    public void create_multitenant_storages() throws Exception {
+        final StorageFactory factory = DatastoreStorageFactory.newInstance(DATASTORE, true);
+        assertTrue(factory.isMultitenant());
+        final StandStorage storage = factory.createStandStorage();
+        assertTrue(storage.isMultitenant());
+        storage.close();
+    }
 
     @Test
     public void create_entity_storage_using_class_parameter() {
