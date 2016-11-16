@@ -29,12 +29,6 @@ import org.spine3.server.storage.EntityStorageShould;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.test.aggregate.Project;
 
-/**
- * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
- * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
- * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
- * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
- */
 public class DsEntityStorageShould extends EntityStorageShould<String> {
 
     private static final TestDatastoreStorageFactory DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
