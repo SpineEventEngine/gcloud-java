@@ -75,7 +75,6 @@ import static com.google.common.base.Preconditions.checkState;
      *
      * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
      */
-    @SuppressWarnings("UseOfSystemOutOrSystemErr")
     /* package */ static TestDatastoreStorageFactory getDefaultInstance() {
         final boolean onCi = "true".equals(System.getenv("CI"));
         final String message = onCi
@@ -149,10 +148,10 @@ import static com.google.common.base.Preconditions.checkState;
         private final Datastore value = DEFAULT_LOCAL_OPTIONS.getService();
     }
 
-    private enum TestingDatastoreSingleton {
+    /*package*/ enum TestingDatastoreSingleton {
         INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Datastore value = TESTING_OPTIONS.getService();
+        @SuppressWarnings({"NonSerializableFieldInSerializableClass", "PackageVisibleField"})
+        /*package*/ final Datastore value = TESTING_OPTIONS.getService();
     }
 
     private static Logger log() {
