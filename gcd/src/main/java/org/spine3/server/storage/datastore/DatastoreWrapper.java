@@ -21,7 +21,6 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.*;
-import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -126,7 +125,7 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Queries the datastore with given arguments.
      *
-     * @param query {@link Query} to execue upon the datastore.
+     * @param query {@link Query} to execute upon the datastore.
      * @return results fo the query packed in a {@link List}.
      * @see DatastoreReader#run(Query)
      */

@@ -56,7 +56,7 @@ import static com.google.common.base.Preconditions.checkArgument;
     private static final String WRONG_OR_BROKEN_MESSAGE_ID = "Passed proto ID %s is wrong or broken.";
     private static final String UNABLE_TO_DETECT_GENERIC_TYPE = "Unable to detect generic type of ID: ";
     private static final Logger LOG = Logger.getLogger(IdTransformer.class.getName());
-    private static final int SERIALIZED_BYTES_REDIX = 16;
+    private static final int SERIALIZED_BYTES_RADIX = 16;
 
     private IdTransformer() {
     }
@@ -155,7 +155,7 @@ import static com.google.common.base.Preconditions.checkArgument;
         final String[] separateStringBytes = bytesString.split(SERIALIZED_MESSAGE_BYTES_DIVIDER);
         final byte[] messageBytes = new byte[separateStringBytes.length];
         for (int i = 0; i < messageBytes.length; i++) {
-            final byte oneByte = Byte.parseByte(separateStringBytes[i], SERIALIZED_BYTES_REDIX);
+            final byte oneByte = Byte.parseByte(separateStringBytes[i], SERIALIZED_BYTES_RADIX);
             messageBytes[i] = oneByte;
         }
 

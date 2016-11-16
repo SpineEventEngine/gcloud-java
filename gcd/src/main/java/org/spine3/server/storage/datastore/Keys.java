@@ -21,7 +21,6 @@
  */
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.IncompleteKey;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 

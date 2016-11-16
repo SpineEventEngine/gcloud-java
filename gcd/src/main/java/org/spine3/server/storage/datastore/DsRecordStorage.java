@@ -61,7 +61,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     private static final String VERSION_KEY = "version";
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityStorageRecord.class);
     private static final String KIND = RECORD_TYPE_URL.getSimpleName();
-    private static final String ID_CONVERTION_ERROR_MESSAGE
+    private static final String ID_CONVERSION_ERROR_MESSAGE
             = "Entity had ID of an invalid type; could not parse ID from String. Note: custom convection is not supported. See Identifiers#idToString.";
 
     /* package */ static <I> DsRecordStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
@@ -155,7 +155,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                 // Retrieve ID
                 final I id = IdTransformer.idFromString(input.getKey()
                                                              .getName(), null);
-                checkState(id != null, ID_CONVERTION_ERROR_MESSAGE);
+                checkState(id != null, ID_CONVERSION_ERROR_MESSAGE);
 
                 // Retrieve record
                 EntityStorageRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
