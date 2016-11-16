@@ -20,15 +20,27 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreException;
+import com.google.cloud.datastore.DatastoreReader;
+import com.google.cloud.datastore.DatastoreReaderWriter;
+import com.google.cloud.datastore.DatastoreWriter;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.FullEntity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.Transaction;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -244,25 +256,10 @@ import static com.google.common.base.Preconditions.checkState;
         return keyFactory;
     }
 
-    /* package */ Key allocateKey(IncompleteKey key) {
-        final Key result = datastore.allocateId(key);
-        return result;
-    }
-
     private KeyFactory initKeyFactory(String kind) {
         final KeyFactory keyFactory = datastore.newKeyFactory()
                 .setKind(kind);
         keyFactories.put(kind, keyFactory);
         return keyFactory;
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(DatastoreWrapper.class);
     }
 }
