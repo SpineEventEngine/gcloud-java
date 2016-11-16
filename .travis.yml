@@ -8,6 +8,7 @@ before_install:
 
 script:
   - ./gradlew build --debug
+  - ./gradlew codeCoverageReport
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
