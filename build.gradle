@@ -41,6 +41,10 @@ allprojects {
     apply plugin: 'jacoco'
     group = 'org.spine3';
     version = project.SPINE_VERSION;
+
+    repositories {
+        mavenCentral()
+    }
 }
 
 subprojects {
@@ -53,7 +57,7 @@ subprojects {
     targetCompatibility = 1.7;
 
     repositories {
-        mavenCentral()
+        //mavenCentral()
         maven {
             url = "$MAVEN_REPOSITORY_URL"
         }
