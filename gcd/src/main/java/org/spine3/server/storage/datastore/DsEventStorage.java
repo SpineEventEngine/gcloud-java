@@ -25,11 +25,14 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Event;
+import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
@@ -42,12 +45,15 @@ import org.spine3.server.storage.EventStorageRecord;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
@@ -91,7 +97,8 @@ class DsEventStorage extends EventStorage {
         }
     };
 
-    /* package */ static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+    /* package */
+    static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsEventStorage(datastore, multitenant);
     }
 
@@ -143,7 +150,8 @@ class DsEventStorage extends EventStorage {
         DatastoreProperties.addTimestampProperty(record.getTimestamp(), builder);
         DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), builder);
 
-        final Message aggregateId = AnyPacker.unpack(record.getContext().getProducerId());
+        final Message aggregateId = AnyPacker.unpack(record.getContext()
+                                                           .getProducerId());
         DatastoreProperties.addAggregateIdProperty(aggregateId, builder);
         DatastoreProperties.addEventTypeProperty(record.getEventType(), builder);
         DatastoreProperties.makeEventContextProperties(record.getContext(), builder);
@@ -203,44 +211,102 @@ class DsEventStorage extends EventStorage {
 
     private static class EventFilterChecker implements Predicate<EventStorageRecord> {
 
-        // TODO:21-10-16:dmytro.dashenkov: Field filters (for both context and message).
-
         private final String eventType;
         private final Collection<String> aggregateIds;
+        private final Collection<FieldFilter> eventFieldFilters;
+        private final Collection<FieldFilter> contextFieldFilters;
+
+        private static final Function<Any, Message> ANY_UNPACKER = new Function<Any, Message>() {
+            @Nullable
+            @Override
+            public Message apply(@Nullable Any input) {
+                if (input == null) {
+                    return null;
+                }
+
+                return AnyPacker.unpack(input);
+            }
+        };
 
         private EventFilterChecker(@SuppressWarnings("TypeMayBeWeakened") EventFilter eventFilter) {
             this.eventType = checkNotNull(eventFilter.getEventType());
             this.aggregateIds = Collections2.transform(eventFilter.getAggregateIdList(), ID_TRANSFORMER);
+            this.eventFieldFilters = eventFilter.getEventFieldFilterList();
+            this.contextFieldFilters = eventFilter.getContextFieldFilterList();
         }
 
         private boolean isDefault() {
-            return eventType.trim().isEmpty() && aggregateIds.isEmpty();
+            return eventType.trim()
+                            .isEmpty()
+                    && aggregateIds.isEmpty()
+                    && eventFieldFilters.isEmpty()
+                    && contextFieldFilters.isEmpty();
         }
 
-        @SuppressWarnings("NullableProblems") // Defined as nullable, parameter `event` is actually non null.
+        // Defined as nullable, parameter `event` is actually non null.
+        @SuppressWarnings({"NullableProblems", "MethodWithMoreThanThreeNegations"})
         @Override
         public boolean apply(@Nonnull EventStorageRecord event) {
-            if (eventType.trim()
-                         .isEmpty() && aggregateIds.isEmpty()) {
-                return true;
-            }
-
             final Any eventWrapped = event.getMessage();
             final Message eventMessage = AnyPacker.unpack(eventWrapped);
             final String actualType = eventMessage.getDescriptorForType()
                                                   .getFullName();
+            // Check event type
             if (!eventType.isEmpty() && !eventType.equals(actualType)) {
                 return false;
             }
 
-            if (aggregateIds.isEmpty()) {
-                return true;
+            // Check aggregate ID
+            final String aggregateId = event.getProducerId();
+            final boolean idMatches = aggregateIds.isEmpty()
+                    || aggregateIds.contains(aggregateId);
+            if (!idMatches) {
+                return false;
             }
 
-            final String aggregateId = event.getProducerId();
+            // Check event fields
+            for (FieldFilter filter : eventFieldFilters) {
+                final boolean matchesFilter = checkFields(eventMessage, filter);
+                if (!matchesFilter) {
+                    return false;
+                }
+            }
 
-            final boolean idMatches = aggregateIds.contains(aggregateId);
-            return idMatches;
+            // Check context fields
+            final EventContext context = event.getContext();
+            for (FieldFilter filter : contextFieldFilters) {
+                final boolean matchesFilter = checkFields(context, filter);
+                if (!matchesFilter) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static boolean checkFields(
+                Message object,
+                @SuppressWarnings("TypeMayBeWeakened") /*BuilderOrType interface*/ FieldFilter filter) {
+            final String fieldPath = filter.getFieldPath();
+            final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.'));
+            checkArgument(!Strings.isNullOrEmpty(fieldName), "Field filter " + filter.toString() + " is invalid");
+            final String fieldGetterName = "get" + fieldName.substring(0, 1)
+                                                            .toUpperCase() + fieldName.substring(1);
+
+            final Collection<Any> expectedAnys = filter.getValueList();
+            final Collection<Message> expectedValues = Collections2.transform(expectedAnys, ANY_UNPACKER);
+            final Message actualValue;
+
+            try {
+                final Class<?> messageClass = object.getClass();
+                final Method fieldGetter = messageClass.getDeclaredMethod(fieldGetterName);
+                actualValue = (Message) fieldGetter.invoke(object);
+            } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
+                throw propagate(e);
+            }
+
+            final boolean result = expectedValues.contains(actualValue);
+            return result;
         }
     }
 }
