@@ -39,6 +39,7 @@ import static org.spine3.server.reflect.Classes.getGenericParameterType;
  * @author Alexander Litus
  * @author Mikhail Mikhaylov
  */
+@SuppressWarnings("WeakerAccess") // Part of API
 public class DatastoreStorageFactory implements StorageFactory {
 
     private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;

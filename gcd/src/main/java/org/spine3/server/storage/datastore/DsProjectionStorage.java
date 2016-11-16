@@ -59,9 +59,7 @@ import java.util.Map;
         super(multitenant);
         this.entityStorage = entityStorage;
         this.propertyStorage = propertyStorage;
-
-        // TODO:2016-04-21:mikhail.mikhaylov: We should use proto class name instead of java's one.
-        lastTimestampId = LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName();
+        this.lastTimestampId = LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName();
     }
 
     @Override

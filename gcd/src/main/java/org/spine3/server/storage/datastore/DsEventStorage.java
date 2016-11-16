@@ -244,7 +244,7 @@ class DsEventStorage extends EventStorage {
         }
 
         // Defined as nullable, parameter `event` is actually non null.
-        @SuppressWarnings({"NullableProblems", "MethodWithMoreThanThreeNegations"})
+        @SuppressWarnings({"NullableProblems", "MethodWithMoreThanThreeNegations", "MethodWithMultipleLoops"})
         @Override
         public boolean apply(@Nonnull EventStorageRecord event) {
             final Any eventWrapped = event.getMessage();

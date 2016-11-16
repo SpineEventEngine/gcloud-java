@@ -235,11 +235,11 @@ class DsRecordStorage<I> extends RecordStorage<I> {
             this.record = record;
         }
 
-        public I getId() {
+        private I getId() {
             return id;
         }
 
-        public EntityStorageRecord getRecord() {
+        private EntityStorageRecord getRecord() {
             return record;
         }
     }

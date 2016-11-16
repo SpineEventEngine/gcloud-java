@@ -51,8 +51,6 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     private static final String EVENT_TYPE_PROPERTY_NAME = "event_type";
     private static final String EVENT_ID_PROPERTY_NAME = "event_id";
 
-    private static final String CONTEXT_FIELD_PROPERTY_PREFIX_NAME = "context_";
-
     private static final String CONTEXT_EVENT_ID_PROPERTY_NAME = "context_event_id";
     private static final String CONTEXT_TIMESTAMP_PROPERTY_NAME = "context_timestamp";
     private static final String CONTEXT_OF_COMMAND_PROPERTY_NAME = "context_of_command";
@@ -93,10 +91,6 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      */
     /* package */ static void addEventTypeProperty(String eventType, Entity.Builder entity) {
         entity.set(EVENT_TYPE_PROPERTY_NAME, eventType);
-    }
-
-    private static String getContextFieldPropertyName(String contextFieldName) {
-        return CONTEXT_FIELD_PROPERTY_PREFIX_NAME + contextFieldName;
     }
 
     /**

@@ -20,11 +20,12 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
@@ -101,7 +102,6 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String stringId = idToString(id);
-        final KeyFactory keyFactory = datastore.getKeyFactory(KIND);
         String eventId = record.getEventId();
         if (eventId.isEmpty()) {
             // Snapshots have no Event IDs.
@@ -143,17 +143,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private String generateDatastoreId(I id) {
         final String stringId = Identifiers.idToString(id);
-        final String datastoreid = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
-        return datastoreid;
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(DsAggregateStorage.class);
+        final String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
+        return datastoreId;
     }
 }

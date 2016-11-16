@@ -72,8 +72,9 @@ import static com.google.common.base.Preconditions.checkState;
      * @throws DatastoreException if an {@link Entity} with such {@link Key} already exists.
      * @see DatastoreWriter#put(FullEntity)
      */
+    @SuppressWarnings("WeakerAccess") // Can be used in future
     /*package*/ void create(Entity entity) throws DatastoreException {
-        actor.put(entity);
+        actor.add(entity);
     }
 
     /**
@@ -83,6 +84,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @throws DatastoreException if the {@link Entity} with such {@link Key} does not exist.
      * @see DatastoreWriter#update(Entity...)
      */
+    @SuppressWarnings("WeakerAccess") // Can be used in future
     /*package*/ void update(Entity entity) throws DatastoreException {
         actor.update(entity);
     }
@@ -95,11 +97,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @see DatastoreWrapper#update(Entity)
      */
     /*package*/ void createOrUpdate(Entity entity) {
-        try {
-            create(entity);
-        } catch (DatastoreException ignored) {
-            update(entity);
-        }
+        actor.put(entity);
     }
 
     /**
@@ -184,6 +182,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @throws IllegalStateException if a transaction is already started on this instance of {@code DatastoreWrapper}.
      * @see #isTransactionActive()
      */
+    @SuppressWarnings("WeakerAccess") // Can be used in future
     /*package*/ void startTransaction() throws IllegalStateException {
         checkState(!isTransactionActive(), NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction = datastore.newTransaction();
@@ -198,6 +197,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}.
      * @see #isTransactionActive()
      */
+    @SuppressWarnings("WeakerAccess") // Can be used in future
     /*package*/ void commitTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.commit();
@@ -212,6 +212,7 @@ import static com.google.common.base.Preconditions.checkState;
      * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}.
      * @see #isTransactionActive()
      */
+    @SuppressWarnings("WeakerAccess") // Can be used in future
     /*package*/ void rollbackTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.rollback();
@@ -223,6 +224,7 @@ import static com.google.common.base.Preconditions.checkState;
      *
      * @return {@code true} if there is an active transaction, {@code false} otherwise.
      */
+    @SuppressWarnings("WeakerAccess") // Can be used in future
     /*package*/ boolean isTransactionActive() {
         return activeTransaction != null && activeTransaction.isActive();
     }
