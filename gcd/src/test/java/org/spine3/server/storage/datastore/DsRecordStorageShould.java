@@ -20,17 +20,22 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
-import org.spine3.server.stand.AggregateStateId;
+import org.spine3.base.Identifiers;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.AbstractStorage;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.StandStorageShould;
+import org.spine3.server.storage.RecordStorageShould;
+import org.spine3.test.storage.Project;
+import org.spine3.test.storage.ProjectId;
+import org.spine3.test.storage.Task;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class DsStandStorageShould extends StandStorageShould {
+public class DsRecordStorageShould extends RecordStorageShould<ProjectId> {
 
     private static final TestDatastoreStorageFactory LOCAL_DATASTORE_STORAGE_FACTORY
             = TestDatastoreStorageFactory.getDefaultInstance();
@@ -45,9 +50,41 @@ public class DsStandStorageShould extends StandStorageShould {
         LOCAL_DATASTORE_STORAGE_FACTORY.tearDown();
     }
 
+    @Override
+    protected Message newState(ProjectId projectId) {
+        final Project project = Project.newBuilder()
+                                       .setId(projectId)
+                                       .setName("Some test name")
+                                       .addTask(Task.getDefaultInstance())
+                                       .setStatus(Project.Status.CREATED)
+                                       .build();
+        return project;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
-    protected <S extends AbstractStorage<AggregateStateId, EntityStorageRecord>> S getStorage() {
-        return (S) LOCAL_DATASTORE_STORAGE_FACTORY.createStandStorage();
+    protected <S extends AbstractStorage<ProjectId, EntityStorageRecord>> S getStorage() {
+        return (S) LOCAL_DATASTORE_STORAGE_FACTORY.createRecordStorage(TestAggregate.class);
+    }
+
+    @Override
+    protected ProjectId newId() {
+        final ProjectId projectId = ProjectId.newBuilder()
+                .setId(Identifiers.newUuid())
+                .build();
+        return projectId;
+    }
+
+    private static class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+
+        /**
+         * Creates a new aggregate instance.
+         *
+         * @param id the ID for the new aggregate
+         * @throws IllegalArgumentException if the ID is not of one of the supported types
+         */
+        private TestAggregate(ProjectId id) {
+            super(id);
+        }
     }
 }
