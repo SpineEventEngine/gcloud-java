@@ -45,7 +45,6 @@ public class DatastoreStorageFactory implements StorageFactory {
     private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
 
     private DatastoreWrapper datastore;
-    private final Options options;
     private final boolean multitenant;
 
     /**
@@ -76,7 +75,6 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"}) // Overriding used for testing
     /* package */DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
-        this.options = new Options();
         this.multitenant = multitenant;
         initDatastoreWrapper(datastore);
     }
@@ -135,39 +133,12 @@ public class DatastoreStorageFactory implements StorageFactory {
         // NOP
     }
 
-    public Options getOptions() {
-        return options;
-    }
-
     protected DatastoreWrapper getDatastore() {
         return datastore;
     }
 
     protected void setDatastore(DatastoreWrapper datastore) {
         this.datastore = datastore;
-    }
-
-    @SuppressWarnings("WeakerAccess") // We provide it as API
-    public static class Options {
-        private Options() {
-        }
-
-        private static final int DEFAULT_PAGE_SIZE = 10;
-
-        private int pageSize = DEFAULT_PAGE_SIZE;
-
-        public void setEventIteratorPageSize(int pageSize) {
-            if (pageSize < 1) {
-                throw new IllegalArgumentException("Events page can not contain less than one event.");
-            }
-
-            this.pageSize = pageSize;
-        }
-
-        @SuppressWarnings("unused") // Part of API
-        public int getEventIteratorPageSize() {
-            return pageSize;
-        }
     }
 
     private static class StandStorageRecord extends Entity<String, EntityStorageRecord> {
