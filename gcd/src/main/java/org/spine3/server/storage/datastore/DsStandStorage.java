@@ -29,12 +29,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import org.spine3.protobuf.KnownTypes;
+import com.google.protobuf.Message;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
-import org.spine3.type.ClassName;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -169,10 +169,11 @@ import static com.google.common.base.Preconditions.checkState;
                 if (input == null) {
                     return false;
                 }
-                final String classnameString = input.getDescriptorForType()
-                                                    .getFullName();
-                final ClassName typeName = ClassName.of(classnameString);
-                final TypeUrl recordType = KnownTypes.getTypeUrl(typeName);
+
+                final Any wrappedState = input.getState();
+                final Message state = AnyPacker.unpack(wrappedState);
+
+                final TypeUrl recordType = TypeUrl.of(state.getDescriptorForType());
 
                 return type.equals(recordType);
             }

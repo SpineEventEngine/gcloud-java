@@ -141,7 +141,7 @@ import static com.google.common.base.Throwables.propagate;
     }
 
     @SuppressWarnings("unchecked")
-    private static <M extends Message> M defaultMessage(TypeUrl type) {
+    /*package*/ static <M extends Message> M defaultMessage(TypeUrl type) {
         final Class<M> messageClass = Messages.toMessageClass(type);
         checkState(messageClass != null, String.format(
                 "Not found class for type url \"%s\". Try to rebuild project",

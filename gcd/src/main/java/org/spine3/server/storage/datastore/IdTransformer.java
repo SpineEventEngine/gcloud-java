@@ -53,6 +53,7 @@ import static com.google.common.base.Preconditions.checkArgument;
     private static final String SERIALIZED_MESSAGE_BYTES_DIVIDER = "-";
     private static final String SERIALIZED_MESSAGE_BYTES_POSTFIX = ":END";
     private static final String SERIALIZED_MESSAGE_DIVIDER = "::";
+    private static final String SERIALIZED_DEFAULT_MESSAGE = "DEFAULT";
     private static final String WRONG_OR_BROKEN_MESSAGE_ID = "Passed proto ID %s is wrong or broken.";
     private static final String UNABLE_TO_DETECT_GENERIC_TYPE = "Unable to detect generic type of ID: ";
     private static final Logger LOG = Logger.getLogger(IdTransformer.class.getName());
@@ -80,10 +81,18 @@ import static com.google.common.base.Preconditions.checkArgument;
                     .append(prefixedTypeUrl)
                     .append(SERIALIZED_MESSAGE_DIVIDER);
             final byte[] serializedMessage = message.toByteArray();
-            for (byte b : serializedMessage) {
-                final String stringByte = BaseEncoding.base16().encode(new byte[]{b});
-                idBuilder.append(stringByte).append(SERIALIZED_MESSAGE_BYTES_DIVIDER);
+            if (serializedMessage.length > 0) {
+                for (int i = 0; i < serializedMessage.length - 1; i++) {
+                    final byte singleByte = serializedMessage[i];
+                    final String stringByte = BaseEncoding.base16().encode(new byte[]{singleByte});
+                    idBuilder.append(stringByte).append(SERIALIZED_MESSAGE_BYTES_DIVIDER);
+                }
+                final byte lastByte = serializedMessage[serializedMessage.length - 1];
+                idBuilder.append(BaseEncoding.base16().encode(new byte[]{lastByte}));
+            } else {
+                idBuilder.append(SERIALIZED_DEFAULT_MESSAGE);
             }
+
             idBuilder.append(SERIALIZED_MESSAGE_BYTES_POSTFIX);
 
             idString = idBuilder.toString();
@@ -149,19 +158,26 @@ import static com.google.common.base.Preconditions.checkArgument;
         checkArgument(stringId.startsWith(TYPE_PREFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
         checkArgument(stringId.endsWith(SERIALIZED_MESSAGE_BYTES_POSTFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
 
+        final int typeStartIndex = stringId.indexOf(TYPE_PREFIX) + TYPE_PREFIX.length();
+        final int typeEndIndex = stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER);
+        final String typeName = stringId.substring(typeStartIndex, typeEndIndex);
+
         final int dataStartIndex = stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER) + SERIALIZED_MESSAGE_DIVIDER.length();
         final int dataEndIndex = stringId.lastIndexOf(SERIALIZED_MESSAGE_BYTES_POSTFIX);
         final String bytesString = stringId.substring(dataStartIndex, dataEndIndex);
+
+        if (bytesString.equals(SERIALIZED_DEFAULT_MESSAGE)) {
+            final TypeUrl typeUrl = TypeUrl.of(typeName);
+            final Message id = Entities.defaultMessage(typeUrl);
+            return id;
+        }
+
         final String[] separateStringBytes = bytesString.split(SERIALIZED_MESSAGE_BYTES_DIVIDER);
         final byte[] messageBytes = new byte[separateStringBytes.length];
         for (int i = 0; i < messageBytes.length; i++) {
             final byte oneByte = Byte.parseByte(separateStringBytes[i], SERIALIZED_BYTES_RADIX);
             messageBytes[i] = oneByte;
         }
-
-        final int typeStartIndex = stringId.indexOf(TYPE_PREFIX) + TYPE_PREFIX.length();
-        final int typeEndIndex = stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER);
-        final String typeName = stringId.substring(typeStartIndex, typeEndIndex);
 
         final ByteString byteString = ByteString.copyFrom(messageBytes);
         final Any wrappedId = Any.newBuilder()

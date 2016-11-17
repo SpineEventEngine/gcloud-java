@@ -124,6 +124,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
                 final EntityStorageRecord readRecord = Entities.entityToMessage(input, RECORD_TYPE_URL);
                 final Message state = AnyPacker.unpack(readRecord.getState());
+                final TypeUrl typeUrl = TypeUrl.of(state.getDescriptorForType());
                 final Message maskedState = FieldMasks.applyMask(fieldMask, state, typeUrl);
                 final Any wrappedState = AnyPacker.pack(maskedState);
 
@@ -161,6 +162,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
                 EntityStorageRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
                 final Any packedState = record.getState();
                 Message state = AnyPacker.unpack(packedState);
+                final TypeUrl typeUrl = TypeUrl.of(state.getDescriptorForType());
                 state = FieldMasks.applyMask(fieldMask, state, typeUrl);
                 record = EntityStorageRecord.newBuilder(record)
                                             .setState(AnyPacker.pack(state))

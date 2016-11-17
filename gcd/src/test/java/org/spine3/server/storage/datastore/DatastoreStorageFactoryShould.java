@@ -45,7 +45,7 @@ public class DatastoreStorageFactoryShould {
     public void create_multitenant_storages() throws Exception {
         final StorageFactory factory = DatastoreStorageFactory.newInstance(DATASTORE, true);
         assertTrue(factory.isMultitenant());
-        final StandStorage storage = factory.createStandStorage();
+        final CommandStorage storage = factory.createCommandStorage();
         assertTrue(storage.isMultitenant());
         storage.close();
     }
