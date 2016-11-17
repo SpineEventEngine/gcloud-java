@@ -187,7 +187,7 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Starts a transaction.
      * <p>Since this method is called and until one of {@link #commitTransaction()} or {@link #rollbackTransaction()}
-     * is called all CRUD operations on datastore performed trough current instance of {@code DatastoreWrapper} become
+     * is called, all CRUD operations on datastore performed trough current instance of {@code DatastoreWrapper} become
      * transactional.
      *
      * @throws IllegalStateException if a transaction is already started on this instance of {@code DatastoreWrapper}.
