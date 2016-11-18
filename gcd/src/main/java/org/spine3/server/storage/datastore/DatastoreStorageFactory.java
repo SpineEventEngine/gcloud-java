@@ -49,6 +49,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     /**
      * Creates new instance of {@code DatastoreStorageFactory}.
+     *
      * <p>Same as calling {@link #newInstance(Datastore, boolean)} with {@code false} second argument.
      *
      * @param datastore the {@link Datastore} implementation to use.
@@ -73,7 +74,8 @@ public class DatastoreStorageFactory implements StorageFactory {
         return new DatastoreStorageFactory(datastore, multitenant);
     }
 
-    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"}) // Overriding used for testing
+    // Overriding used for testing
+    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
     /* package */DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
         this.multitenant = multitenant;
         initDatastoreWrapper(datastore);
@@ -141,6 +143,9 @@ public class DatastoreStorageFactory implements StorageFactory {
         this.datastore = datastore;
     }
 
+    /**
+     * {@link Entity} class used to declare stored type of {@link DsStandStorage}.
+     */
     private static class StandStorageRecord extends Entity<String, EntityStorageRecord> {
 
         /**

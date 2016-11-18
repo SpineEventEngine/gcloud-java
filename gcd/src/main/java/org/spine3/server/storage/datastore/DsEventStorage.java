@@ -97,8 +97,7 @@ class DsEventStorage extends EventStorage {
         }
     };
 
-    /* package */
-    static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+    /* package */ static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsEventStorage(datastore, multitenant);
     }
 
