@@ -32,7 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Custom extension of the {@link DatastoreWrapper} aimed on testing purposes.
+ * Custom extension of the {@link DatastoreWrapper} for the integration testing.
  *
  * @author Dmytro Dashenkov
  * @see TestDatastoreStorageFactory

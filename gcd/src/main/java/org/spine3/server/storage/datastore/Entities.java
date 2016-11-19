@@ -56,11 +56,11 @@ import static com.google.common.base.Throwables.propagate;
 
     /**
      * Retrieves a message of given type, assignable from {@code Message}, from an {@link Entity}.
-     * <p>If passed {@link Entity} is {@code null}, a default instance for given type is returned.
+     * <p>If passed {@link Entity} is {@code null}, a default instance for the given type is returned.
      *
-     * @param entity source {@link Entity} to get message form.
-     * @param type   {@link TypeUrl} of required message.
-     * @param <M>    required message type.
+     * @param entity source {@link Entity} to get message form
+     * @param type   {@link TypeUrl} of required message
+     * @param <M>    required message type
      * @return message contained in the {@link Entity}.
      */
     @SuppressWarnings("unchecked")
@@ -81,13 +81,13 @@ import static com.google.common.base.Throwables.propagate;
     }
 
     /**
-     * Retrieves a {@link List} of message of given type, assignable from {@code Message},
+     * Retrieves a {@link List} of messages of given type, assignable from {@code Message},
      * from a collection of {@link Entity Entities}.
      * <p>If passed {@link Entity} is {@code null}, a default instance for given type is returned.
      *
-     * @param entities a collection of the source {@link Entity Entities} to get message form.
-     * @param type     {@link TypeUrl} of required message.
-     * @param <M>      required message type.
+     * @param entities a collection of the source {@link Entity Entities} to get message form
+     * @param type     {@link TypeUrl} of required message
+     * @param <M>      required message type
      * @return message contained in the {@link Entity}.
      */
     @SuppressWarnings("unchecked")
@@ -144,7 +144,7 @@ import static com.google.common.base.Throwables.propagate;
     /*package*/ static <M extends Message> M defaultMessage(TypeUrl type) {
         final Class<M> messageClass = Messages.toMessageClass(type);
         checkState(messageClass != null, String.format(
-                "Not found class for type url \"%s\". Try to rebuild project",
+                "Not found class for type url \"%s\". Try to rebuild the project",
                 type.getTypeName()));
         final M message;
         try {

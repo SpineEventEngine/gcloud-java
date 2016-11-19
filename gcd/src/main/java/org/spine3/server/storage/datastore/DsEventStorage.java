@@ -66,7 +66,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-class DsEventStorage extends EventStorage {
+/*package*/ class DsEventStorage extends EventStorage {
 
     private final DatastoreWrapper datastore;
     private static final String KIND = EventStorageRecord.class.getName();
@@ -208,6 +208,9 @@ class DsEventStorage extends EventStorage {
         }
     }
 
+    /**
+     * Predicate matching an {@link EventStorageRecord} to the given {@link EventFilter}.
+     */
     private static class EventFilterChecker implements Predicate<EventStorageRecord> {
 
         private final String eventType;

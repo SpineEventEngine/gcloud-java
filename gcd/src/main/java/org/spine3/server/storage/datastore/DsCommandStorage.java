@@ -51,7 +51,7 @@ import static org.spine3.validate.Validate.checkNotDefault;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-class DsCommandStorage extends CommandStorage {
+/*package*/ class DsCommandStorage extends CommandStorage {
 
     private static final TypeUrl TYPE_URL = TypeUrl.of(CommandStorageRecord.getDescriptor());
     private static final String KIND = TYPE_URL.getSimpleName();
@@ -59,7 +59,8 @@ class DsCommandStorage extends CommandStorage {
 
     private final DatastoreWrapper datastore;
 
-    private static final Function<Entity, CommandStorageRecord> RECORD_MAPPER = new Function<Entity, CommandStorageRecord>() {
+    private static final Function<Entity, CommandStorageRecord> RECORD_MAPPER
+            = new Function<Entity, CommandStorageRecord>() {
         @Nullable
         @Override
         public CommandStorageRecord apply(@Nullable Entity input) {

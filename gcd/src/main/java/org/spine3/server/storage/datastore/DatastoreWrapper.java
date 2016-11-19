@@ -46,7 +46,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Represents a wrapper above GAE {@link Datastore}.
- * <p>Provides API for datastore to be used in storages.
+ * <p>Provides API for Datastore to be used in storages.
  *
  * @author Dmytro Dashenkov
  */
@@ -77,9 +77,9 @@ import static com.google.common.base.Preconditions.checkState;
     }
 
     /**
-     * Writes new {@link Entity} into the datastore.
+     * Writes new {@link Entity} into the Datastore.
      *
-     * @param entity new {@link Entity} to put into datastore
+     * @param entity new {@link Entity} to put into the Datastore
      * @throws DatastoreException upon failure.
      * @see DatastoreWriter#put(FullEntity)
      */
@@ -89,7 +89,7 @@ import static com.google.common.base.Preconditions.checkState;
     }
 
     /**
-     * Modifies an {@link Entity} in the datastore.
+     * Modifies an {@link Entity} in the Datastore.
      *
      * @param entity the {@link Entity} to update.
      * @throws DatastoreException if the {@link Entity} with such {@link Key} does not exist.
@@ -101,7 +101,7 @@ import static com.google.common.base.Preconditions.checkState;
     }
 
     /**
-     * Writes an {@link Entity} to the datastore or modifies an existing one.
+     * Writes an {@link Entity} to the Datastore or modifies an existing one.
      *
      * @param entity the {@link Entity} to write or update.
      * @see DatastoreWrapper#create(Entity)
@@ -112,10 +112,10 @@ import static com.google.common.base.Preconditions.checkState;
     }
 
     /**
-     * Retrieves an {@link Entity} with given key from datastore.
+     * Retrieves an {@link Entity} with given key from the Datastore.
      *
      * @param key {@link Key} to search for.
-     * @return the {@link Entity} or {@code null} if there is no such a key.
+     * @return the {@link Entity} or {@code null} in case of no results for the key given.
      * @see DatastoreReader#get(Key)
      */
     @SuppressWarnings("ReturnOfNull")
@@ -135,9 +135,9 @@ import static com.google.common.base.Preconditions.checkState;
     }
 
     /**
-     * Queries the datastore with the given arguments.
+     * Queries the Datastore with the given arguments.
      *
-     * @param query {@link Query} to execute upon the datastore.
+     * @param query {@link Query} to execute upon the Datastore.
      * @return results fo the query packed in a {@link List}.
      * @see DatastoreReader#run(Query)
      */
@@ -186,8 +186,9 @@ import static com.google.common.base.Preconditions.checkState;
 
     /**
      * Starts a transaction.
+     *
      * <p>Since this method is called and until one of {@link #commitTransaction()} or {@link #rollbackTransaction()}
-     * is called, all CRUD operations on datastore performed trough current instance of {@code DatastoreWrapper} become
+     * is called, all CRUD operations on Datastore performed trough current instance of {@code DatastoreWrapper} become
      * transactional.
      *
      * @throws IllegalStateException if a transaction is already started on this instance of {@code DatastoreWrapper}.
@@ -246,6 +247,7 @@ import static com.google.common.base.Preconditions.checkState;
 
     /**
      * Retrieves an instance of {@link KeyFactory} unique for given Kind of data.
+     *
      * <p>Retrieved instances are the same across all instances of {@code DatastoreWrapper}.
      *
      * @param kind kind of {@link Entity} to generate keys for.

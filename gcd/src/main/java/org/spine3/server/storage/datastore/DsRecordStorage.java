@@ -53,7 +53,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-class DsRecordStorage<I> extends RecordStorage<I> {
+/*package*/ class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
@@ -62,13 +62,16 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityStorageRecord.class);
     private static final String KIND = RECORD_TYPE_URL.getSimpleName();
     private static final String ID_CONVERSION_ERROR_MESSAGE
-            = "Entity had ID of an invalid type; could not parse ID from String. Note: custom convection is not supported. See Identifiers#idToString.";
+            = "Entity had ID of an invalid type; could not parse ID from String. Note: custom conversion is not supported. See org.spine3.base.Identifiers#idToString.";
 
-    /* package */ static <I> DsRecordStorage<I> newInstance(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
+    /* package */ static <I> DsRecordStorage<I> newInstance(Descriptor descriptor,
+                                              DatastoreWrapper datastore,
+                                              boolean multitenant) {
         return new DsRecordStorage<>(descriptor, datastore, multitenant);
     }
 
-    private static final Function<Entity, EntityStorageRecord> recordFromEntity = new Function<Entity, EntityStorageRecord>() {
+    private static final Function<Entity, EntityStorageRecord> recordFromEntity
+            = new Function<Entity, EntityStorageRecord>() {
         @Nullable
         @Override
         public EntityStorageRecord apply(@Nullable Entity input) {
@@ -85,7 +88,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
      * Creates a new storage instance.
      *
      * @param descriptor the descriptor of the type of messages to save to the storage.
-     * @param datastore  the datastore implementation to use.
+     * @param datastore  the Datastore implementation to use.
      */
     private DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
         super(multitenant);
@@ -227,6 +230,11 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         datastore.createOrUpdate(entity.build());
     }
 
+    /**
+     * A tuple containing generic record identifier and corresponding {@link EntityStorageRecord}.
+     *
+     * @param <I> type of the {@link org.spine3.server.entity.Entity entity} ID.
+     */
     private static class IdRecordPair<I> {
 
         private final I id;

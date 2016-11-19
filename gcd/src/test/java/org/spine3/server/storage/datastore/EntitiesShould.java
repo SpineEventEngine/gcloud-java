@@ -41,7 +41,7 @@ import static org.spine3.test.Verify.assertSize;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class EntitiesUtilShould {
+public class EntitiesShould {
 
     @Test
     public void have_private_constructor() {

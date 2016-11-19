@@ -38,6 +38,10 @@ import java.util.logging.Logger;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
+ * Utility class for performing transformations on entity IDs.
+ *
+ * <p>Provides functionality for transforming numeric and {@link Message protobuf} IDs into strings and vise versa.
+ *
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")
@@ -62,11 +66,31 @@ import static com.google.common.base.Preconditions.checkArgument;
     private IdTransformer() {
     }
 
-    /*package*/ static String idToString(Object id) {
+    /**
+     * Transforms given wildcard ID into it's string representation.
+     *
+     * @param id accepted types are:
+     *           <ul>
+     *           <li> {@link Number numeric IDs}
+     *           <li> {@code string IDs}
+     *           <li> {@link Message protobuf IDs}
+     *           </ul>
+     *
+     *           <p>Note: there are some limitations on what a string ID can be.
+     *           See <a href="https://cloud.google.com/appengine/docs/python/datastore/entities>Datastore docs</a>
+     *           for more info.
+     *
+     *           <p>Note: keeping in mind those limitations, one should also remember not to use too heavy protobuf
+     *           messages as IDs. Remember that the serialized message should not have more then 100 bytes,
+     *           otherwise this may lead to unexpected errors.
+     * @return string representation of the given ID.
+     */
+    /*package*/
+    static String idToString(Object id) {
         final String idString;
         if (id instanceof String) { // String ID
             idString = (String) id;
-        } else if (isNumber(id.getClass())) { // Numeric ID
+        } else if (isOfSupportedNumberType(id.getClass())) { // Numeric ID
             idString = id.toString();
         } else { // Proto-Message ID
             checkArgument(id instanceof Message, WRONG_ID_TYPE_ERROR_MESSAGE);
@@ -74,7 +98,8 @@ import static com.google.common.base.Preconditions.checkArgument;
             @SuppressWarnings("TypeMayBeWeakened")
             final Message message = (Message) id;
             final StringBuilder idBuilder = new StringBuilder(STRING_BUILDER_INITIAL_CAPACITY);
-            final TypeUrl typeUrl = KnownTypes.getTypeUrl(ClassName.of(id.getClass().getCanonicalName()));
+            final TypeUrl typeUrl = KnownTypes.getTypeUrl(ClassName.of(id.getClass()
+                                                                         .getCanonicalName()));
             final String prefixedTypeUrl = typeUrl.getPrefix() + '/' + typeUrl.getTypeName();
             idBuilder
                     .append(TYPE_PREFIX)
@@ -84,11 +109,14 @@ import static com.google.common.base.Preconditions.checkArgument;
             if (serializedMessage.length > 0) {
                 for (int i = 0; i < serializedMessage.length - 1; i++) {
                     final byte singleByte = serializedMessage[i];
-                    final String stringByte = BaseEncoding.base16().encode(new byte[]{singleByte});
-                    idBuilder.append(stringByte).append(SERIALIZED_MESSAGE_BYTES_DIVIDER);
+                    final String stringByte = BaseEncoding.base16()
+                                                          .encode(new byte[]{singleByte});
+                    idBuilder.append(stringByte)
+                             .append(SERIALIZED_MESSAGE_BYTES_DIVIDER);
                 }
                 final byte lastByte = serializedMessage[serializedMessage.length - 1];
-                idBuilder.append(BaseEncoding.base16().encode(new byte[]{lastByte}));
+                idBuilder.append(BaseEncoding.base16()
+                                             .encode(new byte[]{lastByte}));
             } else {
                 idBuilder.append(SERIALIZED_DEFAULT_MESSAGE);
             }
@@ -101,11 +129,18 @@ import static com.google.common.base.Preconditions.checkArgument;
         return idString;
     }
 
+    /**
+     * Transforms ID from a {@code String} representation back to a {@link Number} or a {@link Message protobuf message}.
+     *
+     * @param stringId          the {@code String} representation of the ID
+     * @param parametrizedClass {@link Class parametrized type} of the {@link org.spine3.server.entity.Entity} to restore ID for
+     * @return generic ID matching the given {@code String} representation
+     */
     @SuppressWarnings("unchecked")
     /*package*/ static <I> I idFromString(String stringId, @Nullable Class parametrizedClass) {
         final Class<I> idClass = getIdClass(stringId, parametrizedClass);
         final I id;
-        if (isNumber(idClass)) { // Numeric ID
+        if (isOfSupportedNumberType(idClass)) { // Numeric ID
             final String typeName = idClass.getSimpleName();
             try {
                 final Method parser = idClass.getDeclaredMethod("parse" + typeName, String.class);
@@ -181,17 +216,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 
         final ByteString byteString = ByteString.copyFrom(messageBytes);
         final Any wrappedId = Any.newBuilder()
-                .setValue(byteString)
-                .setTypeUrl(typeName)
-                .build();
+                                 .setValue(byteString)
+                                 .setTypeUrl(typeName)
+                                 .build();
         final Message id = AnyPacker.unpack(wrappedId);
         return id;
     }
 
-
-    private static boolean isNumber(Class<?> clss) {
-        return clss.isPrimitive()
-                || clss.isAssignableFrom(Integer.class)
-                || clss.isAssignableFrom(Long.class);
+    private static boolean isOfSupportedNumberType(Class<?> clazz) {
+        return clazz.isAssignableFrom(Integer.TYPE)
+                || clazz.isAssignableFrom(Long.TYPE)
+                || clazz.isAssignableFrom(Integer.class)
+                || clazz.isAssignableFrom(Long.class);
     }
 }

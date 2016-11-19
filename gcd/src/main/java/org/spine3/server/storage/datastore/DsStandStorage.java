@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * GAE datastore implementation of {@link StandStorage}.
+ * GAE Datastore implementation of {@link StandStorage}.
  *
  * @author Dmytro Dashenkov
  */
@@ -172,10 +172,9 @@ import static com.google.common.base.Preconditions.checkState;
 
                 final Any wrappedState = input.getState();
                 final Message state = AnyPacker.unpack(wrappedState);
-
                 final TypeUrl recordType = TypeUrl.of(state.getDescriptorForType());
-
-                return type.equals(recordType);
+                final boolean result =  type.equals(recordType);
+                return result;
             }
         };
     }

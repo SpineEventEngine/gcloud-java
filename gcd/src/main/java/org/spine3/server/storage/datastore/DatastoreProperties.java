@@ -35,7 +35,7 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
 
 /**
- * Utility class, which simplifies creation of datastore properties.
+ * Utility class, which simplifies creation of the Datastore properties.
  *
  * @author Mikhail Mikhaylov
  * @author Dmytro Dashenkov
@@ -95,7 +95,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
 
     /**
      * Converts {@link org.spine3.base.EventContext} or it's builder to a set of Properties, which are
-     * ready to add to datastore entity.
+     * ready to add to the Datastore entity.
      */
     /* package */ static void makeEventContextProperties(EventContextOrBuilder context,
                                            Entity.Builder builder) {
@@ -108,7 +108,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
 
     /**
      * Converts {@link org.spine3.base.Event}'s fields to a set of Properties, which are
-     * ready to add to datastore entity.
+     * ready to add to the Datastore entity.
      */
     /* package */ static void makeEventFieldProperties(EventStorageRecordOrBuilder event,
                                          Entity.Builder builder) {
