@@ -65,7 +65,11 @@ public class DatastoreStorageFactory implements StorageFactory {
      * Creates new instance of {@code DatastoreStorageFactory}.
      *
      * @param datastore   the {@link Datastore} implementation to use.
-     * @param multitenant shows if storage factory is configured to serve a multitenant application
+     * @param multitenant shows if storage factory is configured to serve a multitenant application.
+     *                    The implementation does not yet support
+     *                    <a href="https://cloud.google.com/appengine/docs/java/multitenancy/multitenancy">Datastore recommended</a>
+     *                    way of creating multitenant apps.
+     *                    See {@link Storage#isMultitenant()}.
      * @return creates new factory instance.
      * @see DatastoreOptions
      */
