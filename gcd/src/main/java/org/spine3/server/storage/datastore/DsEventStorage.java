@@ -195,7 +195,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 
             for (EventFilter filter : eventFilters) {
                 final EventFilterChecker predicate = new EventFilterChecker(filter);
-                if (predicate.isDefault()) {
+                if (predicate.checkFilterEmpty()) {
                     continue;
                 }
                 final boolean matches = predicate.apply(event);
@@ -237,7 +237,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
             this.contextFieldFilters = eventFilter.getContextFieldFilterList();
         }
 
-        private boolean isDefault() {
+        private boolean checkFilterEmpty() {
             return eventType.trim()
                             .isEmpty()
                     && aggregateIds.isEmpty()
