@@ -5,6 +5,7 @@ jdk:
 
 before_install:
   - chmod +x gradlew
+  - openssl aes-256-cbc -K $encrypted_16408b1fb58f_key -iv $encrypted_16408b1fb58f_iv -in spine-dev-62685282c0b9.json.enc -out ./gcd/src/test/resources/spine-dev-62685282c0b9.json -d
 
 script:
   - ./gradlew build --debug
