@@ -77,7 +77,7 @@ import static com.google.common.base.Preconditions.checkArgument;
      *           </ul>
      *
      *           <p>Note: there are some limitations on what a string ID can be.
-     *           See <a href="https://cloud.google.com/appengine/docs/python/datastore/entities>Datastore docs</a>
+     *           See <a href="https://cloud.google.com/appengine/docs/java/datastore/creating-entity-keys#Java_Kinds_and_identifiers">Datastore docs</a>
      *           for more info.
      *
      *           <p>Note: keeping in mind those limitations, one should also remember not to use too heavy protobuf
