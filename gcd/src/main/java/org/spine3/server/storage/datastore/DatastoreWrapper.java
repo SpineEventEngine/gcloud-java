@@ -69,7 +69,7 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
      *
-     * @param datastore          {@link Datastore} to wrap.
+     * @param datastore          {@link Datastore} to wrap
      * @return new instance of {@code DatastoreWrapper}
      */
     /*package*/ static DatastoreWrapper wrap(Datastore datastore) {
@@ -80,7 +80,7 @@ import static com.google.common.base.Preconditions.checkState;
      * Writes new {@link Entity} into the Datastore.
      *
      * @param entity new {@link Entity} to put into the Datastore
-     * @throws DatastoreException upon failure.
+     * @throws DatastoreException upon failure
      * @see DatastoreWriter#put(FullEntity)
      */
     @SuppressWarnings("WeakerAccess") // Can be used in future
@@ -91,8 +91,8 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Modifies an {@link Entity} in the Datastore.
      *
-     * @param entity the {@link Entity} to update.
-     * @throws DatastoreException if the {@link Entity} with such {@link Key} does not exist.
+     * @param entity the {@link Entity} to update
+     * @throws DatastoreException if the {@link Entity} with such {@link Key} does not exist
      * @see DatastoreWriter#update(Entity...)
      */
     @SuppressWarnings("WeakerAccess") // Can be used in future
@@ -103,7 +103,7 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Writes an {@link Entity} to the Datastore or modifies an existing one.
      *
-     * @param entity the {@link Entity} to write or update.
+     * @param entity the {@link Entity} to write or update
      * @see DatastoreWrapper#create(Entity)
      * @see DatastoreWrapper#update(Entity)
      */
@@ -114,8 +114,8 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Retrieves an {@link Entity} with given key from the Datastore.
      *
-     * @param key {@link Key} to search for.
-     * @return the {@link Entity} or {@code null} in case of no results for the key given.
+     * @param key {@link Key} to search for
+     * @return the {@link Entity} or {@code null} in case of no results for the key given
      * @see DatastoreReader#get(Key)
      */
     @SuppressWarnings("ReturnOfNull")
@@ -126,8 +126,8 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Retrieves an {@link Entity} for each of the given keys.
      *
-     * @param keys {@link Key Keys} to search for.
-     * @return A list of found entities in the order of keys (including {@code null} values for nonexistent keys).
+     * @param keys {@link Key Keys} to search for
+     * @return A list of found entities in the order of keys (including {@code null} values for nonexistent keys)
      * @see DatastoreReader#fetch(Key...)
      */
     /*package*/ List<Entity> read(Iterable<Key> keys) {
@@ -137,8 +137,8 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Queries the Datastore with the given arguments.
      *
-     * @param query {@link Query} to execute upon the Datastore.
-     * @return results fo the query packed in a {@link List}.
+     * @param query {@link Query} to execute upon the Datastore
+     * @return results fo the query packed in a {@link List}
      * @see DatastoreReader#run(Query)
      */
     @SuppressWarnings("unchecked")
@@ -150,7 +150,7 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Deletes all existing {@link Entity Entities} with the given keys.
      *
-     * @param keys {@link Key Keys} of the {@link Entity Entities} to delete. May be nonexistent.
+     * @param keys {@link Key Keys} of the {@link Entity Entities} to delete. May be nonexistent
      */
     /*package*/ void delete(Key... keys) {
         actor.delete(keys);
@@ -159,7 +159,7 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Deletes all existing {@link Entities} of given kind.
      *
-     * @param table Kind (a.k.a. type, table, etc.) of the records to delete.
+     * @param table Kind (a.k.a. type, table, etc.) of the records to delete
      */
     /*package*/ void dropTable(String table) {
         final Query query = Query.newEntityQueryBuilder()
@@ -191,7 +191,7 @@ import static com.google.common.base.Preconditions.checkState;
      * is called, all CRUD operations on Datastore performed trough current instance of {@code DatastoreWrapper} become
      * transactional.
      *
-     * @throws IllegalStateException if a transaction is already started on this instance of {@code DatastoreWrapper}.
+     * @throws IllegalStateException if a transaction is already started on this instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
     @SuppressWarnings("WeakerAccess") // Part of API
@@ -208,7 +208,7 @@ import static com.google.common.base.Preconditions.checkState;
      *
      * <p>All next operations become non-transactional until {@link #startTransaction()} is called again
      *
-     * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}.
+     * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
     @SuppressWarnings("WeakerAccess") // Part of API
@@ -225,7 +225,7 @@ import static com.google.common.base.Preconditions.checkState;
      *
      * <p>All next operations become non-transactional until {@link #startTransaction()} is called again
      *
-     * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}.
+     * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
     @SuppressWarnings("WeakerAccess") // Part of API
@@ -238,7 +238,7 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Checks whether there is an active transaction on this instance of {@code DatastoreWrapper}.
      *
-     * @return {@code true} if there is an active transaction, {@code false} otherwise.
+     * @return {@code true} if there is an active transaction, {@code false} otherwise
      */
     @SuppressWarnings("WeakerAccess") // Part of API
     /*package*/ boolean isTransactionActive() {
@@ -250,8 +250,8 @@ import static com.google.common.base.Preconditions.checkState;
      *
      * <p>Retrieved instances are the same across all instances of {@code DatastoreWrapper}.
      *
-     * @param kind kind of {@link Entity} to generate keys for.
-     * @return an instance of {@link KeyFactory} for given kind.
+     * @param kind kind of {@link Entity} to generate keys for
+     * @return an instance of {@link KeyFactory} for given kind
      */
     /*package*/ KeyFactory getKeyFactory(String kind) {
         KeyFactory keyFactory = keyFactories.get(kind);

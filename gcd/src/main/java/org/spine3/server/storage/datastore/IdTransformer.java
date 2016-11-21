@@ -83,7 +83,7 @@ import static com.google.common.base.Preconditions.checkArgument;
      *           <p>Note: keeping in mind those limitations, one should also remember not to use too heavy protobuf
      *           messages as IDs. Remember that the serialized message should not have more then 100 bytes,
      *           otherwise this may lead to unexpected errors.
-     * @return string representation of the given ID.
+     * @return string representation of the given ID
      */
     /*package*/
     static String idToString(Object id) {

@@ -61,7 +61,7 @@ import static com.google.common.base.Throwables.propagate;
      * @param entity source {@link Entity} to get message form
      * @param type   {@link TypeUrl} of required message
      * @param <M>    required message type
-     * @return message contained in the {@link Entity}.
+     * @return message contained in the {@link Entity}
      */
     @SuppressWarnings("unchecked")
     /*package*/ static <M extends Message> M entityToMessage(@Nullable Entity entity, TypeUrl type) {
@@ -88,7 +88,7 @@ import static com.google.common.base.Throwables.propagate;
      * @param entities a collection of the source {@link Entity Entities} to get message form
      * @param type     {@link TypeUrl} of required message
      * @param <M>      required message type
-     * @return message contained in the {@link Entity}.
+     * @return message contained in the {@link Entity}
      */
     @SuppressWarnings("unchecked")
     /*package*/ static <M extends Message> List<M> entitiesToMessages(Collection<Entity> entities, TypeUrl type) {
@@ -122,9 +122,9 @@ import static com.google.common.base.Throwables.propagate;
     /**
      * Generates an {@link Entity} with given {@link Key} and from given proto {@code Message}
      *
-     * @param message source of data to be put into the {@link Entity}.
-     * @param key     instance of {@link Key} to be assigned to the {@link Entity}.
-     * @return new instance of {@link Entity} containing serialized proto message.
+     * @param message source of data to be put into the {@link Entity}
+     * @param key     instance of {@link Key} to be assigned to the {@link Entity}
+     * @return new instance of {@link Entity} containing serialized proto message
      */
     @SuppressWarnings("ConstantConditions")
     /*package*/ static Entity messageToEntity(Message message, Key key) {

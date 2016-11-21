@@ -87,8 +87,8 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Creates a new storage instance.
      *
-     * @param descriptor the descriptor of the type of messages to save to the storage.
-     * @param datastore  the Datastore implementation to use.
+     * @param descriptor the descriptor of the type of messages to save to the storage
+     * @param datastore  the Datastore implementation to use
      */
     private DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
         super(multitenant);

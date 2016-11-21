@@ -63,8 +63,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      * Makes a property from the given timestamp using
      * {@link org.spine3.protobuf.Timestamps#convertToDate(TimestampOrBuilder)}.
      */
-    /* package */
-    static void addTimestampProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
+    /* package */ static void addTimestampProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final Date date = convertToDate(timestamp);
         entity.set(TIMESTAMP_PROPERTY_NAME, DateTime.copyFrom(date));
     }

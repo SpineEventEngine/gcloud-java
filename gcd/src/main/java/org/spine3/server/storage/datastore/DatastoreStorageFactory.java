@@ -52,7 +52,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      *
      * <p>Same as calling {@link #newInstance(Datastore, boolean)} with {@code false} second argument.
      *
-     * @param datastore the {@link Datastore} implementation to use.
+     * @param datastore the {@link Datastore} implementation to use
      * @return new instance of the {@code DatastoreStorageFactory}.
      * @see DatastoreOptions
      */
@@ -64,7 +64,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     /**
      * Creates new instance of {@code DatastoreStorageFactory}.
      *
-     * @param datastore   the {@link Datastore} implementation to use.
+     * @param datastore   the {@link Datastore} implementation to use
      * @param multitenant shows if storage factory is configured to serve a multitenant application.
      *                    The implementation does not yet support
      *                    <a href="https://cloud.google.com/appengine/docs/java/multitenancy/multitenancy">Datastore recommended</a>
@@ -80,7 +80,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     // Overriding used for testing
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
-    /* package */DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
+    /* package */ DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
         this.multitenant = multitenant;
         initDatastoreWrapper(datastore);
     }
