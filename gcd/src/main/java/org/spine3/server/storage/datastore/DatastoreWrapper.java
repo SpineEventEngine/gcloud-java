@@ -112,7 +112,7 @@ import static com.google.common.base.Preconditions.checkState;
     }
 
     /**
-     * Retrieves an {@link Entity} with given key from the Datastore.
+     * Retrieves an {@link Entity} with the given key from the Datastore.
      *
      * @param key {@link Key} to search for
      * @return the {@link Entity} or {@code null} in case of no results for the key given
@@ -157,9 +157,9 @@ import static com.google.common.base.Preconditions.checkState;
     }
 
     /**
-     * Deletes all existing {@link Entities} of given kind.
+     * Deletes all existing {@link Entities} of a kind given.
      *
-     * @param table Kind (a.k.a. type, table, etc.) of the records to delete
+     * @param table kind (a.k.a. type, table, etc.) of the records to delete
      */
     /*package*/ void dropTable(String table) {
         final Query query = Query.newEntityQueryBuilder()
@@ -187,9 +187,9 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Starts a transaction.
      *
-     * <p>Since this method is called and until one of {@link #commitTransaction()} or {@link #rollbackTransaction()}
-     * is called, all CRUD operations on Datastore performed trough current instance of {@code DatastoreWrapper} become
-     * transactional.
+     * <p>After this method is called, all {@code Entity} modifications performed through this instance of
+     * {@code DatastoreWrapper} become transactional. This behaviour lasts until either {@link #commitTransaction()} or
+     * {@link #rollbackTransaction()} is called.
      *
      * @throws IllegalStateException if a transaction is already started on this instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
@@ -204,9 +204,9 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Commits a transaction.
      *
-     * <p>All transactional operations are being performed.
+     * <p>Upon the method call, all the modifications within the active transaction are applied.
      *
-     * <p>All next operations become non-transactional until {@link #startTransaction()} is called again
+     * <p>All next operations become non-transactional until {@link #startTransaction()} is called.
      *
      * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
@@ -215,24 +215,25 @@ import static com.google.common.base.Preconditions.checkState;
     /*package*/ void commitTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.commit();
-        actor = datastore;
+        this.actor = datastore;
     }
 
     /**
-     * Rollback a transaction.
+     * Rollbacks a transaction.
      *
-     * <p>All transactional operations are not performed.
+     * <p>Upon the method call, all the modifications within the active transaction canceled permanently.
      *
-     * <p>All next operations become non-transactional until {@link #startTransaction()} is called again
+     * <p>After this method execution is over, all the further modifications made through the current instance of
+     * {@code DatastoreWrapper} become non-transactional.
      *
-     * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}
+     * @throws IllegalStateException if no transaction is active for the current instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
     @SuppressWarnings("WeakerAccess") // Part of API
     /*package*/ void rollbackTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.rollback();
-        actor = datastore;
+        this.actor = datastore;
     }
 
     /**
