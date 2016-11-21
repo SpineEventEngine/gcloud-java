@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * GAE Datastore implementation of {@link StandStorage}.
+ * Google cloud Datastore implementation of {@link StandStorage}.
  *
  * @author Dmytro Dashenkov
  */

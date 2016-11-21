@@ -67,7 +67,7 @@ import static com.google.common.base.Preconditions.checkArgument;
     }
 
     /**
-     * Transforms given wildcard ID into it's string representation.
+     * Transforms given wildcard ID into its String representation.
      *
      * @param id accepted types are:
      *           <ul>
@@ -133,7 +133,8 @@ import static com.google.common.base.Preconditions.checkArgument;
      * Transforms ID from a {@code String} representation back to a {@link Number} or a {@link Message protobuf message}.
      *
      * @param stringId          the {@code String} representation of the ID
-     * @param parametrizedClass {@link Class parametrized type} of the {@link org.spine3.server.entity.Entity} to restore ID for
+     * @param parametrizedClass {@link Class parametrized type} of the {@link org.spine3.server.entity.Entity}
+     *                                                         to restore ID for
      * @return generic ID matching the given {@code String} representation
      */
     @SuppressWarnings("unchecked")
@@ -191,7 +192,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 
     private static Message protoIdFromString(String stringId) {
         checkArgument(stringId.startsWith(TYPE_PREFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
-        checkArgument(stringId.endsWith(SERIALIZED_MESSAGE_BYTES_POSTFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
+        checkArgument(
+                stringId.endsWith(SERIALIZED_MESSAGE_BYTES_POSTFIX),
+                String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
 
         final int typeStartIndex = stringId.indexOf(TYPE_PREFIX) + TYPE_PREFIX.length();
         final int typeEndIndex = stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER);

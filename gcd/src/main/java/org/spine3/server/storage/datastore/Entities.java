@@ -56,6 +56,7 @@ import static com.google.common.base.Throwables.propagate;
 
     /**
      * Retrieves a message of given type, assignable from {@code Message}, from an {@link Entity}.
+     *
      * <p>If passed {@link Entity} is {@code null}, a default instance for the given type is returned.
      *
      * @param entity source {@link Entity} to get message form
@@ -83,6 +84,7 @@ import static com.google.common.base.Throwables.propagate;
     /**
      * Retrieves a {@link List} of messages of given type, assignable from {@code Message},
      * from a collection of {@link Entity Entities}.
+     *
      * <p>If passed {@link Entity} is {@code null}, a default instance for given type is returned.
      *
      * @param entities a collection of the source {@link Entity Entities} to get message form

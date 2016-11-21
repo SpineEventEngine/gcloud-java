@@ -133,10 +133,11 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
         final PropertyFilter greaterThen = PropertyFilter.gt(TIMESTAMP_NANOS_PROPERTY_NAME, lower);
         final PropertyFilter lessThen = PropertyFilter.lt(TIMESTAMP_NANOS_PROPERTY_NAME, upper);
         final CompositeFilter filter = CompositeFilter.and(greaterThen, lessThen);
-        return Query.newEntityQueryBuilder()
-                    .setKind(KIND)
-                    .setFilter(filter)
-                    .build();
+        final Query result = Query.newEntityQueryBuilder()
+                                  .setKind(KIND)
+                                  .setFilter(filter)
+                                  .build();
+        return result;
     }
 
     @Override
