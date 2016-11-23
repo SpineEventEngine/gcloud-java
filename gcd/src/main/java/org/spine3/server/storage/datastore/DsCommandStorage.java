@@ -20,41 +20,75 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.cloud.datastore.*;
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
-import org.spine3.type.TypeName;
 
-import static com.google.api.services.datastore.DatastoreV1.*;
-import static com.google.api.services.datastore.client.DatastoreHelper.*;
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Iterator;
+
+import static com.google.cloud.datastore.StructuredQuery.Filter;
+import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
+import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
+import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_PROPERTY_NAME;
+import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
  * Storage for command records based on Google Cloud Datastore.
  *
  * @author Alexander Litus
+ * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
- * @see LocalDatastoreStorageFactory
  */
-class DsCommandStorage extends CommandStorage {
+/*package*/ class DsCommandStorage extends CommandStorage {
+
+    private static final TypeUrl TYPE_URL = TypeUrl.of(CommandStorageRecord.getDescriptor());
+    private static final String KIND = TYPE_URL.getSimpleName();
+    private static final String COMMAND_STATUS_PROPERTY_NAME = "command_status";
 
     private final DatastoreWrapper datastore;
 
-    private final TypeName typeName;
+    private static final Function<Entity, CommandStorageRecord> RECORD_MAPPER
+            = new Function<Entity, CommandStorageRecord>() {
+        @Nullable
+        @Override
+        public CommandStorageRecord apply(@Nullable Entity input) {
+            checkNotNull(input);
+            final CommandStorageRecord record = Entities.entityToMessage(input, TYPE_URL);
+            return record;
+        }
+    };
 
-    /* package */ static CommandStorage newInstance(DatastoreWrapper datastore) {
-        return new DsCommandStorage(datastore);
+    /* package */ static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+        return new DsCommandStorage(datastore, multitenant);
     }
 
-    private DsCommandStorage(DatastoreWrapper datastore) {
+    private DsCommandStorage(DatastoreWrapper datastore, boolean multitenant) {
+        super(multitenant);
         this.datastore = datastore;
-        typeName = TypeName.of(CommandStorageRecord.getDescriptor());
+    }
+
+    @Override
+    protected Iterator<CommandStorageRecord> read(CommandStatus status) {
+        final Filter filter = PropertyFilter.eq(COMMAND_STATUS_PROPERTY_NAME, status.ordinal());
+        final Query query = Query.newEntityQueryBuilder()
+                                 .setKind(TYPE_URL.getSimpleName())
+                                 .setFilter(filter)
+                                 .build();
+        final Collection<Entity> entities = datastore.read(query);
+        final Collection<CommandStorageRecord> records = Collections2.transform(entities, RECORD_MAPPER);
+        return records.iterator();
     }
 
     @Override
@@ -100,18 +134,14 @@ class DsCommandStorage extends CommandStorage {
         checkNotDefault(commandId);
 
         final String idString = idToString(commandId);
-        final Key.Builder key = createKey(idString);
-        final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
+        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Entity entity = datastore.read(key);
 
-        final LookupResponse response = datastore.lookup(request);
-
-        if (response == null || response.getFoundCount() == 0) {
+        if (entity == null) {
             return CommandStorageRecord.getDefaultInstance();
         }
-
-        final EntityResult entity = response.getFound(0);
-        final CommandStorageRecord result = entityToMessage(entity, typeName.toTypeUrl());
-        return result;
+        final CommandStorageRecord record = RECORD_MAPPER.apply(entity);
+        return record;
     }
 
     @Override
@@ -122,17 +152,17 @@ class DsCommandStorage extends CommandStorage {
 
         final String idString = idToString(commandId);
 
-        final Key.Builder key = createKey(idString);
+        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
 
-        final Entity.Builder entity = messageToEntity(record, key);
-        entity.addProperty(DatastoreProperties.makeTimestampProperty(record.getTimestamp()));
-        entity.addProperty(DatastoreProperties.makeTimestampNanosProperty(record.getTimestamp()));
-
-        final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
-        datastore.commit(mutation);
-    }
-
-    private Key.Builder createKey(String idString) {
-        return makeKey(typeName.nameOnly(), idString);
+        Entity entity = messageToEntity(record, key);
+        entity = Entity.newBuilder(entity)
+                       .set(TIMESTAMP_PROPERTY_NAME, record.getTimestamp()
+                                                           .getSeconds())
+                       .set(TIMESTAMP_NANOS_PROPERTY_NAME, record.getTimestamp()
+                                                                 .getNanos())
+                       .set(COMMAND_STATUS_PROPERTY_NAME, record.getStatus()
+                                                                .ordinal())
+                       .build();
+        datastore.createOrUpdate(entity);
     }
 }

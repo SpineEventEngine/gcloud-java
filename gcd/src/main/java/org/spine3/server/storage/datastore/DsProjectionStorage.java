@@ -20,41 +20,46 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.validate.Validate;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 /**
+ * GAE Datastore implementation of the {@link ProjectionStorage}.
+ *
  * @author Mikhail Mikhaylov
  */
 /* package */ class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     private static final String LAST_EVENT_TIMESTAMP_ID = "datastore_event_timestamp_";
 
-    private final DsEntityStorage<I> entityStorage;
+    private final DsRecordStorage<I> entityStorage;
     private final DsPropertyStorage propertyStorage;
 
     private final String lastTimestampId;
 
-    /* package */
-    static <I> DsProjectionStorage<I> newInstance(DsEntityStorage<I> entityStorage,
+    /* package */static <I> DsProjectionStorage<I> newInstance(DsRecordStorage<I> entityStorage,
                                                   DsPropertyStorage propertyStorage,
-                                                  Class<? extends Entity<I, ?>> projectionClass) {
-        return new DsProjectionStorage<>(entityStorage, propertyStorage, projectionClass);
+                                                  Class<? extends Entity<I, ?>> projectionClass,
+                                                  boolean multitenant) {
+        return new DsProjectionStorage<>(entityStorage, propertyStorage, projectionClass, multitenant);
     }
 
-    private DsProjectionStorage(DsEntityStorage<I> entityStorage,
+    private DsProjectionStorage(DsRecordStorage<I> entityStorage,
                                 DsPropertyStorage propertyStorage,
-                                Class<? extends Entity<I, ?>> projectionClass) {
+                                Class<? extends Entity<I, ?>> projectionClass,
+                                boolean multitenant) {
+        super(multitenant);
         this.entityStorage = entityStorage;
         this.propertyStorage = propertyStorage;
-
-        // TODO:2016-04-21:mikhail.mikhaylov: We should use proto class name instead of java's one.
-        lastTimestampId = LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName();
+        this.lastTimestampId = LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName();
     }
 
     @Override
@@ -73,7 +78,27 @@ import javax.annotation.Nullable;
     }
 
     @Override
-    public EntityStorage<I> getEntityStorage() {
+    public RecordStorage<I> getRecordStorage() {
         return entityStorage;
+    }
+
+    @Override
+    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
+        return getRecordStorage().readMultiple(ids);
+    }
+
+    @Override
+    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
+        return getRecordStorage().readMultiple(ids, fieldMask);
+    }
+
+    @Override
+    protected Map<I, EntityStorageRecord> readAllRecords() {
+        return getRecordStorage().readAll();
+    }
+
+    @Override
+    protected Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
+        return getRecordStorage().readAll(fieldMask);
     }
 }

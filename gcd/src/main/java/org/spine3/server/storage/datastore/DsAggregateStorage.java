@@ -20,47 +20,54 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import org.spine3.base.Identifiers;
+import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
-import org.spine3.type.TypeName;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.google.api.services.datastore.DatastoreV1.*;
-import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
-import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
-import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
 import static org.spine3.base.Identifiers.idToString;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
  *
  * @author Alexander Litus
+ * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
- * @see LocalDatastoreStorageFactory
  */
 class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
     private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
+    private static final String SNAPSHOT = "SNAPSHOT";
 
     private static final String KIND = AggregateStorageRecord.class.getName();
-    private static final String TYPE_URL = TypeName.of(AggregateStorageRecord.getDescriptor()).toTypeUrl();
+    private static final TypeUrl TYPE_URL = TypeUrl.of(AggregateStorageRecord.getDescriptor());
 
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;
 
-    /* package */ static <I> DsAggregateStorage<I> newInstance(DatastoreWrapper datastore,
-                                                 DsPropertyStorage propertyStorage) {
-        return new DsAggregateStorage<>(datastore, propertyStorage);
+    /* package */ static <I> DsAggregateStorage<I> newInstance(
+            DatastoreWrapper datastore,
+            DsPropertyStorage propertyStorage,
+            boolean multitenant) {
+        return new DsAggregateStorage<>(datastore, propertyStorage, multitenant);
     }
 
-    private DsAggregateStorage(DatastoreWrapper datastore, DsPropertyStorage propertyStorage) {
+    private DsAggregateStorage(DatastoreWrapper datastore, DsPropertyStorage propertyStorage, boolean multitenant) {
+        super(multitenant);
         this.datastore = datastore;
         this.propertyStorage = propertyStorage;
     }
@@ -85,22 +92,27 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String datastoreId = generateDatastoreId(id);
-        propertyStorage.write(datastoreId, Int32Value.newBuilder().setValue(eventCount).build());
+        propertyStorage.write(datastoreId, Int32Value.newBuilder()
+                                                     .setValue(eventCount)
+                                                     .build());
     }
 
     @Override
-    protected void writeInternal(I id, AggregateStorageRecord record) {
+    protected void writeRecord(I id, AggregateStorageRecord record) {
         checkNotNull(id);
 
-        final Value.Builder idValue = makeValue(idToString(id));
-        final Property.Builder idProperty = makeProperty(AGGREGATE_ID_PROPERTY_NAME, idValue);
-        final Entity.Builder entity = messageToEntity(record, makeKey(KIND));
-        entity.addProperty(idProperty);
-        entity.addProperty(DatastoreProperties.makeTimestampProperty(record.getTimestamp()));
-        entity.addProperty(DatastoreProperties.makeTimestampNanosProperty(record.getTimestamp()));
+        final String stringId = idToString(id);
+        String eventId = record.getEventId();
+        if (eventId.isEmpty()) {
+            // Snapshots have no Event IDs.
+            eventId = SNAPSHOT + stringId;
+        }
 
-        final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
-        datastore.commit(mutation);
+        final Key key = Keys.generateForKindWithName(datastore, KIND, eventId);
+        final Entity incompleteEntity = Entities.messageToEntity(record, key);
+        final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
+        builder.set(AGGREGATE_ID_PROPERTY_NAME, stringId);
+        datastore.createOrUpdate(builder.build());
     }
 
     @Override
@@ -108,20 +120,30 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String idString = idToString(id);
-        final Filter.Builder idFilter = makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL,
-                makeValue(idString));
-        final Query.Builder query = DatastoreQueries.makeQuery(DESCENDING, KIND);
-        query.setFilter(idFilter).build();
+        final Query<?> query = Query.newEntityQueryBuilder()
+                                    .setKind(KIND)
+                                    .setFilter(StructuredQuery.PropertyFilter.eq(AGGREGATE_ID_PROPERTY_NAME, idString))
+                                    .build();
+        final List<Entity> eventEntities = datastore.read(query);
+        if (eventEntities.isEmpty()) {
+            return Collections.emptyIterator();
+        }
 
-        final List<EntityResult> entityResults = datastore.runQuery(query);
-        final List<AggregateStorageRecord> records = entitiesToMessages(entityResults, TYPE_URL);
-        final Iterator<AggregateStorageRecord> recordsIterator = records.iterator();
-        return recordsIterator;
+        final List<AggregateStorageRecord> immutableResult = Entities.entitiesToMessages(eventEntities, TYPE_URL);
+        final List<AggregateStorageRecord> records = Lists.newArrayList(immutableResult);
+
+        Collections.sort(records, new Comparator<AggregateStorageRecord>() {
+            @Override
+            public int compare(AggregateStorageRecord o1, AggregateStorageRecord o2) {
+                return Timestamps.compare(o2.getTimestamp(), o1.getTimestamp());
+            }
+        });
+        return records.iterator();
     }
 
     private String generateDatastoreId(I id) {
         final String stringId = Identifiers.idToString(id);
-        final String datastoreid = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
-        return datastoreid;
+        final String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
+        return datastoreId;
     }
 }

@@ -20,18 +20,18 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.Messages;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
 
-import static com.google.api.services.datastore.DatastoreV1.*;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
+import static org.spine3.server.storage.datastore.Entities.entityToMessage;
+import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 
 /**
  * Special Storage type for storing and retrieving global properties with unique keys.
@@ -40,8 +40,8 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
  */
 /* package */ class DsPropertyStorage {
 
-    private static final String PROPERTIES_KIND = "properties_kind";
-    private static final String ANY_TYPE_URL = TypeName.of(Any.getDescriptor()).toTypeUrl();
+    private static final TypeUrl ANY_TYPE_URL = TypeUrl.of(Any.getDescriptor());
+    private static final String KIND = ANY_TYPE_URL.getTypeName();
 
     private final DatastoreWrapper datastore;
 
@@ -57,25 +57,23 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
         checkNotNull(propertyId);
         checkNotNull(value);
 
-        final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
-        final Entity.Builder entity = messageToEntity(Messages.toAny(value), key);
-        final Mutation.Builder mutation = Mutation.newBuilder().addUpsert(entity);
-        datastore.commit(mutation);
+        final Key key = Keys.generateForKindWithName(datastore, KIND, propertyId);
+
+        final Entity entity = messageToEntity(AnyPacker.pack(value), key);
+        datastore.createOrUpdate(entity);
     }
 
     @Nullable
     /* package */ <V extends Message> V read(String propertyId) {
-        final Key.Builder key = makeKey(PROPERTIES_KIND, propertyId);
-        final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
+        final Key key = Keys.generateForKindWithName(datastore, KIND, propertyId);
+        final Entity response = datastore.read(key);
 
-        final LookupResponse response = datastore.lookup(request);
-
-        if (response == null || response.getFoundCount() == 0) {
+        if (response == null) {
             return null;
         }
 
-        final EntityResult entity = response.getFound(0);
-        final Any anyResult = entityToMessage(entity, ANY_TYPE_URL);
-        return Messages.fromAny(anyResult);
+        final Any anyResult = entityToMessage(response, ANY_TYPE_URL);
+        final V result = AnyPacker.unpack(anyResult);
+        return result;
     }
 }

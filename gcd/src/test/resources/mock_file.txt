@@ -1,0 +1,1 @@
+This file is never used and exists to guarantee test/resources directory existence when building on the CI.

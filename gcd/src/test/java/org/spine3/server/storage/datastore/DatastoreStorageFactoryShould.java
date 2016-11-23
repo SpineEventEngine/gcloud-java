@@ -20,32 +20,39 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.client.Datastore;
-import com.google.api.services.datastore.client.DatastoreFactory;
-import com.google.api.services.datastore.client.DatastoreOptions;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.*;
-import org.spine3.test.project.ProjectId;
-import org.spine3.testdata.*;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreStorageFactoryShould {
 
-    private static final DatastoreOptions DUMMY_OPTIONS = new DatastoreOptions.Builder()
-            .dataset("dummy-dataset")
+    private static final DatastoreOptions DUMMY_OPTIONS = DatastoreOptions.newBuilder()
+            .setProjectId("dummy-dataset")
             .build();
 
-    private static final Datastore DATASTORE = DatastoreFactory.get().create(DUMMY_OPTIONS);
+    private static final Datastore DATASTORE = DUMMY_OPTIONS.getService();
 
     private static final StorageFactory FACTORY = DatastoreStorageFactory.newInstance(DATASTORE);
 
     @Test
+    public void create_multitenant_storages() throws Exception {
+        final StorageFactory factory = DatastoreStorageFactory.newInstance(DATASTORE, true);
+        assertTrue(factory.isMultitenant());
+        final CommandStorage storage = factory.createCommandStorage();
+        assertTrue(storage.isMultitenant());
+        storage.close();
+    }
+
+    @Test
     public void create_entity_storage_using_class_parameter() {
-        final EntityStorage<String> storage = FACTORY.createEntityStorage(TestEntity.class);
+        final RecordStorage<String> storage = FACTORY.createRecordStorage(TestEntity.class);
         assertNotNull(storage);
     }
 

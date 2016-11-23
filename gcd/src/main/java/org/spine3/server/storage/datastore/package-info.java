@@ -17,43 +17,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+/**
+ * This package contains Google Cloud Datastore implementation of storages.
+ *
+ * @see org.spine3.server.storage.AbstractStorage
+ */
+@ParametersAreNonnullByDefault
 package org.spine3.server.storage.datastore;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStorageShould;
-
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class DsEventStorageShould extends EventStorageShould {
-
-    private static final TestDatastoreStorageFactory DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
-
-    @Override
-    public void tearDownEventStorageTest() {
-        super.tearDownEventStorageTest();
-        DATASTORE_FACTORY.clear();
-    }
-
-    @Override
-    protected EventStorage getStorage() {
-        return DATASTORE_FACTORY.createEventStorage();
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-        DATASTORE_FACTORY.setUp();
-    }
-
-    @After
-    public void tearDownTest() {
-        DATASTORE_FACTORY.tearDown();
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        DATASTORE_FACTORY.tearDown();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -20,42 +20,36 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.DatastoreV1.Property;
-import com.google.api.services.datastore.DatastoreV1.PropertyReference;
-import com.google.protobuf.FieldMask;
+import com.google.cloud.datastore.DateTime;
+import com.google.cloud.datastore.Entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.base.EventContextOrBuilder;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EventStorageRecordOrBuilder;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 
-import static com.google.api.services.datastore.client.DatastoreHelper.makeProperty;
-import static com.google.api.services.datastore.client.DatastoreHelper.makePropertyReference;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeValue;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
 
 /**
- * Utility class, which simplifies creation of datastore properties.
+ * Utility class, which simplifies creation of the Datastore properties.
  *
  * @author Mikhail Mikhaylov
+ * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")
 /* package */ class DatastoreProperties {
 
-    private static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
+    /* package */ static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
     /* package */ static final String TIMESTAMP_NANOS_PROPERTY_NAME = "timestamp_nanos";
 
-    /* package */ static final String AGGREGATE_ID_PROPERTY_NAME = "aggregate_id";
+    private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregate_id";
     private static final String PRODUCER_ID_PROPERTY_NAME = "producer_id";
-    /* package */ static final String EVENT_TYPE_PROPERTY_NAME = "event_type";
+    private static final String EVENT_TYPE_PROPERTY_NAME = "event_type";
     private static final String EVENT_ID_PROPERTY_NAME = "event_id";
-
-    private static final String CONTEXT_FIELD_PROPERTY_PREFIX_NAME = "context_";
 
     private static final String CONTEXT_EVENT_ID_PROPERTY_NAME = "context_event_id";
     private static final String CONTEXT_TIMESTAMP_PROPERTY_NAME = "context_timestamp";
@@ -69,100 +63,57 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      * Makes a property from the given timestamp using
      * {@link org.spine3.protobuf.Timestamps#convertToDate(TimestampOrBuilder)}.
      */
-    /* package */ static Property.Builder makeTimestampProperty(TimestampOrBuilder timestamp) {
+    /* package */ static void addTimestampProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final Date date = convertToDate(timestamp);
-        return makeProperty(TIMESTAMP_PROPERTY_NAME, makeValue(date));
+        entity.set(TIMESTAMP_PROPERTY_NAME, DateTime.copyFrom(date));
     }
 
     /**
      * Makes a property from the given timestamp using
      * {@link org.spine3.protobuf.Timestamps#convertToNanos(TimestampOrBuilder)}.
      */
-    /* package */ static Property.Builder makeTimestampNanosProperty(TimestampOrBuilder timestamp) {
+    /* package */ static void addTimestampNanosProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final long nanos = convertToNanos(timestamp);
-        return makeProperty(TIMESTAMP_NANOS_PROPERTY_NAME, makeValue(nanos));
+        entity.set(TIMESTAMP_NANOS_PROPERTY_NAME, nanos);
     }
 
     /**
      * Makes AggregateId property from given {@link Message} value.
-     *
-     * @return {@link Property.Builder}
      */
-    /* package */ static Property.Builder makeAggregateIdProperty(Message aggregateId) {
-        final String propertyValue = Messages.toText(aggregateId);
-        return makeProperty(AGGREGATE_ID_PROPERTY_NAME, makeValue(propertyValue));
+    /* package */ static void addAggregateIdProperty(Object aggregateId, Entity.Builder entity) {
+        final String propertyValue = Identifiers.idToString(aggregateId);
+        entity.set(AGGREGATE_ID_PROPERTY_NAME, propertyValue);
     }
 
     /**
      * Makes EventType property from given String value.
-     *
-     * @return {@link Property.Builder}
      */
-    /* package */ static Property.Builder makeEventTypeProperty(String eventType) {
-        return makeProperty(EVENT_TYPE_PROPERTY_NAME, makeValue(eventType));
-    }
-
-    /**
-     * Makes Property, based on context {@link FieldMask}.
-     *
-     * @return {@link Property.Builder}
-     */
-    @SuppressWarnings("TypeMayBeWeakened") // No need to do this
-    /* package */ static PropertyReference makeContextFieldPropertyReference(FieldMask field) {
-        final String fieldPath = field.getPaths(0);
-        final String propertyName = getContextFieldPropertyName(fieldPath);
-
-        return makePropertyReference(propertyName).build();
-    }
-
-    /**
-     * Makes Property, based on event's {@link FieldMask}.
-     *
-     * @return {@link Property.Builder}
-     */
-    @SuppressWarnings("TypeMayBeWeakened") // No need to do this
-    /* package */ static PropertyReference makeEventFieldPropertyReference(FieldMask field) {
-        final String fieldPath = field.getPaths(0);
-
-        return makePropertyReference(fieldPath).build();
-    }
-
-    private static String getContextFieldPropertyName(String contextFieldName) {
-        return CONTEXT_FIELD_PROPERTY_PREFIX_NAME + contextFieldName;
+    /* package */ static void addEventTypeProperty(String eventType, Entity.Builder entity) {
+        entity.set(EVENT_TYPE_PROPERTY_NAME, eventType);
     }
 
     /**
      * Converts {@link org.spine3.base.EventContext} or it's builder to a set of Properties, which are
-     * ready to add to datastore entity.
+     * ready to add to the Datastore entity.
      */
-    /* package */ static Iterable<? extends Property> makeEventContextProperties(
-            EventContextOrBuilder context) {
-        final Collection<Property> properties = new ArrayList<>();
-        properties.add(makeProperty(CONTEXT_EVENT_ID_PROPERTY_NAME,
-                makeValue(Messages.toText(context.getEventId()))).build());
-        properties.add(makeProperty(CONTEXT_TIMESTAMP_PROPERTY_NAME,
-                makeValue(convertToNanos(context.getTimestamp()))).build());
+    /* package */ static void makeEventContextProperties(EventContextOrBuilder context,
+                                           Entity.Builder builder) {
+        builder.set(CONTEXT_EVENT_ID_PROPERTY_NAME, Messages.toText(context.getEventId()));
+        builder.set(CONTEXT_TIMESTAMP_PROPERTY_NAME, convertToNanos(context.getTimestamp()));
         // We do not re-save producer id
-        properties.add(makeProperty(CONTEXT_OF_COMMAND_PROPERTY_NAME,
-                makeValue(Messages.toText(context.getCommandContext()))).build());
-        properties.add(makeProperty(CONTEXT_VERSION,
-                makeValue(context.getVersion())).build());
-        // We do not save attributes
-        return properties;
+        builder.set(CONTEXT_OF_COMMAND_PROPERTY_NAME, Messages.toText(context.getCommandContext()));
+        builder.set(CONTEXT_VERSION, context.getVersion());
     }
 
     /**
      * Converts {@link org.spine3.base.Event}'s fields to a set of Properties, which are
-     * ready to add to datastore entity.
+     * ready to add to the Datastore entity.
      */
-    /* package */ static Iterable<? extends Property> makeEventFieldProperties(EventStorageRecordOrBuilder event) {
-        final Collection<Property> properties = new ArrayList<>();
-
+    /* package */ static void makeEventFieldProperties(EventStorageRecordOrBuilder event,
+                                         Entity.Builder builder) {
         // We do not re-save timestamp
         // We do not re-save event type
-        properties.add(makeProperty(EVENT_ID_PROPERTY_NAME, makeValue(event.getEventId())).build());
-        properties.add(makeProperty(PRODUCER_ID_PROPERTY_NAME, makeValue(event.getProducerId())).build());
-
-        return properties;
+        builder.set(EVENT_ID_PROPERTY_NAME, event.getEventId());
+        builder.set(PRODUCER_ID_PROPERTY_NAME, event.getProducerId());
     }
 }

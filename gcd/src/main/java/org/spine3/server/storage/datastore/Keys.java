@@ -1,5 +1,6 @@
 /*
- * Copyright 2015, TeamDev Ltd. All rights reserved.
+ *
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -16,19 +17,27 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
  */
+package org.spine3.server.storage.datastore;
 
-package org.spine3.sample.gae;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
 
-import org.junit.Test;
+/**
+ * Utility for generating Google Datastore {@link com.google.cloud.datastore.Key} instances.
+ *
+ * @author Alex Tymchenko
+ */
+@SuppressWarnings("UtilityClass")
+/* package */ class Keys {
 
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class ApplicationShould {
+    private Keys() {}
 
-    private static final String[] ARGS = new String[0];
+    /* package */ static Key generateForKindWithName(DatastoreWrapper datastore, String kind, String keyName) {
+        final KeyFactory keyFactory = datastore.getKeyFactory(kind);
+        final Key key = keyFactory.newKey(keyName);
 
-    @Test
-    public void execute() {
-        Application.main(ARGS);
+        return key;
     }
 }

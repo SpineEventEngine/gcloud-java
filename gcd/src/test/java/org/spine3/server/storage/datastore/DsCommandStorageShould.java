@@ -23,23 +23,13 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageShould;
-import org.spine3.test.project.ProjectId;
 
-/**
- * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
- * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
- * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
- * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
- */
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsCommandStorageShould extends CommandStorageShould {
 
-    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
-
-    private static final ProjectId ID = ProjectId.newBuilder().setId("projectId").build();
+    private static final TestDatastoreStorageFactory DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
 
     @BeforeClass
     public static void setUpClass() {

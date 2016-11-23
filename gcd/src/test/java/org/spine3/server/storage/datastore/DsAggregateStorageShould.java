@@ -24,23 +24,28 @@ import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageShould;
-import org.spine3.test.project.ProjectId;
+import org.spine3.test.storage.Project;
+import org.spine3.test.storage.ProjectId;
 
-
-/**
- * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
- * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
- * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
- * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
- */
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsAggregateStorageShould extends AggregateStorageShould {
 
-    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory DATASTORE_FACTORY;
+
+    // Guarantees any stacktrace to be informative
+    static {
+        try {
+            DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
+        } catch (Throwable e) {
+            log().error("Failed to initialize local datastore factory", e);
+            throw new RuntimeException(e);
+        }
+    }
 
     @BeforeClass
     public static void setUpClass() {
@@ -66,5 +71,29 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     @Override
     protected <Id> AggregateStorage<Id> getStorage(Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aClass) {
         return DATASTORE_FACTORY.createAggregateStorage(aClass);
+    }
+
+    @SuppressWarnings("RefusedBequest")
+    @Override // Override method with the same behavior to change ID value
+    public void write_and_read_event_by_Long_id() {
+        final AggregateStorage storage = getStorage(TestAggregateWithIdLong.class);
+        final long id = 42L;
+        this.writeAndReadEventTest(id, storage);
+    }
+
+    private static class TestAggregateWithIdLong extends Aggregate<Long, Project, org.spine3.test.storage.Project.Builder> {
+        private TestAggregateWithIdLong(Long id) {
+            super(id);
+        }
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(DsAggregateStorageShould.class);
     }
 }

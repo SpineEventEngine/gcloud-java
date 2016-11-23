@@ -20,26 +20,18 @@
 
 package org.spine3.server.storage.datastore;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.spine3.base.Identifiers;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.EntityStorage;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.EntityStorageShould;
-import org.spine3.test.project.Project;
-import org.spine3.test.project.ProjectId;
-import org.spine3.testdata.TestAggregateIdFactory;
-import org.spine3.testdata.TestEntity;
+import org.spine3.server.storage.RecordStorage;
+import org.spine3.test.aggregate.Project;
 
-/**
- * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
- * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
- * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
- * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
- */
 public class DsEntityStorageShould extends EntityStorageShould<String> {
 
-    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
 
     @BeforeClass
     public static void setUpClass() {
@@ -58,8 +50,8 @@ public class DsEntityStorageShould extends EntityStorageShould<String> {
 
 
     @Override
-    protected EntityStorage<String> getStorage() {
-        return DATASTORE_FACTORY.createEntityStorage(TestEntity.class);
+    protected RecordStorage<String> getStorage() {
+        return DATASTORE_FACTORY.createRecordStorage(TestEntity.class);
     }
 
     @Override
@@ -68,7 +60,20 @@ public class DsEntityStorageShould extends EntityStorageShould<String> {
     }
 
     @Override
-    protected <I> EntityStorage<I> getStorage(Class<? extends Entity<I, ?>> entityClass) {
-        return DATASTORE_FACTORY.createEntityStorage(entityClass);
+    protected <I> RecordStorage<I> getStorage(Class<? extends Entity<I, ?>> entityClass) {
+        return DATASTORE_FACTORY.createRecordStorage(entityClass);
+    }
+
+    private static class TestEntity extends Entity<String, Project> {
+
+        /**
+         * Creates a new instance.
+         *
+         * @param id the ID for the new instance
+         * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
+         */
+        private TestEntity(String id) {
+            super(id);
+        }
     }
 }
