@@ -287,19 +287,21 @@ import static org.spine3.util.Exceptions.wrapped;
                 Message object,
                 @SuppressWarnings("TypeMayBeWeakened") /*BuilderOrType interface*/ FieldFilter filter) {
             final String fieldPath = filter.getFieldPath();
-            final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.'));
+            final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
             checkArgument(!Strings.isNullOrEmpty(fieldName), "Field filter " + filter.toString() + " is invalid");
             final String fieldGetterName = "get" + fieldName.substring(0, 1)
                                                             .toUpperCase() + fieldName.substring(1);
 
             final Collection<Any> expectedAnys = filter.getValueList();
             final Collection<Message> expectedValues = Collections2.transform(expectedAnys, ANY_UNPACKER);
-            final Message actualValue;
-
+            Message actualValue;
             try {
                 final Class<?> messageClass = object.getClass();
                 final Method fieldGetter = messageClass.getDeclaredMethod(fieldGetterName);
                 actualValue = (Message) fieldGetter.invoke(object);
+                if (actualValue instanceof Any) {
+                    actualValue = AnyPacker.unpack((Any) actualValue);
+                }
             } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
                 throw wrapped(e);
             }
