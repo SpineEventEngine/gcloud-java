@@ -10,7 +10,7 @@ echo " -- PUBLISHING: current branch is $TRAVIS_BRANCH."
 
 if [ "$TRAVIS_BRANCH" == 'master' ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
     echo " ------ Publishing the artifacts to the repository..."
-    openssl aes-256-cbc -K $encrypted_0f12c1faf1fc_key -iv $encrypted_0f12c1faf1fc_iv -in credentials.properties.enc -out credentials.properties -d
+    openssl aes-256-cbc -K $encrypted_0561e108020c_key -iv $encrypted_0561e108020c_iv -in credentials.properties.enc -out credentials.properties -d
     ./gradlew publish -x test
     echo " ------ Artifacts published."
 else
