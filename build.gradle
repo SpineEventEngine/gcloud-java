@@ -76,7 +76,7 @@ subprojects {
         compile group: 'org.spine3', name: 'examples', version: "0.2", changing: true
 
         // Guava
-        compile group: 'com.google.guava', name: 'guava', version: '19.0'
+        compile group: 'com.google.guava', name: 'guava', version: '20.0'
 
         // Findbugs
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'

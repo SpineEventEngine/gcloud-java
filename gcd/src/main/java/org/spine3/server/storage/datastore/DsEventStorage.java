@@ -29,11 +29,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.base.Event;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
-import org.spine3.base.FieldFilter;
-import org.spine3.base.Identifiers;
+import org.spine3.base.*;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
@@ -53,11 +49,11 @@ import static com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Storage for event records based on Google Cloud Datastore.
@@ -305,7 +301,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
                 final Method fieldGetter = messageClass.getDeclaredMethod(fieldGetterName);
                 actualValue = (Message) fieldGetter.invoke(object);
             } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
-                throw propagate(e);
+                throw wrapped(e);
             }
 
             final boolean result = expectedValues.contains(actualValue);
