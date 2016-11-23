@@ -29,11 +29,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.base.Event;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
-import org.spine3.base.FieldFilter;
-import org.spine3.base.Identifiers;
+import org.spine3.base.*;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
@@ -53,11 +49,11 @@ import static com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Storage for event records based on Google Cloud Datastore.
@@ -291,21 +287,23 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
                 Message object,
                 @SuppressWarnings("TypeMayBeWeakened") /*BuilderOrType interface*/ FieldFilter filter) {
             final String fieldPath = filter.getFieldPath();
-            final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.'));
+            final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
             checkArgument(!Strings.isNullOrEmpty(fieldName), "Field filter " + filter.toString() + " is invalid");
             final String fieldGetterName = "get" + fieldName.substring(0, 1)
                                                             .toUpperCase() + fieldName.substring(1);
 
             final Collection<Any> expectedAnys = filter.getValueList();
             final Collection<Message> expectedValues = Collections2.transform(expectedAnys, ANY_UNPACKER);
-            final Message actualValue;
-
+            Message actualValue;
             try {
                 final Class<?> messageClass = object.getClass();
                 final Method fieldGetter = messageClass.getDeclaredMethod(fieldGetterName);
                 actualValue = (Message) fieldGetter.invoke(object);
+                if (actualValue instanceof Any) {
+                    actualValue = AnyPacker.unpack((Any) actualValue);
+                }
             } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
-                throw propagate(e);
+                throw wrapped(e);
             }
 
             final boolean result = expectedValues.contains(actualValue);
