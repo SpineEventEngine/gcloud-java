@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Blob;
+import com.google.cloud.datastore.BlobValue;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.common.collect.ImmutableList;
@@ -136,8 +137,11 @@ import static org.spine3.util.Exceptions.wrapped;
         final Any wrapped = AnyPacker.pack(message);
         final byte[] messageBytes = wrapped.getValue().toByteArray();
         final Blob valueBlob = Blob.copyFrom(messageBytes);
+        final BlobValue blobValue = BlobValue.newBuilder(valueBlob)
+                                             .setExcludeFromIndexes(true)
+                                             .build();
         final Entity entity = Entity.newBuilder(key)
-                                    .set(VALUE_PROPERTY_NAME, valueBlob)
+                                    .set(VALUE_PROPERTY_NAME, blobValue)
                                     .build();
         return entity;
     }
