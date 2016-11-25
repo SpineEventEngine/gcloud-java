@@ -64,7 +64,11 @@ import static com.google.common.base.Preconditions.checkState;
                                    .setProjectId(DEFAULT_DATASET_NAME).setCredentials(credentials)
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
-            throw new RuntimeException(e);
+            log().warn("Cannot find the configuration file {}", CREDENTIALS_FILE_PATH);
+            final DatastoreOptions defaultOptions = DatastoreOptions.newBuilder()
+                                                                    .setProjectId(DEFAULT_DATASET_NAME)
+                                                                    .build();
+            return defaultOptions;
         }
     }
 
