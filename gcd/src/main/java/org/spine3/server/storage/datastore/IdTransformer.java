@@ -213,8 +213,9 @@ import static com.google.common.base.Preconditions.checkArgument;
         final String[] separateStringBytes = bytesString.split(SERIALIZED_MESSAGE_BYTES_DIVIDER);
         final byte[] messageBytes = new byte[separateStringBytes.length];
         for (int i = 0; i < messageBytes.length; i++) {
-            final byte oneByte = Byte.parseByte(separateStringBytes[i], SERIALIZED_BYTES_RADIX);
-            messageBytes[i] = oneByte;
+            final byte[] singleByteAsArray = BaseEncoding.base16()
+                                        .decode(separateStringBytes[i]);
+            messageBytes[i] = singleByteAsArray[0];
         }
 
         final ByteString byteString = ByteString.copyFrom(messageBytes);
