@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
@@ -37,11 +38,7 @@ import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -60,9 +57,11 @@ import static com.google.common.base.Preconditions.checkState;
 
     private static final String VERSION_KEY = "version";
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityStorageRecord.class);
-    private static final String KIND = RECORD_TYPE_URL.getSimpleName();
-    private static final String ID_CONVERSION_ERROR_MESSAGE
-            = "Entity had ID of an invalid type; could not parse ID from String. Note: custom conversion is not supported. See org.spine3.base.Identifiers#idToString.";
+    private static final String KIND = EntityStorageRecord.class.getName();
+    private static final String ID_CONVERSION_ERROR_MESSAGE =   "Entity had ID of an invalid type; could not " +
+                                                                "parse ID from String. " +
+                                                                "Note: custom conversion is not supported. " +
+                                                                "See org.spine3.base.Identifiers#idToString.";
 
     /* package */ static <I> DsRecordStorage<I> newInstance(Descriptor descriptor,
                                               DatastoreWrapper datastore,
@@ -196,9 +195,9 @@ import static com.google.common.base.Preconditions.checkState;
     }
 
     private Map<I, EntityStorageRecord> queryAll(Function<Entity, IdRecordPair<I>> transformer, FieldMask fieldMask) {
-        final String sql = "SELECT * FROM " + RECORD_TYPE_URL.getSimpleName();
-        final Query<?> query = Query.newGqlQueryBuilder(sql)
-                                    .build();
+        final EntityQuery query = Query.newEntityQueryBuilder()
+                                       .setKind(KIND)
+                                       .build();
         final List<Entity> results = datastore.read(query);
 
         final ImmutableMap.Builder<I, EntityStorageRecord> records = new ImmutableMap.Builder<>();
