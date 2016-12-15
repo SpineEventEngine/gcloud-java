@@ -45,8 +45,8 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
 
     /* package */ static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
     /* package */ static final String TIMESTAMP_NANOS_PROPERTY_NAME = "timestamp_nanos";
+    /* package */ static final String AGGREGATE_ID_PROPERTY_NAME = "aggregate_id";
 
-    private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregate_id";
     private static final String PRODUCER_ID_PROPERTY_NAME = "producer_id";
     private static final String EVENT_TYPE_PROPERTY_NAME = "event_type";
     private static final String EVENT_ID_PROPERTY_NAME = "event_id";

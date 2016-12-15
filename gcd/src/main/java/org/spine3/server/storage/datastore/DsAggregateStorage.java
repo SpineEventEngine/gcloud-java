@@ -39,6 +39,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_ID_PROPERTY_NAME;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -47,9 +48,8 @@ import static org.spine3.base.Identifiers.idToString;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-class DsAggregateStorage<I> extends AggregateStorage<I> {
+/*package*/ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
-    private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
     private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
     private static final String SNAPSHOT = "SNAPSHOT";
 
@@ -111,7 +111,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         final Key key = Keys.generateForKindWithName(datastore, KIND, eventId);
         final Entity incompleteEntity = Entities.messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
-        builder.set(AGGREGATE_ID_PROPERTY_NAME, stringId);
+        DatastoreProperties.addAggregateIdProperty(stringId, builder);
         datastore.createOrUpdate(builder.build());
     }
 

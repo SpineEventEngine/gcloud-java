@@ -21,7 +21,6 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -29,8 +28,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -62,7 +59,8 @@ import static com.google.common.base.Preconditions.checkState;
 
     private final DsRecordStorage<String> recordStorage;
 
-    /*package*/ static StandStorage newInstance(boolean multitenant, DsRecordStorage<String> recordStorage) {
+    /*package*/
+    static StandStorage newInstance(boolean multitenant, DsRecordStorage<String> recordStorage) {
         return new DsStandStorage(multitenant, recordStorage);
     }
 
@@ -73,22 +71,16 @@ import static com.google.common.base.Preconditions.checkState;
 
     @Override
     public ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type) {
-        final Map<?, EntityStorageRecord> records = recordStorage.readAll();
-        final Collection<EntityStorageRecord> recordValues = records.values();
-        final Collection<EntityStorageRecord> filteredRecordValues = Collections2.filter(
-                recordValues,
-                typePredicate(type));
-        return ImmutableList.copyOf(filteredRecordValues);
+        final Map<?, EntityStorageRecord> records = recordStorage.readAllByType(type);
+        final ImmutableList<EntityStorageRecord> result = ImmutableList.copyOf(records.values());
+        return result;
     }
 
     @Override
     public ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type, FieldMask fieldMask) {
-        final Map<?, EntityStorageRecord> records = recordStorage.readAll(fieldMask);
-        final Collection<EntityStorageRecord> recordValues = records.values();
-        final Collection<EntityStorageRecord> filteredRecordValues = Collections2.filter(
-                recordValues,
-                typePredicate(type));
-        return ImmutableList.copyOf(filteredRecordValues);
+        final Map<?, EntityStorageRecord> records = recordStorage.readAllByType(type, fieldMask);
+        final ImmutableList<EntityStorageRecord> result = ImmutableList.copyOf(records.values());
+        return result;
     }
 
     @SuppressWarnings("ConstantConditions") // stringId is formally nullable, but it's not effectively
@@ -99,7 +91,6 @@ import static com.google.common.base.Preconditions.checkState;
         return recordStorage.read(stringId);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
         return recordStorage.readMultiple(transformIds(ids));
@@ -158,23 +149,6 @@ import static com.google.common.base.Preconditions.checkState;
                 checkNotNull(input, "String ID must not be null.");
                 final AggregateStateId id = AggregateStateId.of(input, type);
                 return id;
-            }
-        };
-    }
-
-    private static Predicate<EntityStorageRecord> typePredicate(final TypeUrl type) {
-        return new Predicate<EntityStorageRecord>() {
-            @Override
-            public boolean apply(@Nullable EntityStorageRecord input) {
-                if (input == null) {
-                    return false;
-                }
-
-                final Any wrappedState = input.getState();
-                final Message state = AnyPacker.unpack(wrappedState);
-                final TypeUrl recordType = TypeUrl.of(state.getDescriptorForType());
-                final boolean result =  type.equals(recordType);
-                return result;
             }
         };
     }
