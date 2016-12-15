@@ -24,6 +24,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
@@ -38,7 +39,11 @@ import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -56,14 +61,16 @@ import static com.google.common.base.Preconditions.checkState;
     private final TypeUrl typeUrl;
 
     private static final String VERSION_KEY = "version";
+    private static final String TYPE_URL_PROPERTY_NAME = "type_url";
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityStorageRecord.class);
     private static final String KIND = EntityStorageRecord.class.getName();
-    private static final String ID_CONVERSION_ERROR_MESSAGE =   "Entity had ID of an invalid type; could not " +
-                                                                "parse ID from String. " +
-                                                                "Note: custom conversion is not supported. " +
-                                                                "See org.spine3.base.Identifiers#idToString.";
+    private static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
+            "parse ID from String. " +
+            "Note: custom conversion is not supported. " +
+            "See org.spine3.base.Identifiers#idToString.";
 
-    /* package */ static <I> DsRecordStorage<I> newInstance(Descriptor descriptor,
+    /* package */
+    static <I> DsRecordStorage<I> newInstance(Descriptor descriptor,
                                               DatastoreWrapper datastore,
                                               boolean multitenant) {
         return new DsRecordStorage<>(descriptor, datastore, multitenant);
@@ -147,8 +154,7 @@ import static com.google.common.base.Preconditions.checkState;
 
     @Override
     protected Map<I, EntityStorageRecord> readAllRecords(final FieldMask fieldMask) {
-        final Function<Entity, IdRecordPair<I>> mapper
-                = new Function<Entity, IdRecordPair<I>>() {
+        final Function<Entity, IdRecordPair<I>> mapper = new Function<Entity, IdRecordPair<I>>() {
             @Nullable
             @Override
             public IdRecordPair<I> apply(@Nullable Entity input) {
@@ -174,7 +180,66 @@ import static com.google.common.base.Preconditions.checkState;
             }
         };
 
-        return queryAll(mapper, FieldMask.getDefaultInstance());
+        return queryAll(mapper, null, FieldMask.getDefaultInstance());
+    }
+
+    @SuppressWarnings("WeakerAccess")       // A part of API.
+    public Map<?, EntityStorageRecord> readAllByType(final TypeUrl typeUrl, final FieldMask fieldMask) {
+        final Function<Entity, IdRecordPair<I>> mapper = new Function<Entity, IdRecordPair<I>>() {
+            @Nullable
+            @Override
+            public IdRecordPair<I> apply(@Nullable Entity input) {
+                if (input == null) {
+                    return null;
+                }
+                // Retrieve ID
+                final I id = IdTransformer.idFromString(input.getKey()
+                                                             .getName(), null);
+                checkState(id != null, ID_CONVERSION_ERROR_MESSAGE);
+
+                // Retrieve record
+                EntityStorageRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
+                final Any packedState = record.getState();
+                Message state = AnyPacker.unpack(packedState);
+                state = FieldMasks.applyMask(fieldMask, state, typeUrl);
+                record = EntityStorageRecord.newBuilder(record)
+                                            .setState(AnyPacker.pack(state))
+                                            .build();
+
+                return new IdRecordPair<>(id, record);
+            }
+        };
+
+        return queryAll(mapper, typeUrl, FieldMask.getDefaultInstance());
+    }
+
+    @SuppressWarnings("WeakerAccess")       // A part of API.
+    public Map<?, EntityStorageRecord> readAllByType(final TypeUrl typeUrl) {
+        final Function<Entity, IdRecordPair<I>> mapper = new Function<Entity, IdRecordPair<I>>() {
+            @Nullable
+            @Override
+            public IdRecordPair<I> apply(@Nullable Entity input) {
+                if (input == null) {
+                    return null;
+                }
+                // Retrieve ID
+                final I id = IdTransformer.idFromString(input.getKey()
+                                                             .getName(), null);
+                checkState(id != null, ID_CONVERSION_ERROR_MESSAGE);
+
+                // Retrieve record
+                EntityStorageRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
+                final Any packedState = record.getState();
+                Message state = AnyPacker.unpack(packedState);
+                record = EntityStorageRecord.newBuilder(record)
+                                            .setState(AnyPacker.pack(state))
+                                            .build();
+
+                return new IdRecordPair<>(id, record);
+            }
+        };
+
+        return queryAll(mapper, typeUrl, FieldMask.getDefaultInstance());
     }
 
     private Iterable<EntityStorageRecord> lookup(
@@ -194,10 +259,18 @@ import static com.google.common.base.Preconditions.checkState;
         return Collections.unmodifiableCollection(records);
     }
 
-    private Map<I, EntityStorageRecord> queryAll(Function<Entity, IdRecordPair<I>> transformer, FieldMask fieldMask) {
-        final EntityQuery query = Query.newEntityQueryBuilder()
-                                       .setKind(KIND)
-                                       .build();
+    private Map<I, EntityStorageRecord> queryAll(Function<Entity, IdRecordPair<I>> transformer,
+                                                 @Nullable TypeUrl typeForFilter,
+                                                 FieldMask fieldMask) {
+
+        EntityQuery.Builder builder = Query.newEntityQueryBuilder()
+                                           .setKind(KIND);
+        if (typeForFilter != null) {
+            final PropertyFilter typeFilter = PropertyFilter.eq(TYPE_URL_PROPERTY_NAME, typeForFilter.value());
+            builder = builder.setFilter(typeFilter);
+        }
+        final EntityQuery query = builder.build();
+
         final List<Entity> results = datastore.read(query);
 
         final ImmutableMap.Builder<I, EntityStorageRecord> records = new ImmutableMap.Builder<>();
@@ -221,11 +294,15 @@ import static com.google.common.base.Preconditions.checkState;
         checkNotNull(id, "ID is null.");
         checkNotNull(entityStorageRecord, "Message is null.");
 
+        final String valueTypeUrl = entityStorageRecord.getState()
+                                                       .getTypeUrl();
+
         final String idString = IdTransformer.idToString(id);
         final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
         final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
         final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
         entity.set(VERSION_KEY, entityStorageRecord.getVersion());
+        entity.set(TYPE_URL_PROPERTY_NAME, valueTypeUrl);
         datastore.createOrUpdate(entity.build());
     }
 
