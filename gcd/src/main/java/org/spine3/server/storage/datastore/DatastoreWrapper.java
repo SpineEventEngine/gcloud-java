@@ -20,20 +20,10 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreException;
-import com.google.cloud.datastore.DatastoreReader;
-import com.google.cloud.datastore.DatastoreReaderWriter;
-import com.google.cloud.datastore.DatastoreWriter;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.FullEntity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.QueryResults;
-import com.google.cloud.datastore.Transaction;
+import com.google.cloud.datastore.*;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 
 import javax.annotation.Nullable;
@@ -43,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * Represents a wrapper above GAE {@link Datastore}.
@@ -137,14 +128,58 @@ import static com.google.common.base.Preconditions.checkState;
     /**
      * Queries the Datastore with the given arguments.
      *
+     * <p>As the Datastore may return a partial result set for {@link EntityQuery}, {@link KeyQuery}
+     * and {@link ProjectionEntityQuery}, it is required to repeat a query with the adjusted cursor position.
+     *
+     * <p>Therefore, an execution of this method may in fact result in several queries to the Datastore instance.
+     *
      * @param query {@link Query} to execute upon the Datastore
      * @return results fo the query packed in a {@link List}
      * @see DatastoreReader#run(Query)
      */
-    @SuppressWarnings("unchecked")
-    /*package*/ List<Entity> read(Query query) {
-        final QueryResults queryResults = actor.run(query);
-        return Lists.newArrayList(queryResults);
+    @SuppressWarnings({"unchecked", "IfStatementWithTooManyBranches", "ChainOfInstanceofChecks"})
+   /*package*/ List<Entity> read(Query query) {
+        QueryResults queryResults = actor.run(query);
+        final List<Entity> resultsAsList = newLinkedList();
+
+        while (queryResults != null && queryResults.hasNext()) {
+            Iterators.addAll(resultsAsList, queryResults);
+
+            final Cursor cursorAfter = queryResults.getCursorAfter();
+            final Query queryForMoreResults;
+
+            /**
+             * The generic {@link Query} cannot be transformed into the {@code Builder} instance due to different
+             * nature of builders per {@code Query} subclass.
+             *
+             * <p>That's why the only way to repeat the same query with the cursor position adjusted is
+             * to cast the {@code Query} instance to its subclass. Subclass instances may be transformed into
+             * the {@code Builder}s, allowing to inject a new {@code startCursor} value.
+             **/
+
+            if (query instanceof EntityQuery) {
+                final EntityQuery entityQuery = (EntityQuery) query;
+                queryForMoreResults = entityQuery.toBuilder()
+                        .setStartCursor(cursorAfter)
+                        .build();
+            } else if (query instanceof KeyQuery) {
+                final KeyQuery keyQuery = (KeyQuery) query;
+                queryForMoreResults = keyQuery.toBuilder()
+                        .setStartCursor(cursorAfter)
+                        .build();
+            } else if (query instanceof ProjectionEntityQuery) {
+                final ProjectionEntityQuery peQuery = (ProjectionEntityQuery) query;
+                queryForMoreResults = peQuery.toBuilder()
+                        .setStartCursor(cursorAfter)
+                        .build();
+            } else {
+                queryForMoreResults = null;
+            }
+
+            queryResults = queryForMoreResults == null ? null : actor.run(queryForMoreResults);
+        }
+
+        return resultsAsList;
     }
 
     /**
