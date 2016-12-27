@@ -1,5 +1,5 @@
 project.ext {
-    SPINE_VERSION = '0.6.5-SNAPSHOT';
+    SPINE_VERSION = '0.6.12-SNAPSHOT';
     PROTOBUF_VERSION = '3.0.0';
     SLf4J_VERSION = "1.7.21";
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
