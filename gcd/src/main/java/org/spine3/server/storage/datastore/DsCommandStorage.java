@@ -53,7 +53,7 @@ import static org.spine3.validate.Validate.checkNotDefault;
  */
 /*package*/ class DsCommandStorage extends CommandStorage {
 
-    private static final TypeUrl TYPE_URL = TypeUrl.of(CommandStorageRecord.getDescriptor());
+    private static final TypeUrl TYPE_URL = TypeUrl.from(CommandStorageRecord.getDescriptor());
     private static final String KIND = CommandStorageRecord.class.getName();
     private static final String COMMAND_STATUS_PROPERTY_NAME = "command_status";
 

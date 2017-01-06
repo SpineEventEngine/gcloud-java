@@ -66,7 +66,7 @@ import static org.spine3.util.Exceptions.wrapped;
 
     private final DatastoreWrapper datastore;
     private static final String KIND = EventStorageRecord.class.getName();
-    private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EventStorageRecord.getDescriptor());
+    private static final TypeUrl RECORD_TYPE_URL = TypeUrl.from(EventStorageRecord.getDescriptor());
 
     private static final Function<Entity, EventStorageRecord> ENTITY_TO_EVENT_RECORD
             = new Function<Entity, EventStorageRecord>() {

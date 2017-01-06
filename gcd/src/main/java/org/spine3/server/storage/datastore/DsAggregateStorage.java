@@ -54,7 +54,7 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_
     private static final String SNAPSHOT = "SNAPSHOT";
 
     private static final String KIND = AggregateStorageRecord.class.getName();
-    private static final TypeUrl TYPE_URL = TypeUrl.of(AggregateStorageRecord.getDescriptor());
+    private static final TypeUrl TYPE_URL = TypeUrl.from(AggregateStorageRecord.getDescriptor());
 
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;

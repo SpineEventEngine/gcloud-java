@@ -50,7 +50,7 @@ public class EntitiesShould {
 
     @Test
     public void retrieve_default_message_instance_for_null_entity() {
-        final TypeUrl typeUrl = TypeUrl.of(Project.getDescriptor());
+        final TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
         final Project expected = Project.getDefaultInstance();
         final Project actual = Entities.entityToMessage(null, typeUrl);
 
@@ -59,7 +59,7 @@ public class EntitiesShould {
 
     @Test
     public void retrieve_default_message_for_each_null_entity_in_collection() {
-        final TypeUrl typeUrl = TypeUrl.of(Project.getDescriptor());
+        final TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
         final List<Entity> listOfNulls = Lists.newArrayList(null, null, null, null);
         final Collection<Message> listOfDefaults = Entities.entitiesToMessages(listOfNulls, typeUrl);
         assertSize(listOfNulls.size(), listOfDefaults);
@@ -72,7 +72,7 @@ public class EntitiesShould {
     @Test
     public void retrieve_empty_collection_on_empty_list() {
         final List<Entity> empty = Collections.emptyList();
-        final TypeUrl typeUrl = TypeUrl.of(Project.getDescriptor());
+        final TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
         final Collection<Message> converted = Entities.entitiesToMessages(empty, typeUrl);
         assertNotNull(converted);
         assertTrue(converted.isEmpty());
