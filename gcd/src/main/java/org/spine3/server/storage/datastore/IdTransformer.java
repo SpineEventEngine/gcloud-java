@@ -61,7 +61,6 @@ class IdTransformer {
     private static final String WRONG_OR_BROKEN_MESSAGE_ID = "Passed proto ID %s is wrong or broken.";
     private static final String UNABLE_TO_DETECT_GENERIC_TYPE = "Unable to detect generic type of ID: ";
     private static final Logger LOG = Logger.getLogger(IdTransformer.class.getName());
-    private static final int SERIALIZED_BYTES_RADIX = 16;
 
     private IdTransformer() {
     }
