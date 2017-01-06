@@ -27,7 +27,15 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.*;
+import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.EventStorage;
+import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.StandStorage;
+import org.spine3.server.storage.Storage;
+import org.spine3.server.storage.StorageFactory;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
@@ -49,7 +57,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     /**
      * Creates new instance of {@code DatastoreStorageFactory}.
-     *
+     * <p>
      * <p>Same as calling {@link #newInstance(Datastore, boolean)} with {@code false} second argument.
      *
      * @param datastore the {@link Datastore} implementation to use
