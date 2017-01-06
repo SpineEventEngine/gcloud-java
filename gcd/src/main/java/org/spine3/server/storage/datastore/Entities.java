@@ -40,7 +40,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for converting {@link Message proto messages} into {@link Entity Entities} and vise versa.
@@ -158,7 +157,7 @@ import static org.spine3.util.Exceptions.wrapped;
             message = (M) factoryMethod.invoke(null);
             return message;
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException | ClassCastException e) {
-            throw wrapped(e);
+            throw new RuntimeException(e);
         }
     }
 }
