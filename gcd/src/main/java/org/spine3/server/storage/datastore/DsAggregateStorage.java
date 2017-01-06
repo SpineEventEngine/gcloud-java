@@ -26,7 +26,6 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
-import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.AggregateStorage;
@@ -142,7 +141,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     private String generateDatastoreId(I id) {
-        final String stringId = Identifiers.idToString(id);
+        final String stringId = idToString(id);
         final String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
         return datastoreId;
     }
