@@ -56,7 +56,7 @@ import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
-import static org.spine3.util.Exceptions.wrapped;
+
 
 /**
  * Storage for event records based on Google Cloud Datastore.
@@ -306,7 +306,7 @@ class DsEventStorage extends EventStorage {
                     actualValue = AnyPacker.unpack((Any) actualValue);
                 }
             } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
-                throw wrapped(e);
+                throw new RuntimeException(e);
             }
 
             final boolean result = expectedValues.contains(actualValue);
