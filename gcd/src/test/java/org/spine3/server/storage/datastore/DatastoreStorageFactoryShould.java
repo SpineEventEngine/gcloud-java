@@ -25,7 +25,12 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.*;
+import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.storage.EventStorage;
+import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.StorageFactory;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
