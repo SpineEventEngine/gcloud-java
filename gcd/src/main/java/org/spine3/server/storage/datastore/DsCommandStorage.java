@@ -51,7 +51,7 @@ import static org.spine3.validate.Validate.checkNotDefault;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-/*package*/ class DsCommandStorage extends CommandStorage {
+class DsCommandStorage extends CommandStorage {
 
     private static final TypeUrl TYPE_URL = TypeUrl.from(CommandStorageRecord.getDescriptor());
     private static final String KIND = CommandStorageRecord.class.getName();
@@ -70,7 +70,7 @@ import static org.spine3.validate.Validate.checkNotDefault;
         }
     };
 
-    /* package */ static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+    static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsCommandStorage(datastore, multitenant);
     }
 

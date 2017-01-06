@@ -62,7 +62,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-/*package*/ class DsEventStorage extends EventStorage {
+class DsEventStorage extends EventStorage {
 
     private final DatastoreWrapper datastore;
     private static final String KIND = EventStorageRecord.class.getName();
@@ -93,7 +93,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
         }
     };
 
-    /* package */ static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+    static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsEventStorage(datastore, multitenant);
     }
 

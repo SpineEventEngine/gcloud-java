@@ -80,7 +80,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     // Overriding used for testing
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
-    /* package */ DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
+    DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
         this.multitenant = multitenant;
         initDatastoreWrapper(datastore);
     }

@@ -36,7 +36,7 @@ import java.util.Map;
  *
  * @author Mikhail Mikhaylov
  */
-/* package */ class DsProjectionStorage<I> extends ProjectionStorage<I> {
+class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     private static final String LAST_EVENT_TIMESTAMP_ID = "datastore_event_timestamp_";
 
@@ -45,7 +45,7 @@ import java.util.Map;
 
     private final String lastTimestampId;
 
-    /* package */static <I> DsProjectionStorage<I> newInstance(DsRecordStorage<I> entityStorage,
+    static <I> DsProjectionStorage<I> newInstance(DsRecordStorage<I> entityStorage,
                                                   DsPropertyStorage propertyStorage,
                                                   Class<? extends Entity<I, ?>> projectionClass,
                                                   boolean multitenant) {

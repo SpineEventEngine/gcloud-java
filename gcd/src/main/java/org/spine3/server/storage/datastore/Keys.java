@@ -30,11 +30,11 @@ import com.google.cloud.datastore.KeyFactory;
  * @author Alex Tymchenko
  */
 @SuppressWarnings("UtilityClass")
-/* package */ class Keys {
+class Keys {
 
     private Keys() {}
 
-    /* package */ static Key generateForKindWithName(DatastoreWrapper datastore, String kind, String keyName) {
+    static Key generateForKindWithName(DatastoreWrapper datastore, String kind, String keyName) {
         final KeyFactory keyFactory = datastore.getKeyFactory(kind);
         final Key key = keyFactory.newKey(keyName);
 

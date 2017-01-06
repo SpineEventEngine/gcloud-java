@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkState;
  * Creates storages based on the local Google {@link Datastore}.
  */
 @SuppressWarnings("CallToSystemGetenv")
-/* package */ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
+class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static final String DEFAULT_DATASET_NAME = "spine-dev";
     private static final String DEFAULT_HOST = "localhost:8080";
@@ -79,7 +79,7 @@ import static com.google.common.base.Preconditions.checkState;
      *
      * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
      */
-    /* package */ static TestDatastoreStorageFactory getDefaultInstance() {
+    static TestDatastoreStorageFactory getDefaultInstance() {
         final boolean onCi = "true".equals(System.getenv("CI"));
         final String message = onCi
                                ? "Running on CI. Connecting to remote Google Cloud Datastore"
@@ -128,7 +128,7 @@ import static com.google.common.base.Preconditions.checkState;
      *
      * @see #tearDown()
      */
-    /* package */ void clear() {
+    void clear() {
         ((TestDatastoreWrapper) getDatastore()).dropAllTables();
     }
 
@@ -152,10 +152,10 @@ import static com.google.common.base.Preconditions.checkState;
         private final Datastore value = DEFAULT_LOCAL_OPTIONS.getService();
     }
 
-    /*package*/ enum TestingDatastoreSingleton {
+    enum TestingDatastoreSingleton {
         INSTANCE;
         @SuppressWarnings({"NonSerializableFieldInSerializableClass", "PackageVisibleField"})
-        /*package*/ final Datastore value = TESTING_OPTIONS.getService();
+        final Datastore value = TESTING_OPTIONS.getService();
     }
 
     private static Logger log() {

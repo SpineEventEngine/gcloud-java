@@ -48,7 +48,7 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-/*package*/ class DsAggregateStorage<I> extends AggregateStorage<I> {
+class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
     private static final String SNAPSHOT = "SNAPSHOT";
@@ -59,7 +59,7 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;
 
-    /* package */ static <I> DsAggregateStorage<I> newInstance(
+    static <I> DsAggregateStorage<I> newInstance(
             DatastoreWrapper datastore,
             DsPropertyStorage propertyStorage,
             boolean multitenant) {
