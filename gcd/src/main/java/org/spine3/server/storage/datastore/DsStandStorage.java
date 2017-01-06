@@ -46,7 +46,7 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author Dmytro Dashenkov
  */
-/*package*/ class DsStandStorage extends StandStorage {
+class DsStandStorage extends StandStorage {
 
     private static final Function<AggregateStateId, String> ID_TRANSFORMER = new Function<AggregateStateId, String>() {
         @Override
@@ -59,7 +59,6 @@ import static com.google.common.base.Preconditions.checkState;
 
     private final DsRecordStorage<String> recordStorage;
 
-    /*package*/
     static StandStorage newInstance(boolean multitenant, DsRecordStorage<String> recordStorage) {
         return new DsStandStorage(multitenant, recordStorage);
     }

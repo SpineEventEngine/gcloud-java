@@ -37,7 +37,7 @@ import java.util.List;
  * @author Dmytro Dashenkov
  * @see TestDatastoreStorageFactory
  */
-/*package*/ class TestDatastoreWrapper extends DatastoreWrapper {
+class TestDatastoreWrapper extends DatastoreWrapper {
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
@@ -61,7 +61,6 @@ import java.util.List;
         this.waitForConsistency = waitForConsistency;
     }
 
-    /*package*/
     static TestDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
         return new TestDatastoreWrapper(datastore, waitForConsistency);
     }
@@ -168,7 +167,7 @@ import java.util.List;
     /**
      * Deletes all records from the datastore.
      */
-    /*package*/ void dropAllTables() {
+    void dropAllTables() {
         log().info("Dropping all tables");
         for (String kind : kindsCache) {
             dropTable(kind);

@@ -41,11 +41,11 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")
-/* package */ class DatastoreProperties {
+class DatastoreProperties {
 
-    /* package */ static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
-    /* package */ static final String TIMESTAMP_NANOS_PROPERTY_NAME = "timestamp_nanos";
-    /* package */ static final String AGGREGATE_ID_PROPERTY_NAME = "aggregate_id";
+    static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
+    static final String TIMESTAMP_NANOS_PROPERTY_NAME = "timestamp_nanos";
+    static final String AGGREGATE_ID_PROPERTY_NAME = "aggregate_id";
 
     private static final String PRODUCER_ID_PROPERTY_NAME = "producer_id";
     private static final String EVENT_TYPE_PROPERTY_NAME = "event_type";
@@ -63,7 +63,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      * Makes a property from the given timestamp using
      * {@link org.spine3.protobuf.Timestamps#convertToDate(TimestampOrBuilder)}.
      */
-    /* package */ static void addTimestampProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
+    static void addTimestampProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final Date date = convertToDate(timestamp);
         entity.set(TIMESTAMP_PROPERTY_NAME, DateTime.copyFrom(date));
     }
@@ -72,7 +72,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      * Makes a property from the given timestamp using
      * {@link org.spine3.protobuf.Timestamps#convertToNanos(TimestampOrBuilder)}.
      */
-    /* package */ static void addTimestampNanosProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
+    static void addTimestampNanosProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final long nanos = convertToNanos(timestamp);
         entity.set(TIMESTAMP_NANOS_PROPERTY_NAME, nanos);
     }
@@ -80,7 +80,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     /**
      * Makes AggregateId property from given {@link Message} value.
      */
-    /* package */ static void addAggregateIdProperty(Object aggregateId, Entity.Builder entity) {
+    static void addAggregateIdProperty(Object aggregateId, Entity.Builder entity) {
         final String propertyValue = Identifiers.idToString(aggregateId);
         entity.set(AGGREGATE_ID_PROPERTY_NAME, propertyValue);
     }
@@ -88,7 +88,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
     /**
      * Makes EventType property from given String value.
      */
-    /* package */ static void addEventTypeProperty(String eventType, Entity.Builder entity) {
+    static void addEventTypeProperty(String eventType, Entity.Builder entity) {
         entity.set(EVENT_TYPE_PROPERTY_NAME, eventType);
     }
 
@@ -96,7 +96,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      * Converts {@link org.spine3.base.EventContext} or it's builder to a set of Properties, which are
      * ready to add to the Datastore entity.
      */
-    /* package */ static void makeEventContextProperties(EventContextOrBuilder context,
+    static void makeEventContextProperties(EventContextOrBuilder context,
                                            Entity.Builder builder) {
         builder.set(CONTEXT_EVENT_ID_PROPERTY_NAME, Messages.toText(context.getEventId()));
         builder.set(CONTEXT_TIMESTAMP_PROPERTY_NAME, convertToNanos(context.getTimestamp()));
@@ -109,7 +109,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
      * Converts {@link org.spine3.base.Event}'s fields to a set of Properties, which are
      * ready to add to the Datastore entity.
      */
-    /* package */ static void makeEventFieldProperties(EventStorageRecordOrBuilder event,
+    static void makeEventFieldProperties(EventStorageRecordOrBuilder event,
                                          Entity.Builder builder) {
         // We do not re-save timestamp
         // We do not re-save event type

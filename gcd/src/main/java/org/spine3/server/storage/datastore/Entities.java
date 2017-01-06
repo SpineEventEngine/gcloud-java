@@ -48,7 +48,7 @@ import static org.spine3.util.Exceptions.wrapped;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")
-/*package*/ class Entities {
+class Entities {
 
     private static final String VALUE_PROPERTY_NAME = "value";
 
@@ -66,7 +66,7 @@ import static org.spine3.util.Exceptions.wrapped;
      * @return message contained in the {@link Entity}
      */
     @SuppressWarnings("unchecked")
-    /*package*/ static <M extends Message> M entityToMessage(@Nullable Entity entity, TypeUrl type) {
+    static <M extends Message> M entityToMessage(@Nullable Entity entity, TypeUrl type) {
         if (entity == null) {
             return defaultMessage(type);
         }
@@ -94,7 +94,7 @@ import static org.spine3.util.Exceptions.wrapped;
      * @return message contained in the {@link Entity}
      */
     @SuppressWarnings("unchecked")
-    /*package*/ static <M extends Message> List<M> entitiesToMessages(Collection<Entity> entities, TypeUrl type) {
+    static <M extends Message> List<M> entitiesToMessages(Collection<Entity> entities, TypeUrl type) {
         if (entities.isEmpty()) {
             return Collections.emptyList();
         }
@@ -130,7 +130,7 @@ import static org.spine3.util.Exceptions.wrapped;
      * @return new instance of {@link Entity} containing serialized proto message
      */
     @SuppressWarnings("ConstantConditions")
-    /*package*/ static Entity messageToEntity(Message message, Key key) {
+    static Entity messageToEntity(Message message, Key key) {
         checkArgument(message != null, "Message must not be null");
         checkArgument(key != null, "Key must not be null");
 
@@ -147,7 +147,7 @@ import static org.spine3.util.Exceptions.wrapped;
     }
 
     @SuppressWarnings("unchecked")
-    /*package*/ static <M extends Message> M defaultMessage(TypeUrl type) {
+    static <M extends Message> M defaultMessage(TypeUrl type) {
         final Class<M> messageClass = Messages.toMessageClass(type);
         checkState(messageClass != null, String.format(
                 "Not found class for type url \"%s\". Try to rebuild the project",

@@ -55,7 +55,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-/*package*/ class DsRecordStorage<I> extends RecordStorage<I> {
+class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
@@ -69,7 +69,6 @@ import static com.google.common.base.Preconditions.checkState;
             "Note: custom conversion is not supported. " +
             "See org.spine3.base.Identifiers#idToString.";
 
-    /* package */
     static <I> DsRecordStorage<I> newInstance(Descriptor descriptor,
                                               DatastoreWrapper datastore,
                                               boolean multitenant) {
