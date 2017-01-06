@@ -89,7 +89,7 @@ class DsEventStorage extends EventStorage {
                 return null;
             }
 
-            return Identifiers.idToString(input);
+            return idToString(input);
         }
     };
 
