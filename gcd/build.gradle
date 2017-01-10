@@ -13,16 +13,6 @@ configurations.all {
 }
 
 dependencies {
-
-    // Spine tests and sample
-    compile group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true
-    compile group: 'org.spine3', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true
-    testCompile group: 'org.spine3', name: 'spine-testutil-core', version: project.SPINE_VERSION, changing: true
-
     // Google Cloud Datastore
     compile 'com.google.cloud:google-cloud-datastore:0.8.0-beta'
-
-    testCompile group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
-    testCompile group: 'org.spine3', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
-    testCompile group: 'org.spine3', name: 'spine-testutil-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
 }
