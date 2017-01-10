@@ -40,7 +40,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for converting {@link Message proto messages} into {@link Entity Entities} and vise versa.
@@ -51,13 +50,14 @@ import static org.spine3.util.Exceptions.wrapped;
 class Entities {
 
     private static final String VALUE_PROPERTY_NAME = "value";
+    private static final String DEFAULT_MESSAGE_FACTORY_METHOD_NAME = "getDefaultInstance";
 
     private Entities() {
     }
 
     /**
      * Retrieves a message of given type, assignable from {@code Message}, from an {@link Entity}.
-     *
+     * <p>
      * <p>If passed {@link Entity} is {@code null}, a default instance for the given type is returned.
      *
      * @param entity source {@link Entity} to get message form
@@ -85,7 +85,7 @@ class Entities {
     /**
      * Retrieves a {@link List} of messages of given type, assignable from {@code Message},
      * from a collection of {@link Entity Entities}.
-     *
+     * <p>
      * <p>If passed {@link Entity} is {@code null}, a default instance for given type is returned.
      *
      * @param entities a collection of the source {@link Entity Entities} to get message form
@@ -154,11 +154,13 @@ class Entities {
                 type.getTypeName()));
         final M message;
         try {
-            final Method factoryMethod = messageClass.getDeclaredMethod("getDefaultInstance");
+            final Method factoryMethod = messageClass.getDeclaredMethod(DEFAULT_MESSAGE_FACTORY_METHOD_NAME);
             message = (M) factoryMethod.invoke(null);
             return message;
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException | ClassCastException e) {
-            throw wrapped(e);
+        } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
+            throw new IllegalStateException("Couldn't invoke static method "
+                    + DEFAULT_MESSAGE_FACTORY_METHOD_NAME + " from class "
+                    + messageClass.getCanonicalName(), e);
         }
     }
 }
