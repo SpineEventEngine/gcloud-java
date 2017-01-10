@@ -153,7 +153,7 @@ task startDatastore {
     group "Build Setup"
 }
 
-startDatastore << {
+startDatastore.doLast {
     final String scriptExtension;
     final String pathPrefix;
     if (IS_WINDOWS) {
