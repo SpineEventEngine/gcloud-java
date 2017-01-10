@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * This package contains Google Cloud Datastore implementation of storages.
+ * This package contains Google Cloud Datastore implementation of the storages.
  *
  * @see org.spine3.server.storage.AbstractStorage
  */
