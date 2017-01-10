@@ -306,7 +306,7 @@ class DsEventStorage extends EventStorage {
                     actualValue = AnyPacker.unpack((Any) actualValue);
                 }
             } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
 
             final boolean result = expectedValues.contains(actualValue);
