@@ -42,7 +42,7 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'jacoco'
     group = 'org.spine3'
-    version = project.STORAGE_VERSION
+    version = project.GAE_JAVA_VERSION
 
     repositories {
         mavenCentral()
