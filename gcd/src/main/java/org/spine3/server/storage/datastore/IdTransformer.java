@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")
-/*package*/ class IdTransformer {
+class IdTransformer {
 
     @SuppressWarnings("HardcodedLineSeparator")
     private static final String REFLECTIVE_ERROR_MESSAGE_PATTERN
@@ -61,7 +61,6 @@ import static com.google.common.base.Preconditions.checkArgument;
     private static final String WRONG_OR_BROKEN_MESSAGE_ID = "Passed proto ID %s is wrong or broken.";
     private static final String UNABLE_TO_DETECT_GENERIC_TYPE = "Unable to detect generic type of ID: ";
     private static final Logger LOG = Logger.getLogger(IdTransformer.class.getName());
-    private static final int SERIALIZED_BYTES_RADIX = 16;
 
     private IdTransformer() {
     }
@@ -85,7 +84,6 @@ import static com.google.common.base.Preconditions.checkArgument;
      *           otherwise this may lead to unexpected errors.
      * @return string representation of the given ID
      */
-    /*package*/
     static String idToString(Object id) {
         final String idString;
         if (id instanceof String) { // String ID
@@ -138,7 +136,7 @@ import static com.google.common.base.Preconditions.checkArgument;
      * @return generic ID matching the given {@code String} representation
      */
     @SuppressWarnings("unchecked")
-    /*package*/ static <I> I idFromString(String stringId, @Nullable Class parametrizedClass) {
+    static <I> I idFromString(String stringId, @Nullable Class parametrizedClass) {
         final Class<I> idClass = getIdClass(stringId, parametrizedClass);
         final I id;
         if (isOfSupportedNumberType(idClass)) { // Numeric ID

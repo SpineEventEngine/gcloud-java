@@ -20,7 +20,9 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import org.spine3.base.CommandId;
@@ -51,9 +53,9 @@ import static org.spine3.validate.Validate.checkNotDefault;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-/*package*/ class DsCommandStorage extends CommandStorage {
+class DsCommandStorage extends CommandStorage {
 
-    private static final TypeUrl TYPE_URL = TypeUrl.of(CommandStorageRecord.getDescriptor());
+    private static final TypeUrl TYPE_URL = TypeUrl.from(CommandStorageRecord.getDescriptor());
     private static final String KIND = CommandStorageRecord.class.getName();
     private static final String COMMAND_STATUS_PROPERTY_NAME = "command_status";
 
@@ -70,7 +72,7 @@ import static org.spine3.validate.Validate.checkNotDefault;
         }
     };
 
-    /* package */ static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+    static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsCommandStorage(datastore, multitenant);
     }
 

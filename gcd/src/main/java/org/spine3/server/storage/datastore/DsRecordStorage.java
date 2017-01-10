@@ -55,7 +55,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-/*package*/ class DsRecordStorage<I> extends RecordStorage<I> {
+class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
@@ -69,7 +69,6 @@ import static com.google.common.base.Preconditions.checkState;
             "Note: custom conversion is not supported. " +
             "See org.spine3.base.Identifiers#idToString.";
 
-    /* package */
     static <I> DsRecordStorage<I> newInstance(Descriptor descriptor,
                                               DatastoreWrapper datastore,
                                               boolean multitenant) {
@@ -98,7 +97,7 @@ import static com.google.common.base.Preconditions.checkState;
      */
     private DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
         super(multitenant);
-        this.typeUrl = TypeUrl.of(descriptor);
+        this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
     }
 
@@ -133,7 +132,7 @@ import static com.google.common.base.Preconditions.checkState;
 
                 final EntityStorageRecord readRecord = Entities.entityToMessage(input, RECORD_TYPE_URL);
                 final Message state = AnyPacker.unpack(readRecord.getState());
-                final TypeUrl typeUrl = TypeUrl.of(state.getDescriptorForType());
+                final TypeUrl typeUrl = TypeUrl.from(state.getDescriptorForType());
                 final Message maskedState = FieldMasks.applyMask(fieldMask, state, typeUrl);
                 final Any wrappedState = AnyPacker.pack(maskedState);
 
@@ -170,7 +169,7 @@ import static com.google.common.base.Preconditions.checkState;
                 EntityStorageRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
                 final Any packedState = record.getState();
                 Message state = AnyPacker.unpack(packedState);
-                final TypeUrl typeUrl = TypeUrl.of(state.getDescriptorForType());
+                final TypeUrl typeUrl = TypeUrl.from(state.getDescriptorForType());
                 state = FieldMasks.applyMask(fieldMask, state, typeUrl);
                 record = EntityStorageRecord.newBuilder(record)
                                             .setState(AnyPacker.pack(state))

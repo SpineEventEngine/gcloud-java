@@ -2,6 +2,7 @@
 
 [![codecov](https://codecov.io/gh/SpineEventEngine/gae-java/branch/master/graph/badge.svg)](https://codecov.io/gh/SpineEventEngine/gae-java)
 [![Build Status](https://travis-ci.org/SpineEventEngine/gae-java.svg?branch=master)](https://travis-ci.org/SpineEventEngine/gae-java)
+[![codacy](https://api.codacy.com/project/badge/Grade/fe24ec78520943afa038336d45db4513)](https://www.codacy.com/app/SpineEventEngine/gae-java?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SpineEventEngine/gae-java&amp;utm_campaign=Badge_Grade)
 
 Support for Spine-based Java apps running under Google App Engine.
 

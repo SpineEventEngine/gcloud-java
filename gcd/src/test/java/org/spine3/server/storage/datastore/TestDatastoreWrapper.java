@@ -20,7 +20,11 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import org.slf4j.Logger;
@@ -37,12 +41,12 @@ import java.util.List;
  * @author Dmytro Dashenkov
  * @see TestDatastoreStorageFactory
  */
-/*package*/ class TestDatastoreWrapper extends DatastoreWrapper {
+class TestDatastoreWrapper extends DatastoreWrapper {
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
-    private static final int CONSISTENCY_AWAIT_TIME_MS = 100;
-    private static final int CONSISTENCY_AWAIT_ITERATIONS = 5;
+    private static final int CONSISTENCY_AWAIT_TIME_MS = 75;
+    private static final int CONSISTENCY_AWAIT_ITERATIONS = 20;
 
     /**
      * Due to eventual consistency, {@link #dropTable(String) is performed iteratively until the table has no records}.
@@ -61,7 +65,6 @@ import java.util.List;
         this.waitForConsistency = waitForConsistency;
     }
 
-    /*package*/
     static TestDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
         return new TestDatastoreWrapper(datastore, waitForConsistency);
     }
@@ -168,7 +171,7 @@ import java.util.List;
     /**
      * Deletes all records from the datastore.
      */
-    /*package*/ void dropAllTables() {
+    void dropAllTables() {
         log().info("Dropping all tables");
         for (String kind : kindsCache) {
             dropTable(kind);

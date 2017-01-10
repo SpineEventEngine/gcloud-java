@@ -29,7 +29,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.base.*;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
+import org.spine3.base.FieldFilter;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
@@ -62,11 +65,11 @@ import static org.spine3.util.Exceptions.wrapped;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-/*package*/ class DsEventStorage extends EventStorage {
+class DsEventStorage extends EventStorage {
 
     private final DatastoreWrapper datastore;
     private static final String KIND = EventStorageRecord.class.getName();
-    private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EventStorageRecord.getDescriptor());
+    private static final TypeUrl RECORD_TYPE_URL = TypeUrl.from(EventStorageRecord.getDescriptor());
 
     private static final Function<Entity, EventStorageRecord> ENTITY_TO_EVENT_RECORD
             = new Function<Entity, EventStorageRecord>() {
@@ -89,11 +92,11 @@ import static org.spine3.util.Exceptions.wrapped;
                 return null;
             }
 
-            return Identifiers.idToString(input);
+            return idToString(input);
         }
     };
 
-    /* package */ static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
+    static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
         return new DsEventStorage(datastore, multitenant);
     }
 

@@ -38,14 +38,14 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
  *
  * @author Mikhail Mikhaylov
  */
-/* package */ class DsPropertyStorage {
+class DsPropertyStorage {
 
-    private static final TypeUrl ANY_TYPE_URL = TypeUrl.of(Any.getDescriptor());
+    private static final TypeUrl ANY_TYPE_URL = TypeUrl.from(Any.getDescriptor());
     private static final String KIND = Any.class.getName();
 
     private final DatastoreWrapper datastore;
 
-    /* package */ static DsPropertyStorage newInstance(DatastoreWrapper datastore) {
+    static DsPropertyStorage newInstance(DatastoreWrapper datastore) {
         return new DsPropertyStorage(datastore);
     }
 
@@ -53,7 +53,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
         this.datastore = datastore;
     }
 
-    /* package */ <V extends Message> void write(String propertyId, V value) {
+    <V extends Message> void write(String propertyId, V value) {
         checkNotNull(propertyId);
         checkNotNull(value);
 
@@ -64,7 +64,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
     }
 
     @Nullable
-    /* package */ <V extends Message> V read(String propertyId) {
+    <V extends Message> V read(String propertyId) {
         final Key key = Keys.generateForKindWithName(datastore, KIND, propertyId);
         final Entity response = datastore.read(key);
 

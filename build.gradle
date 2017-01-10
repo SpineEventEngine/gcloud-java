@@ -1,6 +1,6 @@
 project.ext {
-    SPINE_VERSION = '0.6.12-SNAPSHOT';
-    PROTOBUF_VERSION = '3.0.0';
+    SPINE_VERSION = '0.7.0';
+    PROTOBUF_VERSION = '3.1.0';
     SLf4J_VERSION = "1.7.21";
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
@@ -70,10 +70,13 @@ subprojects {
     dependencies {
         // when Spine can be used for evaluation in real projects.
         // Spine
-        compile group: 'org.spine3', name: 'server', version: project.SPINE_VERSION, changing: true
-        compile group: 'org.spine3', name: 'client', version: project.SPINE_VERSION, changing: true
-        compile group: 'org.spine3', name: 'testutil', version: project.SPINE_VERSION, changing: true
-        compile group: 'org.spine3', name: 'examples', version: "0.2", changing: true
+        compile group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true
+        compile group: 'org.spine3', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true
+
+        // Spine for tests
+        testCompile group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
+        testCompile group: 'org.spine3', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
+        testCompile group: 'org.spine3', name: 'spine-testutil-core', version: project.SPINE_VERSION, changing: true
 
         // Guava
         compile group: 'com.google.guava', name: 'guava', version: '20.0'
