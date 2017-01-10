@@ -166,7 +166,7 @@ startDatastore.doLast {
     }
 
     // Run datastore emulator
-    "$pathPrefix/script/start-datastore$scriptExtension".execute()
+    "${pathPrefix}${File.separatorChar}script${File.separatorChar}start-datastore$scriptExtension".execute()
 }
 
 tasks["check"].dependsOn startDatastore
