@@ -95,11 +95,11 @@ class TestDatastoreWrapper extends DatastoreWrapper {
 
     @Override
     void dropTable(String table) {
-        if (!waitForConsistency) {
+        //if (!waitForConsistency) {
             super.dropTable(table);
-        } else {
-            dropTableConsistently(table);
-        }
+//        } else {
+//            dropTableConsistently(table);
+//        }
     }
 
     @SuppressWarnings("BusyWait")   // allow Datastore some time between cleanup attempts.
@@ -153,19 +153,19 @@ class TestDatastoreWrapper extends DatastoreWrapper {
 
     @SuppressWarnings("BusyWait")   // allow Datastore to become consistent before reading.
     private void waitForConsistency() {
-        if (!waitForConsistency) {
-            log().info("Wait for consistency is not required.");
-            return;
-        }
-        log().info("Waiting for data consistency to establish.");
-
-        for (int awaitCycle = 0; awaitCycle < CONSISTENCY_AWAIT_ITERATIONS; awaitCycle++) {
-            try {
-                Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+//        if (!waitForConsistency) {
+//            log().info("Wait for consistency is not required.");
+//            return;
+//        }
+//        log().info("Waiting for data consistency to establish.");
+//
+//        for (int awaitCycle = 0; awaitCycle < CONSISTENCY_AWAIT_ITERATIONS; awaitCycle++) {
+//            try {
+//                Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
     }
 
     /**

@@ -32,6 +32,7 @@ import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.KeyQuery;
+import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.ProjectionEntityQuery;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
@@ -314,7 +315,9 @@ class DatastoreWrapper {
     }
 
     private KeyFactory initKeyFactory(String kind) {
+        final PathElement ancestor = PathElement.of("spine-message", "root");
         final KeyFactory keyFactory = datastore.newKeyFactory()
+                .addAncestor(ancestor)
                 .setKind(kind);
         keyFactories.put(kind, keyFactory);
         return keyFactory;

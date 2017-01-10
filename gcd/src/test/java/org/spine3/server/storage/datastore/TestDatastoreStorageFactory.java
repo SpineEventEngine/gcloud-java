@@ -86,7 +86,8 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
                                : "Running on local machine. Connecting to a local Datastore emulator";
         log().info(message);
         runsOnCi = onCi;
-        return onCi
+        return //onCi
+        true
                ? TestingInstanceSingleton.INSTANCE.value
                : LocalInstanceSingleton.INSTANCE.value;
     }
