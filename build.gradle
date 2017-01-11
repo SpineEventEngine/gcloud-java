@@ -154,19 +154,9 @@ task startDatastore {
     group "Build Setup"
 }
 
-startDatastore.doLast {
-    final String scriptExtension
-    final String pathPrefix
-    if (IS_WINDOWS) {
-        scriptExtension = ".bat"
-        pathPrefix = ""
-    } else {
-        scriptExtension = ".sh"
-        pathPrefix = "."
-    }
-
-    // Run datastore emulator
-    "${pathPrefix}${File.separatorChar}script${File.separatorChar}start-datastore$scriptExtension".execute()
+startDatastore << {
+    // Start Datastore emulator with the CLI command
+    "${IS_WINDOWS ? '' : '.'}${File.separatorChar}script${File.separatorChar}start-datastore.${IS_WINDOWS ? 'bat' : 'sh'}".execute()
 }
 
 tasks["check"].dependsOn startDatastore
