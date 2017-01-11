@@ -155,11 +155,13 @@ task startDatastore {
 
 startDatastore << {
     if (IS_WINDOWS) {
-        return
+        final command = "${project.rootDir.absolutePath}\\script\\start-datastore.bat"
+        println command
+        command.execute()
+    } else {
+        // Run datastore emulator
+        ".${File.separatorChar}script${File.separatorChar}start-datastore.sh".execute()
     }
-
-    // Run datastore emulator
-    ".${File.separatorChar}script${File.separatorChar}start-datastore.sh".execute()
 }
 
 tasks["check"].dependsOn startDatastore
