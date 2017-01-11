@@ -154,18 +154,8 @@ task startDatastore {
 }
 
 startDatastore << {
-    final String scriptExtension;
-    final String pathPrefix;
-    if (IS_WINDOWS) {
-        scriptExtension = ".bat"
-        pathPrefix = ""
-    } else {
-        scriptExtension = ".sh"
-        pathPrefix = "."
-    }
-
-    // Run datastore emulator
-    "$pathPrefix/script/start-datastore$scriptExtension".execute()
+    // Start Datastore emulator with the CLI command
+    "${IS_WINDOWS ? '' : '.'}${File.separatorChar}script${File.separatorChar}start-datastore.${IS_WINDOWS ? 'bat' : 'sh'}".execute()
 }
 
 tasks["check"].dependsOn startDatastore
