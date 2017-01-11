@@ -18,21 +18,22 @@ To run the task successfully, you must have `gcloud` tool properly installed and
  - skip Google App Engine setup if not required
 
 
-###### Unix-like
-To start a localhost emulator and run tests run `./gradlew check`.
+###### Unix-based
+
+To start a local emulator and run test against it, run `./gradlew check`.
 To start an emulator without running tests `./gradlew startDatastore`.
-To stop datastore use standard system means (e.g. `kill -9 $(lsof -i:8080)`).
+To stop the Datastore emulator, just terminate the emulator process (e.g. `kill -9 $(lsof -i:8080)`).
 
 ###### Windows
 
-To start a localhost emulator go to dir `script` and run `start-datastore.bat` as an __administrator__.
+To start a local emulator go to dir `script` and run `start-datastore.bat` as an __administrator__.
 The first launch may download and initialize the emulator itself. If so, rerun the script after the install is complete.
 To run tests execute `gradlew check`
 
 ###### General
 
 The launched emulator will run at `localhost:8080` and will not have any persistence.
-To change this configs see `./script/start-datastore.*` scripts.
+To change the configuration see `./script/start-datastore.*` scripts.
 
 
 The datastore is cleaned up after each test.
