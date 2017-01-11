@@ -40,7 +40,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for converting {@link Message proto messages} into {@link Entity Entities} and vise versa.
@@ -51,6 +50,7 @@ import static org.spine3.util.Exceptions.wrapped;
 class Entities {
 
     private static final String VALUE_PROPERTY_NAME = "value";
+    private static final String DEFAULT_MESSAGE_FACTORY_METHOD_NAME = "getDefaultInstance";
 
     private Entities() {
     }
@@ -154,11 +154,13 @@ class Entities {
                 type.getTypeName()));
         final M message;
         try {
-            final Method factoryMethod = messageClass.getDeclaredMethod("getDefaultInstance");
+            final Method factoryMethod = messageClass.getDeclaredMethod(DEFAULT_MESSAGE_FACTORY_METHOD_NAME);
             message = (M) factoryMethod.invoke(null);
             return message;
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException | ClassCastException e) {
-            throw wrapped(e);
+        } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
+            throw new IllegalStateException("Couldn't invoke static method "
+                    + DEFAULT_MESSAGE_FACTORY_METHOD_NAME + " from class "
+                    + messageClass.getCanonicalName(), e);
         }
     }
 }
