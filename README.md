@@ -12,10 +12,10 @@ Support for Spine-based Java apps running under Google App Engine.
 ###### Preconditions
 
 To run the task successfully, you must have `gcloud` tool properly installed and configured: 
- - install gcloud of the last version
- - login under a Google account when initializing the `gcloud`
- - to run tests you should select `spine-dev` Google Cloud Console project
- - skip Google App Engine setup if not required
+ - install gcloud of the last version;
+ - login under a Google account when initializing the `gcloud`;
+ - to run tests you should select `spine-dev` Google Cloud Console project;
+ - skip Google App Engine setup if not required.
 
 
 ###### Executing the tests
