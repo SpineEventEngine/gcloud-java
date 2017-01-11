@@ -6,17 +6,34 @@
 
 Support for Spine-based Java apps running under Google App Engine.
 
-To start a localhost emulator and run tests run `./gradlew check`.
-To start an emulator without running tests `./gradlew startDatastore`.
-To stop datastore use standard system means (e.g. `kill -9 $(lsof -i:8080)`).
-To run the task successfully, you must have `gcloud` tool properly
-installed and configured: 
+
+##### Testing
+
+###### Preconditions
+
+To run the task successfully, you must have `gcloud` tool properly installed and configured: 
  - install gcloud of the last version
  - login under a Google account when initializing the `gcloud`
  - to run tests you should select `spine-dev` Google Cloud Console project
- 
-The launched emulator will run in `localhost:8080` and will not have any persistence.
+ - skip Google App Engine setup if not required
+
+
+###### Unix-like
+To start a localhost emulator and run tests run `./gradlew check`.
+To start an emulator without running tests `./gradlew startDatastore`.
+To stop datastore use standard system means (e.g. `kill -9 $(lsof -i:8080)`).
+
+###### Windows
+
+To start a localhost emulator go to dir `script` and run `start-datastore.bat` as an __administrator__.
+The first launch may download and initialize the emulator itself. If so, rerun the script after the install is complete.
+To run tests execute `gradlew check`
+
+###### General
+
+The launched emulator will run at `localhost:8080` and will not have any persistence.
 To change this configs see `./script/start-datastore.*` scripts.
+
 
 The datastore is cleaned up after each test.
 See test classes under `./gcd/src/test/java/...` and `TestDatastoreStorageFactory#clear`.
