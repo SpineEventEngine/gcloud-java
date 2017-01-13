@@ -76,22 +76,28 @@ class TestDatastoreWrapper extends DatastoreWrapper {
     }
 
     @Override
-    Entity read(Key key) {
+    void createOrUpdate(Entity entity) {
+        super.createOrUpdate(entity);
         waitForConsistency();
-        return super.read(key);
     }
 
-    @Override
-    List<Entity> read(Iterable<Key> keys) {
-        waitForConsistency();
-        return super.read(keys);
-    }
-
-    @Override
-    List<Entity> read(Query query) {
-        waitForConsistency();
-        return super.read(query);
-    }
+    //    @Override
+//    Entity read(Key key) {
+//        waitForConsistency();
+//        return super.read(key);
+//    }
+//
+//    @Override
+//    List<Entity> read(Iterable<Key> keys) {
+//        waitForConsistency();
+//        return super.read(keys);
+//    }
+//
+//    @Override
+//    List<Entity> read(Query query) {
+//        waitForConsistency();
+//        return super.read(query);
+//    }
 
     @Override
     void dropTable(String table) {
