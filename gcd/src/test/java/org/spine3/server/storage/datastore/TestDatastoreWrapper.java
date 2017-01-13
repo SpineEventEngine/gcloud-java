@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
@@ -45,7 +46,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
-    private static final int CONSISTENCY_AWAIT_TIME_MS = 75;
+    private static final int CONSISTENCY_AWAIT_TIME_MS = 10;
     private static final int CONSISTENCY_AWAIT_ITERATIONS = 20;
 
     /**
@@ -76,21 +77,21 @@ class TestDatastoreWrapper extends DatastoreWrapper {
     }
 
     @Override
-    Entity read(Key key) {
+    void createOrUpdate(Entity entity) {
+        super.createOrUpdate(entity);
         waitForConsistency();
-        return super.read(key);
     }
 
     @Override
-    List<Entity> read(Iterable<Key> keys) {
+    void create(Entity entity) throws DatastoreException {
+        super.create(entity);
         waitForConsistency();
-        return super.read(keys);
     }
 
     @Override
-    List<Entity> read(Query query) {
+    void update(Entity entity) throws DatastoreException {
+        super.update(entity);
         waitForConsistency();
-        return super.read(query);
     }
 
     @Override
