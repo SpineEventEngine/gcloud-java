@@ -154,7 +154,7 @@ task startDatastore {
     group "Build Setup"
 }
 
-startDatastore << {
+startDatastore.doLast {
     // Start Datastore emulator with the CLI command
     "${IS_WINDOWS ? '' : '.'}${File.separatorChar}script${File.separatorChar}start-datastore.${IS_WINDOWS ? 'bat' : 'sh'}".execute()
 }
