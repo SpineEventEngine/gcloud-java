@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
@@ -81,23 +82,17 @@ class TestDatastoreWrapper extends DatastoreWrapper {
         waitForConsistency();
     }
 
-    //    @Override
-//    Entity read(Key key) {
-//        waitForConsistency();
-//        return super.read(key);
-//    }
-//
-//    @Override
-//    List<Entity> read(Iterable<Key> keys) {
-//        waitForConsistency();
-//        return super.read(keys);
-//    }
-//
-//    @Override
-//    List<Entity> read(Query query) {
-//        waitForConsistency();
-//        return super.read(query);
-//    }
+    @Override
+    void create(Entity entity) throws DatastoreException {
+        super.create(entity);
+        waitForConsistency();
+    }
+
+    @Override
+    void update(Entity entity) throws DatastoreException {
+        super.update(entity);
+        waitForConsistency();
+    }
 
     @Override
     void dropTable(String table) {
