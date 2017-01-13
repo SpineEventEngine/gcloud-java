@@ -46,7 +46,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
-    private static final int CONSISTENCY_AWAIT_TIME_MS = 5;
+    private static final int CONSISTENCY_AWAIT_TIME_MS = 8;
     private static final int CONSISTENCY_AWAIT_ITERATIONS = 16;
 
     /**
