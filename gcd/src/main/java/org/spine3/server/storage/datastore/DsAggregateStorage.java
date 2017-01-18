@@ -47,7 +47,8 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-class DsAggregateStorage<I> extends AggregateStorage<I> {
+@SuppressWarnings("WeakerAccess")   // Part of API
+public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
     private static final String SNAPSHOT = "SNAPSHOT";

@@ -46,7 +46,9 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author Dmytro Dashenkov
  */
-class DsStandStorage extends StandStorage {
+
+@SuppressWarnings("WeakerAccess")   // Part of API
+public class DsStandStorage extends StandStorage {
 
     private static final Function<AggregateStateId, String> ID_TRANSFORMER = new Function<AggregateStateId, String>() {
         @Override

@@ -55,7 +55,8 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-class DsRecordStorage<I> extends RecordStorage<I> {
+@SuppressWarnings("WeakerAccess")   // Part of API
+public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;

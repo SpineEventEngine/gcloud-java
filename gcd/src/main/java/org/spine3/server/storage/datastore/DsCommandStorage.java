@@ -53,7 +53,8 @@ import static org.spine3.validate.Validate.checkNotDefault;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-class DsCommandStorage extends CommandStorage {
+@SuppressWarnings("WeakerAccess")   // Part of API
+public class DsCommandStorage extends CommandStorage {
 
     private static final TypeUrl TYPE_URL = TypeUrl.from(CommandStorageRecord.getDescriptor());
     private static final String KIND = CommandStorageRecord.class.getName();

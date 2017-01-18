@@ -36,7 +36,8 @@ import java.util.Map;
  *
  * @author Mikhail Mikhaylov
  */
-class DsProjectionStorage<I> extends ProjectionStorage<I> {
+@SuppressWarnings("WeakerAccess")   // Part of API
+public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     private static final String LAST_EVENT_TIMESTAMP_ID = "datastore_event_timestamp_";
 

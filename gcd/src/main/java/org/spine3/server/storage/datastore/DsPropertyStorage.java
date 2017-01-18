@@ -38,7 +38,8 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
  *
  * @author Mikhail Mikhaylov
  */
-class DsPropertyStorage {
+@SuppressWarnings("WeakerAccess")   // Part of API
+public class DsPropertyStorage {
 
     private static final TypeUrl ANY_TYPE_URL = TypeUrl.from(Any.getDescriptor());
     private static final String KIND = Any.class.getName();
