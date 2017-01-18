@@ -59,14 +59,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;
 
-    static <I> DsAggregateStorage<I> newInstance(
-            DatastoreWrapper datastore,
-            DsPropertyStorage propertyStorage,
-            boolean multitenant) {
-        return new DsAggregateStorage<>(datastore, propertyStorage, multitenant);
-    }
-
-    private DsAggregateStorage(DatastoreWrapper datastore, DsPropertyStorage propertyStorage, boolean multitenant) {
+    public DsAggregateStorage(DatastoreWrapper datastore, DsPropertyStorage propertyStorage, boolean multitenant) {
         super(multitenant);
         this.datastore = datastore;
         this.propertyStorage = propertyStorage;

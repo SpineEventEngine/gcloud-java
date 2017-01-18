@@ -73,11 +73,7 @@ public class DsCommandStorage extends CommandStorage {
         }
     };
 
-    static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
-        return new DsCommandStorage(datastore, multitenant);
-    }
-
-    private DsCommandStorage(DatastoreWrapper datastore, boolean multitenant) {
+    public DsCommandStorage(DatastoreWrapper datastore, boolean multitenant) {
         super(multitenant);
         this.datastore = datastore;
     }

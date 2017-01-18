@@ -61,11 +61,7 @@ public class DsStandStorage extends StandStorage {
 
     private final DsRecordStorage<String> recordStorage;
 
-    static StandStorage newInstance(boolean multitenant, DsRecordStorage<String> recordStorage) {
-        return new DsStandStorage(multitenant, recordStorage);
-    }
-
-    private DsStandStorage(boolean multitenant, DsRecordStorage<String> recordStorage) {
+    public DsStandStorage(DsRecordStorage<String> recordStorage, boolean multitenant) {
         super(multitenant);
         this.recordStorage = recordStorage;
     }

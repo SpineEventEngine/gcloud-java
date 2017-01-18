@@ -39,16 +39,16 @@ import static org.junit.Assert.assertTrue;
 public class DatastoreStorageFactoryShould {
 
     private static final DatastoreOptions DUMMY_OPTIONS = DatastoreOptions.newBuilder()
-            .setProjectId("dummy-dataset")
-            .build();
+                                                                          .setProjectId("dummy-dataset")
+                                                                          .build();
 
     private static final Datastore DATASTORE = DUMMY_OPTIONS.getService();
 
-    private static final StorageFactory FACTORY = DatastoreStorageFactory.newInstance(DATASTORE);
+    private static final StorageFactory FACTORY = new DatastoreStorageFactory(DATASTORE);
 
     @Test
     public void create_multitenant_storages() throws Exception {
-        final StorageFactory factory = DatastoreStorageFactory.newInstance(DATASTORE, true);
+        final StorageFactory factory = new DatastoreStorageFactory(DATASTORE, true);
         assertTrue(factory.isMultitenant());
         final CommandStorage storage = factory.createCommandStorage();
         assertTrue(storage.isMultitenant());

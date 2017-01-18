@@ -57,7 +57,6 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 
-
 /**
  * Storage for event records based on Google Cloud Datastore.
  *
@@ -97,11 +96,7 @@ public class DsEventStorage extends EventStorage {
         }
     };
 
-    static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
-        return new DsEventStorage(datastore, multitenant);
-    }
-
-    private DsEventStorage(DatastoreWrapper datastore, boolean multitenant) {
+    public DsEventStorage(DatastoreWrapper datastore, boolean multitenant) {
         super(multitenant);
         this.datastore = datastore;
     }

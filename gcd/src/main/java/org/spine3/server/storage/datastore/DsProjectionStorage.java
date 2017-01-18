@@ -46,17 +46,10 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     private final String lastTimestampId;
 
-    static <I> DsProjectionStorage<I> newInstance(DsRecordStorage<I> entityStorage,
-                                                  DsPropertyStorage propertyStorage,
-                                                  Class<? extends Entity<I, ?>> projectionClass,
-                                                  boolean multitenant) {
-        return new DsProjectionStorage<>(entityStorage, propertyStorage, projectionClass, multitenant);
-    }
-
-    private DsProjectionStorage(DsRecordStorage<I> entityStorage,
-                                DsPropertyStorage propertyStorage,
-                                Class<? extends Entity<I, ?>> projectionClass,
-                                boolean multitenant) {
+    public DsProjectionStorage(DsRecordStorage<I> entityStorage,
+                               DsPropertyStorage propertyStorage,
+                               Class<? extends Entity<I, ?>> projectionClass,
+                               boolean multitenant) {
         super(multitenant);
         this.entityStorage = entityStorage;
         this.propertyStorage = propertyStorage;

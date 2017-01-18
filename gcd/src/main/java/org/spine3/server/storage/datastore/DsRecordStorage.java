@@ -70,12 +70,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             "Note: custom conversion is not supported. " +
             "See org.spine3.base.Identifiers#idToString.";
 
-    static <I> DsRecordStorage<I> newInstance(Descriptor descriptor,
-                                              DatastoreWrapper datastore,
-                                              boolean multitenant) {
-        return new DsRecordStorage<>(descriptor, datastore, multitenant);
-    }
-
     private static final Function<Entity, EntityStorageRecord> recordFromEntity
             = new Function<Entity, EntityStorageRecord>() {
         @Nullable
@@ -96,7 +90,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param descriptor the descriptor of the type of messages to save to the storage
      * @param datastore  the Datastore implementation to use
      */
-    private DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
+    public DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
