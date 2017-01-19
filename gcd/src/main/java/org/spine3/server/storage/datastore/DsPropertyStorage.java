@@ -22,12 +22,11 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
@@ -54,27 +53,26 @@ public class DsPropertyStorage {
         this.datastore = datastore;
     }
 
-    <V extends Message> void write(String propertyId, V value) {
+    protected <V extends Message> void write(DatastoreRecordId propertyId, V value) {
         checkNotNull(propertyId);
         checkNotNull(value);
 
-        final Key key = Keys.generateForKindWithName(datastore, KIND, propertyId);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, propertyId);
 
         final Entity entity = messageToEntity(AnyPacker.pack(value), key);
         datastore.createOrUpdate(entity);
     }
 
-    @Nullable
-    <V extends Message> V read(String propertyId) {
-        final Key key = Keys.generateForKindWithName(datastore, KIND, propertyId);
+    protected <V extends Message> Optional<V> read(DatastoreRecordId propertyId) {
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, propertyId);
         final Entity response = datastore.read(key);
 
         if (response == null) {
-            return null;
+            return Optional.absent();
         }
 
         final Any anyResult = entityToMessage(response, ANY_TYPE_URL);
         final V result = AnyPacker.unpack(anyResult);
-        return result;
+        return Optional.fromNullable(result);
     }
 }

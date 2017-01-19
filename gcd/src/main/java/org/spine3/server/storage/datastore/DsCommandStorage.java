@@ -40,7 +40,7 @@ import java.util.Iterator;
 import static com.google.cloud.datastore.StructuredQuery.Filter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
@@ -132,8 +132,7 @@ public class DsCommandStorage extends CommandStorage {
         checkNotClosed();
         checkNotDefault(commandId);
 
-        final String idString = idToString(commandId);
-        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(commandId));
         final Entity entity = datastore.read(key);
 
         if (entity == null) {
@@ -149,9 +148,7 @@ public class DsCommandStorage extends CommandStorage {
         checkNotDefault(commandId);
         checkNotDefault(record);
 
-        final String idString = idToString(commandId);
-
-        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(commandId));
 
         Entity entity = messageToEntity(record, key);
         entity = Entity.newBuilder(entity)

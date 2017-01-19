@@ -47,6 +47,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.ofEntityId;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -99,8 +100,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Nullable
     @Override
     protected EntityStorageRecord readRecord(I id) {
-        final String idString = IdTransformer.idToString(id);
-        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
         final Entity response = datastore.read(key);
 
         if (response == null) {
@@ -242,8 +242,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         final Collection<Key> keys = new LinkedList<>();
         for (I id : ids) {
-            final String idString = IdTransformer.idToString(id);
-            final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+            final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
             keys.add(key);
         }
 
@@ -291,8 +290,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final String valueTypeUrl = entityStorageRecord.getState()
                                                        .getTypeUrl();
 
-        final String idString = IdTransformer.idToString(id);
-        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
         final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
         final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
         entity.set(VERSION_KEY, entityStorageRecord.getVersion());

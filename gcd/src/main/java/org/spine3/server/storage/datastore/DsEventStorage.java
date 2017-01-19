@@ -54,6 +54,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 
@@ -137,7 +138,7 @@ public class DsEventStorage extends EventStorage {
 
     @Override
     protected void writeRecord(EventStorageRecord record) {
-        final Key key = Keys.generateForKindWithName(datastore, KIND, record.getEventId());
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(record));
 
         final Entity entity = messageToEntity(record, key);
 
@@ -158,8 +159,7 @@ public class DsEventStorage extends EventStorage {
     @Nullable
     @Override
     protected EventStorageRecord readRecord(EventId eventId) {
-        final String idString = idToString(eventId);
-        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(eventId));
         final Entity response = datastore.read(key);
 
         if (response == null) {
@@ -282,9 +282,7 @@ public class DsEventStorage extends EventStorage {
             return true;
         }
 
-        private static boolean checkFields(
-                Message object,
-                @SuppressWarnings("TypeMayBeWeakened") /*BuilderOrType interface*/ FieldFilter filter) {
+        private static boolean checkFields(Message object, FieldFilter filter) {
             final String fieldPath = filter.getFieldPath();
             final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
             checkArgument(!Strings.isNullOrEmpty(fieldName), "Field filter " + filter.toString() + " is invalid");

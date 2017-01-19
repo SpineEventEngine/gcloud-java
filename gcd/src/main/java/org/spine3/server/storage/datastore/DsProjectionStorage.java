@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.Entity;
@@ -30,6 +31,8 @@ import org.spine3.validate.Validate;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 
 /**
  * GAE Datastore implementation of the {@link ProjectionStorage}.
@@ -44,7 +47,7 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
     private final DsRecordStorage<I> entityStorage;
     private final DsPropertyStorage propertyStorage;
 
-    private final String lastTimestampId;
+    private final DatastoreRecordId lastTimestampId;
 
     public DsProjectionStorage(DsRecordStorage<I> entityStorage,
                                DsPropertyStorage propertyStorage,
@@ -53,7 +56,7 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
         super(multitenant);
         this.entityStorage = entityStorage;
         this.propertyStorage = propertyStorage;
-        this.lastTimestampId = LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName();
+        this.lastTimestampId = of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
     }
 
     @Override
@@ -64,11 +67,13 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
     @Nullable
     @Override
     public Timestamp readLastHandledEventTime() {
-        final Timestamp readTimestamp = propertyStorage.read(lastTimestampId);
-        if ((readTimestamp == null) || Validate.isDefault(readTimestamp)) {
+        final Optional<Timestamp> readTimestamp = propertyStorage.read(lastTimestampId);
+
+        if ((!readTimestamp.isPresent()) || Validate.isDefault(readTimestamp.get())) {
             return null;
         }
-        return readTimestamp;
+        final Timestamp result = readTimestamp.get();
+        return result;
     }
 
     @Override
