@@ -40,6 +40,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 
 /**
  * Google cloud Datastore implementation of {@link StandStorage}.
@@ -50,18 +51,9 @@ import static com.google.common.base.Preconditions.checkState;
 @SuppressWarnings("WeakerAccess")   // Part of API
 public class DsStandStorage extends StandStorage {
 
-    private static final Function<AggregateStateId, String> ID_TRANSFORMER = new Function<AggregateStateId, String>() {
-        @Override
-        public String apply(@Nullable AggregateStateId input) {
-            checkNotNull(input);
-            final Object id = input.getAggregateId();
-            return IdTransformer.idToString(id);
-        }
-    };
+    private final DsRecordStorage<DatastoreRecordId> recordStorage;
 
-    private final DsRecordStorage<String> recordStorage;
-
-    public DsStandStorage(DsRecordStorage<String> recordStorage, boolean multitenant) {
+    public DsStandStorage(DsRecordStorage<DatastoreRecordId> recordStorage, boolean multitenant) {
         super(multitenant);
         this.recordStorage = recordStorage;
     }
@@ -80,12 +72,11 @@ public class DsStandStorage extends StandStorage {
         return result;
     }
 
-    @SuppressWarnings("ConstantConditions") // stringId is formally nullable, but it's not effectively
     @Nullable
     @Override
     protected EntityStorageRecord readRecord(AggregateStateId id) {
-        final String stringId = ID_TRANSFORMER.apply(id);
-        return recordStorage.read(stringId);
+        final DatastoreRecordId recordId = of(id);
+        return recordStorage.read(recordId);
     }
 
     @Override
@@ -95,8 +86,8 @@ public class DsStandStorage extends StandStorage {
 
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
-        final Iterable<String> stringIds = transformIds(ids);
-        return recordStorage.readMultiple(stringIds, fieldMask);
+        final Iterable<DatastoreRecordId> recordIds = transformIds(ids);
+        return recordStorage.readMultiple(recordIds, fieldMask);
     }
 
     @Override
@@ -106,8 +97,8 @@ public class DsStandStorage extends StandStorage {
 
     @Override
     protected Map<AggregateStateId, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
-        final Map<String, EntityStorageRecord> readRecords = recordStorage.readAllRecords(fieldMask);
-        final Collection<String> sourceIds = readRecords.keySet();
+        final Map<DatastoreRecordId, EntityStorageRecord> readRecords = recordStorage.readAllRecords(fieldMask);
+        final Collection<DatastoreRecordId> sourceIds = readRecords.keySet();
         final Collection<AggregateStateId> ids = Collections2.transform(sourceIds, reverseIdTransformer());
 
         final Collection<EntityStorageRecord> recordValues = readRecords.values();
@@ -122,16 +113,24 @@ public class DsStandStorage extends StandStorage {
         return result.build();
     }
 
-    @SuppressWarnings("ConstantConditions") // stringId is formally nullable, but it's not effectively
     @Override
     protected void writeRecord(AggregateStateId id, EntityStorageRecord record) {
-        final String stringId = ID_TRANSFORMER.apply(id);
-        recordStorage.write(stringId, record);
+        final DatastoreRecordId recordId = of(id);
+        recordStorage.write(recordId, record);
     }
 
-    private static Iterable<String> transformIds(Iterable<AggregateStateId> ids) {
-        final Iterable<String> stringIds = Iterables.transform(ids, ID_TRANSFORMER);
-        return stringIds;
+    private static Iterable<DatastoreRecordId> transformIds(Iterable<AggregateStateId> ids) {
+        final Iterable<DatastoreRecordId> recordIds =
+                Iterables.transform(ids,
+                                    new Function<AggregateStateId, DatastoreRecordId>() {
+                                        @Nullable
+                                        @Override
+                                        public DatastoreRecordId apply(@Nullable AggregateStateId input) {
+                                            checkNotNull(input);
+                                            return of(input);
+                                        }
+                                    });
+        return recordIds;
     }
 
     private static Function<Object, AggregateStateId> reverseIdTransformer() {

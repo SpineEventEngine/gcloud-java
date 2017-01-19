@@ -27,7 +27,7 @@ import org.spine3.server.storage.EntityStorageRecord;
  *
  * @author Dmytro Dashenkov
  */
-public class StandStorageRecord extends Entity<String, EntityStorageRecord> {
+public class StandStorageRecord extends Entity<DatastoreRecordId, EntityStorageRecord> {
 
     /**
      * Creates a new instance.
@@ -35,7 +35,7 @@ public class StandStorageRecord extends Entity<String, EntityStorageRecord> {
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
      */
-    private StandStorageRecord(String id) {
+    private StandStorageRecord(DatastoreRecordId id) {
         super(id);
     }
 }

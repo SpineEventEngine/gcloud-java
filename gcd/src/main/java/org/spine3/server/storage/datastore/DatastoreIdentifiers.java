@@ -26,6 +26,7 @@ import com.google.cloud.datastore.KeyFactory;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
 import org.spine3.base.Identifiers;
+import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.EventStorageRecord;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -79,13 +80,20 @@ public class DatastoreIdentifiers {
      * @return the Datastore record identifier
      */
     public static DatastoreRecordId ofEntityId(Object id) {
-        //TODO:01-19-17:alex.tymchenko: why do we have both `IdTransformer` and `Identifiers`?
+        if (id instanceof DatastoreRecordId) {
+            return (DatastoreRecordId) id;
+        }
         final String idAsString = IdTransformer.idToString(id);
         return of(idAsString);
     }
 
     public static DatastoreRecordId of(CommandId commandId) {
         final String idAsString = Identifiers.idToString(commandId);
+        return of(idAsString);
+    }
+
+    public static DatastoreRecordId of(AggregateStateId id) {
+        final String idAsString = IdTransformer.idToString(id.getAggregateId());
         return of(idAsString);
     }
 }

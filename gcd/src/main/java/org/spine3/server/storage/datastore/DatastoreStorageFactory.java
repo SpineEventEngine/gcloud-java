@@ -104,8 +104,8 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public StandStorage createStandStorage() {
-        final DsRecordStorage<String> recordStorage
-                = (DsRecordStorage<String>) createRecordStorage(StandStorageRecord.class);
+        final DsRecordStorage<DatastoreRecordId> recordStorage
+                = (DsRecordStorage<DatastoreRecordId>) createRecordStorage(StandStorageRecord.class);
         final DsStandStorage result = new DsStandStorage(recordStorage, multitenant);
         return result;
     }
