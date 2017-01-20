@@ -65,7 +65,6 @@ class Entities {
      * @param <M>    required message type
      * @return message contained in the {@link Entity}
      */
-    @SuppressWarnings("unchecked")
     static <M extends Message> M entityToMessage(@Nullable Entity entity, TypeUrl type) {
         if (entity == null) {
             return defaultMessage(type);
@@ -93,7 +92,6 @@ class Entities {
      * @param <M>      required message type
      * @return message contained in the {@link Entity}
      */
-    @SuppressWarnings("unchecked")
     static <M extends Message> List<M> entitiesToMessages(Collection<Entity> entities, TypeUrl type) {
         if (entities.isEmpty()) {
             return Collections.emptyList();

@@ -27,6 +27,7 @@ import org.spine3.server.storage.EntityStorageRecord;
  *
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("WeakerAccess")   // Part of API.
 public class StandStorageRecord extends Entity<DatastoreRecordId, EntityStorageRecord> {
 
     /**

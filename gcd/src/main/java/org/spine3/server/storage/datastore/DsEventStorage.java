@@ -120,7 +120,7 @@ public class DsEventStorage extends EventStorage {
         return toEventIterator(iterator);
     }
 
-    @SuppressWarnings({"MethodWithMoreThanThreeNegations", "ValueOfIncrementOrDecrementUsed", "DuplicateStringLiteralInspection"})
+    @SuppressWarnings({"ValueOfIncrementOrDecrementUsed", "DuplicateStringLiteralInspection"})
     private static Query toTimestampQuery(EventStreamQueryOrBuilder query) {
         final long lower = Timestamps.convertToNanos(query.getAfter());
         final long upper = query.hasBefore()
@@ -178,7 +178,6 @@ public class DsEventStorage extends EventStorage {
             this.eventFilters = eventFilters;
         }
 
-        @SuppressWarnings("MethodWithMoreThanThreeNegations")
         @Override
         public boolean apply(@Nullable EventStorageRecord event) {
             if (event == null) {

@@ -158,7 +158,6 @@ class IdTransformer {
         return id;
     }
 
-    @SuppressWarnings("ConstantConditions") // Nullable argument parametrizedClass
     private static <I> Class<I> getIdClass(String stringId, @Nullable Class parametrizedClass) {
         if (parametrizedClass == null) {
             return tryAllSupportedClasses(stringId);

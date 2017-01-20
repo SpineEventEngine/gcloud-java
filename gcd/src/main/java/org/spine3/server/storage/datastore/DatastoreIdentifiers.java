@@ -37,7 +37,9 @@ import static org.spine3.base.Identifiers.idToString;
  *
  * @author Alex Tymchenko
  */
-@SuppressWarnings("UtilityClass")
+@SuppressWarnings({
+        "UtilityClass",
+        "WeakerAccess"  /* as it's part of API */})
 public class DatastoreIdentifiers {
     private DatastoreIdentifiers() {
     }

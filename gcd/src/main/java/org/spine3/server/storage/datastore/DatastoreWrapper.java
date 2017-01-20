@@ -124,7 +124,6 @@ class DatastoreWrapper {
      * @return the {@link Entity} or {@code null} in case of no results for the key given
      * @see DatastoreReader#get(Key)
      */
-    @SuppressWarnings("ReturnOfNull")
     Entity read(Key key) {
         return datastore.get(key);
     }

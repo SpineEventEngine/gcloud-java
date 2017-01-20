@@ -177,7 +177,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return queryAll(mapper, null, FieldMask.getDefaultInstance());
     }
 
-    @SuppressWarnings("WeakerAccess")       // A part of API.
     public Map<?, EntityStorageRecord> readAllByType(final TypeUrl typeUrl, final FieldMask fieldMask) {
         final Function<Entity, IdRecordPair<I>> mapper = new Function<Entity, IdRecordPair<I>>() {
             @Nullable
@@ -207,7 +206,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return queryAll(mapper, typeUrl, FieldMask.getDefaultInstance());
     }
 
-    @SuppressWarnings("WeakerAccess")       // A part of API.
     public Map<?, EntityStorageRecord> readAllByType(final TypeUrl typeUrl) {
         final Function<Entity, IdRecordPair<I>> mapper = new Function<Entity, IdRecordPair<I>>() {
             @Nullable

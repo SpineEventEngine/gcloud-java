@@ -141,7 +141,6 @@ public class DatastoreStorageFactory implements StorageFactory {
         return propertyStorage;
     }
 
-    @SuppressWarnings("ProhibitedExceptionDeclared")
     @Override
     public void close() throws Exception {
         // NOP
