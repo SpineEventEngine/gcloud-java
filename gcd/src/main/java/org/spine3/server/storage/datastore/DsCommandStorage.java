@@ -161,4 +161,15 @@ public class DsCommandStorage extends CommandStorage {
                        .build();
         datastore.createOrUpdate(entity);
     }
+
+    /**
+     * Provides an access to the GAE Datastore with an API, specific to the Spine framework.
+     *
+     * <p>Allows the customization of the storage behavior in descendants.
+     *
+     * @return the wrapped instance of Datastore
+     */
+    protected DatastoreWrapper getDatastore() {
+        return datastore;
+    }
 }

@@ -81,6 +81,11 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
         return entityStorage;
     }
 
+    @SuppressWarnings("unused")     // part of API
+    protected DsPropertyStorage getPropertyStorage() {
+        return propertyStorage;
+    }
+
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
         return getRecordStorage().readMultiple(ids);

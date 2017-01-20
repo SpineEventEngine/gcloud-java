@@ -177,6 +177,29 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return queryAll(mapper, null, FieldMask.getDefaultInstance());
     }
 
+    /**
+     * Provides an access to the GAE Datastore with an API, specific to the Spine framework.
+     *
+     * <p>Allows the customization of the storage behavior in descendants.
+     *
+     * @return the wrapped instance of Datastore
+     */
+    protected DatastoreWrapper getDatastore() {
+        return datastore;
+    }
+
+    /**
+     * Obtains the {@link TypeUrl} of the messages to save to this store.
+     *
+     * <p>Allows the customization of the storage behavior in descendants.
+     *
+     * @return the {@code TyprUrl} of the stored messages
+     */
+    @SuppressWarnings("unused")     // part of API.
+    protected TypeUrl getTypeUrl() {
+        return typeUrl;
+    }
+
     public Map<?, EntityStorageRecord> readAllByType(final TypeUrl typeUrl, final FieldMask fieldMask) {
         final Function<Entity, IdRecordPair<I>> mapper = new Function<Entity, IdRecordPair<I>>() {
             @Nullable
