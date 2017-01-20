@@ -40,6 +40,7 @@ import static org.spine3.base.Stringifiers.idToString;
         "UtilityClass",
         "WeakerAccess"  /* as it's part of API */})
 public class DatastoreIdentifiers {
+
     private DatastoreIdentifiers() {
     }
 

@@ -1,5 +1,6 @@
 /*
- * Copyright 2017, TeamDev Ltd. All rights reserved.
+ *
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -16,27 +17,39 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
  */
 package org.spine3.server.storage.datastore;
 
-import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.junit.Test;
+import org.spine3.base.Identifiers;
+import org.spine3.test.Tests;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
- * A type of entity record, used to store {@link Entity} state in the {@link DsStandStorage}.
- *
- * @author Dmytro Dashenkov
+ * @author Alex Tymchenko
  */
-@SuppressWarnings("WeakerAccess")   // Part of API.
-public class StandStorageRecord extends Entity<DatastoreRecordId, EntityStorageRecord> {
+public class DatastoreIdentifiersShould {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param id the ID for the new instance
-     * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
-     */
-    protected StandStorageRecord(DatastoreRecordId id) {
-        super(id);
+    @Test
+    public void have_private_constructor() {
+        assertTrue(Tests.hasPrivateUtilityConstructor(DatastoreIdentifiers.class));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void not_accept_empty_String_as_identifier_source() {
+        DatastoreIdentifiers.of("");
+    }
+
+    @Test
+    public void wrap_non_empty_String_into_record_identifier() {
+        final String idAsString = Identifiers.newUuid();
+        final DatastoreRecordId recordId = DatastoreIdentifiers.of(idAsString);
+
+        assertNotNull(recordId);
+        assertEquals(idAsString, recordId.getValue());
     }
 }

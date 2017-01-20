@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.aggregate.Aggregate;
@@ -31,6 +32,8 @@ import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.aggregate.AggregateStorageShould;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.storage.Project;
+
+import static org.junit.Assert.assertNotNull;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsAggregateStorageShould extends AggregateStorageShould {
@@ -79,6 +82,20 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         final AggregateStorage storage = getStorage(TestAggregateWithIdLong.class);
         final long id = 42L;
         this.writeAndReadEventTest(id, storage);
+    }
+
+    @Test
+    public void provide_access_to_DatastoreWrapper_for_extensibility() {
+        final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        final DatastoreWrapper datastore = storage.getDatastore();
+        assertNotNull(datastore);
+    }
+
+    @Test
+    public void provide_access_to_PropertyStorage_for_extensibility() {
+        final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        final DsPropertyStorage propertyStorage = storage.getPropertyStorage();
+        assertNotNull(propertyStorage);
     }
 
     private static class TestAggregateWithIdLong extends Aggregate<Long, Project, org.spine3.test.storage.Project.Builder> {

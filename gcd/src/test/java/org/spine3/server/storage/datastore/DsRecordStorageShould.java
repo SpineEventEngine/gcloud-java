@@ -23,7 +23,9 @@ package org.spine3.server.storage.datastore;
 import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.spine3.base.Identifiers;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.AbstractStorage;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -31,6 +33,9 @@ import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Dmytro Dashenkov
@@ -48,6 +53,23 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId> {
     @After
     public void tearDown() throws Exception {
         LOCAL_DATASTORE_STORAGE_FACTORY.tearDown();
+    }
+
+    @Test
+    public void provide_access_to_DatastoreWrapper_for_extensibility() {
+        final DsRecordStorage<ProjectId> storage = getStorage();
+        final DatastoreWrapper datastore = storage.getDatastore();
+        assertNotNull(datastore);
+    }
+
+    @Test
+    public void provide_access_to_TypeUrl_for_extensibility() {
+        final DsRecordStorage<ProjectId> storage = getStorage();
+        final TypeUrl typeUrl = storage.getTypeUrl();
+        assertNotNull(typeUrl);
+
+        // According to the `TestAggregate` declaration.
+        assertEquals(TypeUrl.of(Project.class), typeUrl);
     }
 
     @Override
@@ -70,8 +92,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId> {
     @Override
     protected ProjectId newId() {
         final ProjectId projectId = ProjectId.newBuilder()
-                .setId(Identifiers.newUuid())
-                .build();
+                                             .setId(Identifiers.newUuid())
+                                             .build();
         return projectId;
     }
 

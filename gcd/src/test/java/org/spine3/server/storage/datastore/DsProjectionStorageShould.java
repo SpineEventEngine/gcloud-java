@@ -21,18 +21,21 @@
 package org.spine3.server.storage.datastore;
 
 import org.junit.After;
+import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.projection.ProjectionStorageShould;
 import org.spine3.test.projection.Project;
 
+import static org.junit.Assert.assertNotNull;
+
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("RefusedBequest") // Overrides several methods as NoOps
 public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
-    private static final TestDatastoreStorageFactory DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory DATASTORE_FACTORY =
+            TestDatastoreStorageFactory.getDefaultInstance();
 
     @After
     public void tearDownTest() {
@@ -47,6 +50,13 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
     @Override
     protected String newId() {
         return Identifiers.newUuid();
+    }
+
+    @Test
+    public void provide_access_to_PropertyStorage_for_extensibility() {
+        final DsProjectionStorage<String> storage = (DsProjectionStorage<String>) getStorage();
+        final DsPropertyStorage propertyStorage = storage.getPropertyStorage();
+        assertNotNull(propertyStorage);
     }
 
     private static class TestProjection extends Projection<String, Project> {

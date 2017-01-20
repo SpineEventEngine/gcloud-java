@@ -23,8 +23,11 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.event.EventStorageShould;
+
+import static org.junit.Assert.assertNotNull;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsEventStorageShould extends EventStorageShould {
@@ -55,5 +58,12 @@ public class DsEventStorageShould extends EventStorageShould {
     @AfterClass
     public static void tearDownClass() {
         DATASTORE_FACTORY.tearDown();
+    }
+
+    @Test
+    public void provide_access_to_DatastoreWrapper_for_extensibility() {
+        final DsEventStorage storage = (DsEventStorage) getStorage();
+        final DatastoreWrapper datastore = storage.getDatastore();
+        assertNotNull(datastore);
     }
 }
