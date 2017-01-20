@@ -25,12 +25,11 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
-import org.spine3.base.Identifiers;
+import org.spine3.server.event.storage.EventStorageRecord;
 import org.spine3.server.stand.AggregateStateId;
-import org.spine3.server.storage.EventStorageRecord;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Stringifiers.idToString;
 
 /**
  * Utilities for working with GAE Datastore record identifiers and keys.
@@ -90,7 +89,7 @@ public class DatastoreIdentifiers {
     }
 
     public static DatastoreRecordId of(CommandId commandId) {
-        final String idAsString = Identifiers.idToString(commandId);
+        final String idAsString = idToString(commandId);
         return of(idAsString);
     }
 

@@ -27,10 +27,10 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageShould;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.AggregateStorageShould;
+import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.storage.Project;
-import org.spine3.test.storage.ProjectId;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsAggregateStorageShould extends AggregateStorageShould {

@@ -34,13 +34,12 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.FieldFilter;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventFilter;
+import org.spine3.server.event.EventStorage;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.event.EventStreamQueryOrBuilder;
-import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStorageRecord;
+import org.spine3.server.event.storage.EventStorageRecord;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -52,9 +51,16 @@ import static com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
+import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.protobuf.Timestamps.convertToNanos;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
+import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addAggregateIdProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addEventTypeProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addTimestampNanosProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addTimestampProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventContextProperties;
+import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventFieldProperties;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 
@@ -122,9 +128,9 @@ public class DsEventStorage extends EventStorage {
 
     @SuppressWarnings({"ValueOfIncrementOrDecrementUsed", "DuplicateStringLiteralInspection"})
     private static Query toTimestampQuery(EventStreamQueryOrBuilder query) {
-        final long lower = Timestamps.convertToNanos(query.getAfter());
+        final long lower = convertToNanos(query.getAfter());
         final long upper = query.hasBefore()
-                           ? Timestamps.convertToNanos(query.getBefore())
+                           ? convertToNanos(query.getBefore())
                            : Long.MAX_VALUE;
         final PropertyFilter greaterThen = PropertyFilter.gt(TIMESTAMP_NANOS_PROPERTY_NAME, lower);
         final PropertyFilter lessThen = PropertyFilter.lt(TIMESTAMP_NANOS_PROPERTY_NAME, upper);
@@ -143,15 +149,15 @@ public class DsEventStorage extends EventStorage {
         final Entity entity = messageToEntity(record, key);
 
         final Entity.Builder builder = Entity.newBuilder(entity);
-        DatastoreProperties.addTimestampProperty(record.getTimestamp(), builder);
-        DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), builder);
+        addTimestampProperty(record.getTimestamp(), builder);
+        addTimestampNanosProperty(record.getTimestamp(), builder);
 
         final Message aggregateId = AnyPacker.unpack(record.getContext()
                                                            .getProducerId());
-        DatastoreProperties.addAggregateIdProperty(aggregateId, builder);
-        DatastoreProperties.addEventTypeProperty(record.getEventType(), builder);
-        DatastoreProperties.makeEventContextProperties(record.getContext(), builder);
-        DatastoreProperties.makeEventFieldProperties(record, builder);
+        addAggregateIdProperty(aggregateId, builder);
+        addEventTypeProperty(record.getEventType(), builder);
+        makeEventContextProperties(record.getContext(), builder);
+        makeEventFieldProperties(record, builder);
 
         datastore.createOrUpdate(builder.build());
     }

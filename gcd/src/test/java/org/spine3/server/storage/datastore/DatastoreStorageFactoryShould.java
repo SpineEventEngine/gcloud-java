@@ -24,11 +24,11 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageRecord;
-import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.EventStorage;
+import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 

@@ -23,8 +23,8 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStorageShould;
+import org.spine3.server.event.EventStorage;
+import org.spine3.server.event.EventStorageShould;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsEventStorageShould extends EventStorageShould {

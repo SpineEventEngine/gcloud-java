@@ -30,8 +30,8 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.CommandStorageRecord;
+import org.spine3.server.command.CommandStorage;
+import org.spine3.server.command.storage.CommandStorageRecord;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

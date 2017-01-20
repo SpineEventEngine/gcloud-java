@@ -29,8 +29,8 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,7 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_ID_PROPERTY_NAME;
 
 /**
