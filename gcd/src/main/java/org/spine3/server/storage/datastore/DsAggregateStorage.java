@@ -168,7 +168,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      *
      * @return the wrapped instance of Datastore
      */
-    @SuppressWarnings("unused")     // Part of the API.
     protected DsPropertyStorage getPropertyStorage() {
         return propertyStorage;
     }

@@ -56,7 +56,6 @@ import static org.spine3.server.storage.datastore.DatastoreIdentifiers.ofEntityI
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-@SuppressWarnings("WeakerAccess")   // Part of API
 public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
@@ -195,7 +194,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      *
      * @return the {@code TyprUrl} of the stored messages
      */
-    @SuppressWarnings("unused")     // part of API.
     protected TypeUrl getTypeUrl() {
         return typeUrl;
     }

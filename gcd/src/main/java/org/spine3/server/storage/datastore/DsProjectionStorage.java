@@ -81,7 +81,6 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
         return entityStorage;
     }
 
-    @SuppressWarnings("unused")     // part of API
     protected DsPropertyStorage getPropertyStorage() {
         return propertyStorage;
     }

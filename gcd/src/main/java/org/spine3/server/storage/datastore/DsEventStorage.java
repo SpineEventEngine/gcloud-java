@@ -126,7 +126,7 @@ public class DsEventStorage extends EventStorage {
         return toEventIterator(iterator);
     }
 
-    @SuppressWarnings({"ValueOfIncrementOrDecrementUsed", "DuplicateStringLiteralInspection"})
+    @SuppressWarnings("DuplicateStringLiteralInspection")
     private static Query toTimestampQuery(EventStreamQueryOrBuilder query) {
         final long lower = convertToNanos(query.getAfter());
         final long upper = query.hasBefore()
