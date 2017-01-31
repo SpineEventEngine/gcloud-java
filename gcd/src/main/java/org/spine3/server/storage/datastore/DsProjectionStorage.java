@@ -20,46 +20,43 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.validate.Validate;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
+
 /**
  * GAE Datastore implementation of the {@link ProjectionStorage}.
  *
  * @author Mikhail Mikhaylov
  */
-class DsProjectionStorage<I> extends ProjectionStorage<I> {
+@SuppressWarnings("WeakerAccess")   // Part of API
+public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     private static final String LAST_EVENT_TIMESTAMP_ID = "datastore_event_timestamp_";
 
     private final DsRecordStorage<I> entityStorage;
     private final DsPropertyStorage propertyStorage;
 
-    private final String lastTimestampId;
+    private final DatastoreRecordId lastTimestampId;
 
-    static <I> DsProjectionStorage<I> newInstance(DsRecordStorage<I> entityStorage,
-                                                  DsPropertyStorage propertyStorage,
-                                                  Class<? extends Entity<I, ?>> projectionClass,
-                                                  boolean multitenant) {
-        return new DsProjectionStorage<>(entityStorage, propertyStorage, projectionClass, multitenant);
-    }
-
-    private DsProjectionStorage(DsRecordStorage<I> entityStorage,
-                                DsPropertyStorage propertyStorage,
-                                Class<? extends Entity<I, ?>> projectionClass,
-                                boolean multitenant) {
+    public DsProjectionStorage(DsRecordStorage<I> entityStorage,
+                               DsPropertyStorage propertyStorage,
+                               Class<? extends Entity<I, ?>> projectionClass,
+                               boolean multitenant) {
         super(multitenant);
         this.entityStorage = entityStorage;
         this.propertyStorage = propertyStorage;
-        this.lastTimestampId = LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName();
+        this.lastTimestampId = of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
     }
 
     @Override
@@ -70,16 +67,22 @@ class DsProjectionStorage<I> extends ProjectionStorage<I> {
     @Nullable
     @Override
     public Timestamp readLastHandledEventTime() {
-        final Timestamp readTimestamp = propertyStorage.read(lastTimestampId);
-        if ((readTimestamp == null) || Validate.isDefault(readTimestamp)) {
+        final Optional<Timestamp> readTimestamp = propertyStorage.read(lastTimestampId);
+
+        if ((!readTimestamp.isPresent()) || Validate.isDefault(readTimestamp.get())) {
             return null;
         }
-        return readTimestamp;
+        final Timestamp result = readTimestamp.get();
+        return result;
     }
 
     @Override
     public RecordStorage<I> getRecordStorage() {
         return entityStorage;
+    }
+
+    protected DsPropertyStorage getPropertyStorage() {
+        return propertyStorage;
     }
 
     @Override

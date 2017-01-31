@@ -34,13 +34,12 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.FieldFilter;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventFilter;
+import org.spine3.server.event.EventStorage;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.event.EventStreamQueryOrBuilder;
-import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStorageRecord;
+import org.spine3.server.event.storage.EventStorageRecord;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -52,11 +51,18 @@ import static com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.protobuf.Timestamps.convertToNanos;
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addAggregateIdProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addEventTypeProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addTimestampNanosProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addTimestampProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventContextProperties;
+import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventFieldProperties;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
-
 
 /**
  * Storage for event records based on Google Cloud Datastore.
@@ -65,7 +71,8 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-class DsEventStorage extends EventStorage {
+@SuppressWarnings("WeakerAccess")   // Part of API
+public class DsEventStorage extends EventStorage {
 
     private final DatastoreWrapper datastore;
     private static final String KIND = EventStorageRecord.class.getName();
@@ -96,11 +103,7 @@ class DsEventStorage extends EventStorage {
         }
     };
 
-    static DsEventStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
-        return new DsEventStorage(datastore, multitenant);
-    }
-
-    private DsEventStorage(DatastoreWrapper datastore, boolean multitenant) {
+    public DsEventStorage(DatastoreWrapper datastore, boolean multitenant) {
         super(multitenant);
         this.datastore = datastore;
     }
@@ -123,11 +126,11 @@ class DsEventStorage extends EventStorage {
         return toEventIterator(iterator);
     }
 
-    @SuppressWarnings({"MethodWithMoreThanThreeNegations", "ValueOfIncrementOrDecrementUsed", "DuplicateStringLiteralInspection"})
+    @SuppressWarnings("DuplicateStringLiteralInspection")
     private static Query toTimestampQuery(EventStreamQueryOrBuilder query) {
-        final long lower = Timestamps.convertToNanos(query.getAfter());
+        final long lower = convertToNanos(query.getAfter());
         final long upper = query.hasBefore()
-                           ? Timestamps.convertToNanos(query.getBefore())
+                           ? convertToNanos(query.getBefore())
                            : Long.MAX_VALUE;
         final PropertyFilter greaterThen = PropertyFilter.gt(TIMESTAMP_NANOS_PROPERTY_NAME, lower);
         final PropertyFilter lessThen = PropertyFilter.lt(TIMESTAMP_NANOS_PROPERTY_NAME, upper);
@@ -141,20 +144,20 @@ class DsEventStorage extends EventStorage {
 
     @Override
     protected void writeRecord(EventStorageRecord record) {
-        final Key key = Keys.generateForKindWithName(datastore, KIND, record.getEventId());
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(record));
 
         final Entity entity = messageToEntity(record, key);
 
         final Entity.Builder builder = Entity.newBuilder(entity);
-        DatastoreProperties.addTimestampProperty(record.getTimestamp(), builder);
-        DatastoreProperties.addTimestampNanosProperty(record.getTimestamp(), builder);
+        addTimestampProperty(record.getTimestamp(), builder);
+        addTimestampNanosProperty(record.getTimestamp(), builder);
 
         final Message aggregateId = AnyPacker.unpack(record.getContext()
                                                            .getProducerId());
-        DatastoreProperties.addAggregateIdProperty(aggregateId, builder);
-        DatastoreProperties.addEventTypeProperty(record.getEventType(), builder);
-        DatastoreProperties.makeEventContextProperties(record.getContext(), builder);
-        DatastoreProperties.makeEventFieldProperties(record, builder);
+        addAggregateIdProperty(aggregateId, builder);
+        addEventTypeProperty(record.getEventType(), builder);
+        makeEventContextProperties(record.getContext(), builder);
+        makeEventFieldProperties(record, builder);
 
         datastore.createOrUpdate(builder.build());
     }
@@ -162,8 +165,7 @@ class DsEventStorage extends EventStorage {
     @Nullable
     @Override
     protected EventStorageRecord readRecord(EventId eventId) {
-        final String idString = idToString(eventId);
-        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(eventId));
         final Entity response = datastore.read(key);
 
         if (response == null) {
@@ -174,6 +176,17 @@ class DsEventStorage extends EventStorage {
         return result;
     }
 
+    /**
+     * Provides an access to the GAE Datastore with an API, specific to the Spine framework.
+     *
+     * <p>Allows the customization of the storage behavior in descendants.
+     *
+     * @return the wrapped instance of Datastore
+     */
+    protected DatastoreWrapper getDatastore() {
+        return datastore;
+    }
+
     private static class EventPredicate implements Predicate<EventStorageRecord> {
 
         private final Collection<EventFilter> eventFilters;
@@ -182,7 +195,6 @@ class DsEventStorage extends EventStorage {
             this.eventFilters = eventFilters;
         }
 
-        @SuppressWarnings("MethodWithMoreThanThreeNegations")
         @Override
         public boolean apply(@Nullable EventStorageRecord event) {
             if (event == null) {
@@ -286,9 +298,7 @@ class DsEventStorage extends EventStorage {
             return true;
         }
 
-        private static boolean checkFields(
-                Message object,
-                @SuppressWarnings("TypeMayBeWeakened") /*BuilderOrType interface*/ FieldFilter filter) {
+        private static boolean checkFields(Message object, FieldFilter filter) {
             final String fieldPath = filter.getFieldPath();
             final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
             checkArgument(!Strings.isNullOrEmpty(fieldName), "Field filter " + filter.toString() + " is invalid");

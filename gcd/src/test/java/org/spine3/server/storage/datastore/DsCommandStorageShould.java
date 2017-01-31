@@ -23,8 +23,11 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.CommandStorageShould;
+import org.junit.Test;
+import org.spine3.server.command.CommandStorage;
+import org.spine3.server.command.CommandStorageShould;
+
+import static org.junit.Assert.assertNotNull;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsCommandStorageShould extends CommandStorageShould {
@@ -49,5 +52,12 @@ public class DsCommandStorageShould extends CommandStorageShould {
     @Override
     protected CommandStorage getStorage() {
         return DATASTORE_FACTORY.createCommandStorage();
+    }
+
+    @Test
+    public void provide_access_to_DatastoreWrapper_for_extensibility() {
+        final DsCommandStorage storage = (DsCommandStorage) getStorage();
+        final DatastoreWrapper datastore = storage.getDatastore();
+        assertNotNull(datastore);
     }
 }

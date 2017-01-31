@@ -19,17 +19,24 @@
  */
 package org.spine3.server.storage.datastore;
 
-import org.junit.Test;
-import org.spine3.test.Tests;
-
-import static org.junit.Assert.assertTrue;
+import org.spine3.server.entity.Entity;
+import org.spine3.server.storage.EntityStorageRecord;
 
 /**
- * @author Alex Tymchenko
+ * A type of entity record, used to store {@link Entity} state in the {@link DsStandStorage}.
+ *
+ * @author Dmytro Dashenkov
  */
-public class DatastorePropertiesShould {
-    @Test
-    public void have_private_constructor() {
-        assertTrue(Tests.hasPrivateUtilityConstructor(DatastoreProperties.class));
+@SuppressWarnings("WeakerAccess")   // Part of API.
+public class StandStorageRecord extends Entity<DatastoreRecordId, EntityStorageRecord> {
+
+    /**
+     * Creates a new instance.
+     *
+     * @param id the ID for the new instance
+     * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
+     */
+    protected StandStorageRecord(DatastoreRecordId id) {
+        super(id);
     }
 }

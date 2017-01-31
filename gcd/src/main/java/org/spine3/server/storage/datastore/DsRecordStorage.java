@@ -47,6 +47,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.ofEntityId;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -55,7 +56,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-class DsRecordStorage<I> extends RecordStorage<I> {
+public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
@@ -68,12 +69,6 @@ class DsRecordStorage<I> extends RecordStorage<I> {
             "parse ID from String. " +
             "Note: custom conversion is not supported. " +
             "See org.spine3.base.Identifiers#idToString.";
-
-    static <I> DsRecordStorage<I> newInstance(Descriptor descriptor,
-                                              DatastoreWrapper datastore,
-                                              boolean multitenant) {
-        return new DsRecordStorage<>(descriptor, datastore, multitenant);
-    }
 
     private static final Function<Entity, EntityStorageRecord> recordFromEntity
             = new Function<Entity, EntityStorageRecord>() {
@@ -95,7 +90,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
      * @param descriptor the descriptor of the type of messages to save to the storage
      * @param datastore  the Datastore implementation to use
      */
-    private DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
+    public DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
@@ -104,8 +99,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
     @Nullable
     @Override
     protected EntityStorageRecord readRecord(I id) {
-        final String idString = IdTransformer.idToString(id);
-        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
         final Entity response = datastore.read(key);
 
         if (response == null) {
@@ -182,7 +176,28 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         return queryAll(mapper, null, FieldMask.getDefaultInstance());
     }
 
-    @SuppressWarnings("WeakerAccess")       // A part of API.
+    /**
+     * Provides an access to the GAE Datastore with an API, specific to the Spine framework.
+     *
+     * <p>Allows the customization of the storage behavior in descendants.
+     *
+     * @return the wrapped instance of Datastore
+     */
+    protected DatastoreWrapper getDatastore() {
+        return datastore;
+    }
+
+    /**
+     * Obtains the {@link TypeUrl} of the messages to save to this store.
+     *
+     * <p>Allows the customization of the storage behavior in descendants.
+     *
+     * @return the {@code TyprUrl} of the stored messages
+     */
+    protected TypeUrl getTypeUrl() {
+        return typeUrl;
+    }
+
     public Map<?, EntityStorageRecord> readAllByType(final TypeUrl typeUrl, final FieldMask fieldMask) {
         final Function<Entity, IdRecordPair<I>> mapper = new Function<Entity, IdRecordPair<I>>() {
             @Nullable
@@ -212,7 +227,6 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         return queryAll(mapper, typeUrl, FieldMask.getDefaultInstance());
     }
 
-    @SuppressWarnings("WeakerAccess")       // A part of API.
     public Map<?, EntityStorageRecord> readAllByType(final TypeUrl typeUrl) {
         final Function<Entity, IdRecordPair<I>> mapper = new Function<Entity, IdRecordPair<I>>() {
             @Nullable
@@ -247,8 +261,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
 
         final Collection<Key> keys = new LinkedList<>();
         for (I id : ids) {
-            final String idString = IdTransformer.idToString(id);
-            final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+            final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
             keys.add(key);
         }
 
@@ -296,8 +309,7 @@ class DsRecordStorage<I> extends RecordStorage<I> {
         final String valueTypeUrl = entityStorageRecord.getState()
                                                        .getTypeUrl();
 
-        final String idString = IdTransformer.idToString(id);
-        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
         final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
         final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
         entity.set(VERSION_KEY, entityStorageRecord.getVersion());

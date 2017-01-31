@@ -25,9 +25,9 @@ import com.google.cloud.datastore.Entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.base.EventContextOrBuilder;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.storage.EventStorageRecordOrBuilder;
+import org.spine3.server.event.storage.EventStorageRecord;
 
 import java.util.Date;
 
@@ -81,7 +81,7 @@ class DatastoreProperties {
      * Makes AggregateId property from given {@link Message} value.
      */
     static void addAggregateIdProperty(Object aggregateId, Entity.Builder entity) {
-        final String propertyValue = Identifiers.idToString(aggregateId);
+        final String propertyValue = Stringifiers.idToString(aggregateId);
         entity.set(AGGREGATE_ID_PROPERTY_NAME, propertyValue);
     }
 
@@ -109,7 +109,7 @@ class DatastoreProperties {
      * Converts {@link org.spine3.base.Event}'s fields to a set of Properties, which are
      * ready to add to the Datastore entity.
      */
-    static void makeEventFieldProperties(EventStorageRecordOrBuilder event,
+    static void makeEventFieldProperties(EventStorageRecord event,
                                          Entity.Builder builder) {
         // We do not re-save timestamp
         // We do not re-save event type

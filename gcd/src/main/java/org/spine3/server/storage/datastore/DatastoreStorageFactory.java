@@ -21,19 +21,17 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.event.EventStorage;
+import org.spine3.server.projection.ProjectionStorage;
+import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 
@@ -57,45 +55,32 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     /**
      * Creates new instance of {@code DatastoreStorageFactory}.
-     * <p>
-     * <p>Same as calling {@link #newInstance(Datastore, boolean)} with {@code false} second argument.
-     *
-     * @param datastore the {@link Datastore} implementation to use
-     * @return new instance of the {@code DatastoreStorageFactory}.
-     * @see DatastoreOptions
-     */
-    @SuppressWarnings("WeakerAccess") // Part of API
-    public static DatastoreStorageFactory newInstance(Datastore datastore) {
-        return new DatastoreStorageFactory(datastore, false);
-    }
-
-    /**
-     * Creates new instance of {@code DatastoreStorageFactory}.
      *
      * @param datastore   the {@link Datastore} implementation to use
-     * @param multitenant shows if storage factory is configured to serve a multitenant application.
-     *                    The implementation does not yet support
-     *                    <a href="https://cloud.google.com/appengine/docs/java/multitenancy/multitenancy">Datastore recommended</a>
-     *                    way of creating multitenant apps.
+     * @param multitenant if storage factory is configured to serve a multitenant application.
+     *                    This implementation does not support
+     *                    <a href="https://cloud.google.com/appengine/docs/java/multitenancy/multitenancy">Datastore
+     *                    recommended</a> way of creating multitenant apps yet.
      *                    See {@link Storage#isMultitenant()}.
-     * @return creates new factory instance.
-     * @see DatastoreOptions
      */
-    @SuppressWarnings("WeakerAccess") // Part of API
-    public static DatastoreStorageFactory newInstance(Datastore datastore, boolean multitenant) {
-        return new DatastoreStorageFactory(datastore, multitenant);
-    }
-
-    // Overriding used for testing
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
-    DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
+    public DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
         this.multitenant = multitenant;
         initDatastoreWrapper(datastore);
     }
 
+    /**
+     * Creates new instance of non-multitenant {@code DatastoreStorageFactory}.
+     *
+     * @param datastore the {@link Datastore} implementation to use
+     */
+    public DatastoreStorageFactory(Datastore datastore) {
+        this(datastore, false);
+    }
+
     @VisibleForTesting
     protected void initDatastoreWrapper(Datastore datastore) {
-        checkState(this.getDatastore() == null, "Datastore is already init");
+        checkState(this.getDatastore() == null, "Datastore is already initialized");
         final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore);
         this.setDatastore(wrapped);
     }
@@ -107,41 +92,55 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public CommandStorage createCommandStorage() {
-        return DsCommandStorage.newInstance(getDatastore(), multitenant);
+        final DsCommandStorage result = new DsCommandStorage(getDatastore(), multitenant);
+        return result;
     }
 
     @Override
     public EventStorage createEventStorage() {
-        return DsEventStorage.newInstance(getDatastore(), multitenant);
+        final DsEventStorage result = new DsEventStorage(getDatastore(), multitenant);
+        return result;
     }
 
     @Override
     public StandStorage createStandStorage() {
-        final DsRecordStorage<String> recordStorage
-                = (DsRecordStorage<String>) createRecordStorage(StandStorageRecord.class);
-        return DsStandStorage.newInstance(multitenant, recordStorage);
+        final DsRecordStorage<DatastoreRecordId> recordStorage
+                = (DsRecordStorage<DatastoreRecordId>) createRecordStorage(StandStorageRecord.class);
+        final DsStandStorage result = new DsStandStorage(recordStorage, multitenant);
+        return result;
     }
 
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> aClass) {
         final DsRecordStorage<I> entityStorage = (DsRecordStorage<I>) createRecordStorage(aClass);
-        final DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(getDatastore());
-        return DsProjectionStorage.newInstance(entityStorage, propertyStorage, aClass, multitenant);
+        final DsPropertyStorage propertyStorage = createPropertyStorage();
+        final DsProjectionStorage<I> result = new DsProjectionStorage<>(entityStorage,
+                                                                        propertyStorage,
+                                                                        aClass,
+                                                                        multitenant);
+        return result;
     }
 
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
-        final Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getClassDescriptor(messageClass);
-        return DsRecordStorage.newInstance(descriptor, getDatastore(), multitenant);
+        final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
+        final DsRecordStorage<I> result = new DsRecordStorage<>(descriptor, getDatastore(), multitenant);
+        return result;
     }
 
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> ignored) {
-        return DsAggregateStorage.newInstance(getDatastore(), DsPropertyStorage.newInstance(getDatastore()), multitenant);
+        final DsPropertyStorage propertyStorage = createPropertyStorage();
+        final DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(), propertyStorage, multitenant);
+        return result;
     }
 
-    @SuppressWarnings("ProhibitedExceptionDeclared")
+    protected DsPropertyStorage createPropertyStorage() {
+        final DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(getDatastore());
+        return propertyStorage;
+    }
+
     @Override
     public void close() throws Exception {
         // NOP
@@ -155,19 +154,4 @@ public class DatastoreStorageFactory implements StorageFactory {
         this.datastore = datastore;
     }
 
-    /**
-     * {@link Entity} class used to declare stored type of {@link DsStandStorage}.
-     */
-    private static class StandStorageRecord extends Entity<String, EntityStorageRecord> {
-
-        /**
-         * Creates a new instance.
-         *
-         * @param id the ID for the new instance
-         * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
-         */
-        private StandStorageRecord(String id) {
-            super(id);
-        }
-    }
 }

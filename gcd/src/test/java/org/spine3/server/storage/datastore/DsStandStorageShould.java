@@ -23,9 +23,9 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.Before;
 import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.stand.StandStorageShould;
 import org.spine3.server.storage.AbstractStorage;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.StandStorageShould;
 
 /**
  * @author Dmytro Dashenkov

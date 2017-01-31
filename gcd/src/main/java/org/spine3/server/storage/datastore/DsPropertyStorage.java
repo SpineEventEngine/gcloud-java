@@ -22,12 +22,11 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
@@ -38,7 +37,8 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
  *
  * @author Mikhail Mikhaylov
  */
-class DsPropertyStorage {
+@SuppressWarnings("WeakerAccess")   // Part of API
+public class DsPropertyStorage {
 
     private static final TypeUrl ANY_TYPE_URL = TypeUrl.from(Any.getDescriptor());
     private static final String KIND = Any.class.getName();
@@ -53,27 +53,37 @@ class DsPropertyStorage {
         this.datastore = datastore;
     }
 
-    <V extends Message> void write(String propertyId, V value) {
+    protected <V extends Message> void write(DatastoreRecordId propertyId, V value) {
         checkNotNull(propertyId);
         checkNotNull(value);
 
-        final Key key = Keys.generateForKindWithName(datastore, KIND, propertyId);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, propertyId);
 
         final Entity entity = messageToEntity(AnyPacker.pack(value), key);
         datastore.createOrUpdate(entity);
     }
 
-    @Nullable
-    <V extends Message> V read(String propertyId) {
-        final Key key = Keys.generateForKindWithName(datastore, KIND, propertyId);
+    protected <V extends Message> Optional<V> read(DatastoreRecordId propertyId) {
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, propertyId);
         final Entity response = datastore.read(key);
 
         if (response == null) {
-            return null;
+            return Optional.absent();
         }
 
         final Any anyResult = entityToMessage(response, ANY_TYPE_URL);
         final V result = AnyPacker.unpack(anyResult);
-        return result;
+        return Optional.fromNullable(result);
+    }
+
+    /**
+     * Provides an access to the GAE Datastore with an API, specific to the Spine framework.
+     *
+     * <p>Allows the customization of the storage behavior in descendants.
+     *
+     * @return the wrapped instance of Datastore
+     */
+    protected DatastoreWrapper getDatastore() {
+        return datastore;
     }
 }

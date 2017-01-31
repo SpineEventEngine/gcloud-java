@@ -30,8 +30,8 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.CommandStorageRecord;
+import org.spine3.server.command.CommandStorage;
+import org.spine3.server.command.storage.CommandStorageRecord;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -40,7 +40,7 @@ import java.util.Iterator;
 import static com.google.cloud.datastore.StructuredQuery.Filter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
@@ -53,7 +53,8 @@ import static org.spine3.validate.Validate.checkNotDefault;
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-class DsCommandStorage extends CommandStorage {
+@SuppressWarnings("WeakerAccess")   // Part of API
+public class DsCommandStorage extends CommandStorage {
 
     private static final TypeUrl TYPE_URL = TypeUrl.from(CommandStorageRecord.getDescriptor());
     private static final String KIND = CommandStorageRecord.class.getName();
@@ -72,11 +73,7 @@ class DsCommandStorage extends CommandStorage {
         }
     };
 
-    static CommandStorage newInstance(DatastoreWrapper datastore, boolean multitenant) {
-        return new DsCommandStorage(datastore, multitenant);
-    }
-
-    private DsCommandStorage(DatastoreWrapper datastore, boolean multitenant) {
+    public DsCommandStorage(DatastoreWrapper datastore, boolean multitenant) {
         super(multitenant);
         this.datastore = datastore;
     }
@@ -135,8 +132,7 @@ class DsCommandStorage extends CommandStorage {
         checkNotClosed();
         checkNotDefault(commandId);
 
-        final String idString = idToString(commandId);
-        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(commandId));
         final Entity entity = datastore.read(key);
 
         if (entity == null) {
@@ -152,9 +148,7 @@ class DsCommandStorage extends CommandStorage {
         checkNotDefault(commandId);
         checkNotDefault(record);
 
-        final String idString = idToString(commandId);
-
-        final Key key = Keys.generateForKindWithName(datastore, KIND, idString);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(commandId));
 
         Entity entity = messageToEntity(record, key);
         entity = Entity.newBuilder(entity)
@@ -166,5 +160,16 @@ class DsCommandStorage extends CommandStorage {
                                                                 .ordinal())
                        .build();
         datastore.createOrUpdate(entity);
+    }
+
+    /**
+     * Provides an access to the GAE Datastore with an API, specific to the Spine framework.
+     *
+     * <p>Allows the customization of the storage behavior in descendants.
+     *
+     * @return the wrapped instance of Datastore
+     */
+    protected DatastoreWrapper getDatastore() {
+        return datastore;
     }
 }

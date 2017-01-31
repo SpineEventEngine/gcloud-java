@@ -24,11 +24,11 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageRecord;
-import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.EventStorage;
+import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 
@@ -39,16 +39,16 @@ import static org.junit.Assert.assertTrue;
 public class DatastoreStorageFactoryShould {
 
     private static final DatastoreOptions DUMMY_OPTIONS = DatastoreOptions.newBuilder()
-            .setProjectId("dummy-dataset")
-            .build();
+                                                                          .setProjectId("dummy-dataset")
+                                                                          .build();
 
     private static final Datastore DATASTORE = DUMMY_OPTIONS.getService();
 
-    private static final StorageFactory FACTORY = DatastoreStorageFactory.newInstance(DATASTORE);
+    private static final StorageFactory FACTORY = new DatastoreStorageFactory(DATASTORE);
 
     @Test
     public void create_multitenant_storages() throws Exception {
-        final StorageFactory factory = DatastoreStorageFactory.newInstance(DATASTORE, true);
+        final StorageFactory factory = new DatastoreStorageFactory(DATASTORE, true);
         assertTrue(factory.isMultitenant());
         final CommandStorage storage = factory.createCommandStorage();
         assertTrue(storage.isMultitenant());

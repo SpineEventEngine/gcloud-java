@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
@@ -20,23 +21,26 @@
  */
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
-
 /**
- * Utility for generating Google Datastore {@link com.google.cloud.datastore.Key} instances.
+ * A wrapper type for the {@code String}-based record identifiers in the GAE Datastore.
  *
  * @author Alex Tymchenko
  */
-@SuppressWarnings("UtilityClass")
-class Keys {
+public class DatastoreRecordId {
 
-    private Keys() {}
+    // The wrapped identifier value.
+    private final String value;
 
-    static Key generateForKindWithName(DatastoreWrapper datastore, String kind, String keyName) {
-        final KeyFactory keyFactory = datastore.getKeyFactory(kind);
-        final Key key = keyFactory.newKey(keyName);
+    /**
+     * Creates a new {@code DatastoreRecordId} for the given {@code value}.
+     *
+     * @param value the identity as {@code String} to wrap into an identifier
+     */
+    DatastoreRecordId(String value) {
+        this.value = value;
+    }
 
-        return key;
+    public String getValue() {
+        return value;
     }
 }

@@ -24,12 +24,13 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,7 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_ID_PROPERTY_NAME;
 
 /**
@@ -47,7 +48,8 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_
  * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-class DsAggregateStorage<I> extends AggregateStorage<I> {
+@SuppressWarnings("WeakerAccess")   // Part of API
+public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
     private static final String SNAPSHOT = "SNAPSHOT";
@@ -58,14 +60,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;
 
-    static <I> DsAggregateStorage<I> newInstance(
-            DatastoreWrapper datastore,
-            DsPropertyStorage propertyStorage,
-            boolean multitenant) {
-        return new DsAggregateStorage<>(datastore, propertyStorage, multitenant);
-    }
-
-    private DsAggregateStorage(DatastoreWrapper datastore, DsPropertyStorage propertyStorage, boolean multitenant) {
+    public DsAggregateStorage(DatastoreWrapper datastore, DsPropertyStorage propertyStorage, boolean multitenant) {
         super(multitenant);
         this.datastore = datastore;
         this.propertyStorage = propertyStorage;
@@ -76,12 +71,15 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotClosed();
         checkNotNull(id);
 
-        final String datastoreId = generateDatastoreId(id);
-        final Int32Value count = propertyStorage.read(datastoreId);
-        if (count == null) {
-            return 0;
+        final DatastoreRecordId datastoreId = generateDatastoreId(id);
+        final Optional<Int32Value> count = propertyStorage.read(datastoreId);
+        final int countValue;
+        if (!count.isPresent()) {
+            countValue = 0;
+        } else {
+            countValue = count.get()
+                              .getValue();
         }
-        final int countValue = count.getValue();
         return countValue;
     }
 
@@ -90,7 +88,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotClosed();
         checkNotNull(id);
 
-        final String datastoreId = generateDatastoreId(id);
+        final DatastoreRecordId datastoreId = generateDatastoreId(id);
         propertyStorage.write(datastoreId, Int32Value.newBuilder()
                                                      .setValue(eventCount)
                                                      .build());
@@ -107,7 +105,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
             eventId = SNAPSHOT + stringId;
         }
 
-        final Key key = Keys.generateForKindWithName(datastore, KIND, eventId);
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, DatastoreIdentifiers.of(eventId));
         final Entity incompleteEntity = Entities.messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
         DatastoreProperties.addAggregateIdProperty(stringId, builder);
@@ -140,9 +138,37 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         return records.iterator();
     }
 
-    private String generateDatastoreId(I id) {
+    /**
+     * Generates an identifier of the Datastore record basing on the given {@code Aggregate} identifier.
+     *
+     * @param id an identifier of the {@code Aggregate}
+     * @return the Datastore record ID
+     */
+    protected DatastoreRecordId generateDatastoreId(I id) {
         final String stringId = idToString(id);
         final String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
-        return datastoreId;
+        return DatastoreIdentifiers.of(datastoreId);
+    }
+
+    /**
+     * Provides an access to the GAE Datastore with an API, specific to the Spine framework.
+     *
+     * <p>Allows the customization of the storage behavior in descendants.
+     *
+     * @return the wrapped instance of Datastore
+     */
+    protected DatastoreWrapper getDatastore() {
+        return datastore;
+    }
+
+    /**
+     * Provides an access to the {@link DsPropertyStorage}.
+     *
+     * <p>Allows the customization of the storage behavior in descendants.
+     *
+     * @return the wrapped instance of Datastore
+     */
+    protected DsPropertyStorage getPropertyStorage() {
+        return propertyStorage;
     }
 }
