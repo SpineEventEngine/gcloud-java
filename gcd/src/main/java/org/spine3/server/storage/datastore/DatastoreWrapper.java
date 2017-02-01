@@ -73,7 +73,7 @@ public class DatastoreWrapper {
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
 
-    DatastoreWrapper(Datastore datastore) {
+    protected DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
         this.actor = datastore;
     }
@@ -84,7 +84,8 @@ public class DatastoreWrapper {
      * @param datastore {@link Datastore} to wrap
      * @return new instance of {@code DatastoreWrapper}
      */
-    static DatastoreWrapper wrap(Datastore datastore) {
+    @SuppressWarnings("WeakerAccess") // Part of API
+    protected static DatastoreWrapper wrap(Datastore datastore) {
         return new DatastoreWrapper(datastore);
     }
 
