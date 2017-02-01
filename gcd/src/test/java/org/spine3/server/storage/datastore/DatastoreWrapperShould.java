@@ -84,7 +84,7 @@ public class DatastoreWrapperShould {
     @Test
     public void support_big_bulk_reads() {
         final int bulkSize = 1001;
-        final DatastoreWrapper wrapper = TestDatastoreWrapper.wrap(Given.testDatastore(), false);
+        final TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(Given.testDatastore(), false);
         final Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
         for (Entity record : entities.values()) {
             wrapper.create(record);
@@ -101,6 +101,8 @@ public class DatastoreWrapperShould {
         final Collection<Entity> sourceEntities = entities.values();
         assertEquals(sourceEntities.size(), readEntities.size());
         assertTrue(sourceEntities.containsAll(readEntities));
+
+        wrapper.dropAllTables();
     }
 
     private static class Given {
