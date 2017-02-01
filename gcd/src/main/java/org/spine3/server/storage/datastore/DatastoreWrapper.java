@@ -59,7 +59,7 @@ import static java.lang.Math.min;
  *
  * @author Dmytro Dashenkov
  */
-class DatastoreWrapper {
+public class DatastoreWrapper {
 
     private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should be active.";
     private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should NOT be active.";
