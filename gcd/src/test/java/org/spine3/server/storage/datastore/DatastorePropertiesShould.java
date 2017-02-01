@@ -30,6 +30,6 @@ import static org.junit.Assert.assertTrue;
 public class DatastorePropertiesShould {
     @Test
     public void have_private_constructor() {
-        assertTrue(Tests.hasPrivateUtilityConstructor(DatastoreProperties.class));
+        assertTrue(Tests.hasPrivateParameterlessCtor(DatastoreProperties.class));
     }
 }

@@ -36,7 +36,7 @@ public class DatastoreIdentifiersShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(Tests.hasPrivateUtilityConstructor(DatastoreIdentifiers.class));
+        assertTrue(Tests.hasPrivateParameterlessCtor(DatastoreIdentifiers.class));
     }
 
     @Test(expected = IllegalStateException.class)
