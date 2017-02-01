@@ -156,9 +156,9 @@ public class DatastoreWrapper {
         final List<Key> keysList = newLinkedList(keys);
         final List<Entity> result;
         if (keysList.size() <= MAX_KEYS_PER_READ_REQUEST) {
-            result = readSmallBulk(keysList);
+            result = Lists.newArrayList(datastore.get(keys));
         } else {
-            result = readBigBulk(keysList);
+            result = readBulk(keysList);
         }
         return result;
     }
@@ -364,7 +364,18 @@ public class DatastoreWrapper {
         return keyFactory;
     }
 
-    private List<Entity> readBigBulk(List<Key> keys) {
+    /**
+     * Reads big number of records.
+     *
+     * <p>Google App Engine Datastore has a limitation on the amount of entities queried with a single call —
+     * 1000 entities per query. To deal with this limitation we read the entities in pagination fashion
+     * 1000 entity per page.
+     *
+     * @param keys {@link Key keys} to find the entities for
+     * @return ordered sequence of {@link Entity entities}
+     * @see #read(Iterable)
+     */
+    private List<Entity> readBulk(List<Key> keys) {
         final int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
         log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.", pageCount);
 
@@ -375,7 +386,7 @@ public class DatastoreWrapper {
         for (int i = 0; i < pageCount; i++) {
             final List<Key> keysPage = keys.subList(lowerBound, higherBound);
 
-            final List<Entity> page = readSmallBulk(keysPage);
+            final List<Entity> page = Lists.newArrayList(datastore.get(keys));
             result.addAll(page);
 
             keysLeft -= keysPage.size();
@@ -384,10 +395,6 @@ public class DatastoreWrapper {
         }
 
         return result;
-    }
-
-    private List<Entity> readSmallBulk(Iterable<Key> keys) {
-        return Lists.newArrayList(datastore.get(keys));
     }
 
     private static Logger log() {
