@@ -32,6 +32,7 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -117,6 +118,11 @@ public class DsStandStorage extends StandStorage {
     protected void writeRecord(AggregateStateId id, EntityStorageRecord record) {
         final DatastoreRecordId recordId = of(id);
         recordStorage.write(recordId, record);
+    }
+
+    @SuppressWarnings("unused") // Part of API
+    protected RecordStorage<DatastoreRecordId> getRecordStorage() {
+        return recordStorage;
     }
 
     private static Iterable<DatastoreRecordId> transformIds(Iterable<AggregateStateId> ids) {
