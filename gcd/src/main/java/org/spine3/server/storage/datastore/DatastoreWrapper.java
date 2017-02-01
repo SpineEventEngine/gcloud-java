@@ -151,7 +151,7 @@ class DatastoreWrapper {
         if (keysList.size() <= MAX_KEYS_PER_REQUEST) {
             result = readSmallBulk(keysList);
         } else {
-            result = readBigBulkAsync(keysList);
+            result = readBigBulk(keysList);
         }
         return result;
     }
@@ -340,9 +340,35 @@ class DatastoreWrapper {
         return keyFactory;
     }
 
+    private List<Entity> readBigBulk(List<Key> keys) {
+        return readBigBulkSync(keys);
+    }
+
+    private List<Entity> readBigBulkSync(List<Key> keys) {
+        final int pageCount = keys.size() / MAX_KEYS_PER_REQUEST + 1;
+        log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.", pageCount);
+
+        final List<Entity> result = newLinkedList();
+        int lowerBound = 0;
+        int higherBound = MAX_KEYS_PER_REQUEST;
+        int keysLeft = keys.size();
+        for (int i = 0; i < pageCount; i++) {
+            final List<Key> keysPage = keys.subList(lowerBound, higherBound);
+
+            final List<Entity> page = readSmallBulk(keysPage);
+            result.addAll(page);
+
+            keysLeft -= keysPage.size();
+            lowerBound = higherBound;
+            higherBound += min(keysLeft, MAX_KEYS_PER_REQUEST);
+        }
+
+        return result;
+    }
+
     private List<Entity> readBigBulkAsync(List<Key> keys) {
         final int pageCount = keys.size() / MAX_KEYS_PER_REQUEST + 1;
-        log().debug("Reading a big bulk of entities. The data is read as {} pages.", pageCount);
+        log().debug("Reading a big bulk of entities asynchronously. The data is read as {} pages.", pageCount);
 
         // TODO:31-01-17:dmytro.dashenkov: Review collection implementation choice.
 
