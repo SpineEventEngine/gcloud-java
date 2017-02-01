@@ -152,7 +152,7 @@ class DatastoreWrapper {
      * @see DatastoreReader#fetch(Key...)
      */
     public List<Entity> read(Iterable<Key> keys) {
-        final List<Key> keysList = Lists.newLinkedList(keys);
+        final List<Key> keysList = newLinkedList(keys);
         final List<Entity> result;
         if (keysList.size() <= MAX_KEYS_PER_READ_REQUEST) {
             result = readSmallBulk(keysList);
