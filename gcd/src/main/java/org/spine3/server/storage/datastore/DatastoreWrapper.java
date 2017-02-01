@@ -46,12 +46,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -69,7 +65,6 @@ class DatastoreWrapper {
     private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should NOT be active.";
 
     private static final int MAX_KEYS_PER_REQUEST = 1000;
-    private static final long ASYNC_READ_AWAIT_TIME = 50L;
 
     private static final Map<String, KeyFactory> keyFactories = new HashMap<>();
 
@@ -341,10 +336,6 @@ class DatastoreWrapper {
     }
 
     private List<Entity> readBigBulk(List<Key> keys) {
-        return readBigBulkSync(keys);
-    }
-
-    private List<Entity> readBigBulkSync(List<Key> keys) {
         final int pageCount = keys.size() / MAX_KEYS_PER_REQUEST + 1;
         log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.", pageCount);
 
@@ -366,34 +357,6 @@ class DatastoreWrapper {
         return result;
     }
 
-    private List<Entity> readBigBulkAsync(List<Key> keys) {
-        final int pageCount = keys.size() / MAX_KEYS_PER_REQUEST + 1;
-        log().debug("Reading a big bulk of entities asynchronously. The data is read as {} pages.", pageCount);
-
-        // TODO:31-01-17:dmytro.dashenkov: Review collection implementation choice.
-
-        final Executor executor = Executors.newFixedThreadPool(pageCount); // Each request in own thread
-
-        int lowerBound = 0;
-        int higherBound = MAX_KEYS_PER_REQUEST;
-        int keysLeft = keys.size();
-        final AtomicInteger readCounter = new AtomicInteger(0);
-        final List<Entity> result = newLinkedList();
-        for (int i = 0; i < pageCount; i++) {
-            final List<Key> keysPage = keys.subList(lowerBound, higherBound);
-            executor.execute(new AsyncReadTask(datastore, keysPage, i, readCounter, new AsyncReadTask.Callback() {
-                @Override
-                public void onFetch(Iterator<Entity> entities) {
-                    result.addAll(Lists.newArrayList(entities));
-                }
-            }));
-            keysLeft -= keysPage.size();
-            lowerBound = higherBound;
-            higherBound += min(keysLeft, MAX_KEYS_PER_REQUEST);
-        }
-        return result;
-    }
-
     private List<Entity> readSmallBulk(Iterable<Key> keys) {
         return Lists.newArrayList(datastore.get(keys));
     }
@@ -406,66 +369,5 @@ class DatastoreWrapper {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger logger = LoggerFactory.getLogger(DatastoreWrapper.class);
-    }
-
-    private static class AsyncReadTask implements Runnable {
-
-        private static final int awaitIterations = 50;
-
-        private final Datastore datastore;
-        private final Iterable<Key> keys;
-        private final int ownNumber;
-        private final AtomicInteger counter;
-        private final Callback callback;
-
-        private static final Object lock = new Object();
-
-
-        private AsyncReadTask(Datastore datastore,
-                              List<Key> keys,
-                              int ownNumber,
-                              AtomicInteger counter,
-                              Callback callback) {
-            this.datastore = datastore;
-            this.keys = keys;
-            this.ownNumber = ownNumber;
-            this.counter = counter;
-            this.callback = callback;
-        }
-
-        @SuppressWarnings("SynchronizationOnStaticField") // Single lock for all the instances
-        @Override
-        public void run() {
-            checkState(ownNumber < counter.get());
-            final Iterator<Entity> entities = datastore.get(keys);
-
-            while (true) {
-                synchronized (lock) {
-                    if (ownNumber == counter.get()) {
-                        // To preserve order of the entities, we collect them synchronously
-                        callback.onFetch(entities);
-                        counter.incrementAndGet();
-                        return;
-                    } else {
-                        // Some of the reads of previous pages were not executed yet
-                        // Wait 50ms and try again
-                        awaitAsyncRead();
-                    }
-                }
-            }
-        }
-
-        private interface Callback {
-
-            void onFetch(Iterator<Entity> entities);
-        }
-    }
-
-    private static void awaitAsyncRead() {
-        try {
-            Thread.sleep(ASYNC_READ_AWAIT_TIME);
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
-        }
     }
 }

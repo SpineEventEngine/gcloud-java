@@ -21,10 +21,19 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
+import com.google.protobuf.Any;
 import org.junit.Test;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Dmytro Dashenkov
@@ -34,7 +43,7 @@ public class DatastoreWrapperShould {
 
     @Test
     public void work_with_transactions_if_necessary() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.localDatastore());
+        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
         wrapper.commitTransaction();
@@ -43,7 +52,7 @@ public class DatastoreWrapperShould {
 
     @Test
     public void rollback_transactions() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.localDatastore());
+        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
         wrapper.rollbackTransaction();
@@ -52,7 +61,7 @@ public class DatastoreWrapperShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_start_transaction_if_one_is_active() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.localDatastore());
+        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore());
         try {
             wrapper.startTransaction();
             assertTrue(wrapper.isTransactionActive());
@@ -64,7 +73,7 @@ public class DatastoreWrapperShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_finish_not_active_transaction() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.localDatastore());
+        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
         wrapper.commitTransaction();
@@ -72,10 +81,50 @@ public class DatastoreWrapperShould {
         wrapper.rollbackTransaction();
     }
 
+    @Test
+    public void support_big_bulk_reads() {
+        final int bulkSize = 1001;
+        final DatastoreWrapper wrapper = TestDatastoreWrapper.wrap(Given.testDatastore(), false);
+        final Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
+        for (Entity record : entities.values()) {
+            wrapper.create(record);
+        }
+
+        // Wait some time to make sure the writing is complete
+        try {
+            Thread.sleep(bulkSize * 5);
+        } catch (InterruptedException e) {
+            fail(e.getMessage());
+        }
+
+        final Collection<Entity> readEntities = wrapper.read(entities.keySet());
+        final Collection<Entity> sourceEntities = entities.values();
+        assertEquals(sourceEntities.size(), readEntities.size());
+        assertTrue(sourceEntities.containsAll(readEntities));
+    }
+
     private static class Given {
 
-        private static Datastore localDatastore() {
-            return TestDatastoreStorageFactory.TestingDatastoreSingleton.INSTANCE.value;
+        private static final String GENERIC_ENTITY_KIND = "my.entity";
+
+        private static Datastore testDatastore() {
+            final boolean onCi = "true".equals(System.getenv("CI"));
+            return onCi
+                    ? TestDatastoreStorageFactory.TestingDatastoreSingleton.INSTANCE.value
+                    : TestDatastoreStorageFactory.DefaultDatastoreSingleton.INSTANCE.value;
+        }
+
+        private static Map<Key, Entity> nEntities(int n, DatastoreWrapper wrapper) {
+
+            final Map<Key, Entity> result = new HashMap<>(n);
+            for (int i = 0; i < n; i++) {
+                final Any message = Any.getDefaultInstance();
+                final DatastoreRecordId recordId = new DatastoreRecordId(String.format("record-%s", i));
+                final Key key = DatastoreIdentifiers.keyFor(wrapper, GENERIC_ENTITY_KIND, recordId);
+                final Entity entity = Entities.messageToEntity(message, key);
+                result.put(key, entity);
+            }
+            return result;
         }
     }
 }
