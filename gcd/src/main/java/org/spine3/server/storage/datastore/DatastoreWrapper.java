@@ -123,6 +123,16 @@ class DatastoreWrapper {
     }
 
     /**
+     * Writes the {@link Entity entities} to the Datastore or modifies the existing ones.
+     *
+     * @param entities the {@link Entity Entities} to write or update
+     * @see DatastoreWrapper#createOrUpdate(Entity)
+     */
+    public void createOrUpdate(Entity... entities) {
+        actor.put(entities);
+    }
+
+    /**
      * Retrieves an {@link Entity} with the given key from the Datastore.
      *
      * @param key {@link Key} to search for

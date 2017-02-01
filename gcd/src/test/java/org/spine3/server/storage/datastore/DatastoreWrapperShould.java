@@ -26,8 +26,10 @@ import com.google.cloud.datastore.Key;
 import com.google.protobuf.Any;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -81,14 +83,34 @@ public class DatastoreWrapperShould {
         wrapper.rollbackTransaction();
     }
 
+    // Some variables act in different cases and should have self-explainatory names
+    @SuppressWarnings("UnnecessaryLocalVariable")
     @Test
-    public void support_big_bulk_reads() {
+    public void support_big_bulk_reads() throws InterruptedException {
         final int bulkSize = 1001;
+        final int maxWritesPerCall = 500;
+        final int firstPartStart = 0;
+        final int firstPartEnd = firstPartStart + maxWritesPerCall;
+        final int secondPartStart = firstPartEnd;
+        final int secondPartEnd = secondPartStart + maxWritesPerCall;
+        final int thirdPartStart = secondPartEnd;
+        final int thirdPartEnd = bulkSize;
+
+
         final TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(Given.testDatastore(), false);
         final Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
-        for (Entity record : entities.values()) {
-            wrapper.create(record);
-        }
+        final List<Entity> sourceEntities = new ArrayList<>(entities.values());
+
+        final Entity[] firstPart = new Entity[maxWritesPerCall];
+        final Entity[] secondPart = new Entity[maxWritesPerCall];
+        final Entity[] thirdPart = new Entity[1]; // Only 1 element left. Change this when changing bulkSize
+        sourceEntities.subList(firstPartStart, firstPartEnd).toArray(firstPart);
+        sourceEntities.subList(secondPartStart, secondPartEnd).toArray(secondPart);
+        sourceEntities.subList(thirdPartStart, thirdPartEnd).toArray(thirdPart);
+
+        wrapper.createOrUpdate(firstPart);
+        wrapper.createOrUpdate(secondPart);
+        wrapper.createOrUpdate(thirdPart);
 
         // Wait some time to make sure the writing is complete
         try {
@@ -98,7 +120,6 @@ public class DatastoreWrapperShould {
         }
 
         final Collection<Entity> readEntities = wrapper.read(entities.keySet());
-        final Collection<Entity> sourceEntities = entities.values();
         assertEquals(sourceEntities.size(), readEntities.size());
         assertTrue(sourceEntities.containsAll(readEntities));
 
