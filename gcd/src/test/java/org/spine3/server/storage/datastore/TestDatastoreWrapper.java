@@ -52,7 +52,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
     /**
      * Due to eventual consistency, {@link #dropTable(String) is performed iteratively until the table has no records}.
      *
-     * This constant represents the maximum number of cleanup attempts before the execution is continued.
+     * This constant represents the maximum number of cleanup attempts before the execution is continued
      */
     private static final int MAX_CLEANUP_ATTEMPTS = 5;
 
@@ -77,19 +77,19 @@ class TestDatastoreWrapper extends DatastoreWrapper {
     }
 
     @Override
-    void createOrUpdate(Entity entity) {
+    public void createOrUpdate(Entity entity) {
         super.createOrUpdate(entity);
         waitForConsistency();
     }
 
     @Override
-    void create(Entity entity) throws DatastoreException {
+    public void create(Entity entity) throws DatastoreException {
         super.create(entity);
         waitForConsistency();
     }
 
     @Override
-    void update(Entity entity) throws DatastoreException {
+    public void update(Entity entity) throws DatastoreException {
         super.update(entity);
         waitForConsistency();
     }
