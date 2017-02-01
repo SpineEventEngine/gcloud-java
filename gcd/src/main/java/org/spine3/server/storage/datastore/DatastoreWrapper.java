@@ -256,14 +256,17 @@ class DatastoreWrapper {
         if (keysArray.length > MAX_KEYS_PER_WRITE_REQUEST) {
             int start = 0;
             int end = MAX_KEYS_PER_WRITE_REQUEST;
-            while (end < keysArray.length) {
+            while (true) {
                 final int length = end - start;
+                if (length <= 0) {
+                    return;
+                }
                 final Key[] keysSubarray = new Key[length];
                 System.arraycopy(keysArray, start, keysSubarray, 0, keysSubarray.length);
                 delete(keysSubarray);
 
                 start = end;
-                end = min(end + MAX_KEYS_PER_WRITE_REQUEST, keysArray.length - end);
+                end = min(MAX_KEYS_PER_WRITE_REQUEST, keysArray.length - end);
             }
         } else {
             delete(keysArray);
