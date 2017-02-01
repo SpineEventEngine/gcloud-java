@@ -165,10 +165,10 @@ public class DatastoreWrapper {
 
     /**
      * Queries the Datastore with the given arguments.
-     * <p>
+     *
      * <p>As the Datastore may return a partial result set for {@link EntityQuery}, {@link KeyQuery}
      * and {@link ProjectionEntityQuery}, it is required to repeat a query with the adjusted cursor position.
-     * <p>
+     *
      * <p>Therefore, an execution of this method may in fact result in several queries to the Datastore instance.
      *
      * @param query {@link Query} to execute upon the Datastore
@@ -279,7 +279,7 @@ public class DatastoreWrapper {
 
     /**
      * Starts a transaction.
-     * <p>
+     *
      * <p>After this method is called, all {@code Entity} modifications performed through this instance of
      * {@code DatastoreWrapper} become transactional. This behaviour lasts until either {@link #commitTransaction()} or
      * {@link #rollbackTransaction()} is called.
@@ -297,9 +297,9 @@ public class DatastoreWrapper {
 
     /**
      * Commits a transaction.
-     * <p>
+     *
      * <p>Upon the method call, all the modifications within the active transaction are applied.
-     * <p>
+     *
      * <p>All next operations become non-transactional until {@link #startTransaction()} is called.
      *
      * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}
@@ -315,9 +315,9 @@ public class DatastoreWrapper {
 
     /**
      * Rollbacks a transaction.
-     * <p>
+     *
      * <p>Upon the method call, all the modifications within the active transaction canceled permanently.
-     * <p>
+     *
      * <p>After this method execution is over, all the further modifications made through the current instance of
      * {@code DatastoreWrapper} become non-transactional.
      *
@@ -345,7 +345,7 @@ public class DatastoreWrapper {
 
     /**
      * Retrieves an instance of {@link KeyFactory} unique for given Kind of data.
-     * <p>
+     *
      * <p>Retrieved instances are the same across all instances of {@code DatastoreWrapper}.
      *
      * @param kind kind of {@link Entity} to generate keys for
