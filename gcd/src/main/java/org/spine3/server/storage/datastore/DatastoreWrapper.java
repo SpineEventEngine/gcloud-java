@@ -64,7 +64,8 @@ class DatastoreWrapper {
     private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should be active.";
     private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should NOT be active.";
 
-    private static final int MAX_KEYS_PER_REQUEST = 1000;
+    private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
+    private static final int MAX_KEYS_PER_WRITE_REQUEST = 500;
 
     private static final Map<String, KeyFactory> keyFactories = new HashMap<>();
 
@@ -153,7 +154,7 @@ class DatastoreWrapper {
     public List<Entity> read(Iterable<Key> keys) {
         final List<Key> keysList = Lists.newLinkedList(keys);
         final List<Entity> result;
-        if (keysList.size() <= MAX_KEYS_PER_REQUEST) {
+        if (keysList.size() <= MAX_KEYS_PER_READ_REQUEST) {
             result = readSmallBulk(keysList);
         } else {
             result = readBigBulk(keysList);
@@ -252,7 +253,21 @@ class DatastoreWrapper {
         final Key[] keysArray = new Key[keys.size()];
         keys.toArray(keysArray);
 
-        delete(keysArray);
+        if (keysArray.length > MAX_KEYS_PER_WRITE_REQUEST) {
+            int start = 0;
+            int end = MAX_KEYS_PER_WRITE_REQUEST;
+            while (end < keysArray.length) {
+                final int length = end - start;
+                final Key[] keysSubarray = new Key[length];
+                System.arraycopy(keysArray, start, keysSubarray, 0, keysSubarray.length);
+                delete(keysSubarray);
+
+                start = end;
+                end = min(end + MAX_KEYS_PER_WRITE_REQUEST, keysArray.length - end);
+            }
+        } else {
+            delete(keysArray);
+        }
     }
 
     /**
@@ -346,12 +361,12 @@ class DatastoreWrapper {
     }
 
     private List<Entity> readBigBulk(List<Key> keys) {
-        final int pageCount = keys.size() / MAX_KEYS_PER_REQUEST + 1;
+        final int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
         log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.", pageCount);
 
         final List<Entity> result = newLinkedList();
         int lowerBound = 0;
-        int higherBound = MAX_KEYS_PER_REQUEST;
+        int higherBound = MAX_KEYS_PER_READ_REQUEST;
         int keysLeft = keys.size();
         for (int i = 0; i < pageCount; i++) {
             final List<Key> keysPage = keys.subList(lowerBound, higherBound);
@@ -361,7 +376,7 @@ class DatastoreWrapper {
 
             keysLeft -= keysPage.size();
             lowerBound = higherBound;
-            higherBound += min(keysLeft, MAX_KEYS_PER_REQUEST);
+            higherBound += min(keysLeft, MAX_KEYS_PER_READ_REQUEST);
         }
 
         return result;
