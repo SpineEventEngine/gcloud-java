@@ -96,12 +96,11 @@ class TestDatastoreWrapper extends DatastoreWrapper {
 
     @Override
     void dropTable(String table) {
-//        if (!waitForConsistency) {
-//            super.dropTable(table);
-//        } else {
-//            dropTableConsistently(table);
-//        }
-        super.dropTable(table);
+        if (!waitForConsistency) {
+            super.dropTable(table);
+        } else {
+            dropTableConsistently(table);
+        }
     }
 
     @SuppressWarnings("BusyWait")   // allow Datastore some time between cleanup attempts.
@@ -141,7 +140,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
 
                 final Key[] keysArray = new Key[keys.size()];
                 keys.toArray(keysArray);
-                delete(keysArray);
+                dropTableInternal(keysArray);
 
                 cleanupAttempts++;
             }

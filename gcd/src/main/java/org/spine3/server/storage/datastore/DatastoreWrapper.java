@@ -252,7 +252,10 @@ class DatastoreWrapper {
 
         final Key[] keysArray = new Key[keys.size()];
         keys.toArray(keysArray);
+        dropTableInternal(keysArray);
+    }
 
+    void dropTableInternal(Key[] keysArray) {
         if (keysArray.length > MAX_KEYS_PER_WRITE_REQUEST) {
             int start = 0;
             int end = MAX_KEYS_PER_WRITE_REQUEST;
