@@ -148,7 +148,7 @@ public class DsStandStorage extends StandStorage {
         return new Function<Object, AggregateStateId>() {
             @Override
             public AggregateStateId apply(@Nullable Object input) {
-                checkNotNull(input, "String ID must not be null.");
+                checkNotNull(input, "Aggregate ID must not be null.");
                 final AggregateStateId id = AggregateStateId.of(input, type);
                 return id;
             }
