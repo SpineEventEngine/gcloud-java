@@ -287,8 +287,7 @@ public class DatastoreWrapper {
      * @throws IllegalStateException if a transaction is already started on this instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
-    @SuppressWarnings("WeakerAccess")
-    // Part of API
+    @SuppressWarnings("WeakerAccess") // Part of API
     public void startTransaction() throws IllegalStateException {
         checkState(!isTransactionActive(), NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction = datastore.newTransaction();
@@ -324,8 +323,7 @@ public class DatastoreWrapper {
      * @throws IllegalStateException if no transaction is active for the current instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
-    @SuppressWarnings("WeakerAccess")
-    // Part of API
+    @SuppressWarnings("WeakerAccess") // Part of API
     public void rollbackTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.rollback();
@@ -337,8 +335,7 @@ public class DatastoreWrapper {
      *
      * @return {@code true} if there is an active transaction, {@code false} otherwise
      */
-    @SuppressWarnings("WeakerAccess")
-    // Part of API
+    @SuppressWarnings("WeakerAccess") // Part of API
     public boolean isTransactionActive() {
         return activeTransaction != null && activeTransaction.isActive();
     }
