@@ -44,17 +44,17 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     private static final String LAST_EVENT_TIMESTAMP_ID = "datastore_event_timestamp_";
 
-    private final DsRecordStorage<I> entityStorage;
+    private final DsRecordStorage<I> recordStorage;
     private final DsPropertyStorage propertyStorage;
 
     private final DatastoreRecordId lastTimestampId;
 
-    public DsProjectionStorage(DsRecordStorage<I> entityStorage,
+    public DsProjectionStorage(DsRecordStorage<I> recordStorage,
                                DsPropertyStorage propertyStorage,
                                Class<? extends Entity<I, ?>> projectionClass,
                                boolean multitenant) {
         super(multitenant);
-        this.entityStorage = entityStorage;
+        this.recordStorage = recordStorage;
         this.propertyStorage = propertyStorage;
         this.lastTimestampId = of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
     }
@@ -78,7 +78,7 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     public RecordStorage<I> getRecordStorage() {
-        return entityStorage;
+        return recordStorage;
     }
 
     protected DsPropertyStorage getPropertyStorage() {
