@@ -96,11 +96,12 @@ class TestDatastoreWrapper extends DatastoreWrapper {
 
     @Override
     void dropTable(String table) {
-        if (!waitForConsistency) {
-            super.dropTable(table);
-        } else {
-            dropTableConsistently(table);
-        }
+//        if (!waitForConsistency) {
+//            super.dropTable(table);
+//        } else {
+//            dropTableConsistently(table);
+//        }
+        super.dropTable(table);
     }
 
     @SuppressWarnings("BusyWait")   // allow Datastore some time between cleanup attempts.
