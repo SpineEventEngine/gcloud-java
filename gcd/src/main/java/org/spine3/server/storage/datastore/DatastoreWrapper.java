@@ -386,7 +386,7 @@ public class DatastoreWrapper {
         for (int i = 0; i < pageCount; i++) {
             final List<Key> keysPage = keys.subList(lowerBound, higherBound);
 
-            final List<Entity> page = Lists.newArrayList(datastore.get(keys));
+            final List<Entity> page = Lists.newArrayList(datastore.get(keysPage));
             result.addAll(page);
 
             keysLeft -= keysPage.size();
