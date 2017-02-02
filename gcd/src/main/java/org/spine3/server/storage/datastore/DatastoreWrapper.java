@@ -55,6 +55,7 @@ import static java.lang.Math.min;
 
 /**
  * Represents a wrapper above GAE {@link Datastore}.
+ *
  * <p>Provides API for Datastore to be used in storages.
  *
  * @author Dmytro Dashenkov

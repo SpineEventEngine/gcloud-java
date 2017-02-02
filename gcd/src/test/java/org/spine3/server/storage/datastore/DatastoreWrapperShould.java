@@ -112,7 +112,7 @@ public class DatastoreWrapperShould {
         wrapper.createOrUpdate(secondPart);
         wrapper.createOrUpdate(thirdPart);
 
-        // Wait some time to make sure the writing is complete
+        // Wait for some time to make sure the writing is complete
         try {
             Thread.sleep(bulkSize * 5);
         } catch (InterruptedException e) {
