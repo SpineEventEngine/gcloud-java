@@ -36,7 +36,7 @@ public class IdTransformerShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(Tests.hasPrivateUtilityConstructor(IdTransformer.class));
+        assertTrue(Tests.hasPrivateParameterlessCtor(IdTransformer.class));
     }
 
     @Test

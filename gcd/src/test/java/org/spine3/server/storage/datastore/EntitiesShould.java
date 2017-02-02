@@ -45,7 +45,7 @@ public class EntitiesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(Tests.hasPrivateUtilityConstructor(Entities.class));
+        assertTrue(Tests.hasPrivateParameterlessCtor(Entities.class));
     }
 
     @Test

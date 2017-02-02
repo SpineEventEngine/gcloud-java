@@ -146,10 +146,10 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
                 new TestDatastoreStorageFactory(TestingDatastoreSingleton.INSTANCE.value);
     }
 
-    private enum DefaultDatastoreSingleton {
+    enum DefaultDatastoreSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Datastore value = DEFAULT_LOCAL_OPTIONS.getService();
+        final Datastore value = DEFAULT_LOCAL_OPTIONS.getService();
     }
 
     enum TestingDatastoreSingleton {

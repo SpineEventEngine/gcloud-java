@@ -22,10 +22,14 @@ package org.spine3.server.storage.datastore;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorageShould;
 import org.spine3.server.storage.AbstractStorage;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorage;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Dmytro Dashenkov
@@ -43,6 +47,12 @@ public class DsStandStorageShould extends StandStorageShould {
     @After
     public void tearDown() throws Exception {
         LOCAL_DATASTORE_STORAGE_FACTORY.tearDown();
+    }
+
+    @Test
+    public void contain_record_storage() {
+        final RecordStorage<?> recordStorage = ((DsStandStorage) getStorage()).getRecordStorage();
+        assertNotNull(recordStorage);
     }
 
     @SuppressWarnings("unchecked")

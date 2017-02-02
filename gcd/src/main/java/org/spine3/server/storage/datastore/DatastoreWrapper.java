@@ -40,6 +40,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -49,17 +51,22 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
+import static java.lang.Math.min;
 
 /**
  * Represents a wrapper above GAE {@link Datastore}.
+ *
  * <p>Provides API for Datastore to be used in storages.
  *
  * @author Dmytro Dashenkov
  */
-class DatastoreWrapper {
+public class DatastoreWrapper {
 
     private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should be active.";
     private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should NOT be active.";
+
+    private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
+    private static final int MAX_KEYS_PER_WRITE_REQUEST = 500;
 
     private static final Map<String, KeyFactory> keyFactories = new HashMap<>();
 
@@ -67,7 +74,7 @@ class DatastoreWrapper {
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
 
-    DatastoreWrapper(Datastore datastore) {
+    protected DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
         this.actor = datastore;
     }
@@ -75,10 +82,11 @@ class DatastoreWrapper {
     /**
      * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
      *
-     * @param datastore          {@link Datastore} to wrap
+     * @param datastore {@link Datastore} to wrap
      * @return new instance of {@code DatastoreWrapper}
      */
-    static DatastoreWrapper wrap(Datastore datastore) {
+    @SuppressWarnings("WeakerAccess") // Part of API
+    protected static DatastoreWrapper wrap(Datastore datastore) {
         return new DatastoreWrapper(datastore);
     }
 
@@ -90,7 +98,7 @@ class DatastoreWrapper {
      * @see DatastoreWriter#put(FullEntity)
      */
     @SuppressWarnings("WeakerAccess")
-    void create(Entity entity) throws DatastoreException {
+    public void create(Entity entity) throws DatastoreException {
         actor.add(entity);
     }
 
@@ -102,7 +110,7 @@ class DatastoreWrapper {
      * @see DatastoreWriter#update(Entity...)
      */
     @SuppressWarnings("WeakerAccess")
-    void update(Entity entity) throws DatastoreException {
+    public void update(Entity entity) throws DatastoreException {
         actor.update(entity);
     }
 
@@ -113,8 +121,18 @@ class DatastoreWrapper {
      * @see DatastoreWrapper#create(Entity)
      * @see DatastoreWrapper#update(Entity)
      */
-    void createOrUpdate(Entity entity) {
+    public void createOrUpdate(Entity entity) {
         actor.put(entity);
+    }
+
+    /**
+     * Writes the {@link Entity entities} to the Datastore or modifies the existing ones.
+     *
+     * @param entities the {@link Entity Entities} to write or update
+     * @see DatastoreWrapper#createOrUpdate(Entity)
+     */
+    public void createOrUpdate(Entity... entities) {
+        actor.put(entities);
     }
 
     /**
@@ -124,8 +142,8 @@ class DatastoreWrapper {
      * @return the {@link Entity} or {@code null} in case of no results for the key given
      * @see DatastoreReader#get(Key)
      */
-    Entity read(Key key) {
-        return datastore.get(key);
+    public Entity read(Key key) {
+        return actor.get(key);
     }
 
     /**
@@ -135,8 +153,15 @@ class DatastoreWrapper {
      * @return A list of found entities in the order of keys (including {@code null} values for nonexistent keys)
      * @see DatastoreReader#fetch(Key...)
      */
-    List<Entity> read(Iterable<Key> keys) {
-        return Lists.newArrayList(datastore.get(keys));
+    public List<Entity> read(Iterable<Key> keys) {
+        final List<Key> keysList = newLinkedList(keys);
+        final List<Entity> result;
+        if (keysList.size() <= MAX_KEYS_PER_READ_REQUEST) {
+            result = Lists.newArrayList(datastore.get(keys));
+        } else {
+            result = readBulk(keysList);
+        }
+        return result;
     }
 
     /**
@@ -152,7 +177,7 @@ class DatastoreWrapper {
      * @see DatastoreReader#run(Query)
      */
     @SuppressWarnings({"unchecked", "IfStatementWithTooManyBranches", "ChainOfInstanceofChecks"})
-    List<Entity> read(Query query) {
+    public List<Entity> read(Query query) {
         QueryResults queryResults = actor.run(query);
         final List<Entity> resultsAsList = newLinkedList();
 
@@ -201,7 +226,7 @@ class DatastoreWrapper {
      *
      * @param keys {@link Key Keys} of the {@link Entity Entities} to delete. May be nonexistent
      */
-    void delete(Key... keys) {
+    public void delete(Key... keys) {
         actor.delete(keys);
     }
 
@@ -229,8 +254,28 @@ class DatastoreWrapper {
 
         final Key[] keysArray = new Key[keys.size()];
         keys.toArray(keysArray);
+        dropTableInternal(keysArray);
+    }
 
-        delete(keysArray);
+    void dropTableInternal(Key[] keysArray) {
+        if (keysArray.length > MAX_KEYS_PER_WRITE_REQUEST) {
+            int start = 0;
+            int end = MAX_KEYS_PER_WRITE_REQUEST;
+            while (true) {
+                final int length = end - start;
+                if (length <= 0) {
+                    return;
+                }
+                final Key[] keysSubarray = new Key[length];
+                System.arraycopy(keysArray, start, keysSubarray, 0, keysSubarray.length);
+                delete(keysSubarray);
+
+                start = end;
+                end = min(MAX_KEYS_PER_WRITE_REQUEST, keysArray.length - end);
+            }
+        } else {
+            delete(keysArray);
+        }
     }
 
     /**
@@ -244,7 +289,7 @@ class DatastoreWrapper {
      * @see #isTransactionActive()
      */
     @SuppressWarnings("WeakerAccess") // Part of API
-    void startTransaction() throws IllegalStateException {
+    public void startTransaction() throws IllegalStateException {
         checkState(!isTransactionActive(), NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction = datastore.newTransaction();
         actor = activeTransaction;
@@ -260,8 +305,9 @@ class DatastoreWrapper {
      * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
-    @SuppressWarnings("WeakerAccess") // Part of API
-    void commitTransaction() throws IllegalStateException {
+    @SuppressWarnings("WeakerAccess")
+    // Part of API
+    public void commitTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.commit();
         this.actor = datastore;
@@ -279,7 +325,7 @@ class DatastoreWrapper {
      * @see #isTransactionActive()
      */
     @SuppressWarnings("WeakerAccess") // Part of API
-    void rollbackTransaction() throws IllegalStateException {
+    public void rollbackTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.rollback();
         this.actor = datastore;
@@ -291,7 +337,7 @@ class DatastoreWrapper {
      * @return {@code true} if there is an active transaction, {@code false} otherwise
      */
     @SuppressWarnings("WeakerAccess") // Part of API
-    boolean isTransactionActive() {
+    public boolean isTransactionActive() {
         return activeTransaction != null && activeTransaction.isActive();
     }
 
@@ -303,7 +349,7 @@ class DatastoreWrapper {
      * @param kind kind of {@link Entity} to generate keys for
      * @return an instance of {@link KeyFactory} for given kind
      */
-    KeyFactory getKeyFactory(String kind) {
+    public KeyFactory getKeyFactory(String kind) {
         KeyFactory keyFactory = keyFactories.get(kind);
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
@@ -317,5 +363,48 @@ class DatastoreWrapper {
                 .setKind(kind);
         keyFactories.put(kind, keyFactory);
         return keyFactory;
+    }
+
+    /**
+     * Reads big number of records.
+     *
+     * <p>Google App Engine Datastore has a limitation on the amount of entities queried with a single call —
+     * 1000 entities per query. To deal with this limitation we read the entities in pagination fashion
+     * 1000 entity per page.
+     *
+     * @param keys {@link Key keys} to find the entities for
+     * @return ordered sequence of {@link Entity entities}
+     * @see #read(Iterable)
+     */
+    private List<Entity> readBulk(List<Key> keys) {
+        final int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
+        log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.", pageCount);
+
+        final List<Entity> result = newLinkedList();
+        int lowerBound = 0;
+        int higherBound = MAX_KEYS_PER_READ_REQUEST;
+        int keysLeft = keys.size();
+        for (int i = 0; i < pageCount; i++) {
+            final List<Key> keysPage = keys.subList(lowerBound, higherBound);
+
+            final List<Entity> page = Lists.newArrayList(datastore.get(keysPage));
+            result.addAll(page);
+
+            keysLeft -= keysPage.size();
+            lowerBound = higherBound;
+            higherBound += min(keysLeft, MAX_KEYS_PER_READ_REQUEST);
+        }
+
+        return result;
+    }
+
+    private static Logger log() {
+        return LoggerSingleton.INSTANCE.logger;
+    }
+
+    private enum LoggerSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger logger = LoggerFactory.getLogger(DatastoreWrapper.class);
     }
 }
