@@ -23,10 +23,8 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.stand.StandStorage;
 import org.spine3.server.stand.StandStorageShould;
-import org.spine3.server.storage.AbstractStorage;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import static org.junit.Assert.assertNotNull;
@@ -55,9 +53,8 @@ public class DsStandStorageShould extends StandStorageShould {
         assertNotNull(recordStorage);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected <S extends AbstractStorage<AggregateStateId, EntityStorageRecord>> S getStorage() {
-        return (S) LOCAL_DATASTORE_STORAGE_FACTORY.createStandStorage();
+    protected StandStorage getStorage() {
+        return LOCAL_DATASTORE_STORAGE_FACTORY.createStandStorage();
     }
 }

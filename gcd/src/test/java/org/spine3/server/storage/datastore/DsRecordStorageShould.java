@@ -27,8 +27,6 @@ import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.storage.AbstractStorage;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
@@ -40,7 +38,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Dmytro Dashenkov
  */
-public class DsRecordStorageShould extends RecordStorageShould<ProjectId> {
+public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsRecordStorage<ProjectId>> {
 
     private static final TestDatastoreStorageFactory LOCAL_DATASTORE_STORAGE_FACTORY
             = TestDatastoreStorageFactory.getDefaultInstance();
@@ -83,10 +81,9 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId> {
         return project;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected <S extends AbstractStorage<ProjectId, EntityStorageRecord>> S getStorage() {
-        return (S) LOCAL_DATASTORE_STORAGE_FACTORY.createRecordStorage(TestAggregate.class);
+    protected DsRecordStorage<ProjectId> getStorage() {
+        return (DsRecordStorage<ProjectId>) LOCAL_DATASTORE_STORAGE_FACTORY.createRecordStorage(TestAggregate.class);
     }
 
     @Override

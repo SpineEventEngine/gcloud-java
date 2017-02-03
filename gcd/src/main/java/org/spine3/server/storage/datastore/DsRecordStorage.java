@@ -26,6 +26,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
@@ -96,17 +97,33 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.datastore = datastore;
     }
 
+    @Override
+    public boolean markArchived(I id) {
+        return false;
+    }
+
+    @Override
+    public boolean markDeleted(I id) {
+        return false;
+    }
+
+    @Override
+    public boolean delete(I id) {
+        return false;
+    }
+
     @Nullable
     @Override
-    protected EntityStorageRecord readRecord(I id) {
+    protected Optional<EntityStorageRecord> readRecord(I id) {
         final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
         final Entity response = datastore.read(key);
 
         if (response == null) {
-            return EntityStorageRecord.getDefaultInstance();
+            return Optional.absent();
         }
 
-        return Entities.entityToMessage(response, RECORD_TYPE_URL);
+        final EntityStorageRecord record = Entities.entityToMessage(response, RECORD_TYPE_URL);
+        return Optional.of(record);
     }
 
     @Override
@@ -315,6 +332,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         entity.set(VERSION_KEY, entityStorageRecord.getVersion());
         entity.set(TYPE_URL_PROPERTY_NAME, valueTypeUrl);
         datastore.createOrUpdate(entity.build());
+    }
+
+    @Override
+    protected void writeRecords(Map<I, EntityStorageRecord> records) {
+
     }
 
     /**

@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -73,9 +74,24 @@ public class DsStandStorage extends StandStorage {
         return result;
     }
 
+    @Override
+    public boolean markArchived(AggregateStateId id) {
+        return false;
+    }
+
+    @Override
+    public boolean markDeleted(AggregateStateId id) {
+        return false;
+    }
+
+    @Override
+    public boolean delete(AggregateStateId id) {
+        return false;
+    }
+
     @Nullable
     @Override
-    protected EntityStorageRecord readRecord(AggregateStateId id) {
+    protected Optional<EntityStorageRecord> readRecord(AggregateStateId id) {
         final DatastoreRecordId recordId = of(id);
         return recordStorage.read(recordId);
     }
@@ -118,6 +134,11 @@ public class DsStandStorage extends StandStorage {
     protected void writeRecord(AggregateStateId id, EntityStorageRecord record) {
         final DatastoreRecordId recordId = of(id);
         recordStorage.write(recordId, record);
+    }
+
+    @Override
+    protected void writeRecords(Map<AggregateStateId, EntityStorageRecord> records) {
+
     }
 
     @SuppressWarnings("unused") // Part of API

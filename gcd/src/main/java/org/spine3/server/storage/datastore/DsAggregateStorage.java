@@ -31,6 +31,7 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.entity.status.EntityStatus;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -81,6 +82,16 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                               .getValue();
         }
         return countValue;
+    }
+
+    @Override
+    protected Optional<EntityStatus> readStatus(I id) {
+        return null;
+    }
+
+    @Override
+    protected void writeStatus(I id, EntityStatus status) {
+
     }
 
     @Override
@@ -136,6 +147,16 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             }
         });
         return records.iterator();
+    }
+
+    @Override
+    protected boolean markArchived(I id) {
+        return false;
+    }
+
+    @Override
+    protected boolean markDeleted(I id) {
+        return false;
     }
 
     /**

@@ -24,6 +24,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
@@ -164,16 +165,16 @@ public class DsEventStorage extends EventStorage {
 
     @Nullable
     @Override
-    protected EventStorageRecord readRecord(EventId eventId) {
+    protected Optional<EventStorageRecord> readRecord(EventId eventId) {
         final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(eventId));
         final Entity response = datastore.read(key);
 
         if (response == null) {
-            return null;
+            return Optional.absent();
         }
 
         final EventStorageRecord result = entityToMessage(response, RECORD_TYPE_URL);
-        return result;
+        return Optional.of(result);
     }
 
     /**

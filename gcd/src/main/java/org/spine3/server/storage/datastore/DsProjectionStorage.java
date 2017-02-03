@@ -37,6 +37,7 @@ import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 /**
  * GAE Datastore implementation of the {@link ProjectionStorage}.
  *
+ * @author Dmytro Dashenkov
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("WeakerAccess")   // Part of API
@@ -77,31 +78,46 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    public RecordStorage<I> getRecordStorage() {
+    public RecordStorage<I> recordStorage() {
         return recordStorage;
     }
 
-    protected DsPropertyStorage getPropertyStorage() {
+    protected DsPropertyStorage propertyStorage() {
         return propertyStorage;
     }
 
     @Override
+    public boolean markArchived(I id) {
+        return false;
+    }
+
+    @Override
+    public boolean markDeleted(I id) {
+        return false;
+    }
+
+    @Override
+    public boolean delete(I id) {
+        return false;
+    }
+
+    @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
-        return getRecordStorage().readMultiple(ids);
+        return recordStorage().readMultiple(ids);
     }
 
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
-        return getRecordStorage().readMultiple(ids, fieldMask);
+        return recordStorage().readMultiple(ids, fieldMask);
     }
 
     @Override
     protected Map<I, EntityStorageRecord> readAllRecords() {
-        return getRecordStorage().readAll();
+        return recordStorage().readAll();
     }
 
     @Override
     protected Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
-        return getRecordStorage().readAll(fieldMask);
+        return recordStorage().readAll(fieldMask);
     }
 }
