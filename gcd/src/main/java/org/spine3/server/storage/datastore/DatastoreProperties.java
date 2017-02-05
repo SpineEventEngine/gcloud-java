@@ -51,6 +51,9 @@ class DatastoreProperties {
     private static final String EVENT_TYPE_PROPERTY_NAME = "event_type";
     private static final String EVENT_ID_PROPERTY_NAME = "event_id";
 
+    private static final String ARCHIVED_PROPERTY_NAME = "archived";
+    private static final String DELETED_PROPERTY_NAME = "deleted";
+
     private static final String CONTEXT_EVENT_ID_PROPERTY_NAME = "context_event_id";
     private static final String CONTEXT_TIMESTAMP_PROPERTY_NAME = "context_timestamp";
     private static final String CONTEXT_OF_COMMAND_PROPERTY_NAME = "context_of_command";
@@ -90,6 +93,14 @@ class DatastoreProperties {
      */
     static void addEventTypeProperty(String eventType, Entity.Builder entity) {
         entity.set(EVENT_TYPE_PROPERTY_NAME, eventType);
+    }
+
+    static void markArchived(Entity.Builder entity) {
+        entity.set(ARCHIVED_PROPERTY_NAME, true);
+    }
+
+    static void markDeleted(Entity.Builder entity) {
+        entity.set(DELETED_PROPERTY_NAME, true);
     }
 
     /**

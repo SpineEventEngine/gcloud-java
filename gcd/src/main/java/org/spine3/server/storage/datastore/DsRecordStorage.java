@@ -99,17 +99,32 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public boolean markArchived(I id) {
-        return false;
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
+        final Entity entity = datastore.read(key);
+        final Entity.Builder builder = Entity.newBuilder(entity);
+        DatastoreProperties.markArchived(builder);
+        datastore.update(builder.build());
+        return true;
     }
 
     @Override
     public boolean markDeleted(I id) {
-        return false;
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
+        final Entity entity = datastore.read(key);
+        final Entity.Builder builder = Entity.newBuilder(entity);
+        DatastoreProperties.markDeleted(builder);
+        datastore.update(builder.build());
+        return true;
     }
 
     @Override
     public boolean delete(I id) {
-        return false;
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
+        datastore.delete(key);
+
+        // Check presence
+        final Entity record = datastore.read(key);
+        return record == null;
     }
 
     @Nullable
