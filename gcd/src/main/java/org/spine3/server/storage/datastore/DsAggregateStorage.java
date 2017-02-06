@@ -47,12 +47,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.not;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.keyFor;
-import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_ID_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.DatastoreProperties.activeEntityPredicate;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addArchivedProperty;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addDeletedProperty;
 import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
 import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
+import static org.spine3.server.storage.datastore.EntityFields.AggregateFields.AGGREGATE_ID;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -202,7 +202,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final String idString = idToString(id);
         final Query<?> query = Query.newEntityQueryBuilder()
                                     .setKind(KIND)
-                                    .setFilter(StructuredQuery.PropertyFilter.eq(AGGREGATE_ID_PROPERTY_NAME, idString))
+                                    .setFilter(StructuredQuery.PropertyFilter.eq(AGGREGATE_ID.toString(), idString))
                                     .build();
         final List<Entity> eventEntities = datastore.read(query);
         if (eventEntities.isEmpty()) {

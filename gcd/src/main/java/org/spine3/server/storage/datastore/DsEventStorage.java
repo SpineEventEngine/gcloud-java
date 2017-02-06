@@ -55,7 +55,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
-import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addAggregateIdProperty;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addEventTypeProperty;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addTimestampNanosProperty;
@@ -64,6 +63,7 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventC
 import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventFieldProperties;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
+import static org.spine3.server.storage.datastore.EntityFields.CommonFields.TIMESTAMP_NANOS;
 
 /**
  * Storage for event records based on Google Cloud Datastore.
@@ -133,8 +133,8 @@ public class DsEventStorage extends EventStorage {
         final long upper = query.hasBefore()
                            ? convertToNanos(query.getBefore())
                            : Long.MAX_VALUE;
-        final PropertyFilter greaterThen = PropertyFilter.gt(TIMESTAMP_NANOS_PROPERTY_NAME, lower);
-        final PropertyFilter lessThen = PropertyFilter.lt(TIMESTAMP_NANOS_PROPERTY_NAME, upper);
+        final PropertyFilter greaterThen = PropertyFilter.gt(TIMESTAMP_NANOS.toString(), lower);
+        final PropertyFilter lessThen = PropertyFilter.lt(TIMESTAMP_NANOS.toString(), upper);
         final CompositeFilter filter = CompositeFilter.and(greaterThen, lessThen);
         final Query result = Query.newEntityQueryBuilder()
                                   .setKind(KIND)
