@@ -20,10 +20,14 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.*;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.EntityQuery;
+import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
@@ -44,13 +48,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.cloud.datastore.StructuredQuery.*;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.ofEntityId;
-import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
-import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
+import static org.spine3.server.storage.datastore.DatastoreProperties.*;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -306,8 +308,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         final List<Entity> results = datastore.read(keys);
-        final Collection<EntityStorageRecord> records = Collections2.transform(results, transformer);
-
+        final Collection<Entity> filteredResults = Collections2.filter(results, activeEntityPredicate());
+        final Collection<EntityStorageRecord> records = Collections2.transform(filteredResults, transformer);
         return Collections.unmodifiableCollection(records);
     }
 
@@ -325,8 +327,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         final List<Entity> results = datastore.read(query);
 
+        final Predicate<Entity> archivedAndDeletedFilter = activeEntityPredicate();
+
         final ImmutableMap.Builder<I, EntityStorageRecord> records = new ImmutableMap.Builder<>();
         for (Entity entity : results) {
+            if (archivedAndDeletedFilter.apply(entity)) {
+                continue;
+            }
             final IdRecordPair<I> recordPair = transformer.apply(entity);
             checkNotNull(recordPair, "Datastore may not contain null records.");
             final EntityStorageRecord fullRecord = recordPair.getRecord();
