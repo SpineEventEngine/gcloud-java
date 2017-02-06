@@ -133,8 +133,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         }
 
         final EntityStatus resultStatus = EntityStatus.newBuilder()
-                .setArchived(true)
-                .build();
+                                                      .setArchived(true)
+                                                      .build();
         writeStatus(id, resultStatus);
         return true;
     }
@@ -144,17 +144,16 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final Optional<EntityStatus> entityStatus = readStatus(id);
         if (entityStatus.isPresent()
                 && entityStatus.get()
-                .getDeleted()) {
+                               .getDeleted()) {
             return false;
         }
 
         final EntityStatus resultStatus = EntityStatus.newBuilder()
-                .setDeleted(true)
-                .build();
+                                                      .setDeleted(true)
+                                                      .build();
         writeStatus(id, resultStatus);
         return true;
     }
-
 
     @Override
     public void writeEventCountAfterLastSnapshot(I id, int eventCount) {

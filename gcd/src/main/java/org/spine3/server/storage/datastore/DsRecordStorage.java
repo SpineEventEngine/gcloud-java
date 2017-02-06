@@ -112,7 +112,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return false;
         }
         final Entity.Builder builder = Entity.newBuilder(entity);
-        DatastoreProperties.addArchivedProperty(builder, true);
+        addArchivedProperty(builder, true);
         datastore.update(builder.build());
         return true;
     }
@@ -125,7 +125,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return false;
         }
         final Entity.Builder builder = Entity.newBuilder(entity);
-        DatastoreProperties.addDeletedProperty(builder, true);
+        addDeletedProperty(builder, true);
         datastore.update(builder.build());
         return true;
     }
@@ -153,10 +153,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final EntityStorageRecord record = Entities.entityToMessage(response, RECORD_TYPE_URL);
         final EntityStatus entityStatus = getEntityStatus(response);
         final EntityStorageRecord result = isDefault(entityStatus) // Avoid inequality of written and read records
-                ? record                                           // caused by empty {@code EntityStatus} object
-                : EntityStorageRecord.newBuilder(record)
-                                     .setEntityStatus(entityStatus)
-                                     .build();
+                                           ? record                // caused by empty {@code EntityStatus} object
+                                           : EntityStorageRecord.newBuilder(record)
+                                                                .setEntityStatus(entityStatus)
+                                                                .build();
 
         return Optional.of(result);
     }
