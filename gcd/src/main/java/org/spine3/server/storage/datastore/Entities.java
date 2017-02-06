@@ -44,6 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
 import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
+import static org.spine3.server.storage.datastore.EntityFields.CommonFields.VALUE;
 
 /**
  * Utility class for converting {@link Message proto messages} into {@link Entity Entities} and vise versa.
@@ -53,7 +54,6 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
 @SuppressWarnings("UtilityClass")
 class Entities {
 
-    private static final String VALUE_PROPERTY_NAME = "value";
     private static final String DEFAULT_MESSAGE_FACTORY_METHOD_NAME = "getDefaultInstance";
 
     private Entities() {
@@ -74,7 +74,7 @@ class Entities {
             return defaultMessage(type);
         }
 
-        final Blob value = entity.getBlob(VALUE_PROPERTY_NAME);
+        final Blob value = entity.getBlob(VALUE.toString());
         final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
         final Any wrapped = Any.newBuilder()
@@ -110,7 +110,7 @@ class Entities {
                 continue;
             }
 
-            final Blob value = entity.getBlob(VALUE_PROPERTY_NAME);
+            final Blob value = entity.getBlob(VALUE.toString());
             final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
             final Any wrapped = Any.newBuilder()
@@ -143,7 +143,7 @@ class Entities {
                                              .setExcludeFromIndexes(true)
                                              .build();
         final Entity entity = Entity.newBuilder(key)
-                                    .set(VALUE_PROPERTY_NAME, blobValue)
+                                    .set(VALUE.toString(), blobValue)
                                     .build();
         return entity;
     }

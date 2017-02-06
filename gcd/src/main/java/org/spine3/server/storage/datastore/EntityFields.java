@@ -83,7 +83,8 @@ class EntityFields {
     enum CommonFields {
 
         TIMESTAMP,
-        TIMESTAMP_NANOS;
+        TIMESTAMP_NANOS,
+        VALUE;
 
         @Override
         public String toString() {
