@@ -53,7 +53,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.ofEntityId;
-import static org.spine3.server.storage.datastore.DatastoreProperties.*;
+import static org.spine3.server.storage.datastore.DatastoreProperties.activeEntityPredicate;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addArchivedProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addDeletedProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
+import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
 import static org.spine3.server.storage.datastore.Entities.getEntityStatus;
 import static org.spine3.validate.Validate.isDefault;
 
