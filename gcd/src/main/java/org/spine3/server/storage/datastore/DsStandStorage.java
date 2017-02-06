@@ -22,7 +22,11 @@ package org.spine3.server.storage.datastore;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.*;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import org.spine3.protobuf.TypeUrl;
