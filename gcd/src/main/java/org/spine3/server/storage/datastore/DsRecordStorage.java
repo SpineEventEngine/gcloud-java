@@ -347,7 +347,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         final ImmutableMap.Builder<I, EntityStorageRecord> records = new ImmutableMap.Builder<>();
         for (Entity entity : results) {
-            if (archivedAndDeletedFilter.apply(entity)) {
+            if (!archivedAndDeletedFilter.apply(entity)) {
                 continue;
             }
             final IdRecordPair<I> recordPair = transformer.apply(entity);

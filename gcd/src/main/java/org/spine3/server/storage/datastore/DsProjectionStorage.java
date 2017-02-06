@@ -88,17 +88,17 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     public boolean markArchived(I id) {
-        return false;
+        return recordStorage.markArchived(id);
     }
 
     @Override
     public boolean markDeleted(I id) {
-        return false;
+        return recordStorage.markDeleted(id);
     }
 
     @Override
     public boolean delete(I id) {
-        return false;
+        return recordStorage.delete(id);
     }
 
     @Override

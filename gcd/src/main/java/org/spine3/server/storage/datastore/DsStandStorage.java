@@ -22,11 +22,7 @@ package org.spine3.server.storage.datastore;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.*;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import org.spine3.protobuf.TypeUrl;
@@ -37,6 +33,7 @@ import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -76,17 +73,20 @@ public class DsStandStorage extends StandStorage {
 
     @Override
     public boolean markArchived(AggregateStateId id) {
-        return false;
+        final DatastoreRecordId recordId = of(id);
+        return recordStorage.markArchived(recordId);
     }
 
     @Override
     public boolean markDeleted(AggregateStateId id) {
-        return false;
+        final DatastoreRecordId recordId = of(id);
+        return recordStorage.markDeleted(recordId);
     }
 
     @Override
     public boolean delete(AggregateStateId id) {
-        return false;
+        final DatastoreRecordId recordId = of(id);
+        return recordStorage.delete(recordId);
     }
 
     @Nullable
@@ -138,7 +138,12 @@ public class DsStandStorage extends StandStorage {
 
     @Override
     protected void writeRecords(Map<AggregateStateId, EntityStorageRecord> records) {
-
+        final Map<DatastoreRecordId, EntityStorageRecord> datastoreRecords = new HashMap<>(records.size());
+        for (Map.Entry<AggregateStateId, EntityStorageRecord> entry : records.entrySet()) {
+            final DatastoreRecordId id = of(entry.getKey());
+            datastoreRecords.put(id, entry.getValue());
+        }
+        recordStorage.writeRecords(datastoreRecords);
     }
 
     @SuppressWarnings("unused") // Part of API
