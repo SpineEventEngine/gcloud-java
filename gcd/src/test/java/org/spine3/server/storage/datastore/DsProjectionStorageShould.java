@@ -55,7 +55,7 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
     @Test
     public void provide_access_to_PropertyStorage_for_extensibility() {
         final DsProjectionStorage<String> storage = (DsProjectionStorage<String>) getStorage();
-        final DsPropertyStorage propertyStorage = storage.getPropertyStorage();
+        final DsPropertyStorage propertyStorage = storage.propertyStorage();
         assertNotNull(propertyStorage);
     }
 

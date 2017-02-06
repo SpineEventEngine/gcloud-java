@@ -1,7 +1,7 @@
 project.ext {
-    SPINE_VERSION = '0.8.0'
-    GAE_JAVA_VERSION = "0.8.0"
-    PROTOBUF_VERSION = '3.1.0'
+    SPINE_VERSION = '0.8.3-SNAPSHOT'
+    GAE_JAVA_VERSION = "0.8.3-SNAPSHOT"
+    PROTOBUF_VERSION = '3.2.0'
     SLf4J_VERSION = "1.7.21"
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
@@ -90,8 +90,7 @@ subprojects {
         compile group: 'org.slf4j', name: 'slf4j-jdk14', version: SLf4J_VERSION
 
         // Protobuf
-        compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
-        compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: project.PROTOBUF_VERSION
+        //compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
 
         // JUnit
         testCompile(group: 'junit', name: 'junit', version: '4.12') {

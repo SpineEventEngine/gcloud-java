@@ -22,6 +22,7 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.DateTime;
 import com.google.cloud.datastore.Entity;
+import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.base.EventContextOrBuilder;
@@ -29,8 +30,10 @@ import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.event.storage.EventStorageRecord;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
 
@@ -51,10 +54,26 @@ class DatastoreProperties {
     private static final String EVENT_TYPE_PROPERTY_NAME = "event_type";
     private static final String EVENT_ID_PROPERTY_NAME = "event_id";
 
+    private static final String ARCHIVED_PROPERTY_NAME = "archived";
+    private static final String DELETED_PROPERTY_NAME = "deleted";
+
     private static final String CONTEXT_EVENT_ID_PROPERTY_NAME = "context_event_id";
     private static final String CONTEXT_TIMESTAMP_PROPERTY_NAME = "context_timestamp";
     private static final String CONTEXT_OF_COMMAND_PROPERTY_NAME = "context_of_command";
     private static final String CONTEXT_VERSION = "context_version";
+
+    private static final Predicate<Entity> NOT_ARCHIVED_OR_DELETED = new Predicate<Entity>() {
+        // TODO:2017-02-06:dmytro.dashenkov: Temporary solution. Filter the results in the query, not in memory.
+        @Override
+        public boolean apply(@Nullable Entity input) {
+            if (input == null) {
+                return false;
+            }
+            final boolean isNotArchived = !isArchived(input);
+            final boolean isNotDeleted = !isDeleted(input);
+            return isNotArchived && isNotDeleted;
+        }
+    };
 
     private DatastoreProperties() {
     }
@@ -92,6 +111,31 @@ class DatastoreProperties {
         entity.set(EVENT_TYPE_PROPERTY_NAME, eventType);
     }
 
+    static void addArchivedProperty(Entity.Builder entity, boolean archived) {
+        entity.set(ARCHIVED_PROPERTY_NAME, archived);
+    }
+
+    static void addDeletedProperty(Entity.Builder entity, boolean deleted) {
+        entity.set(DELETED_PROPERTY_NAME, deleted);
+    }
+
+    static boolean isArchived(Entity entity) {
+        checkNotNull(entity);
+        return hasFlag(entity, ARCHIVED_PROPERTY_NAME);
+    }
+
+    static boolean isDeleted(Entity entity) {
+        checkNotNull(entity);
+        return hasFlag(entity, DELETED_PROPERTY_NAME);
+    }
+
+    private static boolean hasFlag(Entity entity, String flagName) {
+        final boolean result =
+                entity.contains(flagName)
+                        && entity.getBoolean(flagName);
+        return result;
+    }
+
     /**
      * Converts {@link org.spine3.base.EventContext} or it's builder to a set of Properties, which are
      * ready to add to the Datastore entity.
@@ -115,5 +159,9 @@ class DatastoreProperties {
         // We do not re-save event type
         builder.set(EVENT_ID_PROPERTY_NAME, event.getEventId());
         builder.set(PRODUCER_ID_PROPERTY_NAME, event.getProducerId());
+    }
+
+    static Predicate<Entity> activeEntityPredicate() {
+        return NOT_ARCHIVED_OR_DELETED;
     }
 }

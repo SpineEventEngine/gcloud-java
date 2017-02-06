@@ -3,6 +3,9 @@
 .idea/libraries
 .idea/*.xml
 
+# Do not ignore code style settings.
+!/.idea/codeStyleSettings.xml
+
 # Gradle interim configs
 .gradle/*
 

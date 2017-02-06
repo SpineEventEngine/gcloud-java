@@ -24,6 +24,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
@@ -95,6 +96,7 @@ public class DsCommandStorage extends CommandStorage {
         checkNotNull(commandId);
 
         final CommandStorageRecord updatedRecord = read(commandId)
+                .or(CommandStorageRecord.getDefaultInstance())
                 .toBuilder()
                 .setStatus(CommandStatus.OK)
                 .build();
@@ -107,6 +109,7 @@ public class DsCommandStorage extends CommandStorage {
         checkNotNull(error);
 
         final CommandStorageRecord updatedRecord = read(commandId)
+                .or(CommandStorageRecord.getDefaultInstance())
                 .toBuilder()
                 .setStatus(CommandStatus.ERROR)
                 .setError(error)
@@ -120,6 +123,7 @@ public class DsCommandStorage extends CommandStorage {
         checkNotNull(failure);
 
         final CommandStorageRecord updatedRecord = read(commandId)
+                .or(CommandStorageRecord.getDefaultInstance())
                 .toBuilder()
                 .setStatus(CommandStatus.FAILURE)
                 .setFailure(failure)
@@ -128,7 +132,7 @@ public class DsCommandStorage extends CommandStorage {
     }
 
     @Override
-    public CommandStorageRecord read(CommandId commandId) {
+    public Optional<CommandStorageRecord> read(CommandId commandId) {
         checkNotClosed();
         checkNotDefault(commandId);
 
@@ -136,10 +140,10 @@ public class DsCommandStorage extends CommandStorage {
         final Entity entity = datastore.read(key);
 
         if (entity == null) {
-            return CommandStorageRecord.getDefaultInstance();
+            return Optional.absent();
         }
         final CommandStorageRecord record = RECORD_MAPPER.apply(entity);
-        return record;
+        return Optional.of(record);
     }
 
     @Override
