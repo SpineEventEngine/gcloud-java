@@ -40,14 +40,12 @@ import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.*;
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.ofEntityId;
 
 /**
@@ -99,7 +97,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public boolean markArchived(I id) {
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
+        final Key key = keyFor(datastore, KIND, ofEntityId(id));
         final Entity entity = datastore.read(key);
         final Entity.Builder builder = Entity.newBuilder(entity);
         DatastoreProperties.markArchived(builder);
@@ -109,7 +107,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public boolean markDeleted(I id) {
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
+        final Key key = keyFor(datastore, KIND, ofEntityId(id));
         final Entity entity = datastore.read(key);
         final Entity.Builder builder = Entity.newBuilder(entity);
         DatastoreProperties.markDeleted(builder);
@@ -119,7 +117,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public boolean delete(I id) {
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
+        final Key key = keyFor(datastore, KIND, ofEntityId(id));
         datastore.delete(key);
 
         // Check presence
@@ -130,7 +128,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Nullable
     @Override
     protected Optional<EntityStorageRecord> readRecord(I id) {
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
+        final Key key = keyFor(datastore, KIND, ofEntityId(id));
         final Entity response = datastore.read(key);
 
         if (response == null) {
@@ -293,7 +291,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         final Collection<Key> keys = new LinkedList<>();
         for (I id : ids) {
-            final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
+            final Key key = keyFor(datastore, KIND, ofEntityId(id));
             keys.add(key);
         }
 
@@ -341,7 +339,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final String valueTypeUrl = entityStorageRecord.getState()
                                                        .getTypeUrl();
 
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, ofEntityId(id));
+        final Key key = keyFor(datastore, KIND, ofEntityId(id));
         final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
         final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
         entity.set(VERSION_KEY, entityStorageRecord.getVersion());
@@ -351,7 +349,24 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected void writeRecords(Map<I, EntityStorageRecord> records) {
+        checkNotNull(records);
 
+        final Collection<Entity> entitiesToWrite = new ArrayList<>(records.size());
+        for (Map.Entry<I, EntityStorageRecord> record : records.entrySet()) {
+            final EntityStorageRecord entityStorageRecord = record.getValue();
+            final String valueTypeUrl = entityStorageRecord.getState()
+                                                           .getTypeUrl();
+            final Key key = keyFor(
+                    datastore,
+                    KIND,
+                    ofEntityId(record.getKey()));
+            final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
+            final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
+            entity.set(VERSION_KEY, entityStorageRecord.getVersion());
+            entity.set(TYPE_URL_PROPERTY_NAME, valueTypeUrl);
+            entitiesToWrite.add(entity.build());
+        }
+        datastore.createOrUpdate(entitiesToWrite);
     }
 
     /**
