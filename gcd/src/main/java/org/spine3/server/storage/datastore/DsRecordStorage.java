@@ -112,7 +112,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return false;
         }
         final Entity.Builder builder = Entity.newBuilder(entity);
-        DatastoreProperties.markArchived(builder);
+        DatastoreProperties.addArchivedProperty(builder, true);
         datastore.update(builder.build());
         return true;
     }
@@ -125,7 +125,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return false;
         }
         final Entity.Builder builder = Entity.newBuilder(entity);
-        DatastoreProperties.markDeleted(builder);
+        DatastoreProperties.addDeletedProperty(builder, true);
         datastore.update(builder.build());
         return true;
     }

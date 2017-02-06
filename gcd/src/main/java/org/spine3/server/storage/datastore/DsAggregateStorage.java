@@ -40,7 +40,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_ID_PROPERTY_NAME;
+import static org.spine3.server.storage.datastore.DatastoreIdentifiers.keyFor;
+import static org.spine3.server.storage.datastore.DatastoreProperties.*;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -56,6 +57,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     private static final String SNAPSHOT = "SNAPSHOT";
 
     private static final String KIND = AggregateStorageRecord.class.getName();
+    private static final String AGGREGATE_ENTITY_STATUS_KIND = EntityStatus.class.getName();
     private static final TypeUrl TYPE_URL = TypeUrl.from(AggregateStorageRecord.getDescriptor());
 
     private final DatastoreWrapper datastore;
@@ -86,13 +88,73 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected Optional<EntityStatus> readStatus(I id) {
-        return null;
+        checkNotNull(id);
+
+        final DatastoreRecordId recordId = generateDatastoreId(id);
+        final Key key = keyFor(datastore, AGGREGATE_ENTITY_STATUS_KIND, recordId);
+        final Entity entityStateRecord = datastore.read(key);
+        if (entityStateRecord == null) {
+            return Optional.absent();
+        }
+
+        final boolean archived = isArchived(entityStateRecord);
+        final boolean deleted = isDeleted(entityStateRecord);
+
+        if (!archived && !deleted) {
+            return Optional.absent();
+        }
+        final EntityStatus entityStatus = EntityStatus.newBuilder()
+                                                      .setArchived(archived)
+                                                      .setDeleted(deleted)
+                                                      .build();
+        return Optional.of(entityStatus);
     }
 
     @Override
     protected void writeStatus(I id, EntityStatus status) {
+        checkNotNull(id);
+        checkNotNull(status);
 
+        final DatastoreRecordId recordId = generateDatastoreId(id);
+        final Key key = keyFor(datastore, AGGREGATE_ENTITY_STATUS_KIND, recordId);
+        final Entity.Builder entityStateRecord = Entity.newBuilder(key);
+        addArchivedProperty(entityStateRecord, status.getArchived());
+        addDeletedProperty(entityStateRecord, status.getDeleted());
+        datastore.createOrUpdate(entityStateRecord.build());
     }
+
+    @Override
+    protected boolean markArchived(I id) {
+        final Optional<EntityStatus> entityStatus = readStatus(id);
+        if (entityStatus.isPresent()
+                && entityStatus.get()
+                               .getArchived()) {
+            return false;
+        }
+
+        final EntityStatus resultStatus = EntityStatus.newBuilder()
+                .setArchived(true)
+                .build();
+        writeStatus(id, resultStatus);
+        return true;
+    }
+
+    @Override
+    protected boolean markDeleted(I id) {
+        final Optional<EntityStatus> entityStatus = readStatus(id);
+        if (entityStatus.isPresent()
+                && entityStatus.get()
+                .getDeleted()) {
+            return false;
+        }
+
+        final EntityStatus resultStatus = EntityStatus.newBuilder()
+                .setDeleted(true)
+                .build();
+        writeStatus(id, resultStatus);
+        return true;
+    }
+
 
     @Override
     public void writeEventCountAfterLastSnapshot(I id, int eventCount) {
@@ -116,7 +178,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             eventId = SNAPSHOT + stringId;
         }
 
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, DatastoreIdentifiers.of(eventId));
+        final Key key = keyFor(datastore, KIND, DatastoreIdentifiers.of(eventId));
         final Entity incompleteEntity = Entities.messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
         DatastoreProperties.addAggregateIdProperty(stringId, builder);
@@ -147,16 +209,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             }
         });
         return records.iterator();
-    }
-
-    @Override
-    protected boolean markArchived(I id) {
-        return false;
-    }
-
-    @Override
-    protected boolean markDeleted(I id) {
-        return false;
     }
 
     /**

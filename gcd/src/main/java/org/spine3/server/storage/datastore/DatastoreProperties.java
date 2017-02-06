@@ -111,12 +111,12 @@ class DatastoreProperties {
         entity.set(EVENT_TYPE_PROPERTY_NAME, eventType);
     }
 
-    static void markArchived(Entity.Builder entity) {
-        entity.set(ARCHIVED_PROPERTY_NAME, true);
+    static void addArchivedProperty(Entity.Builder entity, boolean archived) {
+        entity.set(ARCHIVED_PROPERTY_NAME, archived);
     }
 
-    static void markDeleted(Entity.Builder entity) {
-        entity.set(DELETED_PROPERTY_NAME, true);
+    static void addDeletedProperty(Entity.Builder entity, boolean deleted) {
+        entity.set(DELETED_PROPERTY_NAME, deleted);
     }
 
     static boolean isArchived(Entity entity) {
