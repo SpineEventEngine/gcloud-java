@@ -20,12 +20,11 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.*;
-import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.cloud.datastore.DateTime;
+import com.google.cloud.datastore.Entity;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
-import com.sun.org.apache.regexp.internal.RE;
 import org.spine3.base.EventContextOrBuilder;
 import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.Messages;
@@ -34,6 +33,7 @@ import org.spine3.server.event.storage.EventStorageRecord;
 import javax.annotation.Nullable;
 import java.util.Date;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
 
@@ -120,16 +120,19 @@ class DatastoreProperties {
     }
 
     static boolean isArchived(Entity entity) {
+        checkNotNull(entity);
         return hasFlag(entity, ARCHIVED_PROPERTY_NAME);
     }
 
     static boolean isDeleted(Entity entity) {
+        checkNotNull(entity);
         return hasFlag(entity, DELETED_PROPERTY_NAME);
     }
 
     private static boolean hasFlag(Entity entity, String flagName) {
         final boolean result =
-                entity.contains(flagName) && entity.getBoolean(flagName);
+                entity.contains(flagName)
+                        && entity.getBoolean(flagName);
         return result;
     }
 

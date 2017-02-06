@@ -37,6 +37,7 @@ import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.FieldMasks;
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 
@@ -53,6 +54,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.ofEntityId;
 import static org.spine3.server.storage.datastore.DatastoreProperties.*;
+import static org.spine3.server.storage.datastore.Entities.getEntityStatus;
+import static org.spine3.validate.Validate.isDefault;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -105,7 +108,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public boolean markArchived(I id) {
         final Key key = keyFor(datastore, KIND, ofEntityId(id));
         final Entity entity = datastore.read(key);
-        if (isArchived(entity)) {
+        if (entity == null || isArchived(entity)) {
             return false;
         }
         final Entity.Builder builder = Entity.newBuilder(entity);
@@ -118,7 +121,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public boolean markDeleted(I id) {
         final Key key = keyFor(datastore, KIND, ofEntityId(id));
         final Entity entity = datastore.read(key);
-        if (isDeleted(entity)) {
+        if (entity == null || isDeleted(entity)) {
             return false;
         }
         final Entity.Builder builder = Entity.newBuilder(entity);
@@ -148,7 +151,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         final EntityStorageRecord record = Entities.entityToMessage(response, RECORD_TYPE_URL);
-        return Optional.of(record);
+        final EntityStatus entityStatus = getEntityStatus(response);
+        final EntityStorageRecord result = isDefault(entityStatus) // Avoid inequality of written and read records
+                ? record                                           // caused by empty {@code EntityStatus} object
+                : EntityStorageRecord.newBuilder(record)
+                                     .setEntityStatus(entityStatus)
+                                     .build();
+
+        return Optional.of(result);
     }
 
     @Override
@@ -172,8 +182,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 final Message maskedState = FieldMasks.applyMask(fieldMask, state, typeUrl);
                 final Any wrappedState = AnyPacker.pack(maskedState);
 
+                final EntityStatus entityStatus = getEntityStatus(input);
                 final EntityStorageRecord record = EntityStorageRecord.newBuilder(readRecord)
                                                                       .setState(wrappedState)
+                                                                      .setEntityStatus(entityStatus)
                                                                       .build();
                 return record;
             }
@@ -207,10 +219,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 Message state = AnyPacker.unpack(packedState);
                 final TypeUrl typeUrl = TypeUrl.from(state.getDescriptorForType());
                 state = FieldMasks.applyMask(fieldMask, state, typeUrl);
+                final EntityStatus entityStatus = getEntityStatus(input);
                 record = EntityStorageRecord.newBuilder(record)
                                             .setState(AnyPacker.pack(state))
+                                            .setEntityStatus(entityStatus)
                                             .build();
-
                 return new IdRecordPair<>(id, record);
             }
         };
@@ -258,10 +271,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 final Any packedState = record.getState();
                 Message state = AnyPacker.unpack(packedState);
                 state = FieldMasks.applyMask(fieldMask, state, typeUrl);
+                final EntityStatus entityStatus = getEntityStatus(input);
                 record = EntityStorageRecord.newBuilder(record)
                                             .setState(AnyPacker.pack(state))
+                                            .setEntityStatus(entityStatus)
                                             .build();
-
                 return new IdRecordPair<>(id, record);
             }
         };
@@ -286,8 +300,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 EntityStorageRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
                 final Any packedState = record.getState();
                 Message state = AnyPacker.unpack(packedState);
+                final EntityStatus entityStatus = getEntityStatus(input);
                 record = EntityStorageRecord.newBuilder(record)
                                             .setState(AnyPacker.pack(state))
+                                            .setEntityStatus(entityStatus)
                                             .build();
 
                 return new IdRecordPair<>(id, record);
@@ -339,8 +355,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             final EntityStorageRecord fullRecord = recordPair.getRecord();
             final Message fullState = AnyPacker.unpack(fullRecord.getState());
             final Message maskedState = FieldMasks.applyMask(fieldMask, fullState, typeUrl);
+            final EntityStatus entityStatus = getEntityStatus(entity);
             final EntityStorageRecord maskedRecord = EntityStorageRecord.newBuilder(fullRecord)
                                                                         .setState(AnyPacker.pack(maskedState))
+                                                                        .setEntityStatus(entityStatus)
                                                                         .build();
             records.put(recordPair.getId(), maskedRecord);
         }
