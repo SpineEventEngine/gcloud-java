@@ -24,7 +24,10 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import org.spine3.protobuf.Timestamps;
@@ -33,15 +36,23 @@ import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.entity.status.EntityStatus;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.not;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.keyFor;
-import static org.spine3.server.storage.datastore.DatastoreProperties.*;
+import static org.spine3.server.storage.datastore.DatastoreProperties.AGGREGATE_ID_PROPERTY_NAME;
+import static org.spine3.server.storage.datastore.DatastoreProperties.activeEntityPredicate;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addArchivedProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.addDeletedProperty;
+import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
+import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -198,7 +209,23 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             return Collections.emptyIterator();
         }
 
-        final List<AggregateStorageRecord> immutableResult = Entities.entitiesToMessages(eventEntities, TYPE_URL);
+        final Collection<Entity> aggregateEntityStates = Collections2.filter(
+                getEntityStates(),
+                not(activeEntityPredicate()));
+        final Collection<Key> inactiveAggregateKeys = Collections2.transform(
+                aggregateEntityStates,
+                new Function<Entity, Key>() {
+                    @Nullable
+                    @Override
+                    public Key apply(@Nullable Entity input) {
+                        checkNotNull(input);
+                        return input.getKey();
+                    }
+                });
+
+        final Collection<Entity> filteredEntities = Collections2.filter(eventEntities,
+                                                                        new IsActiveAggregateId(inactiveAggregateKeys));
+        final List<AggregateStorageRecord> immutableResult = Entities.entitiesToMessages(filteredEntities, TYPE_URL);
         final List<AggregateStorageRecord> records = Lists.newArrayList(immutableResult);
 
         Collections.sort(records, new Comparator<AggregateStorageRecord>() {
@@ -208,6 +235,13 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             }
         });
         return records.iterator();
+    }
+
+    private Collection<Entity> getEntityStates() {
+        final Query query = Query.newEntityQueryBuilder()
+                                 .setKind(AGGREGATE_ENTITY_STATUS_KIND)
+                                 .build();
+        return datastore.read(query);
     }
 
     /**
@@ -242,5 +276,20 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      */
     protected DsPropertyStorage getPropertyStorage() {
         return propertyStorage;
+    }
+
+    private static class IsActiveAggregateId implements Predicate<Entity> {
+
+        private final Collection<Key> inActiveAggregateIds;
+
+        private IsActiveAggregateId(Collection<Key> inActiveAggregateIds) {
+            this.inActiveAggregateIds = checkNotNull(inActiveAggregateIds);
+        }
+
+        @Override
+        public boolean apply(@Nullable Entity input) {
+            checkNotNull(input);
+            return !inActiveAggregateIds.contains(input.getKey());
+        }
     }
 }
