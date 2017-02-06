@@ -20,10 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.EntityQuery;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -40,13 +37,20 @@ import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
+import static com.google.cloud.datastore.StructuredQuery.*;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.server.storage.datastore.DatastoreIdentifiers.*;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.ofEntityId;
+import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
+import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -99,6 +103,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public boolean markArchived(I id) {
         final Key key = keyFor(datastore, KIND, ofEntityId(id));
         final Entity entity = datastore.read(key);
+        if (isArchived(entity)) {
+            return false;
+        }
         final Entity.Builder builder = Entity.newBuilder(entity);
         DatastoreProperties.markArchived(builder);
         datastore.update(builder.build());
@@ -109,6 +116,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public boolean markDeleted(I id) {
         final Key key = keyFor(datastore, KIND, ofEntityId(id));
         final Entity entity = datastore.read(key);
+        if (isDeleted(entity)) {
+            return false;
+        }
         final Entity.Builder builder = Entity.newBuilder(entity);
         DatastoreProperties.markDeleted(builder);
         datastore.update(builder.build());
