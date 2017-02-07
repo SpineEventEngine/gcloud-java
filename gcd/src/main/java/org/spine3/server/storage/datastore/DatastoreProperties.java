@@ -59,7 +59,6 @@ import static org.spine3.server.storage.datastore.EntityFields.EventFields.PRODU
 class DatastoreProperties {
 
     private static final Predicate<Entity> NOT_ARCHIVED_OR_DELETED = new Predicate<Entity>() {
-        // TODO:2017-02-06:dmytro.dashenkov: Temporary solution. Filter the results in the query, not in memory.
         @Override
         public boolean apply(@Nullable Entity input) {
             if (input == null) {
