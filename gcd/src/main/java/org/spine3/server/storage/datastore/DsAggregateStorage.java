@@ -150,7 +150,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             return false;
         }
 
-        final EntityStatus resultStatus = EntityStatus.newBuilder()
+        final EntityStatus resultStatus = EntityStatus.newBuilder(entityStatus.or(EntityStatus.getDefaultInstance()))
                                                       .setArchived(true)
                                                       .build();
         writeStatus(id, resultStatus);
@@ -166,7 +166,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             return false;
         }
 
-        final EntityStatus resultStatus = EntityStatus.newBuilder()
+        final EntityStatus resultStatus = EntityStatus.newBuilder(entityStatus.or(EntityStatus.getDefaultInstance()))
                                                       .setDeleted(true)
                                                       .build();
         writeStatus(id, resultStatus);
