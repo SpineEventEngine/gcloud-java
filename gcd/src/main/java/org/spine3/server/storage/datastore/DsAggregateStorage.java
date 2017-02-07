@@ -65,6 +65,13 @@ import static org.spine3.server.storage.datastore.EntityFields.AggregateFields.A
 public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
+    /**
+     * Prefix for the string IDs of the {@link AggregateStorageRecord records} which represent an aggregate snapshot,
+     * not an event.
+     *
+     * <p>When reading all the {@link AggregateStorageRecord records} {@link #historyBackward(Object) by an ID},
+     * the snapshots will never be included.
+     */
     private static final String SNAPSHOT = "SNAPSHOT";
 
     private static final String KIND = AggregateStorageRecord.class.getName();
