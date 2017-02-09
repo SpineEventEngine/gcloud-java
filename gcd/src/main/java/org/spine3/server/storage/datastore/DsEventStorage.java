@@ -63,7 +63,7 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventC
 import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventFieldProperties;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
-import static org.spine3.server.storage.datastore.EntityFields.CommonFields.TIMESTAMP_NANOS;
+import static org.spine3.server.storage.datastore.field.EntityField.timestamp_nanos;
 
 /**
  * Storage for event records based on Google Cloud Datastore.
@@ -133,8 +133,8 @@ public class DsEventStorage extends EventStorage {
         final long upper = query.hasBefore()
                            ? convertToNanos(query.getBefore())
                            : Long.MAX_VALUE;
-        final PropertyFilter greaterThen = PropertyFilter.gt(TIMESTAMP_NANOS.toString(), lower);
-        final PropertyFilter lessThen = PropertyFilter.lt(TIMESTAMP_NANOS.toString(), upper);
+        final PropertyFilter greaterThen = PropertyFilter.gt(timestamp_nanos.toString(), lower);
+        final PropertyFilter lessThen = PropertyFilter.lt(timestamp_nanos.toString(), upper);
         final CompositeFilter filter = CompositeFilter.and(greaterThen, lessThen);
         final Query result = Query.newEntityQueryBuilder()
                                   .setKind(KIND)

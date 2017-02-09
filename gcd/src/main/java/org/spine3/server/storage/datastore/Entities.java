@@ -32,6 +32,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.storage.datastore.field.EntityField;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -44,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
 import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
-import static org.spine3.server.storage.datastore.EntityFields.CommonFields.VALUE;
+import static org.spine3.server.storage.datastore.field.EntityField.value;
 
 /**
  * Utility class for converting {@link Message proto messages} into {@link Entity Entities} and vise versa.
@@ -74,7 +75,7 @@ class Entities {
             return defaultMessage(type);
         }
 
-        final Blob value = entity.getBlob(VALUE.toString());
+        final Blob value = entity.getBlob(EntityField.value.toString());
         final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
         final Any wrapped = Any.newBuilder()
@@ -110,7 +111,7 @@ class Entities {
                 continue;
             }
 
-            final Blob value = entity.getBlob(VALUE.toString());
+            final Blob value = entity.getBlob(EntityField.value.toString());
             final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
             final Any wrapped = Any.newBuilder()
@@ -143,7 +144,7 @@ class Entities {
                                              .setExcludeFromIndexes(true)
                                              .build();
         final Entity entity = Entity.newBuilder(key)
-                                    .set(VALUE.toString(), blobValue)
+                                    .set(value.toString(), blobValue)
                                     .build();
         return entity;
     }

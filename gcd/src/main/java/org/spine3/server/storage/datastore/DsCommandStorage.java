@@ -43,8 +43,8 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
-import static org.spine3.server.storage.datastore.EntityFields.CommonFields.TIMESTAMP;
-import static org.spine3.server.storage.datastore.EntityFields.CommonFields.TIMESTAMP_NANOS;
+import static org.spine3.server.storage.datastore.field.EntityField.timestamp;
+import static org.spine3.server.storage.datastore.field.EntityField.timestamp_nanos;
 import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
@@ -156,10 +156,10 @@ public class DsCommandStorage extends CommandStorage {
 
         Entity entity = messageToEntity(record, key);
         entity = Entity.newBuilder(entity)
-                       .set(TIMESTAMP.toString(), record.getTimestamp()
-                                                           .getSeconds())
-                       .set(TIMESTAMP_NANOS.toString(), record.getTimestamp()
-                                                                 .getNanos())
+                       .set(timestamp.toString(), record.getTimestamp()
+                                                        .getSeconds())
+                       .set(timestamp_nanos.toString(), record.getTimestamp()
+                                                              .getNanos())
                        .set(COMMAND_STATUS_PROPERTY_NAME, record.getStatus()
                                                                 .ordinal())
                        .build();

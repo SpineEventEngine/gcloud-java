@@ -52,7 +52,7 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.addArchive
 import static org.spine3.server.storage.datastore.DatastoreProperties.addDeletedProperty;
 import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
 import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
-import static org.spine3.server.storage.datastore.EntityFields.AggregateFields.AGGREGATE_ID;
+import static org.spine3.server.storage.datastore.field.AggregateField.aggregate_id;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -209,7 +209,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final String idString = idToString(id);
         final Query<?> query = Query.newEntityQueryBuilder()
                                     .setKind(KIND)
-                                    .setFilter(StructuredQuery.PropertyFilter.eq(AGGREGATE_ID.toString(), idString))
+                                    .setFilter(StructuredQuery.PropertyFilter.eq(aggregate_id.toString(), idString))
                                     .build();
         final List<Entity> eventEntities = datastore.read(query);
         if (eventEntities.isEmpty()) {
