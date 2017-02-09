@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  *
  * <p>Owing to that, we may simply call {@link Enum#toString()} or {@link Enum#name()} to get a valid field name.
  *
- * @author Dmytro Dashenkov.
+ * @author Dmytro Dashenkov
  */
 @Internal
 @Documented

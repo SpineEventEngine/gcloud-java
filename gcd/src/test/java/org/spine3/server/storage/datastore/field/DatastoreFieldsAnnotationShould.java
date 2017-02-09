@@ -20,17 +20,28 @@
 
 package org.spine3.server.storage.datastore.field;
 
-import org.spine3.Internal;
+import org.junit.Test;
+
+import java.lang.annotation.Annotation;
+
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Dmytro Dashenkov.
  */
-@DatastoreFields
-@Internal
-public enum EventField {
+public class DatastoreFieldsAnnotationShould {
 
-    producer_id,
-    event_id,
-    event_type
+    @Test
+    public void not_be_visible_in_runtime() {
+        final Class<MockFields> fieldsClass = MockFields.class;
+        @SuppressWarnings("ReflectionForUnavailableAnnotation") // That's what we test here
+        final Annotation annotation = fieldsClass.getAnnotation(DatastoreFields.class);
+        assertNull(annotation);
+    }
 
+    @SuppressWarnings("EmptyClass") // Required as a bearer for the {@code @DatastoreFields} annotation.
+    @DatastoreFields
+    private static class MockFields {
+
+    }
 }

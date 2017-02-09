@@ -20,10 +20,13 @@
 
 package org.spine3.server.storage.datastore.field;
 
+import org.spine3.Internal;
+
 /**
  * @author Dmytro Dashenkov.
  */
 @DatastoreFields
+@Internal
 public enum EntityStatusField {
 
     archived,

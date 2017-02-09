@@ -20,10 +20,18 @@
 
 package org.spine3.server.storage.datastore.field;
 
+import com.google.cloud.datastore.Entity;
+import org.spine3.Internal;
+import org.spine3.server.storage.datastore.DsAggregateStorage;
+
 /**
- * @author Dmytro Dashenkov.
+ * A container for the {@link Entity} fields specific for the {@link DsAggregateStorage aggregate storage}.
+ *
+ * @author Dmytro Dashenkov
+ * @see DatastoreFields
  */
 @DatastoreFields
+@Internal
 public enum AggregateField {
 
     aggregate_id
