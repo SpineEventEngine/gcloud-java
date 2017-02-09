@@ -35,12 +35,12 @@ import org.spine3.test.aggregate.ProjectId;
  */
 public class DsAggregateStorageStatusHandlingShould extends AggregateStorageStatusHandlingShould {
 
-    private static final TestDatastoreStorageFactory DATASTORE_FACTORY;
+    private static final TestDatastoreStorageFactory datastoreFactory;
 
     // Guarantees any stacktrace to be informative
     static {
         try {
-            DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
+            datastoreFactory = TestDatastoreStorageFactory.getDefaultInstance();
         } catch (Throwable e) {
             log().error("Could not initialize test datastore factory {}", e);
             throw new RuntimeException(e);
@@ -49,22 +49,22 @@ public class DsAggregateStorageStatusHandlingShould extends AggregateStorageStat
 
     @BeforeClass
     public static void setUpClass() {
-        DATASTORE_FACTORY.setUp();
+        datastoreFactory.setUp();
     }
 
     @After
     public void tearDownTest() {
-        DATASTORE_FACTORY.clear();
+        datastoreFactory.clear();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        DATASTORE_FACTORY.tearDown();
+        datastoreFactory.tearDown();
     }
 
     @Override
     protected AggregateStorage<ProjectId> getAggregateStorage(Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
-        return DATASTORE_FACTORY.createAggregateStorage(aggregateClass);
+        return datastoreFactory.createAggregateStorage(aggregateClass);
     }
 
     private static Logger log() {

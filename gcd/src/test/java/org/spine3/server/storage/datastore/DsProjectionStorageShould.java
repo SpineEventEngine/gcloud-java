@@ -34,17 +34,17 @@ import static org.junit.Assert.assertNotNull;
  * @author Mikhail Mikhaylov
  */
 public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
-    private static final TestDatastoreStorageFactory DATASTORE_FACTORY =
+    private static final TestDatastoreStorageFactory datastoreFactory =
             TestDatastoreStorageFactory.getDefaultInstance();
 
     @After
     public void tearDownTest() {
-        DATASTORE_FACTORY.clear();
+        datastoreFactory.clear();
     }
 
     @Override
     protected ProjectionStorage<String> getStorage() {
-        return DATASTORE_FACTORY.createProjectionStorage(TestProjection.class);
+        return datastoreFactory.createProjectionStorage(TestProjection.class);
     }
 
     @Override

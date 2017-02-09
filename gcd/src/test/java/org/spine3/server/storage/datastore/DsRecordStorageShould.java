@@ -40,17 +40,17 @@ import static org.junit.Assert.assertNotNull;
  */
 public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsRecordStorage<ProjectId>> {
 
-    private static final TestDatastoreStorageFactory LOCAL_DATASTORE_STORAGE_FACTORY
+    private static final TestDatastoreStorageFactory datastoreFactory
             = TestDatastoreStorageFactory.getDefaultInstance();
 
     @Before
     public void setUp() throws Exception {
-        LOCAL_DATASTORE_STORAGE_FACTORY.setUp();
+        datastoreFactory.setUp();
     }
 
     @After
     public void tearDown() throws Exception {
-        LOCAL_DATASTORE_STORAGE_FACTORY.tearDown();
+        datastoreFactory.tearDown();
     }
 
     @Test
@@ -83,7 +83,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
 
     @Override
     protected DsRecordStorage<ProjectId> getStorage() {
-        return (DsRecordStorage<ProjectId>) LOCAL_DATASTORE_STORAGE_FACTORY.createRecordStorage(TestAggregate.class);
+        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(TestAggregate.class);
     }
 
     @Override

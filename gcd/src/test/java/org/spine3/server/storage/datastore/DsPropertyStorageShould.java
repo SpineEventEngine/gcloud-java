@@ -29,7 +29,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Alex Tymchenko
  */
 public class DsPropertyStorageShould {
-    private static final TestDatastoreStorageFactory DATASTORE_FACTORY =
+    private static final TestDatastoreStorageFactory datastoreFactory =
             TestDatastoreStorageFactory.getDefaultInstance();
 
     @Test
@@ -40,7 +40,7 @@ public class DsPropertyStorageShould {
     }
 
     private static DsPropertyStorage getStorage() {
-        return DATASTORE_FACTORY.createPropertyStorage();
+        return datastoreFactory.createPropertyStorage();
     }
 
 }

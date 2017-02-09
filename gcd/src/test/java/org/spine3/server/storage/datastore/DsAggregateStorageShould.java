@@ -38,12 +38,12 @@ import static org.junit.Assert.assertNotNull;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsAggregateStorageShould extends AggregateStorageShould {
 
-    private static final TestDatastoreStorageFactory DATASTORE_FACTORY;
+    private static final TestDatastoreStorageFactory datastoreFactory;
 
     // Guarantees any stacktrace to be informative
     static {
         try {
-            DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
+            datastoreFactory = TestDatastoreStorageFactory.getDefaultInstance();
         } catch (Throwable e) {
             log().error("Failed to initialize local datastore factory", e);
             throw new RuntimeException(e);
@@ -52,28 +52,28 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
 
     @BeforeClass
     public static void setUpClass() {
-        DATASTORE_FACTORY.setUp();
+        datastoreFactory.setUp();
     }
 
     @After
     public void tearDownTest() {
-        DATASTORE_FACTORY.clear();
+        datastoreFactory.clear();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        DATASTORE_FACTORY.tearDown();
+        datastoreFactory.tearDown();
     }
 
     @SuppressWarnings("ConstantConditions") // passing null because this parameter isn't used in this implementation
     @Override
     protected AggregateStorage<ProjectId> getStorage() {
-        return DATASTORE_FACTORY.createAggregateStorage(null);
+        return datastoreFactory.createAggregateStorage(null);
     }
 
     @Override
     protected <Id> AggregateStorage<Id> getStorage(Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aClass) {
-        return DATASTORE_FACTORY.createAggregateStorage(aClass);
+        return datastoreFactory.createAggregateStorage(aClass);
     }
 
     @SuppressWarnings("RefusedBequest")

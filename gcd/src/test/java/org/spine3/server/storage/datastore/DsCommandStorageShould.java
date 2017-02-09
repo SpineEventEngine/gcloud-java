@@ -32,26 +32,26 @@ import static org.junit.Assert.assertNotNull;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsCommandStorageShould extends CommandStorageShould {
 
-    private static final TestDatastoreStorageFactory DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory datastoreFactory = TestDatastoreStorageFactory.getDefaultInstance();
 
     @BeforeClass
     public static void setUpClass() {
-        DATASTORE_FACTORY.setUp();
+        datastoreFactory.setUp();
     }
 
     @After
     public void tearDownTest() {
-        DATASTORE_FACTORY.clear();
+        datastoreFactory.clear();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        DATASTORE_FACTORY.tearDown();
+        datastoreFactory.tearDown();
     }
 
     @Override
     protected CommandStorage getStorage() {
-        return DATASTORE_FACTORY.createCommandStorage();
+        return datastoreFactory.createCommandStorage();
     }
 
     @Test
