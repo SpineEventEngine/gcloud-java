@@ -54,6 +54,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
+import static org.spine3.server.storage.EntityField.timestamp_nanos;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addAggregateIdProperty;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addEventTypeProperty;
@@ -63,7 +64,6 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventC
 import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventFieldProperties;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
-import static org.spine3.server.storage.datastore.field.EntityField.timestamp_nanos;
 
 /**
  * Storage for event records based on Google Cloud Datastore.

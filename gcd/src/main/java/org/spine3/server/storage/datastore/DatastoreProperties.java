@@ -29,8 +29,8 @@ import org.spine3.base.EventContextOrBuilder;
 import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.event.storage.EventStorageRecord;
-import org.spine3.server.storage.datastore.field.EntityField;
-import org.spine3.server.storage.datastore.field.EntityStatusField;
+import org.spine3.server.storage.EntityField;
+import org.spine3.server.storage.EntityStatusField;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -38,17 +38,17 @@ import java.util.Date;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
-import static org.spine3.server.storage.datastore.field.AggregateField.aggregate_id;
-import static org.spine3.server.storage.datastore.field.EntityField.timestamp_nanos;
-import static org.spine3.server.storage.datastore.field.EntityStatusField.archived;
-import static org.spine3.server.storage.datastore.field.EntityStatusField.deleted;
-import static org.spine3.server.storage.datastore.field.EventContextField.context_event_id;
-import static org.spine3.server.storage.datastore.field.EventContextField.context_of_command;
-import static org.spine3.server.storage.datastore.field.EventContextField.context_timestamp;
-import static org.spine3.server.storage.datastore.field.EventContextField.context_version;
-import static org.spine3.server.storage.datastore.field.EventField.event_id;
-import static org.spine3.server.storage.datastore.field.EventField.event_type;
-import static org.spine3.server.storage.datastore.field.EventField.producer_id;
+import static org.spine3.server.aggregate.storage.AggregateField.aggregate_id;
+import static org.spine3.server.event.storage.EventContextField.context_event_id;
+import static org.spine3.server.event.storage.EventContextField.context_of_command;
+import static org.spine3.server.event.storage.EventContextField.context_timestamp;
+import static org.spine3.server.event.storage.EventContextField.context_version;
+import static org.spine3.server.event.storage.EventField.event_id;
+import static org.spine3.server.event.storage.EventField.event_type;
+import static org.spine3.server.event.storage.EventField.producer_id;
+import static org.spine3.server.storage.EntityField.timestamp_nanos;
+import static org.spine3.server.storage.EntityStatusField.archived;
+import static org.spine3.server.storage.EntityStatusField.deleted;
 
 /**
  * Utility class, which simplifies creation of the Datastore properties.

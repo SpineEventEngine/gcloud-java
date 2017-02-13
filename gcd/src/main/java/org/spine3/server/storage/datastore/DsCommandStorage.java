@@ -41,10 +41,10 @@ import java.util.Iterator;
 import static com.google.cloud.datastore.StructuredQuery.Filter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.storage.EntityField.timestamp;
+import static org.spine3.server.storage.EntityField.timestamp_nanos;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
-import static org.spine3.server.storage.datastore.field.EntityField.timestamp;
-import static org.spine3.server.storage.datastore.field.EntityField.timestamp_nanos;
 import static org.spine3.validate.Validate.checkNotDefault;
 
 /**

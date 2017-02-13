@@ -46,13 +46,13 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.not;
 import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.server.aggregate.storage.AggregateField.aggregate_id;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DatastoreProperties.activeEntityPredicate;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addArchivedProperty;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addDeletedProperty;
 import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
 import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
-import static org.spine3.server.storage.datastore.field.AggregateField.aggregate_id;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
