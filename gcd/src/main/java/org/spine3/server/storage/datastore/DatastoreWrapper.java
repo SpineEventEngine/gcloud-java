@@ -189,7 +189,7 @@ public class DatastoreWrapper {
      * @return results fo the query packed in a {@link List}
      * @see DatastoreReader#run(Query)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // Untyped query which always works with datastore {@code Entity}.
     public List<Entity> read(Query query) {
         QueryResults queryResults = actor.run(query);
         final List<Entity> resultsAsList = newLinkedList();

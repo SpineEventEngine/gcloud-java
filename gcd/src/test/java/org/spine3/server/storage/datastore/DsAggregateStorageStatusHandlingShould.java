@@ -63,7 +63,8 @@ public class DsAggregateStorageStatusHandlingShould extends AggregateStorageStat
     }
 
     @Override
-    protected AggregateStorage<ProjectId> getAggregateStorage(Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
+    protected AggregateStorage<ProjectId> getAggregateStorage(
+            Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
         return datastoreFactory.createAggregateStorage(aggregateClass);
     }
 
