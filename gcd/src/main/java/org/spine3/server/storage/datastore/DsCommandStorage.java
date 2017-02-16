@@ -65,7 +65,6 @@ public class DsCommandStorage extends CommandStorage {
 
     private static final Function<Entity, CommandStorageRecord> RECORD_MAPPER
             = new Function<Entity, CommandStorageRecord>() {
-        @Nullable
         @Override
         public CommandStorageRecord apply(@Nullable Entity input) {
             checkNotNull(input);
@@ -82,10 +81,10 @@ public class DsCommandStorage extends CommandStorage {
     @Override
     protected Iterator<CommandStorageRecord> read(CommandStatus status) {
         final Filter filter = PropertyFilter.eq(COMMAND_STATUS_PROPERTY_NAME, status.ordinal());
-        final Query query = Query.newEntityQueryBuilder()
-                                 .setKind(KIND)
-                                 .setFilter(filter)
-                                 .build();
+        final Query<Entity> query = Query.newEntityQueryBuilder()
+                                         .setKind(KIND)
+                                         .setFilter(filter)
+                                         .build();
         final Collection<Entity> entities = datastore.read(query);
         final Collection<CommandStorageRecord> records = Collections2.transform(entities, RECORD_MAPPER);
         return records.iterator();
@@ -143,6 +142,7 @@ public class DsCommandStorage extends CommandStorage {
             return Optional.absent();
         }
         final CommandStorageRecord record = RECORD_MAPPER.apply(entity);
+        checkNotNull(record);
         return Optional.of(record);
     }
 

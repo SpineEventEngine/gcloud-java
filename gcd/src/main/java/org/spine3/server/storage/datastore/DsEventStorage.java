@@ -116,7 +116,7 @@ public class DsEventStorage extends EventStorage {
 
     @Override
     public Iterator<Event> iterator(EventStreamQuery eventStreamQuery) {
-        final Query query = toTimestampQuery(eventStreamQuery);
+        final Query<Entity> query = toTimestampQuery(eventStreamQuery);
 
         final Collection<Entity> entities = datastore.read(query);
         // Transform and filter order does not matter since both operations are performed lazily
@@ -128,7 +128,7 @@ public class DsEventStorage extends EventStorage {
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static Query toTimestampQuery(EventStreamQueryOrBuilder query) {
+    private static Query<Entity> toTimestampQuery(EventStreamQueryOrBuilder query) {
         final long lower = convertToNanos(query.getAfter());
         final long upper = query.hasBefore()
                            ? convertToNanos(query.getBefore())
@@ -136,10 +136,10 @@ public class DsEventStorage extends EventStorage {
         final PropertyFilter greaterThen = PropertyFilter.gt(timestamp_nanos.toString(), lower);
         final PropertyFilter lessThen = PropertyFilter.lt(timestamp_nanos.toString(), upper);
         final CompositeFilter filter = CompositeFilter.and(greaterThen, lessThen);
-        final Query result = Query.newEntityQueryBuilder()
-                                  .setKind(KIND)
-                                  .setFilter(filter)
-                                  .build();
+        final Query<Entity> result = Query.newEntityQueryBuilder()
+                                          .setKind(KIND)
+                                          .setFilter(filter)
+                                          .build();
         return result;
     }
 

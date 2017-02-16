@@ -189,17 +189,15 @@ public class DatastoreWrapper {
      * @return results fo the query packed in a {@link List}
      * @see DatastoreReader#run(Query)
      */
-    @SuppressWarnings("unchecked")
-    // As the type of the {@code QueryResult} we always use Datastore {@code Entity}.
-    public List<Entity> read(Query query) {
-        QueryResults queryResults = actor.run(query);
+    public List<Entity> read(Query<Entity> query) {
+        QueryResults<Entity> queryResults = actor.run(query);
         final List<Entity> resultsAsList = newLinkedList();
 
         while (queryResults != null && queryResults.hasNext()) {
             Iterators.addAll(resultsAsList, queryResults);
 
             final Cursor cursorAfter = queryResults.getCursorAfter();
-            final Query queryForMoreResults;
+            final Query<Entity> queryForMoreResults;
 
             /**
              * The generic {@link Query} cannot be transformed into the {@code Builder} instance due to different
@@ -211,7 +209,7 @@ public class DatastoreWrapper {
              **/
 
             if (query instanceof StructuredQuery) {
-                final StructuredQuery structuredQuery = (StructuredQuery) query;
+                final StructuredQuery<Entity> structuredQuery = (StructuredQuery<Entity>) query;
                 queryForMoreResults = structuredQuery.toBuilder()
                         .setStartCursor(cursorAfter)
                         .build();

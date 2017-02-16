@@ -207,7 +207,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String idString = idToString(id);
-        final Query<?> query = Query.newEntityQueryBuilder()
+        final Query<Entity> query = Query.newEntityQueryBuilder()
                                     .setKind(KIND)
                                     .setFilter(StructuredQuery.PropertyFilter.eq(aggregate_id.toString(), idString))
                                     .build();
@@ -245,7 +245,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     private Collection<Entity> getEntityStates() {
-        final Query query = Query.newEntityQueryBuilder()
+        final Query<Entity> query = Query.newEntityQueryBuilder()
                                  .setKind(AGGREGATE_ENTITY_STATUS_KIND)
                                  .build();
         return datastore.read(query);

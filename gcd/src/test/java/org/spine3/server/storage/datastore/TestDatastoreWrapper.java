@@ -119,9 +119,9 @@ class TestDatastoreWrapper extends DatastoreWrapper {
                 }
             }
 
-            final Query query = Query.newEntityQueryBuilder()
-                    .setKind(table)
-                    .build();
+            final Query<Entity> query = Query.newEntityQueryBuilder()
+                                             .setKind(table)
+                                             .build();
             final List<Entity> entities = read(query);
             remainingEntityCount = entities.size();
 
