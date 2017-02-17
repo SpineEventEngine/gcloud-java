@@ -42,13 +42,13 @@ public class DatastoreStorageFactoryShould {
                                                                           .setProjectId("dummy-dataset")
                                                                           .build();
 
-    private static final Datastore DATASTORE = DUMMY_OPTIONS.getService();
+    private static final Datastore datastore = DUMMY_OPTIONS.getService();
 
-    private static final StorageFactory FACTORY = new DatastoreStorageFactory(DATASTORE);
+    private static final StorageFactory datastoreFactory = new DatastoreStorageFactory(datastore);
 
     @Test
     public void create_multitenant_storages() throws Exception {
-        final StorageFactory factory = new DatastoreStorageFactory(DATASTORE, true);
+        final StorageFactory factory = new DatastoreStorageFactory(datastore, true);
         assertTrue(factory.isMultitenant());
         final CommandStorage storage = factory.createCommandStorage();
         assertTrue(storage.isMultitenant());
@@ -57,26 +57,26 @@ public class DatastoreStorageFactoryShould {
 
     @Test
     public void create_entity_storage_using_class_parameter() {
-        final RecordStorage<String> storage = FACTORY.createRecordStorage(TestEntity.class);
+        final RecordStorage<String> storage = datastoreFactory.createRecordStorage(TestEntity.class);
         assertNotNull(storage);
     }
 
     @Test
     public void create_event_storage() {
-        final EventStorage storage = FACTORY.createEventStorage();
+        final EventStorage storage = datastoreFactory.createEventStorage();
         assertNotNull(storage);
     }
 
     @Test
     public void create_command_storage() {
-        final CommandStorage storage = FACTORY.createCommandStorage();
+        final CommandStorage storage = datastoreFactory.createCommandStorage();
         assertNotNull(storage);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test
     public void create_aggregate_storage_not_using_class_parameter() {
-        final AggregateStorage<AggregateStorageRecord> storage = FACTORY.createAggregateStorage(null);
+        final AggregateStorage<AggregateStorageRecord> storage = datastoreFactory.createAggregateStorage(null);
         assertNotNull(storage);
     }
 

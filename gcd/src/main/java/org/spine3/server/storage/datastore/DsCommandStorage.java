@@ -41,9 +41,9 @@ import java.util.Iterator;
 import static com.google.cloud.datastore.StructuredQuery.Filter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.storage.EntityField.timestamp;
+import static org.spine3.server.storage.EntityField.timestamp_nanos;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
-import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
-import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 import static org.spine3.validate.Validate.checkNotDefault;
 
@@ -65,7 +65,6 @@ public class DsCommandStorage extends CommandStorage {
 
     private static final Function<Entity, CommandStorageRecord> RECORD_MAPPER
             = new Function<Entity, CommandStorageRecord>() {
-        @Nullable
         @Override
         public CommandStorageRecord apply(@Nullable Entity input) {
             checkNotNull(input);
@@ -82,10 +81,10 @@ public class DsCommandStorage extends CommandStorage {
     @Override
     protected Iterator<CommandStorageRecord> read(CommandStatus status) {
         final Filter filter = PropertyFilter.eq(COMMAND_STATUS_PROPERTY_NAME, status.ordinal());
-        final Query query = Query.newEntityQueryBuilder()
-                                 .setKind(KIND)
-                                 .setFilter(filter)
-                                 .build();
+        final Query<Entity> query = Query.newEntityQueryBuilder()
+                                         .setKind(KIND)
+                                         .setFilter(filter)
+                                         .build();
         final Collection<Entity> entities = datastore.read(query);
         final Collection<CommandStorageRecord> records = Collections2.transform(entities, RECORD_MAPPER);
         return records.iterator();
@@ -143,6 +142,7 @@ public class DsCommandStorage extends CommandStorage {
             return Optional.absent();
         }
         final CommandStorageRecord record = RECORD_MAPPER.apply(entity);
+        checkNotNull(record);
         return Optional.of(record);
     }
 
@@ -156,10 +156,10 @@ public class DsCommandStorage extends CommandStorage {
 
         Entity entity = messageToEntity(record, key);
         entity = Entity.newBuilder(entity)
-                       .set(TIMESTAMP_PROPERTY_NAME, record.getTimestamp()
-                                                           .getSeconds())
-                       .set(TIMESTAMP_NANOS_PROPERTY_NAME, record.getTimestamp()
-                                                                 .getNanos())
+                       .set(timestamp.toString(), record.getTimestamp()
+                                                        .getSeconds())
+                       .set(timestamp_nanos.toString(), record.getTimestamp()
+                                                              .getNanos())
                        .set(COMMAND_STATUS_PROPERTY_NAME, record.getStatus()
                                                                 .ordinal())
                        .build();

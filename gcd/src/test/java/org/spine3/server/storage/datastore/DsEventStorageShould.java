@@ -32,32 +32,32 @@ import static org.junit.Assert.assertNotNull;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsEventStorageShould extends EventStorageShould {
 
-    private static final TestDatastoreStorageFactory DATASTORE_FACTORY = TestDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory datastoreFactory = TestDatastoreStorageFactory.getDefaultInstance();
 
     @Override
     public void tearDownEventStorageTest() {
         super.tearDownEventStorageTest();
-        DATASTORE_FACTORY.clear();
+        datastoreFactory.clear();
     }
 
     @Override
     protected EventStorage getStorage() {
-        return DATASTORE_FACTORY.createEventStorage();
+        return datastoreFactory.createEventStorage();
     }
 
     @BeforeClass
     public static void setUpClass() {
-        DATASTORE_FACTORY.setUp();
+        datastoreFactory.setUp();
     }
 
     @After
     public void tearDownTest() {
-        DATASTORE_FACTORY.tearDown();
+        datastoreFactory.tearDown();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        DATASTORE_FACTORY.tearDown();
+        datastoreFactory.tearDown();
     }
 
     @Test

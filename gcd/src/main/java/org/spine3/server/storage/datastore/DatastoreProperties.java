@@ -29,6 +29,8 @@ import org.spine3.base.EventContextOrBuilder;
 import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.event.storage.EventStorageRecord;
+import org.spine3.server.storage.EntityField;
+import org.spine3.server.storage.EntityStatusField;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -36,6 +38,17 @@ import java.util.Date;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
+import static org.spine3.server.aggregate.storage.AggregateField.aggregate_id;
+import static org.spine3.server.event.storage.EventContextField.context_event_id;
+import static org.spine3.server.event.storage.EventContextField.context_of_command;
+import static org.spine3.server.event.storage.EventContextField.context_timestamp;
+import static org.spine3.server.event.storage.EventContextField.context_version;
+import static org.spine3.server.event.storage.EventField.event_id;
+import static org.spine3.server.event.storage.EventField.event_type;
+import static org.spine3.server.event.storage.EventField.producer_id;
+import static org.spine3.server.storage.EntityField.timestamp_nanos;
+import static org.spine3.server.storage.EntityStatusField.archived;
+import static org.spine3.server.storage.EntityStatusField.deleted;
 
 /**
  * Utility class, which simplifies creation of the Datastore properties.
@@ -46,24 +59,7 @@ import static org.spine3.protobuf.Timestamps.convertToNanos;
 @SuppressWarnings("UtilityClass")
 class DatastoreProperties {
 
-    static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
-    static final String TIMESTAMP_NANOS_PROPERTY_NAME = "timestamp_nanos";
-    static final String AGGREGATE_ID_PROPERTY_NAME = "aggregate_id";
-
-    private static final String PRODUCER_ID_PROPERTY_NAME = "producer_id";
-    private static final String EVENT_TYPE_PROPERTY_NAME = "event_type";
-    private static final String EVENT_ID_PROPERTY_NAME = "event_id";
-
-    private static final String ARCHIVED_PROPERTY_NAME = "archived";
-    private static final String DELETED_PROPERTY_NAME = "deleted";
-
-    private static final String CONTEXT_EVENT_ID_PROPERTY_NAME = "context_event_id";
-    private static final String CONTEXT_TIMESTAMP_PROPERTY_NAME = "context_timestamp";
-    private static final String CONTEXT_OF_COMMAND_PROPERTY_NAME = "context_of_command";
-    private static final String CONTEXT_VERSION = "context_version";
-
     private static final Predicate<Entity> NOT_ARCHIVED_OR_DELETED = new Predicate<Entity>() {
-        // TODO:2017-02-06:dmytro.dashenkov: Temporary solution. Filter the results in the query, not in memory.
         @Override
         public boolean apply(@Nullable Entity input) {
             if (input == null) {
@@ -84,7 +80,7 @@ class DatastoreProperties {
      */
     static void addTimestampProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final Date date = convertToDate(timestamp);
-        entity.set(TIMESTAMP_PROPERTY_NAME, DateTime.copyFrom(date));
+        entity.set(EntityField.timestamp.toString(), DateTime.copyFrom(date));
     }
 
     /**
@@ -93,7 +89,7 @@ class DatastoreProperties {
      */
     static void addTimestampNanosProperty(TimestampOrBuilder timestamp, Entity.Builder entity) {
         final long nanos = convertToNanos(timestamp);
-        entity.set(TIMESTAMP_NANOS_PROPERTY_NAME, nanos);
+        entity.set(timestamp_nanos.toString(), nanos);
     }
 
     /**
@@ -101,32 +97,32 @@ class DatastoreProperties {
      */
     static void addAggregateIdProperty(Object aggregateId, Entity.Builder entity) {
         final String propertyValue = Stringifiers.idToString(aggregateId);
-        entity.set(AGGREGATE_ID_PROPERTY_NAME, propertyValue);
+        entity.set(aggregate_id.toString(), propertyValue);
     }
 
     /**
      * Makes EventType property from given String value.
      */
     static void addEventTypeProperty(String eventType, Entity.Builder entity) {
-        entity.set(EVENT_TYPE_PROPERTY_NAME, eventType);
+        entity.set(event_type.toString(), eventType);
     }
 
     static void addArchivedProperty(Entity.Builder entity, boolean archived) {
-        entity.set(ARCHIVED_PROPERTY_NAME, archived);
+        entity.set(EntityStatusField.archived.toString(), archived);
     }
 
     static void addDeletedProperty(Entity.Builder entity, boolean deleted) {
-        entity.set(DELETED_PROPERTY_NAME, deleted);
+        entity.set(EntityStatusField.deleted.toString(), deleted);
     }
 
     static boolean isArchived(Entity entity) {
         checkNotNull(entity);
-        return hasFlag(entity, ARCHIVED_PROPERTY_NAME);
+        return hasFlag(entity, archived.toString());
     }
 
     static boolean isDeleted(Entity entity) {
         checkNotNull(entity);
-        return hasFlag(entity, DELETED_PROPERTY_NAME);
+        return hasFlag(entity, deleted.toString());
     }
 
     private static boolean hasFlag(Entity entity, String flagName) {
@@ -142,11 +138,11 @@ class DatastoreProperties {
      */
     static void makeEventContextProperties(EventContextOrBuilder context,
                                            Entity.Builder builder) {
-        builder.set(CONTEXT_EVENT_ID_PROPERTY_NAME, Messages.toText(context.getEventId()));
-        builder.set(CONTEXT_TIMESTAMP_PROPERTY_NAME, convertToNanos(context.getTimestamp()));
+        builder.set(context_event_id.toString(), Messages.toText(context.getEventId()));
+        builder.set(context_timestamp.toString(), convertToNanos(context.getTimestamp()));
         // We do not re-save producer id
-        builder.set(CONTEXT_OF_COMMAND_PROPERTY_NAME, Messages.toText(context.getCommandContext()));
-        builder.set(CONTEXT_VERSION, context.getVersion());
+        builder.set(context_of_command.toString(), Messages.toText(context.getCommandContext()));
+        builder.set(context_version.toString(), context.getVersion());
     }
 
     /**
@@ -157,8 +153,8 @@ class DatastoreProperties {
                                          Entity.Builder builder) {
         // We do not re-save timestamp
         // We do not re-save event type
-        builder.set(EVENT_ID_PROPERTY_NAME, event.getEventId());
-        builder.set(PRODUCER_ID_PROPERTY_NAME, event.getProducerId());
+        builder.set(event_id.toString(), event.getEventId());
+        builder.set(producer_id.toString(), event.getProducerId());
     }
 
     static Predicate<Entity> activeEntityPredicate() {

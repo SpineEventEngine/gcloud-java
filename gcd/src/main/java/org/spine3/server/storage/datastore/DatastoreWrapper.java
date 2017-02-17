@@ -35,6 +35,7 @@ import com.google.cloud.datastore.KeyQuery;
 import com.google.cloud.datastore.ProjectionEntityQuery;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
@@ -188,16 +189,15 @@ public class DatastoreWrapper {
      * @return results fo the query packed in a {@link List}
      * @see DatastoreReader#run(Query)
      */
-    @SuppressWarnings({"unchecked", "IfStatementWithTooManyBranches", "ChainOfInstanceofChecks"})
-    public List<Entity> read(Query query) {
-        QueryResults queryResults = actor.run(query);
+    public List<Entity> read(Query<Entity> query) {
+        QueryResults<Entity> queryResults = actor.run(query);
         final List<Entity> resultsAsList = newLinkedList();
 
         while (queryResults != null && queryResults.hasNext()) {
             Iterators.addAll(resultsAsList, queryResults);
 
             final Cursor cursorAfter = queryResults.getCursorAfter();
-            final Query queryForMoreResults;
+            final Query<Entity> queryForMoreResults;
 
             /**
              * The generic {@link Query} cannot be transformed into the {@code Builder} instance due to different
@@ -208,19 +208,9 @@ public class DatastoreWrapper {
              * the {@code Builder}s, allowing to inject a new {@code startCursor} value.
              **/
 
-            if (query instanceof EntityQuery) {
-                final EntityQuery entityQuery = (EntityQuery) query;
-                queryForMoreResults = entityQuery.toBuilder()
-                        .setStartCursor(cursorAfter)
-                        .build();
-            } else if (query instanceof KeyQuery) {
-                final KeyQuery keyQuery = (KeyQuery) query;
-                queryForMoreResults = keyQuery.toBuilder()
-                        .setStartCursor(cursorAfter)
-                        .build();
-            } else if (query instanceof ProjectionEntityQuery) {
-                final ProjectionEntityQuery peQuery = (ProjectionEntityQuery) query;
-                queryForMoreResults = peQuery.toBuilder()
+            if (query instanceof StructuredQuery) {
+                final StructuredQuery<Entity> structuredQuery = (StructuredQuery<Entity>) query;
+                queryForMoreResults = structuredQuery.toBuilder()
                         .setStartCursor(cursorAfter)
                         .build();
             } else {

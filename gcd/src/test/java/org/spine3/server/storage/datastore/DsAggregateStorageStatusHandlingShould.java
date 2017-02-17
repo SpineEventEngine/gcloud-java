@@ -23,16 +23,29 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import org.spine3.server.command.CommandStorage;
-import org.spine3.server.command.CommandStorageShould;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.AggregateStorageStatusHandlingShould;
+import org.spine3.test.aggregate.ProjectId;
 
-import static org.junit.Assert.assertNotNull;
+/**
+ * @author Dmytro Dashenkov.
+ */
+public class DsAggregateStorageStatusHandlingShould extends AggregateStorageStatusHandlingShould {
 
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class DsCommandStorageShould extends CommandStorageShould {
+    private static final TestDatastoreStorageFactory datastoreFactory;
 
-    private static final TestDatastoreStorageFactory datastoreFactory = TestDatastoreStorageFactory.getDefaultInstance();
+    // Guarantees any stacktrace to be informative
+    static {
+        try {
+            datastoreFactory = TestDatastoreStorageFactory.getDefaultInstance();
+        } catch (Throwable e) {
+            log().error("Could not initialize test datastore factory {}", e);
+            throw new RuntimeException(e);
+        }
+    }
 
     @BeforeClass
     public static void setUpClass() {
@@ -50,14 +63,19 @@ public class DsCommandStorageShould extends CommandStorageShould {
     }
 
     @Override
-    protected CommandStorage getStorage() {
-        return datastoreFactory.createCommandStorage();
+    protected AggregateStorage<ProjectId> getAggregateStorage(
+            Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
+        return datastoreFactory.createAggregateStorage(aggregateClass);
     }
 
-    @Test
-    public void provide_access_to_DatastoreWrapper_for_extensibility() {
-        final DsCommandStorage storage = (DsCommandStorage) getStorage();
-        final DatastoreWrapper datastore = storage.getDatastore();
-        assertNotNull(datastore);
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(DsAggregateStorageStatusHandlingShould.class);
+    }
+
 }

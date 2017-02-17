@@ -54,8 +54,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
+import static org.spine3.server.storage.EntityField.timestamp_nanos;
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
-import static org.spine3.server.storage.datastore.DatastoreProperties.TIMESTAMP_NANOS_PROPERTY_NAME;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addAggregateIdProperty;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addEventTypeProperty;
 import static org.spine3.server.storage.datastore.DatastoreProperties.addTimestampNanosProperty;
@@ -116,7 +116,7 @@ public class DsEventStorage extends EventStorage {
 
     @Override
     public Iterator<Event> iterator(EventStreamQuery eventStreamQuery) {
-        final Query query = toTimestampQuery(eventStreamQuery);
+        final Query<Entity> query = toTimestampQuery(eventStreamQuery);
 
         final Collection<Entity> entities = datastore.read(query);
         // Transform and filter order does not matter since both operations are performed lazily
@@ -128,18 +128,18 @@ public class DsEventStorage extends EventStorage {
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static Query toTimestampQuery(EventStreamQueryOrBuilder query) {
+    private static Query<Entity> toTimestampQuery(EventStreamQueryOrBuilder query) {
         final long lower = convertToNanos(query.getAfter());
         final long upper = query.hasBefore()
                            ? convertToNanos(query.getBefore())
                            : Long.MAX_VALUE;
-        final PropertyFilter greaterThen = PropertyFilter.gt(TIMESTAMP_NANOS_PROPERTY_NAME, lower);
-        final PropertyFilter lessThen = PropertyFilter.lt(TIMESTAMP_NANOS_PROPERTY_NAME, upper);
+        final PropertyFilter greaterThen = PropertyFilter.gt(timestamp_nanos.toString(), lower);
+        final PropertyFilter lessThen = PropertyFilter.lt(timestamp_nanos.toString(), upper);
         final CompositeFilter filter = CompositeFilter.and(greaterThen, lessThen);
-        final Query result = Query.newEntityQueryBuilder()
-                                  .setKind(KIND)
-                                  .setFilter(filter)
-                                  .build();
+        final Query<Entity> result = Query.newEntityQueryBuilder()
+                                          .setKind(KIND)
+                                          .setFilter(filter)
+                                          .build();
         return result;
     }
 

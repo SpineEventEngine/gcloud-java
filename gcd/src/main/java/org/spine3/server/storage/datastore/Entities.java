@@ -32,6 +32,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.storage.EntityField;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -39,7 +40,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
@@ -53,7 +53,6 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
 @SuppressWarnings("UtilityClass")
 class Entities {
 
-    private static final String VALUE_PROPERTY_NAME = "value";
     private static final String DEFAULT_MESSAGE_FACTORY_METHOD_NAME = "getDefaultInstance";
 
     private Entities() {
@@ -74,7 +73,7 @@ class Entities {
             return defaultMessage(type);
         }
 
-        final Blob value = entity.getBlob(VALUE_PROPERTY_NAME);
+        final Blob value = entity.getBlob(EntityField.value.toString());
         final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
         final Any wrapped = Any.newBuilder()
@@ -110,7 +109,7 @@ class Entities {
                 continue;
             }
 
-            final Blob value = entity.getBlob(VALUE_PROPERTY_NAME);
+            final Blob value = entity.getBlob(EntityField.value.toString());
             final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
             final Any wrapped = Any.newBuilder()
@@ -131,19 +130,17 @@ class Entities {
      * @param key     instance of {@link Key} to be assigned to the {@link Entity}
      * @return new instance of {@link Entity} containing serialized proto message
      */
-    @SuppressWarnings("ConstantConditions")
     static Entity messageToEntity(Message message, Key key) {
-        checkArgument(message != null, "Message must not be null");
-        checkArgument(key != null, "Key must not be null");
+        checkNotNull(message);
+        checkNotNull(key);
 
-        final Any wrapped = AnyPacker.pack(message);
-        final byte[] messageBytes = wrapped.getValue().toByteArray();
+        final byte[] messageBytes = message.toByteArray();
         final Blob valueBlob = Blob.copyFrom(messageBytes);
         final BlobValue blobValue = BlobValue.newBuilder(valueBlob)
                                              .setExcludeFromIndexes(true)
                                              .build();
         final Entity entity = Entity.newBuilder(key)
-                                    .set(VALUE_PROPERTY_NAME, blobValue)
+                                    .set(EntityField.value.toString(), blobValue)
                                     .build();
         return entity;
     }

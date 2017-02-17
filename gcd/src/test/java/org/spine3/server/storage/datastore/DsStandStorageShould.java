@@ -34,17 +34,17 @@ import static org.junit.Assert.assertNotNull;
  */
 public class DsStandStorageShould extends StandStorageShould {
 
-    private static final TestDatastoreStorageFactory LOCAL_DATASTORE_STORAGE_FACTORY
+    private static final TestDatastoreStorageFactory datastoreFactory
             = TestDatastoreStorageFactory.getDefaultInstance();
 
     @Before
     public void setUp() throws Exception {
-        LOCAL_DATASTORE_STORAGE_FACTORY.setUp();
+        datastoreFactory.setUp();
     }
 
     @After
     public void tearDown() throws Exception {
-        LOCAL_DATASTORE_STORAGE_FACTORY.tearDown();
+        datastoreFactory.tearDown();
     }
 
     @Test
@@ -55,6 +55,6 @@ public class DsStandStorageShould extends StandStorageShould {
 
     @Override
     protected StandStorage getStorage() {
-        return LOCAL_DATASTORE_STORAGE_FACTORY.createStandStorage();
+        return datastoreFactory.createStandStorage();
     }
 }

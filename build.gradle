@@ -1,6 +1,6 @@
 project.ext {
-    SPINE_VERSION = '0.8.3-SNAPSHOT'
-    GAE_JAVA_VERSION = "0.8.3-SNAPSHOT"
+    SPINE_VERSION = '0.8.7-SNAPSHOT'
+    GAE_JAVA_VERSION = "0.8.7-SNAPSHOT"
     PROTOBUF_VERSION = '3.2.0'
     SLf4J_VERSION = "1.7.21"
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
@@ -71,11 +71,17 @@ subprojects {
     dependencies {
         // when Spine can be used for evaluation in real projects.
         // Spine
-        compile group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true
+        compile (group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true) {
+            exclude group: 'com.google.protobuf', module: 'protobuf-lite'
+            exclude group: 'io.grpc', module: 'grpc-protobuf-lite'
+        }
         compile group: 'org.spine3', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true
 
         // Spine for tests
-        testCompile group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
+        testCompile (group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true, classifier: 'test') {
+            exclude group: 'com.google.protobuf', module: 'protobuf-lite'
+            exclude group: 'io.grpc', module: 'grpc-protobuf-lite'
+        }
         testCompile group: 'org.spine3', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
         testCompile group: 'org.spine3', name: 'spine-testutil-core', version: project.SPINE_VERSION, changing: true
 
