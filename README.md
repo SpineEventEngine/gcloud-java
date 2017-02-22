@@ -40,10 +40,9 @@ indexes:
 
 ```
 
-After this upload the file onto the Google Cloud Console and run `gcloud datastore create-indexes index.yaml`
-to update the indexes.
+After this upload the file onto the Google Cloud Console using the [Cloud Shell Tool](https://cloud.google.com/shell/docs/features) and run `gcloud datastore create-indexes index.yaml`to update the indexes.
 
-This helps us to perform more efficient queries to the Cloud Datastore.
+This helps to perform more efficient queries to the Cloud Datastore.
 
 #### Testing
 
@@ -68,4 +67,4 @@ The launched emulator will run at `localhost:8080` and will not have any persist
 To change the configuration see `./script/start-datastore.*` scripts.
 
 The datastore is cleaned up after each test.
-See test classes under `./gcd/src/test/java/...` and `TestDatastoreStorageFactory#clear`.
+See test classes under `./gcd/src/test/java/...` and `org.spine3.server.storage.datastore.TestDatastoreStorageFactory#clear`.
