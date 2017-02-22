@@ -149,7 +149,7 @@ public class DsEventStorage extends EventStorage {
         // Merge sort
         Collections.sort(sortedEvents, EVENT_RECORD_HISTORICAL_COMPARATOR);
 
-        final Iterator<EventStorageRecord> iterator = events.iterator();
+        final Iterator<EventStorageRecord> iterator = sortedEvents.iterator();
         return toEventIterator(iterator);
     }
 
