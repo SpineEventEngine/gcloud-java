@@ -18,10 +18,19 @@
   ~ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 
+<!--
+    This is an example of the Datastore index config XML file.
+    If you deploy your app to the App Engine you may just add file like this to your `WEB-INF` directory.
+    Otherwise, please see the YAML example.
+-->
 <datastore-indexes
         autoGenerate="true">
+
+    <!-- Your custom indexes -->
+
     <datastore-index kind="org.spine3.server.event.storage.EventStorageRecord" ancestor="false">
         <property name="event_type" direction="asc" />
         <property name="timestamp_nanos" direction="asc" />
     </datastore-index>
+
 </datastore-indexes>

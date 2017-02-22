@@ -18,7 +18,14 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+# This is an example of the Datastore index config YAML file.
+#
+# Follow the instructions in the README file to make this config active for your Datastore.
+#
 indexes:
+
+  # Your custom indexes
+
   - kind: org.spine3.server.event.storage.EventStorageRecord
     ancestor: no
     properties:
