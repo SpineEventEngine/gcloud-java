@@ -6,10 +6,47 @@
 
 Support for Spine-based Java apps running under Google App Engine.
 
+#### Set up
+ 
+To start using **Spine GAE-Java** implementation please configure your `WEB-INF/datastore-indexes.xml` file:
 
-##### Testing
+```xml
+<datastore-indexes
+        autoGenerate="true">
+        
+    <!-- Your custom indexes -->
+        
+    <datastore-index kind="org.spine3.server.event.storage.EventStorageRecord"
+            ancestor="false">
+        <property name="event_type" direction="asc" />
+        <property name="timestamp_nanos" direction="asc" />
+    </datastore-index>
+</datastore-indexes>
+```
 
-###### Preconditions
+Or alternatively use YAML config file (it must have name `index.yaml`):
+```yaml
+indexes:
+
+  #
+  # Your custom kinds
+  #
+  
+  - kind: org.spine3.server.event.storage.EventStorageRecord
+    ancestor: no
+    properties:
+      - name: event_type
+      - name: timestamp_nanos
+
+```
+
+After this upload the file onto the Google Cloud Console using the [Cloud Shell Tool](https://cloud.google.com/shell/docs/features) and run `gcloud datastore create-indexes index.yaml`to update the indexes.
+
+This helps to perform more efficient queries to the Cloud Datastore.
+
+#### Testing
+
+##### Preconditions
 
 To run the task successfully, you must have `gcloud` tool properly installed and configured: 
  - install gcloud of the last version;
@@ -18,7 +55,7 @@ To run the task successfully, you must have `gcloud` tool properly installed and
  - skip Google App Engine setup if not required.
 
 
-###### Executing the tests
+##### Executing the tests
 
 To start a local emulator and run test against it, run `./gradlew check`.
 
@@ -30,4 +67,4 @@ The launched emulator will run at `localhost:8080` and will not have any persist
 To change the configuration see `./script/start-datastore.*` scripts.
 
 The datastore is cleaned up after each test.
-See test classes under `./gcd/src/test/java/...` and `TestDatastoreStorageFactory#clear`.
+See test classes under `./gcd/src/test/java/...` and `org.spine3.server.storage.datastore.TestDatastoreStorageFactory#clear`.

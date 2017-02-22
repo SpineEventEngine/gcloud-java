@@ -61,7 +61,8 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
             final ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(bufferedStream);
             return DatastoreOptions.newBuilder()
-                                   .setProjectId(DEFAULT_DATASET_NAME).setCredentials(credentials)
+                                   .setProjectId(DEFAULT_DATASET_NAME)
+                                   .setCredentials(credentials)
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
             log().warn("Cannot find the configuration file {}", CREDENTIALS_FILE_PATH);
