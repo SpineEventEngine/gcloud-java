@@ -1,5 +1,0 @@
-- kind: org.spine3.server.event.storage.EventStorageRecord
-  ancestor: no
-  properties:
-  - name: event_type
-  - name: timestamp_nanos
