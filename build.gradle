@@ -1,6 +1,6 @@
 project.ext {
     SPINE_VERSION = '0.8.7-SNAPSHOT'
-    GAE_JAVA_VERSION = "0.8.7-SNAPSHOT"
+    GAE_JAVA_VERSION = "0.8.7.1-SNAPSHOT"
     PROTOBUF_VERSION = '3.2.0'
     SLf4J_VERSION = "1.7.21"
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
