@@ -14,7 +14,7 @@ To start using **Spine GAE-Java** implementation please configure your `WEB-INF/
 <datastore-indexes
         autoGenerate="true">
         
-    <!-- your custom indexes -->
+    <!-- Your custom indexes -->
         
     <datastore-index kind="org.spine3.server.event.storage.EventStorageRecord"
             ancestor="false">
@@ -23,6 +23,25 @@ To start using **Spine GAE-Java** implementation please configure your `WEB-INF/
     </datastore-index>
 </datastore-indexes>
 ```
+
+Or alternatively use YAML config file (it must have name `index.yaml`):
+```yaml
+indexes:
+
+  #
+  # Your custom kinds
+  #
+  
+  - kind: org.spine3.server.event.storage.EventStorageRecord
+    ancestor: no
+    properties:
+      - name: event_type
+      - name: timestamp_nanos
+
+```
+
+After this upload the file onto the Google Cloud Console and run `gcloud datastore create-indexes index.yaml`
+to update the indexes.
 
 This helps us to perform more efficient queries to the Cloud Datastore.
 
