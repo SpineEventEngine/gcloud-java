@@ -28,6 +28,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Event;
@@ -60,6 +61,7 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.gt;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Collections2.transform;
 import static java.util.Collections.singleton;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
@@ -142,7 +144,7 @@ public class DsEventStorage extends EventStorage {
             entities.addAll(queryResults);
         }
         // Transform and filter order does not matter since both operations are performed lazily
-        Collection<EventStorageRecord> events = Collections2.transform(entities, ENTITY_TO_EVENT_RECORD);
+        Collection<EventStorageRecord> events = transform(entities, ENTITY_TO_EVENT_RECORD);
         events = Collections2.filter(events, eventPredicate(eventStreamQuery));
         final List<EventStorageRecord> sortedEvents = new ArrayList<>(events);
 
@@ -251,31 +253,19 @@ public class DsEventStorage extends EventStorage {
                 return true;
             }
 
-            boolean atLeastOneNonEmptyFilter = false;
-            for (EventFilter filter : eventFilters) {
-                final EventFilterChecker predicate = new EventFilterChecker(filter);
-                if (predicate.checkFilterEmpty()) {
-                    continue;
-                }
-                atLeastOneNonEmptyFilter = true;
-                final boolean matches = predicate.apply(event);
-                if (matches) {
-                    return true;
-                }
-            }
+            final Predicate<EventFilter> filterPredicate = new EventFilterChecker(event);
+            final boolean result = Iterables.any(eventFilters, filterPredicate);
 
-            return !atLeastOneNonEmptyFilter;
+            return result;
         }
     }
 
     /**
-     * Predicate matching an {@link EventStorageRecord} to the given {@link EventFilter}.
+     * Predicate matching {@linkplain EventFilter EventFilters} to the given {@linkplain EventStorageRecord}.
      */
-    private static class EventFilterChecker implements Predicate<EventStorageRecord> {
+    private static class EventFilterChecker implements Predicate<EventFilter> {
 
-        private final Collection<String> aggregateIds;
-        private final Collection<FieldFilter> eventFieldFilters;
-        private final Collection<FieldFilter> contextFieldFilters;
+        private final EventStorageRecord event;
 
         private static final Function<Any, Message> ANY_UNPACKER = new Function<Any, Message>() {
             @Nullable
@@ -289,13 +279,13 @@ public class DsEventStorage extends EventStorage {
             }
         };
 
-        private EventFilterChecker(@SuppressWarnings("TypeMayBeWeakened") EventFilter eventFilter) {
-            this.aggregateIds = Collections2.transform(eventFilter.getAggregateIdList(), ID_TRANSFORMER);
-            this.eventFieldFilters = eventFilter.getEventFieldFilterList();
-            this.contextFieldFilters = eventFilter.getContextFieldFilterList();
+        private EventFilterChecker(EventStorageRecord event) {
+            this.event = event;
         }
 
-        private boolean checkFilterEmpty() {
+        private static boolean checkFilterEmpty(Collection<String> aggregateIds,
+                                                Collection<FieldFilter> eventFieldFilters,
+                                                Collection<FieldFilter> contextFieldFilters) {
             return aggregateIds.isEmpty()
                     && eventFieldFilters.isEmpty()
                     && contextFieldFilters.isEmpty();
@@ -304,7 +294,15 @@ public class DsEventStorage extends EventStorage {
         // Defined as nullable, parameter `event` is actually non null.
         @SuppressWarnings({"NullableProblems", "MethodWithMoreThanThreeNegations", "MethodWithMultipleLoops"})
         @Override
-        public boolean apply(@Nonnull EventStorageRecord event) {
+        public boolean apply(@Nonnull EventFilter eventFilter) {
+            final Collection<String> aggregateIds = transform(eventFilter.getAggregateIdList(), ID_TRANSFORMER);
+            final Collection<FieldFilter> eventFieldFilters = eventFilter.getEventFieldFilterList();
+            final Collection<FieldFilter> contextFieldFilters = eventFilter.getContextFieldFilterList();
+
+            if (checkFilterEmpty(aggregateIds, eventFieldFilters, contextFieldFilters)) {
+                return true;
+            }
+
             final Any eventWrapped = event.getMessage();
             final Message eventMessage = AnyPacker.unpack(eventWrapped);
 
@@ -344,7 +342,7 @@ public class DsEventStorage extends EventStorage {
                                                             .toUpperCase() + fieldName.substring(1);
 
             final Collection<Any> expectedAnys = filter.getValueList();
-            final Collection<Message> expectedValues = Collections2.transform(expectedAnys, ANY_UNPACKER);
+            final Collection<Message> expectedValues = transform(expectedAnys, ANY_UNPACKER);
             Message actualValue;
             try {
                 final Class<?> messageClass = object.getClass();
