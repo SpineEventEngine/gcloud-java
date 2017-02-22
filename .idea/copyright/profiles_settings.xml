@@ -3,5 +3,9 @@
     <module2copyright>
       <element module="All" copyright="TeamDev Open-Source" />
     </module2copyright>
+    <LanguageOptions name="XML">
+      <option name="fileTypeOverride" value="3" />
+      <option name="prefixLines" value="false" />
+    </LanguageOptions>
   </settings>
 </component>
