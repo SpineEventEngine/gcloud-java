@@ -56,6 +56,7 @@ import java.util.List;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.Filter;
+import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.gt;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
@@ -185,7 +186,7 @@ public class DsEventStorage extends EventStorage {
         final Query<Entity> query = Query.newEntityQueryBuilder()
                                          .setKind(KIND)
                                          .setFilter(filter)
-                                         //.addOrderBy(asc(timestamp_nanos.toString()))
+                                         .addOrderBy(asc(timestamp_nanos.toString()))
                                          .build();
         return query;
     }
