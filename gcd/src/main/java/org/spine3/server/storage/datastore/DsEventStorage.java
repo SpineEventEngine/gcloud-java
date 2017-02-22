@@ -56,7 +56,6 @@ import java.util.List;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.Filter;
-import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.gt;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
@@ -139,12 +138,15 @@ public class DsEventStorage extends EventStorage {
 
         final Collection<Entity> entities = new LinkedList<>();
         for (Query<Entity> query : queries) {
-            entities.addAll(datastore.read(query));
+            final Collection<Entity> queryResults = datastore.read(query);
+            entities.addAll(queryResults);
         }
         // Transform and filter order does not matter since both operations are performed lazily
         Collection<EventStorageRecord> events = Collections2.transform(entities, ENTITY_TO_EVENT_RECORD);
         events = Collections2.filter(events, eventPredicate(eventStreamQuery));
         final List<EventStorageRecord> sortedEvents = new ArrayList<>(events);
+
+        // Merge sort
         Collections.sort(sortedEvents, EVENT_RECORD_HISTORICAL_COMPARATOR);
 
         final Iterator<EventStorageRecord> iterator = events.iterator();
@@ -183,7 +185,7 @@ public class DsEventStorage extends EventStorage {
         final Query<Entity> query = Query.newEntityQueryBuilder()
                                          .setKind(KIND)
                                          .setFilter(filter)
-                                         .addOrderBy(asc(timestamp_nanos.toString()))
+                                         //.addOrderBy(asc(timestamp_nanos.toString()))
                                          .build();
         return query;
     }
