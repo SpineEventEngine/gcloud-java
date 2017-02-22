@@ -146,7 +146,6 @@ public class DsEventStorage extends EventStorage {
         events = Collections2.filter(events, eventPredicate(eventStreamQuery));
         final List<EventStorageRecord> sortedEvents = new ArrayList<>(events);
 
-        // Merge sort
         Collections.sort(sortedEvents, EVENT_RECORD_HISTORICAL_COMPARATOR);
 
         final Iterator<EventStorageRecord> iterator = sortedEvents.iterator();
