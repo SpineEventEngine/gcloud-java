@@ -6,7 +6,7 @@
 
 Support for Spine-based Java apps running under Google App Engine.
 
-##### Set up
+#### Set up
  
 To start using **Spine GAE-Java** implementation please configure your `WEB-INF/datastore-indexes.xml` file:
 
@@ -26,9 +26,9 @@ To start using **Spine GAE-Java** implementation please configure your `WEB-INF/
 
 This helps us to perform more efficient queries to the Cloud Datastore.
 
-##### Testing
+#### Testing
 
-###### Preconditions
+##### Preconditions
 
 To run the task successfully, you must have `gcloud` tool properly installed and configured: 
  - install gcloud of the last version;
@@ -37,7 +37,7 @@ To run the task successfully, you must have `gcloud` tool properly installed and
  - skip Google App Engine setup if not required.
 
 
-###### Executing the tests
+##### Executing the tests
 
 To start a local emulator and run test against it, run `./gradlew check`.
 
