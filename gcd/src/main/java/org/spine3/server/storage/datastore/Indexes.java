@@ -36,19 +36,45 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A utility for generating the {@linkplain org.spine3.server.storage.Storage#index() storage ID indexes}.
+ *
  * @author Dmytro Dashenkov.
+ * @see org.spine3.server.storage.Storage#index()
  */
 public class Indexes {
 
     private Indexes() {
     }
 
+    /**
+     * Retrieves the ID index for the given {@code kind} or the storage records.
+     *
+     * <p>A call to this method is equivalent to {@code indexIterator(datastore, kind, idClass, null)}.
+     *
+     * @param datastore datastore to get the indexes for
+     * @param kind      the kind if the records in the datastore
+     * @param idClass   {@link Class} of the record ID
+     * @param <I>       type of the IDs to retrieve
+     * @return an {@link Iterator} of the IDs matching given record kind
+     * @see #indexIterator(DatastoreWrapper, String, Class, StructuredQuery.Filter)
+     */
     public static <I> Iterator<I> indexIterator(DatastoreWrapper datastore,
-                                            String kind,
-                                            Class<I> idClass) {
+                                                String kind,
+                                                Class<I> idClass) {
         return indexIterator(datastore, kind, idClass, null);
     }
 
+    /**
+     * Retrieves the ID index for the given {@code kind} or the storage records.
+     *
+     * @param datastore datastore to get the indexes for
+     * @param kind      the kind if the records in the datastore
+     * @param idClass   {@link Class} of the record ID
+     * @param filter    custom filters for selecting only a subset of the records of given type from datastore;
+     *                  {@code null} stands for no custom filters
+     * @param <I>       type of the IDs to retrieve
+     * @return an {@link Iterator} of the IDs matching given record kind and filter
+     */
     public static <I> Iterator<I> indexIterator(DatastoreWrapper datastore,
                                                 String kind,
                                                 Class<I> idClass,
