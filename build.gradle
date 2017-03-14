@@ -73,7 +73,7 @@ subprojects {
         // Spine
         compile (group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true) {
             exclude group: 'com.google.protobuf', module: 'protobuf-lite'
-            exclude group: 'io.grpc', module: 'grpc-protobuf-lite'
+            exclude group: 'io.grpc'
         }
         compile group: 'org.spine3', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true
 
@@ -94,9 +94,6 @@ subprojects {
         // SLF4J
         compile group: 'org.slf4j', name: 'slf4j-api', version: SLf4J_VERSION
         compile group: 'org.slf4j', name: 'slf4j-jdk14', version: SLf4J_VERSION
-
-        // Protobuf
-        //compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
 
         // JUnit
         testCompile(group: 'junit', name: 'junit', version: '4.12') {
