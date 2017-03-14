@@ -34,10 +34,10 @@ import com.google.protobuf.Message;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.event.EventStreamQuery;
@@ -110,7 +110,8 @@ public class DsEventStorage extends EventStorage {
             new Comparator<Event>() {
                 @Override
                 public int compare(Event left, Event right) {
-                    return Timestamps2.compare(left.getContext().getTimestamp(), right.getContext().getTimestamp());
+                    return Events.eventComparator()
+                                 .compare(left, right);
                 }
             };
 
@@ -199,21 +200,24 @@ public class DsEventStorage extends EventStorage {
         checkNotNull(record);
         checkNotClosed();
 
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(record));
+        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(id));
 
         final Entity entity = messageToEntity(record, key);
 
+        final EventContext context = record.getContext();
         final Entity.Builder builder = Entity.newBuilder(entity);
-        addTimestampProperty(record.getContext().getTimestamp(), builder);
-        addTimestampNanosProperty(record.getContext().getTimestamp(), builder);
+        addTimestampProperty(context.getTimestamp(), builder);
+        addTimestampNanosProperty(context.getTimestamp(), builder);
 
         final Message aggregateId = AnyPacker.unpack(record.getContext()
                                                            .getProducerId());
         addAggregateIdProperty(aggregateId, builder);
-        final String eventName = TypeName.of(record.getMessage())
-                                         .value();
-        addEventTypeProperty(eventName, builder);
-        makeEventContextProperties(record.getContext(), builder);
+
+        final Message message = AnyPacker.unpack(record.getMessage());
+        final String eventTypeName = TypeName.of(message)
+                                             .value();
+        addEventTypeProperty(eventTypeName, builder);
+        makeEventContextProperties(record.getContext(), builder)
         makeEventFieldProperties(record, builder);
 
         datastore.createOrUpdate(builder.build());
@@ -325,7 +329,8 @@ public class DsEventStorage extends EventStorage {
             final Message eventMessage = AnyPacker.unpack(eventWrapped);
 
             // Check aggregate ID
-            final String aggregateId = Identifiers.idToString(event.getContext().getProducerId());
+            final String aggregateId = Identifiers.idToString(event.getContext()
+                                                                   .getProducerId());
             final boolean idMatches = aggregateIds.isEmpty()
                     || aggregateIds.contains(aggregateId);
             if (!idMatches) {
