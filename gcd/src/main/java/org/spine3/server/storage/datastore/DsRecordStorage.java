@@ -30,10 +30,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterators;
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -69,6 +72,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
+    private final Class<I> idClass;
 
     private static final String VERSION_KEY = "version";
     private static final String TYPE_URL_PROPERTY_NAME = "type_url";
@@ -99,10 +103,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param descriptor the descriptor of the type of messages to save to the storage
      * @param datastore  the Datastore implementation to use
      */
-    public DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant) {
+    public DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant, Class<I> idClass) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
+        this.idClass = checkNotNull(idClass);
     }
 
     @Override
@@ -381,7 +386,24 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public Iterator<I> index() {
-        return null;
+        checkNotClosed();
+
+        final Query<Entity> query = Query.newEntityQueryBuilder()
+                                         .setKind(KIND)
+                                         .build();
+        final Iterable<Entity> allEntities = datastore.read(query);
+        final Function<Entity, I> idExtractor = new Function<Entity, I>() {
+            @Override
+            public I apply(@Nullable Entity input) {
+                checkNotNull(input);
+                final Key key = input.getKey();
+                final String stringId = key.getName();
+                final I id = Stringifiers.parse(stringId, TypeToken.of(idClass));
+                return id;
+            }
+        };
+        final Iterator<I> idIterator = Iterators.transform(allEntities.iterator(), idExtractor);
+        return idIterator;
     }
 
     /**

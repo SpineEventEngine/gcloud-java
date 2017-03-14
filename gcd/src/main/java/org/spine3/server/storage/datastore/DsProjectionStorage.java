@@ -114,6 +114,6 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     public Iterator<I> index() {
-        return null;
+        return recordStorage.index();
     }
 }

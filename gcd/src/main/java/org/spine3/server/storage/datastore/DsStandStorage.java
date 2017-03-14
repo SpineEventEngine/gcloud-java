@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import org.spine3.server.entity.EntityRecord;
@@ -54,6 +55,18 @@ import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 @SuppressWarnings("WeakerAccess")   // Part of API
 public class DsStandStorage extends StandStorage {
 
+    private static final Function<DatastoreRecordId, AggregateStateId> ID_PARSER =
+            new Function<DatastoreRecordId, AggregateStateId>() {
+                @Override
+                public AggregateStateId apply(@Nullable DatastoreRecordId input) {
+                    checkNotNull(input);
+                    // TODO:2017-03-14:dmytro.dashenkov: Implement properly.
+                    final String stringId = input.getValue();
+                    final AggregateStateId id = AggregateStateId.of(stringId, null);
+                    return id;
+                }
+            };
+
     private final DsRecordStorage<DatastoreRecordId> recordStorage;
 
     public DsStandStorage(DsRecordStorage<DatastoreRecordId> recordStorage, boolean multitenant) {
@@ -77,7 +90,9 @@ public class DsStandStorage extends StandStorage {
 
     @Override
     public Iterator<AggregateStateId> index() {
-        return null;
+        final Iterator<DatastoreRecordId> dsIdIterator = recordStorage.index();
+        final Iterator<AggregateStateId> result = Iterators.transform(dsIdIterator, ID_PARSER);
+        return result;
     }
 
     @Override
