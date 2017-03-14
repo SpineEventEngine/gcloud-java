@@ -142,7 +142,8 @@ public class DsCommandStorage extends CommandStorage {
 
     @Override
     public Iterator<CommandId> index() {
-        return null;
+        checkNotClosed();
+        return Indexes.indexIterator(datastore, KIND, CommandId.class);
     }
 
     @Override

@@ -36,8 +36,11 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
+import static org.spine3.server.entity.Entity.GenericParameter.ID;
+import static org.spine3.server.entity.Entity.GenericParameter.STATE;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
@@ -126,15 +129,22 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
-        final Class<I> idClass = Classes.getGenericParameterType(entityClass, Entity.GenericParameter.ID.getIndex());
+        final Class<I> idClass = Classes.getGenericParameterType(entityClass, ID.getIndex());
         final DsRecordStorage<I> result = new DsRecordStorage<>(descriptor, getDatastore(), multitenant, idClass);
         return result;
     }
 
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> ignored) {
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> entityClass) {
+        checkNotNull(entityClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
-        final DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(), propertyStorage, multitenant);
+        final Class<I> idClass = Classes.getGenericParameterType(entityClass, ID.getIndex());
+        final Class<? extends Message> stateClass = Classes.getGenericParameterType(entityClass, STATE.getIndex());
+        final DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(),
+                                                                      propertyStorage,
+                                                                      multitenant,
+                                                                      idClass,
+                                                                      stateClass);
         return result;
     }
 

@@ -24,19 +24,17 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterators;
-import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -387,23 +385,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     public Iterator<I> index() {
         checkNotClosed();
-
-        final Query<Entity> query = Query.newEntityQueryBuilder()
-                                         .setKind(KIND)
-                                         .build();
-        final Iterable<Entity> allEntities = datastore.read(query);
-        final Function<Entity, I> idExtractor = new Function<Entity, I>() {
-            @Override
-            public I apply(@Nullable Entity input) {
-                checkNotNull(input);
-                final Key key = input.getKey();
-                final String stringId = key.getName();
-                final I id = Stringifiers.parse(stringId, TypeToken.of(idClass));
-                return id;
-            }
-        };
-        final Iterator<I> idIterator = Iterators.transform(allEntities.iterator(), idExtractor);
-        return idIterator;
+        final StructuredQuery.Filter filter = PropertyFilter.eq(TYPE_URL_PROPERTY_NAME, typeUrl.getTypeName());
+        return Indexes.indexIterator(datastore, KIND, idClass, filter);
     }
 
     /**

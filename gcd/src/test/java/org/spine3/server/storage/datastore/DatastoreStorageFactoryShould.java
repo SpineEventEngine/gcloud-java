@@ -24,13 +24,13 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
-import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.test.aggregate.ProjectId;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -74,9 +74,9 @@ public class DatastoreStorageFactoryShould {
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Test
-    public void create_aggregate_storage_not_using_class_parameter() {
-        final AggregateStorage<AggregateEventRecord> storage = datastoreFactory.createAggregateStorage(null);
+    @Test(expected = NullPointerException.class)
+    public void fail_to_create_aggregate_storage_not_using_class_parameter() {
+        final AggregateStorage<ProjectId> storage = datastoreFactory.createAggregateStorage(null);
         assertNotNull(storage);
     }
 

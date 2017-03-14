@@ -138,8 +138,9 @@ public class DsEventStorage extends EventStorage {
 
     @Override
     public Iterator<Event> iterator(EventStreamQuery eventStreamQuery) {
-        final Iterable<Query<Entity>> queries = toEventIteratorQueries(eventStreamQuery);
+        checkNotClosed();
 
+        final Iterable<Query<Entity>> queries = toEventIteratorQueries(eventStreamQuery);
         final Collection<Entity> entities = new LinkedList<>();
         for (Query<Entity> query : queries) {
             final Collection<Entity> queryResults = datastore.read(query);
@@ -196,6 +197,7 @@ public class DsEventStorage extends EventStorage {
     public void write(EventId id, Event record) {
         checkNotNull(id);
         checkNotNull(record);
+        checkNotClosed();
 
         final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(record));
 
@@ -218,13 +220,9 @@ public class DsEventStorage extends EventStorage {
     }
 
     @Override
-    public Iterator<EventId> index() {
-        return null;
-    }
-
-    @Override
     public Optional<Event> read(EventId eventId) {
         checkNotNull(eventId);
+        checkNotClosed();
 
         final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(eventId));
         final Entity response = datastore.read(key);
@@ -235,6 +233,13 @@ public class DsEventStorage extends EventStorage {
 
         final Event result = entityToMessage(response, RECORD_TYPE_URL);
         return Optional.of(result);
+    }
+
+    @Override
+    public Iterator<EventId> index() {
+        checkNotClosed();
+
+        return Indexes.indexIterator(datastore, KIND, EventId.class);
     }
 
     /**
