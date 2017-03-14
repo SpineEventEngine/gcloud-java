@@ -65,8 +65,8 @@ public class DatastoreIdentifiers {
         return new DatastoreRecordId(value);
     }
 
-    public static DatastoreRecordId of(Event record) {
-        return of(record.getContext().getEventId());
+    public static DatastoreRecordId of(Event event) {
+        return of(event.getContext().getEventId());
     }
 
     public static DatastoreRecordId of(EventId eventId) {
