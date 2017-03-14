@@ -90,7 +90,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 public class DsEventStorage extends EventStorage {
 
     private final DatastoreWrapper datastore;
-    private static final String KIND = Event.class.getName();
+    private static final String KIND = TypeName.from(Event.getDescriptor()).value();
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.from(Event.getDescriptor());
 
     private static final Function<Entity, Event> ENTITY_TO_EVENT_RECORD

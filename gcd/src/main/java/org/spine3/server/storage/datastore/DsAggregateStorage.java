@@ -78,8 +78,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      */
     private static final String SNAPSHOT = "SNAPSHOT";
 
-    private static final String KIND = AggregateEventRecord.class.getName();
-    private static final String AGGREGATE_LIFECYCLE_KIND = LifecycleFlags.class.getName();
+    private static final String KIND = TypeName.from(AggregateEventRecord.getDescriptor()).value();
+    private static final String AGGREGATE_LIFECYCLE_KIND = TypeName.from(LifecycleFlags.getDescriptor()).value();
     private static final TypeUrl TYPE_URL = TypeUrl.from(AggregateEventRecord.getDescriptor());
 
     private final DatastoreWrapper datastore;

@@ -40,6 +40,7 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -75,7 +76,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private static final String VERSION_KEY = "version";
     private static final String TYPE_URL_PROPERTY_NAME = "type_url";
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
-    private static final String KIND = EntityRecord.class.getName();
+    private static final String KIND = TypeName.from(EntityRecord.getDescriptor()).value();
     private static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
             "parse ID from String. " +
             "Note: custom conversion is not supported. " +

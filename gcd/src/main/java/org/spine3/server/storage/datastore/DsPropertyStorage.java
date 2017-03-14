@@ -41,7 +41,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 public class DsPropertyStorage {
 
     private static final TypeUrl ANY_TYPE_URL = TypeUrl.from(Any.getDescriptor());
-    private static final String KIND = Any.class.getName();
+    private static final String KIND = "spine_properties";
 
     private final DatastoreWrapper datastore;
 
