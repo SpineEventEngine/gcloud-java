@@ -217,7 +217,7 @@ public class DsEventStorage extends EventStorage {
         final String eventTypeName = TypeName.of(message)
                                              .value();
         addEventTypeProperty(eventTypeName, builder);
-        makeEventContextProperties(record.getContext(), builder)
+        makeEventContextProperties(record.getContext(), builder);
         makeEventFieldProperties(record, builder);
 
         datastore.createOrUpdate(builder.build());
