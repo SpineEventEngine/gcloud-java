@@ -24,9 +24,8 @@ import com.google.cloud.datastore.Entity;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.protobuf.TypeUrl;
-import org.spine3.test.Tests;
 import org.spine3.test.storage.Project;
+import org.spine3.type.TypeUrl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +34,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertSize;
 
 /**
@@ -45,7 +45,7 @@ public class EntitiesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(Tests.hasPrivateParameterlessCtor(Entities.class));
+        assertHasPrivateParameterlessCtor(Entities.class);
     }
 
     @Test

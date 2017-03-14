@@ -21,12 +21,12 @@
 package org.spine3.server.storage.datastore;
 
 import org.junit.Test;
-import org.spine3.test.Tests;
 import org.spine3.test.storage.ProjectId;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Dmytro Dashenkov
@@ -36,7 +36,7 @@ public class IdTransformerShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(Tests.hasPrivateParameterlessCtor(IdTransformer.class));
+        assertHasPrivateParameterlessCtor(IdTransformer.class);
     }
 
     @Test

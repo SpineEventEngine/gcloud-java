@@ -25,12 +25,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
+import org.spine3.type.TypeUrl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

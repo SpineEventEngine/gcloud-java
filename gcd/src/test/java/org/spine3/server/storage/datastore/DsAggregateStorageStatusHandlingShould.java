@@ -27,13 +27,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.aggregate.AggregateStorageStatusHandlingShould;
+import org.spine3.server.aggregate.AggregateStorageVisibilityHandlingShould;
 import org.spine3.test.aggregate.ProjectId;
 
 /**
  * @author Dmytro Dashenkov.
  */
-public class DsAggregateStorageStatusHandlingShould extends AggregateStorageStatusHandlingShould {
+public class DsAggregateStorageStatusHandlingShould extends AggregateStorageVisibilityHandlingShould {
 
     private static final TestDatastoreStorageFactory datastoreFactory;
 

@@ -25,10 +25,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.KnownTypes;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.reflect.Classes;
 import org.spine3.type.ClassName;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

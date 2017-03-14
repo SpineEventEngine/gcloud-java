@@ -24,10 +24,10 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.command.CommandStorage;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -76,11 +76,11 @@ public class DatastoreStorageFactoryShould {
     @SuppressWarnings("ConstantConditions")
     @Test
     public void create_aggregate_storage_not_using_class_parameter() {
-        final AggregateStorage<AggregateStorageRecord> storage = datastoreFactory.createAggregateStorage(null);
+        final AggregateStorage<AggregateEventRecord> storage = datastoreFactory.createAggregateStorage(null);
         assertNotNull(storage);
     }
 
-    private static class TestEntity extends Entity<String, StringValue> {
+    private static class TestEntity extends AbstractEntity<String, StringValue> {
 
         private TestEntity(String id) {
             super(id);

@@ -23,11 +23,10 @@ package org.spine3.server.storage.datastore;
 
 import org.junit.Test;
 import org.spine3.base.Identifiers;
-import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alex Tymchenko
@@ -36,7 +35,7 @@ public class DatastoreIdentifiersShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(Tests.hasPrivateParameterlessCtor(DatastoreIdentifiers.class));
+        assertHasPrivateParameterlessCtor(DatastoreIdentifiers.class);
     }
 
     @Test(expected = IllegalStateException.class)

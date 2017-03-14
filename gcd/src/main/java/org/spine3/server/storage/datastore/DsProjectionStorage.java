@@ -24,12 +24,13 @@ import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.validate.Validate;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 import java.util.Map;
 
 import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
@@ -87,37 +88,32 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    public boolean markArchived(I id) {
-        return recordStorage.markArchived(id);
-    }
-
-    @Override
-    public boolean markDeleted(I id) {
-        return recordStorage.markDeleted(id);
-    }
-
-    @Override
     public boolean delete(I id) {
         return recordStorage.delete(id);
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids) {
         return recordStorage().readMultiple(ids);
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
         return recordStorage().readMultiple(ids, fieldMask);
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllRecords() {
+    protected Map<I, EntityRecord> readAllRecords() {
         return recordStorage().readAll();
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
+    protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
         return recordStorage().readAll(fieldMask);
+    }
+
+    @Override
+    public Iterator<I> index() {
+        return null;
     }
 }

@@ -19,8 +19,9 @@
  */
 package org.spine3.server.storage.datastore;
 
+import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.entity.EntityRecord;
 
 /**
  * A type of entity record, used to store {@link Entity} state in the {@link DsStandStorage}.
@@ -28,7 +29,7 @@ import org.spine3.server.storage.EntityStorageRecord;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public class StandStorageRecord extends Entity<DatastoreRecordId, EntityStorageRecord> {
+public class StandStorageRecord extends AbstractEntity<DatastoreRecordId, EntityRecord> {
 
     /**
      * Creates a new instance.

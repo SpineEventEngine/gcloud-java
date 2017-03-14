@@ -29,10 +29,9 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Messages;
-import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.storage.EntityField;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -73,7 +72,7 @@ class Entities {
             return defaultMessage(type);
         }
 
-        final Blob value = entity.getBlob(EntityField.value.toString());
+        final Blob value = entity.getBlob(EntityField.bytes.toString());
         final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
         final Any wrapped = Any.newBuilder()
@@ -109,7 +108,7 @@ class Entities {
                 continue;
             }
 
-            final Blob value = entity.getBlob(EntityField.value.toString());
+            final Blob value = entity.getBlob(EntityField.bytes.toString());
             final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
             final Any wrapped = Any.newBuilder()
@@ -140,25 +139,25 @@ class Entities {
                                              .setExcludeFromIndexes(true)
                                              .build();
         final Entity entity = Entity.newBuilder(key)
-                                    .set(EntityField.value.toString(), blobValue)
+                                    .set(EntityField.bytes.toString(), blobValue)
                                     .build();
         return entity;
     }
 
-    static EntityStatus getEntityStatus(Entity entity) {
+    static LifecycleFlags getEntityStatus(Entity entity) {
         checkNotNull(entity);
         final boolean archived = isArchived(entity);
         final boolean deleted = isDeleted(entity);
-        final EntityStatus result = EntityStatus.newBuilder()
-                                                .setArchived(archived)
-                                                .setDeleted(deleted)
-                                                .build();
+        final LifecycleFlags result = LifecycleFlags.newBuilder()
+                                                  .setArchived(archived)
+                                                  .setDeleted(deleted)
+                                                  .build();
         return result;
     }
 
     @SuppressWarnings("unchecked")
     static <M extends Message> M defaultMessage(TypeUrl type) {
-        final Class<M> messageClass = Messages.toMessageClass(type);
+        final Class<M> messageClass = type.toMessageClass();
         checkState(messageClass != null, String.format(
                 "Not found class for type url \"%s\". Try to rebuild the project",
                 type.getTypeName()));

@@ -26,7 +26,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
