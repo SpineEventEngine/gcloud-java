@@ -22,6 +22,7 @@ package org.spine3.server.storage.datastore;
 import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.stand.AggregateStateId;
 
 /**
  * A type of entity record, used to store {@link Entity} state in the {@link DsStandStorage}.
@@ -29,7 +30,7 @@ import org.spine3.server.entity.EntityRecord;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public class StandStorageRecord extends AbstractEntity<DatastoreRecordId, EntityRecord> {
+public class StandStorageRecord extends AbstractEntity<AggregateStateId, EntityRecord> {
 
     /**
      * Creates a new instance.
@@ -37,7 +38,7 @@ public class StandStorageRecord extends AbstractEntity<DatastoreRecordId, Entity
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
      */
-    protected StandStorageRecord(DatastoreRecordId id) {
+    protected StandStorageRecord(AggregateStateId id) {
         super(id);
     }
 }

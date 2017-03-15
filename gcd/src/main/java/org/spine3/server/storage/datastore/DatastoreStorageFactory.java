@@ -30,7 +30,7 @@ import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.reflect.Classes;
+import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
@@ -108,8 +108,8 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public StandStorage createStandStorage() {
-        final DsRecordStorage<DatastoreRecordId> recordStorage
-                = (DsRecordStorage<DatastoreRecordId>) createRecordStorage(StandStorageRecord.class);
+        final DsRecordStorage<AggregateStateId> recordStorage
+                = (DsRecordStorage<AggregateStateId>) createRecordStorage(StandStorageRecord.class);
         final DsStandStorage result = new DsStandStorage(recordStorage, multitenant);
         return result;
     }
@@ -138,7 +138,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> entityClass) {
         checkNotNull(entityClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
-        final Class<I> idClass = Classes.getGenericParameterType(entityClass, ID.getIndex());
+        final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
         final Class<? extends Message> stateClass = getGenericParameterType(entityClass, STATE.getIndex());
         final DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(),
                                                                       propertyStorage,

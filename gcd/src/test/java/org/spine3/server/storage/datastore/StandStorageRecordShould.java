@@ -21,13 +21,16 @@
  */
 package org.spine3.server.storage.datastore;
 
+import com.google.protobuf.Any;
 import org.junit.Test;
-import org.spine3.base.Identifiers;
+import org.spine3.server.stand.AggregateStateId;
+import org.spine3.type.TypeUrl;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
 
 /**
  * @author Alex Tymchenko
@@ -36,9 +39,9 @@ public class StandStorageRecordShould {
 
     @Test
     public void have_protected_constructor_for_extension() {
-        final DatastoreRecordId someRecordId = DatastoreIdentifiers.of(Identifiers.newUuid());
+        final AggregateStateId somedId = AggregateStateId.of(newUuid(), TypeUrl.from(Any.getDescriptor()));
         final boolean matches = hasProtectedConstructorWithSingleParam(
-                StandStorageRecord.class, someRecordId);
+                StandStorageRecord.class, somedId);
         assertTrue(matches);
     }
 

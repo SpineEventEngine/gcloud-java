@@ -85,6 +85,9 @@ public class DatastoreIdentifiers {
         if (id instanceof DatastoreRecordId) {
             return (DatastoreRecordId) id;
         }
+        if (id instanceof AggregateStateId) {
+            return of((AggregateStateId) id);
+        }
         final String idAsString = IdTransformer.idToString(id);
         return of(idAsString);
     }
