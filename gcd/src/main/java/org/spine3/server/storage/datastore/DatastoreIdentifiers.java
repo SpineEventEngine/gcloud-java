@@ -82,9 +82,6 @@ public class DatastoreIdentifiers {
      * @return the Datastore record identifier
      */
     public static DatastoreRecordId ofEntityId(Object id) {
-        if (id instanceof DatastoreRecordId) {
-            return (DatastoreRecordId) id;
-        }
         if (id instanceof AggregateStateId) {
             return of((AggregateStateId) id);
         }
