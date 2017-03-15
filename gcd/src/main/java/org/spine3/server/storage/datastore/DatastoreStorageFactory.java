@@ -129,7 +129,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
-        final Class<I> idClass = Classes.getGenericParameterType(entityClass, ID.getIndex());
+        final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
         final DsRecordStorage<I> result = new DsRecordStorage<>(descriptor, getDatastore(), multitenant, idClass);
         return result;
     }
@@ -139,7 +139,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         checkNotNull(entityClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
         final Class<I> idClass = Classes.getGenericParameterType(entityClass, ID.getIndex());
-        final Class<? extends Message> stateClass = Classes.getGenericParameterType(entityClass, STATE.getIndex());
+        final Class<? extends Message> stateClass = getGenericParameterType(entityClass, STATE.getIndex());
         final DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(),
                                                                       propertyStorage,
                                                                       multitenant,

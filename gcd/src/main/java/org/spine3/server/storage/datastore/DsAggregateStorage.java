@@ -31,7 +31,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.aggregate.AggregateStorage;
@@ -78,8 +77,10 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      */
     private static final String SNAPSHOT = "SNAPSHOT";
 
-    private static final String KIND = TypeName.from(AggregateEventRecord.getDescriptor()).value();
-    private static final String AGGREGATE_LIFECYCLE_KIND = TypeName.from(LifecycleFlags.getDescriptor()).value();
+    private static final String KIND = TypeName.from(AggregateEventRecord.getDescriptor())
+                                               .value();
+    private static final String AGGREGATE_LIFECYCLE_KIND = TypeName.from(LifecycleFlags.getDescriptor())
+                                                                   .value();
     private static final TypeUrl TYPE_URL = TypeUrl.from(AggregateEventRecord.getDescriptor());
 
     private final DatastoreWrapper datastore;
@@ -132,9 +133,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String stringId = idToString(id);
-        String eventId = Identifiers.idToString(record.getEvent()
-                                                      .getContext()
-                                                      .getEventId());
+        String eventId = idToString(record.getEvent()
+                                          .getContext()
+                                          .getEventId());
         if (eventId.isEmpty()) {
             // Snapshots have no Event IDs.
             eventId = SNAPSHOT + stringId;
@@ -154,9 +155,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final String idString = idToString(id);
         final Query<Entity> query = Query.newEntityQueryBuilder()
-                                    .setKind(KIND)
-                                    .setFilter(StructuredQuery.PropertyFilter.eq(aggregate_id.toString(), idString))
-                                    .build();
+                                         .setKind(KIND)
+                                         .setFilter(StructuredQuery.PropertyFilter.eq(aggregate_id.toString(), idString))
+                                         .build();
         final List<Entity> eventEntities = datastore.read(query);
         if (eventEntities.isEmpty()) {
             return Collections.emptyIterator();
@@ -192,8 +193,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private Collection<Entity> getEntityStates() {
         final Query<Entity> query = Query.newEntityQueryBuilder()
-                                 .setKind(AGGREGATE_LIFECYCLE_KIND)
-                                 .build();
+                                         .setKind(AGGREGATE_LIFECYCLE_KIND)
+                                         .build();
         return datastore.read(query);
     }
 
@@ -249,9 +250,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             return Optional.absent();
         }
         final LifecycleFlags flags = LifecycleFlags.newBuilder()
-                                                      .setArchived(archived)
-                                                      .setDeleted(deleted)
-                                                      .build();
+                                                   .setArchived(archived)
+                                                   .setDeleted(deleted)
+                                                   .build();
         return Optional.of(flags);
     }
 
