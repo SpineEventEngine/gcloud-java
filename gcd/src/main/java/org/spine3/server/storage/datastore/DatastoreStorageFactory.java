@@ -35,10 +35,10 @@ import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.server.entity.Entity.GenericParameter.ID;
 import static org.spine3.server.entity.Entity.GenericParameter.STATE;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
@@ -128,7 +128,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
-        final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
+        final TypeUrl typeUrl = TypeUrl.of(messageClass);
+        final Descriptor descriptor = (Descriptor) typeUrl.getDescriptor();
         final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
         final DsRecordStorage<I> result = new DsRecordStorage<>(descriptor, getDatastore(), multitenant, idClass);
         return result;

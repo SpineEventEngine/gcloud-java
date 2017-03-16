@@ -157,7 +157,7 @@ class Entities {
 
     @SuppressWarnings("unchecked")
     static <M extends Message> M defaultMessage(TypeUrl type) {
-        final Class<M> messageClass = type.toMessageClass();
+        final Class<M> messageClass = type.getJavaClass();
         checkState(messageClass != null, String.format(
                 "Not found class for type url \"%s\". Try to rebuild the project",
                 type.getTypeName()));
