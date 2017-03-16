@@ -39,9 +39,9 @@ import static org.spine3.base.Identifiers.idToString;
 @SuppressWarnings({
         "UtilityClass",
         "WeakerAccess"  /* as it's part of API */})
-public class DatastoreIdentifiers {
+public class DsIdentifiers {
 
-    private DatastoreIdentifiers() {
+    private DsIdentifiers() {
     }
 
     /**

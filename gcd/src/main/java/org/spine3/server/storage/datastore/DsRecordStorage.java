@@ -40,7 +40,6 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -54,9 +53,9 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.server.storage.datastore.DatastoreIdentifiers.keyFor;
-import static org.spine3.server.storage.datastore.DatastoreIdentifiers.ofEntityId;
-import static org.spine3.server.storage.datastore.DatastoreProperties.activeEntityPredicate;
+import static org.spine3.server.storage.datastore.DsIdentifiers.keyFor;
+import static org.spine3.server.storage.datastore.DsIdentifiers.ofEntityId;
+import static org.spine3.server.storage.datastore.DsProperties.activeEntityPredicate;
 import static org.spine3.server.storage.datastore.Entities.getEntityStatus;
 import static org.spine3.validate.Validate.isDefault;
 
@@ -76,7 +75,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private static final String VERSION_KEY = "version";
     private static final String TYPE_URL_PROPERTY_NAME = "type_url";
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
-    private static final String KIND = TypeName.from(EntityRecord.getDescriptor()).value();
+    private static final String KIND = RECORD_TYPE_URL.value();
     private static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
             "parse ID from String. " +
             "Note: custom conversion is not supported. " +

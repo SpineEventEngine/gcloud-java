@@ -55,7 +55,7 @@ import static org.spine3.server.storage.LifecycleFlagField.archived;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")
-class DatastoreProperties {
+class DsProperties {
 
     private static final Predicate<Entity> NOT_ARCHIVED_OR_DELETED = new Predicate<Entity>() {
         @Override
@@ -69,7 +69,7 @@ class DatastoreProperties {
         }
     };
 
-    private DatastoreProperties() {
+    private DsProperties() {
     }
 
     /**

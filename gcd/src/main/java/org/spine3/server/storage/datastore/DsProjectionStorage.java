@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
+import static org.spine3.server.storage.datastore.DsIdentifiers.of;
 
 /**
  * GAE Datastore implementation of the {@link ProjectionStorage}.

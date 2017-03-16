@@ -41,8 +41,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
-import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
+import static org.spine3.server.storage.datastore.DsProperties.isArchived;
+import static org.spine3.server.storage.datastore.DsProperties.isDeleted;
 
 /**
  * Utility class for converting {@link Message proto messages} into {@link Entity Entities} and vise versa.

@@ -44,6 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class Indexes {
 
     private Indexes() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -79,9 +80,9 @@ public class Indexes {
                                                 String kind,
                                                 Class<I> idClass,
                                                 @Nullable StructuredQuery.Filter filter) {
-        checkNotNull(datastore, "datastore");
-        checkNotNull(kind, "kind");
-        checkNotNull(idClass, "idClass");
+        checkNotNull(datastore);
+        checkNotNull(kind);
+        checkNotNull(idClass);
 
         final EntityQuery.Builder query = Query.newEntityQueryBuilder()
                                                .setKind(kind);

@@ -35,18 +35,18 @@ public class DatastoreIdentifiersShould {
 
     @Test
     public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(DatastoreIdentifiers.class);
+        assertHasPrivateParameterlessCtor(DsIdentifiers.class);
     }
 
     @Test(expected = IllegalStateException.class)
     public void not_accept_empty_String_as_identifier_source() {
-        DatastoreIdentifiers.of("");
+        DsIdentifiers.of("");
     }
 
     @Test
     public void wrap_non_empty_String_into_record_identifier() {
         final String idAsString = Identifiers.newUuid();
-        final DatastoreRecordId recordId = DatastoreIdentifiers.of(idAsString);
+        final DatastoreRecordId recordId = DsIdentifiers.of(idAsString);
 
         assertNotNull(recordId);
         assertEquals(idAsString, recordId.getValue());

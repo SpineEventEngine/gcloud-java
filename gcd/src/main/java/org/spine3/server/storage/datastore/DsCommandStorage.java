@@ -45,7 +45,7 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.EntityField.timestamp;
 import static org.spine3.server.storage.EntityField.timestamp_nanos;
-import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
+import static org.spine3.server.storage.datastore.DsIdentifiers.of;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 import static org.spine3.validate.Validate.checkNotDefault;
 
@@ -152,7 +152,7 @@ public class DsCommandStorage extends CommandStorage {
         checkNotClosed();
         checkNotDefault(commandId);
 
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(commandId));
+        final Key key = DsIdentifiers.keyFor(datastore, KIND, of(commandId));
         final Entity entity = datastore.read(key);
 
         if (entity == null) {
@@ -169,7 +169,7 @@ public class DsCommandStorage extends CommandStorage {
         checkNotDefault(commandId);
         checkNotDefault(record);
 
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(commandId));
+        final Key key = DsIdentifiers.keyFor(datastore, KIND, of(commandId));
 
         Entity entity = messageToEntity(record, key);
         entity = Entity.newBuilder(entity)

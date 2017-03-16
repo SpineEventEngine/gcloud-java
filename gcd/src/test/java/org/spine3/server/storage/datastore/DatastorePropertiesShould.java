@@ -28,6 +28,6 @@ import org.spine3.test.Tests;
 public class DatastorePropertiesShould {
     @Test
     public void have_private_constructor() {
-        Tests.assertHasPrivateParameterlessCtor(DatastoreProperties.class);
+        Tests.assertHasPrivateParameterlessCtor(DsProperties.class);
     }
 }

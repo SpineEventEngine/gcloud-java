@@ -57,14 +57,14 @@ public class DsPropertyStorage {
         checkNotNull(propertyId);
         checkNotNull(value);
 
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, propertyId);
+        final Key key = DsIdentifiers.keyFor(datastore, KIND, propertyId);
 
         final Entity entity = messageToEntity(AnyPacker.pack(value), key);
         datastore.createOrUpdate(entity);
     }
 
     protected <V extends Message> Optional<V> read(DatastoreRecordId propertyId) {
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, propertyId);
+        final Key key = DsIdentifiers.keyFor(datastore, KIND, propertyId);
         final Entity response = datastore.read(key);
 
         if (response == null) {

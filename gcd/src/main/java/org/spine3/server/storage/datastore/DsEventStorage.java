@@ -68,13 +68,13 @@ import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.Timestamps2.convertToDate;
 import static org.spine3.server.event.storage.EventField.event_type;
 import static org.spine3.server.storage.EntityField.timestamp_nanos;
-import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
-import static org.spine3.server.storage.datastore.DatastoreProperties.addAggregateIdProperty;
-import static org.spine3.server.storage.datastore.DatastoreProperties.addEventTypeProperty;
-import static org.spine3.server.storage.datastore.DatastoreProperties.addTimestampNanosProperty;
-import static org.spine3.server.storage.datastore.DatastoreProperties.addTimestampProperty;
-import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventContextProperties;
-import static org.spine3.server.storage.datastore.DatastoreProperties.makeEventFieldProperties;
+import static org.spine3.server.storage.datastore.DsIdentifiers.of;
+import static org.spine3.server.storage.datastore.DsProperties.addAggregateIdProperty;
+import static org.spine3.server.storage.datastore.DsProperties.addEventTypeProperty;
+import static org.spine3.server.storage.datastore.DsProperties.addTimestampNanosProperty;
+import static org.spine3.server.storage.datastore.DsProperties.addTimestampProperty;
+import static org.spine3.server.storage.datastore.DsProperties.makeEventContextProperties;
+import static org.spine3.server.storage.datastore.DsProperties.makeEventFieldProperties;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 
@@ -200,7 +200,7 @@ public class DsEventStorage extends EventStorage {
         checkNotNull(record);
         checkNotClosed();
 
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(id));
+        final Key key = DsIdentifiers.keyFor(datastore, KIND, of(id));
 
         final Entity entity = messageToEntity(record, key);
 
@@ -228,7 +228,7 @@ public class DsEventStorage extends EventStorage {
         checkNotNull(eventId);
         checkNotClosed();
 
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(eventId));
+        final Key key = DsIdentifiers.keyFor(datastore, KIND, of(eventId));
         final Entity response = datastore.read(key);
 
         if (response == null) {
