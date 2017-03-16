@@ -289,18 +289,6 @@ public class DsEventStorage extends EventStorage {
 
         private final Event event;
 
-        private static final Function<Any, Message> ANY_UNPACKER = new Function<Any, Message>() {
-            @Nullable
-            @Override
-            public Message apply(@Nullable Any input) {
-                if (input == null) {
-                    return null;
-                }
-
-                return AnyPacker.unpack(input);
-            }
-        };
-
         private EventFilterChecker(Event event) {
             this.event = event;
         }
@@ -365,7 +353,7 @@ public class DsEventStorage extends EventStorage {
                                                             .toUpperCase() + fieldName.substring(1);
 
             final Collection<Any> expectedAnys = filter.getValueList();
-            final Collection<Message> expectedValues = transform(expectedAnys, ANY_UNPACKER);
+            final Collection<Message> expectedValues = transform(expectedAnys, AnyPacker.unpackFunc());
             Message actualValue;
             try {
                 final Class<?> messageClass = object.getClass();
