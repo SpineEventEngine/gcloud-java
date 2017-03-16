@@ -80,7 +80,7 @@ subprojects {
         // Spine for tests
         testCompile (group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true, classifier: 'test') {
             exclude group: 'com.google.protobuf', module: 'protobuf-lite'
-            exclude group: 'io.grpc', module: 'grpc-protobuf-lite'
+            exclude group: 'io.grpc'
         }
         testCompile group: 'org.spine3', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
         testCompile group: 'org.spine3', name: 'spine-testutil-core', version: project.SPINE_VERSION, changing: true
