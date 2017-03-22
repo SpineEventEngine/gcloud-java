@@ -30,9 +30,11 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.command.CommandRecord;
 import org.spine3.server.command.CommandStorage;
-import org.spine3.server.command.storage.CommandStorageRecord;
+import org.spine3.server.command.ProcessingStatus;
+import org.spine3.type.TypeName;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -43,7 +45,7 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.EntityField.timestamp;
 import static org.spine3.server.storage.EntityField.timestamp_nanos;
-import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
+import static org.spine3.server.storage.datastore.DsIdentifiers.of;
 import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 import static org.spine3.validate.Validate.checkNotDefault;
 
@@ -57,18 +59,18 @@ import static org.spine3.validate.Validate.checkNotDefault;
 @SuppressWarnings("WeakerAccess")   // Part of API
 public class DsCommandStorage extends CommandStorage {
 
-    private static final TypeUrl TYPE_URL = TypeUrl.from(CommandStorageRecord.getDescriptor());
-    private static final String KIND = CommandStorageRecord.class.getName();
+    private static final TypeUrl TYPE_URL = TypeUrl.from(CommandRecord.getDescriptor());
+    private static final String KIND = TypeName.from(CommandRecord.getDescriptor()).value();
     private static final String COMMAND_STATUS_PROPERTY_NAME = "command_status";
 
     private final DatastoreWrapper datastore;
 
-    private static final Function<Entity, CommandStorageRecord> RECORD_MAPPER
-            = new Function<Entity, CommandStorageRecord>() {
+    private static final Function<Entity, CommandRecord> RECORD_MAPPER
+            = new Function<Entity, CommandRecord>() {
         @Override
-        public CommandStorageRecord apply(@Nullable Entity input) {
+        public CommandRecord apply(@Nullable Entity input) {
             checkNotNull(input);
-            final CommandStorageRecord record = Entities.entityToMessage(input, TYPE_URL);
+            final CommandRecord record = Entities.entityToMessage(input, TYPE_URL);
             return record;
         }
     };
@@ -79,14 +81,14 @@ public class DsCommandStorage extends CommandStorage {
     }
 
     @Override
-    protected Iterator<CommandStorageRecord> read(CommandStatus status) {
+    protected Iterator<CommandRecord> read(CommandStatus status) {
         final Filter filter = PropertyFilter.eq(COMMAND_STATUS_PROPERTY_NAME, status.ordinal());
         final Query<Entity> query = Query.newEntityQueryBuilder()
                                          .setKind(KIND)
                                          .setFilter(filter)
                                          .build();
         final Collection<Entity> entities = datastore.read(query);
-        final Collection<CommandStorageRecord> records = Collections2.transform(entities, RECORD_MAPPER);
+        final Collection<CommandRecord> records = Collections2.transform(entities, RECORD_MAPPER);
         return records.iterator();
     }
 
@@ -94,10 +96,13 @@ public class DsCommandStorage extends CommandStorage {
     public void setOkStatus(CommandId commandId) {
         checkNotNull(commandId);
 
-        final CommandStorageRecord updatedRecord = read(commandId)
-                .or(CommandStorageRecord.getDefaultInstance())
+        final ProcessingStatus status = ProcessingStatus.newBuilder()
+                                                        .setCode(CommandStatus.OK)
+                                                        .build();
+        final CommandRecord updatedRecord = read(commandId)
+                .or(CommandRecord.getDefaultInstance())
                 .toBuilder()
-                .setStatus(CommandStatus.OK)
+                .setStatus(status)
                 .build();
         write(commandId, updatedRecord);
     }
@@ -107,11 +112,14 @@ public class DsCommandStorage extends CommandStorage {
         checkNotNull(commandId);
         checkNotNull(error);
 
-        final CommandStorageRecord updatedRecord = read(commandId)
-                .or(CommandStorageRecord.getDefaultInstance())
+        final ProcessingStatus status = ProcessingStatus.newBuilder()
+                                                        .setCode(CommandStatus.ERROR)
+                                                        .setError(error)
+                                                        .build();
+        final CommandRecord updatedRecord = read(commandId)
+                .or(CommandRecord.getDefaultInstance())
                 .toBuilder()
-                .setStatus(CommandStatus.ERROR)
-                .setError(error)
+                .setStatus(status)
                 .build();
         write(commandId, updatedRecord);
     }
@@ -121,38 +129,47 @@ public class DsCommandStorage extends CommandStorage {
         checkNotNull(commandId);
         checkNotNull(failure);
 
-        final CommandStorageRecord updatedRecord = read(commandId)
-                .or(CommandStorageRecord.getDefaultInstance())
-                .toBuilder()
-                .setStatus(CommandStatus.FAILURE)
+        final ProcessingStatus status = ProcessingStatus.newBuilder()
+                .setCode(CommandStatus.FAILURE)
                 .setFailure(failure)
+                .build();
+        final CommandRecord updatedRecord = read(commandId)
+                .or(CommandRecord.getDefaultInstance())
+                .toBuilder()
+                .setStatus(status)
                 .build();
         write(commandId, updatedRecord);
     }
 
     @Override
-    public Optional<CommandStorageRecord> read(CommandId commandId) {
+    public Iterator<CommandId> index() {
+        checkNotClosed();
+        return Indexes.indexIterator(datastore, KIND, CommandId.class);
+    }
+
+    @Override
+    public Optional<CommandRecord> read(CommandId commandId) {
         checkNotClosed();
         checkNotDefault(commandId);
 
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(commandId));
+        final Key key = DsIdentifiers.keyFor(datastore, KIND, of(commandId));
         final Entity entity = datastore.read(key);
 
         if (entity == null) {
             return Optional.absent();
         }
-        final CommandStorageRecord record = RECORD_MAPPER.apply(entity);
+        final CommandRecord record = RECORD_MAPPER.apply(entity);
         checkNotNull(record);
         return Optional.of(record);
     }
 
     @Override
-    public void write(CommandId commandId, CommandStorageRecord record) {
+    public void write(CommandId commandId, CommandRecord record) {
         checkNotClosed();
         checkNotDefault(commandId);
         checkNotDefault(record);
 
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, of(commandId));
+        final Key key = DsIdentifiers.keyFor(datastore, KIND, of(commandId));
 
         Entity entity = messageToEntity(record, key);
         entity = Entity.newBuilder(entity)
@@ -160,8 +177,7 @@ public class DsCommandStorage extends CommandStorage {
                                                         .getSeconds())
                        .set(timestamp_nanos.toString(), record.getTimestamp()
                                                               .getNanos())
-                       .set(COMMAND_STATUS_PROPERTY_NAME, record.getStatus()
-                                                                .ordinal())
+                       .set(COMMAND_STATUS_PROPERTY_NAME, record.getStatus().getCodeValue())
                        .build();
         datastore.createOrUpdate(entity);
     }

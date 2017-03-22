@@ -20,30 +20,19 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 
 /**
  * Google cloud Datastore implementation of {@link StandStorage}.
@@ -54,134 +43,75 @@ import static org.spine3.server.storage.datastore.DatastoreIdentifiers.of;
 @SuppressWarnings("WeakerAccess")   // Part of API
 public class DsStandStorage extends StandStorage {
 
-    private final DsRecordStorage<DatastoreRecordId> recordStorage;
+    private final DsRecordStorage<AggregateStateId> recordStorage;
 
-    public DsStandStorage(DsRecordStorage<DatastoreRecordId> recordStorage, boolean multitenant) {
+    public DsStandStorage(DsRecordStorage<AggregateStateId> recordStorage, boolean multitenant) {
         super(multitenant);
         this.recordStorage = recordStorage;
     }
 
     @Override
-    public ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type) {
-        final Map<?, EntityStorageRecord> records = recordStorage.readAllByType(type);
-        final ImmutableList<EntityStorageRecord> result = ImmutableList.copyOf(records.values());
+    public ImmutableCollection<EntityRecord> readAllByType(TypeUrl type) {
+        final Map<?, EntityRecord> records = recordStorage.readAllByType(type);
+        final ImmutableList<EntityRecord> result = ImmutableList.copyOf(records.values());
         return result;
     }
 
     @Override
-    public ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type, FieldMask fieldMask) {
-        final Map<?, EntityStorageRecord> records = recordStorage.readAllByType(type, fieldMask);
-        final ImmutableList<EntityStorageRecord> result = ImmutableList.copyOf(records.values());
+    public ImmutableCollection<EntityRecord> readAllByType(TypeUrl type, FieldMask fieldMask) {
+        final Map<?, EntityRecord> records = recordStorage.readAllByType(type, fieldMask);
+        final ImmutableList<EntityRecord> result = ImmutableList.copyOf(records.values());
         return result;
     }
 
     @Override
-    public boolean markArchived(AggregateStateId id) {
-        final DatastoreRecordId recordId = of(id);
-        return recordStorage.markArchived(recordId);
-    }
-
-    @Override
-    public boolean markDeleted(AggregateStateId id) {
-        final DatastoreRecordId recordId = of(id);
-        return recordStorage.markDeleted(recordId);
+    public Iterator<AggregateStateId> index() {
+        return recordStorage.index();
     }
 
     @Override
     public boolean delete(AggregateStateId id) {
-        final DatastoreRecordId recordId = of(id);
-        return recordStorage.delete(recordId);
+        return recordStorage.delete(id);
     }
 
     @Nullable
     @Override
-    protected Optional<EntityStorageRecord> readRecord(AggregateStateId id) {
-        final DatastoreRecordId recordId = of(id);
-        return recordStorage.read(recordId);
+    protected Optional<EntityRecord> readRecord(AggregateStateId id) {
+        return recordStorage.read(id);
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
-        return recordStorage.readMultiple(transformIds(ids));
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
+        return recordStorage.readMultiple(ids);
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
-        final Iterable<DatastoreRecordId> recordIds = transformIds(ids);
-        return recordStorage.readMultiple(recordIds, fieldMask);
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
+        return recordStorage.readMultiple(ids, fieldMask);
     }
 
     @Override
-    protected Map<AggregateStateId, EntityStorageRecord> readAllRecords() {
+    protected Map<AggregateStateId, EntityRecord> readAllRecords() {
         return readAllRecords(FieldMask.getDefaultInstance());
     }
 
     @Override
-    protected Map<AggregateStateId, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
-        final Map<DatastoreRecordId, EntityStorageRecord> readRecords = recordStorage.readAllRecords(fieldMask);
-        final Collection<DatastoreRecordId> sourceIds = readRecords.keySet();
-        final Collection<AggregateStateId> ids = Collections2.transform(sourceIds, reverseIdTransformer());
-
-        final Collection<EntityStorageRecord> recordValues = readRecords.values();
-        final Iterator<EntityStorageRecord> recordIterator = recordValues.iterator();
-        final ImmutableMap.Builder<AggregateStateId, EntityStorageRecord> result = new ImmutableMap.Builder<>();
-        for (AggregateStateId id : ids) {
-            checkState(recordIterator.hasNext(), "Set of read values is shorter then set of keys.");
-            result.put(id, recordIterator.next());
-        }
-        checkState(!recordIterator.hasNext(), "Set of read values is longer then set of keys.");
-
-        return result.build();
+    protected Map<AggregateStateId, EntityRecord> readAllRecords(FieldMask fieldMask) {
+        return recordStorage.readAllRecords(fieldMask);
     }
 
     @Override
-    protected void writeRecord(AggregateStateId id, EntityStorageRecord record) {
-        final DatastoreRecordId recordId = of(id);
-        recordStorage.write(recordId, record);
+    protected void writeRecord(AggregateStateId id, EntityRecord record) {
+        recordStorage.write(id, record);
     }
 
     @Override
-    protected void writeRecords(Map<AggregateStateId, EntityStorageRecord> records) {
-        final Map<DatastoreRecordId, EntityStorageRecord> datastoreRecords = new HashMap<>(records.size());
-        for (Map.Entry<AggregateStateId, EntityStorageRecord> entry : records.entrySet()) {
-            final DatastoreRecordId id = of(entry.getKey());
-            datastoreRecords.put(id, entry.getValue());
-        }
-        recordStorage.writeRecords(datastoreRecords);
+    protected void writeRecords(Map<AggregateStateId, EntityRecord> records) {
+        recordStorage.writeRecords(records);
     }
 
     @SuppressWarnings("unused") // Part of API
-    protected RecordStorage<DatastoreRecordId> getRecordStorage() {
+    protected RecordStorage<AggregateStateId> getRecordStorage() {
         return recordStorage;
-    }
-
-    private static Iterable<DatastoreRecordId> transformIds(Iterable<AggregateStateId> ids) {
-        final Iterable<DatastoreRecordId> recordIds =
-                Iterables.transform(ids,
-                                    new Function<AggregateStateId, DatastoreRecordId>() {
-                                        @Nullable
-                                        @Override
-                                        public DatastoreRecordId apply(@Nullable AggregateStateId input) {
-                                            checkNotNull(input);
-                                            return of(input);
-                                        }
-                                    });
-        return recordIds;
-    }
-
-    private static Function<Object, AggregateStateId> reverseIdTransformer() {
-        return reverseIdTransformer(null);
-    }
-
-    private static Function<Object, AggregateStateId> reverseIdTransformer(@Nullable final TypeUrl withType) {
-        final TypeUrl type = withType != null ? withType : TypeUrl.of(Any.class);
-        return new Function<Object, AggregateStateId>() {
-            @Override
-            public AggregateStateId apply(@Nullable Object input) {
-                checkNotNull(input, "Aggregate ID must not be null.");
-                final AggregateStateId id = AggregateStateId.of(input, type);
-                return id;
-            }
-        };
     }
 }

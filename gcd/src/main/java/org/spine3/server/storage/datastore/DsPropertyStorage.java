@@ -26,7 +26,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.datastore.Entities.entityToMessage;
@@ -41,7 +41,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 public class DsPropertyStorage {
 
     private static final TypeUrl ANY_TYPE_URL = TypeUrl.from(Any.getDescriptor());
-    private static final String KIND = Any.class.getName();
+    private static final String KIND = "spine_properties";
 
     private final DatastoreWrapper datastore;
 
@@ -57,14 +57,14 @@ public class DsPropertyStorage {
         checkNotNull(propertyId);
         checkNotNull(value);
 
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, propertyId);
+        final Key key = DsIdentifiers.keyFor(datastore, KIND, propertyId);
 
         final Entity entity = messageToEntity(AnyPacker.pack(value), key);
         datastore.createOrUpdate(entity);
     }
 
     protected <V extends Message> Optional<V> read(DatastoreRecordId propertyId) {
-        final Key key = DatastoreIdentifiers.keyFor(datastore, KIND, propertyId);
+        final Key key = DsIdentifiers.keyFor(datastore, KIND, propertyId);
         final Entity response = datastore.read(key);
 
         if (response == null) {

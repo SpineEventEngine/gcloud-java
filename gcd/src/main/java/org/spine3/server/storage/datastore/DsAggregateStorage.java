@@ -30,11 +30,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
-import org.spine3.protobuf.Timestamps;
-import org.spine3.protobuf.TypeUrl;
+import com.google.protobuf.Message;
+import org.spine3.protobuf.Timestamps2;
+import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.aggregate.storage.AggregateStorageRecord;
-import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.type.TypeName;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -45,14 +47,13 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.not;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.aggregate.storage.AggregateField.aggregate_id;
-import static org.spine3.server.storage.datastore.DatastoreIdentifiers.keyFor;
-import static org.spine3.server.storage.datastore.DatastoreProperties.activeEntityPredicate;
-import static org.spine3.server.storage.datastore.DatastoreProperties.addArchivedProperty;
-import static org.spine3.server.storage.datastore.DatastoreProperties.addDeletedProperty;
-import static org.spine3.server.storage.datastore.DatastoreProperties.isArchived;
-import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
+import static org.spine3.server.storage.datastore.DsProperties.activeEntityPredicate;
+import static org.spine3.server.storage.datastore.DsProperties.addArchivedProperty;
+import static org.spine3.server.storage.datastore.DsProperties.addDeletedProperty;
+import static org.spine3.server.storage.datastore.DsProperties.isArchived;
+import static org.spine3.server.storage.datastore.DsProperties.isDeleted;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -65,26 +66,35 @@ import static org.spine3.server.storage.datastore.DatastoreProperties.isDeleted;
 public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
+    private static final String AGGREGATE_TYPE = "aggregate_type";
 
     /**
-     * Prefix for the string IDs of the {@link AggregateStorageRecord records} which represent an aggregate snapshot,
+     * Prefix for the string IDs of the {@link AggregateEventRecord records} which represent an aggregate snapshot,
      * not an event.
      *
      * The aggregate snapshots are stored under an ID composed from {@code SNAPSHOT} and the aggregate ID.
      */
     private static final String SNAPSHOT = "SNAPSHOT";
 
-    private static final String KIND = AggregateStorageRecord.class.getName();
-    private static final String AGGREGATE_ENTITY_STATUS_KIND = EntityStatus.class.getName();
-    private static final TypeUrl TYPE_URL = TypeUrl.from(AggregateStorageRecord.getDescriptor());
+    private static final TypeName AGGREGATE_RECORD_KIND = TypeName.from(AggregateEventRecord.getDescriptor());
+    private static final TypeName AGGREGATE_LIFECYCLE_KIND = TypeName.from(LifecycleFlags.getDescriptor());
+    private static final TypeUrl AGGREGATE_RECORD_TYPE_URL = TypeUrl.from(AggregateEventRecord.getDescriptor());
 
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;
+    private final Class<I> idClass;
+    private final TypeName stateTypeName;
 
-    public DsAggregateStorage(DatastoreWrapper datastore, DsPropertyStorage propertyStorage, boolean multitenant) {
+    public DsAggregateStorage(DatastoreWrapper datastore,
+                              DsPropertyStorage propertyStorage,
+                              boolean multitenant,
+                              Class<I> idClass,
+                              Class<? extends Message> stateClass) {
         super(multitenant);
         this.datastore = datastore;
         this.propertyStorage = propertyStorage;
+        this.idClass = idClass;
+        this.stateTypeName = TypeName.of(stateClass);
     }
 
     @Override
@@ -105,75 +115,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected Optional<EntityStatus> readStatus(I id) {
-        checkNotNull(id);
-
-        final DatastoreRecordId recordId = generateDatastoreId(id);
-        final Key key = keyFor(datastore, AGGREGATE_ENTITY_STATUS_KIND, recordId);
-        final Entity entityStateRecord = datastore.read(key);
-        if (entityStateRecord == null) {
-            return Optional.absent();
-        }
-
-        final boolean archived = isArchived(entityStateRecord);
-        final boolean deleted = isDeleted(entityStateRecord);
-
-        if (!archived && !deleted) {
-            return Optional.absent();
-        }
-        final EntityStatus entityStatus = EntityStatus.newBuilder()
-                                                      .setArchived(archived)
-                                                      .setDeleted(deleted)
-                                                      .build();
-        return Optional.of(entityStatus);
-    }
-
-    @Override
-    protected void writeStatus(I id, EntityStatus status) {
-        checkNotNull(id);
-        checkNotNull(status);
-
-        final DatastoreRecordId recordId = generateDatastoreId(id);
-        final Key key = keyFor(datastore, AGGREGATE_ENTITY_STATUS_KIND, recordId);
-        final Entity.Builder entityStateRecord = Entity.newBuilder(key);
-        addArchivedProperty(entityStateRecord, status.getArchived());
-        addDeletedProperty(entityStateRecord, status.getDeleted());
-        datastore.createOrUpdate(entityStateRecord.build());
-    }
-
-    @Override
-    protected boolean markArchived(I id) {
-        final Optional<EntityStatus> entityStatus = readStatus(id);
-        if (entityStatus.isPresent()
-                && entityStatus.get()
-                               .getArchived()) {
-            return false;
-        }
-
-        final EntityStatus resultStatus = EntityStatus.newBuilder(entityStatus.or(EntityStatus.getDefaultInstance()))
-                                                      .setArchived(true)
-                                                      .build();
-        writeStatus(id, resultStatus);
-        return true;
-    }
-
-    @Override
-    protected boolean markDeleted(I id) {
-        final Optional<EntityStatus> entityStatus = readStatus(id);
-        if (entityStatus.isPresent()
-                && entityStatus.get()
-                               .getDeleted()) {
-            return false;
-        }
-
-        final EntityStatus resultStatus = EntityStatus.newBuilder(entityStatus.or(EntityStatus.getDefaultInstance()))
-                                                      .setDeleted(true)
-                                                      .build();
-        writeStatus(id, resultStatus);
-        return true;
-    }
-
-    @Override
     public void writeEventCountAfterLastSnapshot(I id, int eventCount) {
         checkNotClosed();
         checkNotNull(id);
@@ -185,32 +126,37 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void writeRecord(I id, AggregateStorageRecord record) {
+    protected void writeRecord(I id, AggregateEventRecord record) {
         checkNotNull(id);
 
         final String stringId = idToString(id);
-        String eventId = record.getEventId();
+        String eventId = idToString(record.getEvent()
+                                          .getContext()
+                                          .getEventId());
         if (eventId.isEmpty()) {
             // Snapshots have no Event IDs.
             eventId = SNAPSHOT + stringId;
         }
 
-        final Key key = keyFor(datastore, KIND, DatastoreIdentifiers.of(eventId));
+        final Key key = DsIdentifiers.keyFor(datastore,
+                                             AGGREGATE_RECORD_KIND.value(),
+                                             DsIdentifiers.of(eventId));
         final Entity incompleteEntity = Entities.messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
-        DatastoreProperties.addAggregateIdProperty(stringId, builder);
+        DsProperties.addAggregateIdProperty(stringId, builder);
+        builder.set(AGGREGATE_TYPE, stateTypeName.value());
         datastore.createOrUpdate(builder.build());
     }
 
     @Override
-    protected Iterator<AggregateStorageRecord> historyBackward(I id) {
+    protected Iterator<AggregateEventRecord> historyBackward(I id) {
         checkNotNull(id);
 
         final String idString = idToString(id);
         final Query<Entity> query = Query.newEntityQueryBuilder()
-                                    .setKind(KIND)
-                                    .setFilter(StructuredQuery.PropertyFilter.eq(aggregate_id.toString(), idString))
-                                    .build();
+                                         .setKind(AGGREGATE_RECORD_KIND.value())
+                                         .setFilter(StructuredQuery.PropertyFilter.eq(aggregate_id.toString(), idString))
+                                         .build();
         final List<Entity> eventEntities = datastore.read(query);
         if (eventEntities.isEmpty()) {
             return Collections.emptyIterator();
@@ -232,13 +178,13 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final Collection<Entity> filteredEntities = Collections2.filter(eventEntities,
                                                                         new IsActiveAggregateId(inactiveAggregateKeys));
-        final List<AggregateStorageRecord> immutableResult = Entities.entitiesToMessages(filteredEntities, TYPE_URL);
-        final List<AggregateStorageRecord> records = Lists.newArrayList(immutableResult);
+        final List<AggregateEventRecord> immutableResult = Entities.entitiesToMessages(filteredEntities, AGGREGATE_RECORD_TYPE_URL);
+        final List<AggregateEventRecord> records = Lists.newArrayList(immutableResult);
 
-        Collections.sort(records, new Comparator<AggregateStorageRecord>() {
+        Collections.sort(records, new Comparator<AggregateEventRecord>() {
             @Override
-            public int compare(AggregateStorageRecord o1, AggregateStorageRecord o2) {
-                return Timestamps.compare(o2.getTimestamp(), o1.getTimestamp());
+            public int compare(AggregateEventRecord o1, AggregateEventRecord o2) {
+                return Timestamps2.compare(o2.getTimestamp(), o1.getTimestamp());
             }
         });
         return records.iterator();
@@ -246,8 +192,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private Collection<Entity> getEntityStates() {
         final Query<Entity> query = Query.newEntityQueryBuilder()
-                                 .setKind(AGGREGATE_ENTITY_STATUS_KIND)
-                                 .build();
+                                         .setKind(AGGREGATE_LIFECYCLE_KIND.value())
+                                         .build();
         return datastore.read(query);
     }
 
@@ -260,7 +206,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected DatastoreRecordId generateDatastoreId(I id) {
         final String stringId = idToString(id);
         final String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
-        return DatastoreIdentifiers.of(datastoreId);
+        return DsIdentifiers.of(datastoreId);
     }
 
     /**
@@ -283,6 +229,54 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      */
     protected DsPropertyStorage getPropertyStorage() {
         return propertyStorage;
+    }
+
+    @Override
+    public Optional<LifecycleFlags> readLifecycleFlags(I id) {
+        checkNotNull(id);
+
+        final Key key = keyFor(id);
+        final Entity entityStateRecord = datastore.read(key);
+        if (entityStateRecord == null) {
+            return Optional.absent();
+        }
+
+        final boolean archived = isArchived(entityStateRecord);
+        final boolean deleted = isDeleted(entityStateRecord);
+
+        if (!archived && !deleted) {
+            return Optional.absent();
+        }
+        final LifecycleFlags flags = LifecycleFlags.newBuilder()
+                                                   .setArchived(archived)
+                                                   .setDeleted(deleted)
+                                                   .build();
+        return Optional.of(flags);
+    }
+
+    @Override
+    public void writeLifecycleFlags(I id, LifecycleFlags flags) {
+        checkNotNull(id);
+        checkNotNull(flags);
+
+        final Key key = keyFor(id);
+        final Entity.Builder entityStateRecord = Entity.newBuilder(key);
+        addArchivedProperty(entityStateRecord, flags.getArchived());
+        addDeletedProperty(entityStateRecord, flags.getDeleted());
+        datastore.createOrUpdate(entityStateRecord.build());
+    }
+
+    @Override
+    public Iterator<I> index() {
+        checkNotClosed();
+        final StructuredQuery.Filter filter = StructuredQuery.PropertyFilter.eq(AGGREGATE_TYPE, stateTypeName.value());
+        return Indexes.indexIterator(datastore, AGGREGATE_RECORD_KIND.value(), idClass, filter);
+    }
+
+    private Key keyFor(I id) {
+        final DatastoreRecordId recordId = generateDatastoreId(id);
+        final Key key = DsIdentifiers.keyFor(datastore, AGGREGATE_LIFECYCLE_KIND.value(), recordId);
+        return key;
     }
 
     private static class IsActiveAggregateId implements Predicate<Entity> {

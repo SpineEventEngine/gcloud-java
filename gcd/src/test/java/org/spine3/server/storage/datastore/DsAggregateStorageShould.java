@@ -68,7 +68,7 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     @SuppressWarnings("ConstantConditions") // passing null because this parameter isn't used in this implementation
     @Override
     protected AggregateStorage<ProjectId> getStorage() {
-        return datastoreFactory.createAggregateStorage(null);
+        return datastoreFactory.createAggregateStorage(TestAggregate.class);
     }
 
     @Override
@@ -107,10 +107,10 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(DsAggregateStorageShould.class);
+
     }
 }

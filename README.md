@@ -32,7 +32,7 @@ indexes:
   # Your custom kinds
   #
   
-  - kind: org.spine3.server.event.storage.EventStorageRecord
+  - kind: spine.base.Event
     ancestor: no
     properties:
       - name: event_type

@@ -23,11 +23,10 @@ package org.spine3.server.storage.datastore;
 
 import org.junit.Test;
 import org.spine3.base.Identifiers;
-import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alex Tymchenko
@@ -36,18 +35,18 @@ public class DatastoreIdentifiersShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(Tests.hasPrivateParameterlessCtor(DatastoreIdentifiers.class));
+        assertHasPrivateParameterlessCtor(DsIdentifiers.class);
     }
 
     @Test(expected = IllegalStateException.class)
     public void not_accept_empty_String_as_identifier_source() {
-        DatastoreIdentifiers.of("");
+        DsIdentifiers.of("");
     }
 
     @Test
     public void wrap_non_empty_String_into_record_identifier() {
         final String idAsString = Identifiers.newUuid();
-        final DatastoreRecordId recordId = DatastoreIdentifiers.of(idAsString);
+        final DatastoreRecordId recordId = DsIdentifiers.of(idAsString);
 
         assertNotNull(recordId);
         assertEquals(idAsString, recordId.getValue());

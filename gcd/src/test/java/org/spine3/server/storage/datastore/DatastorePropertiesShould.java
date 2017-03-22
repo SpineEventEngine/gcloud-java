@@ -22,14 +22,12 @@ package org.spine3.server.storage.datastore;
 import org.junit.Test;
 import org.spine3.test.Tests;
 
-import static org.junit.Assert.assertTrue;
-
 /**
  * @author Alex Tymchenko
  */
 public class DatastorePropertiesShould {
     @Test
     public void have_private_constructor() {
-        assertTrue(Tests.hasPrivateParameterlessCtor(DatastoreProperties.class));
+        Tests.assertHasPrivateParameterlessCtor(DsProperties.class);
     }
 }

@@ -25,10 +25,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.KnownTypes;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.reflect.Classes;
 import org.spine3.type.ClassName;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -195,14 +195,14 @@ class IdTransformer {
 
         final int typeStartIndex = stringId.indexOf(TYPE_PREFIX) + TYPE_PREFIX.length();
         final int typeEndIndex = stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER);
-        final String typeName = stringId.substring(typeStartIndex, typeEndIndex);
+        final String typUrlDecoded = stringId.substring(typeStartIndex, typeEndIndex);
 
         final int dataStartIndex = stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER) + SERIALIZED_MESSAGE_DIVIDER.length();
         final int dataEndIndex = stringId.lastIndexOf(SERIALIZED_MESSAGE_BYTES_POSTFIX);
         final String bytesString = stringId.substring(dataStartIndex, dataEndIndex);
 
         if (bytesString.equals(SERIALIZED_DEFAULT_MESSAGE)) {
-            final TypeUrl typeUrl = TypeUrl.of(typeName);
+            final TypeUrl typeUrl = TypeUrl.parse(typUrlDecoded);
             final Message id = Entities.defaultMessage(typeUrl);
             return id;
         }
@@ -218,7 +218,7 @@ class IdTransformer {
         final ByteString byteString = ByteString.copyFrom(messageBytes);
         final Any wrappedId = Any.newBuilder()
                                  .setValue(byteString)
-                                 .setTypeUrl(typeName)
+                                 .setTypeUrl(typUrlDecoded)
                                  .build();
         final Message id = AnyPacker.unpack(wrappedId);
         return id;

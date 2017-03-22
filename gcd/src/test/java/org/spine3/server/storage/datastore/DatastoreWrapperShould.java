@@ -143,7 +143,7 @@ public class DatastoreWrapperShould {
             for (int i = 0; i < n; i++) {
                 final Any message = Any.getDefaultInstance();
                 final DatastoreRecordId recordId = new DatastoreRecordId(String.format("record-%s", i));
-                final Key key = DatastoreIdentifiers.keyFor(wrapper, GENERIC_ENTITY_KIND, recordId);
+                final Key key = DsIdentifiers.keyFor(wrapper, GENERIC_ENTITY_KIND, recordId);
                 final Entity entity = Entities.messageToEntity(message, key);
                 result.put(key, entity);
             }

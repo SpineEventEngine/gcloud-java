@@ -17,28 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.spine3.server.storage.datastore;
 
-import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.storage.Project;
 
 /**
- * A type of entity record, used to store {@link Entity} state in the {@link DsStandStorage}.
- *
- * @author Dmytro Dashenkov
+ * @author Dmytro Dashenkov.
  */
-@SuppressWarnings("WeakerAccess")   // Part of API.
-public class StandStorageRecord extends AbstractEntity<AggregateStateId, EntityRecord> {
-
-    /**
-     * Creates a new instance.
-     *
-     * @param id the ID for the new instance
-     * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
-     */
-    protected StandStorageRecord(AggregateStateId id) {
+class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    protected TestAggregate(ProjectId id) {
         super(id);
     }
 }
