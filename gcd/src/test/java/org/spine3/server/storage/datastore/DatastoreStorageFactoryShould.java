@@ -25,9 +25,7 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.aggregate.ProjectId;
@@ -44,13 +42,18 @@ public class DatastoreStorageFactoryShould {
 
     private static final Datastore datastore = DUMMY_OPTIONS.getService();
 
-    private static final StorageFactory datastoreFactory = new DatastoreStorageFactory(datastore);
+    private static final StorageFactory datastoreFactory = DatastoreStorageFactory.newBuilder()
+                                                                                  .setDatastore(datastore)
+                                                                                  .build();
 
     @Test
     public void create_multitenant_storages() throws Exception {
-        final StorageFactory factory = new DatastoreStorageFactory(datastore, true);
+        final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                              .setDatastore(datastore)
+                                                              .setMultitenant(true)
+                                                              .build();
         assertTrue(factory.isMultitenant());
-        final CommandStorage storage = factory.createCommandStorage();
+        final RecordStorage storage = factory.createStandStorage();
         assertTrue(storage.isMultitenant());
         storage.close();
     }
@@ -58,18 +61,6 @@ public class DatastoreStorageFactoryShould {
     @Test
     public void create_entity_storage_using_class_parameter() {
         final RecordStorage<String> storage = datastoreFactory.createRecordStorage(TestEntity.class);
-        assertNotNull(storage);
-    }
-
-    @Test
-    public void create_event_storage() {
-        final EventStorage storage = datastoreFactory.createEventStorage();
-        assertNotNull(storage);
-    }
-
-    @Test
-    public void create_command_storage() {
-        final CommandStorage storage = datastoreFactory.createCommandStorage();
         assertNotNull(storage);
     }
 

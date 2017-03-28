@@ -39,6 +39,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.type.TypeUrl;
 
@@ -345,28 +346,31 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected void writeRecord(I id, EntityRecord entityStorageRecord) {
+    protected void writeRecord(I id, EntityRecordWithStorageFields entityStorageRecord) {
         checkNotNull(id, "ID is null.");
         checkNotNull(entityStorageRecord, "Message is null.");
 
-        final String valueTypeUrl = entityStorageRecord.getState()
-                                                       .getTypeUrl();
+        final EntityRecord record = entityStorageRecord.getRecord();
+        final String valueTypeUrl = record.getState()
+                                          .getTypeUrl();
 
         final Key key = keyFor(datastore, KIND, ofEntityId(id));
-        final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
+        final Entity incompleteEntity = Entities.messageToEntity(record, key);
         final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
-        entity.set(VERSION_KEY, entityStorageRecord.getVersion().getNumber());
+        entity.set(VERSION_KEY, record.getVersion()
+                                      .getNumber());
         entity.set(TYPE_URL_PROPERTY_NAME, valueTypeUrl);
         datastore.createOrUpdate(entity.build());
     }
 
     @Override
-    protected void writeRecords(Map<I, EntityRecord> records) {
+    protected void writeRecords(Map<I, EntityRecordWithStorageFields> records) {
         checkNotNull(records);
 
         final Collection<Entity> entitiesToWrite = new ArrayList<>(records.size());
-        for (Map.Entry<I, EntityRecord> record : records.entrySet()) {
-            final EntityRecord entityStorageRecord = record.getValue();
+        for (Map.Entry<I, EntityRecordWithStorageFields> record : records.entrySet()) {
+            final EntityRecord entityStorageRecord = record.getValue()
+                                                           .getRecord();
             final String valueTypeUrl = entityStorageRecord.getState()
                                                            .getTypeUrl();
             final Key key = keyFor(

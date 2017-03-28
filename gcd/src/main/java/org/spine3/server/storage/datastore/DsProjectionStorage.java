@@ -25,6 +25,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.validate.Validate;
@@ -110,6 +111,11 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
     @Override
     protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
         return recordStorage().readAll(fieldMask);
+    }
+
+    @Override
+    protected void writeRecord(I id, EntityRecordWithStorageFields record) {
+        recordStorage.writeRecord(id, record);
     }
 
     @Override

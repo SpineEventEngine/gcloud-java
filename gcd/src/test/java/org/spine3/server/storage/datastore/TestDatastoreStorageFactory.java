@@ -25,6 +25,7 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.server.entity.storage.ColumnTypeRegistry;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -93,10 +94,10 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private TestDatastoreStorageFactory(Datastore datastore) {
-        super(datastore, false);
+        super(datastore, false, ColumnTypeRegistry.empty());
     }
 
-    @SuppressWarnings("RefusedBequest")
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     protected void initDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already initialized.");

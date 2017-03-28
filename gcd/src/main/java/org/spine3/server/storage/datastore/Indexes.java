@@ -27,7 +27,6 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
-import com.google.common.reflect.TypeToken;
 import org.spine3.base.Stringifiers;
 
 import javax.annotation.Nullable;
@@ -101,7 +100,7 @@ public class Indexes {
                 checkNotNull(input);
                 final Key key = input.getKey();
                 final String stringId = key.getName();
-                final I id = Stringifiers.parse(stringId, TypeToken.of(idClass));
+                final I id = Stringifiers.fromString(stringId, idClass);
                 return id;
             }
         };

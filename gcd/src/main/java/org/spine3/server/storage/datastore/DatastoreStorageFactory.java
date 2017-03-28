@@ -26,14 +26,12 @@ import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.event.EventStorage;
+import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.TypeUrl;
 
@@ -56,30 +54,21 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private DatastoreWrapper datastore;
     private final boolean multitenant;
+    private final ColumnTypeRegistry typeRegistry;
 
-    /**
-     * Creates new instance of {@code DatastoreStorageFactory}.
-     *
-     * @param datastore   the {@link Datastore} implementation to use
-     * @param multitenant if storage factory is configured to serve a multitenant application.
-     *                    This implementation does not support
-     *                    <a href="https://cloud.google.com/appengine/docs/java/multitenancy/multitenancy">Datastore
-     *                    recommended</a> way of creating multitenant apps yet.
-     *                    See {@link Storage#isMultitenant()}.
-     */
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
-    public DatastoreStorageFactory(Datastore datastore, boolean multitenant) {
-        this.multitenant = multitenant;
-        initDatastoreWrapper(datastore);
+    private DatastoreStorageFactory(Builder builder) {
+        this.multitenant = builder.multitenant;
+        this.typeRegistry = builder.typeRegistry;
+        initDatastoreWrapper(builder.datastore);
     }
 
-    /**
-     * Creates new instance of non-multitenant {@code DatastoreStorageFactory}.
-     *
-     * @param datastore the {@link Datastore} implementation to use
-     */
-    public DatastoreStorageFactory(Datastore datastore) {
-        this(datastore, false);
+    @VisibleForTesting
+    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
+    protected DatastoreStorageFactory(Datastore datastore, boolean multitenant, ColumnTypeRegistry typeRegistry) {
+        this.multitenant = multitenant;
+        this.typeRegistry = typeRegistry;
+        initDatastoreWrapper(datastore);
     }
 
     @VisibleForTesting
@@ -95,15 +84,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     @Override
-    public CommandStorage createCommandStorage() {
-        final DsCommandStorage result = new DsCommandStorage(getDatastore(), multitenant);
-        return result;
-    }
-
-    @Override
-    public EventStorage createEventStorage() {
-        final DsEventStorage result = new DsEventStorage(getDatastore(), multitenant);
-        return result;
+    public ColumnTypeRegistry getTypeRegistry() {
+        return typeRegistry;
     }
 
     @Override
@@ -116,9 +98,9 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> aClass) {
-        final DsRecordStorage<I> entityStorage = (DsRecordStorage<I>) createRecordStorage(aClass);
+        final DsRecordStorage<I> recordStorage = (DsRecordStorage<I>) createRecordStorage(aClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
-        final DsProjectionStorage<I> result = new DsProjectionStorage<>(entityStorage,
+        final DsProjectionStorage<I> result = new DsProjectionStorage<>(recordStorage,
                                                                         propertyStorage,
                                                                         aClass,
                                                                         multitenant);
@@ -167,4 +149,36 @@ public class DatastoreStorageFactory implements StorageFactory {
         this.datastore = datastore;
     }
 
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private Datastore datastore;
+        private boolean multitenant;
+        private ColumnTypeRegistry typeRegistry;
+
+        private Builder() {
+        }
+
+        public Builder setDatastore(Datastore datastore) {
+            this.datastore = datastore;
+            return this;
+        }
+
+        public Builder setMultitenant(boolean multitenant) {
+            this.multitenant = multitenant;
+            return this;
+        }
+
+        public Builder setTypeRegistry(ColumnTypeRegistry typeRegistry) {
+            this.typeRegistry = typeRegistry;
+            return this;
+        }
+
+        public DatastoreStorageFactory build() {
+            return new DatastoreStorageFactory(this);
+        }
+    }
 }
