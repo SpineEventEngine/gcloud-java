@@ -345,6 +345,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return new IdRecordPair<>(id, record);
     }
 
+    String getKind() {
+        return kindFrom(typeUrl);
+    }
+
     /**
      * A tuple containing generic record identifier and corresponding {@link EntityRecord}.
      *

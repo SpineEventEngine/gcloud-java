@@ -33,6 +33,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.storage.Project;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -74,13 +75,13 @@ public class DatastoreStorageFactoryShould {
         assertNotNull(storage);
     }
 
-//    @Test
-//    public void create_separate_record_storage_per_state_type() {
-//        final DsRecordStorage<?> storage = (DsRecordStorage<?>) datastoreFactory.createRecordStorage(TestEntity.class);
-//        final DsRecordStorage<?> differentStorage =
-//                (DsRecordStorage<?>) datastoreFactory.createRecordStorage(DifferentTestEntity.class);
-//        assertNotEquals(storage.getKind(), differentStorage.getKind());
-//    }
+    @Test
+    public void create_separate_record_storage_per_state_type() {
+        final DsRecordStorage<?> storage = (DsRecordStorage<?>) datastoreFactory.createRecordStorage(TestEntity.class);
+        final DsRecordStorage<?> differentStorage =
+                (DsRecordStorage<?>) datastoreFactory.createRecordStorage(DifferentTestEntity.class);
+        assertNotEquals(storage.getKind(), differentStorage.getKind());
+    }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
@@ -96,7 +97,7 @@ public class DatastoreStorageFactoryShould {
         }
     }
 
-    private static class  DifferentTestEntity extends AbstractEntity<String, Project> {
+    private static class DifferentTestEntity extends AbstractEntity<String, Project> {
         protected DifferentTestEntity(String id) {
             super(id);
         }
