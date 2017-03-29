@@ -162,7 +162,7 @@ class DsProperties {
         builder.set(producer_id.toString(), producerId);
     }
 
-    static Predicate<Entity> activeEntityPredicate() {
+    static Predicate<Entity> activedEntityPredicate() {
         return NOT_ARCHIVED_OR_DELETED;
     }
 }

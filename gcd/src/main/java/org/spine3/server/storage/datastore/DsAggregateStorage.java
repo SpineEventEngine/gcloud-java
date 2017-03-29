@@ -49,7 +49,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.not;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.aggregate.storage.AggregateField.aggregate_id;
-import static org.spine3.server.storage.datastore.DsProperties.activeEntityPredicate;
+import static org.spine3.server.storage.datastore.DsProperties.activedEntityPredicate;
 import static org.spine3.server.storage.datastore.DsProperties.addArchivedProperty;
 import static org.spine3.server.storage.datastore.DsProperties.addDeletedProperty;
 import static org.spine3.server.storage.datastore.DsProperties.isArchived;
@@ -161,7 +161,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final Collection<Entity> aggregateEntityStates = Collections2.filter(
                 getEntityStates(),
-                not(activeEntityPredicate()));
+                not(activedEntityPredicate()));
         final Collection<Key> inactiveAggregateKeys = Collections2.transform(
                 aggregateEntityStates,
                 new Function<Entity, Key>() {

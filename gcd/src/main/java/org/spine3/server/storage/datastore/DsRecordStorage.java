@@ -24,7 +24,6 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -54,7 +53,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DsIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DsIdentifiers.ofEntityId;
-import static org.spine3.server.storage.datastore.DsProperties.activeEntityPredicate;
+import static org.spine3.server.storage.datastore.DsProperties.activedEntityPredicate;
 import static org.spine3.server.storage.datastore.Entities.getEntityStatus;
 import static org.spine3.validate.Validate.isDefault;
 
@@ -70,11 +69,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
     private final Class<I> idClass;
-    private final String kind;
 
     private static final String VERSION_KEY = "version";
-    private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
-    private static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
+    protected static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
+    protected static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
             "parse ID from String. " +
             "Note: custom conversion is not supported. " +
             "See org.spine3.base.Identifiers#idToString.";
@@ -104,12 +102,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
         this.idClass = checkNotNull(idClass);
-        this.kind = descriptor.getFullName();
     }
 
     @Override
     public boolean delete(I id) {
-        final Key key = keyFor(datastore, kind, ofEntityId(id));
+        final Key key = keyFor(datastore,
+                               kindFrom(typeUrl),
+                               ofEntityId(id));
         datastore.delete(key);
 
         // Check presence
@@ -120,7 +119,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Nullable
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
-        final Key key = keyFor(datastore, kind, ofEntityId(id));
+        final Key key = keyFor(datastore,
+                               kindFrom(typeUrl),
+                               ofEntityId(id));
         final Entity response = datastore.read(key);
 
         if (response == null) {
@@ -130,10 +131,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final EntityRecord record = Entities.entityToMessage(response, RECORD_TYPE_URL);
         final LifecycleFlags entityStatus = getEntityStatus(response);
         final EntityRecord result = isDefault(entityStatus) // Avoid inequality of written and read records
-                                           ? record                // caused by empty {@code EntityStatus} object
-                                           : EntityRecord.newBuilder(record)
-                                                                .setLifecycleFlags(entityStatus)
-                                                                .build();
+                                    ? record                // caused by empty {@code EntityStatus} object
+                                    : EntityRecord.newBuilder(record)
+                                                  .setLifecycleFlags(entityStatus)
+                                                  .build();
 
         return Optional.of(result);
     }
@@ -161,9 +162,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
                 final LifecycleFlags entityStatus = getEntityStatus(input);
                 final EntityRecord record = EntityRecord.newBuilder(readRecord)
-                                                                      .setState(wrappedState)
-                                                                      .setLifecycleFlags(entityStatus)
-                                                                      .build();
+                                                        .setState(wrappedState)
+                                                        .setLifecycleFlags(entityStatus)
+                                                        .build();
                 return record;
             }
         };
@@ -178,34 +179,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Map<I, EntityRecord> readAllRecords(final FieldMask fieldMask) {
-        final Function<Entity, IdRecordPair<I>> mapper = new Function<Entity, IdRecordPair<I>>() {
-            @Nullable
-            @Override
-            public IdRecordPair<I> apply(@Nullable Entity input) {
-                if (input == null) {
-                    return null;
-                }
-                // Retrieve ID
-                final I id = IdTransformer.idFromString(input.getKey()
-                                                             .getName(), null);
-                checkState(id != null, ID_CONVERSION_ERROR_MESSAGE);
-
-                // Retrieve record
-                EntityRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
-                final Any packedState = record.getState();
-                Message state = AnyPacker.unpack(packedState);
-                final TypeUrl typeUrl = TypeUrl.from(state.getDescriptorForType());
-                state = FieldMasks.applyMask(fieldMask, state, typeUrl);
-                final LifecycleFlags entityStatus = getEntityStatus(input);
-                record = EntityRecord.newBuilder(record)
-                                            .setState(AnyPacker.pack(state))
-                                            .setLifecycleFlags(entityStatus)
-                                            .build();
-                return new IdRecordPair<>(id, record);
-            }
-        };
-
-        return queryAll(mapper, typeUrl, FieldMask.getDefaultInstance());
+        return queryAll(typeUrl, fieldMask);
     }
 
     /**
@@ -230,113 +204,71 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return typeUrl;
     }
 
-    public Map<?, EntityRecord> readAllByType(final TypeUrl typeUrl, final FieldMask fieldMask) {
-        final Function<Entity, IdRecordPair<I>> mapper = new Function<Entity, IdRecordPair<I>>() {
-            @Nullable
-            @Override
-            public IdRecordPair<I> apply(@Nullable Entity input) {
-                if (input == null) {
-                    return null;
-                }
-                // Retrieve ID
-                final I id = IdTransformer.idFromString(input.getKey()
-                                                             .getName(), null);
-                checkState(id != null, ID_CONVERSION_ERROR_MESSAGE);
-
-                // Retrieve record
-                EntityRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
-                final Any packedState = record.getState();
-                Message state = AnyPacker.unpack(packedState);
-                state = FieldMasks.applyMask(fieldMask, state, typeUrl);
-                final LifecycleFlags entityStatus = getEntityStatus(input);
-                record = EntityRecord.newBuilder(record)
-                                            .setState(AnyPacker.pack(state))
-                                            .setLifecycleFlags(entityStatus)
-                                            .build();
-                return new IdRecordPair<>(id, record);
-            }
-        };
-
-        return queryAll(mapper, typeUrl, FieldMask.getDefaultInstance());
-    }
-
-    public Map<?, EntityRecord> readAllByType(final TypeUrl typeUrl) {
-        final Function<Entity, IdRecordPair<I>> mapper = new Function<Entity, IdRecordPair<I>>() {
-            @Nullable
-            @Override
-            public IdRecordPair<I> apply(@Nullable Entity input) {
-                if (input == null) {
-                    return null;
-                }
-                // Retrieve ID
-                final I id = IdTransformer.idFromString(input.getKey()
-                                                             .getName(), null);
-                checkState(id != null, ID_CONVERSION_ERROR_MESSAGE);
-
-                // Retrieve record
-                EntityRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
-                final Any packedState = record.getState();
-                Message state = AnyPacker.unpack(packedState);
-                final LifecycleFlags entityStatus = getEntityStatus(input);
-                record = EntityRecord.newBuilder(record)
-                                            .setState(AnyPacker.pack(state))
-                                            .setLifecycleFlags(entityStatus)
-                                            .build();
-
-                return new IdRecordPair<>(id, record);
-            }
-        };
-
-        return queryAll(mapper, typeUrl, FieldMask.getDefaultInstance());
-    }
-
     private Iterable<EntityRecord> lookup(
             Iterable<I> ids,
             Function<Entity, EntityRecord> transformer) {
 
         final Collection<Key> keys = new LinkedList<>();
         for (I id : ids) {
-            final Key key = keyFor(datastore, kind, ofEntityId(id));
+            final Key key = keyFor(datastore,
+                                   kindFrom(typeUrl),
+                                   ofEntityId(id));
             keys.add(key);
         }
 
         final List<Entity> results = datastore.read(keys);
-        final Collection<Entity> filteredResults = Collections2.filter(results, activeEntityPredicate());
+        final Collection<Entity> filteredResults = Collections2.filter(results, activedEntityPredicate());
         final Collection<EntityRecord> records = Collections2.transform(filteredResults, transformer);
         return Collections.unmodifiableCollection(records);
     }
 
-    private Map<I, EntityRecord> queryAll(Function<Entity, IdRecordPair<I>> transformer,
-                                          TypeUrl typeUrl,
-                                          FieldMask fieldMask) {
-
-        EntityQuery.Builder builder = Query.newEntityQueryBuilder()
-                                           .setKind(kind);
-        final EntityQuery query = builder.build();
+    protected Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
+                                            FieldMask fieldMask) {
+        final EntityQuery query = buildAllQuery(typeUrl);
 
         final List<Entity> results = datastore.read(query);
 
-        final Predicate<Entity> archivedAndDeletedFilter = activeEntityPredicate();
+        final Predicate<Entity> archivedAndDeletedFilter = activedEntityPredicate();
 
         final ImmutableMap.Builder<I, EntityRecord> records = new ImmutableMap.Builder<>();
         for (Entity entity : results) {
             if (!archivedAndDeletedFilter.apply(entity)) {
                 continue;
             }
-            final IdRecordPair<I> recordPair = transformer.apply(entity);
-            checkNotNull(recordPair, "Datastore may not contain null records.");
-            final EntityRecord fullRecord = recordPair.getRecord();
-            final Message fullState = AnyPacker.unpack(fullRecord.getState());
-            final Message maskedState = FieldMasks.applyMask(fieldMask, fullState, typeUrl);
-            final LifecycleFlags entityStatus = getEntityStatus(entity);
-            final EntityRecord maskedRecord = EntityRecord.newBuilder(fullRecord)
-                                                                        .setState(AnyPacker.pack(maskedState))
-                                                                        .setLifecycleFlags(entityStatus)
-                                                                        .build();
-            records.put(recordPair.getId(), maskedRecord);
+            final IdRecordPair<I> recordPair = getRecordFromEntity(entity, typeUrl);
+            EntityRecord record = recordPair.getRecord();
+
+            if (!isDefault(fieldMask)) {
+                Message state = AnyPacker.unpack(record.getState());
+                state = FieldMasks.applyMask(fieldMask, state, typeUrl);
+                record = EntityRecord.newBuilder(record)
+                                     .setState(AnyPacker.pack(state))
+                                     .build();
+            }
+            records.put(recordPair.getId(), record);
         }
 
         return records.build();
+    }
+
+    protected EntityQuery buildAllQuery(TypeUrl typeUrl) {
+        final EntityQuery query = Query.newEntityQueryBuilder()
+                                       .setKind(kindFrom(typeUrl))
+                                       .build();
+        return query;
+    }
+
+    protected Entity entityRecordToEntity(I id, EntityRecord record) {
+        final Key key = keyFor(datastore,
+                               kindFrom(record),
+                               ofEntityId(id));
+        final Entity incompleteEntity = Entities.messageToEntity(record, key);
+
+        final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
+        entity.set(VERSION_KEY, record.getVersion()
+                                      .getNumber());
+        final Entity completeEntity = entity.build();
+        return completeEntity;
     }
 
     @Override
@@ -344,11 +276,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         checkNotNull(id, "ID is null.");
         checkNotNull(entityStorageRecord, "Message is null.");
 
-        final Key key = keyFor(datastore, kind, ofEntityId(id));
-        final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
-        final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
-        entity.set(VERSION_KEY, entityStorageRecord.getVersion().getNumber());
-        datastore.createOrUpdate(entity.build());
+        final Entity entity = entityRecordToEntity(id, entityStorageRecord);
+        datastore.createOrUpdate(entity);
     }
 
     @Override
@@ -357,15 +286,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         final Collection<Entity> entitiesToWrite = new ArrayList<>(records.size());
         for (Map.Entry<I, EntityRecord> record : records.entrySet()) {
-            final EntityRecord entityStorageRecord = record.getValue();
-            final Key key = keyFor(
-                    datastore,
-                    kind,
-                    ofEntityId(record.getKey()));
-            final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
-            final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
-            entity.set(VERSION_KEY, entityStorageRecord.getVersion().getNumber());
-            entitiesToWrite.add(entity.build());
+            final Entity entity = entityRecordToEntity(record.getKey(), record.getValue());
+            entitiesToWrite.add(entity);
         }
         datastore.createOrUpdate(entitiesToWrite);
     }
@@ -373,12 +295,54 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     public Iterator<I> index() {
         checkNotClosed();
-        return Indexes.indexIterator(datastore, kind, idClass);
+        return Indexes.indexIterator(datastore,
+                                     kindFrom(typeUrl),
+                                     idClass);
     }
 
-    @VisibleForTesting
-    String getKind() {
-        return kind;
+    @Nullable
+    protected String getDefaultKind() {
+        return null;
+    }
+
+    protected I unpackKey(Key key, @SuppressWarnings("unused") TypeUrl stateType) {
+        final I id = IdTransformer.idFromString(key.getName(), null);
+        return id;
+    }
+
+    private String kindFrom(EntityRecord record) {
+        final String defaultKind = getDefaultKind();
+        if (defaultKind != null) {
+            return defaultKind;
+        }
+        final Any packedState = record.getState();
+        final Message state = AnyPacker.unpack(packedState);
+        final String typeName = state.getDescriptorForType()
+                                     .getFullName();
+        return typeName;
+    }
+
+    private String kindFrom(TypeUrl typeUrl) {
+        final String defaultKind = getDefaultKind();
+        if (defaultKind != null) {
+            return defaultKind;
+        }
+        return typeUrl.getTypeName();
+    }
+
+    protected IdRecordPair<I> getRecordFromEntity(Entity entity, TypeUrl stateType) {
+        // Retrieve ID
+        final I id = unpackKey(entity.getKey(), stateType);
+        checkState(id != null, ID_CONVERSION_ERROR_MESSAGE);
+
+        // Retrieve record
+        EntityRecord record = Entities.entityToMessage(entity, RECORD_TYPE_URL);
+        final Any packedState = record.getState();
+        Message state = AnyPacker.unpack(packedState);
+        record = EntityRecord.newBuilder(record)
+                             .setState(AnyPacker.pack(state))
+                             .build();
+        return new IdRecordPair<>(id, record);
     }
 
     /**
@@ -386,21 +350,21 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      *
      * @param <I> type of the {@link org.spine3.server.entity.Entity entity} ID.
      */
-    private static class IdRecordPair<I> {
+    protected static class IdRecordPair<I> {
 
         private final I id;
         private final EntityRecord record;
 
-        private IdRecordPair(I id, EntityRecord record) {
+        protected IdRecordPair(I id, EntityRecord record) {
             this.id = id;
             this.record = record;
         }
 
-        private I getId() {
+        protected I getId() {
             return id;
         }
 
-        private EntityRecord getRecord() {
+        protected EntityRecord getRecord() {
             return record;
         }
     }
