@@ -333,11 +333,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             final EntityRecord fullRecord = recordPair.getRecord();
             final Message fullState = AnyPacker.unpack(fullRecord.getState());
             final Message maskedState = FieldMasks.applyMask(fieldMask, fullState, typeUrl);
-            final LifecycleFlags entityStatus = getEntityStatus(entity);
             final EntityRecord maskedRecord = EntityRecord.newBuilder(fullRecord)
-                                                                        .setState(AnyPacker.pack(maskedState))
-                                                                        .setLifecycleFlags(entityStatus)
-                                                                        .build();
+                                                          .setState(AnyPacker.pack(maskedState))
+                                                          .build();
             records.put(recordPair.getId(), maskedRecord);
         }
 
