@@ -24,7 +24,6 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -74,7 +73,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final String kind;
 
     private static final String VERSION_KEY = "version";
-    private static final String TYPE_URL_PROPERTY_NAME = "type_url";
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
     private static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
             "parse ID from String. " +
@@ -207,7 +205,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             }
         };
 
-        return queryAll(mapper, null, FieldMask.getDefaultInstance());
+        return queryAll(mapper, typeUrl, FieldMask.getDefaultInstance());
     }
 
     /**
@@ -309,15 +307,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Map<I, EntityRecord> queryAll(Function<Entity, IdRecordPair<I>> transformer,
-                                                 @Nullable TypeUrl typeForFilter,
-                                                 FieldMask fieldMask) {
+                                          TypeUrl typeUrl,
+                                          FieldMask fieldMask) {
 
         EntityQuery.Builder builder = Query.newEntityQueryBuilder()
                                            .setKind(kind);
-        if (typeForFilter != null) {
-            final PropertyFilter typeFilter = PropertyFilter.eq(TYPE_URL_PROPERTY_NAME, typeForFilter.value());
-            builder = builder.setFilter(typeFilter);
-        }
         final EntityQuery query = builder.build();
 
         final List<Entity> results = datastore.read(query);
@@ -350,14 +344,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         checkNotNull(id, "ID is null.");
         checkNotNull(entityStorageRecord, "Message is null.");
 
-        final String valueTypeUrl = entityStorageRecord.getState()
-                                                       .getTypeUrl();
-
         final Key key = keyFor(datastore, kind, ofEntityId(id));
         final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
         final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
         entity.set(VERSION_KEY, entityStorageRecord.getVersion().getNumber());
-        entity.set(TYPE_URL_PROPERTY_NAME, valueTypeUrl);
         datastore.createOrUpdate(entity.build());
     }
 
@@ -368,8 +358,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final Collection<Entity> entitiesToWrite = new ArrayList<>(records.size());
         for (Map.Entry<I, EntityRecord> record : records.entrySet()) {
             final EntityRecord entityStorageRecord = record.getValue();
-            final String valueTypeUrl = entityStorageRecord.getState()
-                                                           .getTypeUrl();
             final Key key = keyFor(
                     datastore,
                     kind,
@@ -377,7 +365,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
             final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
             entity.set(VERSION_KEY, entityStorageRecord.getVersion().getNumber());
-            entity.set(TYPE_URL_PROPERTY_NAME, valueTypeUrl);
             entitiesToWrite.add(entity.build());
         }
         datastore.createOrUpdate(entitiesToWrite);
