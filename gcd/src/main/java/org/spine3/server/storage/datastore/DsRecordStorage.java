@@ -107,7 +107,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     public boolean delete(I id) {
         final Key key = keyFor(datastore,
-                               kindFrom(typeUrl),
+                               getKind(),
                                ofEntityId(id));
         datastore.delete(key);
 
@@ -120,7 +120,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
         final Key key = keyFor(datastore,
-                               kindFrom(typeUrl),
+                               getKind(),
                                ofEntityId(id));
         final Entity response = datastore.read(key);
 
@@ -296,7 +296,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public Iterator<I> index() {
         checkNotClosed();
         return Indexes.indexIterator(datastore,
-                                     kindFrom(typeUrl),
+                                     getKind(),
                                      idClass);
     }
 
@@ -345,7 +345,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return new IdRecordPair<>(id, record);
     }
 
-    String getKind() {
+    protected String getKind() {
         return kindFrom(typeUrl);
     }
 
