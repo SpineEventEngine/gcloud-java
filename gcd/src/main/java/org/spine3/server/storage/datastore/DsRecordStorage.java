@@ -24,7 +24,6 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
@@ -387,8 +386,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     public Iterator<I> index() {
         checkNotClosed();
-        final StructuredQuery.Filter filter = PropertyFilter.eq(TYPE_URL_PROPERTY_NAME, typeUrl.getTypeName());
-        return Indexes.indexIterator(datastore, kind, idClass, filter);
+        return Indexes.indexIterator(datastore, kind, idClass);
     }
 
     @VisibleForTesting
