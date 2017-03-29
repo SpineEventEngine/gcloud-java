@@ -198,11 +198,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 Message state = AnyPacker.unpack(packedState);
                 final TypeUrl typeUrl = TypeUrl.from(state.getDescriptorForType());
                 state = FieldMasks.applyMask(fieldMask, state, typeUrl);
-                final LifecycleFlags entityStatus = getEntityStatus(input);
+
                 record = EntityRecord.newBuilder(record)
-                                            .setState(AnyPacker.pack(state))
-                                            .setLifecycleFlags(entityStatus)
-                                            .build();
+                                     .setState(AnyPacker.pack(state))
+                                     .build();
                 return new IdRecordPair<>(id, record);
             }
         };
