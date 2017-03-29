@@ -31,6 +31,7 @@ import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
+import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.type.TypeUrl;
 
@@ -66,9 +67,10 @@ public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     }
 
     @Override
-    protected Entity entityRecordToEntity(AggregateStateId id, EntityRecord record) {
+    protected Entity entityRecordToEntity(AggregateStateId id, EntityRecordWithStorageFields record) {
         final Entity incompleteEntity = super.entityRecordToEntity(id, record);
-        final String typeUrl = record.getState()
+        final String typeUrl = record.getRecord()
+                                     .getState()
                                      .getTypeUrl();
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity)
                                              .set(TYPE_URL_KEY, typeUrl);
