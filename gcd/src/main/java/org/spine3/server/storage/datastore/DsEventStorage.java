@@ -89,8 +89,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
 public class DsEventStorage extends EventStorage {
 
     private final DatastoreWrapper datastore;
-    private static final String KIND = TypeName.from(Event.getDescriptor())
-                                               .value();
+    private static final Kind KIND = Kind.of(Event.getDescriptor());
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.from(Event.getDescriptor());
 
     private static final Function<Entity, Event> ENTITY_TO_EVENT_RECORD
@@ -188,7 +187,7 @@ public class DsEventStorage extends EventStorage {
 
     private static Query<Entity> queryWithFilter(Filter filter) {
         final Query<Entity> query = Query.newEntityQueryBuilder()
-                                         .setKind(KIND)
+                                         .setKind(KIND.getValue())
                                          .setFilter(filter)
                                          .build();
         return query;

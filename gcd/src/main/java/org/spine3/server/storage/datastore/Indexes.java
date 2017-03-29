@@ -56,14 +56,14 @@ public class Indexes {
      * @return an {@link Iterator} of the IDs matching given record kind
      */
     public static <I> Iterator<I> indexIterator(DatastoreWrapper datastore,
-                                                String kind,
+                                                Kind kind,
                                                 Class<I> idClass) {
         checkNotNull(datastore);
         checkNotNull(kind);
         checkNotNull(idClass);
 
         final EntityQuery.Builder query = Query.newEntityQueryBuilder()
-                                               .setKind(kind);
+                                               .setKind(kind.getValue());
         final Iterable<Entity> allEntities = datastore.read(query.build());
         final Iterator<I> idIterator = Iterators.transform(allEntities.iterator(),
                                                            idExtractor(idClass));

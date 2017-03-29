@@ -137,7 +137,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         }
 
         final Key key = DsIdentifiers.keyFor(datastore,
-                                             stateTypeName.value(),
+                                             Kind.of(stateTypeName),
                                              DsIdentifiers.of(eventId));
         final Entity incompleteEntity = Entities.messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
@@ -266,12 +266,12 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     public Iterator<I> index() {
         checkNotClosed();
-        return Indexes.indexIterator(datastore, stateTypeName.value(), idClass);
+        return Indexes.indexIterator(datastore, Kind.of(stateTypeName), idClass);
     }
 
     private Key keyFor(I id) {
         final DatastoreRecordId recordId = generateDatastoreId(id);
-        final Key key = DsIdentifiers.keyFor(datastore, AGGREGATE_LIFECYCLE_KIND.value(), recordId);
+        final Key key = DsIdentifiers.keyFor(datastore, Kind.of(AGGREGATE_LIFECYCLE_KIND), recordId);
         return key;
     }
 

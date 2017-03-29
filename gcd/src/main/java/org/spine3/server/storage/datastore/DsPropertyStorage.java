@@ -58,7 +58,7 @@ public class DsPropertyStorage {
         checkNotNull(value);
 
         final Descriptor typeDescriptor = value.getDescriptorForType();
-        final String kind = kindFrom(typeDescriptor);
+        final Kind kind = Kind.of(typeDescriptor);
 
         final Key key = DsIdentifiers.keyFor(datastore, kind, propertyId);
 
@@ -71,7 +71,7 @@ public class DsPropertyStorage {
         checkNotNull(propertyId);
         checkNotNull(targetTypeDescriptor);
 
-        final String kind = kindFrom(targetTypeDescriptor);
+        final Kind kind = Kind.of(targetTypeDescriptor);
 
         final Key key = DsIdentifiers.keyFor(datastore, kind, propertyId);
         final Entity response = datastore.read(key);
@@ -83,10 +83,6 @@ public class DsPropertyStorage {
         final Any anyResult = entityToMessage(response, ANY_TYPE_URL);
         final V result = AnyPacker.unpack(anyResult);
         return Optional.fromNullable(result);
-    }
-
-    private static String kindFrom(Descriptor descriptor) {
-        return descriptor.getFullName();
     }
 
     /**

@@ -46,7 +46,7 @@ import static org.spine3.validate.Validate.isDefault;
  */
 public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
-    private static final String KIND = "spine3.stand_storage_record";
+    private static final Kind KIND = Kind.of("spine3.stand_storage_record");
 
     private static final String TYPE_URL_KEY = "type_name";
 
@@ -61,7 +61,7 @@ public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") // Overrides a pure method behavior
     @Override
-    protected String getDefaultKind() {
+    protected Kind getDefaultKind() {
         return KIND;
     }
 

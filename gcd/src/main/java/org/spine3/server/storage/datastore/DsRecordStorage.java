@@ -252,8 +252,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     protected EntityQuery buildAllQuery(TypeUrl typeUrl) {
+        final String entityKind = kindFrom(typeUrl).getValue();
         final EntityQuery query = Query.newEntityQueryBuilder()
-                                       .setKind(kindFrom(typeUrl))
+                                       .setKind(entityKind)
                                        .build();
         return query;
     }
@@ -301,7 +302,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Nullable
-    protected String getDefaultKind() {
+    protected Kind getDefaultKind() {
         return null;
     }
 
@@ -310,24 +311,23 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return id;
     }
 
-    private String kindFrom(EntityRecord record) {
-        final String defaultKind = getDefaultKind();
+    private Kind kindFrom(EntityRecord record) {
+        final Kind defaultKind = getDefaultKind();
         if (defaultKind != null) {
             return defaultKind;
         }
         final Any packedState = record.getState();
         final Message state = AnyPacker.unpack(packedState);
-        final String typeName = state.getDescriptorForType()
-                                     .getFullName();
-        return typeName;
+        final Kind kind = Kind.of(state);
+        return kind;
     }
 
-    private String kindFrom(TypeUrl typeUrl) {
-        final String defaultKind = getDefaultKind();
+    private Kind kindFrom(TypeUrl typeUrl) {
+        final Kind defaultKind = getDefaultKind();
         if (defaultKind != null) {
             return defaultKind;
         }
-        return typeUrl.getTypeName();
+        return Kind.of(typeUrl);
     }
 
     protected IdRecordPair<I> getRecordFromEntity(Entity entity, TypeUrl stateType) {
@@ -345,7 +345,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return new IdRecordPair<>(id, record);
     }
 
-    protected String getKind() {
+    protected Kind getKind() {
         return kindFrom(typeUrl);
     }
 
