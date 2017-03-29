@@ -29,7 +29,6 @@ import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -90,8 +89,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public StandStorage createStandStorage() {
-        final DsRecordStorage<AggregateStateId> recordStorage
-                = (DsRecordStorage<AggregateStateId>) createRecordStorage(StandStorageRecord.class);
+        final DsStandStorageDelegate recordStorage = new DsStandStorageDelegate(datastore, multitenant);
         final DsStandStorage result = new DsStandStorage(recordStorage, multitenant);
         return result;
     }

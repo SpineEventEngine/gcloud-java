@@ -29,7 +29,9 @@ import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.storage.Project;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -64,6 +66,14 @@ public class DatastoreStorageFactoryShould {
         assertNotNull(storage);
     }
 
+    @Test
+    public void create_separate_record_storage_per_state_type() {
+        final DsRecordStorage<?> storage = (DsRecordStorage<?>) datastoreFactory.createRecordStorage(TestEntity.class);
+        final DsRecordStorage<?> differentStorage =
+                (DsRecordStorage<?>) datastoreFactory.createRecordStorage(DifferentTestEntity.class);
+        assertNotEquals(storage.getKind(), differentStorage.getKind());
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_to_create_aggregate_storage_not_using_class_parameter() {
@@ -74,6 +84,12 @@ public class DatastoreStorageFactoryShould {
     private static class TestEntity extends AbstractEntity<String, StringValue> {
 
         private TestEntity(String id) {
+            super(id);
+        }
+    }
+
+    private static class DifferentTestEntity extends AbstractEntity<String, Project> {
+        protected DifferentTestEntity(String id) {
             super(id);
         }
     }

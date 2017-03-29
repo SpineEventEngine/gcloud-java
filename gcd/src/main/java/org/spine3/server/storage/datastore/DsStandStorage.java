@@ -44,9 +44,9 @@ import java.util.Map;
 @SuppressWarnings("WeakerAccess")   // Part of API
 public class DsStandStorage extends StandStorage {
 
-    private final DsRecordStorage<AggregateStateId> recordStorage;
+    private final DsStandStorageDelegate recordStorage;
 
-    public DsStandStorage(DsRecordStorage<AggregateStateId> recordStorage, boolean multitenant) {
+    public DsStandStorage(DsStandStorageDelegate recordStorage, boolean multitenant) {
         super(multitenant);
         this.recordStorage = recordStorage;
     }

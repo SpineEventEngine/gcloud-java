@@ -24,7 +24,6 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import org.spine3.base.Stringifiers;
@@ -49,47 +48,24 @@ public class Indexes {
     /**
      * Retrieves the ID index for the given {@code kind} or the storage records.
      *
-     * <p>A call to this method is equivalent to {@code indexIterator(datastore, kind, idClass, null)}.
-     *
      * @param datastore datastore to get the indexes for
      * @param kind      the kind if the records in the datastore
      * @param idClass   {@link Class} of the record ID
      * @param <I>       type of the IDs to retrieve
      * @return an {@link Iterator} of the IDs matching given record kind
-     * @see #indexIterator(DatastoreWrapper, String, Class, StructuredQuery.Filter)
      */
     public static <I> Iterator<I> indexIterator(DatastoreWrapper datastore,
-                                                String kind,
+                                                Kind kind,
                                                 Class<I> idClass) {
-        return indexIterator(datastore, kind, idClass, null);
-    }
-
-    /**
-     * Retrieves the ID index for the given {@code kind} or the storage records.
-     *
-     * @param datastore datastore to get the indexes for
-     * @param kind      the kind if the records in the datastore
-     * @param idClass   {@link Class} of the record ID
-     * @param filter    custom filters for selecting only a subset of the records of given type from datastore;
-     *                  {@code null} stands for no custom filters
-     * @param <I>       type of the IDs to retrieve
-     * @return an {@link Iterator} of the IDs matching given record kind and filter
-     */
-    public static <I> Iterator<I> indexIterator(DatastoreWrapper datastore,
-                                                String kind,
-                                                Class<I> idClass,
-                                                @Nullable StructuredQuery.Filter filter) {
         checkNotNull(datastore);
         checkNotNull(kind);
         checkNotNull(idClass);
 
         final EntityQuery.Builder query = Query.newEntityQueryBuilder()
-                                               .setKind(kind);
-        if (filter != null) {
-            query.setFilter(filter);
-        }
+                                               .setKind(kind.getValue());
         final Iterable<Entity> allEntities = datastore.read(query.build());
-        final Iterator<I> idIterator = Iterators.transform(allEntities.iterator(), idExtractor(idClass));
+        final Iterator<I> idIterator = Iterators.transform(allEntities.iterator(),
+                                                           idExtractor(idClass));
         return idIterator;
     }
 
