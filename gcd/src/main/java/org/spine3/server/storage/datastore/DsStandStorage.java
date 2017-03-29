@@ -93,12 +93,12 @@ public class DsStandStorage extends StandStorage {
 
     @Override
     protected Map<AggregateStateId, EntityRecord> readAllRecords() {
-        return readAllRecords(FieldMask.getDefaultInstance());
+        return recordStorage.readAll();
     }
 
     @Override
     protected Map<AggregateStateId, EntityRecord> readAllRecords(FieldMask fieldMask) {
-        return recordStorage.readAllRecords(fieldMask);
+        return recordStorage.readAll(fieldMask);
     }
 
     @Override
@@ -114,5 +114,11 @@ public class DsStandStorage extends StandStorage {
     @SuppressWarnings("unused") // Part of API
     protected RecordStorage<AggregateStateId> getRecordStorage() {
         return recordStorage;
+    }
+
+    @Override
+    public void close() throws Exception {
+        super.close();
+        recordStorage.close();
     }
 }
