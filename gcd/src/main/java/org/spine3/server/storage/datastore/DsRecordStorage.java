@@ -26,6 +26,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -71,11 +72,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
     private final Class<I> idClass;
+    private final String kind;
 
     private static final String VERSION_KEY = "version";
     private static final String TYPE_URL_PROPERTY_NAME = "type_url";
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
-    private static final String KIND = RECORD_TYPE_URL.value();
     private static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
             "parse ID from String. " +
             "Note: custom conversion is not supported. " +
@@ -106,11 +107,12 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
         this.idClass = checkNotNull(idClass);
+        this.kind = descriptor.getFullName();
     }
 
     @Override
     public boolean delete(I id) {
-        final Key key = keyFor(datastore, KIND, ofEntityId(id));
+        final Key key = keyFor(datastore, kind, ofEntityId(id));
         datastore.delete(key);
 
         // Check presence
@@ -121,7 +123,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Nullable
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
-        final Key key = keyFor(datastore, KIND, ofEntityId(id));
+        final Key key = keyFor(datastore, kind, ofEntityId(id));
         final Entity response = datastore.read(key);
 
         if (response == null) {
@@ -297,7 +299,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         final Collection<Key> keys = new LinkedList<>();
         for (I id : ids) {
-            final Key key = keyFor(datastore, KIND, ofEntityId(id));
+            final Key key = keyFor(datastore, kind, ofEntityId(id));
             keys.add(key);
         }
 
@@ -312,7 +314,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                                  FieldMask fieldMask) {
 
         EntityQuery.Builder builder = Query.newEntityQueryBuilder()
-                                           .setKind(KIND);
+                                           .setKind(kind);
         if (typeForFilter != null) {
             final PropertyFilter typeFilter = PropertyFilter.eq(TYPE_URL_PROPERTY_NAME, typeForFilter.value());
             builder = builder.setFilter(typeFilter);
@@ -352,7 +354,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final String valueTypeUrl = entityStorageRecord.getState()
                                                        .getTypeUrl();
 
-        final Key key = keyFor(datastore, KIND, ofEntityId(id));
+        final Key key = keyFor(datastore, kind, ofEntityId(id));
         final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
         final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
         entity.set(VERSION_KEY, entityStorageRecord.getVersion().getNumber());
@@ -371,7 +373,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                                            .getTypeUrl();
             final Key key = keyFor(
                     datastore,
-                    KIND,
+                    kind,
                     ofEntityId(record.getKey()));
             final Entity incompleteEntity = Entities.messageToEntity(entityStorageRecord, key);
             final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
@@ -386,7 +388,12 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public Iterator<I> index() {
         checkNotClosed();
         final StructuredQuery.Filter filter = PropertyFilter.eq(TYPE_URL_PROPERTY_NAME, typeUrl.getTypeName());
-        return Indexes.indexIterator(datastore, KIND, idClass, filter);
+        return Indexes.indexIterator(datastore, kind, idClass, filter);
+    }
+
+    @VisibleForTesting
+    String getKind() {
+        return kind;
     }
 
     /**
