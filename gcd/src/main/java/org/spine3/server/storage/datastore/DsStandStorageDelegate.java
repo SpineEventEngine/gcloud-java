@@ -42,9 +42,12 @@ import static org.spine3.server.storage.datastore.DsProperties.activedEntityPred
 import static org.spine3.validate.Validate.isDefault;
 
 /**
+ * A {@link org.spine3.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage} delegates its
+ * operations.
+ *
  * @author Dmytro Dashenkov
  */
-public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
+class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
     private static final Kind KIND = Kind.of("spine3.stand_storage_record");
 
