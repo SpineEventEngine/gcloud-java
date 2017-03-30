@@ -49,26 +49,23 @@ public class Indexes {
      *
      * @param datastore datastore to get the indexes for
      * @param kind      the kind if the records in the datastore
-     * @param idClass   {@link Class} of the record ID
      * @param <I>       type of the IDs to retrieve
      * @return an {@link Iterator} of the IDs matching given record kind
      */
     public static <I> Iterator<I> indexIterator(DatastoreWrapper datastore,
-                                                Kind kind,
-                                                Class<I> idClass) {
+                                                Kind kind) {
         checkNotNull(datastore);
         checkNotNull(kind);
-        checkNotNull(idClass);
 
         final EntityQuery.Builder query = Query.newEntityQueryBuilder()
                                                .setKind(kind.getValue());
         final Iterable<Entity> allEntities = datastore.read(query.build());
         final Iterator<I> idIterator = Iterators.transform(allEntities.iterator(),
-                                                           idExtractor(idClass));
+                                                           Indexes.<I>idExtractor());
         return idIterator;
     }
 
-    private static <I> Function<Entity, I> idExtractor(final Class<I> idClass) {
+    private static <I> Function<Entity, I> idExtractor() {
         return new Function<Entity, I>() {
             @Override
             public I apply(@Nullable Entity input) {
@@ -76,7 +73,6 @@ public class Indexes {
                 final Key key = input.getKey();
                 final String stringId = key.getName();
                 final I id = IdTransformer.idFromString(stringId, null);
-                //final I id = Stringifiers.fromString(stringId, idClass);
                 return id;
             }
         };

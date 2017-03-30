@@ -23,9 +23,12 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery.Filter;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterators;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
@@ -37,10 +40,13 @@ import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.type.TypeUrl;
 
+import javax.annotation.Nullable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.datastore.DsProperties.activedEntityPredicate;
 import static org.spine3.validate.Validate.isDefault;
 
@@ -51,7 +57,7 @@ public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
     private static final Kind KIND = Kind.of("spine3.stand_storage_record");
 
-    private static final String TYPE_URL_KEY = "type_name";
+    private static final String TYPE_URL_KEY = "type_url";
 
     /**
      * Creates a new storage instance.
@@ -123,6 +129,28 @@ public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         return records.build();
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // Overrides parent behavior
+    @Override
+    public Iterator<AggregateStateId> index() {
+        checkNotClosed();
+
+        final EntityQuery.Builder query = Query.newEntityQueryBuilder()
+                                               .setKind(KIND.getValue());
+
+        final Iterable<Entity> allEntities = getDatastore().read(query.build());
+        final Iterator<AggregateStateId> idIterator =
+                Iterators.transform(allEntities.iterator(),
+                                    new Function<Entity, AggregateStateId>() {
+                                        @Override
+                                        public AggregateStateId apply(@Nullable Entity entity) {
+                                            checkNotNull(entity);
+                                            final AggregateStateId result = unpackKey(entity);
+                                            return result;
+                                        }
+                                    });
+        return idIterator;
+    }
+
     @SuppressWarnings("MethodDoesntCallSuperMethod")
         // Ignore Storage Fields since StandStorage does not support them yet
     @Override
@@ -141,7 +169,10 @@ public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") // Overrides parent behavior
     @Override
-    protected AggregateStateId unpackKey(Key key, TypeUrl stateType) {
+    protected AggregateStateId unpackKey(Entity entity) {
+        final Key key = entity.getKey();
+        final String typeUrl = entity.getString(TYPE_URL_KEY);
+        final TypeUrl stateType = TypeUrl.parse(typeUrl);
         final Object genericId = IdTransformer.idFromString(key.getName(), null);
         final AggregateStateId aggregateStateId = AggregateStateId.of(genericId, stateType);
         return aggregateStateId;

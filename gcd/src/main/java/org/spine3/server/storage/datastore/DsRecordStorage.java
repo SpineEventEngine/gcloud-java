@@ -339,8 +339,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public Iterator<I> index() {
         checkNotClosed();
         return Indexes.indexIterator(datastore,
-                                     getKind(),
-                                     idClass);
+                                     getKind());
     }
 
     @Nullable
@@ -348,8 +347,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return null;
     }
 
-    protected I unpackKey(Key key, @SuppressWarnings("unused") TypeUrl stateType) {
-        final I id = IdTransformer.idFromString(key.getName(), null);
+    protected I unpackKey(Entity entity) {
+        final String stringId = entity.getKey().getName();
+        final I id = IdTransformer.idFromString(stringId, null);
         return id;
     }
 
@@ -374,7 +374,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     protected IdRecordPair<I> getRecordFromEntity(Entity entity, TypeUrl stateType) {
         // Retrieve ID
-        final I id = unpackKey(entity.getKey(), stateType);
+        final I id = unpackKey(entity);
         checkState(id != null, ID_CONVERSION_ERROR_MESSAGE);
 
         // Retrieve record

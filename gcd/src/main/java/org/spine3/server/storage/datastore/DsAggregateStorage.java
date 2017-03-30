@@ -28,9 +28,11 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
+import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.aggregate.AggregateStorage;
@@ -47,7 +49,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.not;
-import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.aggregate.storage.AggregateField.aggregate_id;
 import static org.spine3.server.storage.datastore.DsProperties.activedEntityPredicate;
 import static org.spine3.server.storage.datastore.DsProperties.addArchivedProperty;
@@ -127,10 +128,10 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected void writeRecord(I id, AggregateEventRecord record) {
         checkNotNull(id);
 
-        final String stringId = idToString(id);
-        String eventId = idToString(record.getEvent()
-                                          .getContext()
-                                          .getEventId());
+        final String stringId = Stringifiers.toString(id);
+        String eventId = Stringifiers.toString(record.getEvent()
+                                                     .getContext()
+                                                     .getEventId());
         if (eventId.isEmpty()) {
             // Snapshots have no Event IDs.
             eventId = SNAPSHOT + stringId;
@@ -149,7 +150,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected Iterator<AggregateEventRecord> historyBackward(I id) {
         checkNotNull(id);
 
-        final String idString = idToString(id);
+        final String idString = Stringifiers.toString(id);
         final Query<Entity> query = Query.newEntityQueryBuilder()
                                          .setKind(stateTypeName.value())
                                          .setFilter(StructuredQuery.PropertyFilter.eq(aggregate_id.toString(), idString))
@@ -201,7 +202,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      * @return the Datastore record ID
      */
     protected DatastoreRecordId generateDatastoreId(I id) {
-        final String stringId = idToString(id);
+        final String stringId = Stringifiers.toString(id);
         final String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
         return DsIdentifiers.of(datastoreId);
     }
@@ -266,13 +267,35 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     public Iterator<I> index() {
         checkNotClosed();
-        return Indexes.indexIterator(datastore, Kind.of(stateTypeName), idClass);
+
+        final Query<Entity> allQuery = Query.newEntityQueryBuilder()
+                                            .setKind(stateTypeName.value())
+                                            .build();
+        final List<Entity> allRecords = datastore.read(allQuery);
+        final Iterator<I> index = Iterators.transform(allRecords.iterator(), new IndexExtractror<>(idClass));
+        return index;
     }
 
     private Key keyFor(I id) {
         final DatastoreRecordId recordId = generateDatastoreId(id);
         final Key key = DsIdentifiers.keyFor(datastore, Kind.of(AGGREGATE_LIFECYCLE_KIND), recordId);
         return key;
+    }
+
+    private static class IndexExtractror<I> implements Function<Entity, I> {
+
+        private final Class<I> idClass;
+
+        public IndexExtractror(Class<I> idClass) {
+            this.idClass = idClass;
+        }
+
+        @Override
+        public I apply(@Nullable Entity entity) {
+            checkNotNull(entity);
+            final String stringId = entity.getString(aggregate_id.toString());
+            return Stringifiers.fromString(stringId, idClass);
+        }
     }
 
     private static class IsActiveAggregateId implements Predicate<Entity> {
