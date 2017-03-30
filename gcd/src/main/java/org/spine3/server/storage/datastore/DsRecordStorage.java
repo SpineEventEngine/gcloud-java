@@ -24,8 +24,6 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.StructuredQuery;
-import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -39,6 +37,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.type.TypeUrl;
@@ -263,12 +262,21 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     protected Entity entityRecordToEntity(I id, EntityRecordWithStorageFields record) {
-        // TODO:2017-03-29:dmytro.dashenkov: Manage storage fields here.
         final EntityRecord entityRecord = record.getRecord();
         final Key key = keyFor(datastore,
                                kindFrom(entityRecord),
                                ofEntityId(id));
         final Entity incompleteEntity = Entities.messageToEntity(entityRecord, key);
+
+        if (record.hasStorageFields()) {
+            final Map<String, Column.MemoizedValue<?>> storageFields = record.getStorageFields();
+            for (Map.Entry<String, Column.MemoizedValue<?>> field : storageFields.entrySet()) {
+                final Column<?> storageColumn = field.getValue()
+                                                     .getSourceColumn();
+                final Class<?> fieldType = storageColumn.getType();
+//                final DatastoreColumnType<?, ?> columnType =
+            }
+        }
 
         final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
         entity.set(VERSION_KEY, entityRecord.getVersion()
