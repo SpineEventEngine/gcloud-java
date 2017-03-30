@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
-import static org.spine3.server.storage.datastore.DsProperties.activeEntityPredicate;
+import static org.spine3.server.storage.datastore.Entities.activeEntity;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -95,7 +95,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
         final List<Entity> results = getDatastore().read(query);
 
-        final Predicate<Entity> archivedAndDeletedFilter = activeEntityPredicate();
+        final Predicate<Entity> archivedAndDeletedFilter = activeEntity();
 
         final ImmutableMap.Builder<AggregateStateId, EntityRecord> records = new ImmutableMap.Builder<>();
         for (Entity entity : results) {

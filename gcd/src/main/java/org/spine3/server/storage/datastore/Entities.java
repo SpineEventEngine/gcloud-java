@@ -24,6 +24,7 @@ import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.BlobValue;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
@@ -51,6 +52,18 @@ import static org.spine3.server.storage.datastore.DsProperties.isDeleted;
  */
 @SuppressWarnings("UtilityClass")
 class Entities {
+
+    private static final Predicate<Entity> NOT_ARCHIVED_OR_DELETED = new Predicate<Entity>() {
+        @Override
+        public boolean apply(@Nullable Entity input) {
+            if (input == null) {
+                return false;
+            }
+            final boolean isNotArchived = !isArchived(input);
+            final boolean isNotDeleted = !isDeleted(input);
+            return isNotArchived && isNotDeleted;
+        }
+    };
 
     private static final String DEFAULT_MESSAGE_FACTORY_METHOD_NAME = "getDefaultInstance";
 
@@ -153,6 +166,10 @@ class Entities {
                                                   .setDeleted(deleted)
                                                   .build();
         return result;
+    }
+
+    static Predicate<Entity> activeEntity() {
+        return NOT_ARCHIVED_OR_DELETED;
     }
 
     @SuppressWarnings("unchecked")
