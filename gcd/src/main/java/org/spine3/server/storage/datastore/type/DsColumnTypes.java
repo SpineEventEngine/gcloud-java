@@ -23,6 +23,7 @@ package org.spine3.server.storage.datastore.type;
 import com.google.cloud.datastore.DateTime;
 import com.google.cloud.datastore.Entity;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Version;
 import org.spine3.protobuf.Timestamps2;
 
 import java.util.Date;
@@ -50,6 +51,10 @@ public class DsColumnTypes {
 
     public static DatastoreColumnType<Timestamp, DateTime> timestampType() {
         return new TimestampColumnType();
+    }
+
+    public static DatastoreColumnType<Version, Integer> versionType() {
+        return new VersionColumnType();
     }
 
     private static class StringColumnType
@@ -89,6 +94,19 @@ public class DsColumnTypes {
 
         @Override
         public void setColumnValue(Entity.Builder storageRecord, DateTime value, String columnIdentifier) {
+            storageRecord.set(columnIdentifier, value);
+        }
+    }
+
+    private static class VersionColumnType implements DatastoreColumnType<Version, Integer> {
+
+        @Override
+        public Integer convertColumnValue(Version fieldValue) {
+            return fieldValue.getNumber();
+        }
+
+        @Override
+        public void setColumnValue(Entity.Builder storageRecord, Integer value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }

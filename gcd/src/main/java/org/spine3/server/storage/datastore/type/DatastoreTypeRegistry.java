@@ -21,9 +21,14 @@
 package org.spine3.server.storage.datastore.type;
 
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Version;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 
-import static org.spine3.server.storage.datastore.type.DsColumnTypes.*;
+import static org.spine3.server.storage.datastore.type.DsColumnTypes.booleanType;
+import static org.spine3.server.storage.datastore.type.DsColumnTypes.integerType;
+import static org.spine3.server.storage.datastore.type.DsColumnTypes.stringType;
+import static org.spine3.server.storage.datastore.type.DsColumnTypes.timestampType;
+import static org.spine3.server.storage.datastore.type.DsColumnTypes.versionType;
 
 /**
  * @author Dmytro Dashenkov
@@ -36,6 +41,7 @@ public class DatastoreTypeRegistry {
                               .put(Integer.class, integerType())
                               .put(Boolean.class, booleanType())
                               .put(Timestamp.class, timestampType())
+                              .put(Version.class, versionType())
                               .build();
 
     private DatastoreTypeRegistry() {
