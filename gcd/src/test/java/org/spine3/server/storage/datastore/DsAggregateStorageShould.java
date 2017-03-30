@@ -27,6 +27,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.Stringifier;
+import org.spine3.base.StringifierRegistry;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.aggregate.AggregateStorageShould;
@@ -48,6 +50,24 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
             log().error("Failed to initialize local datastore factory", e);
             throw new RuntimeException(e);
         }
+    }
+
+    @BeforeClass
+    public static void setUpAll() {
+        StringifierRegistry.getInstance()
+                           .register(new Stringifier<ProjectId>() {
+                               @Override
+                               protected String toString(ProjectId obj) {
+                                   return obj.getId();
+                               }
+
+                               @Override
+                               protected ProjectId fromString(String s) {
+                                   return ProjectId.newBuilder()
+                                                   .setId(s)
+                                                   .build();
+                               }
+                           }, ProjectId.class);
     }
 
     @BeforeClass
@@ -76,7 +96,7 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         return datastoreFactory.createAggregateStorage(aClass);
     }
 
-    @SuppressWarnings("RefusedBequest")
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override // Override method with the same behavior to change ID value
     public void write_and_read_event_by_Long_id() {
         final AggregateStorage storage = getStorage(TestAggregateWithIdLong.class);
@@ -107,6 +127,7 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
+
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")

@@ -23,8 +23,11 @@ package org.spine3.server.storage.datastore;
 import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Stringifier;
+import org.spine3.base.StringifierRegistry;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.storage.Project;
@@ -42,6 +45,24 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
 
     private static final TestDatastoreStorageFactory datastoreFactory
             = TestDatastoreStorageFactory.getDefaultInstance();
+
+    @BeforeClass
+    public static void setUpAll() {
+        StringifierRegistry.getInstance()
+                           .register(new Stringifier<ProjectId>() {
+                               @Override
+                               protected String toString(ProjectId obj) {
+                                   return obj.getId();
+                               }
+
+                               @Override
+                               protected ProjectId fromString(String s) {
+                                   return ProjectId.newBuilder()
+                                                   .setId(s)
+                                                   .build();
+                               }
+                           }, ProjectId.class);
+    }
 
     @Before
     public void setUp() throws Exception {
