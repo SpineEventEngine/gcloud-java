@@ -25,7 +25,7 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.server.entity.storage.ColumnTypeRegistry;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -94,7 +94,7 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private TestDatastoreStorageFactory(Datastore datastore) {
-        super(datastore, false, ColumnTypeRegistry.empty());
+        super(datastore, false, DatastoreTypeRegistry.defaultInstance());
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")

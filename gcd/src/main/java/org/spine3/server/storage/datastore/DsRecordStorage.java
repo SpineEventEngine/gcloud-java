@@ -38,8 +38,10 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.Column;
+import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -71,6 +73,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
     private final Class<I> idClass;
+    private final ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry;
 
     private static final String VERSION_KEY = "version";
     protected static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
@@ -99,11 +102,16 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param descriptor the descriptor of the type of messages to save to the storage
      * @param datastore  the Datastore implementation to use
      */
-    public DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore, boolean multitenant, Class<I> idClass) {
+    public DsRecordStorage(Descriptor descriptor,
+                           DatastoreWrapper datastore,
+                           boolean multitenant,
+                           Class<I> idClass,
+                           ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
         this.idClass = checkNotNull(idClass);
+        this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
     }
 
     @Override
@@ -267,22 +275,43 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                kindFrom(entityRecord),
                                ofEntityId(id));
         final Entity incompleteEntity = Entities.messageToEntity(entityRecord, key);
-
-        if (record.hasStorageFields()) {
-            final Map<String, Column.MemoizedValue<?>> storageFields = record.getStorageFields();
-            for (Map.Entry<String, Column.MemoizedValue<?>> field : storageFields.entrySet()) {
-                final Column<?> storageColumn = field.getValue()
-                                                     .getSourceColumn();
-                final Class<?> fieldType = storageColumn.getType();
-//                final DatastoreColumnType<?, ?> columnType =
-            }
-        }
-
         final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
+
+        populateFromStorageFields(entity, record);
+
         entity.set(VERSION_KEY, entityRecord.getVersion()
                                             .getNumber());
         final Entity completeEntity = entity.build();
         return completeEntity;
+    }
+
+    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithStorageFields record) {
+        if (record.hasStorageFields()) {
+            final Map<String, Column.MemoizedValue<?>> storageFields = record.getStorageFields();
+            for (Map.Entry<String, Column.MemoizedValue<?>> field : storageFields.entrySet()) {
+                appendValue(entity, field.getValue(), columnTypeRegistry);
+            }
+        }
+    }
+
+    private static <T, S> void appendValue(Entity.Builder entity,
+                                           Column.MemoizedValue<T> value,
+                                           ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry) {
+        if (value.isNull()) {
+            return;
+        }
+        final Column<T> storageColumn = value.getSourceColumn();
+
+        @SuppressWarnings("unchecked")
+        final DatastoreColumnType<T, S> columnType = columnTypeRegistry.get(storageColumn);
+        checkState(columnType != null,
+                   "Missing Column Type definition for type %s",
+                   storageColumn.getType());
+
+        final T initialValue = value.getValue();
+        checkNotNull(initialValue);
+        final S storedValue = columnType.convertColumnValue(initialValue);
+        columnType.setColumnValue(entity, storedValue, storageColumn.getName());
     }
 
     @Override

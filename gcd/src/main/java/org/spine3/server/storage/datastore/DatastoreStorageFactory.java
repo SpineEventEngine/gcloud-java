@@ -32,6 +32,8 @@ import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.datastore.type.DatastoreColumnType;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
 import org.spine3.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,7 +55,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private DatastoreWrapper datastore;
     private final boolean multitenant;
-    private final ColumnTypeRegistry typeRegistry;
+    private final ColumnTypeRegistry<DatastoreColumnType> typeRegistry;
 
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
     private DatastoreStorageFactory(Builder builder) {
@@ -64,7 +66,9 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @VisibleForTesting
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
-    protected DatastoreStorageFactory(Datastore datastore, boolean multitenant, ColumnTypeRegistry typeRegistry) {
+    protected DatastoreStorageFactory(Datastore datastore,
+                                      boolean multitenant,
+                                      ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
         initDatastoreWrapper(datastore);
@@ -111,7 +115,11 @@ public class DatastoreStorageFactory implements StorageFactory {
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
         final Descriptor descriptor = (Descriptor) typeUrl.getDescriptor();
         final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
-        final DsRecordStorage<I> result = new DsRecordStorage<>(descriptor, getDatastore(), multitenant, idClass);
+        final DsRecordStorage<I> result = new DsRecordStorage<>(descriptor,
+                                                                getDatastore(),
+                                                                multitenant,
+                                                                idClass,
+                                                                typeRegistry);
         return result;
     }
 
@@ -155,7 +163,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         private Datastore datastore;
         private boolean multitenant;
-        private ColumnTypeRegistry typeRegistry;
+        private ColumnTypeRegistry<DatastoreColumnType> typeRegistry = DatastoreTypeRegistry.defaultInstance();
 
         private Builder() {
         }
@@ -170,7 +178,7 @@ public class DatastoreStorageFactory implements StorageFactory {
             return this;
         }
 
-        public Builder setTypeRegistry(ColumnTypeRegistry typeRegistry) {
+        public Builder setTypeRegistry(ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
             this.typeRegistry = typeRegistry;
             return this;
         }

@@ -30,8 +30,8 @@ import static org.spine3.server.storage.datastore.type.DsColumnTypes.*;
  */
 public class DatastoreTypeRegistry {
 
-    private static final ColumnTypeRegistry DEFAULT_REGISTRY =
-            ColumnTypeRegistry.newBuilder()
+    private static final ColumnTypeRegistry<DatastoreColumnType> DEFAULT_REGISTRY =
+            ColumnTypeRegistry.<DatastoreColumnType>newBuilder()
                               .put(String.class, stringType())
                               .put(Integer.class, integerType())
                               .put(Boolean.class, booleanType())
@@ -42,11 +42,11 @@ public class DatastoreTypeRegistry {
         // Prevent initialization of a utility class
     }
 
-    public static ColumnTypeRegistry defaultInstance() {
+    public static ColumnTypeRegistry<DatastoreColumnType> defaultInstance() {
         return DEFAULT_REGISTRY;
     }
 
-    public static ColumnTypeRegistry.Builder predifinedValuesAnd() {
+    public static ColumnTypeRegistry.Builder<DatastoreColumnType> predifinedValuesAnd() {
         return ColumnTypeRegistry.newBuilder(DEFAULT_REGISTRY);
     }
 }

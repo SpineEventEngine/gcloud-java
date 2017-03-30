@@ -31,8 +31,10 @@ import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
+import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.type.TypeUrl;
 
 import java.util.List;
@@ -57,7 +59,11 @@ public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
      * @param datastore the Datastore implementation to use
      */
     public DsStandStorageDelegate(DatastoreWrapper datastore, boolean multitenant) {
-        super(EntityRecord.getDescriptor(), datastore, multitenant, AggregateStateId.class);
+        super(EntityRecord.getDescriptor(),
+              datastore,
+              multitenant,
+              AggregateStateId.class,
+              ColumnTypeRegistry.<DatastoreColumnType>empty());
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") // Overrides a pure method behavior
@@ -115,6 +121,13 @@ public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         }
 
         return records.build();
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+        // Ignore Storage Fields since StandStorage does not support them yet
+    @Override
+    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithStorageFields record) {
+        // NOP
     }
 
     protected EntityQuery buildByTypeQuery(TypeUrl typeUrl) {
