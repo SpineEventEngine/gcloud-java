@@ -152,7 +152,10 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final String idString = idToString(id);
         final Query<Entity> query = Query.newEntityQueryBuilder()
                                          .setKind(stateTypeName.value())
-                                         .setFilter(StructuredQuery.PropertyFilter.eq(aggregate_id.toString(), idString))
+                                         .setFilter(
+                                                 StructuredQuery.PropertyFilter.eq(
+                                                         aggregate_id.toString(),
+                                                         idString))
                                          .build();
         final List<Entity> eventEntities = datastore.read(query);
         if (eventEntities.isEmpty()) {
@@ -175,7 +178,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final Collection<Entity> filteredEntities = Collections2.filter(eventEntities,
                                                                         new IsActiveAggregateId(inactiveAggregateKeys));
-        final List<AggregateEventRecord> immutableResult = Entities.entitiesToMessages(filteredEntities, AGGREGATE_RECORD_TYPE_URL);
+        final List<AggregateEventRecord> immutableResult = Entities.entitiesToMessages(filteredEntities,
+                                                                                       AGGREGATE_RECORD_TYPE_URL);
         final List<AggregateEventRecord> records = Lists.newArrayList(immutableResult);
 
         Collections.sort(records, new Comparator<AggregateEventRecord>() {
