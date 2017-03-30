@@ -26,7 +26,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
-import org.spine3.base.Stringifiers;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -76,7 +75,8 @@ public class Indexes {
                 checkNotNull(input);
                 final Key key = input.getKey();
                 final String stringId = key.getName();
-                final I id = Stringifiers.fromString(stringId, idClass);
+                final I id = IdTransformer.idFromString(stringId, null);
+                //final I id = Stringifiers.fromString(stringId, idClass);
                 return id;
             }
         };
