@@ -55,8 +55,6 @@ import static org.spine3.server.storage.LifecycleFlagField.archived;
 @SuppressWarnings("UtilityClass")
 class DsProperties {
 
-
-
     private DsProperties() {
     }
 
