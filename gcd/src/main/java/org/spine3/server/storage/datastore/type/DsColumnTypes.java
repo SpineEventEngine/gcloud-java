@@ -22,8 +22,10 @@ package org.spine3.server.storage.datastore.type;
 
 import com.google.cloud.datastore.DateTime;
 import com.google.cloud.datastore.Entity;
+import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Version;
+import org.spine3.json.Json;
 import org.spine3.protobuf.Timestamps2;
 
 import java.util.Date;
@@ -51,6 +53,10 @@ public class DsColumnTypes {
 
     public static DatastoreColumnType<Timestamp, DateTime> timestampType() {
         return new TimestampColumnType();
+    }
+
+    public static DatastoreColumnType<AbstractMessage, String> messageType() {
+        return new MessageType();
     }
 
     public static DatastoreColumnType<Version, Integer> versionType() {
@@ -107,6 +113,19 @@ public class DsColumnTypes {
 
         @Override
         public void setColumnValue(Entity.Builder storageRecord, Integer value, String columnIdentifier) {
+            storageRecord.set(columnIdentifier, value);
+        }
+    }
+
+    private static class MessageType implements DatastoreColumnType<AbstractMessage, String> {
+
+        @Override
+        public String convertColumnValue(AbstractMessage fieldValue) {
+            return Json.toJson(fieldValue);
+        }
+
+        @Override
+        public void setColumnValue(Entity.Builder storageRecord, String value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
