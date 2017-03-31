@@ -211,8 +211,8 @@ public class DatastoreWrapper {
             if (query instanceof StructuredQuery) {
                 final StructuredQuery<Entity> structuredQuery = (StructuredQuery<Entity>) query;
                 queryForMoreResults = structuredQuery.toBuilder()
-                        .setStartCursor(cursorAfter)
-                        .build();
+                                                     .setStartCursor(cursorAfter)
+                                                     .build();
             } else {
                 queryForMoreResults = null;
             }
@@ -238,9 +238,9 @@ public class DatastoreWrapper {
      * @param table kind (a.k.a. type, table, etc.) of the records to delete
      */
     void dropTable(String table) {
-        final Query query = Query.newEntityQueryBuilder()
-                .setKind(table)
-                .build();
+        final Query<Entity> query = Query.newEntityQueryBuilder()
+                                         .setKind(table)
+                                         .build();
         final List<Entity> entities = read(query);
         final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
             @Nullable
@@ -362,7 +362,7 @@ public class DatastoreWrapper {
 
     private KeyFactory initKeyFactory(String kind) {
         final KeyFactory keyFactory = datastore.newKeyFactory()
-                .setKind(kind);
+                                               .setKind(kind);
         keyFactories.put(kind, keyFactory);
         return keyFactory;
     }
