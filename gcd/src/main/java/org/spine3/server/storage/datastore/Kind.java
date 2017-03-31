@@ -25,17 +25,25 @@ import com.google.protobuf.Message;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A data transfer object representing a Datastore
+ * <a href="https://cloud.google.com/datastore/docs/concepts/entities#kinds_and_identifiers>kind</a>.
+ *
  * @author Dmytro Dashenkov
  */
 public final class Kind {
 
+    private static final String INVALID_KIND_ERROR_MESSAGE =
+            "Datastore kind cannot start with \"__\". See https://cloud.google.com/datastore/docs/concepts/entities#kinds_and_identifiers for more info.";
+    private static final String FORBIDDEN_PREFIX = "__";
+
     private final String value;
 
     private Kind(String value) {
-        this.value = checkNotNull(value);
+        this.value = checkValidKind(value);
     }
 
     public static Kind of(String value) {
@@ -60,5 +68,11 @@ public final class Kind {
 
     public String getValue() {
         return value;
+    }
+
+    private static String checkValidKind(String kind) {
+        checkNotNull(kind);
+        checkArgument(!kind.startsWith(FORBIDDEN_PREFIX), INVALID_KIND_ERROR_MESSAGE);
+        return kind;
     }
 }

@@ -50,11 +50,11 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.not;
 import static org.spine3.server.aggregate.storage.AggregateField.aggregate_id;
-import static org.spine3.server.storage.datastore.DsProperties.activedEntityPredicate;
 import static org.spine3.server.storage.datastore.DsProperties.addArchivedProperty;
 import static org.spine3.server.storage.datastore.DsProperties.addDeletedProperty;
 import static org.spine3.server.storage.datastore.DsProperties.isArchived;
 import static org.spine3.server.storage.datastore.DsProperties.isDeleted;
+import static org.spine3.server.storage.datastore.Entities.activeEntity;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -153,7 +153,10 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final String idString = Stringifiers.toString(id);
         final Query<Entity> query = Query.newEntityQueryBuilder()
                                          .setKind(stateTypeName.value())
-                                         .setFilter(StructuredQuery.PropertyFilter.eq(aggregate_id.toString(), idString))
+                                         .setFilter(
+                                                 StructuredQuery.PropertyFilter.eq(
+                                                         aggregate_id.toString(),
+                                                         idString))
                                          .build();
         final List<Entity> eventEntities = datastore.read(query);
         if (eventEntities.isEmpty()) {
@@ -162,7 +165,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final Collection<Entity> aggregateEntityStates = Collections2.filter(
                 getEntityStates(),
-                not(activedEntityPredicate()));
+                not(activeEntity()));
         final Collection<Key> inactiveAggregateKeys = Collections2.transform(
                 aggregateEntityStates,
                 new Function<Entity, Key>() {
@@ -176,7 +179,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final Collection<Entity> filteredEntities = Collections2.filter(eventEntities,
                                                                         new IsActiveAggregateId(inactiveAggregateKeys));
-        final List<AggregateEventRecord> immutableResult = Entities.entitiesToMessages(filteredEntities, AGGREGATE_RECORD_TYPE_URL);
+        final List<AggregateEventRecord> immutableResult = Entities.entitiesToMessages(filteredEntities,
+                                                                                       AGGREGATE_RECORD_TYPE_URL);
         final List<AggregateEventRecord> records = Lists.newArrayList(immutableResult);
 
         Collections.sort(records, new Comparator<AggregateEventRecord>() {

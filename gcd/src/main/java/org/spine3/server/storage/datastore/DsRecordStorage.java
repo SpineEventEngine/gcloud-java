@@ -57,7 +57,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DsIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DsIdentifiers.ofEntityId;
-import static org.spine3.server.storage.datastore.DsProperties.activedEntityPredicate;
+import static org.spine3.server.storage.datastore.Entities.activeEntity;
 import static org.spine3.server.storage.datastore.Entities.getEntityStatus;
 import static org.spine3.validate.Validate.isDefault;
 
@@ -223,7 +223,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         final List<Entity> results = datastore.read(keys);
-        final Collection<Entity> filteredResults = Collections2.filter(results, activedEntityPredicate());
+        final Collection<Entity> filteredResults = Collections2.filter(results, activeEntity());
         final Collection<EntityRecord> records = Collections2.transform(filteredResults, transformer);
         return Collections.unmodifiableCollection(records);
     }
@@ -234,7 +234,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         final List<Entity> results = datastore.read(query);
 
-        final Predicate<Entity> archivedAndDeletedFilter = activedEntityPredicate();
+        final Predicate<Entity> archivedAndDeletedFilter = activeEntity();
 
         final ImmutableMap.Builder<I, EntityRecord> records = new ImmutableMap.Builder<>();
         for (Entity entity : results) {

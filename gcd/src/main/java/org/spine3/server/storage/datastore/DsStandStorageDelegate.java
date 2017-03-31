@@ -47,17 +47,20 @@ import java.util.Map;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.datastore.DsProperties.activedEntityPredicate;
+import static org.spine3.server.storage.datastore.Entities.activeEntity;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
+ * A {@link org.spine3.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage} delegates its
+ * operations.
+ *
  * @author Dmytro Dashenkov
  */
-public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
+class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
     private static final Kind KIND = Kind.of("spine3.stand_storage_record");
 
-    private static final String TYPE_URL_KEY = "type_url";
+    private static final String TYPE_URL_KEY = "type_name";
 
     /**
      * Creates a new storage instance.
@@ -105,7 +108,7 @@ public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
         final List<Entity> results = getDatastore().read(query);
 
-        final Predicate<Entity> archivedAndDeletedFilter = activedEntityPredicate();
+        final Predicate<Entity> archivedAndDeletedFilter = activeEntity();
 
         final ImmutableMap.Builder<AggregateStateId, EntityRecord> records = new ImmutableMap.Builder<>();
         for (Entity entity : results) {
