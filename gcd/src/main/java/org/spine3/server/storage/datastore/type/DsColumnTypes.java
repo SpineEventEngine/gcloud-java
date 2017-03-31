@@ -24,6 +24,7 @@ import com.google.cloud.datastore.DateTime;
 import com.google.cloud.datastore.Entity;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Version;
 import org.spine3.json.Json;
 import org.spine3.protobuf.Timestamps2;
@@ -31,36 +32,68 @@ import org.spine3.protobuf.Timestamps2;
 import java.util.Date;
 
 /**
+ * A utility for creating the basic {@link DatastoreColumnType} implementations for
+ * <ul>
+ *     <li>{@code String}
+ *     <li>{@code Integer}
+ *     <li>{@code Boolean}
+ *     <li>{@link Timestamp}
+ *     <li>{@link Version}
+ *     <li>{@link AbstractMessage}
+ * </ul>
+ *
  * @author Dmytro Dashenkov
  */
+@Internal
 public class DsColumnTypes {
 
     private DsColumnTypes() {
         // Prevent instantiation of a utility class
     }
 
+    /**
+     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<String>}
+     */
     public static SimpleDatastoreColumnType<String> stringType() {
         return new StringColumnType();
     }
 
+    /**
+     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Integer>}
+     */
     public static SimpleDatastoreColumnType<Integer> integerType() {
         return new IntegerColumnType();
     }
 
+    /**
+     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Boolean>}
+     */
     public static SimpleDatastoreColumnType<Boolean> booleanType() {
         return new BooleanColumnType();
     }
 
+    /**
+     * @return new instance of {@link DatastoreColumnType} storing {@link Timestamp} as the {@link DateTime}
+     */
     public static DatastoreColumnType<Timestamp, DateTime> timestampType() {
         return new TimestampColumnType();
     }
 
-    public static DatastoreColumnType<AbstractMessage, String> messageType() {
-        return new MessageType();
-    }
-
+    /**
+     * @return new instance of {@link DatastoreColumnType} storing {@link Timestamp} as the version
+     * {@link Version#getNumber() number}.
+     */
     public static DatastoreColumnType<Version, Integer> versionType() {
         return new VersionColumnType();
+    }
+
+    /**
+     * @return new instance of {@link DatastoreColumnType} storing {@link AbstractMessage} as its
+     * {@link Json} {@code String} representation
+     * @see Json
+     */
+    public static DatastoreColumnType<AbstractMessage, String> messageType() {
+        return new MessageType();
     }
 
     private static class StringColumnType
