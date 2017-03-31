@@ -72,10 +72,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
-    private final Class<I> idClass;
     private final ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry;
 
-    private static final String VERSION_KEY = "version";
     protected static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
     protected static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
             "parse ID from String. " +
@@ -105,12 +103,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public DsRecordStorage(Descriptor descriptor,
                            DatastoreWrapper datastore,
                            boolean multitenant,
-                           Class<I> idClass,
                            ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
-        this.idClass = checkNotNull(idClass);
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
     }
 
@@ -245,7 +241,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             if (!archivedAndDeletedFilter.apply(entity)) {
                 continue;
             }
-            final IdRecordPair<I> recordPair = getRecordFromEntity(entity, typeUrl);
+            final IdRecordPair<I> recordPair = getRecordFromEntity(entity);
             EntityRecord record = recordPair.getRecord();
 
             if (!isDefault(fieldMask)) {
@@ -279,8 +275,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         populateFromStorageFields(entity, record);
 
-        entity.set(VERSION_KEY, entityRecord.getVersion()
-                                            .getNumber());
         final Entity completeEntity = entity.build();
         return completeEntity;
     }
@@ -372,18 +366,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return Kind.of(typeUrl);
     }
 
-    protected IdRecordPair<I> getRecordFromEntity(Entity entity, TypeUrl stateType) {
+    protected IdRecordPair<I> getRecordFromEntity(Entity entity) {
         // Retrieve ID
         final I id = unpackKey(entity);
         checkState(id != null, ID_CONVERSION_ERROR_MESSAGE);
 
         // Retrieve record
-        EntityRecord record = Entities.entityToMessage(entity, RECORD_TYPE_URL);
-        final Any packedState = record.getState();
-        Message state = AnyPacker.unpack(packedState);
-        record = EntityRecord.newBuilder(record)
-                             .setState(AnyPacker.pack(state))
-                             .build();
+        final EntityRecord record = Entities.entityToMessage(entity, RECORD_TYPE_URL);
         return new IdRecordPair<>(id, record);
     }
 

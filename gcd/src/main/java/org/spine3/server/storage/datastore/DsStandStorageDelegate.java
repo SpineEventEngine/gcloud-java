@@ -68,7 +68,6 @@ public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         super(EntityRecord.getDescriptor(),
               datastore,
               multitenant,
-              AggregateStateId.class,
               ColumnTypeRegistry.<DatastoreColumnType>empty());
     }
 
@@ -113,7 +112,7 @@ public class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
             if (!archivedAndDeletedFilter.apply(entity)) {
                 continue;
             }
-            final IdRecordPair<AggregateStateId> recordPair = getRecordFromEntity(entity, typeUrl);
+            final IdRecordPair<AggregateStateId> recordPair = getRecordFromEntity(entity);
             EntityRecord record = recordPair.getRecord();
 
             if (!isDefault(fieldMask)) {
