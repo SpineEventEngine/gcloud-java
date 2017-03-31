@@ -55,7 +55,7 @@ public class DatastoreTypeRegistry {
         return DEFAULT_REGISTRY;
     }
 
-    public static ColumnTypeRegistry.Builder<DatastoreColumnType> predifinedValuesAnd() {
+    public static ColumnTypeRegistry.Builder<DatastoreColumnType> predefinedValuesAnd() {
         return ColumnTypeRegistry.newBuilder(DEFAULT_REGISTRY);
     }
 }

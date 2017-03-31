@@ -58,7 +58,7 @@ public class DatastoreTypeRegistryShould {
     @Test
     public void allow_to_customize_types() {
         final ColumnTypeRegistry<DatastoreColumnType> registry =
-                DatastoreTypeRegistry.predifinedValuesAnd()
+                DatastoreTypeRegistry.predefinedValuesAnd()
                                      .put(byte.class, new ByteColumnType())
                                      .build();
         final DatastoreColumnType byteColumnType = registry.get(mockColumn(Byte.class));
@@ -69,7 +69,7 @@ public class DatastoreTypeRegistryShould {
     @Test
     public void allow_to_override_types() {
         final ColumnTypeRegistry<DatastoreColumnType> registry =
-                DatastoreTypeRegistry.predifinedValuesAnd()
+                DatastoreTypeRegistry.predefinedValuesAnd()
                                      .put(String.class, new CustomStringType())
                                      .build();
         final DatastoreColumnType byteColumnType = registry.get(mockColumn(String.class));
