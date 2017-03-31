@@ -20,13 +20,16 @@
 
 package org.spine3.server.storage.datastore.type;
 
+import com.google.cloud.datastore.Entity;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.Version;
 import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -52,9 +55,51 @@ public class DatastoreTypeRegistryShould {
         assertNotNull(versionType);
     }
 
+    @Test
+    public void allow_to_customize_types() {
+        final ColumnTypeRegistry<DatastoreColumnType> registry =
+                DatastoreTypeRegistry.predifinedValuesAnd()
+                                     .put(byte.class, new ByteColumnType())
+                                     .build();
+        final DatastoreColumnType byteColumnType = registry.get(mockColumn(Byte.class));
+        assertNotNull(byteColumnType);
+        assertThat(byteColumnType, instanceOf(ByteColumnType.class));
+    }
+
+    @Test
+    public void allow_to_override_types() {
+        final ColumnTypeRegistry<DatastoreColumnType> registry =
+                DatastoreTypeRegistry.predifinedValuesAnd()
+                                     .put(String.class, new CustomStringType())
+                                     .build();
+        final DatastoreColumnType byteColumnType = registry.get(mockColumn(String.class));
+        assertNotNull(byteColumnType);
+        assertThat(byteColumnType, instanceOf(CustomStringType.class));
+    }
+
     private static Column<?> mockColumn(Class type) {
         final Column<?> column = mock(Column.class);
         when(column.getType()).thenReturn(type);
         return column;
+    }
+
+    private static class ByteColumnType extends SimpleDatastoreColumnType<Byte> {
+        @Override
+        public void setColumnValue(Entity.Builder storageRecord, Byte value, String columnIdentifier) {
+            storageRecord.set(columnIdentifier, value);
+        }
+    }
+
+    private static class CustomStringType implements DatastoreColumnType<String, Integer> {
+
+        @Override
+        public Integer convertColumnValue(String fieldValue) {
+            return fieldValue.length();
+        }
+
+        @Override
+        public void setColumnValue(Entity.Builder storageRecord, Integer value, String columnIdentifier) {
+            storageRecord.set(columnIdentifier, value);
+        }
     }
 }
