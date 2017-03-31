@@ -117,7 +117,7 @@ public class DsStandStorage extends StandStorage {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         super.close();
         recordStorage.close();
     }

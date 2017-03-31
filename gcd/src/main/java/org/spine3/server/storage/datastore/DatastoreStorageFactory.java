@@ -74,6 +74,14 @@ public class DatastoreStorageFactory implements StorageFactory {
         initDatastoreWrapper(datastore);
     }
 
+    protected DatastoreStorageFactory(DatastoreWrapper datastore,
+                                      boolean multitenant,
+                                      ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
+        this.datastore = datastore;
+        this.multitenant = multitenant;
+        this.typeRegistry = typeRegistry;
+    }
+
     @VisibleForTesting
     protected void initDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already initialized");
@@ -89,6 +97,13 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public ColumnTypeRegistry getTypeRegistry() {
         return typeRegistry;
+    }
+
+    @Override
+    public StorageFactory toSingleTenant() {
+        return isMultitenant()
+                ? new DatastoreStorageFactory(getDatastore(), false, typeRegistry)
+                : this;
     }
 
     @Override
