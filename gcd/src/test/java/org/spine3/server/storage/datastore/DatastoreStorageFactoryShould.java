@@ -26,13 +26,17 @@ import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.AbstractEntity;
+import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.storage.Project;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -74,11 +78,41 @@ public class DatastoreStorageFactoryShould {
         assertNotEquals(storage.getKind(), differentStorage.getKind());
     }
 
+    @Test
+    public void convert_itself_to_single_tenant() {
+        final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                              .setMultitenant(true)
+                                                              .build();
+        assertTrue(factory.isMultitenant());
+        final StorageFactory singleTenantFactory = factory.toSingleTenant();
+        assertFalse(singleTenantFactory.isMultitenant());
+    }
+
+    @Test
+    public void return_self_if_single_tenant() {
+        final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                              .setMultitenant(false)
+                                                              .build();
+        assertFalse(factory.isMultitenant());
+        final StorageFactory singleTenantFactory = factory.toSingleTenant();
+        assertFalse(singleTenantFactory.isMultitenant());
+        assertSame(factory, singleTenantFactory);
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_to_create_aggregate_storage_not_using_class_parameter() {
         final AggregateStorage<ProjectId> storage = datastoreFactory.createAggregateStorage(null);
         assertNotNull(storage);
+    }
+
+    @Test
+    public void have_default_column_type_registry() {
+        final DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                                       .build();
+        final ColumnTypeRegistry defaultRegistry = factory.getTypeRegistry();
+        assertNotNull(defaultRegistry);
+        assertSame(DatastoreTypeRegistry.defaultInstance(), defaultRegistry);
     }
 
     private static class TestEntity extends AbstractEntity<String, StringValue> {
