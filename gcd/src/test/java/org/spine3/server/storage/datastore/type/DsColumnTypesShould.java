@@ -80,6 +80,16 @@ public class DsColumnTypesShould {
     }
 
     @Test
+    public void provide_simple_long_type() {
+        final SimpleDatastoreColumnType<Long> type = DsColumnTypes.longType();
+        final long value = 42L;
+
+        setSimpleType(type, value);
+
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(value));
+    }
+
+    @Test
     public void provide_simple_bool_type() {
         final SimpleDatastoreColumnType<Boolean> type = DsColumnTypes.booleanType();
         final boolean value = true;

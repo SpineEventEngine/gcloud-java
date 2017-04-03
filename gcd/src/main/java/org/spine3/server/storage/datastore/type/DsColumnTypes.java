@@ -66,6 +66,13 @@ public class DsColumnTypes {
     }
 
     /**
+     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Integer>}
+     */
+    public static SimpleDatastoreColumnType<Long> longType() {
+        return new LongColumnType();
+    }
+
+    /**
      * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Boolean>}
      */
     public static SimpleDatastoreColumnType<Boolean> booleanType() {
@@ -110,6 +117,15 @@ public class DsColumnTypes {
 
         @Override
         public void setColumnValue(BaseEntity.Builder storageRecord, Integer value, String columnIdentifier) {
+            storageRecord.set(columnIdentifier, value);
+        }
+    }
+
+    private static class LongColumnType
+            extends SimpleDatastoreColumnType<Long> {
+
+        @Override
+        public void setColumnValue(BaseEntity.Builder storageRecord, Long value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }

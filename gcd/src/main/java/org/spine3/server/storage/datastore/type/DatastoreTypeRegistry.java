@@ -27,6 +27,7 @@ import org.spine3.server.entity.storage.ColumnTypeRegistry;
 
 import static org.spine3.server.storage.datastore.type.DsColumnTypes.booleanType;
 import static org.spine3.server.storage.datastore.type.DsColumnTypes.integerType;
+import static org.spine3.server.storage.datastore.type.DsColumnTypes.longType;
 import static org.spine3.server.storage.datastore.type.DsColumnTypes.messageType;
 import static org.spine3.server.storage.datastore.type.DsColumnTypes.stringType;
 import static org.spine3.server.storage.datastore.type.DsColumnTypes.timestampType;
@@ -41,6 +42,7 @@ public class DatastoreTypeRegistry {
             ColumnTypeRegistry.<DatastoreColumnType>newBuilder()
                               .put(String.class, stringType())
                               .put(Integer.class, integerType())
+                              .put(Long.class, longType())
                               .put(Boolean.class, booleanType())
                               .put(Timestamp.class, timestampType())
                               .put(Version.class, versionType())
