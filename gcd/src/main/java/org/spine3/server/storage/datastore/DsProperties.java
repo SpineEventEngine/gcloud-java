@@ -22,7 +22,6 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.DateTime;
 import com.google.cloud.datastore.Entity;
-import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.base.Event;
@@ -32,7 +31,6 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EntityField;
 import org.spine3.server.storage.LifecycleFlagField;
 
-import javax.annotation.Nullable;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -56,18 +54,6 @@ import static org.spine3.server.storage.LifecycleFlagField.archived;
  */
 @SuppressWarnings("UtilityClass")
 class DsProperties {
-
-    private static final Predicate<Entity> NOT_ARCHIVED_OR_DELETED = new Predicate<Entity>() {
-        @Override
-        public boolean apply(@Nullable Entity input) {
-            if (input == null) {
-                return false;
-            }
-            final boolean isNotArchived = !isArchived(input);
-            final boolean isNotDeleted = !isDeleted(input);
-            return isNotArchived && isNotDeleted;
-        }
-    };
 
     private DsProperties() {
     }
@@ -160,9 +146,5 @@ class DsProperties {
                      .getProducerId());
         builder.set(event_id.toString(), eventId);
         builder.set(producer_id.toString(), producerId);
-    }
-
-    static Predicate<Entity> activeEntityPredicate() {
-        return NOT_ARCHIVED_OR_DELETED;
     }
 }

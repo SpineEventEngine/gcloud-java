@@ -23,10 +23,15 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Version;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps2;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.projection.ProjectionStorageShould;
 import org.spine3.test.projection.Project;
+import org.spine3.testdata.Sample;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -36,6 +41,16 @@ import static org.junit.Assert.assertNotNull;
 public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
     private static final TestDatastoreStorageFactory datastoreFactory =
             TestDatastoreStorageFactory.getDefaultInstance();
+
+    @SuppressWarnings({"MagicNumber", "MethodDoesntCallSuperMethod"})
+    @Override
+    protected EntityRecord newStorageRecord() {
+        return EntityRecord.newBuilder()
+                .setState(
+                        AnyPacker.pack(Sample.messageOfType(Project.class)))
+                .setVersion(Version.newBuilder().setNumber(42).setTimestamp(Timestamps2.getCurrentTime()))
+                .build();
+    }
 
     @After
     public void tearDownTest() {

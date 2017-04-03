@@ -33,7 +33,6 @@ import org.spine3.base.Failure;
 import org.spine3.server.command.CommandRecord;
 import org.spine3.server.command.CommandStorage;
 import org.spine3.server.command.ProcessingStatus;
-import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -60,7 +59,7 @@ import static org.spine3.validate.Validate.checkNotDefault;
 public class DsCommandStorage extends CommandStorage {
 
     private static final TypeUrl TYPE_URL = TypeUrl.from(CommandRecord.getDescriptor());
-    private static final String KIND = TypeName.from(CommandRecord.getDescriptor()).value();
+    private static final Kind KIND = Kind.of(CommandRecord.getDescriptor());
     private static final String COMMAND_STATUS_PROPERTY_NAME = "command_status";
 
     private final DatastoreWrapper datastore;
@@ -84,7 +83,7 @@ public class DsCommandStorage extends CommandStorage {
     protected Iterator<CommandRecord> read(CommandStatus status) {
         final Filter filter = PropertyFilter.eq(COMMAND_STATUS_PROPERTY_NAME, status.ordinal());
         final Query<Entity> query = Query.newEntityQueryBuilder()
-                                         .setKind(KIND)
+                                         .setKind(KIND.getValue())
                                          .setFilter(filter)
                                          .build();
         final Collection<Entity> entities = datastore.read(query);
