@@ -37,6 +37,7 @@ import static org.spine3.server.storage.datastore.Entities.messageToEntity;
  * Special Storage type for storing and retrieving global properties with unique keys.
  *
  * @author Mikhail Mikhaylov
+ * @author Dmytro Dashenkov
  */
 @SuppressWarnings("WeakerAccess")   // Part of API
 public class DsPropertyStorage {
