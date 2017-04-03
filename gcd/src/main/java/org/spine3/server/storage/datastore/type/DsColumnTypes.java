@@ -20,8 +20,8 @@
 
 package org.spine3.server.storage.datastore.type;
 
+import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.DateTime;
-import com.google.cloud.datastore.Entity;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
 import org.spine3.annotations.Internal;
@@ -100,7 +100,7 @@ public class DsColumnTypes {
             extends SimpleDatastoreColumnType<String> {
 
         @Override
-        public void setColumnValue(Entity.Builder storageRecord, String value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord, String value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
@@ -109,7 +109,7 @@ public class DsColumnTypes {
             extends SimpleDatastoreColumnType<Integer> {
 
         @Override
-        public void setColumnValue(Entity.Builder storageRecord, Integer value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord, Integer value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
@@ -118,7 +118,7 @@ public class DsColumnTypes {
             extends SimpleDatastoreColumnType<Boolean> {
 
         @Override
-        public void setColumnValue(Entity.Builder storageRecord, Boolean value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord, Boolean value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
@@ -132,7 +132,7 @@ public class DsColumnTypes {
         }
 
         @Override
-        public void setColumnValue(Entity.Builder storageRecord, DateTime value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord, DateTime value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
@@ -145,7 +145,7 @@ public class DsColumnTypes {
         }
 
         @Override
-        public void setColumnValue(Entity.Builder storageRecord, Integer value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord, Integer value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
@@ -158,7 +158,7 @@ public class DsColumnTypes {
         }
 
         @Override
-        public void setColumnValue(Entity.Builder storageRecord, String value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord, String value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }

@@ -20,7 +20,7 @@
 
 package org.spine3.server.storage.datastore.type;
 
-import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.BaseEntity;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.Version;
@@ -32,11 +32,17 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class DatastoreTypeRegistryShould {
+
+    @Test
+    public void have_private_ctor() {
+        assertHasPrivateParameterlessCtor(DatastoreTypeRegistry.class);
+    }
 
     @Test
     public void have_default_column_types() {
@@ -85,7 +91,7 @@ public class DatastoreTypeRegistryShould {
 
     private static class ByteColumnType extends SimpleDatastoreColumnType<Byte> {
         @Override
-        public void setColumnValue(Entity.Builder storageRecord, Byte value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord, Byte value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
@@ -98,7 +104,7 @@ public class DatastoreTypeRegistryShould {
         }
 
         @Override
-        public void setColumnValue(Entity.Builder storageRecord, Integer value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord, Integer value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
