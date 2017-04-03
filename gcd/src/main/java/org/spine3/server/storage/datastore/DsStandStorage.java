@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
@@ -102,12 +102,12 @@ public class DsStandStorage extends StandStorage {
     }
 
     @Override
-    protected void writeRecord(AggregateStateId id, EntityRecordWithStorageFields record) {
+    protected void writeRecord(AggregateStateId id, EntityRecordWithColumns record) {
         recordStorage.write(id, record);
     }
 
     @Override
-    protected void writeRecords(Map<AggregateStateId, EntityRecordWithStorageFields> records) {
+    protected void writeRecords(Map<AggregateStateId, EntityRecordWithColumns> records) {
         recordStorage.writeRecords(records);
     }
 

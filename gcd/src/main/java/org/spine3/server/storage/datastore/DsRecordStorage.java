@@ -39,7 +39,7 @@ import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
-import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.type.TypeUrl;
@@ -265,7 +265,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return query;
     }
 
-    protected Entity entityRecordToEntity(I id, EntityRecordWithStorageFields record) {
+    protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
         final EntityRecord entityRecord = record.getRecord();
         final Key key = keyFor(datastore,
                                kindFrom(entityRecord),
@@ -279,9 +279,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return completeEntity;
     }
 
-    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithStorageFields record) {
-        if (record.hasStorageFields()) {
-            final Map<String, Column.MemoizedValue<?>> storageFields = record.getStorageFields();
+    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithColumns record) {
+        if (record.hasColumns()) {
+            final Map<String, Column.MemoizedValue<?>> storageFields = record.getColumns();
             for (Map.Entry<String, Column.MemoizedValue<?>> field : storageFields.entrySet()) {
                 appendValue(entity, field.getValue(), columnTypeRegistry);
             }
@@ -309,7 +309,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected void writeRecord(I id, EntityRecordWithStorageFields entityStorageRecord) {
+    protected void writeRecord(I id, EntityRecordWithColumns entityStorageRecord) {
         checkNotNull(id, "ID is null.");
         checkNotNull(entityStorageRecord, "Message is null.");
 
@@ -318,11 +318,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected void writeRecords(Map<I, EntityRecordWithStorageFields> records) {
+    protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
         checkNotNull(records);
 
         final Collection<Entity> entitiesToWrite = new ArrayList<>(records.size());
-        for (Map.Entry<I, EntityRecordWithStorageFields> record : records.entrySet()) {
+        for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
             final Entity entity = entityRecordToEntity(record.getKey(), record.getValue());
             entitiesToWrite.add(entity);
         }

@@ -35,7 +35,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
-import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.type.TypeUrl;
@@ -81,7 +81,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     }
 
     @Override
-    protected Entity entityRecordToEntity(AggregateStateId id, EntityRecordWithStorageFields record) {
+    protected Entity entityRecordToEntity(AggregateStateId id, EntityRecordWithColumns record) {
         final Entity incompleteEntity = super.entityRecordToEntity(id, record);
         final String typeUrl = record.getRecord()
                                      .getState()
@@ -156,7 +156,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
         // Ignore Storage Fields since StandStorage does not support them yet
     @Override
-    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithStorageFields record) {
+    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithColumns record) {
         // NOP
     }
 
