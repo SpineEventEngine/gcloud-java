@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
@@ -30,13 +32,23 @@ import org.spine3.base.Identifiers;
 import org.spine3.base.Stringifier;
 import org.spine3.base.StringifierRegistry;
 import org.spine3.base.Version;
+import org.spine3.base.Versions;
+import org.spine3.json.Json;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.Column;
+import org.spine3.server.entity.storage.Columns;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorageShould;
+import org.spine3.test.Verify;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
 import org.spine3.type.TypeUrl;
+
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -48,6 +60,30 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
 
     private static final TestDatastoreStorageFactory datastoreFactory
             = TestDatastoreStorageFactory.getDefaultInstance();
+
+    @Override
+    protected DsRecordStorage<ProjectId> getStorage() {
+        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(TestConstCounterEntity.class);
+    }
+
+    @Override
+    protected ProjectId newId() {
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId(Identifiers.newUuid())
+                                             .build();
+        return projectId;
+    }
+
+    @Override
+    protected Message newState(ProjectId projectId) {
+        final Project project = Project.newBuilder()
+                                       .setId(projectId)
+                                       .setName("Some test name")
+                                       .addTask(Task.getDefaultInstance())
+                                       .setStatus(Project.Status.CREATED)
+                                       .build();
+        return project;
+    }
 
     @BeforeClass
     public static void setUpAll() {
@@ -90,46 +126,102 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
         final TypeUrl typeUrl = storage.getTypeUrl();
         assertNotNull(typeUrl);
 
-        // According to the `TestDsCounterEntity` declaration.
+        // According to the `TestConstCounterEntity` declaration.
         assertEquals(TypeUrl.of(Project.class), typeUrl);
     }
 
-    @Override
-    protected Message newState(ProjectId projectId) {
-        final Project project = Project.newBuilder()
-                                       .setId(projectId)
-                                       .setName("Some test name")
-                                       .addTask(Task.getDefaultInstance())
-                                       .setStatus(Project.Status.CREATED)
-                                       .build();
-        return project;
-    }
+    @SuppressWarnings("OverlyLongMethod")
+        // A complicated test case verifying right Datastore behavior on
+        // a low level of DatastoreWrapper and Datastore Entity/
+        // Additionally checks the standard predefined Datastore Column Types
+    @Test
+    public void persist_entity_Columns_beside_its_record() {
+        final String counter = "counter";
+        final String bigCounter = "bigCounter";
+        final String counterEven = "counterEven";
+        final String counterVersion = "counterVersion";
+        final String creationTime = "creationTime";
+        final String counterState = "counterState";
+        final String version = "version";
+        final String archived = "archived";
+        final String deleted = "deleted";
 
-    @Override
-    protected DsRecordStorage<ProjectId> getStorage() {
-        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(TestDsCounterEntity.class);
-    }
+        final ProjectId id = newId();
+        final Project state = (Project) newState(id);
+        final Version versionValue = Versions.newVersion(5, Timestamps2.getCurrentTime());
+        final TestConstCounterEntity entity = new TestConstCounterEntity(id);
+        entity.injectState(state, versionValue);
+        final EntityRecord record = EntityRecord.newBuilder()
+                                                .setState(AnyPacker.pack(state))
+                                                .setEntityId(AnyPacker.pack(id))
+                                                .setVersion(versionValue)
+                                                .build();
+        final Map<String, Column.MemoizedValue<?>> columns = Columns.from(entity);
+        assertNotNull(columns);
 
-    @Override
-    protected ProjectId newId() {
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(Identifiers.newUuid())
-                                             .build();
-        return projectId;
+        // Custom Columns
+        Verify.assertContainsKey(counter, columns);
+        Verify.assertContainsKey(bigCounter, columns);
+        Verify.assertContainsKey(counterEven, columns);
+        Verify.assertContainsKey(counterVersion, columns);
+        Verify.assertContainsKey(creationTime, columns);
+        Verify.assertContainsKey(counterState, columns);
+
+        // Columns defined in superclasses
+        Verify.assertContainsKey(version, columns);
+        Verify.assertContainsKey(archived, columns);
+        Verify.assertContainsKey(deleted, columns);
+
+        final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(record, columns);
+        final DsRecordStorage<ProjectId> storage = getStorage();
+
+        // High level write operation
+        storage.write(id, recordWithColumns);
+
+        // Read Datastore Entity
+        final DatastoreWrapper datastore = storage.getDatastore();
+        final Key key = DsIdentifiers.keyFor(datastore,
+                                             Kind.of(state),
+                                             DsIdentifiers.ofEntityId(id));
+        final Entity datastoreEntity = datastore.read(key);
+
+        // Check entity record
+        final EntityRecord readRecord = Entities.entityToMessage(datastoreEntity,
+                                                                 TypeUrl.from(EntityRecord.getDescriptor()));
+        assertEquals(record, readRecord);
+
+        // Check custom Columns
+        assertEquals(entity.getCounter(), datastoreEntity.getLong(counter));
+        assertEquals(entity.getBigCounter(), datastoreEntity.getLong(bigCounter));
+        assertEquals(entity.getCounterVersion()
+                           .getNumber(), datastoreEntity.getLong(counterVersion));
+
+        assertEquals(entity.getCreationTime()
+                           .getNanos() / Timestamps2.NANOS_PER_MICROSECOND,
+                     // in Datastore max DateTime precision is 1 microsecond
+                     datastoreEntity.getDateTime(creationTime).getTimestampMicroseconds());
+        assertEquals(entity.isCounterEven(), datastoreEntity.getBoolean(counterEven));
+        assertEquals(Json.toJson(entity.getCounterState()), datastoreEntity.getString(counterState));
+
+        // Check standard Columns
+        assertEquals(entity.getVersion().getNumber(), datastoreEntity.getLong(version));
+        assertEquals(entity.isArchived(), datastoreEntity.getBoolean(archived));
+        assertEquals(entity.isDeleted(), datastoreEntity.getBoolean(deleted));
     }
 
     @SuppressWarnings("unused") // Reflective access
-    public static class TestDsCounterEntity extends AbstractVersionableEntity<ProjectId, Project> {
+    public static class TestConstCounterEntity extends AbstractVersionableEntity<ProjectId, Project> {
 
-        private int counter = 0;
+        private static final int COUNTER = 42;
+        private final Timestamp creationTime;
 
-        protected TestDsCounterEntity(ProjectId id) {
+        protected TestConstCounterEntity(ProjectId id) {
             super(id);
+            this.creationTime = Timestamps2.getCurrentTime();
         }
 
         public int getCounter() {
-            counter++;
-            return counter;
+            return COUNTER;
         }
 
         public long getBigCounter() {
@@ -137,7 +229,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
         }
 
         public boolean isCounterEven() {
-            return counter % 2 == 0;
+            return true;
         }
 
         public String getCounterName() {
@@ -146,16 +238,21 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
 
         public Version getCounterVersion() {
             return Version.newBuilder()
-                          .setNumber(counter)
+                          .setNumber(COUNTER)
                           .build();
         }
 
-        public Timestamp getNow() {
-            return Timestamps2.getCurrentTime();
+        public Timestamp getCreationTime() {
+            return creationTime;
         }
 
         public Project getCounterState() {
             return getState();
+        }
+
+        private void injectState(Project state, Version version) {
+            incrementState(state);
+            advanceVersion(version);
         }
     }
 }
