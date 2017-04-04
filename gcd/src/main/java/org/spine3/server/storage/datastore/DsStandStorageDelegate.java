@@ -71,7 +71,8 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         super(EntityRecord.getDescriptor(),
               datastore,
               multitenant,
-              ColumnTypeRegistry.<DatastoreColumnType>empty());
+              ColumnTypeRegistry.<DatastoreColumnType>newBuilder()
+                                .build());
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") // Overrides a pure method behavior
@@ -154,7 +155,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
-        // Ignore Storage Fields since StandStorage does not support them yet
+    // Ignore Storage Fields since StandStorage does not support them yet
     @Override
     protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithColumns record) {
         // NOP
