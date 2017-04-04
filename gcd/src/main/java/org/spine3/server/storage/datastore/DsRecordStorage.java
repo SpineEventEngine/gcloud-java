@@ -25,6 +25,7 @@ import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -37,7 +38,8 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.entity.storage.Column;
+import org.spine3.server.entity.storage.ColumnRecords;
+import org.spine3.server.entity.storage.ColumnType;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
@@ -72,7 +74,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
-    private final ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry;
+    private final ColumnTypeRegistry<?> columnTypeRegistry;
 
     protected static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
     protected static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
@@ -280,32 +282,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithColumns record) {
+        final ColumnTypeRegistry<? extends ColumnType<?, ?, Entity.Builder, String>> columnTypeRegistry =
+                (ColumnTypeRegistry<? extends ColumnType<?, ?, Entity.Builder, String>>) this.columnTypeRegistry;
         if (record.hasColumns()) {
-            final Map<String, Column.MemoizedValue<?>> storageFields = record.getColumns();
-            for (Map.Entry<String, Column.MemoizedValue<?>> field : storageFields.entrySet()) {
-                appendValue(entity, field.getValue(), columnTypeRegistry);
-            }
+            ColumnRecords.feedColumnsTo(entity,
+                                        record,
+                                        columnTypeRegistry,
+                                        Functions.<String>identity());
         }
-    }
-
-    private static <T, S> void appendValue(Entity.Builder entity,
-                                           Column.MemoizedValue<T> value,
-                                           ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry) {
-        if (value.isNull()) {
-            return;
-        }
-        final Column<T> storageColumn = value.getSourceColumn();
-
-        @SuppressWarnings("unchecked")
-        final DatastoreColumnType<T, S> columnType = columnTypeRegistry.get(storageColumn);
-        checkState(columnType != null,
-                   "Missing Column Type definition for type %s",
-                   storageColumn.getType());
-
-        final T initialValue = value.getValue();
-        checkNotNull(initialValue);
-        final S storedValue = columnType.convertColumnValue(initialValue);
-        columnType.setColumnValue(entity, storedValue, storageColumn.getName());
     }
 
     @Override

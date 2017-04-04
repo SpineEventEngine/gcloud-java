@@ -139,7 +139,7 @@ public class DsColumnTypes {
         }
     }
 
-    private static class TimestampColumnType implements DatastoreColumnType<Timestamp, DateTime> {
+    private static class TimestampColumnType extends AbstractDatastoreColumnType<Timestamp, DateTime> {
 
         @Override
         public DateTime convertColumnValue(Timestamp fieldValue) {
@@ -153,7 +153,7 @@ public class DsColumnTypes {
         }
     }
 
-    private static class VersionColumnType implements DatastoreColumnType<Version, Integer> {
+    private static class VersionColumnType extends AbstractDatastoreColumnType<Version, Integer> {
 
         @Override
         public Integer convertColumnValue(Version fieldValue) {
@@ -166,7 +166,7 @@ public class DsColumnTypes {
         }
     }
 
-    private static class MessageType implements DatastoreColumnType<AbstractMessage, String> {
+    private static class MessageType extends AbstractDatastoreColumnType<AbstractMessage, String> {
 
         @Override
         public String convertColumnValue(AbstractMessage fieldValue) {

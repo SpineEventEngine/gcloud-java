@@ -21,17 +21,11 @@
 package org.spine3.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
-import org.spine3.server.entity.storage.SimpleColumnType;
 
 /**
- * A base for implementing {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface for Datastore
- * storage regardless the type conversion.
- *
  * @author Dmytro Dashenkov
  */
-public abstract class SimpleDatastoreColumnType<T>
-        extends SimpleColumnType<T, BaseEntity.Builder, String>
-        implements DatastoreColumnType<T, T> {
+public abstract class AbstractDatastoreColumnType<J, C> implements DatastoreColumnType<J, C> {
 
     @Override
     public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {

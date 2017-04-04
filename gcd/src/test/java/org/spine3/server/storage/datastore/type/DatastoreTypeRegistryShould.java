@@ -96,7 +96,7 @@ public class DatastoreTypeRegistryShould {
         }
     }
 
-    private static class CustomStringType implements DatastoreColumnType<String, Integer> {
+    private static class CustomStringType extends AbstractDatastoreColumnType<String, Integer> {
 
         @Override
         public Integer convertColumnValue(String fieldValue) {

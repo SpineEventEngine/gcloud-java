@@ -39,10 +39,8 @@ import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.Column;
-import org.spine3.server.entity.storage.Columns;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorageShould;
-import org.spine3.test.Verify;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
@@ -52,6 +50,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.spine3.test.Verify.assertContainsKey;
 
 /**
  * @author Dmytro Dashenkov
@@ -156,23 +155,23 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
                                                 .setEntityId(AnyPacker.pack(id))
                                                 .setVersion(versionValue)
                                                 .build();
-        final Map<String, Column.MemoizedValue<?>> columns = Columns.from(entity);
+        final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.create(record, entity);
+        final Map<String, Column<?>> columns = recordWithColumns.getColumns();
         assertNotNull(columns);
 
         // Custom Columns
-        Verify.assertContainsKey(counter, columns);
-        Verify.assertContainsKey(bigCounter, columns);
-        Verify.assertContainsKey(counterEven, columns);
-        Verify.assertContainsKey(counterVersion, columns);
-        Verify.assertContainsKey(creationTime, columns);
-        Verify.assertContainsKey(counterState, columns);
+        assertContainsKey(counter, columns);
+        assertContainsKey(bigCounter, columns);
+        assertContainsKey(counterEven, columns);
+        assertContainsKey(counterVersion, columns);
+        assertContainsKey(creationTime, columns);
+        assertContainsKey(counterState, columns);
 
         // Columns defined in superclasses
-        Verify.assertContainsKey(version, columns);
-        Verify.assertContainsKey(archived, columns);
-        Verify.assertContainsKey(deleted, columns);
+        assertContainsKey(version, columns);
+        assertContainsKey(archived, columns);
+        assertContainsKey(deleted, columns);
 
-        final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(record, columns);
         final DsRecordStorage<ProjectId> storage = getStorage();
 
         // High level write operation
