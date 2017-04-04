@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -28,7 +29,9 @@ import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Stringifier;
 import org.spine3.base.StringifierRegistry;
-import org.spine3.server.aggregate.Aggregate;
+import org.spine3.base.Version;
+import org.spine3.protobuf.Timestamps2;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
@@ -87,7 +90,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
         final TypeUrl typeUrl = storage.getTypeUrl();
         assertNotNull(typeUrl);
 
-        // According to the `TestAggregate` declaration.
+        // According to the `TestDsCounterEntity` declaration.
         assertEquals(TypeUrl.of(Project.class), typeUrl);
     }
 
@@ -104,7 +107,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
 
     @Override
     protected DsRecordStorage<ProjectId> getStorage() {
-        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(TestAggregate.class);
+        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(TestDsCounterEntity.class);
     }
 
     @Override
@@ -115,16 +118,44 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
         return projectId;
     }
 
-    private static class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    @SuppressWarnings("unused") // Reflective access
+    public static class TestDsCounterEntity extends AbstractVersionableEntity<ProjectId, Project> {
 
-        /**
-         * Creates a new aggregate instance.
-         *
-         * @param id the ID for the new aggregate
-         * @throws IllegalArgumentException if the ID is not of one of the supported types
-         */
-        private TestAggregate(ProjectId id) {
+        private int counter = 0;
+
+        protected TestDsCounterEntity(ProjectId id) {
             super(id);
+        }
+
+        public int getCounter() {
+            counter++;
+            return counter;
+        }
+
+        public long getBigCounter() {
+            return getCounter();
+        }
+
+        public boolean isCounterEven() {
+            return counter % 2 == 0;
+        }
+
+        public String getCounterName() {
+            return getId().toString();
+        }
+
+        public Version getCounterVersion() {
+            return Version.newBuilder()
+                          .setNumber(counter)
+                          .build();
+        }
+
+        public Timestamp getNow() {
+            return Timestamps2.getCurrentTime();
+        }
+
+        public Project getCounterState() {
+            return getState();
         }
     }
 }
