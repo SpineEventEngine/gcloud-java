@@ -157,7 +157,7 @@ class Entities {
         return entity;
     }
 
-    static LifecycleFlags getEntityStatus(Entity entity) {
+    static LifecycleFlags getLisececleFlags(Entity entity) {
         checkNotNull(entity);
         final boolean archived = isArchived(entity);
         final boolean deleted = isDeleted(entity);

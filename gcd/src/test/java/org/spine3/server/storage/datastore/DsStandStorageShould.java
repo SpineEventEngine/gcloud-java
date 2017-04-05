@@ -44,6 +44,7 @@ public class DsStandStorageShould extends StandStorageShould {
 
     @BeforeClass
     public static void setUpAll() {
+        // TODO:2017-04-05:dmytro.dashenkov: Remove after migrating to core-v0.8.30.
         StringifierRegistry.getInstance()
                            .register(new Stringifier<AggregateStateId>() {
 
