@@ -61,7 +61,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DsIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static org.spine3.server.storage.datastore.Entities.activeEntity;
-import static org.spine3.server.storage.datastore.Entities.getLisececleFlags;
+import static org.spine3.server.storage.datastore.Entities.getLifecycleFlags;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -141,7 +141,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         final EntityRecord record = Entities.entityToMessage(response, RECORD_TYPE_URL);
-        final LifecycleFlags flags = getLisececleFlags(response);
+        final LifecycleFlags flags = getLifecycleFlags(response);
         final EntityRecord result = isDefault(flags) // Avoid inequality of written and read records
                                     ? record         // caused by empty `LifecycleFlags` object
                                     : EntityRecord.newBuilder(record)
@@ -172,7 +172,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 final Message maskedState = FieldMasks.applyMask(fieldMask, state, typeUrl);
                 final Any wrappedState = AnyPacker.pack(maskedState);
 
-                final LifecycleFlags entityStatus = getLisececleFlags(input);
+                final LifecycleFlags entityStatus = getLifecycleFlags(input);
                 final EntityRecord record = EntityRecord.newBuilder(readRecord)
                                                         .setState(wrappedState)
                                                         .setLifecycleFlags(entityStatus)
