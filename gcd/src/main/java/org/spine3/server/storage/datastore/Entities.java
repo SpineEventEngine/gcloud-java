@@ -46,7 +46,8 @@ import static org.spine3.server.storage.datastore.DsProperties.isArchived;
 import static org.spine3.server.storage.datastore.DsProperties.isDeleted;
 
 /**
- * Utility class for converting {@link Message proto messages} into {@link Entity Entities} and vise versa.
+ * Utility class for converting {@link Message proto messages} into {@link Entity Entities} and
+ * vise versa.
  *
  * @author Dmytro Dashenkov
  */
@@ -73,7 +74,8 @@ class Entities {
     /**
      * Retrieves a message of given type, assignable from {@code Message}, from an {@link Entity}.
      *
-     * <p>If passed {@link Entity} is {@code null}, a default instance for the given type is returned.
+     * <p>If passed {@link Entity} is {@code null}, a default instance for the given type
+     * is returned.
      *
      * @param entity source {@link Entity} to get message form
      * @param type   {@link TypeUrl} of required message
@@ -107,7 +109,8 @@ class Entities {
      * @param <M>      required message type
      * @return message contained in the {@link Entity}
      */
-    static <M extends Message> List<M> entitiesToMessages(Collection<Entity> entities, TypeUrl type) {
+    static <M extends Message> List<M> entitiesToMessages(Collection<Entity> entities,
+                                                          TypeUrl type) {
         if (entities.isEmpty()) {
             return Collections.emptyList();
         }
@@ -180,7 +183,8 @@ class Entities {
                 type.getTypeName()));
         final M message;
         try {
-            final Method factoryMethod = messageClass.getDeclaredMethod(DEFAULT_MESSAGE_FACTORY_METHOD_NAME);
+            final Method factoryMethod =
+                    messageClass.getDeclaredMethod(DEFAULT_MESSAGE_FACTORY_METHOD_NAME);
             message = (M) factoryMethod.invoke(null);
             return message;
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
