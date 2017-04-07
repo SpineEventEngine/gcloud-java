@@ -41,7 +41,8 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Dmytro Dashenkov
  */
-public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsRecordStorage<ProjectId>> {
+public class DsRecordStorageShould
+        extends RecordStorageShould<ProjectId, DsRecordStorage<ProjectId>> {
 
     private static final TestDatastoreStorageFactory datastoreFactory
             = TestDatastoreStorageFactory.getDefaultInstance();
@@ -104,7 +105,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
 
     @Override
     protected DsRecordStorage<ProjectId> getStorage() {
-        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(TestAggregate.class);
+        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(
+                TestAggregate.class);
     }
 
     @Override
