@@ -61,7 +61,8 @@ public class EntitiesShould {
     public void retrieve_default_message_for_each_null_entity_in_collection() {
         final TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
         final List<Entity> listOfNulls = Lists.newArrayList(null, null, null, null);
-        final Collection<Message> listOfDefaults = Entities.entitiesToMessages(listOfNulls, typeUrl);
+        final Collection<Message> listOfDefaults =
+                Entities.entitiesToMessages(listOfNulls, typeUrl);
         assertSize(listOfNulls.size(), listOfDefaults);
         final Project expectedValue = Project.getDefaultInstance();
         for (Message message : listOfDefaults) {
