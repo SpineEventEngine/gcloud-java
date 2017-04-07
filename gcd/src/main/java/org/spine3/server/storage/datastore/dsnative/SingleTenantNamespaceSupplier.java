@@ -27,9 +27,6 @@ final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
 
     private static final String DEFAULT_NAMESPACE = "";
 
-    SingleTenantNamespaceSupplier() {
-    }
-
     @Override
     public Namespace getNamespace() {
         return NamespaceSingleton.INSTANCE.value;
