@@ -50,6 +50,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
 import static org.spine3.test.Verify.assertContainsKey;
 
 /**
@@ -82,6 +83,12 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
                                        .setStatus(Project.Status.CREATED)
                                        .build();
         return project;
+    }
+
+    private EntityRecordWithColumns newRecordWithColumns() {
+        final EntityRecord record = newStorageRecord();
+        final EntityRecordWithColumns recordWithColumns = create(record, new TestConstCounterEntity(newId()));
+        return recordWithColumns;
     }
 
     @BeforeClass
@@ -155,7 +162,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
                                                 .setEntityId(AnyPacker.pack(id))
                                                 .setVersion(versionValue)
                                                 .build();
-        final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.create(record, entity);
+        final EntityRecordWithColumns recordWithColumns = create(record, entity);
         final Map<String, Column<?>> columns = recordWithColumns.getColumns();
         assertNotNull(columns);
 
@@ -206,6 +213,29 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
         assertEquals(entity.getVersion().getNumber(), datastoreEntity.getLong(version));
         assertEquals(entity.isArchived(), datastoreEntity.getBoolean(archived));
         assertEquals(entity.isDeleted(), datastoreEntity.getBoolean(deleted));
+    }
+
+    @Test
+    public void pass_big_data_speed_test() {
+        // Default bulk size is 500 records - the maximum records that could be written within one write operation
+        final long maxReadTime = 400;
+        final long maxWriteTime = 8000;
+
+        new BigDataTester<>(getStorage())
+                .setEntrySupplier(new BigDataTester.EntrySupplier<ProjectId>() {
+                    @Override
+                    public ProjectId newId() {
+                        return DsRecordStorageShould.this.newId();
+                    }
+
+                    @Override
+                    public EntityRecordWithColumns newRecord() {
+                        return DsRecordStorageShould.this.newRecordWithColumns();
+                    }
+                })
+                .setReadLimit(maxReadTime)
+                .setWriteLimit(maxWriteTime)
+                .testBigDataOperations();
     }
 
     @SuppressWarnings("unused") // Reflective access
