@@ -57,7 +57,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final boolean multitenant;
     private final ColumnTypeRegistry<DatastoreColumnType> typeRegistry;
 
-    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
+    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction",
+            "OverriddenMethodCallDuringObjectConstruction"})
     private DatastoreStorageFactory(Builder builder) {
         this.multitenant = builder.multitenant;
         this.typeRegistry = builder.typeRegistry;
@@ -65,7 +66,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     @VisibleForTesting
-    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
+    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction",
+            "OverriddenMethodCallDuringObjectConstruction"})
     protected DatastoreStorageFactory(Datastore datastore,
                                       boolean multitenant,
                                       ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
@@ -108,7 +110,8 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public StandStorage createStandStorage() {
-        final DsStandStorageDelegate recordStorage = new DsStandStorageDelegate(datastore, multitenant);
+        final DsStandStorageDelegate recordStorage = new DsStandStorageDelegate(datastore,
+                                                                                multitenant);
         final DsStandStorage result = new DsStandStorage(recordStorage, multitenant);
         return result;
     }
@@ -126,7 +129,8 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
+        final Class<Message> messageClass =
+                getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
         final Descriptor descriptor = (Descriptor) typeUrl.getDescriptor();
         final DsRecordStorage<I> result = new DsRecordStorage<>(descriptor,
@@ -137,11 +141,13 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> entityClass) {
+    public <I> AggregateStorage<I> createAggregateStorage(
+            Class<? extends Aggregate<I, ?, ?>> entityClass) {
         checkNotNull(entityClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
         final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
-        final Class<? extends Message> stateClass = getGenericParameterType(entityClass, STATE.getIndex());
+        final Class<? extends Message> stateClass = getGenericParameterType(entityClass,
+                                                                            STATE.getIndex());
         final DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(),
                                                                       propertyStorage,
                                                                       multitenant,
@@ -176,7 +182,8 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         private Datastore datastore;
         private boolean multitenant;
-        private ColumnTypeRegistry<DatastoreColumnType> typeRegistry = DatastoreTypeRegistry.defaultInstance();
+        private ColumnTypeRegistry<DatastoreColumnType> typeRegistry =
+                DatastoreTypeRegistry.defaultInstance();
 
         private Builder() {
         }
