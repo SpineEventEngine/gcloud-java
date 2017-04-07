@@ -33,7 +33,8 @@ import org.spine3.test.aggregate.ProjectId;
 /**
  * @author Dmytro Dashenkov.
  */
-public class DsAggregateStorageStatusHandlingShould extends AggregateStorageVisibilityHandlingShould {
+public class DsAggregateStorageStatusHandlingShould
+        extends AggregateStorageVisibilityHandlingShould {
 
     private static final TestDatastoreStorageFactory datastoreFactory;
 
@@ -75,7 +76,8 @@ public class DsAggregateStorageStatusHandlingShould extends AggregateStorageVisi
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(DsAggregateStorageStatusHandlingShould.class);
+        private final Logger value = LoggerFactory.getLogger(
+                DsAggregateStorageStatusHandlingShould.class);
     }
 
 }
