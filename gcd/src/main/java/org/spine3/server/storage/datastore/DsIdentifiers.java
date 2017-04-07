@@ -45,8 +45,8 @@ public class DsIdentifiers {
     }
 
     /**
-     * Creates an instance of {@link com.google.cloud.datastore.Key} basing on the Datastore entity {@code kind}
-     * and {@code recordId}.
+     * Creates an instance of {@link com.google.cloud.datastore.Key} basing on the Datastore
+     * entity {@code kind} and {@code recordId}.
      *
      * @param datastore the instance of {@code datastore} to create a {@code Key} for
      * @param kind      the kind of the Datastore entity
@@ -75,8 +75,8 @@ public class DsIdentifiers {
     }
 
     /**
-     * Creates an instance of {@code DatastoreRecordId} for a given {@link org.spine3.server.entity.Entity}
-     * identifier.
+     * Creates an instance of {@code DatastoreRecordId} for a
+     * given {@link org.spine3.server.entity.Entity} identifier.
      *
      * @param id an identifier of an {@code Entity}
      * @return the Datastore record identifier
