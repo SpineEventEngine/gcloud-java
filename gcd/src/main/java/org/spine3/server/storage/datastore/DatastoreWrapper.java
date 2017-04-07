@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +53,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
+import static java.lang.Math.floor;
 import static java.lang.Math.min;
 
 /**
@@ -67,7 +69,7 @@ public class DatastoreWrapper {
     private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should NOT be active.";
 
     private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
-    private static final int MAX_KEYS_PER_WRITE_REQUEST = 500;
+    private static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
     private static final Map<String, KeyFactory> keyFactories = new HashMap<>();
 
@@ -133,7 +135,11 @@ public class DatastoreWrapper {
      * @see DatastoreWrapper#createOrUpdate(Entity)
      */
     public void createOrUpdate(Entity... entities) {
-        actor.put(entities);
+        if (entities.length <= MAX_ENTITIES_PER_WRITE_REQUEST) {
+            writeSmallBulk(entities);
+        } else {
+            writeBulk(entities);
+        }
     }
 
     /**
@@ -145,7 +151,7 @@ public class DatastoreWrapper {
     public void createOrUpdate(Collection<Entity> entities) {
         final Entity[] array = new Entity[entities.size()];
         entities.toArray(array);
-        actor.put(array);
+        createOrUpdate(array);
     }
 
     /**
@@ -260,9 +266,9 @@ public class DatastoreWrapper {
     }
 
     void dropTableInternal(Key[] keysArray) {
-        if (keysArray.length > MAX_KEYS_PER_WRITE_REQUEST) {
+        if (keysArray.length > MAX_ENTITIES_PER_WRITE_REQUEST) {
             int start = 0;
-            int end = MAX_KEYS_PER_WRITE_REQUEST;
+            int end = MAX_ENTITIES_PER_WRITE_REQUEST;
             while (true) {
                 final int length = end - start;
                 if (length <= 0) {
@@ -273,7 +279,7 @@ public class DatastoreWrapper {
                 delete(keysSubarray);
 
                 start = end;
-                end = min(MAX_KEYS_PER_WRITE_REQUEST, keysArray.length - end);
+                end = min(MAX_ENTITIES_PER_WRITE_REQUEST, keysArray.length - end);
             }
         } else {
             delete(keysArray);
@@ -398,6 +404,22 @@ public class DatastoreWrapper {
         }
 
         return result;
+    }
+
+    private void writeBulk(Entity[] entities) {
+        @SuppressWarnings("NumericCastThatLosesPrecision") // The value cast is floored, i.e. is an integer in fact
+        final int partsCount = (int) floor((float) entities.length / MAX_ENTITIES_PER_WRITE_REQUEST);
+        for (int i = 0; i < partsCount; i++) {
+            final int partHead = i * MAX_ENTITIES_PER_WRITE_REQUEST;
+            final int partTail = min(partHead + MAX_ENTITIES_PER_WRITE_REQUEST, entities.length);
+
+            final Entity[] part = Arrays.copyOfRange(entities, partHead, partTail);
+            writeSmallBulk(part);
+        }
+    }
+
+    private void writeSmallBulk(Entity[] entities) {
+        actor.put(entities);
     }
 
     private static Logger log() {
