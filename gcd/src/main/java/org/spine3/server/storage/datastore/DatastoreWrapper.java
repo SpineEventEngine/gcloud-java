@@ -53,7 +53,6 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
-import static java.lang.Math.floor;
 import static java.lang.Math.min;
 
 /**
@@ -407,8 +406,7 @@ public class DatastoreWrapper {
     }
 
     private void writeBulk(Entity[] entities) {
-        @SuppressWarnings("NumericCastThatLosesPrecision") // The value cast is floored, i.e. is an integer in fact
-        final int partsCount = (int) floor((float) entities.length / MAX_ENTITIES_PER_WRITE_REQUEST);
+        final int partsCount = entities.length / MAX_ENTITIES_PER_WRITE_REQUEST + 1;
         for (int i = 0; i < partsCount; i++) {
             final int partHead = i * MAX_ENTITIES_PER_WRITE_REQUEST;
             final int partTail = min(partHead + MAX_ENTITIES_PER_WRITE_REQUEST, entities.length);

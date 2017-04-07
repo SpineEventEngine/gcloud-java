@@ -87,7 +87,6 @@ public class DatastoreWrapperShould {
     public void support_big_bulk_reads() throws InterruptedException {
         final int bulkSize = 1001;
 
-
         final TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(Given.testDatastore(), false);
         final Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
         final Collection<Entity> expectedEntities = entities.values();
@@ -120,7 +119,6 @@ public class DatastoreWrapperShould {
         }
 
         private static Map<Key, Entity> nEntities(int n, DatastoreWrapper wrapper) {
-
             final Map<Key, Entity> result = new HashMap<>(n);
             for (int i = 0; i < n; i++) {
                 final Any message = Any.getDefaultInstance();
