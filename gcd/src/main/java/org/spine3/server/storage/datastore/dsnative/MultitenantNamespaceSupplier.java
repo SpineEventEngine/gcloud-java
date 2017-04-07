@@ -20,17 +20,67 @@
 
 package org.spine3.server.storage.datastore.dsnative;
 
+import org.spine3.server.tenant.TenantFunction;
+import org.spine3.users.TenantId;
+
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
+
 /**
  * @author Dmytro Dashenkov
  */
 final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
-    MultitenantNamespaceSupplier() {
-    }
-
     @Override
     public Namespace getNamespace() {
-        // TODO:2017-04-07:dmytro.dashenkov: Namespace based of the tenant ID.
-        return Namespace.of("???");
+        final TenantIdRetriever retriever = TenantIdRetriever.instance();
+        final TenantId tenantId = retriever.execute();
+        checkNotNull(tenantId);
+        final String stringTenantId = tenantIdToSignificantString(tenantId);
+        final Namespace result = Namespace.of(stringTenantId);
+        return result;
+    }
+
+    private static String tenantIdToSignificantString(TenantId id) {
+        final TenantId.KindCase kindCase = id.getKindCase();
+        switch (kindCase) {
+            case DOMAIN:
+                return id.getDomain()
+                         .getValue();
+            case EMAIL:
+                return id.getEmail()
+                         .getValue();
+            case VALUE:
+                return id.getValue();
+            case KIND_NOT_SET:
+            default:
+                throw new IllegalStateException(format("Tenant id is not set. Kind of TenantId is %s.",
+                                                       kindCase.toString()));
+        }
+    }
+
+    private static class TenantIdRetriever extends TenantFunction<TenantId> {
+
+        private static TenantIdRetriever instance() {
+            return Singleton.INSTANCE.value;
+        }
+
+        private TenantIdRetriever() {
+            super(true);
+        }
+
+        @Override
+        public TenantId apply(@Nullable TenantId input) {
+            checkNotNull(input);
+            return input;
+        }
+
+        private enum Singleton {
+            INSTANCE;
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final TenantIdRetriever value = new TenantIdRetriever();
+        }
     }
 }
