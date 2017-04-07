@@ -75,10 +75,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry;
 
     protected static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
-    protected static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
-            "parse ID from String. " +
-            "Note: custom conversion is not supported. " +
-            "See org.spine3.base.Identifiers#idToString.";
+    protected static final String ID_CONVERSION_ERROR_MESSAGE =
+            "Entity had ID of an invalid type; could not " +
+                    "parse ID from String. " +
+                    "Note: custom conversion is not supported. " +
+                    "See org.spine3.base.Identifiers#idToString.";
 
     private static final Function<Entity, EntityRecord> recordFromEntity
             = new Function<Entity, EntityRecord>() {
@@ -136,8 +137,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         final EntityRecord record = Entities.entityToMessage(response, RECORD_TYPE_URL);
         final LifecycleFlags entityStatus = getEntityStatus(response);
-        final EntityRecord result = isDefault(entityStatus) // Avoid inequality of written and read records
-                                    ? record                // caused by empty {@code EntityStatus} object
+        // Avoid inequality of written and read records caused by empty {@code EntityStatus} object
+        final EntityRecord result = isDefault(entityStatus)
+                                    ? record
                                     : EntityRecord.newBuilder(record)
                                                   .setLifecycleFlags(entityStatus)
                                                   .build();
@@ -151,7 +153,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids, final FieldMask fieldMask) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids,
+                                                         final FieldMask fieldMask) {
         final Function<Entity, EntityRecord> transformer = new Function<Entity, EntityRecord>() {
             @Nullable
             @Override
@@ -223,8 +226,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         final List<Entity> results = datastore.read(keys);
-        final Collection<Entity> filteredResults = Collections2.filter(results, activeEntity());
-        final Collection<EntityRecord> records = Collections2.transform(filteredResults, transformer);
+        final Collection<Entity> filteredResults = Collections2.filter(results,
+                                                                       activeEntity());
+        final Collection<EntityRecord> records = Collections2.transform(filteredResults,
+                                                                        transformer);
         return Collections.unmodifiableCollection(records);
     }
 
@@ -279,7 +284,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return completeEntity;
     }
 
-    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithStorageFields record) {
+    protected void populateFromStorageFields(Entity.Builder entity,
+                                             EntityRecordWithStorageFields record) {
         if (record.hasStorageFields()) {
             final Map<String, Column.MemoizedValue<?>> storageFields = record.getStorageFields();
             for (Map.Entry<String, Column.MemoizedValue<?>> field : storageFields.entrySet()) {
@@ -342,7 +348,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     protected I unpackKey(Entity entity) {
-        final String stringId = entity.getKey().getName();
+        final String stringId = entity.getKey()
+                                      .getName();
         final I id = IdTransformer.idFromString(stringId, null);
         return id;
     }
