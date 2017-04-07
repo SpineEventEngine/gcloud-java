@@ -70,7 +70,8 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
     @Nullable
     @Override
     public Timestamp readLastHandledEventTime() {
-        final Optional<Timestamp> readTimestamp = propertyStorage.read(lastTimestampId, Timestamp.getDescriptor());
+        final Optional<Timestamp> readTimestamp = propertyStorage.read(lastTimestampId,
+                                                                       Timestamp.getDescriptor());
 
         if ((!readTimestamp.isPresent()) || Validate.isDefault(readTimestamp.get())) {
             return null;
