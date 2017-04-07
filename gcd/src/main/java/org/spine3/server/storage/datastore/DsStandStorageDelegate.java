@@ -51,8 +51,8 @@ import static org.spine3.server.storage.datastore.Entities.activeEntity;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
- * A {@link org.spine3.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage} delegates its
- * operations.
+ * A {@link org.spine3.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage}
+ * delegates its operations.
  *
  * @author Dmytro Dashenkov
  */
@@ -81,7 +81,8 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     }
 
     @Override
-    protected Entity entityRecordToEntity(AggregateStateId id, EntityRecordWithStorageFields record) {
+    protected Entity entityRecordToEntity(AggregateStateId id,
+                                          EntityRecordWithStorageFields record) {
         final Entity incompleteEntity = super.entityRecordToEntity(id, record);
         final String typeUrl = record.getRecord()
                                      .getState()
@@ -110,7 +111,8 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
         final Predicate<Entity> archivedAndDeletedFilter = activeEntity();
 
-        final ImmutableMap.Builder<AggregateStateId, EntityRecord> records = new ImmutableMap.Builder<>();
+        final ImmutableMap.Builder<AggregateStateId, EntityRecord> records =
+                new ImmutableMap.Builder<>();
         for (Entity entity : results) {
             if (!archivedAndDeletedFilter.apply(entity)) {
                 continue;
@@ -156,7 +158,8 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
         // Ignore Storage Fields since StandStorage does not support them yet
     @Override
-    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithStorageFields record) {
+    protected void populateFromStorageFields(Entity.Builder entity,
+                                             EntityRecordWithStorageFields record) {
         // NOP
     }
 
