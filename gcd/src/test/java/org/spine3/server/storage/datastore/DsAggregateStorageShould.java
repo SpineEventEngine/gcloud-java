@@ -85,14 +85,16 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         datastoreFactory.tearDown();
     }
 
-    @SuppressWarnings("ConstantConditions") // passing null because this parameter isn't used in this implementation
+    @SuppressWarnings("ConstantConditions")
+    // passing null because this parameter isn't used in this implementation
     @Override
     protected AggregateStorage<ProjectId> getStorage() {
         return datastoreFactory.createAggregateStorage(TestAggregate.class);
     }
 
     @Override
-    protected <Id> AggregateStorage<Id> getStorage(Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aClass) {
+    protected <Id> AggregateStorage<Id> getStorage(
+            Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aClass) {
         return datastoreFactory.createAggregateStorage(aClass);
     }
 
@@ -118,7 +120,8 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         assertNotNull(propertyStorage);
     }
 
-    private static class TestAggregateWithIdLong extends Aggregate<Long, Project, org.spine3.test.storage.Project.Builder> {
+    private static class TestAggregateWithIdLong
+            extends Aggregate<Long, Project, org.spine3.test.storage.Project.Builder> {
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }
