@@ -48,7 +48,8 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
         return EntityRecord.newBuilder()
                 .setState(
                         AnyPacker.pack(Sample.messageOfType(Project.class)))
-                .setVersion(Version.newBuilder().setNumber(42).setTimestamp(Timestamps2.getCurrentTime()))
+                .setVersion(Version.newBuilder()
+                                   .setNumber(42).setTimestamp(Timestamps2.getCurrentTime()))
                 .build();
     }
 
