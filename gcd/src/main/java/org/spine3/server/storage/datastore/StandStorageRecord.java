@@ -36,7 +36,8 @@ public class StandStorageRecord extends AbstractEntity<AggregateStateId, EntityR
      * Creates a new instance.
      *
      * @param id the ID for the new instance
-     * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
+     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     *                                  for identifiers
      */
     protected StandStorageRecord(AggregateStateId id) {
         super(id);
