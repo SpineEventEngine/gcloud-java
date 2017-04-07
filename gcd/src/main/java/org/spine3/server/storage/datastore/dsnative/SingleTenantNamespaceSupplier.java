@@ -21,12 +21,19 @@
 package org.spine3.server.storage.datastore.dsnative;
 
 /**
+ * A {@link NamespaceSupplier} for single-tenant storage factories.
+ *
  * @author Dmytro Dashenkov
  */
 final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
 
     private static final String DEFAULT_NAMESPACE = "";
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return the {@link Namespace} representing the empty string
+     */
     @Override
     public Namespace getNamespace() {
         return NamespaceSingleton.INSTANCE.value;

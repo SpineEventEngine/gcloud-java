@@ -21,7 +21,13 @@
 package org.spine3.server.storage.datastore.dsnative;
 
 /**
+ * A value object representing the Datastore
+ * <a href="https://cloud.google.com/datastore/docs/concepts/multitenancy">namespace</a>.
+ *
+ * <p>The primary usage of the namespaces is multitenancy.
+ *
  * @author Dmytro Dashenkov
+ * @see NamespaceSupplier
  */
 public final class Namespace {
 
@@ -31,7 +37,7 @@ public final class Namespace {
         this.value = value;
     }
 
-    public static Namespace of(String datastoreNamespace) {
+    static Namespace of(String datastoreNamespace) {
         return new Namespace(datastoreNamespace);
     }
 

@@ -80,6 +80,12 @@ public class DatastoreWrapper {
 
     private final NamespaceSupplier namespaceSupplier;
 
+    /**
+     * Creates a new instance of {@code DatastoreWrapper}.
+     *
+     * @param datastore         {@link Datastore} to wrap
+     * @param namespaceSupplier an instance of {@link NamespaceSupplier} to use in the queries and keys
+     */
     protected DatastoreWrapper(Datastore datastore, NamespaceSupplier namespaceSupplier) {
         this.namespaceSupplier = namespaceSupplier;
         this.datastore = datastore;
@@ -89,7 +95,8 @@ public class DatastoreWrapper {
     /**
      * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
      *
-     * @param datastore {@link Datastore} to wrap
+     * @param datastore         {@link Datastore} to wrap
+     * @param namespaceSupplier an instance of {@link NamespaceSupplier} to use in the queries and keys
      * @return new instance of {@code DatastoreWrapper}
      */
     @SuppressWarnings("WeakerAccess") // Part of API
@@ -202,8 +209,8 @@ public class DatastoreWrapper {
     public List<Entity> read(StructuredQuery<Entity> query) {
         final Namespace namespace = namespaceSupplier.getNamespace();
         final StructuredQuery<Entity> queryWithNamespace = query.toBuilder()
-                                                          .setNamespace(namespace.getValue())
-                                                          .build();
+                                                                .setNamespace(namespace.getValue())
+                                                                .build();
         QueryResults<Entity> queryResults = actor.run(queryWithNamespace);
         final List<Entity> resultsAsList = newLinkedList();
 
@@ -344,9 +351,7 @@ public class DatastoreWrapper {
     }
 
     /**
-     * Retrieves an instance of {@link KeyFactory} unique for given Kind of data.
-     *
-     * <p>Retrieved instances are the same across all instances of {@code DatastoreWrapper}.
+     * Retrieves an instance of {@link KeyFactory} unique for given Kind of data regarding the current namespace.
      *
      * @param kind kind of {@link Entity} to generate keys for
      * @return an instance of {@link KeyFactory} for given kind
@@ -356,6 +361,8 @@ public class DatastoreWrapper {
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
         }
+        final Namespace namespace = namespaceSupplier.getNamespace();
+        keyFactory.setNamespace(namespace.getValue());
 
         return keyFactory;
     }
@@ -365,10 +372,8 @@ public class DatastoreWrapper {
     }
 
     private KeyFactory initKeyFactory(String kind) {
-        final Namespace namespace = namespaceSupplier.getNamespace();
         final KeyFactory keyFactory = datastore.newKeyFactory()
-                                               .setKind(kind)
-                                               .setNamespace(namespace.getValue());
+                                               .setKind(kind);
         keyFactories.put(kind, keyFactory);
         return keyFactory;
     }

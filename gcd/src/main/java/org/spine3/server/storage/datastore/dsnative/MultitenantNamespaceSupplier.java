@@ -29,10 +29,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
+ * A {@link NamespaceSupplier} for multitenant storage factories.
+ *
  * @author Dmytro Dashenkov
  */
 final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return the {@link Namespace} representing the current tenant {@link TenantId ID}
+     */
     @Override
     public Namespace getNamespace() {
         final TenantIdRetriever retriever = TenantIdRetriever.instance();
@@ -43,6 +50,9 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
         return result;
     }
 
+    /**
+     * @return a human-friendly string representation of the {@link TenantId}
+     */
     private static String tenantIdToSignificantString(TenantId id) {
         final TenantId.KindCase kindCase = id.getKindCase();
         switch (kindCase) {

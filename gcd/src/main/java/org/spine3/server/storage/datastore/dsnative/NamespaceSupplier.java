@@ -26,10 +26,20 @@ import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A factory for the {@linkplain Namespace namespaces}, based on the current multitenancy configuration and
+ * {@linkplain org.spine3.users.TenantId tenant ID}.
+ *
  * @author Dmytro Dashenkov
  */
 public abstract class NamespaceSupplier {
 
+    /**
+     * Obtains an instance of {@code NamespaceSupplier} for the passed
+     * {@linkplain DatastoreStorageFactory storage factory}.
+     *
+     * @param factory the {@linkplain DatastoreStorageFactory storage factory} to return a supplier for
+     * @see org.spine3.server.storage.StorageFactory#isMultitenant
+     */
     public static NamespaceSupplier instanceFor(DatastoreStorageFactory factory) {
         checkNotNull(factory);
         if (factory.isMultitenant()) {
@@ -47,6 +57,13 @@ public abstract class NamespaceSupplier {
     NamespaceSupplier() {
     }
 
+    /**
+     * Generates a {@link Namespace} based on the current {@linkplain org.spine3.users.TenantId tenant ID}.
+     *
+     * @return an instance of {@link Namespace} representing either the current tenant ID or an empty string if
+     * the {@linkplain DatastoreStorageFactory storage factory} passed upon the initialization is configured to be
+     * single tenant
+     */
     public abstract Namespace getNamespace();
 
     private enum Singleton {
