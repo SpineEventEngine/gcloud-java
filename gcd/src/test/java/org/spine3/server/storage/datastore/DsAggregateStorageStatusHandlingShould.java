@@ -25,6 +25,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.Stringifier;
+import org.spine3.base.StringifierRegistry;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.aggregate.AggregateStorageVisibilityHandlingShould;
@@ -50,6 +52,21 @@ public class DsAggregateStorageStatusHandlingShould extends AggregateStorageVisi
     @BeforeClass
     public static void setUpClass() {
         datastoreFactory.setUp();
+
+        StringifierRegistry.getInstance()
+                           .register(new Stringifier<ProjectId>() {
+                               @Override
+                               protected String toString(ProjectId obj) {
+                                   return obj.getId();
+                               }
+
+                               @Override
+                               protected ProjectId fromString(String s) {
+                                   return ProjectId.newBuilder()
+                                                   .setId(s)
+                                                   .build();
+                               }
+                           }, ProjectId.class);
     }
 
     @After
