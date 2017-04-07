@@ -38,15 +38,17 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreStorageFactoryShould {
 
-    private static final DatastoreOptions DUMMY_OPTIONS = DatastoreOptions.newBuilder()
-                                                                          .setProjectId("dummy-dataset")
-                                                                          .build();
+    private static final DatastoreOptions DUMMY_OPTIONS =
+            DatastoreOptions.newBuilder()
+                            .setProjectId("dummy-dataset")
+                            .build();
 
     private static final Datastore datastore = DUMMY_OPTIONS.getService();
 
-    private static final StorageFactory datastoreFactory = DatastoreStorageFactory.newBuilder()
-                                                                                  .setDatastore(datastore)
-                                                                                  .build();
+    private static final StorageFactory datastoreFactory =
+            DatastoreStorageFactory.newBuilder()
+                                   .setDatastore(datastore)
+                                   .build();
 
     @Test
     public void create_multitenant_storages() throws Exception {
@@ -68,7 +70,8 @@ public class DatastoreStorageFactoryShould {
 
     @Test
     public void create_separate_record_storage_per_state_type() {
-        final DsRecordStorage<?> storage = (DsRecordStorage<?>) datastoreFactory.createRecordStorage(TestEntity.class);
+        final DsRecordStorage<?> storage =
+                (DsRecordStorage<?>) datastoreFactory.createRecordStorage(TestEntity.class);
         final DsRecordStorage<?> differentStorage =
                 (DsRecordStorage<?>) datastoreFactory.createRecordStorage(DifferentTestEntity.class);
         assertNotEquals(storage.getKind(), differentStorage.getKind());
@@ -77,7 +80,8 @@ public class DatastoreStorageFactoryShould {
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_to_create_aggregate_storage_not_using_class_parameter() {
-        final AggregateStorage<ProjectId> storage = datastoreFactory.createAggregateStorage(null);
+        final AggregateStorage<ProjectId> storage =
+                datastoreFactory.createAggregateStorage(null);
         assertNotNull(storage);
     }
 
