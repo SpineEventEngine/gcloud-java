@@ -50,9 +50,11 @@ class TestDatastoreWrapper extends DatastoreWrapper {
     private static final int CONSISTENCY_AWAIT_ITERATIONS = 20;
 
     /**
-     * Due to eventual consistency, {@link #dropTable(String) is performed iteratively until the table has no records}.
+     * Due to eventual consistency, {@link #dropTable(String) is performed iteratively until
+     * the table has no records}.
      *
-     * This constant represents the maximum number of cleanup attempts before the execution is continued
+     * This constant represents the maximum number of cleanup attempts before the execution
+     * is continued
      */
     private static final int MAX_CLEANUP_ATTEMPTS = 5;
 
@@ -108,7 +110,9 @@ class TestDatastoreWrapper extends DatastoreWrapper {
         Integer remainingEntityCount = null;
         int cleanupAttempts = 0;
 
-        while ((remainingEntityCount == null || remainingEntityCount > 0) && cleanupAttempts < MAX_CLEANUP_ATTEMPTS) {
+        while ((remainingEntityCount == null
+                || remainingEntityCount > 0)
+                && cleanupAttempts < MAX_CLEANUP_ATTEMPTS) {
 
             // sleep in between the cleanup attempts.
             if (cleanupAttempts > 0) {
