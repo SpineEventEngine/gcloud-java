@@ -43,6 +43,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.server.storage.datastore.dsnative.Kind;
 import org.spine3.server.storage.datastore.dsnative.Namespace;
 import org.spine3.server.storage.datastore.dsnative.NamespaceSupplier;
 
@@ -72,7 +73,7 @@ public class DatastoreWrapper {
     private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
     private static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
-    private static final Map<String, KeyFactory> keyFactories = new HashMap<>();
+    private static final Map<Kind, KeyFactory> keyFactories = new HashMap<>();
 
     private final Datastore datastore;
     private Transaction activeTransaction;
@@ -356,7 +357,7 @@ public class DatastoreWrapper {
      * @param kind kind of {@link Entity} to generate keys for
      * @return an instance of {@link KeyFactory} for given kind
      */
-    public KeyFactory getKeyFactory(String kind) {
+    public KeyFactory getKeyFactory(Kind kind) {
         KeyFactory keyFactory = keyFactories.get(kind);
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
@@ -371,9 +372,9 @@ public class DatastoreWrapper {
         return datastore;
     }
 
-    private KeyFactory initKeyFactory(String kind) {
+    private KeyFactory initKeyFactory(Kind kind) {
         final KeyFactory keyFactory = datastore.newKeyFactory()
-                                               .setKind(kind);
+                                               .setKind(kind.getValue());
         keyFactories.put(kind, keyFactory);
         return keyFactory;
     }

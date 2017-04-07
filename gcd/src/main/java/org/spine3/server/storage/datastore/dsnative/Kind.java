@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore.dsnative;
 
+import com.google.common.base.Objects;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import org.spine3.type.TypeName;
@@ -74,5 +75,22 @@ public final class Kind {
         checkNotNull(kind);
         checkArgument(!kind.startsWith(FORBIDDEN_PREFIX), INVALID_KIND_ERROR_MESSAGE);
         return kind;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Kind kind = (Kind) o;
+        return Objects.equal(getValue(), kind.getValue());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getValue());
     }
 }

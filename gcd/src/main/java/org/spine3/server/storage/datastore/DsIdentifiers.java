@@ -55,7 +55,7 @@ public class DsIdentifiers {
      * @return the Datastore {@code Key} instance
      */
     static Key keyFor(DatastoreWrapper datastore, Kind kind, DatastoreRecordId recordId) {
-        final KeyFactory keyFactory = datastore.getKeyFactory(kind.getValue());
+        final KeyFactory keyFactory = datastore.getKeyFactory(kind);
         final Key key = keyFactory.newKey(recordId.getValue());
 
         return key;

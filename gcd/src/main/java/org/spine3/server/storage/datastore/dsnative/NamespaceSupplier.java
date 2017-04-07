@@ -50,8 +50,13 @@ public abstract class NamespaceSupplier {
     }
 
     @VisibleForTesting
-    public static NamespaceSupplier constant() {
+    static NamespaceSupplier constant() {
         return Singleton.INSTANCE.singleTenant;
+    }
+
+    @VisibleForTesting
+    static NamespaceSupplier multitenant() {
+        return Singleton.INSTANCE.multipleTenant;
     }
 
     NamespaceSupplier() {
