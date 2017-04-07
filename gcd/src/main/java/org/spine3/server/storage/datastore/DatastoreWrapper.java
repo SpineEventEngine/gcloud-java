@@ -63,8 +63,10 @@ import static java.lang.Math.min;
  */
 public class DatastoreWrapper {
 
-    private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should be active.";
-    private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE = "Transaction should NOT be active.";
+    private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE =
+            "Transaction should be active.";
+    private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE =
+            "Transaction should NOT be active.";
 
     private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
     private static final int MAX_KEYS_PER_WRITE_REQUEST = 500;
@@ -81,7 +83,8 @@ public class DatastoreWrapper {
     }
 
     /**
-     * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
+     * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns
+     * the instance.
      *
      * @param datastore {@link Datastore} to wrap
      * @return new instance of {@code DatastoreWrapper}
@@ -163,7 +166,8 @@ public class DatastoreWrapper {
      * Retrieves an {@link Entity} for each of the given keys.
      *
      * @param keys {@link Key Keys} to search for
-     * @return A list of found entities in the order of keys (including {@code null} values for nonexistent keys)
+     * @return A list of found entities in the order of keys (including {@code null} values for
+     * nonexistent keys)
      * @see DatastoreReader#fetch(Key...)
      */
     public List<Entity> read(Iterable<Key> keys) {
@@ -181,9 +185,11 @@ public class DatastoreWrapper {
      * Queries the Datastore with the given arguments.
      *
      * <p>As the Datastore may return a partial result set for {@link EntityQuery}, {@link KeyQuery}
-     * and {@link ProjectionEntityQuery}, it is required to repeat a query with the adjusted cursor position.
+     * and {@link ProjectionEntityQuery}, it is required to repeat a query with the adjusted
+     * cursor position.
      *
-     * <p>Therefore, an execution of this method may in fact result in several queries to the Datastore instance.
+     * <p>Therefore, an execution of this method may in fact result in several queries to
+     * the Datastore instance.
      *
      * @param query {@link Query} to execute upon the Datastore
      * @return results fo the query packed in a {@link List}
@@ -200,12 +206,13 @@ public class DatastoreWrapper {
             final Query<Entity> queryForMoreResults;
 
             /**
-             * The generic {@link Query} cannot be transformed into the {@code Builder} instance due to different
-             * nature of builders per {@code Query} subclass.
+             * The generic {@link Query} cannot be transformed into the {@code Builder} instance due
+             * to different nature of builders per {@code Query} subclass.
              *
-             * <p>That's why the only way to repeat the same query with the cursor position adjusted is
-             * to cast the {@code Query} instance to its subclass. Subclass instances may be transformed into
-             * the {@code Builder}s, allowing to inject a new {@code startCursor} value.
+             * <p>That's why the only way to repeat the same query with the cursor position adjusted
+             * is to cast the {@code Query} instance to its subclass. Subclass instances may be
+             * transformed into the {@code Builder}s, allowing to inject a new
+             * {@code startCursor} value.
              **/
 
             if (query instanceof StructuredQuery) {
@@ -283,11 +290,12 @@ public class DatastoreWrapper {
     /**
      * Starts a transaction.
      *
-     * <p>After this method is called, all {@code Entity} modifications performed through this instance of
-     * {@code DatastoreWrapper} become transactional. This behaviour lasts until either {@link #commitTransaction()} or
-     * {@link #rollbackTransaction()} is called.
+     * <p>After this method is called, all {@code Entity} modifications performed through this
+     * instance of {@code DatastoreWrapper} become transactional. This behaviour lasts until either
+     * {@link #commitTransaction()} or {@link #rollbackTransaction()} is called.
      *
-     * @throws IllegalStateException if a transaction is already started on this instance of {@code DatastoreWrapper}
+     * @throws IllegalStateException if a transaction is already started on this instance of
+     * {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
     @SuppressWarnings("WeakerAccess") // Part of API
@@ -304,7 +312,8 @@ public class DatastoreWrapper {
      *
      * <p>All next operations become non-transactional until {@link #startTransaction()} is called.
      *
-     * @throws IllegalStateException if no transaction is started on this instance of {@code DatastoreWrapper}
+     * @throws IllegalStateException if no transaction is started on this instance of
+     * {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
     @SuppressWarnings("WeakerAccess")
@@ -318,12 +327,14 @@ public class DatastoreWrapper {
     /**
      * Rollbacks a transaction.
      *
-     * <p>Upon the method call, all the modifications within the active transaction canceled permanently.
+     * <p>Upon the method call, all the modifications within the active transaction
+     * canceled permanently.
      *
-     * <p>After this method execution is over, all the further modifications made through the current instance of
-     * {@code DatastoreWrapper} become non-transactional.
+     * <p>After this method execution is over, all the further modifications made through
+     * the current instance of {@code DatastoreWrapper} become non-transactional.
      *
-     * @throws IllegalStateException if no transaction is active for the current instance of {@code DatastoreWrapper}
+     * @throws IllegalStateException if no transaction is active for the current
+     * instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
     @SuppressWarnings("WeakerAccess") // Part of API
@@ -370,9 +381,9 @@ public class DatastoreWrapper {
     /**
      * Reads big number of records.
      *
-     * <p>Google App Engine Datastore has a limitation on the amount of entities queried with a single call —
-     * 1000 entities per query. To deal with this limitation we read the entities in pagination fashion
-     * 1000 entity per page.
+     * <p>Google App Engine Datastore has a limitation on the amount of entities queried with a
+     * single call — 1000 entities per query. To deal with this limitation we read the entities in
+     * pagination fashion 1000 entity per page.
      *
      * @param keys {@link Key keys} to find the entities for
      * @return ordered sequence of {@link Entity entities}
@@ -380,7 +391,8 @@ public class DatastoreWrapper {
      */
     private List<Entity> readBulk(List<Key> keys) {
         final int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
-        log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.", pageCount);
+        log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.",
+                    pageCount);
 
         final List<Entity> result = newLinkedList();
         int lowerBound = 0;
