@@ -43,6 +43,8 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.server.storage.datastore.dsnative.Namespace;
+import org.spine3.server.storage.datastore.dsnative.NamespaceSupplier;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -76,7 +78,10 @@ public class DatastoreWrapper {
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
 
-    protected DatastoreWrapper(Datastore datastore) {
+    private final NamespaceSupplier namespaceSupplier;
+
+    protected DatastoreWrapper(Datastore datastore, NamespaceSupplier namespaceSupplier) {
+        this.namespaceSupplier = namespaceSupplier;
         this.datastore = datastore;
         this.actor = datastore;
     }
@@ -88,8 +93,8 @@ public class DatastoreWrapper {
      * @return new instance of {@code DatastoreWrapper}
      */
     @SuppressWarnings("WeakerAccess") // Part of API
-    protected static DatastoreWrapper wrap(Datastore datastore) {
-        return new DatastoreWrapper(datastore);
+    protected static DatastoreWrapper wrap(Datastore datastore, NamespaceSupplier namespaceSupplier) {
+        return new DatastoreWrapper(datastore, namespaceSupplier);
     }
 
     /**
@@ -194,35 +199,23 @@ public class DatastoreWrapper {
      * @return results fo the query packed in a {@link List}
      * @see DatastoreReader#run(Query)
      */
-    public List<Entity> read(Query<Entity> query) {
-        QueryResults<Entity> queryResults = actor.run(query);
+    public List<Entity> read(StructuredQuery<Entity> query) {
+        final Namespace namespace = namespaceSupplier.getNamespace();
+        final StructuredQuery<Entity> queryWithNamespace = query.toBuilder()
+                                                          .setNamespace(namespace.getValue())
+                                                          .build();
+        QueryResults<Entity> queryResults = actor.run(queryWithNamespace);
         final List<Entity> resultsAsList = newLinkedList();
 
         while (queryResults != null && queryResults.hasNext()) {
             Iterators.addAll(resultsAsList, queryResults);
 
             final Cursor cursorAfter = queryResults.getCursorAfter();
-            final Query<Entity> queryForMoreResults;
+            final Query<Entity> queryForMoreResults = queryWithNamespace.toBuilder()
+                                                                        .setStartCursor(cursorAfter)
+                                                                        .build();
 
-            /**
-             * The generic {@link Query} cannot be transformed into the {@code Builder} instance due to different
-             * nature of builders per {@code Query} subclass.
-             *
-             * <p>That's why the only way to repeat the same query with the cursor position adjusted is
-             * to cast the {@code Query} instance to its subclass. Subclass instances may be transformed into
-             * the {@code Builder}s, allowing to inject a new {@code startCursor} value.
-             **/
-
-            if (query instanceof StructuredQuery) {
-                final StructuredQuery<Entity> structuredQuery = (StructuredQuery<Entity>) query;
-                queryForMoreResults = structuredQuery.toBuilder()
-                                                     .setStartCursor(cursorAfter)
-                                                     .build();
-            } else {
-                queryForMoreResults = null;
-            }
-
-            queryResults = queryForMoreResults == null ? null : actor.run(queryForMoreResults);
+            queryResults = actor.run(queryForMoreResults);
         }
 
         return resultsAsList;
@@ -243,9 +236,11 @@ public class DatastoreWrapper {
      * @param table kind (a.k.a. type, table, etc.) of the records to delete
      */
     void dropTable(String table) {
-        final Query<Entity> query = Query.newEntityQueryBuilder()
-                                         .setKind(table)
-                                         .build();
+        final Namespace namespace = namespaceSupplier.getNamespace();
+        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+                                                   .setNamespace(namespace.getValue())
+                                                   .setKind(table)
+                                                   .build();
         final List<Entity> entities = read(query);
         final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
             @Nullable
@@ -365,9 +360,15 @@ public class DatastoreWrapper {
         return keyFactory;
     }
 
+    Datastore getDatastore() {
+        return datastore;
+    }
+
     private KeyFactory initKeyFactory(String kind) {
+        final Namespace namespace = namespaceSupplier.getNamespace();
         final KeyFactory keyFactory = datastore.newKeyFactory()
-                                               .setKind(kind);
+                                               .setKind(kind)
+                                               .setNamespace(namespace.getValue());
         keyFactories.put(kind, keyFactory);
         return keyFactory;
     }

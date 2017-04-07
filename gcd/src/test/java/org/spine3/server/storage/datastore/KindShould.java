@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.server.storage.datastore.dsnative.Kind;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 

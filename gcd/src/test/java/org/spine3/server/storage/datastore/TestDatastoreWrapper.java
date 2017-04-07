@@ -26,10 +26,12 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.server.storage.datastore.dsnative.NamespaceSupplier;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -56,13 +58,12 @@ class TestDatastoreWrapper extends DatastoreWrapper {
      */
     private static final int MAX_CLEANUP_ATTEMPTS = 5;
 
-
     private static final Collection<String> kindsCache = new LinkedList<>();
 
     private final boolean waitForConsistency;
 
     private TestDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
-        super(datastore);
+        super(datastore, NamespaceSupplier.constant());
         this.waitForConsistency = waitForConsistency;
     }
 
@@ -119,9 +120,9 @@ class TestDatastoreWrapper extends DatastoreWrapper {
                 }
             }
 
-            final Query<Entity> query = Query.newEntityQueryBuilder()
-                                             .setKind(table)
-                                             .build();
+            final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+                                                       .setKind(table)
+                                                       .build();
             final List<Entity> entities = read(query);
             remainingEntityCount = entities.size();
 
@@ -148,7 +149,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
 
         if (cleanupAttempts >= MAX_CLEANUP_ATTEMPTS && remainingEntityCount > 0) {
             throw new RuntimeException("Cannot cleanup the table: " + table +
-                    ". Remaining entity count is " + remainingEntityCount);
+                                               ". Remaining entity count is " + remainingEntityCount);
         }
     }
 

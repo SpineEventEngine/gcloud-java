@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore;
+package org.spine3.server.storage.datastore.dsnative;
 
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;

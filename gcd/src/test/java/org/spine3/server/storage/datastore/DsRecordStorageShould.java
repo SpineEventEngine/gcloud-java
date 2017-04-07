@@ -41,6 +41,7 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorageShould;
+import org.spine3.server.storage.datastore.dsnative.Kind;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;

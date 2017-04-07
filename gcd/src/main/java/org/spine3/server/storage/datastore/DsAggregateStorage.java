@@ -37,6 +37,7 @@ import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.storage.datastore.dsnative.Kind;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
@@ -151,13 +152,12 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         final String idString = Stringifiers.toString(id);
-        final Query<Entity> query = Query.newEntityQueryBuilder()
-                                         .setKind(stateTypeName.value())
-                                         .setFilter(
-                                                 StructuredQuery.PropertyFilter.eq(
-                                                         aggregate_id.toString(),
-                                                         idString))
-                                         .build();
+        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+                                                   .setKind(stateTypeName.value())
+                                                   .setFilter(StructuredQuery.PropertyFilter.eq(
+                                                           aggregate_id.toString(),
+                                                           idString))
+                                                   .build();
         final List<Entity> eventEntities = datastore.read(query);
         if (eventEntities.isEmpty()) {
             return Collections.emptyIterator();
@@ -193,9 +193,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     private Collection<Entity> getEntityStates() {
-        final Query<Entity> query = Query.newEntityQueryBuilder()
-                                         .setKind(AGGREGATE_LIFECYCLE_KIND.value())
-                                         .build();
+        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+                                                   .setKind(AGGREGATE_LIFECYCLE_KIND.value())
+                                                   .build();
         return datastore.read(query);
     }
 
@@ -272,9 +272,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     public Iterator<I> index() {
         checkNotClosed();
 
-        final Query<Entity> allQuery = Query.newEntityQueryBuilder()
-                                            .setKind(stateTypeName.value())
-                                            .build();
+        final StructuredQuery<Entity> allQuery = Query.newEntityQueryBuilder()
+                                                      .setKind(stateTypeName.value())
+                                                      .build();
         final List<Entity> allRecords = datastore.read(allQuery);
         final Iterator<I> index = Iterators.transform(allRecords.iterator(), new IndexExtractror<>(idClass));
         return index;

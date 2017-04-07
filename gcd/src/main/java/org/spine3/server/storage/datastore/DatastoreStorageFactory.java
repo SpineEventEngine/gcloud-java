@@ -32,6 +32,7 @@ import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.datastore.dsnative.NamespaceSupplier;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
 import org.spine3.type.TypeUrl;
@@ -47,6 +48,7 @@ import static org.spine3.server.reflect.Classes.getGenericParameterType;
  *
  * @author Alexander Litus
  * @author Mikhail Mikhaylov
+ * @author Dmytro Dashenkov
  */
 @SuppressWarnings("WeakerAccess") // Part of API
 public class DatastoreStorageFactory implements StorageFactory {
@@ -85,7 +87,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     @VisibleForTesting
     protected void initDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already initialized");
-        final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore);
+        final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore, NamespaceSupplier.instanceFor(this));
         this.setDatastore(wrapped);
     }
 

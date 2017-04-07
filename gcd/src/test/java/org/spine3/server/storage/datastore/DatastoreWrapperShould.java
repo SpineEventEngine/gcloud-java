@@ -25,6 +25,8 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.protobuf.Any;
 import org.junit.Test;
+import org.spine3.server.storage.datastore.dsnative.Kind;
+import org.spine3.server.storage.datastore.dsnative.NamespaceSupplier;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,7 +45,7 @@ public class DatastoreWrapperShould {
 
     @Test
     public void work_with_transactions_if_necessary() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore());
+        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(), NamespaceSupplier.constant());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
         wrapper.commitTransaction();
@@ -52,7 +54,7 @@ public class DatastoreWrapperShould {
 
     @Test
     public void rollback_transactions() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore());
+        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(), NamespaceSupplier.constant());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
         wrapper.rollbackTransaction();
@@ -61,7 +63,7 @@ public class DatastoreWrapperShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_start_transaction_if_one_is_active() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore());
+        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(), NamespaceSupplier.constant());
         try {
             wrapper.startTransaction();
             assertTrue(wrapper.isTransactionActive());
@@ -73,7 +75,7 @@ public class DatastoreWrapperShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_finish_not_active_transaction() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore());
+        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(), NamespaceSupplier.constant());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
         wrapper.commitTransaction();

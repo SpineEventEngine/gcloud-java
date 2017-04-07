@@ -43,6 +43,7 @@ import org.spine3.server.entity.storage.ColumnType;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.datastore.dsnative.Kind;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.type.TypeUrl;
 

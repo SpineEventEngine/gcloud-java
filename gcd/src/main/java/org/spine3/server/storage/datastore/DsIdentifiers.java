@@ -27,6 +27,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.storage.datastore.dsnative.Kind;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Identifiers.idToString;
