@@ -46,7 +46,8 @@ public class DatastoreTypeRegistryShould {
 
     @Test
     public void have_default_column_types() {
-        final ColumnTypeRegistry<DatastoreColumnType> registry = DatastoreTypeRegistry.defaultInstance();
+        final ColumnTypeRegistry<DatastoreColumnType> registry =
+                DatastoreTypeRegistry.defaultInstance();
         final DatastoreColumnType<?, ?> stringType = registry.get(mockColumn(String.class));
         assertNotNull(stringType);
         final DatastoreColumnType<?, ?> intType = registry.get(mockColumn(int.class));
@@ -91,7 +92,8 @@ public class DatastoreTypeRegistryShould {
 
     private static class ByteColumnType extends SimpleDatastoreColumnType<Byte> {
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, Byte value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord,
+                                   Byte value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
@@ -104,7 +106,8 @@ public class DatastoreTypeRegistryShould {
         }
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, Integer value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord,
+                                   Integer value, String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
