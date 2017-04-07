@@ -40,7 +40,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * Utility class for performing transformations on entity IDs.
  *
- * <p>Provides functionality for transforming numeric and {@link Message protobuf} IDs into strings and vise versa.
+ * <p>Provides functionality for transforming numeric and {@link Message protobuf} IDs into strings
+ * and vise versa.
  *
  * @author Dmytro Dashenkov
  */
@@ -51,15 +52,18 @@ class IdTransformer {
     private static final String REFLECTIVE_ERROR_MESSAGE_PATTERN
             = "Reflective operation error trying to parse %s instance from string \"%s\"\n";
     private static final String WRONG_ID_TYPE_ERROR_MESSAGE
-            = "Only String, numeric and Proto-message identifiers are allowed in GAE storage implementation.";
+            = "Only String, numeric and Proto-message identifiers are allowed in " +
+            "GAE storage implementation.";
     private static final int STRING_BUILDER_INITIAL_CAPACITY = 128;
     private static final String TYPE_PREFIX = "TYPE:";
     private static final String SERIALIZED_MESSAGE_BYTES_DIVIDER = "-";
     private static final String SERIALIZED_MESSAGE_BYTES_POSTFIX = ":END";
     private static final String SERIALIZED_MESSAGE_DIVIDER = "::";
     private static final String SERIALIZED_DEFAULT_MESSAGE = "DEFAULT";
-    private static final String WRONG_OR_BROKEN_MESSAGE_ID = "Passed proto ID %s is wrong or broken.";
-    private static final String UNABLE_TO_DETECT_GENERIC_TYPE = "Unable to detect generic type of ID: ";
+    private static final String WRONG_OR_BROKEN_MESSAGE_ID =
+            "Passed proto ID %s is wrong or broken.";
+    private static final String UNABLE_TO_DETECT_GENERIC_TYPE =
+            "Unable to detect generic type of ID: ";
     private static final Logger LOG = Logger.getLogger(IdTransformer.class.getName());
 
     private IdTransformer() {
@@ -79,9 +83,9 @@ class IdTransformer {
      *           See <a href="https://cloud.google.com/appengine/docs/java/datastore/creating-entity-keys#Java_Kinds_and_identifiers">Datastore docs</a>
      *           for more info.
      *
-     *           <p>Note: keeping in mind those limitations, one should also remember not to use too heavy protobuf
-     *           messages as IDs. Remember that the serialized message should not have more then 100 bytes,
-     *           otherwise this may lead to unexpected errors.
+     *           <p>Note: keeping in mind those limitations, one should also remember not to use too
+     *           heavy protobuf messages as IDs. Remember that the serialized message should not
+     *           have more then 100 bytes, otherwise this may lead to unexpected errors.
      * @return string representation of the given ID
      */
     static String idToString(Object id) {
@@ -128,11 +132,12 @@ class IdTransformer {
     }
 
     /**
-     * Transforms ID from a {@code String} representation back to a {@link Number} or a {@link Message protobuf message}.
+     * Transforms ID from a {@code String} representation back to a {@link Number} or
+     * a {@link Message protobuf message}.
      *
      * @param stringId          the {@code String} representation of the ID
-     * @param parametrizedClass {@link Class parametrized type} of the {@link org.spine3.server.entity.Entity}
-     *                                                         to restore ID for
+     * @param parametrizedClass {@link Class parametrized type} of the
+     *                          {@link org.spine3.server.entity.Entity} to restore ID for
      * @return generic ID matching the given {@code String} representation
      */
     @SuppressWarnings("unchecked")
@@ -142,7 +147,8 @@ class IdTransformer {
         if (isOfSupportedNumberType(idClass)) { // Numeric ID
             final String typeName = idClass.getSimpleName();
             try {
-                final Method parser = idClass.getDeclaredMethod("parse" + typeName, String.class);
+                final Method parser = idClass.getDeclaredMethod("parse" + typeName,
+                                                                String.class);
                 id = (I) parser.invoke(null, stringId);
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                 // Never happen
@@ -165,7 +171,8 @@ class IdTransformer {
 
         try {
             @SuppressWarnings("unchecked")  // cast should be safe, since the convention.
-            final Class<I> result = Classes.getGenericParameterType(parametrizedClass, 0);
+            final Class<I> result = Classes.getGenericParameterType(parametrizedClass,
+                                                                    0);
             return result;
         } catch (ClassCastException e) {
             LOG.warning(UNABLE_TO_DETECT_GENERIC_TYPE + e.toString());
@@ -188,7 +195,8 @@ class IdTransformer {
     }
 
     private static Message protoIdFromString(String stringId) {
-        checkArgument(stringId.startsWith(TYPE_PREFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
+        checkArgument(stringId.startsWith(TYPE_PREFIX), String.format(WRONG_OR_BROKEN_MESSAGE_ID,
+                                                                      stringId));
         checkArgument(
                 stringId.endsWith(SERIALIZED_MESSAGE_BYTES_POSTFIX),
                 String.format(WRONG_OR_BROKEN_MESSAGE_ID, stringId));
@@ -197,7 +205,8 @@ class IdTransformer {
         final int typeEndIndex = stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER);
         final String typUrlDecoded = stringId.substring(typeStartIndex, typeEndIndex);
 
-        final int dataStartIndex = stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER) + SERIALIZED_MESSAGE_DIVIDER.length();
+        final int dataStartIndex = stringId.indexOf(SERIALIZED_MESSAGE_DIVIDER) +
+                SERIALIZED_MESSAGE_DIVIDER.length();
         final int dataEndIndex = stringId.lastIndexOf(SERIALIZED_MESSAGE_BYTES_POSTFIX);
         final String bytesString = stringId.substring(dataStartIndex, dataEndIndex);
 
@@ -211,7 +220,7 @@ class IdTransformer {
         final byte[] messageBytes = new byte[separateStringBytes.length];
         for (int i = 0; i < messageBytes.length; i++) {
             final byte[] singleByteAsArray = BaseEncoding.base16()
-                                        .decode(separateStringBytes[i]);
+                                                         .decode(separateStringBytes[i]);
             messageBytes[i] = singleByteAsArray[0];
         }
 
