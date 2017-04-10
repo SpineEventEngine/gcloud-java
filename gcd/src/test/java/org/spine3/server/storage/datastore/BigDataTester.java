@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.common.base.Throwables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.entity.EntityRecord;
@@ -87,6 +88,12 @@ public class BigDataTester<I> {
         }
 
         log().debug("Writing took {} millis.", writeTime);
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            fail(Throwables.getStackTraceAsString(e));
+        }
 
         final long readStart = System.currentTimeMillis();
 
