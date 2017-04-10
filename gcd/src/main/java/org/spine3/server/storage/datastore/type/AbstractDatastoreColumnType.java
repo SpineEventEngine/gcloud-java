@@ -25,8 +25,9 @@ import com.google.cloud.datastore.BaseEntity;
 /**
  * An abstract base for implementing {@link DatastoreColumnType}.
  *
- * <p>This class handles the {@code null} case, since its implementation is the same for all the types within a Storage
- * implementation.
+ * <p>This class provides the default implementation for the {@link #setNull setNull} method
+ * of {@link org.spine3.server.entity.storage.ColumnType}. Since this method implementation is the
+ * same for all the types within a Storage implementation, it's convenient to declare it once.
  *
  * @author Dmytro Dashenkov
  */

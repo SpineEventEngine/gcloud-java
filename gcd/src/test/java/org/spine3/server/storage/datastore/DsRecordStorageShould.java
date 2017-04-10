@@ -26,11 +26,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
-import org.spine3.base.Stringifier;
-import org.spine3.base.StringifierRegistry;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.json.Json;
@@ -89,24 +86,6 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
         final EntityRecord record = newStorageRecord();
         final EntityRecordWithColumns recordWithColumns = create(record, new TestConstCounterEntity(newId()));
         return recordWithColumns;
-    }
-
-    @BeforeClass
-    public static void setUpAll() {
-        StringifierRegistry.getInstance()
-                           .register(new Stringifier<ProjectId>() {
-                               @Override
-                               protected String toString(ProjectId obj) {
-                                   return obj.getId();
-                               }
-
-                               @Override
-                               protected ProjectId fromString(String s) {
-                                   return ProjectId.newBuilder()
-                                                   .setId(s)
-                                                   .build();
-                               }
-                           }, ProjectId.class);
     }
 
     @Before

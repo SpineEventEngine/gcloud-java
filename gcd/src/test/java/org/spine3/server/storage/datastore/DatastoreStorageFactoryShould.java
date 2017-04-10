@@ -111,6 +111,7 @@ public class DatastoreStorageFactoryShould {
     @Test
     public void convert_itself_to_single_tenant() {
         final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                              .setDatastore(datastore)
                                                               .setMultitenant(true)
                                                               .build();
         assertTrue(factory.isMultitenant());
@@ -121,6 +122,7 @@ public class DatastoreStorageFactoryShould {
     @Test
     public void return_self_if_single_tenant() {
         final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                              .setDatastore(datastore)
                                                               .setMultitenant(false)
                                                               .build();
         assertFalse(factory.isMultitenant());
@@ -139,10 +141,17 @@ public class DatastoreStorageFactoryShould {
     @Test
     public void have_default_column_type_registry() {
         final DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                                       .setDatastore(datastore)
                                                                        .build();
         final ColumnTypeRegistry defaultRegistry = factory.getTypeRegistry();
         assertNotNull(defaultRegistry);
         assertSame(DatastoreTypeRegistry.defaultInstance(), defaultRegistry);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void fail_to_construct_without_datastore() {
+        DatastoreStorageFactory.newBuilder()
+                               .build();
     }
 
     private static <T> Column<T> mockColumn(Class<T> type) {
