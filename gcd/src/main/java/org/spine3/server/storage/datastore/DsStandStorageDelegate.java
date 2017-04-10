@@ -156,7 +156,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
-    // Ignore Storage Fields since StandStorage does not support them yet
+        // Ignore Entity Columns since StandStorage does not support them yet
     @Override
     protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithColumns record) {
         // NOP

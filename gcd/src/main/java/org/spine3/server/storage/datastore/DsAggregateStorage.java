@@ -276,7 +276,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                                                       .setKind(stateTypeName.value())
                                                       .build();
         final List<Entity> allRecords = datastore.read(allQuery);
-        final Iterator<I> index = Iterators.transform(allRecords.iterator(), new IndexExtractror<>(idClass));
+        final Iterator<I> index = Iterators.transform(allRecords.iterator(), new IndexTransformer<>(idClass));
         return index;
     }
 
@@ -286,11 +286,16 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         return key;
     }
 
-    private static class IndexExtractror<I> implements Function<Entity, I> {
+    /**
+     * A {@linkplain Function} type transforming String IDs into the specified generic type.
+     *
+     * @param <I> the generic ID type
+     */
+    private static class IndexTransformer<I> implements Function<Entity, I> {
 
         private final Class<I> idClass;
 
-        public IndexExtractror(Class<I> idClass) {
+        private IndexTransformer(Class<I> idClass) {
             this.idClass = idClass;
         }
 
@@ -302,6 +307,10 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         }
     }
 
+    /**
+     * A {@linkplain Predicate} type filtering the input {@linkplain Entity entities} by presence of their
+     * {@linkplain Key keys} in the given {@link Collection} of keys.
+     */
     private static class IsActiveAggregateId implements Predicate<Entity> {
 
         private final Collection<Key> inActiveAggregateIds;

@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.common.base.Throwables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.entity.EntityRecord;
@@ -34,6 +35,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
+ * A test utility that checks that the data read/write operations perform well (i.e. execute within
+ * the specified time
+ * limit) upon a big amount of records.
+ *
+ * <p>The default count of records is 500. Use {@link #setBulkSize(int)} to modify this number.
+ *
+ * <p>Note: the operations expected to be executed upon the whole bulk of records, not each record
+ * separately.
+ *
+ * <p>The test suits based on this utility are not expected to check if the read records match
+ * those that were written or not. Instead they should just check the time consumed by
+ * the operations and the consistency of the data (i.e. count of the records written and read).
+ *
  * @author Dmytro Dashenkov
  */
 public class BigDataTester<I> {
@@ -71,6 +85,23 @@ public class BigDataTester<I> {
         return this;
     }
 
+    /**
+     * Preforms the actual check.
+     *
+     * <p>The execution flow is as follows:
+     * <ol>
+     *     <li>1. Produce the records with the given {@link EntrySupplier}
+     *     <li>2. Measure the time of the {@linkplain RecordStorage#write(Map) bulk write}
+     *     <li>3. Fail if the time is over the specified limit
+     *     <li>4. Wait 1 second to ensure the Datastore has established the data consistency
+     *     <li>5. Measure the time of the {@linkplain RecordStorage#readAll() bulk read}
+     *     <li>6. Fail if the time is over the specified limit
+     *     <li>7. Check the count of the records written and read is equal
+     * </ol>
+     *
+     * <p>This method performs {@code debug} logging of the measure results. To see the log, run
+     * the tests with {@code debug} logging.
+     */
     public void testBigDataOperations() {
         final Map<I, EntityRecordWithColumns> records = new HashMap<>(bulkSize);
         for (int i = 0; i < bulkSize; i++) {
@@ -88,6 +119,12 @@ public class BigDataTester<I> {
 
         log().debug("Writing took {} millis.", writeTime);
 
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            fail(Throwables.getStackTraceAsString(e));
+        }
+
         final long readStart = System.currentTimeMillis();
 
         // Do not test data equality here, only the sizes and time
@@ -101,9 +138,16 @@ public class BigDataTester<I> {
         }
         log().debug("Reading took {} millis.", readTime);
 
-        assertEquals(records.size(), readRecords.size());
+        assertEquals("Unexpected records count read.", records.size(), readRecords.size());
     }
 
+    /**
+     * A supplier of the records to write into the Datastore for the check.
+     *
+     * <p>It's recommended to provide generic non-empty records to make the check closer to a real-life cases.
+     *
+     * @param <I> the type of the record ID
+     */
     public interface EntrySupplier<I> {
         I newId();
         EntityRecordWithColumns newRecord();

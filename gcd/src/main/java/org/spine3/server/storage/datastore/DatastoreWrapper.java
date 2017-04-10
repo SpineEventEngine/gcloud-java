@@ -37,6 +37,7 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
@@ -368,6 +369,7 @@ public class DatastoreWrapper {
         return keyFactory;
     }
 
+    @VisibleForTesting
     Datastore getDatastore() {
         return datastore;
     }
