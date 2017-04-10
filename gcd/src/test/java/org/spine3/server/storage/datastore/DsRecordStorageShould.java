@@ -218,7 +218,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
     @Test
     public void pass_big_data_speed_test() {
         // Default bulk size is 500 records - the maximum records that could be written within one write operation
-        final long maxReadTime = 850;
+        final long maxReadTime = 1000;
         final long maxWriteTime = 9500;
 
         new BigDataTester<>(getStorage())
