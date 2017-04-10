@@ -24,11 +24,8 @@ import org.spine3.server.tenant.TenantFunction;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 
 /**
  * A {@link NamespaceSupplier} for multitenant storage factories.
@@ -37,55 +34,17 @@ import static java.lang.String.format;
  */
 final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
-    private static final Pattern AT_SYMBOL_PATTERN = Pattern.compile("@", Pattern.LITERAL);
-    private static final String AT_SYMBOL_REPLACEMENT = "-at-";
-
     /**
      * {@inheritDoc}
      *
      * @return the {@link Namespace} representing the current tenant {@link TenantId ID}
      */
     @Override
-    public Namespace getNamespace() {
+    public Namespace get() {
         final TenantIdRetriever retriever = new TenantIdRetriever();
         final TenantId tenantId = retriever.execute();
         checkNotNull(tenantId);
-        final String stringTenantId = tenantIdToSignificantString(tenantId);
-        final Namespace result = Namespace.of(stringTenantId);
-        return result;
-    }
-
-    /**
-     * @return a human-friendly string representation of the {@link TenantId}
-     */
-    private static String tenantIdToSignificantString(TenantId id) {
-        final TenantId.KindCase kindCase = id.getKindCase();
-        final String result;
-        switch (kindCase) {
-            case DOMAIN:
-                result = id.getDomain()
-                           .getValue();
-                break;
-            case EMAIL:
-                result = id.getEmail()
-                           .getValue();
-                break;
-            case VALUE:
-                result = id.getValue();
-                break;
-            case KIND_NOT_SET:
-            default:
-                throw new IllegalStateException(format("Tenant ID is not set. Kind of TenantId is %s.",
-                                                       kindCase.toString()));
-        }
-
-        final String escapedResult = escapeIllegalCharacters(result);
-        return escapedResult;
-    }
-
-    private static String escapeIllegalCharacters(String condidateNamespace) {
-        final String result = AT_SYMBOL_PATTERN.matcher(condidateNamespace)
-                                               .replaceAll(Matcher.quoteReplacement(AT_SYMBOL_REPLACEMENT));
+        final Namespace result = Namespace.of(tenantId);
         return result;
     }
 

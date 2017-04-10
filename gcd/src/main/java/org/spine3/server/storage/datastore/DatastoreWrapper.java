@@ -209,7 +209,7 @@ public class DatastoreWrapper {
      * @see DatastoreReader#run(Query)
      */
     public List<Entity> read(StructuredQuery<Entity> query) {
-        final Namespace namespace = namespaceSupplier.getNamespace();
+        final Namespace namespace = namespaceSupplier.get();
         final StructuredQuery<Entity> queryWithNamespace = query.toBuilder()
                                                                 .setNamespace(namespace.getValue())
                                                                 .build();
@@ -245,7 +245,7 @@ public class DatastoreWrapper {
      * @param table kind (a.k.a. type, table, etc.) of the records to delete
      */
     void dropTable(String table) {
-        final Namespace namespace = namespaceSupplier.getNamespace();
+        final Namespace namespace = namespaceSupplier.get();
         final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setNamespace(namespace.getValue())
                                                    .setKind(table)
@@ -363,7 +363,7 @@ public class DatastoreWrapper {
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
         }
-        final Namespace namespace = namespaceSupplier.getNamespace();
+        final Namespace namespace = namespaceSupplier.get();
         keyFactory.setNamespace(namespace.getValue());
 
         return keyFactory;

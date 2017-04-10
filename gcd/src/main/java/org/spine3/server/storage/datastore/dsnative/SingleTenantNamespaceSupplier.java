@@ -35,7 +35,7 @@ final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
      * @return the {@link Namespace} representing the empty string
      */
     @Override
-    public Namespace getNamespace() {
+    public Namespace get() {
         return NamespaceSingleton.INSTANCE.value;
     }
 

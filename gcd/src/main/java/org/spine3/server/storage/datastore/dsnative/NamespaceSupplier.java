@@ -21,17 +21,18 @@
 package org.spine3.server.storage.datastore.dsnative;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Supplier;
 import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A factory for the {@linkplain Namespace namespaces}, based on the current multitenancy configuration and
+ * A supplier for the {@linkplain Namespace namespaces}, based on the current multitenancy configuration and
  * {@linkplain org.spine3.users.TenantId tenant ID}.
  *
  * @author Dmytro Dashenkov
  */
-public abstract class NamespaceSupplier {
+public abstract class NamespaceSupplier implements Supplier<Namespace> {
 
     /**
      * Obtains an instance of {@code NamespaceSupplier} for the passed
@@ -69,7 +70,8 @@ public abstract class NamespaceSupplier {
      * the {@linkplain DatastoreStorageFactory storage factory} passed upon the initialization is configured to be
      * single tenant
      */
-    public abstract Namespace getNamespace();
+    @Override
+    public abstract Namespace get();
 
     private enum Singleton {
         INSTANCE;
