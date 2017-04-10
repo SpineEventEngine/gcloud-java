@@ -31,7 +31,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.server.storage.datastore.dsnative.NamespaceSupplier;
+import org.spine3.server.storage.datastore.dsnative.Kind;
+import org.spine3.server.storage.datastore.dsnative.TestNamespaceSuppliers;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -63,7 +64,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
     private final boolean waitForConsistency;
 
     private TestDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
-        super(datastore, NamespaceSupplier.constant());
+        super(datastore, TestNamespaceSuppliers.singleTenant());
         this.waitForConsistency = waitForConsistency;
     }
 
@@ -72,8 +73,8 @@ class TestDatastoreWrapper extends DatastoreWrapper {
     }
 
     @Override
-    public KeyFactory getKeyFactory(String kind) {
-        kindsCache.add(kind);
+    public KeyFactory getKeyFactory(Kind kind) {
+        kindsCache.add(kind.getValue());
         return super.getKeyFactory(kind);
     }
 

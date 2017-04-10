@@ -24,6 +24,8 @@ import org.spine3.server.tenant.TenantFunction;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -35,6 +37,9 @@ import static java.lang.String.format;
  */
 final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
+    private static final Pattern AT_SYMBOL_PATTERN = Pattern.compile("@", Pattern.LITERAL);
+    private static final String AT_SYMBOL_REPLACEMENT = "-at-";
+
     /**
      * {@inheritDoc}
      *
@@ -42,7 +47,7 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
      */
     @Override
     public Namespace getNamespace() {
-        final TenantIdRetriever retriever = TenantIdRetriever.instance();
+        final TenantIdRetriever retriever = new TenantIdRetriever();
         final TenantId tenantId = retriever.execute();
         checkNotNull(tenantId);
         final String stringTenantId = tenantIdToSignificantString(tenantId);
@@ -55,27 +60,36 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
      */
     private static String tenantIdToSignificantString(TenantId id) {
         final TenantId.KindCase kindCase = id.getKindCase();
+        final String result;
         switch (kindCase) {
             case DOMAIN:
-                return id.getDomain()
-                         .getValue();
+                result = id.getDomain()
+                           .getValue();
+                break;
             case EMAIL:
-                return id.getEmail()
-                         .getValue();
+                result = id.getEmail()
+                           .getValue();
+                break;
             case VALUE:
-                return id.getValue();
+                result = id.getValue();
+                break;
             case KIND_NOT_SET:
             default:
-                throw new IllegalStateException(format("Tenant id is not set. Kind of TenantId is %s.",
+                throw new IllegalStateException(format("Tenant ID is not set. Kind of TenantId is %s.",
                                                        kindCase.toString()));
         }
+
+        final String escapedResult = escapeIllegalCharacters(result);
+        return escapedResult;
+    }
+
+    private static String escapeIllegalCharacters(String condidateNamespace) {
+        final String result = AT_SYMBOL_PATTERN.matcher(condidateNamespace)
+                                               .replaceAll(Matcher.quoteReplacement(AT_SYMBOL_REPLACEMENT));
+        return result;
     }
 
     private static class TenantIdRetriever extends TenantFunction<TenantId> {
-
-        private static TenantIdRetriever instance() {
-            return Singleton.INSTANCE.value;
-        }
 
         private TenantIdRetriever() {
             super(true);
@@ -85,12 +99,6 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
         public TenantId apply(@Nullable TenantId input) {
             checkNotNull(input);
             return input;
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final TenantIdRetriever value = new TenantIdRetriever();
         }
     }
 }
