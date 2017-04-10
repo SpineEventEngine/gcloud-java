@@ -45,7 +45,7 @@ import java.util.Date;
  * @author Dmytro Dashenkov
  */
 @Internal
-public class DsColumnTypes {
+class DsColumnTypes {
 
     private DsColumnTypes() {
         // Prevent instantiation of a utility class
@@ -54,35 +54,35 @@ public class DsColumnTypes {
     /**
      * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<String>}
      */
-    public static SimpleDatastoreColumnType<String> stringType() {
+    static SimpleDatastoreColumnType<String> stringType() {
         return new StringColumnType();
     }
 
     /**
      * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Integer>}
      */
-    public static SimpleDatastoreColumnType<Integer> integerType() {
+    static SimpleDatastoreColumnType<Integer> integerType() {
         return new IntegerColumnType();
     }
 
     /**
      * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Integer>}
      */
-    public static SimpleDatastoreColumnType<Long> longType() {
+    static SimpleDatastoreColumnType<Long> longType() {
         return new LongColumnType();
     }
 
     /**
      * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Boolean>}
      */
-    public static SimpleDatastoreColumnType<Boolean> booleanType() {
+    static SimpleDatastoreColumnType<Boolean> booleanType() {
         return new BooleanColumnType();
     }
 
     /**
      * @return new instance of {@link DatastoreColumnType} storing {@link Timestamp} as the {@link DateTime}
      */
-    public static DatastoreColumnType<Timestamp, DateTime> timestampType() {
+    static DatastoreColumnType<Timestamp, DateTime> timestampType() {
         return new TimestampColumnType();
     }
 
@@ -90,7 +90,7 @@ public class DsColumnTypes {
      * @return new instance of {@link DatastoreColumnType} storing {@link Timestamp} as the version
      * {@link Version#getNumber() number}.
      */
-    public static DatastoreColumnType<Version, Integer> versionType() {
+    static DatastoreColumnType<Version, Integer> versionType() {
         return new VersionColumnType();
     }
 
@@ -99,7 +99,7 @@ public class DsColumnTypes {
      * {@link Json} {@code String} representation
      * @see Json
      */
-    public static DatastoreColumnType<AbstractMessage, String> messageType() {
+    static DatastoreColumnType<AbstractMessage, String> messageType() {
         return new MessageType();
     }
 
