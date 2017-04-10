@@ -23,10 +23,20 @@ package org.spine3.server.storage.datastore.type;
 import com.google.cloud.datastore.BaseEntity;
 
 /**
+ * An abstract base for implementing {@link DatastoreColumnType}.
+ *
+ * <p>This class handles the {@code null} case, since its implementation is the same for all the types within a Storage
+ * implementation.
+ *
  * @author Dmytro Dashenkov
  */
 public abstract class AbstractDatastoreColumnType<J, C> implements DatastoreColumnType<J, C> {
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Delegates the call to the Datastore-native {@link BaseEntity.Builder#setNull setNull}.
+     */
     @Override
     public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {
         storageRecord.setNull(columnIdentifier);
