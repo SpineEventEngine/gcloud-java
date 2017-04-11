@@ -55,7 +55,7 @@ public class DatastoreWrapperShould {
     public static void tearDown() {
         final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
                                                                TestNamespaceSuppliers.singleTenant());
-        wrapper.dropTable(NAMESPACE_HOLDER_KIND);
+        //wrapper.dropTable(NAMESPACE_HOLDER_KIND);
     }
 
     @Test
