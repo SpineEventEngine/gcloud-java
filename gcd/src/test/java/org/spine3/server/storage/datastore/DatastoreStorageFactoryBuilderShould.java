@@ -28,7 +28,7 @@ import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.ColumnType;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.server.storage.datastore.type.SimpleDatastoreColumnType;
 
 import static org.junit.Assert.assertFalse;
@@ -51,7 +51,7 @@ public class DatastoreStorageFactoryBuilderShould {
     public void not_accept_nulls() {
         new NullPointerTester()
                 .setDefault(Datastore.class, mockDatastore())
-                .setDefault(ColumnTypeRegistry.class, DatastoreTypeRegistry.defaultInstance())
+                .setDefault(ColumnTypeRegistry.class, DatastoreTypeRegistryFactory.defaultInstance())
                 .testInstanceMethods(DatastoreStorageFactory.newBuilder(), NullPointerTester.Visibility.PACKAGE);
     }
 
@@ -77,9 +77,9 @@ public class DatastoreStorageFactoryBuilderShould {
         final StorageFactory factory =
                 DatastoreStorageFactory.newBuilder()
                                        .setDatastore(mockDatastore())
-                                       .setTypeRegistry(DatastoreTypeRegistry.predefinedValuesAnd()
-                                                                             .put(Byte.class, new MockByteColumnType())
-                                                                             .build())
+                                       .setTypeRegistry(DatastoreTypeRegistryFactory.predefinedValuesAnd()
+                                                                                    .put(Byte.class, new MockByteColumnType())
+                                                                                    .build())
                                        .build();
         final ColumnTypeRegistry<?> registry = factory.getTypeRegistry();
         assertNotNull(registry);

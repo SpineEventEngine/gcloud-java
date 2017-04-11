@@ -29,7 +29,7 @@ import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.storage.Project;
 
@@ -115,7 +115,7 @@ public class DatastoreStorageFactoryShould {
                                                                        .build();
         final ColumnTypeRegistry defaultRegistry = factory.getTypeRegistry();
         assertNotNull(defaultRegistry);
-        assertSame(DatastoreTypeRegistry.defaultInstance(), defaultRegistry);
+        assertSame(DatastoreTypeRegistryFactory.defaultInstance(), defaultRegistry);
     }
 
     @Test(expected = NullPointerException.class)

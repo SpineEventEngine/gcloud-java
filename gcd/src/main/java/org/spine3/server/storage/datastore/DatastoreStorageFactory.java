@@ -33,7 +33,7 @@ import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
-import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -231,7 +231,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         /**
          * Sets a {@link ColumnTypeRegistry} for handling the Entity Columns.
          *
-         * <p>Default value is {@link DatastoreTypeRegistry#defaultInstance()}.
+         * <p>Default value is {@link DatastoreTypeRegistryFactory#defaultInstance()}.
          *
          * @param typeRegistry the type registry containing all the required
          * {@linkplain org.spine3.server.entity.storage.ColumnType column types} to handle the existing Entity Columns
@@ -252,7 +252,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         public DatastoreStorageFactory build() {
             checkNotNull(datastore);
             if (typeRegistry == null) {
-                typeRegistry = DatastoreTypeRegistry.defaultInstance();
+                typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
             }
             return new DatastoreStorageFactory(this);
         }

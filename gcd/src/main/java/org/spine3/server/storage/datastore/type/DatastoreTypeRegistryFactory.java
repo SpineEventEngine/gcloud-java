@@ -34,11 +34,11 @@ import static org.spine3.server.storage.datastore.type.DsColumnTypes.timestampTy
 import static org.spine3.server.storage.datastore.type.DsColumnTypes.versionType;
 
 /**
- * A utility for working with the Datastore-specific {@link ColumnTypeRegistry}.
+ * A factory of the Datastore-specific {@link ColumnTypeRegistry ColumnTypeRegistries}.
  *
  * @author Dmytro Dashenkov
  */
-public class DatastoreTypeRegistry {
+public class DatastoreTypeRegistryFactory {
 
     private static final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> DEFAULT_REGISTRY =
             ColumnTypeRegistry.<DatastoreColumnType<?, ?>>newBuilder()
@@ -51,7 +51,7 @@ public class DatastoreTypeRegistry {
                               .put(AbstractMessage.class, messageType())
                               .build();
 
-    private DatastoreTypeRegistry() {
+    private DatastoreTypeRegistryFactory() {
         // Prevent initialization of a utility class
     }
 
