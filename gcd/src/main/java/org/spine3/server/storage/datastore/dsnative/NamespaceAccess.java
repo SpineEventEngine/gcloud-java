@@ -21,8 +21,7 @@
 package org.spine3.server.storage.datastore.dsnative;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.EntityQuery;
+import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
@@ -40,14 +39,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 class NamespaceAccess {
 
     private static final Kind NAMESPACE_KIND = Kind.ofNamespace();
-    private static final Function<Entity, Namespace> NAMESPACE_UNPACKER =
-            new Function<Entity, Namespace>() {
+    private static final Function<Key, Namespace> NAMESPACE_UNPACKER =
+            new Function<Key, Namespace>() {
                 @Nullable
                 @Override
-                public Namespace apply(@Nullable Entity entity) {
-                    checkNotNull(entity);
-
-                    return null;
+                public Namespace apply(@Nullable Key key) {
+                    checkNotNull(key);
+                    final String namespace = key.getName();
+                    if (namespace == null || namespace.isEmpty()) {
+                        return null;
+                    }
+                    return Namespace.of(namespace);
                 }
             };
 
@@ -62,7 +64,8 @@ class NamespaceAccess {
     boolean exists(Namespace namespace) {
         checkNotNull(namespace);
 
-        if (namespace.getValue().isEmpty()) {
+        if (namespace.getValue()
+                     .isEmpty()) { // Default namespace, always exists
             return true;
         }
         final boolean cachedNamespace = cache.contains(namespace);
@@ -71,11 +74,10 @@ class NamespaceAccess {
         }
         cache.clear();
 
-        final EntityQuery query = Query.newEntityQueryBuilder()
-                                       .setKind(NAMESPACE_KIND.getValue())
-                                       .build();
-
-        final Iterator<Entity> existingNamespaces = datastore.run(query);
+        final Query<Key> query = Query.newKeyQueryBuilder()
+                                      .setKind(NAMESPACE_KIND.getValue())
+                                      .build();
+        final Iterator<Key> existingNamespaces = datastore.run(query);
         final Iterator<Namespace> extractedNamespaces =
                 Iterators.transform(existingNamespaces, NAMESPACE_UNPACKER);
         Iterators.addAll(cache, extractedNamespaces);
