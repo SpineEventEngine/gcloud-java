@@ -31,6 +31,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
 import org.spine3.server.storage.datastore.type.SimpleDatastoreColumnType;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,6 +62,14 @@ public class DatastoreStorageFactoryBuilderShould {
                                                               .build();
         final ColumnTypeRegistry registry = factory.getTypeRegistry();
         assertNotNull(registry);
+    }
+
+    @Test
+    public void construct_single_tenant_factories_by_default() {
+        final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                              .setDatastore(mockDatastore())
+                                                              .build();
+        assertFalse(factory.isMultitenant());
     }
 
     @Test
