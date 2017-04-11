@@ -41,7 +41,7 @@ import static org.junit.Assert.fail;
  * the specified time
  * limit) upon a big amount of records.
  *
- * <p>The default count of records is 500. Use {@link Builder#setBulkSize(int)} to modify this
+ * <p>The default count of records is {@link #DEFAULT_BULK_SIZE}. Use {@link Builder#setBulkSize(int)} to modify this
  * number.
  *
  * <p>Note: the operations expected to be executed upon the whole bulk of records, not each record
@@ -176,9 +176,12 @@ public class BigDataTester<I> {
 
         /**
          * @param bulkSize the size of the test bulk; the {@link EntryFactory} methods will be
-         *                 called exactly this number of times; the default value is {@code 500}
+         *                 called exactly this number of times; the default value is
+         *                 {@link #DEFAULT_BULK_SIZE}
          */
         public Builder<I> setBulkSize(int bulkSize) {
+            checkArgument(bulkSize > 0,
+                          "The records bulk size should be greater then 0.");
             this.bulkSize = bulkSize;
             return this;
         }
@@ -196,6 +199,8 @@ public class BigDataTester<I> {
          *                         operation to execute for
          */
         public Builder<I> setWriteLimit(long writeMillisLimit) {
+            checkArgument(writeMillisLimit > 0,
+                          "The write time limit should be greater then 0.");
             this.writeMillisLimit = writeMillisLimit;
             return this;
         }
@@ -205,6 +210,8 @@ public class BigDataTester<I> {
          *                        operation to execute for
          */
         public Builder<I> setReadLimit(long readMillisLimit) {
+            checkArgument(readMillisLimit > 0,
+                          "The read time limit should be greater then 0.");
             this.readMillisLimit = readMillisLimit;
             return this;
         }
