@@ -437,7 +437,7 @@ public class DatastoreWrapper {
 
     private DsNamespaceValidator namespaceValidator() {
         if (namespaceValidator == null) {
-            namespaceValidator = new DsNamespaceValidator(this);
+            namespaceValidator = new DsNamespaceValidator(getDatastore());
         }
         return namespaceValidator;
     }

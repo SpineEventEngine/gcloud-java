@@ -20,17 +20,16 @@
 
 package org.spine3.server.storage.datastore.dsnative;
 
+import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import org.spine3.server.storage.datastore.DatastoreWrapper;
+import com.google.common.collect.Iterators;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,17 +51,20 @@ class NamespaceAccess {
                 }
             };
 
-    private final DatastoreWrapper datastore;
+    private final Datastore datastore;
 
     private final Set<Namespace> cache = new HashSet<>();
 
-    NamespaceAccess(DatastoreWrapper datastore) {
+    NamespaceAccess(Datastore datastore) {
         this.datastore = datastore;
     }
 
-    boolean contains(Namespace namespace) {
+    boolean exists(Namespace namespace) {
         checkNotNull(namespace);
 
+        if (namespace.getValue().isEmpty()) {
+            return true;
+        }
         final boolean cachedNamespace = cache.contains(namespace);
         if (cachedNamespace) {
             return true;
@@ -72,11 +74,11 @@ class NamespaceAccess {
         final EntityQuery query = Query.newEntityQueryBuilder()
                                        .setKind(NAMESPACE_KIND.getValue())
                                        .build();
-        // TODO:2017-04-11:dmytro.dashenkov: Recursive call here. Fix this.
-        final List<Entity> existingNamespaces = datastore.read(query);
-        final Collection<Namespace> extractedNamespaces =
-                Collections2.transform(existingNamespaces, NAMESPACE_UNPACKER);
-        cache.addAll(extractedNamespaces);
+
+        final Iterator<Entity> existingNamespaces = datastore.run(query);
+        final Iterator<Namespace> extractedNamespaces =
+                Iterators.transform(existingNamespaces, NAMESPACE_UNPACKER);
+        Iterators.addAll(cache, extractedNamespaces);
         final boolean result = cache.contains(namespace);
         return result;
     }

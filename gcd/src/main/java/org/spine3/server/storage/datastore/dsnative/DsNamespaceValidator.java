@@ -20,7 +20,7 @@
 
 package org.spine3.server.storage.datastore.dsnative;
 
-import org.spine3.server.storage.datastore.DatastoreWrapper;
+import com.google.cloud.datastore.Datastore;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -32,13 +32,13 @@ public class DsNamespaceValidator {
 
     private final NamespaceAccess namespaceAccess;
 
-    public DsNamespaceValidator(DatastoreWrapper datastore) {
+    public DsNamespaceValidator(Datastore datastore) {
         this.namespaceAccess = new NamespaceAccess(datastore);
     }
 
     public void validate(Namespace namespace) {
         checkNotNull(namespace);
-        final boolean found = namespaceAccess.contains(namespace);
+        final boolean found = namespaceAccess.exists(namespace);
         checkState(found, "Namespace %s could not be found in the Datastore.", namespace);
     }
 }
