@@ -45,6 +45,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.server.storage.datastore.dsnative.DsNamespaceValidator;
 import org.spine3.server.storage.datastore.dsnative.Kind;
 import org.spine3.server.storage.datastore.dsnative.Namespace;
 
@@ -76,11 +77,12 @@ public class DatastoreWrapper {
 
     private static final Map<Kind, KeyFactory> keyFactories = new HashMap<>();
 
+    private final Supplier<Namespace> namespaceSupplier;
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
 
-    private final Supplier<Namespace> namespaceSupplier;
+    private DsNamespaceValidator namespaceValidator;
 
     /**
      * Creates a new instance of {@code DatastoreWrapper}.
@@ -211,7 +213,7 @@ public class DatastoreWrapper {
      * @see DatastoreReader#run(Query)
      */
     public List<Entity> read(StructuredQuery<Entity> query) {
-        final Namespace namespace = namespaceSupplier.get();
+        final Namespace namespace = getNamespace();
         final StructuredQuery<Entity> queryWithNamespace = query.toBuilder()
                                                                 .setNamespace(namespace.getValue())
                                                                 .build();
@@ -247,7 +249,7 @@ public class DatastoreWrapper {
      * @param table kind (a.k.a. type, table, etc.) of the records to delete
      */
     void dropTable(String table) {
-        final Namespace namespace = namespaceSupplier.get();
+        final Namespace namespace = getNamespace();
         final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setNamespace(namespace.getValue())
                                                    .setKind(table)
@@ -365,7 +367,7 @@ public class DatastoreWrapper {
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
         }
-        final Namespace namespace = namespaceSupplier.get();
+        final Namespace namespace = getNamespace();
         keyFactory.setNamespace(namespace.getValue());
 
         return keyFactory;
@@ -425,6 +427,19 @@ public class DatastoreWrapper {
             final Entity[] part = Arrays.copyOfRange(entities, partHead, partTail);
             writeSmallBulk(part);
         }
+    }
+
+    private Namespace getNamespace() {
+        final Namespace namespace = namespaceSupplier.get();
+        namespaceValidator().validate(namespace);
+        return namespace;
+    }
+
+    private DsNamespaceValidator namespaceValidator() {
+        if (namespaceValidator == null) {
+            namespaceValidator = new DsNamespaceValidator(this);
+        }
+        return namespaceValidator;
     }
 
     private void writeSmallBulk(Entity[] entities) {
