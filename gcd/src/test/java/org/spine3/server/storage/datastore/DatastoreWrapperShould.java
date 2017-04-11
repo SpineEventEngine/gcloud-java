@@ -23,7 +23,9 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyFactory;
 import com.google.protobuf.Any;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.spine3.net.EmailAddress;
 import org.spine3.net.InternetDomain;
@@ -46,6 +48,15 @@ import static org.junit.Assert.fail;
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreWrapperShould {
+
+    private static final String NAMESPACE_HOLDER_KIND = "spine.test.NAMESPACE_HOLDER_KIND";
+
+    @AfterClass
+    public static void tearDown() {
+        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
+                                                               TestNamespaceSuppliers.singleTenant());
+        wrapper.dropTable(NAMESPACE_HOLDER_KIND);
+    }
 
     @Test
     public void work_with_transactions_if_necessary() {
@@ -125,6 +136,9 @@ public class DatastoreWrapperShould {
         final String tenantId2 = "second@tenant.id";
         final String tenantId2Escaped = "second-at-tenant.id";
         final String tenantId3 = "third.id";
+        ensureNamespace(tenantId1, wrapper.getDatastore());
+        ensureNamespace(tenantId2Escaped, wrapper.getDatastore());
+        ensureNamespace(tenantId3, wrapper.getDatastore());
         final TenantId id1 = TenantId.newBuilder()
                                      .setValue(tenantId1)
                                      .build();
@@ -151,6 +165,15 @@ public class DatastoreWrapperShould {
                 assertEquals(id, key.getNamespace());
             }
         }.execute();
+    }
+
+    private static void ensureNamespace(String namespaceValue, Datastore datastore) {
+        final KeyFactory keyFactory = datastore.newKeyFactory()
+                                               .setNamespace(namespaceValue)
+                                               .setKind(NAMESPACE_HOLDER_KIND);
+        final Entity entity = Entity.newBuilder(keyFactory.newKey(42L))
+                                    .build();
+        datastore.put(entity);
     }
 
     private static class Given {
