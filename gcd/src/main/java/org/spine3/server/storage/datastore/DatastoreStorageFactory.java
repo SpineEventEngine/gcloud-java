@@ -204,7 +204,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         private Datastore datastore;
         private boolean multitenant;
-        private ColumnTypeRegistry<DatastoreColumnType> typeRegistry = DatastoreTypeRegistry.defaultInstance();
+        private ColumnTypeRegistry<DatastoreColumnType> typeRegistry;
 
         private Builder() {
             // Avoid direct initialization
@@ -215,7 +215,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          * @return self for method chaining
          */
         public Builder setDatastore(Datastore datastore) {
-            this.datastore = datastore;
+            this.datastore = checkNotNull(datastore);
             return this;
         }
 
@@ -240,7 +240,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          * @return self for method chaining
          */
         public Builder setTypeRegistry(ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
-            this.typeRegistry = typeRegistry;
+            this.typeRegistry = checkNotNull(typeRegistry);
             return this;
         }
 
@@ -253,6 +253,9 @@ public class DatastoreStorageFactory implements StorageFactory {
          */
         public DatastoreStorageFactory build() {
             checkNotNull(datastore);
+            if (typeRegistry == null) {
+                typeRegistry = DatastoreTypeRegistry.defaultInstance();
+            }
             return new DatastoreStorageFactory(this);
         }
     }
