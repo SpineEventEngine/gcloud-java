@@ -25,8 +25,6 @@ import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
 import org.spine3.server.storage.LifecycleFlagField;
 
-import javax.annotation.Nullable;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.aggregate.storage.AggregateField.aggregate_id;
 import static org.spine3.server.storage.LifecycleFlagField.archived;
