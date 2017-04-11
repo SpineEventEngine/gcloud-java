@@ -55,7 +55,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private DatastoreWrapper datastore;
     private final boolean multitenant;
-    private final ColumnTypeRegistry<DatastoreColumnType> typeRegistry;
+    private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
 
     private DatastoreStorageFactory(Builder builder) {
         this.multitenant = builder.multitenant;
@@ -67,7 +67,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
     protected DatastoreStorageFactory(Datastore datastore,
                                       boolean multitenant,
-                                      ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
+                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
         initDatastoreWrapper(datastore);
@@ -75,7 +75,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     protected DatastoreStorageFactory(DatastoreWrapper datastore,
                                       boolean multitenant,
-                                      ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
+                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
         this.datastore = datastore;
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
@@ -204,7 +204,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         private Datastore datastore;
         private boolean multitenant;
-        private ColumnTypeRegistry<DatastoreColumnType> typeRegistry;
+        private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
 
         private Builder() {
             // Avoid direct initialization
@@ -239,7 +239,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          * {@linkplain org.spine3.server.entity.storage.ColumnType column types} to handle the existing Entity Columns
          * @return self for method chaining
          */
-        public Builder setTypeRegistry(ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
+        public Builder setTypeRegistry(ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
             this.typeRegistry = checkNotNull(typeRegistry);
             return this;
         }

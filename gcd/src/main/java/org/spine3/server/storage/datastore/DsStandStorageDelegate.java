@@ -71,7 +71,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         super(EntityRecord.getDescriptor(),
               datastore,
               multitenant,
-              ColumnTypeRegistry.<DatastoreColumnType>newBuilder()
+              ColumnTypeRegistry.<DatastoreColumnType<?, ?>>newBuilder()
                                 .build());
     }
 
