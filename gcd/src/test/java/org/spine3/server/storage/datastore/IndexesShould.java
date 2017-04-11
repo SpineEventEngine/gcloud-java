@@ -20,8 +20,10 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
+import static org.mockito.Mockito.mock;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -32,5 +34,13 @@ public class IndexesShould {
     @Test
     public void have_private_utility_ctor() {
         assertHasPrivateParameterlessCtor(Indexes.class);
+    }
+
+    @Test
+    public void not_accept_nulls() {
+        new NullPointerTester()
+                .setDefault(Kind.class, Kind.of("arbitrary-kind"))
+                .setDefault(DatastoreWrapper.class, mock(DatastoreWrapper.class))
+                .testStaticMethods(Indexes.class, NullPointerTester.Visibility.PACKAGE);
     }
 }

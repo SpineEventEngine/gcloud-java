@@ -35,7 +35,7 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.datastore.dsnative.DsNamespaces;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
-import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -60,19 +60,17 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private DatastoreWrapper datastore;
     private final boolean multitenant;
-    private final ColumnTypeRegistry<DatastoreColumnType> typeRegistry;
+    private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
 
     private DatastoreStorageFactory(Builder builder) {
-        this.multitenant = builder.multitenant;
-        this.typeRegistry = builder.typeRegistry;
-        initDatastoreWrapper(builder.datastore);
+        this(builder.datastore, builder.multitenant, builder.typeRegistry);
     }
 
     @VisibleForTesting
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
     protected DatastoreStorageFactory(Datastore datastore,
                                       boolean multitenant,
-                                      ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
+                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
         initDatastoreWrapper(datastore);
@@ -80,7 +78,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     protected DatastoreStorageFactory(DatastoreWrapper datastore,
                                       boolean multitenant,
-                                      ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
+                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
         this.datastore = datastore;
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
@@ -209,7 +207,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         private Datastore datastore;
         private boolean multitenant;
-        private ColumnTypeRegistry<DatastoreColumnType> typeRegistry = DatastoreTypeRegistry.defaultInstance();
+        private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
 
         private Builder() {
             // Avoid direct initialization
@@ -239,14 +237,14 @@ public class DatastoreStorageFactory implements StorageFactory {
         /**
          * Sets a {@link ColumnTypeRegistry} for handling the Entity Columns.
          *
-         * <p>Default value is {@link DatastoreTypeRegistry#defaultInstance()}.
+         * <p>Default value is {@link DatastoreTypeRegistryFactory#defaultInstance()}.
          *
          * @param typeRegistry the type registry containing all the required
          * {@linkplain org.spine3.server.entity.storage.ColumnType column types} to handle the existing Entity Columns
          * @return self for method chaining
          */
-        public Builder setTypeRegistry(ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
-            this.typeRegistry = typeRegistry;
+        public Builder setTypeRegistry(ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
+            this.typeRegistry = checkNotNull(typeRegistry);
             return this;
         }
 
@@ -259,6 +257,9 @@ public class DatastoreStorageFactory implements StorageFactory {
          */
         public DatastoreStorageFactory build() {
             checkNotNull(datastore);
+            if (typeRegistry == null) {
+                typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
+            }
             return new DatastoreStorageFactory(this);
         }
 

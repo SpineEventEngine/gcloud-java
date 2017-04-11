@@ -30,6 +30,8 @@ import org.spine3.server.storage.RecordStorage;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -39,7 +41,8 @@ import static org.junit.Assert.fail;
  * the specified time
  * limit) upon a big amount of records.
  *
- * <p>The default count of records is 500. Use {@link #setBulkSize(int)} to modify this number.
+ * <p>The default count of records is {@link #DEFAULT_BULK_SIZE}. Use {@link Builder#setBulkSize(int)} to modify this
+ * number.
  *
  * <p>Note: the operations expected to be executed upon the whole bulk of records, not each record
  * separately.
@@ -48,41 +51,27 @@ import static org.junit.Assert.fail;
  * those that were written or not. Instead they should just check the time consumed by
  * the operations and the consistency of the data (i.e. count of the records written and read).
  *
+ * @param <I> the type of the ID in the tested {@linkplain RecordStorage}
  * @author Dmytro Dashenkov
  */
 public class BigDataTester<I> {
 
     private static final int DEFAULT_BULK_SIZE = 500;
 
-    private final RecordStorage<I> storage;
+    private final int bulkSize;
+    private final EntryFactory<I> entryFactory;
+    private final long writeMillisLimit;
+    private final long readMillisLimit;
 
-    private int bulkSize = DEFAULT_BULK_SIZE;
-    private EntrySupplier<I> entrySupplier;
-    private long writeMillisLimit;
-    private long readMillisLimit;
-
-    public BigDataTester(RecordStorage<I> target) {
-        this.storage = target;
+    private BigDataTester(Builder<I> builder) {
+        this.bulkSize = builder.bulkSize;
+        this.entryFactory = builder.entryFactory;
+        this.writeMillisLimit = builder.writeMillisLimit;
+        this.readMillisLimit = builder.readMillisLimit;
     }
 
-    public BigDataTester setBulkSize(int bulkSize) {
-        this.bulkSize = bulkSize;
-        return this;
-    }
-
-    public BigDataTester setEntrySupplier(EntrySupplier<I> entrySupplier) {
-        this.entrySupplier = entrySupplier;
-        return this;
-    }
-
-    public BigDataTester setWriteLimit(long writeMillisLimit) {
-        this.writeMillisLimit = writeMillisLimit;
-        return this;
-    }
-
-    public BigDataTester setReadLimit(long readMillisLimit) {
-        this.readMillisLimit = readMillisLimit;
-        return this;
+    public static <I> Builder<I> newBuilder() {
+        return new Builder<>();
     }
 
     /**
@@ -90,22 +79,23 @@ public class BigDataTester<I> {
      *
      * <p>The execution flow is as follows:
      * <ol>
-     *     <li>1. Produce the records with the given {@link EntrySupplier}
-     *     <li>2. Measure the time of the {@linkplain RecordStorage#write(Map) bulk write}
-     *     <li>3. Fail if the time is over the specified limit
-     *     <li>4. Wait 1 second to ensure the Datastore has established the data consistency
-     *     <li>5. Measure the time of the {@linkplain RecordStorage#readAll() bulk read}
-     *     <li>6. Fail if the time is over the specified limit
-     *     <li>7. Check the count of the records written and read is equal
+     * <li>1. Produce the records with the given {@link EntryFactory}
+     * <li>2. Measure the time of the {@linkplain RecordStorage#write(Map) bulk write}
+     * <li>3. Fail if the time is over the specified limit
+     * <li>4. Wait 1 second to ensure the Datastore has established the data consistency
+     * <li>5. Measure the time of the {@linkplain RecordStorage#readAll() bulk read}
+     * <li>6. Fail if the time is over the specified limit
+     * <li>7. Check the count of the records written and read is equal
      * </ol>
      *
      * <p>This method performs {@code debug} logging of the measure results. To see the log, run
      * the tests with {@code debug} logging.
      */
-    public void testBigDataOperations() {
+    public void testBigDataOperations(RecordStorage<I> storage) {
+        checkNotNull(storage);
         final Map<I, EntityRecordWithColumns> records = new HashMap<>(bulkSize);
         for (int i = 0; i < bulkSize; i++) {
-            records.put(entrySupplier.newId(), entrySupplier.newRecord());
+            records.put(entryFactory.newId(), entryFactory.newRecord());
         }
 
         final long writeStart = System.currentTimeMillis();
@@ -114,7 +104,9 @@ public class BigDataTester<I> {
 
         final long writeTime = writeEnd - writeStart;
         if (writeTime > writeMillisLimit) {
-            fail(format("Writing took too long. Expected %d millis but was %d millis.", writeMillisLimit, writeTime));
+            fail(format("Writing took too long. Expected %d millis but was %d millis.",
+                        writeMillisLimit,
+                        writeTime));
         }
 
         log().debug("Writing took {} millis.", writeTime);
@@ -134,7 +126,9 @@ public class BigDataTester<I> {
         final long readTime = readEnd - readStart;
 
         if (readTime > readMillisLimit) {
-            fail(format("Reading took too long. Expected %d millis but was %d millis.", readMillisLimit, readTime));
+            fail(format("Reading took too long. Expected %d millis but was %d millis.",
+                        readMillisLimit,
+                        readTime));
         }
         log().debug("Reading took {} millis.", readTime);
 
@@ -144,11 +138,12 @@ public class BigDataTester<I> {
     /**
      * A supplier of the records to write into the Datastore for the check.
      *
-     * <p>It's recommended to provide generic non-empty records to make the check closer to a real-life cases.
+     * <p>It's recommended to provide generic non-empty records to make the check closer to a
+     * real-life cases.
      *
      * @param <I> the type of the record ID
      */
-    public interface EntrySupplier<I> {
+    public interface EntryFactory<I> {
         I newId();
         EntityRecordWithColumns newRecord();
     }
@@ -161,5 +156,78 @@ public class BigDataTester<I> {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(BigDataTester.class);
+    }
+
+    /**
+     * A builder for the {@code BigDataTester}.
+     *
+     * @param <I> the target type of the ID in the tested {@linkplain RecordStorage}
+     */
+    public static class Builder<I> {
+
+        private int bulkSize;
+        private EntryFactory<I> entryFactory;
+        private long writeMillisLimit;
+        private long readMillisLimit;
+
+        private Builder() {
+            // Prevent direct initialization
+        }
+
+        /**
+         * @param bulkSize the size of the test bulk; the {@link EntryFactory} methods will be
+         *                 called exactly this number of times; the default value is
+         *                 {@link #DEFAULT_BULK_SIZE}
+         */
+        public Builder<I> setBulkSize(int bulkSize) {
+            checkArgument(bulkSize > 0,
+                          "The records bulk size should be greater then 0.");
+            this.bulkSize = bulkSize;
+            return this;
+        }
+
+        /**
+         * @param entryFactory the {@link EntryFactory} which generates the test data
+         */
+        public Builder<I> setEntryFactory(EntryFactory<I> entryFactory) {
+            this.entryFactory = entryFactory;
+            return this;
+        }
+
+        /**
+         * @param writeMillisLimit the max time in milliseconds which is allowed for the write
+         *                         operation to execute for
+         */
+        public Builder<I> setWriteLimit(long writeMillisLimit) {
+            checkArgument(writeMillisLimit > 0,
+                          "The write time limit should be greater then 0.");
+            this.writeMillisLimit = writeMillisLimit;
+            return this;
+        }
+
+        /**
+         * @param readMillisLimit the max time in milliseconds which is allowed for the read
+         *                        operation to execute for
+         */
+        public Builder<I> setReadLimit(long readMillisLimit) {
+            checkArgument(readMillisLimit > 0,
+                          "The read time limit should be greater then 0.");
+            this.readMillisLimit = readMillisLimit;
+            return this;
+        }
+
+        /**
+         * @return new instance of the {@code BigDataTester}
+         */
+        public BigDataTester<I> build() {
+            checkNotNull(entryFactory);
+            if (bulkSize == 0) {
+                bulkSize = DEFAULT_BULK_SIZE;
+            }
+            checkArgument(writeMillisLimit != 0, "Write time limit should be set.");
+            checkArgument(readMillisLimit != 0, "Read time limit should be set.");
+            final BigDataTester<I> tester = new BigDataTester<>(this);
+            return tester;
+        }
     }
 }

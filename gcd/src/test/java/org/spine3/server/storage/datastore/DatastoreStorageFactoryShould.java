@@ -20,20 +20,16 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.entity.storage.Column;
-import org.spine3.server.entity.storage.ColumnType;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
-import org.spine3.server.storage.datastore.type.SimpleDatastoreColumnType;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.storage.Project;
 
@@ -42,8 +38,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreStorageFactoryShould {
@@ -68,30 +62,6 @@ public class DatastoreStorageFactoryShould {
         final RecordStorage storage = factory.createStandStorage();
         assertTrue(storage.isMultitenant());
         storage.close();
-    }
-
-    @Test
-    public void construct_with_default_type_registry() {
-        final StorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                              .setDatastore(datastore)
-                                                              .build();
-        final ColumnTypeRegistry registry = factory.getTypeRegistry();
-        assertNotNull(registry);
-    }
-
-    @Test
-    public void construct_with_extended_type_registry() {
-        final StorageFactory factory =
-                DatastoreStorageFactory.newBuilder()
-                                       .setDatastore(datastore)
-                                       .setTypeRegistry(DatastoreTypeRegistry.predefinedValuesAnd()
-                                                                             .put(Byte.class, new MockByteColumnType())
-                                                                             .build())
-                                       .build();
-        final ColumnTypeRegistry<?> registry = factory.getTypeRegistry();
-        assertNotNull(registry);
-        final ColumnType type = registry.get(mockColumn(Byte.class));
-        assertNotNull(type);
     }
 
     @Test
@@ -145,20 +115,13 @@ public class DatastoreStorageFactoryShould {
                                                                        .build();
         final ColumnTypeRegistry defaultRegistry = factory.getTypeRegistry();
         assertNotNull(defaultRegistry);
-        assertSame(DatastoreTypeRegistry.defaultInstance(), defaultRegistry);
+        assertSame(DatastoreTypeRegistryFactory.defaultInstance(), defaultRegistry);
     }
 
     @Test(expected = NullPointerException.class)
     public void fail_to_construct_without_datastore() {
         DatastoreStorageFactory.newBuilder()
                                .build();
-    }
-
-    private static <T> Column<T> mockColumn(Class<T> type) {
-        @SuppressWarnings("unchecked")
-        final Column<T> mock = mock(Column.class);
-        when(mock.getType()).thenReturn(type);
-        return mock;
     }
 
     private static class TestEntity extends AbstractEntity<String, StringValue> {
@@ -171,13 +134,6 @@ public class DatastoreStorageFactoryShould {
     private static class DifferentTestEntity extends AbstractEntity<String, Project> {
         protected DifferentTestEntity(String id) {
             super(id);
-        }
-    }
-
-    private static class MockByteColumnType extends SimpleDatastoreColumnType<Byte> {
-        @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, Byte value, String columnIdentifier) {
-            // NOP
         }
     }
 }

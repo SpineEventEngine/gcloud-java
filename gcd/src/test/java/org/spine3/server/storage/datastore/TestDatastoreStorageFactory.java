@@ -25,7 +25,7 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -92,7 +92,7 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private TestDatastoreStorageFactory(Datastore datastore) {
-        super(datastore, false, DatastoreTypeRegistry.defaultInstance());
+        super(datastore, false, DatastoreTypeRegistryFactory.defaultInstance());
         initDatastoreWrapper(getDatastore());
     }
 

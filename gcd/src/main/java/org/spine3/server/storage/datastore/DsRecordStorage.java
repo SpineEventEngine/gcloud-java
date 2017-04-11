@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
@@ -75,7 +76,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
-    private final ColumnTypeRegistry<?> columnTypeRegistry;
+    private final ColumnTypeRegistry<? extends ColumnType<?, ?, BaseEntity.Builder, String>> columnTypeRegistry;
 
     protected static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
     protected static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
@@ -106,7 +107,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public DsRecordStorage(Descriptor descriptor,
                            DatastoreWrapper datastore,
                            boolean multitenant,
-                           ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry) {
+                           ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
@@ -283,8 +284,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithColumns record) {
-        final ColumnTypeRegistry<? extends ColumnType<?, ?, Entity.Builder, String>> columnTypeRegistry =
-                (ColumnTypeRegistry<? extends ColumnType<?, ?, Entity.Builder, String>>) this.columnTypeRegistry;
         if (record.hasColumns()) {
             ColumnRecords.feedColumnsTo(entity,
                                         record,
