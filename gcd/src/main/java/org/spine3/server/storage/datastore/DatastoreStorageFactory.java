@@ -58,9 +58,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
 
     private DatastoreStorageFactory(Builder builder) {
-        this.multitenant = builder.multitenant;
-        this.typeRegistry = builder.typeRegistry;
-        initDatastoreWrapper(builder.datastore);
+        this(builder.datastore, builder.multitenant, builder.typeRegistry);
     }
 
     @VisibleForTesting
