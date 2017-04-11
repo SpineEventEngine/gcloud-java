@@ -41,10 +41,23 @@ public final class Kind {
             "Datastore kind cannot start with \"__\". See https://cloud.google.com/datastore/docs/concepts/entities#kinds_and_identifiers for more info.";
     private static final String FORBIDDEN_PREFIX = "__";
 
+    private static final String NAMESPACE_KIND = "__namespace__";
+
     private final String value;
 
     private Kind(String value) {
         this.value = checkValidKind(value);
+    }
+
+    /**
+     * Creates a new instance of {@code Kind} representing an ancillary Datastore kind.
+     *
+     * @param value the name of the kind
+     * @param ancillary the flag showing that the {@code Kind} is ancillary; must be set to {@code true}
+     */
+    private Kind(String value, boolean ancillary) {
+        checkArgument(ancillary);
+        this.value = value;
     }
 
     public static Kind of(String value) {
@@ -65,6 +78,10 @@ public final class Kind {
 
     public static Kind of(TypeName typeName) {
         return new Kind(typeName.value());
+    }
+
+    static Kind ofNamespace() {
+        return new Kind(NAMESPACE_KIND, true);
     }
 
     public String getValue() {

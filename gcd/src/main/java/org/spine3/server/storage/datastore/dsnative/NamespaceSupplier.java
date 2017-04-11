@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-public abstract class NamespaceSupplier implements Supplier<Namespace> {
+abstract class NamespaceSupplier implements Supplier<Namespace> {
 
     /**
      * Obtains an instance of {@code NamespaceSupplier} for the passed
@@ -41,7 +41,7 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
      * @param factory the {@linkplain DatastoreStorageFactory storage factory} to return a supplier for
      * @see org.spine3.server.storage.StorageFactory#isMultitenant
      */
-    public static NamespaceSupplier instanceFor(DatastoreStorageFactory factory) {
+    static NamespaceSupplier instanceFor(DatastoreStorageFactory factory) {
         checkNotNull(factory);
         if (factory.isMultitenant()) {
             return Singleton.INSTANCE.singleTenant;
@@ -58,9 +58,6 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
     @VisibleForTesting
     static NamespaceSupplier multitenant() {
         return Singleton.INSTANCE.multipleTenant;
-    }
-
-    NamespaceSupplier() {
     }
 
     /**

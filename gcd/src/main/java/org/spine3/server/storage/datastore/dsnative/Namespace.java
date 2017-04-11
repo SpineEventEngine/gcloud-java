@@ -54,7 +54,7 @@ public final class Namespace {
      * @param datastoreNamespace a string representing the datastore namespace
      * @return new instance of {@code Namespace}
      */
-    public static Namespace of(String datastoreNamespace) {
+    static Namespace of(String datastoreNamespace) {
         return new Namespace(
                 escapeIllegalCharacters(datastoreNamespace));
     }

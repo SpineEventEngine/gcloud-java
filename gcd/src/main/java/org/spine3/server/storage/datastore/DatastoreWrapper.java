@@ -39,6 +39,7 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -46,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.storage.datastore.dsnative.Kind;
 import org.spine3.server.storage.datastore.dsnative.Namespace;
-import org.spine3.server.storage.datastore.dsnative.NamespaceSupplier;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -80,15 +80,16 @@ public class DatastoreWrapper {
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
 
-    private final NamespaceSupplier namespaceSupplier;
+    private final Supplier<Namespace> namespaceSupplier;
 
     /**
      * Creates a new instance of {@code DatastoreWrapper}.
      *
      * @param datastore         {@link Datastore} to wrap
-     * @param namespaceSupplier an instance of {@link NamespaceSupplier} to use in the queries and keys
+     * @param namespaceSupplier an instance of {@link Supplier Supplier<Namespace>} to get the
+     *                          namespaces for the queries from
      */
-    protected DatastoreWrapper(Datastore datastore, NamespaceSupplier namespaceSupplier) {
+    protected DatastoreWrapper(Datastore datastore, Supplier<Namespace> namespaceSupplier) {
         this.namespaceSupplier = namespaceSupplier;
         this.datastore = datastore;
         this.actor = datastore;
@@ -98,11 +99,12 @@ public class DatastoreWrapper {
      * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
      *
      * @param datastore         {@link Datastore} to wrap
-     * @param namespaceSupplier an instance of {@link NamespaceSupplier} to use in the queries and keys
+     * @param namespaceSupplier an instance of {@link Supplier Supplier<Namespace>} to get the
+     *                          namespaces for the queries from
      * @return new instance of {@code DatastoreWrapper}
      */
     @SuppressWarnings("WeakerAccess") // Part of API
-    protected static DatastoreWrapper wrap(Datastore datastore, NamespaceSupplier namespaceSupplier) {
+    protected static DatastoreWrapper wrap(Datastore datastore, Supplier<Namespace> namespaceSupplier) {
         return new DatastoreWrapper(datastore, namespaceSupplier);
     }
 
