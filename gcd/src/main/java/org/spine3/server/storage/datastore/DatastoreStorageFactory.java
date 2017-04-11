@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
@@ -37,8 +38,10 @@ import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
 import org.spine3.type.TypeUrl;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.spine3.server.entity.Entity.GenericParameter.ID;
 import static org.spine3.server.entity.Entity.GenericParameter.STATE;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
@@ -217,6 +220,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          * @return self for method chaining
          */
         public Builder setDatastore(Datastore datastore) {
+            checkHasNoNamespace(datastore);
             this.datastore = datastore;
             return this;
         }
@@ -256,6 +260,13 @@ public class DatastoreStorageFactory implements StorageFactory {
         public DatastoreStorageFactory build() {
             checkNotNull(datastore);
             return new DatastoreStorageFactory(this);
+        }
+
+        private static void checkHasNoNamespace(Datastore datastore) {
+            final DatastoreOptions options = datastore.getOptions();
+            final String namespace = options.getNamespace();
+            checkArgument(isNullOrEmpty(namespace),
+                          "Datastore namespace should not be set explicitly.");
         }
     }
 }
