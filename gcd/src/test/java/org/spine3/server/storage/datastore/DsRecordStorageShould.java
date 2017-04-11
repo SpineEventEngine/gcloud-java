@@ -201,7 +201,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
         final long maxWriteTime = 9500;
 
         BigDataTester.<ProjectId>newBuilder()
-                .setEntrySupplier(new BigDataTester.EntrySupplier<ProjectId>() {
+                .setEntryFactory(new BigDataTester.EntryFactory<ProjectId>() {
                     @Override
                     public ProjectId newId() {
                         return DsRecordStorageShould.this.newId();

@@ -59,13 +59,13 @@ public class BigDataTester<I> {
     private static final int DEFAULT_BULK_SIZE = 500;
 
     private final int bulkSize;
-    private final EntrySupplier<I> entrySupplier;
+    private final EntryFactory<I> entryFactory;
     private final long writeMillisLimit;
     private final long readMillisLimit;
 
     private BigDataTester(Builder<I> builder) {
         this.bulkSize = builder.bulkSize;
-        this.entrySupplier = builder.entrySupplier;
+        this.entryFactory = builder.entryFactory;
         this.writeMillisLimit = builder.writeMillisLimit;
         this.readMillisLimit = builder.readMillisLimit;
     }
@@ -79,7 +79,7 @@ public class BigDataTester<I> {
      *
      * <p>The execution flow is as follows:
      * <ol>
-     * <li>1. Produce the records with the given {@link EntrySupplier}
+     * <li>1. Produce the records with the given {@link EntryFactory}
      * <li>2. Measure the time of the {@linkplain RecordStorage#write(Map) bulk write}
      * <li>3. Fail if the time is over the specified limit
      * <li>4. Wait 1 second to ensure the Datastore has established the data consistency
@@ -95,7 +95,7 @@ public class BigDataTester<I> {
         checkNotNull(storage);
         final Map<I, EntityRecordWithColumns> records = new HashMap<>(bulkSize);
         for (int i = 0; i < bulkSize; i++) {
-            records.put(entrySupplier.newId(), entrySupplier.newRecord());
+            records.put(entryFactory.newId(), entryFactory.newRecord());
         }
 
         final long writeStart = System.currentTimeMillis();
@@ -143,9 +143,8 @@ public class BigDataTester<I> {
      *
      * @param <I> the type of the record ID
      */
-    public interface EntrySupplier<I> {
+    public interface EntryFactory<I> {
         I newId();
-
         EntityRecordWithColumns newRecord();
     }
 
@@ -167,7 +166,7 @@ public class BigDataTester<I> {
     public static class Builder<I> {
 
         private int bulkSize;
-        private EntrySupplier<I> entrySupplier;
+        private EntryFactory<I> entryFactory;
         private long writeMillisLimit;
         private long readMillisLimit;
 
@@ -176,7 +175,7 @@ public class BigDataTester<I> {
         }
 
         /**
-         * @param bulkSize the size of the test bulk; the {@link EntrySupplier} methods will be
+         * @param bulkSize the size of the test bulk; the {@link EntryFactory} methods will be
          *                 called exactly this number of times; the default value is {@code 500}
          */
         public Builder<I> setBulkSize(int bulkSize) {
@@ -185,10 +184,10 @@ public class BigDataTester<I> {
         }
 
         /**
-         * @param entrySupplier the {@link EntrySupplier} which generates the test data
+         * @param entryFactory the {@link EntryFactory} which generates the test data
          */
-        public Builder<I> setEntrySupplier(EntrySupplier<I> entrySupplier) {
-            this.entrySupplier = entrySupplier;
+        public Builder<I> setEntryFactory(EntryFactory<I> entryFactory) {
+            this.entryFactory = entryFactory;
             return this;
         }
 
@@ -214,7 +213,7 @@ public class BigDataTester<I> {
          * @return new instance of the {@code BigDataTester}
          */
         public BigDataTester<I> build() {
-            checkNotNull(entrySupplier);
+            checkNotNull(entryFactory);
             if (bulkSize == 0) {
                 bulkSize = DEFAULT_BULK_SIZE;
             }
