@@ -22,6 +22,7 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.server.entity.storage.Column;
@@ -87,13 +88,22 @@ public class DatastoreStorageFactoryBuilderShould {
         assertNotNull(type);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void ensure_datastore_has_no_namespace() {
+        final DatastoreOptions options = DatastoreOptions.newBuilder()
+                                                         .setNamespace("non-null-or-empty-namespace")
+                                                         .build();
+        DatastoreStorageFactory.newBuilder()
+                               .setDatastore(options.getService());
+    }
+
     private static Datastore mockDatastore() {
-        return mock(Datastore.class);
+        final DatastoreOptions options = DatastoreOptions.getDefaultInstance();
+        return options.getService();
     }
 
     private static <T> Column<T> mockColumn(Class<T> type) {
-        @SuppressWarnings("unchecked")
-        final Column<T> mock = mock(Column.class);
+        @SuppressWarnings("unchecked") final Column<T> mock = mock(Column.class);
         when(mock.getType()).thenReturn(type);
         return mock;
     }

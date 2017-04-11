@@ -264,6 +264,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
 
         private static void checkHasNoNamespace(Datastore datastore) {
+            checkNotNull(datastore);
             final DatastoreOptions options = datastore.getOptions();
             final String namespace = options.getNamespace();
             checkArgument(isNullOrEmpty(namespace),

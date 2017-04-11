@@ -22,6 +22,7 @@ package org.spine3.server.storage.datastore;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
+import org.spine3.server.storage.datastore.dsnative.Kind;
 
 import static org.mockito.Mockito.mock;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
