@@ -24,7 +24,6 @@ import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.DateTime;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
-import org.spine3.annotations.Internal;
 import org.spine3.base.Version;
 import org.spine3.json.Json;
 import org.spine3.protobuf.Timestamps2;
@@ -44,8 +43,7 @@ import java.util.Date;
  *
  * @author Dmytro Dashenkov
  */
-@Internal
-public class DsColumnTypes {
+class DsColumnTypes {
 
     private DsColumnTypes() {
         // Prevent instantiation of a utility class
@@ -54,43 +52,44 @@ public class DsColumnTypes {
     /**
      * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<String>}
      */
-    public static SimpleDatastoreColumnType<String> stringType() {
+    static SimpleDatastoreColumnType<String> stringType() {
         return new StringColumnType();
     }
 
     /**
      * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Integer>}
      */
-    public static SimpleDatastoreColumnType<Integer> integerType() {
+    static SimpleDatastoreColumnType<Integer> integerType() {
         return new IntegerColumnType();
     }
 
     /**
-     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Integer>}
+     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Long>}
      */
-    public static SimpleDatastoreColumnType<Long> longType() {
+    static SimpleDatastoreColumnType<Long> longType() {
         return new LongColumnType();
     }
 
     /**
      * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Boolean>}
      */
-    public static SimpleDatastoreColumnType<Boolean> booleanType() {
+    static SimpleDatastoreColumnType<Boolean> booleanType() {
         return new BooleanColumnType();
     }
 
     /**
-     * @return new instance of {@link DatastoreColumnType} storing {@link Timestamp} as the {@link DateTime}
+     * @return new instance of {@link DatastoreColumnType} storing {@link Timestamp} as the
+     * {@link DateTime}
      */
-    public static DatastoreColumnType<Timestamp, DateTime> timestampType() {
+    static DatastoreColumnType<Timestamp, DateTime> timestampType() {
         return new TimestampColumnType();
     }
 
     /**
-     * @return new instance of {@link DatastoreColumnType} storing {@link Timestamp} as the version
+     * @return new instance of {@link DatastoreColumnType} storing {@link Version} as the version
      * {@link Version#getNumber() number}.
      */
-    public static DatastoreColumnType<Version, Integer> versionType() {
+    static DatastoreColumnType<Version, Integer> versionType() {
         return new VersionColumnType();
     }
 
@@ -99,7 +98,7 @@ public class DsColumnTypes {
      * {@link Json} {@code String} representation
      * @see Json
      */
-    public static DatastoreColumnType<AbstractMessage, String> messageType() {
+    static DatastoreColumnType<AbstractMessage, String> messageType() {
         return new MessageType();
     }
 
@@ -107,7 +106,9 @@ public class DsColumnTypes {
             extends SimpleDatastoreColumnType<String> {
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, String value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord,
+                                   String value,
+                                   String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
@@ -116,7 +117,9 @@ public class DsColumnTypes {
             extends SimpleDatastoreColumnType<Integer> {
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, Integer value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord,
+                                   Integer value,
+                                   String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
@@ -125,7 +128,9 @@ public class DsColumnTypes {
             extends SimpleDatastoreColumnType<Long> {
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, Long value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord,
+                                   Long value,
+                                   String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
@@ -134,26 +139,33 @@ public class DsColumnTypes {
             extends SimpleDatastoreColumnType<Boolean> {
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, Boolean value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord,
+                                   Boolean value,
+                                   String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
 
-    private static class TimestampColumnType extends AbstractDatastoreColumnType<Timestamp, DateTime> {
+    private static class TimestampColumnType
+            extends AbstractDatastoreColumnType<Timestamp, DateTime> {
 
         @Override
         public DateTime convertColumnValue(Timestamp fieldValue) {
-            final Date intermediate = new Date(fieldValue.getNanos() / Timestamps2.NANOS_PER_MILLISECOND);
+            final Date intermediate = new Date(
+                    fieldValue.getNanos() / Timestamps2.NANOS_PER_MILLISECOND);
             return DateTime.copyFrom(intermediate);
         }
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, DateTime value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord,
+                                   DateTime value,
+                                   String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
 
-    private static class VersionColumnType extends AbstractDatastoreColumnType<Version, Integer> {
+    private static class VersionColumnType
+            extends AbstractDatastoreColumnType<Version, Integer> {
 
         @Override
         public Integer convertColumnValue(Version fieldValue) {
@@ -161,12 +173,15 @@ public class DsColumnTypes {
         }
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, Integer value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord,
+                                   Integer value,
+                                   String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }
 
-    private static class MessageType extends AbstractDatastoreColumnType<AbstractMessage, String> {
+    private static class MessageType
+            extends AbstractDatastoreColumnType<AbstractMessage, String> {
 
         @Override
         public String convertColumnValue(AbstractMessage fieldValue) {
@@ -174,7 +189,9 @@ public class DsColumnTypes {
         }
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, String value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord,
+                                   String value,
+                                   String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
     }

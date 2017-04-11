@@ -29,7 +29,7 @@ import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.storage.Project;
 
@@ -81,6 +81,7 @@ public class DatastoreStorageFactoryShould {
     @Test
     public void convert_itself_to_single_tenant() {
         final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                              .setDatastore(datastore)
                                                               .setMultitenant(true)
                                                               .build();
         assertTrue(factory.isMultitenant());
@@ -91,6 +92,7 @@ public class DatastoreStorageFactoryShould {
     @Test
     public void return_self_if_single_tenant() {
         final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                              .setDatastore(datastore)
                                                               .setMultitenant(false)
                                                               .build();
         assertFalse(factory.isMultitenant());
@@ -109,10 +111,17 @@ public class DatastoreStorageFactoryShould {
     @Test
     public void have_default_column_type_registry() {
         final DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                                       .setDatastore(datastore)
                                                                        .build();
         final ColumnTypeRegistry defaultRegistry = factory.getTypeRegistry();
         assertNotNull(defaultRegistry);
-        assertSame(DatastoreTypeRegistry.defaultInstance(), defaultRegistry);
+        assertSame(DatastoreTypeRegistryFactory.defaultInstance(), defaultRegistry);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void fail_to_construct_without_datastore() {
+        DatastoreStorageFactory.newBuilder()
+                               .build();
     }
 
     private static class TestEntity extends AbstractEntity<String, StringValue> {

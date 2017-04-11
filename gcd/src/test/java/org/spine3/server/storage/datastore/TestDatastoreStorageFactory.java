@@ -25,13 +25,11 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Creates storages based on the local Google {@link Datastore}.
@@ -94,14 +92,12 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private TestDatastoreStorageFactory(Datastore datastore) {
-        super(datastore, false, DatastoreTypeRegistry.defaultInstance());
+        super(datastore, false, DatastoreTypeRegistryFactory.defaultInstance());
+        initDatastoreWrapper(getDatastore());
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    @Override
-    protected void initDatastoreWrapper(Datastore datastore) {
-        checkState(this.getDatastore() == null, "Datastore is already initialized.");
-        this.setDatastore(TestDatastoreWrapper.wrap(datastore, runsOnCi));
+    private void initDatastoreWrapper(DatastoreWrapper wrapper) {
+        this.setDatastore(TestDatastoreWrapper.wrap(wrapper.getDatastore(), runsOnCi));
     }
 
     /**

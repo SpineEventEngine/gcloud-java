@@ -34,7 +34,7 @@ import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
-import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -56,20 +56,17 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private DatastoreWrapper datastore;
     private final boolean multitenant;
-    private final ColumnTypeRegistry<DatastoreColumnType> typeRegistry;
+    private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
 
-    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
     private DatastoreStorageFactory(Builder builder) {
-        this.multitenant = builder.multitenant;
-        this.typeRegistry = builder.typeRegistry;
-        initDatastoreWrapper(builder.datastore);
+        this(builder.datastore, builder.multitenant, builder.typeRegistry);
     }
 
     @VisibleForTesting
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
     protected DatastoreStorageFactory(Datastore datastore,
                                       boolean multitenant,
-                                      ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
+                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
         initDatastoreWrapper(datastore);
@@ -77,29 +74,37 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     protected DatastoreStorageFactory(DatastoreWrapper datastore,
                                       boolean multitenant,
-                                      ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
+                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
         this.datastore = datastore;
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
     }
 
-    @VisibleForTesting
-    protected void initDatastoreWrapper(Datastore datastore) {
+    private void initDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already initialized");
         final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore);
         this.setDatastore(wrapped);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isMultitenant() {
         return multitenant;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ColumnTypeRegistry getTypeRegistry() {
         return typeRegistry;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public StorageFactory toSingleTenant() {
         return isMultitenant()
@@ -107,6 +112,9 @@ public class DatastoreStorageFactory implements StorageFactory {
                 : this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public StandStorage createStandStorage() {
         final DsStandStorageDelegate recordStorage = new DsStandStorageDelegate(datastore, multitenant);
@@ -114,6 +122,9 @@ public class DatastoreStorageFactory implements StorageFactory {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> aClass) {
         final DsRecordStorage<I> recordStorage = (DsRecordStorage<I>) createRecordStorage(aClass);
@@ -125,6 +136,9 @@ public class DatastoreStorageFactory implements StorageFactory {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
@@ -139,6 +153,9 @@ public class DatastoreStorageFactory implements StorageFactory {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> entityClass) {
         checkNotNull(entityClass);
@@ -158,6 +175,9 @@ public class DatastoreStorageFactory implements StorageFactory {
         return propertyStorage;
     }
 
+    /**
+     * Performs no action.
+     */
     @Override
     public void close() throws Exception {
         // NOP
@@ -171,35 +191,72 @@ public class DatastoreStorageFactory implements StorageFactory {
         this.datastore = datastore;
     }
 
+    /**
+     * Creates new instance of {@link Builder}.
+     */
     public static Builder newBuilder() {
         return new Builder();
     }
 
+    /**
+     * A builder for the {@code DatastoreStorageFactory}.
+     */
     public static class Builder {
 
         private Datastore datastore;
         private boolean multitenant;
-        private ColumnTypeRegistry<DatastoreColumnType> typeRegistry = DatastoreTypeRegistry.defaultInstance();
+        private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
 
         private Builder() {
+            // Avoid direct initialization
         }
 
+        /**
+         * @param datastore the {@link Datastore} to use for the DB interactions
+         * @return self for method chaining
+         */
         public Builder setDatastore(Datastore datastore) {
-            this.datastore = datastore;
+            this.datastore = checkNotNull(datastore);
             return this;
         }
 
+        /**
+         * Switches the {@code DatastoreStorageFactory} that is being built to be or not to be multitenant.
+         *
+         * @param multitenant {@code true} if the {@code DatastoreStorageFactory} should be multitenant or not
+         * @return self for method chaining
+         */
         public Builder setMultitenant(boolean multitenant) {
             this.multitenant = multitenant;
             return this;
         }
 
-        public Builder setTypeRegistry(ColumnTypeRegistry<DatastoreColumnType> typeRegistry) {
-            this.typeRegistry = typeRegistry;
+        /**
+         * Sets a {@link ColumnTypeRegistry} for handling the Entity Columns.
+         *
+         * <p>Default value is {@link DatastoreTypeRegistryFactory#defaultInstance()}.
+         *
+         * @param typeRegistry the type registry containing all the required
+         * {@linkplain org.spine3.server.entity.storage.ColumnType column types} to handle the existing Entity Columns
+         * @return self for method chaining
+         */
+        public Builder setTypeRegistry(ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
+            this.typeRegistry = checkNotNull(typeRegistry);
             return this;
         }
 
+        /**
+         * Creates a new instance of {@code DatastoreStorageFactory} with the passed parameters.
+         *
+         * <p>Precondition of a successful build is that the {@code datastore} field has been set.
+         *
+         * @return new instance of {@code DatastoreStorageFactory}
+         */
         public DatastoreStorageFactory build() {
+            checkNotNull(datastore);
+            if (typeRegistry == null) {
+                typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
+            }
             return new DatastoreStorageFactory(this);
         }
     }

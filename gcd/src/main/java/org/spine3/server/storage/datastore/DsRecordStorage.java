@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
@@ -75,7 +76,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
-    private final ColumnTypeRegistry<?> columnTypeRegistry;
+    private final ColumnTypeRegistry<? extends ColumnType<?, ?, BaseEntity.Builder, String>> columnTypeRegistry;
     private final Class<I> idClass;
 
     protected static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
@@ -107,7 +108,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public DsRecordStorage(Descriptor descriptor,
                            DatastoreWrapper datastore,
                            boolean multitenant,
-                           ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry,
+                           ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
                            Class<I> idClass) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
@@ -286,8 +287,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithColumns record) {
-        final ColumnTypeRegistry<? extends ColumnType<?, ?, Entity.Builder, String>> columnTypeRegistry =
-                (ColumnTypeRegistry<? extends ColumnType<?, ?, Entity.Builder, String>>) this.columnTypeRegistry;
         if (record.hasColumns()) {
             ColumnRecords.feedColumnsTo(entity,
                                         record,
