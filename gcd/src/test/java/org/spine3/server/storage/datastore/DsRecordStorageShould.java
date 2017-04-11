@@ -200,7 +200,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
         final long maxReadTime = 1000;
         final long maxWriteTime = 9500;
 
-        new BigDataTester<>(getStorage())
+        BigDataTester.<ProjectId>newBuilder()
                 .setEntrySupplier(new BigDataTester.EntrySupplier<ProjectId>() {
                     @Override
                     public ProjectId newId() {
@@ -214,7 +214,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
                 })
                 .setReadLimit(maxReadTime)
                 .setWriteLimit(maxWriteTime)
-                .testBigDataOperations();
+                .build()
+                .testBigDataOperations(getStorage());
     }
 
     @SuppressWarnings("unused") // Reflective access
