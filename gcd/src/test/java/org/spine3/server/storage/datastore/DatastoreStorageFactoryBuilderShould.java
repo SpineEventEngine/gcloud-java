@@ -36,6 +36,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.spine3.server.storage.datastore.TestDatastoreStorageFactory.TestingDatastoreSingleton.INSTANCE;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -98,8 +99,7 @@ public class DatastoreStorageFactoryBuilderShould {
     }
 
     private static Datastore mockDatastore() {
-        final DatastoreOptions options = DatastoreOptions.getDefaultInstance();
-        return options.getService();
+        return INSTANCE.value;
     }
 
     private static <T> Column<T> mockColumn(Class<T> type) {
