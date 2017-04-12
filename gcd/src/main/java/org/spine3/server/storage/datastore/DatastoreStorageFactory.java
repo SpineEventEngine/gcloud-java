@@ -33,7 +33,7 @@ import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.datastore.dsnative.DsNamespaceSupplierFactory;
+import org.spine3.server.storage.datastore.tenant.DsNamespaceSupplierFactory;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.type.TypeUrl;

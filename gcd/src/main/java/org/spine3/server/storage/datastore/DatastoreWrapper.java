@@ -45,9 +45,8 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.server.storage.datastore.dsnative.DsNamespaceValidator;
-import org.spine3.server.storage.datastore.dsnative.Kind;
-import org.spine3.server.storage.datastore.dsnative.Namespace;
+import org.spine3.server.storage.datastore.tenant.DsNamespaceValidator;
+import org.spine3.server.storage.datastore.tenant.Namespace;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;

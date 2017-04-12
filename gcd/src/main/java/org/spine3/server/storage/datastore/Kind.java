@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.dsnative;
+package org.spine3.server.storage.datastore;
 
 import com.google.common.base.Objects;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
+import org.spine3.annotations.Internal;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
@@ -80,7 +81,11 @@ public final class Kind {
         return new Kind(typeName.value());
     }
 
-    static Kind ofNamespace() {
+    /**
+     * Produces a {@code Kind} representing the datastore namespace kind.
+     */
+    @Internal
+    public static Kind ofNamespace() {
         return new Kind(NAMESPACE_KIND, true);
     }
 

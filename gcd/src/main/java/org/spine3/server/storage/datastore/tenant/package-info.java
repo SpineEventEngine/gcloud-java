@@ -18,25 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.type;
-
-import com.google.cloud.datastore.BaseEntity;
-import org.spine3.annotations.SPI;
-import org.spine3.server.entity.storage.SimpleColumnType;
-
 /**
- * A base for implementing {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface for Datastore
- * storage regardless the type conversion.
- *
- * @author Dmytro Dashenkov
+ * This package contains classes for working with the
+ * <a href="https://cloud.google.com/datastore/docs/concepts/multitenancy">multitenancy</a>
+ * in the GAE Datastore.
  */
-@SPI
-public abstract class SimpleDatastoreColumnType<T>
-        extends SimpleColumnType<T, BaseEntity.Builder, String>
-        implements DatastoreColumnType<T, T> {
+@Internal
+@ParametersAreNonnullByDefault
+package org.spine3.server.storage.datastore.tenant;
 
-    @Override
-    public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {
-        storageRecord.setNull(columnIdentifier);
-    }
-}
+import org.spine3.annotations.Internal;
+
+import javax.annotation.ParametersAreNonnullByDefault;

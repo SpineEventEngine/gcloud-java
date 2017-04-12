@@ -29,8 +29,7 @@ import org.junit.AfterClass;
 import org.junit.Test;
 import org.spine3.net.EmailAddress;
 import org.spine3.net.InternetDomain;
-import org.spine3.server.storage.datastore.dsnative.Kind;
-import org.spine3.server.storage.datastore.dsnative.TestNamespaceSuppliers;
+import org.spine3.server.storage.datastore.tenant.TestNamespaceSuppliers;
 import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.users.TenantId;
 

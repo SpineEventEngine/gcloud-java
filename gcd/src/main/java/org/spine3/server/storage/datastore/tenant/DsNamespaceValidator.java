@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.dsnative;
+package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Datastore;
 import org.spine3.annotations.Internal;

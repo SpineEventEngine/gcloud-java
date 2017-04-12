@@ -18,30 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.dsnative;
+package org.spine3.server.storage.datastore.tenant;
 
 /**
- * A {@link NamespaceSupplier} for single-tenant storage factories.
- *
  * @author Dmytro Dashenkov
  */
-final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
+public class TestNamespaceSuppliers {
 
-    private static final String DEFAULT_NAMESPACE = "";
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return the {@link Namespace} representing the empty string
-     */
-    @Override
-    public Namespace get() {
-        return NamespaceSingleton.INSTANCE.value;
+    public static Namespace.NamespaceSupplier singleTenant() {
+        return Namespace.NamespaceSupplier.constant();
     }
 
-    private enum NamespaceSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Namespace value = Namespace.of(DEFAULT_NAMESPACE);
+    public static Namespace.NamespaceSupplier multitenant() {
+        return Namespace.NamespaceSupplier.multitenant();
     }
 }

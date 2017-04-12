@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.dsnative;
+package org.spine3.server.storage.datastore.tenant;
 
 import org.spine3.server.tenant.TenantFunction;
 import org.spine3.users.TenantId;
@@ -28,11 +28,11 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A {@link NamespaceSupplier} for multitenant storage factories.
+ * A {@link Namespace.NamespaceSupplier} for multitenant storage factories.
  *
  * @author Dmytro Dashenkov
  */
-final class MultitenantNamespaceSupplier extends NamespaceSupplier {
+final class MultitenantNamespaceSupplier extends Namespace.NamespaceSupplier {
 
     /**
      * {@inheritDoc}

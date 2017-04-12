@@ -18,14 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.dsnative;
+package org.spine3.server.storage.datastore.tenant;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import com.google.common.base.Supplier;
+import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 import org.spine3.users.TenantId;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
@@ -129,5 +133,58 @@ public final class Namespace {
     @Override
     public int hashCode() {
         return Objects.hashCode(getValue());
+    }
+
+    /**
+     * A supplier for the {@linkplain Namespace namespaces}, based on the current multitenancy configuration and
+     * {@linkplain TenantId tenant ID}.
+     *
+     * @author Dmytro Dashenkov
+     */
+    abstract static class NamespaceSupplier implements Supplier<Namespace> {
+
+        /**
+         * Obtains an instance of {@code NamespaceSupplier} for the passed
+         * {@linkplain DatastoreStorageFactory storage factory}.
+         *
+         * @param factory the {@linkplain DatastoreStorageFactory storage factory} to return a supplier for
+         * @see org.spine3.server.storage.StorageFactory#isMultitenant
+         */
+        static NamespaceSupplier instanceFor(DatastoreStorageFactory factory) {
+            checkNotNull(factory);
+            if (factory.isMultitenant()) {
+                return Singleton.INSTANCE.singleTenant;
+            } else {
+                return Singleton.INSTANCE.multipleTenant;
+            }
+        }
+
+        @VisibleForTesting
+        static NamespaceSupplier constant() {
+            return Singleton.INSTANCE.singleTenant;
+        }
+
+        @VisibleForTesting
+        static NamespaceSupplier multitenant() {
+            return Singleton.INSTANCE.multipleTenant;
+        }
+
+        /**
+         * Generates a {@link Namespace} based on the current {@linkplain TenantId tenant ID}.
+         *
+         * @return an instance of {@link Namespace} representing either the current tenant ID or an empty string if
+         * the {@linkplain DatastoreStorageFactory storage factory} passed upon the initialization is configured to be
+         * single tenant
+         */
+        @Override
+        public abstract Namespace get();
+
+        private enum Singleton {
+            INSTANCE;
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final NamespaceSupplier singleTenant = new SingleTenantNamespaceSupplier();
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final NamespaceSupplier multipleTenant = new MultitenantNamespaceSupplier();
+        }
     }
 }

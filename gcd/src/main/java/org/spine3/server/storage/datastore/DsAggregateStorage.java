@@ -37,7 +37,6 @@ import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.storage.datastore.dsnative.Kind;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 

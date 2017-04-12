@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.dsnative;
+package org.spine3.server.storage.datastore.tenant;
 
 import com.google.common.base.Supplier;
 import org.spine3.annotations.Internal;
@@ -50,7 +50,7 @@ public class DsNamespaceSupplierFactory {
      */
     public static Supplier<Namespace> getSupplierFor(DatastoreStorageFactory factory) {
         checkNotNull(factory);
-        final Supplier<Namespace> result = NamespaceSupplier.instanceFor(factory);
+        final Supplier<Namespace> result = Namespace.NamespaceSupplier.instanceFor(factory);
         return result;
     }
 }
