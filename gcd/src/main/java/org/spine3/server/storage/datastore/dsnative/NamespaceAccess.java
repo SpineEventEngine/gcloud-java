@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * A DAO for the Datastore {@link Namespace Namespaces}.
@@ -41,19 +42,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 class NamespaceAccess {
 
     private static final Kind NAMESPACE_KIND = Kind.ofNamespace();
-    private static final Function<Key, Namespace> NAMESPACE_UNPACKER =
-            new Function<Key, Namespace>() {
-                @Nullable
-                @Override
-                public Namespace apply(@Nullable Key key) {
-                    checkNotNull(key);
-                    final String namespace = key.getName();
-                    if (namespace == null || namespace.isEmpty()) {
-                        return null;
-                    }
-                    return Namespace.of(namespace);
-                }
-            };
 
     private final Datastore datastore;
 
@@ -90,9 +78,33 @@ class NamespaceAccess {
                                       .build();
         final Iterator<Key> existingNamespaces = datastore.run(query);
         final Iterator<Namespace> extractedNamespaces =
-                Iterators.transform(existingNamespaces, NAMESPACE_UNPACKER);
+                Iterators.transform(existingNamespaces, new NamespaceUnpacker());
         Iterators.addAll(cache, extractedNamespaces);
         final boolean result = cache.contains(namespace);
         return result;
+    }
+
+    /**
+     * A function retrieving a {@link Namespace} from a given {@link Key}.
+     */
+    private static class NamespaceUnpacker implements Function<Key, Namespace> {
+
+        /**
+         * Retrieves a {@link Namespace} from a given {@link Key}.
+         *
+         * @param key a Datastore {@link Key} representing a Datastore namespace
+         * @return the result of call to {@link Key#getName()} or {@code null} if the
+         * {@link Key} has no name (i.e. for the default namespace)
+         */
+        @Nullable
+        @Override
+        public Namespace apply(@Nullable Key key) {
+            checkNotNull(key);
+            final String namespace = key.getName();
+            if (isNullOrEmpty(namespace)) {
+                return null;
+            }
+            return Namespace.of(namespace);
+        }
     }
 }

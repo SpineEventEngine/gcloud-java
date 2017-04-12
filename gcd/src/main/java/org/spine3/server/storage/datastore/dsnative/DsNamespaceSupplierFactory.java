@@ -27,15 +27,27 @@ import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A factory for the {@link Supplier Supplier{@literal <}Namespace>} objects.
+ *
  * @author Dmytro Dashenkov
+ * @see Namespace
  */
 @Internal
-public class DsNamespaces {
+public class DsNamespaceSupplierFactory {
 
-    private DsNamespaces() {
+    private DsNamespaceSupplierFactory() {
         // Avoid initializing of a utility class
     }
 
+    /**
+     * Produces an instance of {@link Supplier Supplier{@literal <}Namespace>} for the given
+     * {@link DatastoreStorageFactory}.
+     *
+     * @param factory the factory to poduce the supplier for
+     * @return a {@link Supplier Supplier{@literal <}Namespace>} instance depending on the given
+     * {@link DatastoreStorageFactory}
+     * {@linkplain org.spine3.server.storage.StorageFactory#isMultitenant multitenancy mode}
+     */
     public static Supplier<Namespace> getSupplierFor(DatastoreStorageFactory factory) {
         checkNotNull(factory);
         final Supplier<Namespace> result = NamespaceSupplier.instanceFor(factory);

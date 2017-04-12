@@ -33,7 +33,7 @@ import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.datastore.dsnative.DsNamespaces;
+import org.spine3.server.storage.datastore.dsnative.DsNamespaceSupplierFactory;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.type.TypeUrl;
@@ -87,7 +87,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     private void initDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already initialized");
         final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore,
-                                                               DsNamespaces.getSupplierFor(this));
+                                                               DsNamespaceSupplierFactory.getSupplierFor(this));
         this.setDatastore(wrapped);
     }
 

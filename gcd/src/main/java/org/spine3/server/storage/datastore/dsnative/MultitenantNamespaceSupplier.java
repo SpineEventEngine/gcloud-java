@@ -48,12 +48,27 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
         return result;
     }
 
+    /**
+     * A function declosuring the current tenant {@linkplain TenantId ID}.
+     *
+     */
     private static class TenantIdRetriever extends TenantFunction<TenantId> {
 
-        private TenantIdRetriever() {
+        /**
+         * Creates a new instance of {@code TenantIdRetriever}.
+         *
+         * @throws IllegalStateException if the application is has a single tenant
+         */
+        private TenantIdRetriever() throws IllegalStateException {
             super(true);
         }
 
+        /**
+         * Retrieves the passed {@link TenantId}, ensuring it's not equal to {@code null}.
+         *
+         * @param input current {@link TenantId}
+         * @return the input
+         */
         @Override
         public TenantId apply(@Nullable TenantId input) {
             checkNotNull(input);
