@@ -25,16 +25,18 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.event.EventStorage;
+import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.storage.Project;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -46,13 +48,18 @@ public class DatastoreStorageFactoryShould {
 
     private static final Datastore datastore = DUMMY_OPTIONS.getService();
 
-    private static final StorageFactory datastoreFactory = new DatastoreStorageFactory(datastore);
+    private static final StorageFactory datastoreFactory = DatastoreStorageFactory.newBuilder()
+                                                                                  .setDatastore(datastore)
+                                                                                  .build();
 
     @Test
     public void create_multitenant_storages() throws Exception {
-        final StorageFactory factory = new DatastoreStorageFactory(datastore, true);
+        final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                              .setDatastore(datastore)
+                                                              .setMultitenant(true)
+                                                              .build();
         assertTrue(factory.isMultitenant());
-        final CommandStorage storage = factory.createCommandStorage();
+        final RecordStorage storage = factory.createStandStorage();
         assertTrue(storage.isMultitenant());
         storage.close();
     }
@@ -64,18 +71,6 @@ public class DatastoreStorageFactoryShould {
     }
 
     @Test
-    public void create_event_storage() {
-        final EventStorage storage = datastoreFactory.createEventStorage();
-        assertNotNull(storage);
-    }
-
-    @Test
-    public void create_command_storage() {
-        final CommandStorage storage = datastoreFactory.createCommandStorage();
-        assertNotNull(storage);
-    }
-
-    @Test
     public void create_separate_record_storage_per_state_type() {
         final DsRecordStorage<?> storage = (DsRecordStorage<?>) datastoreFactory.createRecordStorage(TestEntity.class);
         final DsRecordStorage<?> differentStorage =
@@ -83,11 +78,50 @@ public class DatastoreStorageFactoryShould {
         assertNotEquals(storage.getKind(), differentStorage.getKind());
     }
 
+    @Test
+    public void convert_itself_to_single_tenant() {
+        final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                              .setDatastore(datastore)
+                                                              .setMultitenant(true)
+                                                              .build();
+        assertTrue(factory.isMultitenant());
+        final StorageFactory singleTenantFactory = factory.toSingleTenant();
+        assertFalse(singleTenantFactory.isMultitenant());
+    }
+
+    @Test
+    public void return_self_if_single_tenant() {
+        final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                              .setDatastore(datastore)
+                                                              .setMultitenant(false)
+                                                              .build();
+        assertFalse(factory.isMultitenant());
+        final StorageFactory singleTenantFactory = factory.toSingleTenant();
+        assertFalse(singleTenantFactory.isMultitenant());
+        assertSame(factory, singleTenantFactory);
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_to_create_aggregate_storage_not_using_class_parameter() {
         final AggregateStorage<ProjectId> storage = datastoreFactory.createAggregateStorage(null);
         assertNotNull(storage);
+    }
+
+    @Test
+    public void have_default_column_type_registry() {
+        final DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                                       .setDatastore(datastore)
+                                                                       .build();
+        final ColumnTypeRegistry defaultRegistry = factory.getTypeRegistry();
+        assertNotNull(defaultRegistry);
+        assertSame(DatastoreTypeRegistryFactory.defaultInstance(), defaultRegistry);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void fail_to_construct_without_datastore() {
+        DatastoreStorageFactory.newBuilder()
+                               .build();
     }
 
     private static class TestEntity extends AbstractEntity<String, StringValue> {

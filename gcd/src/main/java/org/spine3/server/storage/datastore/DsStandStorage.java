@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
@@ -92,26 +93,32 @@ public class DsStandStorage extends StandStorage {
 
     @Override
     protected Map<AggregateStateId, EntityRecord> readAllRecords() {
-        return readAllRecords(FieldMask.getDefaultInstance());
+        return recordStorage.readAll();
     }
 
     @Override
     protected Map<AggregateStateId, EntityRecord> readAllRecords(FieldMask fieldMask) {
-        return recordStorage.readAllRecords(fieldMask);
+        return recordStorage.readAll(fieldMask);
     }
 
     @Override
-    protected void writeRecord(AggregateStateId id, EntityRecord record) {
+    protected void writeRecord(AggregateStateId id, EntityRecordWithColumns record) {
         recordStorage.write(id, record);
     }
 
     @Override
-    protected void writeRecords(Map<AggregateStateId, EntityRecord> records) {
+    protected void writeRecords(Map<AggregateStateId, EntityRecordWithColumns> records) {
         recordStorage.writeRecords(records);
     }
 
     @SuppressWarnings("unused") // Part of API
     protected RecordStorage<AggregateStateId> getRecordStorage() {
         return recordStorage;
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        recordStorage.close();
     }
 }

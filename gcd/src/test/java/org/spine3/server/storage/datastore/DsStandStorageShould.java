@@ -22,10 +22,15 @@ package org.spine3.server.storage.datastore;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.spine3.base.Stringifier;
+import org.spine3.base.StringifierRegistry;
+import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.stand.StandStorageShould;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.type.TypeUrl;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -36,6 +41,33 @@ public class DsStandStorageShould extends StandStorageShould {
 
     private static final TestDatastoreStorageFactory datastoreFactory
             = TestDatastoreStorageFactory.getDefaultInstance();
+
+    @BeforeClass
+    public static void setUpAll() {
+        StringifierRegistry.getInstance()
+                           .register(new Stringifier<AggregateStateId>() {
+
+                               private static final String INFIX = "::";
+
+                               @Override
+                               protected String toString(AggregateStateId obj) {
+                                   final String type = obj.getStateType().value();
+                                   final String id = IdTransformer.idToString(obj.getAggregateId());
+                                   return type + INFIX + id;
+                               }
+
+                               @Override
+                               protected AggregateStateId fromString(String s) {
+                                   final int infixIndex = s.indexOf(INFIX);
+                                   final String type = s.substring(0, infixIndex);
+                                   final String id = s.substring(infixIndex + INFIX.length());
+
+                                   final Object genericId = IdTransformer.idFromString(id, null);
+
+                                   return AggregateStateId.of(genericId, TypeUrl.parse(type));
+                               }
+                           }, AggregateStateId.class);
+    }
 
     @Before
     public void setUp() throws Exception {

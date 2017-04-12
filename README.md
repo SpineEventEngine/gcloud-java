@@ -6,44 +6,6 @@
 
 Support for Spine-based Java apps running under Google App Engine.
 
-#### Set up
- 
-To start using **Spine GAE-Java** implementation please configure your `WEB-INF/datastore-indexes.xml` file:
-
-```xml
-<datastore-indexes
-        autoGenerate="true">
-        
-    <!-- Your custom indexes -->
-        
-    <datastore-index kind="org.spine3.server.event.storage.EventStorageRecord"
-            ancestor="false">
-        <property name="event_type" direction="asc" />
-        <property name="timestamp_nanos" direction="asc" />
-    </datastore-index>
-</datastore-indexes>
-```
-
-Or alternatively use YAML config file (it must have name `index.yaml`):
-```yaml
-indexes:
-
-  #
-  # Your custom kinds
-  #
-  
-  - kind: spine.base.Event
-    ancestor: no
-    properties:
-      - name: event_type
-      - name: timestamp_nanos
-
-```
-
-After this upload the file onto the Google Cloud Console using the [Cloud Shell Tool](https://cloud.google.com/shell/docs/features) and run `gcloud datastore create-indexes index.yaml`to update the indexes.
-
-This helps to perform more efficient queries to the Cloud Datastore.
-
 #### Testing
 
 ##### Preconditions

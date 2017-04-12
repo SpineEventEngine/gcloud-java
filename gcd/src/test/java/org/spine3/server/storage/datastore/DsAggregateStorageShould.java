@@ -76,7 +76,7 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         return datastoreFactory.createAggregateStorage(aClass);
     }
 
-    @SuppressWarnings("RefusedBequest")
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override // Override method with the same behavior to change ID value
     public void write_and_read_event_by_Long_id() {
         final AggregateStorage storage = getStorage(TestAggregateWithIdLong.class);
@@ -107,6 +107,7 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
+
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
