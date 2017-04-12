@@ -94,8 +94,8 @@ public final class Namespace {
                 break;
             case KIND_NOT_SET:
             default:
-                throw new IllegalStateException(format("Tenant ID is not set. Kind of TenantId is %s.",
-                                                       kindCase.toString()));
+                throw new IllegalArgumentException(format("Tenant ID is not set. Kind of TenantId is %s.",
+                                                          kindCase.toString()));
         }
         return result;
     }
@@ -153,9 +153,9 @@ public final class Namespace {
         static NamespaceSupplier instanceFor(DatastoreStorageFactory factory) {
             checkNotNull(factory);
             if (factory.isMultitenant()) {
-                return Singleton.INSTANCE.singleTenant;
-            } else {
                 return Singleton.INSTANCE.multipleTenant;
+            } else {
+                return Singleton.INSTANCE.singleTenant;
             }
         }
 
