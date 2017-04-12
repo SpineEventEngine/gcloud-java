@@ -34,6 +34,8 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A DAO for the Datastore {@link Namespace Namespaces}.
+ *
  * @author Dmytro Dashenkov
  */
 class NamespaceAccess {
@@ -61,6 +63,15 @@ class NamespaceAccess {
         this.datastore = datastore;
     }
 
+    /**
+     * Checks if the Datastore has the given {@linkplain Namespace}, i.e. there is at least one
+     * {@linkplain com.google.cloud.datastore.Entity Entity} in this {@linkplain Namespace}.
+     *
+     * @param namespace the {@linkplain Namespace} yo look for
+     * @return {@code true} if there is at least one
+     * {@linkplain com.google.cloud.datastore.Entity Entity} in this {@linkplain Namespace},
+     * {@code false} otherwise
+     */
     boolean exists(Namespace namespace) {
         checkNotNull(namespace);
 

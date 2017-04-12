@@ -21,24 +21,45 @@
 package org.spine3.server.storage.datastore.dsnative;
 
 import com.google.cloud.datastore.Datastore;
+import org.spine3.annotations.Internal;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
+ * A validator of the Datastore {@linkplain Namespace namespaces}.
+ *
  * @author Dmytro Dashenkov
  */
+@Internal
 public class DsNamespaceValidator {
 
     private final NamespaceAccess namespaceAccess;
 
+    /**
+     * Creates a new instance of the {@code DsNamespaceValidator}.
+     *
+     * @param datastore the {@link Datastore} to validate the {@linkplain Namespace namespaces} upon
+     */
     public DsNamespaceValidator(Datastore datastore) {
         this.namespaceAccess = new NamespaceAccess(datastore);
     }
 
-    public void validate(Namespace namespace) {
+    /**
+     * Validates the given {@link Namespace} to match these constraints:
+     * <ul>
+     *     <li>Be not-{@code null}
+     *     <li>Be {@linkplain NamespaceAccess#exists(Namespace) present} in the Datastore
+     * </ul>
+     *
+     * @param namespace the {@link Namespace} to validate
+     * @throws IllegalStateException upon an invalid {@link Namespace}
+     */
+    public void validate(Namespace namespace) throws IllegalStateException {
         checkNotNull(namespace);
         final boolean found = namespaceAccess.exists(namespace);
-        checkState(found, "Namespace %s could not be found in the Datastore.", namespace);
+        checkArgument(found,
+                      "Namespace %s could not be found in the Datastore.",
+                      namespace);
     }
 }
