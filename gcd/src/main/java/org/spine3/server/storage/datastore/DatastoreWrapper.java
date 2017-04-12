@@ -98,7 +98,8 @@ public class DatastoreWrapper {
     }
 
     /**
-     * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
+     * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns
+     * the instance.
      *
      * @param datastore         {@link Datastore} to wrap
      * @param namespaceSupplier an instance of {@link Supplier Supplier<Namespace>} to get the
@@ -106,7 +107,8 @@ public class DatastoreWrapper {
      * @return new instance of {@code DatastoreWrapper}
      */
     @SuppressWarnings("WeakerAccess") // Part of API
-    protected static DatastoreWrapper wrap(Datastore datastore, Supplier<Namespace> namespaceSupplier) {
+    protected static DatastoreWrapper wrap(Datastore datastore,
+                                           Supplier<Namespace> namespaceSupplier) {
         return new DatastoreWrapper(datastore, namespaceSupplier);
     }
 
@@ -186,7 +188,8 @@ public class DatastoreWrapper {
      * Retrieves an {@link Entity} for each of the given keys.
      *
      * @param keys {@link Key Keys} to search for
-     * @return A list of found entities in the order of keys (including {@code null} values for nonexistent keys)
+     * @return A list of found entities in the order of keys (including {@code null} values for
+     * nonexistent keys)
      * @see DatastoreReader#fetch(Key...)
      */
     public List<Entity> read(Iterable<Key> keys) {
@@ -203,10 +206,12 @@ public class DatastoreWrapper {
     /**
      * Queries the Datastore with the given arguments.
      *
-     * <p>As the Datastore may return a partial result set for {@link EntityQuery}, {@link KeyQuery}
-     * and {@link ProjectionEntityQuery}, it is required to repeat a query with the adjusted cursor position.
+     * <p>As the Datastore may return a partial result set for {@link EntityQuery},
+     * {@link KeyQuery} and {@link ProjectionEntityQuery}, it is required to repeat a query with
+     * the adjusted cursor position.
      *
-     * <p>Therefore, an execution of this method may in fact result in several queries to the Datastore instance.
+     * <p>Therefore, an execution of this method may in fact result in several queries to
+     * the Datastore instance.
      *
      * @param query {@link Query} to execute upon the Datastore
      * @return results fo the query packed in a {@link List}
@@ -224,9 +229,10 @@ public class DatastoreWrapper {
             Iterators.addAll(resultsAsList, queryResults);
 
             final Cursor cursorAfter = queryResults.getCursorAfter();
-            final Query<Entity> queryForMoreResults = queryWithNamespace.toBuilder()
-                                                                        .setStartCursor(cursorAfter)
-                                                                        .build();
+            final Query<Entity> queryForMoreResults =
+                    queryWithNamespace.toBuilder()
+                                      .setStartCursor(cursorAfter)
+                                      .build();
 
             queryResults = actor.run(queryForMoreResults);
         }

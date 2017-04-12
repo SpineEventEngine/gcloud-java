@@ -86,7 +86,8 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private void initDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already initialized");
-        final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore, DsNamespaces.getSupplierFor(this));
+        final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore,
+                                                               DsNamespaces.getSupplierFor(this));
         this.setDatastore(wrapped);
     }
 
@@ -121,8 +122,10 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public StandStorage createStandStorage() {
-        final DsStandStorageDelegate recordStorage = new DsStandStorageDelegate(datastore, multitenant);
-        final DsStandStorage result = new DsStandStorage(recordStorage, multitenant);
+        final DsStandStorageDelegate recordStorage =
+                new DsStandStorageDelegate(datastore, multitenant);
+        final DsStandStorage result =
+                new DsStandStorage(recordStorage, multitenant);
         return result;
     }
 
@@ -145,7 +148,8 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
+        final Class<Message> messageClass =
+                getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
         final Descriptor descriptor = (Descriptor) typeUrl.getDescriptor();
         final DsRecordStorage<I> result = new DsRecordStorage<>(descriptor,
@@ -163,7 +167,8 @@ public class DatastoreStorageFactory implements StorageFactory {
         checkNotNull(entityClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
         final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
-        final Class<? extends Message> stateClass = getGenericParameterType(entityClass, STATE.getIndex());
+        final Class<? extends Message> stateClass =
+                getGenericParameterType(entityClass, STATE.getIndex());
         final DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(),
                                                                       propertyStorage,
                                                                       multitenant,
@@ -224,9 +229,11 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
 
         /**
-         * Switches the {@code DatastoreStorageFactory} that is being built to be or not to be multitenant.
+         * Switches the {@code DatastoreStorageFactory} that is being built to be or not
+         * to be multitenant.
          *
-         * @param multitenant {@code true} if the {@code DatastoreStorageFactory} should be multitenant or not
+         * @param multitenant {@code true} if the {@code DatastoreStorageFactory} should
+         *                                be multitenant or not
          * @return self for method chaining
          */
         public Builder setMultitenant(boolean multitenant) {
@@ -240,7 +247,8 @@ public class DatastoreStorageFactory implements StorageFactory {
          * <p>Default value is {@link DatastoreTypeRegistryFactory#defaultInstance()}.
          *
          * @param typeRegistry the type registry containing all the required
-         * {@linkplain org.spine3.server.entity.storage.ColumnType column types} to handle the existing Entity Columns
+         * {@linkplain org.spine3.server.entity.storage.ColumnType column types} to handle the
+         *                     existing Entity Columns
          * @return self for method chaining
          */
         public Builder setTypeRegistry(ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
