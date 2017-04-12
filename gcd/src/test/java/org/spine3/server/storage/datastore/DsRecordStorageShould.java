@@ -187,7 +187,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
                      // in Datastore max DateTime precision is 1 microsecond
                      datastoreEntity.getDateTime(creationTime).getTimestampMicroseconds());
         assertEquals(entity.isCounterEven(), datastoreEntity.getBoolean(counterEven));
-        assertEquals(Json.toJson(entity.getCounterState()), datastoreEntity.getString(counterState));
+        assertEquals(Json.toCompactJson(entity.getCounterState()), datastoreEntity.getString(counterState));
 
         // Check standard Columns
         assertEquals(entity.getVersion().getNumber(), datastoreEntity.getLong(version));
