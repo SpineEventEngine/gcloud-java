@@ -69,7 +69,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
      */
     public DsStandStorageDelegate(DatastoreWrapper datastore, boolean multitenant) {
         super(EntityRecord.getDescriptor(),
-              datastore,
+              checkNotNull(datastore),
               multitenant,
               ColumnTypeRegistry.<DatastoreColumnType<?, ?>>newBuilder()
                                 .build());
@@ -161,7 +161,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         // NOP
     }
 
-    protected EntityQuery buildByTypeQuery(TypeUrl typeUrl) {
+    private EntityQuery buildByTypeQuery(TypeUrl typeUrl) {
         final EntityQuery incompleteQuery = buildAllQuery(typeUrl);
         final Filter filter = eq(TYPE_URL_KEY, typeUrl.value());
         final EntityQuery query = incompleteQuery.toBuilder()

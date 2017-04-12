@@ -113,8 +113,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public StorageFactory toSingleTenant() {
         return isMultitenant()
-                ? new DatastoreStorageFactory(getDatastore(), false, typeRegistry)
-                : this;
+               ? new DatastoreStorageFactory(getDatastore(), false, typeRegistry)
+               : this;
     }
 
     /**
@@ -152,10 +152,13 @@ public class DatastoreStorageFactory implements StorageFactory {
                 getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
         final Descriptor descriptor = (Descriptor) typeUrl.getDescriptor();
-        final DsRecordStorage<I> result = new DsRecordStorage<>(descriptor,
-                                                                getDatastore(),
-                                                                multitenant,
-                                                                typeRegistry);
+        final DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
+                                                         .setDescriptor(descriptor)
+                                                         .setDatastore(getDatastore())
+                                                         .setMultitenant(isMultitenant())
+                                                         .setColumnTypeRegistry(typeRegistry)
+                                                         .build();
+
         return result;
     }
 
@@ -233,7 +236,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          * to be multitenant.
          *
          * @param multitenant {@code true} if the {@code DatastoreStorageFactory} should
-         *                                be multitenant or not
+         *                    be multitenant or not
          * @return self for method chaining
          */
         public Builder setMultitenant(boolean multitenant) {
@@ -247,7 +250,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          * <p>Default value is {@link DatastoreTypeRegistryFactory#defaultInstance()}.
          *
          * @param typeRegistry the type registry containing all the required
-         * {@linkplain org.spine3.server.entity.storage.ColumnType column types} to handle the
+         *                     {@linkplain org.spine3.server.entity.storage.ColumnType column types} to handle the
          *                     existing Entity Columns
          * @return self for method chaining
          */

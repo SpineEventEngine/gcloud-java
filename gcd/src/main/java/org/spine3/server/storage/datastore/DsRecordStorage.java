@@ -103,7 +103,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param descriptor the descriptor of the type of messages to save to the storage
      * @param datastore  the Datastore implementation to use
      */
-    public DsRecordStorage(Descriptor descriptor,
+    protected DsRecordStorage(Descriptor descriptor,
                            DatastoreWrapper datastore,
                            boolean multitenant,
                            ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
@@ -111,6 +111,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
+    }
+
+    private DsRecordStorage(Builder<I> builder) {
+        this(builder.descriptor,
+             builder.datastore,
+             builder.multitenant,
+             builder.columnTypeRegistry);
     }
 
     @Override
@@ -361,6 +368,51 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     protected Kind getKind() {
         return kindFrom(typeUrl);
+    }
+
+    public static <I> Builder<I> newBuilder() {
+        return new Builder<>();
+    }
+
+    public static class Builder<I> {
+
+        private Descriptor descriptor;
+        private DatastoreWrapper datastore;
+        private boolean multitenant;
+        private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
+
+        private Builder() {
+            // Avoid direct initialization
+        }
+
+        public Builder<I> setDescriptor(Descriptor descriptor) {
+            this.descriptor = checkNotNull(descriptor);
+            return this;
+        }
+
+        public Builder<I> setDatastore(DatastoreWrapper datastore) {
+            this.datastore = checkNotNull(datastore);
+            return this;
+        }
+
+        public Builder<I> setMultitenant(boolean multitenant) {
+            this.multitenant = multitenant;
+            return this;
+        }
+
+        public Builder<I> setColumnTypeRegistry(
+                ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
+            this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
+            return this;
+        }
+
+        public DsRecordStorage<I> build() {
+            checkNotNull(descriptor, "State descriptor is not set.");
+            checkNotNull(datastore, "Datastore is not set.");
+            checkNotNull(columnTypeRegistry, "Column type registry is not set.");
+            final DsRecordStorage<I> storage = new DsRecordStorage<>(this);
+            return storage;
+        }
     }
 
     /**
