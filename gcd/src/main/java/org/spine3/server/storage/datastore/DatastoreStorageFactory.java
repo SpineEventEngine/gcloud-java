@@ -29,7 +29,6 @@ import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.reflect.Classes;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -143,7 +142,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
-        final Class<I> idClass = Classes.getGenericParameterType(entityClass, ID.getIndex());
+        final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
         final Descriptor descriptor = (Descriptor) typeUrl.getDescriptor();
         final DsRecordStorage<I> result = new DsRecordStorage<>(descriptor,
                                                                 getDatastore(),
