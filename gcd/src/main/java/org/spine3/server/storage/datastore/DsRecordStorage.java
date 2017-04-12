@@ -39,7 +39,6 @@ import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
-import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.ColumnRecords;
 import org.spine3.server.entity.storage.ColumnType;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
@@ -62,7 +61,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DsIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static org.spine3.server.storage.datastore.Entities.activeEntity;
-import static org.spine3.server.storage.datastore.Entities.getLifecycleFlags;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -141,14 +139,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return Optional.absent();
         }
 
-        final EntityRecord record = Entities.entityToMessage(response, RECORD_TYPE_URL);
-        final LifecycleFlags flags = getLifecycleFlags(response);
-        final EntityRecord result = isDefault(flags) // Avoid inequality of written and read records
-                                    ? record         // caused by empty `LifecycleFlags` object
-                                    : EntityRecord.newBuilder(record)
-                                                  .setLifecycleFlags(flags)
-                                                  .build();
-
+        final EntityRecord result = Entities.entityToMessage(response, RECORD_TYPE_URL);
         return Optional.of(result);
     }
 
@@ -173,10 +164,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 final Message maskedState = FieldMasks.applyMask(fieldMask, state, typeUrl);
                 final Any wrappedState = AnyPacker.pack(maskedState);
 
-                final LifecycleFlags entityStatus = getLifecycleFlags(input);
                 final EntityRecord record = EntityRecord.newBuilder(readRecord)
                                                         .setState(wrappedState)
-                                                        .setLifecycleFlags(entityStatus)
                                                         .build();
                 return record;
             }
