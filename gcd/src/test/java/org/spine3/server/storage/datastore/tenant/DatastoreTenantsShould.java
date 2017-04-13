@@ -40,12 +40,18 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertContains;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class DatastoreTenantsShould {
+
+    @Test
+    public void have_private_utility_ctor() {
+        assertHasPrivateParameterlessCtor(DatastoreTenants.class);
+    }
 
     @Test
     public void create_tenant_index() {

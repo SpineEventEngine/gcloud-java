@@ -32,6 +32,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class DatastoreTenants {
 
+    private DatastoreTenants() {
+        // Prevent the utility class initialization
+    }
+
     /**
      * Creates a {@link TenantIndex} for the given {@link Datastore}.
      *
