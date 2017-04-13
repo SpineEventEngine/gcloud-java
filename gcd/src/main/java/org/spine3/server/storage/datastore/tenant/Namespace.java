@@ -69,7 +69,7 @@ public final class Namespace {
      */
     static Namespace of(String datastoreNamespace) {
         return new Namespace(
-                escapeIllegalCharacters(datastoreNamespace));
+                TENANT_ID_VALUE_PREFIX + escapeIllegalCharacters(datastoreNamespace));
     }
 
     /**
@@ -80,7 +80,7 @@ public final class Namespace {
      */
     static Namespace of(TenantId tenantId) {
         final String idStringValue = tenantIdToSignificantString(tenantId);
-        return of(idStringValue);
+        return new Namespace(escapeIllegalCharacters(idStringValue));
     }
 
     /**
