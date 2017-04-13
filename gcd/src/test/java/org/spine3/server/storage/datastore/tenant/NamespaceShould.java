@@ -23,7 +23,11 @@ package org.spine3.server.storage.datastore.tenant;
 import com.google.common.testing.EqualsTester;
 import org.junit.Test;
 import org.spine3.net.EmailAddress;
+import org.spine3.net.InternetDomain;
 import org.spine3.users.TenantId;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * @author Dmytro Dashenkov
@@ -37,7 +41,7 @@ public class NamespaceShould {
     }
 
     @SuppressWarnings("LocalVariableNamingConvention")
-        // Required comprehensive naming
+    // Required comprehensive naming
     @Test
     public void support_equality() {
         final String aGroupValue = "namespace1";
@@ -63,5 +67,52 @@ public class NamespaceShould {
                 .addEqualityGroup(bGroupNamespaceFromTenantId,
                                   bGroupNamespaceFromString)
                 .testEquals();
+    }
+
+    @Test
+    public void restore_self_to_tenant_id() {
+        final String randomTenantIdString = "arbitrary-tenant-id";
+        final TenantId domainId = TenantId.newBuilder()
+                                          .setDomain(InternetDomain.newBuilder()
+                                                                   .setValue(randomTenantIdString))
+                                          .build();
+        final TenantId emailId = TenantId.newBuilder()
+                                         .setEmail(EmailAddress.newBuilder()
+                                                               .setValue(randomTenantIdString))
+                                         .build();
+        final TenantId stringId = TenantId.newBuilder()
+                                          .setValue(randomTenantIdString)
+                                          .build();
+        assertNotEquals(domainId, emailId);
+        assertNotEquals(domainId, stringId);
+        assertNotEquals(emailId, stringId);
+
+        final Namespace fromDomainId = Namespace.of(domainId);
+        final Namespace fromEmailId = Namespace.of(emailId);
+        final Namespace fromStringId = Namespace.of(stringId);
+
+        assertEquals(fromDomainId, fromEmailId);
+        assertEquals(fromDomainId, fromStringId);
+        assertEquals(fromEmailId, fromStringId);
+
+        final TenantId domainIdRestored = fromDomainId.toTenantId();
+        final TenantId emailIdRestored = fromEmailId.toTenantId();
+        final TenantId stringIdRestored = fromStringId.toTenantId();
+
+        assertEquals(domainId, domainIdRestored);
+        assertEquals(emailId, emailIdRestored);
+        assertEquals(stringId, stringIdRestored);
+    }
+
+    @Test
+    public void convert_self_to_string_based_tenant_if_created_from_string() {
+        final String namespaceString = "my.namespace";
+
+        final TenantId expectedId = TenantId.newBuilder()
+                                          .setValue(namespaceString)
+                                          .build();
+        final Namespace namespace = Namespace.of(namespaceString);
+        final TenantId actualId = namespace.toTenantId();
+        assertEquals(expectedId, actualId);
     }
 }

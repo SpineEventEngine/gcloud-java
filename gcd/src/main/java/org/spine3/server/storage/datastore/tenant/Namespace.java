@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore.tenant;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import org.spine3.net.EmailAddress;
@@ -45,20 +46,15 @@ import static java.lang.String.format;
  */
 public final class Namespace {
 
-    private static final char TENANT_ID_DOMAIN_PREFIX = 'D';
-    private static final char TENANT_ID_EMAIL_PREFIX = 'E';
-    private static final char TENANT_ID_VALUE_PREFIX = 'V';
-
-    private static final int SIGNIFICANT_NAMESPACE_PART_START_INDEX = 1;
-    private static final int PREFIX_INDEX = 0;
-
     private static final Pattern AT_SYMBOL_PATTERN = Pattern.compile("@", Pattern.LITERAL);
     private static final String AT_SYMBOL_REPLACEMENT = "-at-";
 
     private final String value;
+    private final TenantIdConverter tenantIdConverter;
 
-    private Namespace(String value) {
-        this.value = value;
+    private Namespace(String value, TenantIdConverter tenantIdConverter) {
+        this.value = escapeIllegalCharacters(value);
+        this.tenantIdConverter = tenantIdConverter;
     }
 
     /**
@@ -68,46 +64,42 @@ public final class Namespace {
      * @return new instance of {@code Namespace}
      */
     static Namespace of(String datastoreNamespace) {
-        return new Namespace(
-                TENANT_ID_VALUE_PREFIX + escapeIllegalCharacters(datastoreNamespace));
+        return new Namespace(datastoreNamespace, TenantIdConverter.VALUE);
     }
 
     /**
      * Creates new instance of {@code Namespace} from the given {@link TenantId}.
      *
-     * @param tenantId the {@link TenantId} to create the {@code Namespace} from
+     * @param id the {@link TenantId} to create the {@code Namespace} from
      * @return new instance of {@code Namespace}
      */
-    static Namespace of(TenantId tenantId) {
-        final String idStringValue = tenantIdToSignificantString(tenantId);
-        return new Namespace(escapeIllegalCharacters(idStringValue));
-    }
+    static Namespace of(TenantId id) {
+        checkNotNull(id);
 
-    /**
-     * @return a human-friendly string representation of the {@link TenantId}
-     */
-    private static String tenantIdToSignificantString(TenantId id) {
+        final String value;
+        final TenantIdConverter converter;
         final TenantId.KindCase kindCase = id.getKindCase();
-        final String result;
         switch (kindCase) {
             case DOMAIN:
-                result = TENANT_ID_DOMAIN_PREFIX + id.getDomain()
-                                                     .getValue();
-
+                value = id.getDomain()
+                          .getValue();
+                converter = TenantIdConverter.DOMAIN;
                 break;
             case EMAIL:
-                result = TENANT_ID_EMAIL_PREFIX + id.getEmail()
-                                                    .getValue();
+                value = id.getEmail()
+                          .getValue();
+                converter = TenantIdConverter.EMAIL;
                 break;
             case VALUE:
-                result = TENANT_ID_VALUE_PREFIX + id.getValue();
+                value = id.getValue();
+                converter = TenantIdConverter.VALUE;
                 break;
             case KIND_NOT_SET:
             default:
                 throw new IllegalArgumentException(format("Tenant ID is not set. Kind of TenantId is %s.",
                                                           kindCase.toString()));
         }
-        return result;
+        return new Namespace(value, converter);
     }
 
     private static String escapeIllegalCharacters(String candidateNamespace) {
@@ -120,38 +112,29 @@ public final class Namespace {
      * @return a string value of this {@code Namespace}
      */
     public String getValue() {
-        final String result = value.substring(SIGNIFICANT_NAMESPACE_PART_START_INDEX);
-        return result;
+        return value;
     }
 
-    TenantId toTenantId() throws IllegalStateException {
-        final char prefix = value.charAt(PREFIX_INDEX);
-        final TenantId tenantId;
-        switch (prefix) {
-            case TENANT_ID_DOMAIN_PREFIX:
-                final InternetDomain domain = InternetDomain.newBuilder()
-                                                            .setValue(getValue())
-                                                            .build();
-                tenantId = TenantId.newBuilder()
-                                   .setDomain(domain)
-                                   .build();
-                break;
-            case TENANT_ID_EMAIL_PREFIX:
-                final EmailAddress email = EmailAddress.newBuilder()
-                                                       .setValue(getValue())
-                                                       .build();
-                tenantId = TenantId.newBuilder()
-                                   .setEmail(email)
-                                   .build();
-                break;
-            case TENANT_ID_VALUE_PREFIX:
-                tenantId = TenantId.newBuilder()
-                                   .setValue(getValue())
-                                   .build();
-                break;
-            default:
-                throw new IllegalStateException(format("Malformed Namespace \"%s\"", value));
-        }
+    /**
+     * Converts this object to a {@link TenantId}.
+     *
+     * <p>If current instance was created with {@link Namespace#of(TenantId)}, then the result will
+     * be {@code equal} to that {@link TenantId}.
+     *
+     * <p>If current instance was created with {@link Namespace#of(String)}, then the result will
+     * be equivalent to the result of
+     * <code>
+     * <pre>
+     *         TenantId.newBuilder()
+     *                 .setValue(namespace.getValue())
+     *                 .build();
+     *     </pre>
+     * </code>
+     *
+     * @return a {@link TenantId} represented by this {@code Namespace}
+     */
+    TenantId toTenantId() {
+        final TenantId tenantId = tenantIdConverter.apply(this);
         return tenantId;
     }
 
@@ -228,5 +211,47 @@ public final class Namespace {
             @SuppressWarnings("NonSerializableFieldInSerializableClass")
             private final NamespaceSupplier multipleTenant = new MultitenantNamespaceSupplier();
         }
+    }
+
+    private enum TenantIdConverter implements Function<Namespace, TenantId> {
+        DOMAIN {
+            @Override
+            public TenantId apply(Namespace namespace) {
+                checkNotNull(namespace);
+                final InternetDomain domain = InternetDomain.newBuilder()
+                                                            .setValue(namespace.getValue())
+                                                            .build();
+                final TenantId tenantId = TenantId.newBuilder()
+                                                  .setDomain(domain)
+                                                  .build();
+                return tenantId;
+            }
+        },
+        EMAIL {
+            @Override
+            public TenantId apply(Namespace namespace) {
+                final EmailAddress email = EmailAddress.newBuilder()
+                                                       .setValue(namespace.getValue())
+                                                       .build();
+                final TenantId tenantId = TenantId.newBuilder()
+                                                  .setEmail(email)
+                                                  .build();
+                return tenantId;
+            }
+        },
+        VALUE {
+            @Override
+            public TenantId apply(Namespace namespace) {
+                final TenantId tenantId = TenantId.newBuilder()
+                                                  .setValue(namespace.getValue())
+                                                  .build();
+                return tenantId;
+            }
+        };
+
+        @SuppressWarnings("NullableProblems")
+        // Does not accept nulls
+        @Override
+        public abstract TenantId apply(Namespace namespace);
     }
 }
