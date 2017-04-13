@@ -29,6 +29,15 @@ final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
 
     private static final String DEFAULT_NAMESPACE = "";
 
+    private final Namespace namespace;
+
+    SingleTenantNamespaceSupplier(Namespace namespace) {
+        this.namespace = !namespace.getValue()
+                                   .isEmpty() ?
+                         namespace :
+                         NamespaceSingleton.INSTANCE.value;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -36,7 +45,7 @@ final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
      */
     @Override
     public Namespace get() {
-        return NamespaceSingleton.INSTANCE.value;
+        return namespace;
     }
 
     private enum NamespaceSingleton {

@@ -32,6 +32,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.server.storage.datastore.type.SimpleDatastoreColumnType;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -90,12 +91,30 @@ public class DatastoreStorageFactoryBuilderShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void ensure_datastore_has_no_namespace() {
+    public void ensure_datastore_has_no_namespace_if_multitenant() {
         final DatastoreOptions options = DatastoreOptions.newBuilder()
                                                          .setNamespace("non-null-or-empty-namespace")
                                                          .build();
         DatastoreStorageFactory.newBuilder()
-                               .setDatastore(options.getService());
+                               .setMultitenant(true)
+                               .setDatastore(options.getService())
+                               .build();
+    }
+
+    @Test
+    public void allow_custom_namespace_for_single_tenant_instances() {
+        final String namespace = "my.custom.namespace";
+        final DatastoreOptions options = DatastoreOptions.newBuilder()
+                                                         .setNamespace(namespace)
+                                                         .build();
+        final DatastoreStorageFactory factory =
+                DatastoreStorageFactory.newBuilder()
+                                       .setMultitenant(false)
+                                       .setDatastore(options.getService())
+                                       .build();
+        assertNotNull(factory);
+        final String actualNamespace = factory.getDatastore().getDatastoreOptions().getNamespace();
+        assertEquals(namespace, actualNamespace);
     }
 
     private static Datastore mockDatastore() {

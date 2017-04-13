@@ -25,6 +25,7 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.server.storage.datastore.tenant.NamespaceSupplier;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 
 import java.io.BufferedInputStream;
@@ -92,12 +93,17 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private TestDatastoreStorageFactory(Datastore datastore) {
-        super(datastore, false, DatastoreTypeRegistryFactory.defaultInstance());
-        initDatastoreWrapper(getDatastore());
+        super(datastore,
+              false,
+              DatastoreTypeRegistryFactory.defaultInstance(),
+              NamespaceSupplier.singleTenant());
     }
 
-    private void initDatastoreWrapper(DatastoreWrapper wrapper) {
-        this.setDatastore(TestDatastoreWrapper.wrap(wrapper.getDatastore(), runsOnCi));
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+        // Overrides the behavior for tests
+    @Override
+    protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
+        return TestDatastoreWrapper.wrap(datastore, runsOnCi);
     }
 
     /**

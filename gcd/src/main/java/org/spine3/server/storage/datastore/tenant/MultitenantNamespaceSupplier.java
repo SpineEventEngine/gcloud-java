@@ -34,6 +34,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
+    static MultitenantNamespaceSupplier instance() {
+        return Singleton.INSTANCE.value;
+    }
+
+    private MultitenantNamespaceSupplier() {
+        super();
+        // Prevent direct initialization
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -74,5 +83,11 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
             checkNotNull(input);
             return input;
         }
+    }
+
+    private enum Singleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final MultitenantNamespaceSupplier value = new MultitenantNamespaceSupplier();
     }
 }

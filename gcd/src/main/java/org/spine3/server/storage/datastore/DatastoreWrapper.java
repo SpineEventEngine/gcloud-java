@@ -23,6 +23,7 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
+import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.DatastoreReaderWriter;
 import com.google.cloud.datastore.DatastoreWriter;
@@ -376,6 +377,13 @@ public class DatastoreWrapper {
         keyFactory.setNamespace(namespace.getValue());
 
         return keyFactory;
+    }
+
+    public DatastoreOptions getDatastoreOptions() {
+        final DatastoreOptions options = datastore.getOptions()
+                                                  .toBuilder()
+                                                  .build();
+        return options;
     }
 
     @VisibleForTesting

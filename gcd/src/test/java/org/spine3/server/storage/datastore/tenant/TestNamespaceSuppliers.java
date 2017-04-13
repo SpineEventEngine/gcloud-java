@@ -26,7 +26,7 @@ package org.spine3.server.storage.datastore.tenant;
 public class TestNamespaceSuppliers {
 
     public static NamespaceSupplier singleTenant() {
-        return NamespaceSupplier.constant();
+        return NamespaceSupplier.singleTenant();
     }
 
     public static NamespaceSupplier multitenant() {

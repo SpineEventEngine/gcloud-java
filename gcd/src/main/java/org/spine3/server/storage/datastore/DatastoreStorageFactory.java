@@ -23,6 +23,7 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Supplier;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
@@ -33,7 +34,8 @@ import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.datastore.tenant.DsNamespaceSupplierFactory;
+import org.spine3.server.storage.datastore.tenant.Namespace;
+import org.spine3.server.storage.datastore.tenant.NamespaceSupplier;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.type.TypeUrl;
@@ -58,37 +60,41 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
 
-    private DatastoreWrapper datastore;
+    private final DatastoreWrapper datastore;
     private final boolean multitenant;
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
+    private final Supplier<Namespace> namespaceSupplier;
 
     private DatastoreStorageFactory(Builder builder) {
-        this(builder.datastore, builder.multitenant, builder.typeRegistry);
+        this(builder.datastore, builder.multitenant, builder.typeRegistry, builder.namespaceSupplier);
     }
 
     @VisibleForTesting
     @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
     protected DatastoreStorageFactory(Datastore datastore,
                                       boolean multitenant,
-                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
+                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
+                                      Supplier<Namespace> namespaceSupplier) {
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
-        initDatastoreWrapper(datastore);
+        this.namespaceSupplier = namespaceSupplier;
+        this.datastore = createDatastoreWrapper(datastore);
     }
 
     protected DatastoreStorageFactory(DatastoreWrapper datastore,
                                       boolean multitenant,
-                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
-        this.datastore = datastore;
+                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
+                                      Supplier<Namespace> namespaceSupplier) {
+        this.datastore = checkNotNull(datastore);
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
+        this.namespaceSupplier = namespaceSupplier;
     }
 
-    private void initDatastoreWrapper(Datastore datastore) {
+    protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already initialized");
-        final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore,
-                                                               DsNamespaceSupplierFactory.getSupplierFor(this));
-        this.setDatastore(wrapped);
+        final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore, namespaceSupplier);
+        return wrapped;
     }
 
     /**
@@ -113,7 +119,10 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public StorageFactory toSingleTenant() {
         return isMultitenant()
-               ? new DatastoreStorageFactory(getDatastore(), false, typeRegistry)
+               ? new DatastoreStorageFactory(getDatastore(),
+                                             false,
+                                             typeRegistry,
+                                             NamespaceSupplier.singleTenant())
                : this;
     }
 
@@ -153,11 +162,11 @@ public class DatastoreStorageFactory implements StorageFactory {
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
         final Descriptor descriptor = (Descriptor) typeUrl.getDescriptor();
         final DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
-                                                         .setDescriptor(descriptor)
-                                                         .setDatastore(getDatastore())
-                                                         .setMultitenant(isMultitenant())
-                                                         .setColumnTypeRegistry(typeRegistry)
-                                                         .build();
+                .setDescriptor(descriptor)
+                .setDatastore(getDatastore())
+                .setMultitenant(isMultitenant())
+                .setColumnTypeRegistry(typeRegistry)
+                .build();
 
         return result;
     }
@@ -193,12 +202,8 @@ public class DatastoreStorageFactory implements StorageFactory {
         // NOP
     }
 
-    protected DatastoreWrapper getDatastore() {
+    public DatastoreWrapper getDatastore() {
         return datastore;
-    }
-
-    protected void setDatastore(DatastoreWrapper datastore) {
-        this.datastore = datastore;
     }
 
     /**
@@ -216,6 +221,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         private Datastore datastore;
         private boolean multitenant;
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
+        public Supplier<Namespace> namespaceSupplier;
 
         private Builder() {
             // Avoid direct initialization
@@ -226,8 +232,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          * @return self for method chaining
          */
         public Builder setDatastore(Datastore datastore) {
-            checkHasNoNamespace(datastore);
-            this.datastore = datastore;
+            this.datastore = checkNotNull(datastore);
             return this;
         }
 
@@ -269,6 +274,15 @@ public class DatastoreStorageFactory implements StorageFactory {
          */
         public DatastoreStorageFactory build() {
             checkNotNull(datastore);
+            final String defaultNamespace;
+            if (multitenant) {
+                checkHasNoNamespace(datastore);
+                defaultNamespace = null;
+            } else {
+                defaultNamespace = datastore.getOptions()
+                                            .getNamespace();
+            }
+            this.namespaceSupplier = NamespaceSupplier.instance(multitenant, defaultNamespace);
             if (typeRegistry == null) {
                 typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
             }

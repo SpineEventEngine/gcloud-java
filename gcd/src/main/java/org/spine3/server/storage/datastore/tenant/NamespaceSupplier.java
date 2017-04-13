@@ -22,10 +22,11 @@ package org.spine3.server.storage.datastore.tenant;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
+import org.spine3.annotations.Internal;
 import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 import org.spine3.users.TenantId;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import javax.annotation.Nullable;
 
 /**
  * A supplier for the {@linkplain Namespace namespaces}, based on the current multitenancy configuration and
@@ -33,32 +34,34 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-abstract class NamespaceSupplier implements Supplier<Namespace> {
+@Internal
+public abstract class NamespaceSupplier implements Supplier<Namespace> {
 
     /**
      * Obtains an instance of {@code NamespaceSupplier} for the passed
      * {@linkplain DatastoreStorageFactory storage factory}.
      *
-     * @param factory the {@linkplain DatastoreStorageFactory storage factory} to return a supplier for
      * @see org.spine3.server.storage.StorageFactory#isMultitenant
      */
-    static NamespaceSupplier instanceFor(DatastoreStorageFactory factory) {
-        checkNotNull(factory);
-        if (factory.isMultitenant()) {
-            return Singleton.INSTANCE.multipleTenant;
+    public static NamespaceSupplier instance(boolean multitenant, @Nullable String defaultNamespace) {
+        if (multitenant) {
+            return multitenant();
         } else {
-            return Singleton.INSTANCE.singleTenant;
+            final String namespace = defaultNamespace != null
+                                     ? defaultNamespace
+                                     : "";
+            final Namespace singleNamespace = Namespace.of(namespace);
+            return new SingleTenantNamespaceSupplier(singleNamespace);
         }
     }
 
-    @VisibleForTesting
-    static NamespaceSupplier constant() {
-        return Singleton.INSTANCE.singleTenant;
+    public static NamespaceSupplier singleTenant() {
+        return new SingleTenantNamespaceSupplier(Namespace.of(""));
     }
 
     @VisibleForTesting
     static NamespaceSupplier multitenant() {
-        return Singleton.INSTANCE.multipleTenant;
+        return MultitenantNamespaceSupplier.instance();
     }
 
     /**
@@ -69,16 +72,7 @@ abstract class NamespaceSupplier implements Supplier<Namespace> {
      * single tenant
      */
     @SuppressWarnings("AbstractMethodOverridesAbstractMethod")
-        // Overridden to provide a descriptive documentation
+    // Overrides to provide a descriptive documentation
     @Override
     public abstract Namespace get();
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final NamespaceSupplier singleTenant = new SingleTenantNamespaceSupplier();
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final NamespaceSupplier multipleTenant = new MultitenantNamespaceSupplier();
-    }
 }
