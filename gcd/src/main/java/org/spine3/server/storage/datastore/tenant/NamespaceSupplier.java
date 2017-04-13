@@ -37,6 +37,10 @@ import javax.annotation.Nullable;
 @Internal
 public abstract class NamespaceSupplier implements Supplier<Namespace> {
 
+    NamespaceSupplier() {
+        // Avoid direct initialization from outside the package
+    }
+
     /**
      * Obtains an instance of {@code NamespaceSupplier} for the passed
      * {@linkplain DatastoreStorageFactory storage factory}.

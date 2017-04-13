@@ -51,11 +51,11 @@ class NamespaceIndex implements TenantIndex {
 
     private final Set<Namespace> cache = new HashSet<>();
 
+    private final Object lock = new Object();
+
     NamespaceIndex(Datastore datastore) {
         this.datastore = datastore;
     }
-
-    private final Object lock = new Object();
 
     /**
      * {@inheritDoc}

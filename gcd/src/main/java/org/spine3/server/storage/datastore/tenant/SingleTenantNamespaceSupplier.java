@@ -32,6 +32,7 @@ final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
     private final Namespace namespace;
 
     SingleTenantNamespaceSupplier(Namespace namespace) {
+        super();
         this.namespace = !namespace.getValue()
                                    .isEmpty() ?
                          namespace :

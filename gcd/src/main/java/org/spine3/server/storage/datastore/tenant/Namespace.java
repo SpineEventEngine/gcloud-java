@@ -21,7 +21,6 @@
 package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Key;
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import org.spine3.net.EmailAddress;
 import org.spine3.net.InternetDomain;
@@ -33,7 +32,6 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 
 /**
  * A value object representing the Datastore
@@ -76,30 +74,8 @@ public final class Namespace {
     static Namespace of(TenantId id) {
         checkNotNull(id);
 
-        final String value;
-        final TenantIdConverter converter;
-        final TenantId.KindCase kindCase = id.getKindCase();
-        switch (kindCase) {
-            case DOMAIN:
-                value = id.getDomain()
-                          .getValue();
-                converter = TenantIdConverter.DOMAIN;
-                break;
-            case EMAIL:
-                value = id.getEmail()
-                          .getValue();
-                converter = TenantIdConverter.EMAIL;
-                break;
-            case VALUE:
-                value = id.getValue();
-                converter = TenantIdConverter.VALUE;
-                break;
-            case KIND_NOT_SET:
-            default:
-                throw new IllegalArgumentException(format("Tenant ID is not set. Kind of TenantId is %s.",
-                                                          kindCase.toString()));
-        }
-        return new Namespace(value, converter);
+        final TenantIdConverter converter = TenantIdConverter.forTenantId(id);
+        return converter.toNamespace(id);
     }
 
     /**
@@ -151,7 +127,7 @@ public final class Namespace {
      * @return a {@link TenantId} represented by this {@code Namespace}
      */
     TenantId toTenantId() {
-        final TenantId tenantId = tenantIdConverter.apply(this);
+        final TenantId tenantId = tenantIdConverter.toTenantId(this);
         return tenantId;
     }
 
@@ -178,16 +154,18 @@ public final class Namespace {
     }
 
     /**
-     * The converter of the {@code Namespace} into a {@link TenantId} of the specific type..
+     * The converter of the {@code Namespace} into a {@link TenantId} of the specific type.
+     *
+     * <p>By th naming this type is the same as {@link TenantId.KindCase}.
      */
-    private enum TenantIdConverter implements Function<Namespace, TenantId> {
+    private enum TenantIdConverter {
 
         /**
          * Converts the given {@code Namespace} into a {@link TenantId} which has a {@code domain}.
          */
         DOMAIN {
             @Override
-            public TenantId apply(Namespace namespace) {
+            public TenantId toTenantId(Namespace namespace) {
                 final InternetDomain domain = InternetDomain.newBuilder()
                                                             .setValue(namespace.getValue())
                                                             .build();
@@ -196,6 +174,14 @@ public final class Namespace {
                                                   .build();
                 return tenantId;
             }
+
+            @Override
+            public Namespace toNamespace(TenantId tenantId) {
+                final String value = tenantId.getDomain()
+                                             .getValue();
+                final Namespace namespace = new Namespace(value, this);
+                return namespace;
+            }
         },
 
         /**
@@ -203,7 +189,7 @@ public final class Namespace {
          */
         EMAIL {
             @Override
-            public TenantId apply(Namespace namespace) {
+            public TenantId toTenantId(Namespace namespace) {
                 final EmailAddress email = EmailAddress.newBuilder()
                                                        .setValue(namespace.getValue())
                                                        .build();
@@ -211,6 +197,14 @@ public final class Namespace {
                                                   .setEmail(email)
                                                   .build();
                 return tenantId;
+            }
+
+            @Override
+            public Namespace toNamespace(TenantId tenantId) {
+                final String value = tenantId.getEmail()
+                                       .getValue();
+                final Namespace namespace = new Namespace(value, this);
+                return namespace;
             }
         },
 
@@ -220,25 +214,31 @@ public final class Namespace {
          */
         VALUE {
             @Override
-            public TenantId apply(Namespace namespace) {
+            public TenantId toTenantId(Namespace namespace) {
                 final TenantId tenantId = TenantId.newBuilder()
                                                   .setValue(namespace.getValue())
                                                   .build();
                 return tenantId;
             }
+
+            @Override
+            public Namespace toNamespace(TenantId tenantId) {
+                final String value = tenantId.getValue();
+                final Namespace namespace = new Namespace(value, this);
+                return namespace;
+            }
         };
 
-        /**
-         * {@inheritDoc}
-         *
-         * <p>Overridden for the nullability contract reset: is {@code non-null} and does not
-         * accept {@code null}s.
-         */
-        @SuppressWarnings({
-                "NullableProblems", // Does not accept nulls
-                "AbstractMethodOverridesAbstractMethod" // Overrides the nullability contract
-        })
-        @Override
-        public abstract TenantId apply(Namespace namespace);
+        private static TenantIdConverter forTenantId(TenantId tenantId) {
+            checkNotNull(tenantId);
+            final TenantId.KindCase kindCase = tenantId.getKindCase();
+            final String kindCaseName = kindCase.name();
+            final TenantIdConverter converter = valueOf(kindCaseName);
+            return converter;
+        }
+
+        abstract TenantId toTenantId(Namespace namespace);
+
+        abstract Namespace toNamespace(TenantId tenantId);
     }
 }
