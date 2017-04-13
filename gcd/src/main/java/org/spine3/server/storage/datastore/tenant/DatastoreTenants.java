@@ -39,6 +39,35 @@ public class DatastoreTenants {
     /**
      * Creates a {@link TenantIndex} for the given {@link Datastore}.
      *
+     * <p>In a multitenant application it's necessary to pass an instance of
+     * the {@link TenantIndex} to a
+     * {@link org.spine3.server.BoundedContext.Builder BoundedContext.Builder}
+     * when creating an instance of {@link org.spine3.server.BoundedContext BoundedContext}.
+     *
+     * <p>An example of creating a multitenant
+     * {@link org.spine3.server.BoundedContext BoundedContext} using the Datastore Storage:
+     * <code>
+     *     <pre>
+     *         final Datastore myDatastoreConfig = myDatastoreOptions.getService();
+     *
+     *         // Create DatastoreStorageFactories using this instance of Datastore
+     *         final Supplier{@literal <}StorageFactory{@literal >} dsStorageFactorySupplier = getDatastoreStorageFactorySupplier(myDatastoreConfig);
+     *
+     *         // Use the same instance for the TenantIndex
+     *         final TenantIndex myTenantIndex = DatastoreTenants.index(myDatastoreConfig);
+     *
+     *         // Pass both to the BoundedContext.Builder
+     *         final BoundedContext multitenantAppBc = BoundedContext.newBuilder()
+     *                                                               .setStorageFactorySupplier(dsStorageFactorySupplier)
+     *                                                               .setTenantIndex(myTenantIndex)
+     *                                                               // set other prams
+     *                                                               .build();
+     *     </pre>
+     * </code>
+     *
+     * <p>A single-tenant app (or a single-tenant BoundedContext in a multitenant app) does not
+     * require a {@code TenantIndex} to be set explicitly.
+     *
      * @param datastore the {@link Datastore} to get the {@link TenantIndex} for
      * @return a new instance of the {@link TenantIndex}
      */
