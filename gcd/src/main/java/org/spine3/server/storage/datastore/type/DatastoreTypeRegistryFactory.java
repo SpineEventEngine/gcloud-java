@@ -56,7 +56,7 @@ public class DatastoreTypeRegistryFactory {
     }
 
     /**
-     * Retrieves a default {@link ColumnTypeRegistry ColumnTypeRegistry{@literal <}? extends DatastoreColumnType>}
+     * Retrieves a default {@link ColumnTypeRegistry ColumnTypeRegistry&lt;? extends DatastoreColumnType&gt;}
      */
     public static ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> defaultInstance() {
         return DEFAULT_REGISTRY;

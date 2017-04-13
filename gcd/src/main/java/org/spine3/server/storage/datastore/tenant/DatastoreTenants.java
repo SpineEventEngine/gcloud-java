@@ -46,8 +46,8 @@ public class DatastoreTenants {
      *
      * <p>An example of creating a multitenant
      * {@link org.spine3.server.BoundedContext BoundedContext} using the Datastore Storage:
-     * <code>
-     *     <pre>
+     * <pre>
+     *     <code>
      *         final Datastore myDatastoreConfig = myDatastoreOptions.getService();
      *
      *         // Create DatastoreStorageFactories using this instance of Datastore
@@ -60,10 +60,10 @@ public class DatastoreTenants {
      *         final BoundedContext multitenantAppBc = BoundedContext.newBuilder()
      *                                                               .setStorageFactorySupplier(dsStorageFactorySupplier)
      *                                                               .setTenantIndex(myTenantIndex)
-     *                                                               // set other prams
+     *                                                               // set other params
      *                                                               .build();
-     *     </pre>
-     * </code>
+     *     </code>
+     * </pre>
      *
      * <p>A single-tenant app (or a single-tenant BoundedContext in a multitenant app) does not
      * require a {@code TenantIndex} to be set explicitly.

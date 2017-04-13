@@ -19,12 +19,6 @@
  */
 
 /**
- * This package contains classes for working with the
- * <a href="https://cloud.google.com/datastore/docs/concepts/multitenancy">multitenancy</a>
- * in the GAE Datastore.
- */
-
-/**
  * This package contains the types which work with the Datastore-specific Tenant policy implementation.
  *
  * @see org.spine3.server.storage.datastore.tenant.DatastoreTenants

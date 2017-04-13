@@ -87,7 +87,7 @@ public class DatastoreWrapper {
      * Creates a new instance of {@code DatastoreWrapper}.
      *
      * @param datastore         {@link Datastore} to wrap
-     * @param namespaceSupplier an instance of {@link Supplier Supplier<Namespace>} to get the
+     * @param namespaceSupplier an instance of {@link Supplier Supplier&lt;Namespace&gt;} to get the
      *                          namespaces for the queries from
      */
     protected DatastoreWrapper(Datastore datastore, Supplier<Namespace> namespaceSupplier) {
@@ -101,7 +101,7 @@ public class DatastoreWrapper {
      * the instance.
      *
      * @param datastore         {@link Datastore} to wrap
-     * @param namespaceSupplier an instance of {@link Supplier Supplier<Namespace>} to get the
+     * @param namespaceSupplier an instance of {@link Supplier Supplier&lt;Namespace&gt;} to get the
      *                          namespaces for the queries from
      * @return new instance of {@code DatastoreWrapper}
      */
