@@ -21,11 +21,11 @@
 package org.spine3.server.storage.datastore.tenant;
 
 /**
- * A {@link Namespace.NamespaceSupplier} for single-tenant storage factories.
+ * A {@link NamespaceSupplier} for single-tenant storage factories.
  *
  * @author Dmytro Dashenkov
  */
-final class SingleTenantNamespaceSupplier extends Namespace.NamespaceSupplier {
+final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
 
     private static final String DEFAULT_NAMESPACE = "";
 

@@ -20,13 +20,10 @@
 
 package org.spine3.server.storage.datastore.tenant;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.base.Supplier;
 import org.spine3.net.EmailAddress;
 import org.spine3.net.InternetDomain;
-import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 import org.spine3.users.TenantId;
 
 import java.util.regex.Matcher;
@@ -161,63 +158,16 @@ public final class Namespace {
     }
 
     /**
-     * A supplier for the {@linkplain Namespace namespaces}, based on the current multitenancy configuration and
-     * {@linkplain TenantId tenant ID}.
-     *
-     * @author Dmytro Dashenkov
+     * The converter of the {@code Namespace} into a {@link TenantId} of the specific type..
      */
-    abstract static class NamespaceSupplier implements Supplier<Namespace> {
-
-        /**
-         * Obtains an instance of {@code NamespaceSupplier} for the passed
-         * {@linkplain DatastoreStorageFactory storage factory}.
-         *
-         * @param factory the {@linkplain DatastoreStorageFactory storage factory} to return a supplier for
-         * @see org.spine3.server.storage.StorageFactory#isMultitenant
-         */
-        static NamespaceSupplier instanceFor(DatastoreStorageFactory factory) {
-            checkNotNull(factory);
-            if (factory.isMultitenant()) {
-                return Singleton.INSTANCE.multipleTenant;
-            } else {
-                return Singleton.INSTANCE.singleTenant;
-            }
-        }
-
-        @VisibleForTesting
-        static NamespaceSupplier constant() {
-            return Singleton.INSTANCE.singleTenant;
-        }
-
-        @VisibleForTesting
-        static NamespaceSupplier multitenant() {
-            return Singleton.INSTANCE.multipleTenant;
-        }
-
-        /**
-         * Generates a {@link Namespace} based on the current {@linkplain TenantId tenant ID}.
-         *
-         * @return an instance of {@link Namespace} representing either the current tenant ID or an empty string if
-         * the {@linkplain DatastoreStorageFactory storage factory} passed upon the initialization is configured to be
-         * single tenant
-         */
-        @Override
-        public abstract Namespace get();
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final NamespaceSupplier singleTenant = new SingleTenantNamespaceSupplier();
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final NamespaceSupplier multipleTenant = new MultitenantNamespaceSupplier();
-        }
-    }
-
     private enum TenantIdConverter implements Function<Namespace, TenantId> {
+
+        /**
+         * Converts the given {@code Namespace} into a {@link TenantId} which has a {@code domain}.
+         */
         DOMAIN {
             @Override
             public TenantId apply(Namespace namespace) {
-                checkNotNull(namespace);
                 final InternetDomain domain = InternetDomain.newBuilder()
                                                             .setValue(namespace.getValue())
                                                             .build();
@@ -227,6 +177,10 @@ public final class Namespace {
                 return tenantId;
             }
         },
+
+        /**
+         * Converts the given {@code Namespace} into a {@link TenantId} which has an {@code email}.
+         */
         EMAIL {
             @Override
             public TenantId apply(Namespace namespace) {
@@ -239,6 +193,11 @@ public final class Namespace {
                 return tenantId;
             }
         },
+
+        /**
+         * Converts the given {@code Namespace} into a {@link TenantId} which represents a string
+         * value.
+         */
         VALUE {
             @Override
             public TenantId apply(Namespace namespace) {
@@ -249,6 +208,12 @@ public final class Namespace {
             }
         };
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Overridden for the nullability contract reset: is {@code non-null} and does not
+         * accept {@code null}s.
+         */
         @SuppressWarnings("NullableProblems")
         // Does not accept nulls
         @Override

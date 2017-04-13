@@ -28,11 +28,11 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A {@link Namespace.NamespaceSupplier} for multitenant storage factories.
+ * A {@link NamespaceSupplier} for multitenant storage factories.
  *
  * @author Dmytro Dashenkov
  */
-final class MultitenantNamespaceSupplier extends Namespace.NamespaceSupplier {
+final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
     /**
      * {@inheritDoc}

@@ -50,7 +50,7 @@ public class DsNamespaceSupplierFactory {
      */
     public static Supplier<Namespace> getSupplierFor(DatastoreStorageFactory factory) {
         checkNotNull(factory);
-        final Supplier<Namespace> result = Namespace.NamespaceSupplier.instanceFor(factory);
+        final Supplier<Namespace> result = NamespaceSupplier.instanceFor(factory);
         return result;
     }
 }
