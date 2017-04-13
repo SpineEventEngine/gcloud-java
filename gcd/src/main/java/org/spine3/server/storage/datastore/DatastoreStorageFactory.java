@@ -238,6 +238,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          * @param multitenant {@code true} if the {@code DatastoreStorageFactory} should
          *                    be multitenant or not
          * @return self for method chaining
+         * @see org.spine3.server.storage.datastore.tenant.DatastoreTenants
          */
         public Builder setMultitenant(boolean multitenant) {
             this.multitenant = multitenant;

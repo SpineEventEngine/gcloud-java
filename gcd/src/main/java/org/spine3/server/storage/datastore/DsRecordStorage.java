@@ -104,9 +104,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param datastore  the Datastore implementation to use
      */
     protected DsRecordStorage(Descriptor descriptor,
-                           DatastoreWrapper datastore,
-                           boolean multitenant,
-                           ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
+                              DatastoreWrapper datastore,
+                              boolean multitenant,
+                              ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
@@ -332,7 +332,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     protected I unpackKey(Entity entity) {
-        final String stringId = entity.getKey().getName();
+        final String stringId = entity.getKey()
+                                      .getName();
         final I id = IdTransformer.idFromString(stringId, null);
         return id;
     }
@@ -370,10 +371,19 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return kindFrom(typeUrl);
     }
 
+    /**
+     * Creates new instance of the {@link Builder}.
+     *
+     * @param <I> the ID type of the instances built by the created {@link Builder}
+     * @return new instance of the {@link Builder}
+     */
     public static <I> Builder<I> newBuilder() {
         return new Builder<>();
     }
 
+    /**
+     * A builder for the {@code DsRecordStorage}.
+     */
     public static class Builder<I> {
 
         private Descriptor descriptor;
@@ -385,27 +395,44 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             // Avoid direct initialization
         }
 
+        /**
+         * @param descriptor the record state {@link Descriptor}
+         */
         public Builder<I> setDescriptor(Descriptor descriptor) {
             this.descriptor = checkNotNull(descriptor);
             return this;
         }
 
+        /**
+         * @param datastore the {@link DatastoreWrapper} to use in this storage
+         */
         public Builder<I> setDatastore(DatastoreWrapper datastore) {
             this.datastore = checkNotNull(datastore);
             return this;
         }
 
+        /**
+         * @param multitenant {@code true} if the build storage should be
+         * {@link org.spine3.server.storage.Storage#isMultitenant multitenant} or not
+         */
         public Builder<I> setMultitenant(boolean multitenant) {
             this.multitenant = multitenant;
             return this;
         }
 
+        /**
+         * @param columnTypeRegistry the registry of the Entity
+         * {@link org.spine3.server.entity.storage.Column Columns} types
+         */
         public Builder<I> setColumnTypeRegistry(
                 ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
             this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
             return this;
         }
 
+        /**
+         * Creates new instance of the {@code DsRecordStorage}.
+         */
         public DsRecordStorage<I> build() {
             checkNotNull(descriptor, "State descriptor is not set.");
             checkNotNull(datastore, "Datastore is not set.");
