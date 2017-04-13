@@ -43,7 +43,7 @@ public class DsNamespaceSupplierFactory {
      * Produces an instance of {@link Supplier Supplier&lt;Namespace&gt;} for the given
      * {@link DatastoreStorageFactory}.
      *
-     * @param factory the factory to poduce the supplier for
+     * @param factory the factory to produce the supplier for
      * @return a {@link Supplier Supplier&lt;Namespace&gt;} instance depending on the given
      * {@link DatastoreStorageFactory}
      * {@linkplain org.spine3.server.storage.StorageFactory#isMultitenant multitenancy mode}

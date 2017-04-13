@@ -20,16 +20,19 @@
 
 package org.spine3.server.storage.datastore.tenant;
 
+import com.google.cloud.datastore.Key;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import org.spine3.net.EmailAddress;
 import org.spine3.net.InternetDomain;
 import org.spine3.users.TenantId;
 
+import javax.annotation.Nullable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 /**
@@ -97,6 +100,23 @@ public final class Namespace {
                                                           kindCase.toString()));
         }
         return new Namespace(value, converter);
+    }
+
+    /**
+     * Creates new instance of {@code Namespace} from the name of the given {@link Key}.
+     *
+     * @param key the {@link Key} to get a {@code Namespace} from
+     * @return a {@code Namespace} of the given Key name or {@code null} if the name is
+     * {@code null} or empty
+     */
+    @Nullable
+    static Namespace fromNameOf(Key key) {
+        checkNotNull(key);
+        final String namespace = key.getName();
+        if (isNullOrEmpty(namespace)) {
+            return null;
+        }
+        return of(namespace);
     }
 
     private static String escapeIllegalCharacters(String candidateNamespace) {
@@ -214,8 +234,10 @@ public final class Namespace {
          * <p>Overridden for the nullability contract reset: is {@code non-null} and does not
          * accept {@code null}s.
          */
-        @SuppressWarnings("NullableProblems")
-        // Does not accept nulls
+        @SuppressWarnings({
+                "NullableProblems", // Does not accept nulls
+                "AbstractMethodOverridesAbstractMethod" // Overrides the nullability contract
+        })
         @Override
         public abstract TenantId apply(Namespace namespace);
     }

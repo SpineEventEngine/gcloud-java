@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public class DsNamespaceValidator {
 
-    private final NamespaceAccess namespaceAccess;
+    private final NamespaceIndex namespaceIndex;
 
     /**
      * Creates a new instance of the {@code DsNamespaceValidator}.
@@ -42,14 +42,14 @@ public class DsNamespaceValidator {
      * @param datastore the {@link Datastore} to validate the {@linkplain Namespace namespaces} upon
      */
     public DsNamespaceValidator(Datastore datastore) {
-        this.namespaceAccess = new NamespaceAccess(datastore);
+        this.namespaceIndex = new NamespaceIndex(datastore);
     }
 
     /**
      * Validates the given {@link Namespace} to match these constraints:
      * <ul>
-     *     <li>Be not-{@code null}
-     *     <li>Be {@linkplain NamespaceAccess#exists(Namespace) present} in the Datastore
+     *     <li>be non-{@code null};
+     *     <li>be {@linkplain NamespaceIndex#exists(Namespace) present} in the Datastore.
      * </ul>
      *
      * @param namespace the {@link Namespace} to validate
@@ -57,7 +57,7 @@ public class DsNamespaceValidator {
      */
     public void validate(Namespace namespace) throws IllegalStateException {
         checkNotNull(namespace);
-        final boolean found = namespaceAccess.exists(namespace);
+        final boolean found = namespaceIndex.exists(namespace);
         checkArgument(found,
                       "Namespace %s could not be found in the Datastore.",
                       namespace);

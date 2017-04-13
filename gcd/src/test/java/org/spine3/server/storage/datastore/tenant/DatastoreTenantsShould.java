@@ -57,7 +57,7 @@ public class DatastoreTenantsShould {
     public void create_tenant_index() {
         final TenantIndex index = DatastoreTenants.index(mockDatastore());
         assertNotNull(index);
-        assertThat(index, instanceOf(NamespaceAccess.class));
+        assertThat(index, instanceOf(NamespaceIndex.class));
 
         final String customNamespace = "my-namespace";
         final TenantId customId = TenantId.newBuilder()

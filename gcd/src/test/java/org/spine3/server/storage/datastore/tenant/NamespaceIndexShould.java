@@ -39,23 +39,23 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public class NamespaceAccessShould {
+public class NamespaceIndexShould {
 
     private static final String TENANT_ID_STRING = "some-tenant";
 
     @Test
     public void store_tenant_ids() {
-        final NamespaceAccess namespaceAccess = new NamespaceAccess(mockDatastore());
+        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore());
 
-        final Set<TenantId> initialEmptySet = namespaceAccess.getAll();
+        final Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
         final TenantId newId = TenantId.newBuilder()
                                        .setValue(TENANT_ID_STRING)
                                        .build();
-        namespaceAccess.keep(newId);
+        namespaceIndex.keep(newId);
 
-        final Set<TenantId> ids = namespaceAccess.getAll();
+        final Set<TenantId> ids = namespaceIndex.getAll();
         assertFalse(ids.isEmpty());
         assertSize(1, ids);
 
@@ -65,19 +65,19 @@ public class NamespaceAccessShould {
 
     @Test
     public void do_nothing_on_close() {
-        final NamespaceAccess namespaceAccess = new NamespaceAccess(mockDatastore());
+        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore());
 
-        namespaceAccess.close();
-        namespaceAccess.close();
+        namespaceIndex.close();
+        namespaceIndex.close();
         // No exception is thrown on the second call to #close() => no operation is performed
     }
 
     @Test
     public void find_existing_namespaces() {
-        final NamespaceAccess namespaceAccess = new NamespaceAccess(mockDatastore());
+        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore());
 
         // Ensure no namespace has been kept
-        final Set<TenantId> initialEmptySet = namespaceAccess.getAll();
+        final Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
         final TenantId newId = TenantId.newBuilder()
@@ -85,16 +85,16 @@ public class NamespaceAccessShould {
                                        .build();
         final Namespace newNamespace = Namespace.of(newId);
 
-        namespaceAccess.keep(newId);
-        assertTrue(namespaceAccess.exists(newNamespace));
+        namespaceIndex.keep(newId);
+        assertTrue(namespaceIndex.exists(newNamespace));
     }
 
     @Test
     public void not_find_non_existing_namespaces() {
-        final NamespaceAccess namespaceAccess = new NamespaceAccess(mockDatastore());
+        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore());
 
         // Ensure no namespace has been kept
-        final Set<TenantId> initialEmptySet = namespaceAccess.getAll();
+        final Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
         final TenantId fakeId = TenantId.newBuilder()
@@ -102,7 +102,7 @@ public class NamespaceAccessShould {
                                        .build();
         final Namespace fakeNamespace = Namespace.of(fakeId);
 
-        assertFalse(namespaceAccess.exists(fakeNamespace));
+        assertFalse(namespaceIndex.exists(fakeNamespace));
     }
 
     private static Datastore mockDatastore() {

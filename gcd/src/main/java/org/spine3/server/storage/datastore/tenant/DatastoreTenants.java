@@ -73,7 +73,7 @@ public class DatastoreTenants {
      */
     public static TenantIndex index(Datastore datastore) {
         checkNotNull(datastore);
-        final TenantIndex index = new NamespaceAccess(datastore);
+        final TenantIndex index = new NamespaceIndex(datastore);
         return index;
     }
 }

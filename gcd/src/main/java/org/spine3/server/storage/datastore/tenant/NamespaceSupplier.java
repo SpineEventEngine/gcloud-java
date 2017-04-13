@@ -68,6 +68,8 @@ abstract class NamespaceSupplier implements Supplier<Namespace> {
      * the {@linkplain DatastoreStorageFactory storage factory} passed upon the initialization is configured to be
      * single tenant
      */
+    @SuppressWarnings("AbstractMethodOverridesAbstractMethod")
+        // Overridden to provide a descriptive documentation
     @Override
     public abstract Namespace get();
 
@@ -75,6 +77,7 @@ abstract class NamespaceSupplier implements Supplier<Namespace> {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final NamespaceSupplier singleTenant = new SingleTenantNamespaceSupplier();
+
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final NamespaceSupplier multipleTenant = new MultitenantNamespaceSupplier();
     }

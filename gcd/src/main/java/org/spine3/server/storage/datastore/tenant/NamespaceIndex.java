@@ -35,14 +35,13 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * A DAO for the Datastore {@link Namespace Namespaces}.
  *
  * @author Dmytro Dashenkov
  */
-class NamespaceAccess implements TenantIndex {
+class NamespaceIndex implements TenantIndex {
 
     private static final Kind NAMESPACE_KIND = Kind.ofNamespace();
 
@@ -50,7 +49,7 @@ class NamespaceAccess implements TenantIndex {
 
     private final Set<Namespace> cache = new HashSet<>();
 
-    NamespaceAccess(Datastore datastore) {
+    NamespaceIndex(Datastore datastore) {
         this.datastore = datastore;
     }
 
@@ -150,11 +149,7 @@ class NamespaceAccess implements TenantIndex {
         @Override
         public Namespace apply(@Nullable Key key) {
             checkNotNull(key);
-            final String namespace = key.getName();
-            if (isNullOrEmpty(namespace)) {
-                return null;
-            }
-            return Namespace.of(namespace);
+            return Namespace.fromNameOf(key);
         }
     }
 }
