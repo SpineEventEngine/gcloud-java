@@ -57,7 +57,7 @@ public class DatastoreTenantsShould {
         final TenantId customId = TenantId.newBuilder()
                                           .setValue(customNamespace)
                                           .build();
-        index.eep(customId);
+        index.keep(customId);
         final Set<TenantId> ids = index.getAll();
         assertContains(customId, ids);
     }
