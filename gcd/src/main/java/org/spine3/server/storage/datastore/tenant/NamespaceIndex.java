@@ -30,6 +30,7 @@ import org.spine3.server.tenant.TenantIndex;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -41,6 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
+@ThreadSafe
 class NamespaceIndex implements TenantIndex {
 
     private static final Kind NAMESPACE_KIND = Kind.ofNamespace();
@@ -53,6 +55,8 @@ class NamespaceIndex implements TenantIndex {
         this.datastore = datastore;
     }
 
+    private final Object lock = new Object();
+
     /**
      * {@inheritDoc}
      *
@@ -63,7 +67,9 @@ class NamespaceIndex implements TenantIndex {
     @Override
     public void keep(TenantId id) {
         checkNotNull(id);
-        cache.add(Namespace.of(id));
+        synchronized (lock) {
+            cache.add(Namespace.of(id));
+        }
     }
 
     /**
@@ -71,7 +77,9 @@ class NamespaceIndex implements TenantIndex {
      */
     @Override
     public Set<TenantId> getAll() {
-        fetchNamespaces();
+        synchronized (lock) {
+            fetchNamespaces();
+        }
         final Set<TenantId> result = new HashSet<>(cache.size());
         for (Namespace namespace : cache) {
             if (namespace != null) {
@@ -106,14 +114,17 @@ class NamespaceIndex implements TenantIndex {
                      .isEmpty()) { // Default namespace, always exists
             return true;
         }
-        final boolean cachedNamespace = cache.contains(namespace);
-        if (cachedNamespace) {
-            return true;
-        }
 
-        fetchNamespaces();
-        final boolean result = cache.contains(namespace);
-        return result;
+        synchronized (lock) {
+            final boolean cachedNamespace = cache.contains(namespace);
+            if (cachedNamespace) {
+                return true;
+            }
+
+            fetchNamespaces();
+            final boolean result = cache.contains(namespace);
+            return result;
+        }
     }
 
     /**
