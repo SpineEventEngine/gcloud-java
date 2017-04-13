@@ -23,6 +23,8 @@ package org.spine3.server.storage.datastore.tenant;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
+import org.spine3.net.EmailAddress;
+import org.spine3.net.InternetDomain;
 import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 import org.spine3.users.TenantId;
 
@@ -42,6 +44,13 @@ import static java.lang.String.format;
  * @see NamespaceSupplier
  */
 public final class Namespace {
+
+    private static final char TENANT_ID_DOMAIN_PREFIX = 'D';
+    private static final char TENANT_ID_EMAIL_PREFIX = 'E';
+    private static final char TENANT_ID_VALUE_PREFIX = 'V';
+
+    private static final int SIGNIFICANT_NAMESPACE_PART_START_INDEX = 1;
+    private static final int PREFIX_INDEX = 0;
 
     private static final Pattern AT_SYMBOL_PATTERN = Pattern.compile("@", Pattern.LITERAL);
     private static final String AT_SYMBOL_REPLACEMENT = "-at-";
@@ -82,15 +91,16 @@ public final class Namespace {
         final String result;
         switch (kindCase) {
             case DOMAIN:
-                result = id.getDomain()
-                           .getValue();
+                result = TENANT_ID_DOMAIN_PREFIX + id.getDomain()
+                                                     .getValue();
+
                 break;
             case EMAIL:
-                result = id.getEmail()
-                           .getValue();
+                result = TENANT_ID_EMAIL_PREFIX + id.getEmail()
+                                                    .getValue();
                 break;
             case VALUE:
-                result = id.getValue();
+                result = TENANT_ID_VALUE_PREFIX + id.getValue();
                 break;
             case KIND_NOT_SET:
             default:
@@ -110,7 +120,39 @@ public final class Namespace {
      * @return a string value of this {@code Namespace}
      */
     public String getValue() {
-        return value;
+        final String result = value.substring(SIGNIFICANT_NAMESPACE_PART_START_INDEX);
+        return result;
+    }
+
+    TenantId toTenantId() throws IllegalStateException {
+        final char prefix = value.charAt(PREFIX_INDEX);
+        final TenantId tenantId;
+        switch (prefix) {
+            case TENANT_ID_DOMAIN_PREFIX:
+                final InternetDomain domain = InternetDomain.newBuilder()
+                                                            .setValue(getValue())
+                                                            .build();
+                tenantId = TenantId.newBuilder()
+                                   .setDomain(domain)
+                                   .build();
+                break;
+            case TENANT_ID_EMAIL_PREFIX:
+                final EmailAddress email = EmailAddress.newBuilder()
+                                                       .setValue(getValue())
+                                                       .build();
+                tenantId = TenantId.newBuilder()
+                                   .setEmail(email)
+                                   .build();
+                break;
+            case TENANT_ID_VALUE_PREFIX:
+                tenantId = TenantId.newBuilder()
+                                   .setValue(getValue())
+                                   .build();
+                break;
+            default:
+                throw new IllegalStateException(format("Malformed Namespace \"%s\"", value));
+        }
+        return tenantId;
     }
 
     @Override

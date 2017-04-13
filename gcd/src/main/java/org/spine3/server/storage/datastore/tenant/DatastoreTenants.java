@@ -18,18 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package contains classes for working with the
- * <a href="https://cloud.google.com/datastore/docs/concepts/multitenancy">multitenancy</a>
- * in the GAE Datastore.
- */
-
-/**
- * This package contains the types which work with the Datastore-specific Tenant policy implementation.
- *
- * @see org.spine3.server.storage.datastore.tenant.DatastoreTenants
- */
-@ParametersAreNonnullByDefault
 package org.spine3.server.storage.datastore.tenant;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import com.google.cloud.datastore.Datastore;
+import org.spine3.server.tenant.TenantIndex;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * A factory of the Datastore-specific Tenant related objects.
+ *
+ * @author Dmytro Dashenkov
+ */
+public class DatastoreTenants {
+
+    /**
+     * Creates a {@link TenantIndex} for the given {@link Datastore}.
+     *
+     * @param datastore the {@link Datastore} to get the {@link TenantIndex} for
+     * @return a new instance of the {@link TenantIndex}
+     */
+    public static TenantIndex index(Datastore datastore) {
+        checkNotNull(datastore);
+        final TenantIndex index = new NamespaceAccess(datastore);
+        return index;
+    }
+}

@@ -26,6 +26,8 @@ import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import org.spine3.server.storage.datastore.Kind;
+import org.spine3.server.tenant.TenantIndex;
+import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -40,7 +42,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  *
  * @author Dmytro Dashenkov
  */
-class NamespaceAccess {
+class NamespaceAccess implements TenantIndex {
 
     private static final Kind NAMESPACE_KIND = Kind.ofNamespace();
 
@@ -50,6 +52,29 @@ class NamespaceAccess {
 
     NamespaceAccess(Datastore datastore) {
         this.datastore = datastore;
+    }
+
+    @Override
+    public void keep(TenantId id) {
+        checkNotNull(id);
+        cache.add(Namespace.of(id));
+    }
+
+    @Override
+    public Set<TenantId> getAll() {
+        fetchNamespaces();
+        final Set<TenantId> result = new HashSet<>(cache.size());
+        for (Namespace namespace : cache) {
+            if (namespace != null) {
+                result.add(namespace.toTenantId());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void close() {
+        // NOP
     }
 
     /**
@@ -72,17 +97,24 @@ class NamespaceAccess {
         if (cachedNamespace) {
             return true;
         }
-        cache.clear();
 
+        fetchNamespaces();
+        final boolean result = cache.contains(namespace);
+        return result;
+    }
+
+    private void fetchNamespaces() {
         final Query<Key> query = Query.newKeyQueryBuilder()
                                       .setKind(NAMESPACE_KIND.getValue())
                                       .build();
         final Iterator<Key> existingNamespaces = datastore.run(query);
+        final Set<Namespace> newNamespaces = new HashSet<>();
         final Iterator<Namespace> extractedNamespaces =
                 Iterators.transform(existingNamespaces, new NamespaceUnpacker());
-        Iterators.addAll(cache, extractedNamespaces);
-        final boolean result = cache.contains(namespace);
-        return result;
+        Iterators.addAll(newNamespaces, extractedNamespaces);
+
+        // Never delete tenants, only add new ones
+        cache.addAll(newNamespaces);
     }
 
     /**
