@@ -54,12 +54,22 @@ class NamespaceAccess implements TenantIndex {
         this.datastore = datastore;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>If the ID is not found, writes the ID into the in-mem cache.
+     *
+     * @param id the ID to ensure
+     */
     @Override
     public void keep(TenantId id) {
         checkNotNull(id);
         cache.add(Namespace.of(id));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<TenantId> getAll() {
         fetchNamespaces();
@@ -72,6 +82,9 @@ class NamespaceAccess implements TenantIndex {
         return result;
     }
 
+    /**
+     * Preforms no action.
+     */
     @Override
     public void close() {
         // NOP
@@ -83,7 +96,8 @@ class NamespaceAccess implements TenantIndex {
      *
      * @param namespace the {@linkplain Namespace} yo look for
      * @return {@code true} if there is at least one
-     * {@linkplain com.google.cloud.datastore.Entity Entity} in this {@linkplain Namespace},
+     * {@linkplain com.google.cloud.datastore.Entity Entity} in this {@linkplain Namespace} or the corresponding
+     * {@link TenantId} has been put into the index by a call to {@link #keep(TenantId)},
      * {@code false} otherwise
      */
     boolean exists(Namespace namespace) {
@@ -103,6 +117,9 @@ class NamespaceAccess implements TenantIndex {
         return result;
     }
 
+    /**
+     * Fetches the namespaces from the Datastore into the in-mem cache.
+     */
     private void fetchNamespaces() {
         final Query<Key> query = Query.newKeyQueryBuilder()
                                       .setKind(NAMESPACE_KIND.getValue())
