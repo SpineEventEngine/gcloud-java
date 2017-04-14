@@ -162,11 +162,11 @@ public class DatastoreStorageFactory implements StorageFactory {
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
         final Descriptor descriptor = (Descriptor) typeUrl.getDescriptor();
         final DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
-                .setDescriptor(descriptor)
-                .setDatastore(getDatastore())
-                .setMultitenant(isMultitenant())
-                .setColumnTypeRegistry(typeRegistry)
-                .build();
+                                                         .setDescriptor(descriptor)
+                                                         .setDatastore(getDatastore())
+                                                         .setMultitenant(isMultitenant())
+                                                         .setColumnTypeRegistry(typeRegistry)
+                                                         .build();
 
         return result;
     }

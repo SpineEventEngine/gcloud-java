@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Math.min;
@@ -92,8 +93,8 @@ public class DatastoreWrapper {
      *                          namespaces for the queries from
      */
     protected DatastoreWrapper(Datastore datastore, Supplier<Namespace> namespaceSupplier) {
-        this.namespaceSupplier = namespaceSupplier;
-        this.datastore = datastore;
+        this.namespaceSupplier = checkNotNull(namespaceSupplier);
+        this.datastore = checkNotNull(datastore);
         this.actor = datastore;
     }
 
