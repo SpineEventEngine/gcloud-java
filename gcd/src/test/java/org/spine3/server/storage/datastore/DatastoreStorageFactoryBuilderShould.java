@@ -38,6 +38,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.spine3.server.storage.datastore.TestDatastoreStorageFactory.TestingDatastoreSingleton.INSTANCE;
+import static org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -80,9 +81,9 @@ public class DatastoreStorageFactoryBuilderShould {
         final StorageFactory factory =
                 DatastoreStorageFactory.newBuilder()
                                        .setDatastore(mockDatastore())
-                                       .setTypeRegistry(DatastoreTypeRegistryFactory.predefinedValuesAnd()
-                                                                                    .put(Byte.class, new MockByteColumnType())
-                                                                                    .build())
+                                       .setTypeRegistry(predefinedValuesAnd()
+                                                                .put(Byte.class, new MockByteColumnType())
+                                                                .build())
                                        .build();
         final ColumnTypeRegistry<?> registry = factory.getTypeRegistry();
         assertNotNull(registry);
@@ -92,9 +93,11 @@ public class DatastoreStorageFactoryBuilderShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void ensure_datastore_has_no_namespace_if_multitenant() {
-        final DatastoreOptions options = DatastoreOptions.newBuilder()
-                                                         .setNamespace("non-null-or-empty-namespace")
-                                                         .build();
+        final DatastoreOptions options =
+                DatastoreOptions.newBuilder()
+                                .setNamespace("non-null-or-empty-namespace")
+                                .setProjectId(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME)
+                                .build();
         DatastoreStorageFactory.newBuilder()
                                .setMultitenant(true)
                                .setDatastore(options.getService())
@@ -104,16 +107,20 @@ public class DatastoreStorageFactoryBuilderShould {
     @Test
     public void allow_custom_namespace_for_single_tenant_instances() {
         final String namespace = "my.custom.namespace";
-        final DatastoreOptions options = DatastoreOptions.newBuilder()
-                                                         .setNamespace(namespace)
-                                                         .build();
+        final DatastoreOptions options =
+                DatastoreOptions.newBuilder()
+                                .setProjectId(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME)
+                                .setNamespace(namespace)
+                                .build();
         final DatastoreStorageFactory factory =
                 DatastoreStorageFactory.newBuilder()
                                        .setMultitenant(false)
                                        .setDatastore(options.getService())
                                        .build();
         assertNotNull(factory);
-        final String actualNamespace = factory.getDatastore().getDatastoreOptions().getNamespace();
+        final String actualNamespace = factory.getDatastore()
+                                              .getDatastoreOptions()
+                                              .getNamespace();
         assertEquals(namespace, actualNamespace);
     }
 
