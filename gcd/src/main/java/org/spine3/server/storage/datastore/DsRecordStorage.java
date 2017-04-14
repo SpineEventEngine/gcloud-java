@@ -119,7 +119,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this(builder.descriptor,
              builder.datastore,
              builder.multitenant,
-             builder.columnTypeRegistry);
+             builder.columnTypeRegistry,
+             builder.idClass);
     }
 
     @Override
@@ -384,6 +385,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         private DatastoreWrapper datastore;
         private boolean multitenant;
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
+        private Class<I> idClass;
 
         private Builder() {
             // Prevent direct initialization
@@ -420,6 +422,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         public Builder<I> setColumnTypeRegistry(
                 ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
             this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
+            return this;
+        }
+
+        public Builder<I> setIdClass(Class<I> idClass) {
+            this.idClass = checkNotNull(idClass);
             return this;
         }
 

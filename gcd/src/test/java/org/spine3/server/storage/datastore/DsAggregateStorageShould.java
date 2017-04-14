@@ -76,14 +76,6 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         return datastoreFactory.createAggregateStorage(aClass);
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    @Override // Override method with the same behavior to change ID value
-    public void write_and_read_event_by_Long_id() {
-        final AggregateStorage storage = getStorage(TestAggregateWithIdLong.class);
-        final long id = 42L;
-        this.writeAndReadEventTest(id, storage);
-    }
-
     @Test
     public void provide_access_to_DatastoreWrapper_for_extensibility() {
         final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
