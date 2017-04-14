@@ -24,7 +24,6 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
@@ -160,9 +159,8 @@ public class DatastoreStorageFactory implements StorageFactory {
         final Class<Message> messageClass =
                 getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
-        final Descriptor descriptor = (Descriptor) typeUrl.getDescriptor();
         final DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
-                                                         .setDescriptor(descriptor)
+                                                         .setStateType(typeUrl)
                                                          .setDatastore(getDatastore())
                                                          .setMultitenant(isMultitenant())
                                                          .setColumnTypeRegistry(typeRegistry)

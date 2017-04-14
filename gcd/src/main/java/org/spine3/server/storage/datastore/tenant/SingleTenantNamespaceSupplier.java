@@ -36,6 +36,7 @@ final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
     private final Namespace namespace;
 
     SingleTenantNamespaceSupplier(@Nullable String namespace) {
+        super();
         this.namespace = isNullOrEmpty(namespace)
                          ? NamespaceSingleton.INSTANCE.value
                          : Namespace.of(namespace);

@@ -395,10 +395,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             // Prevent direct initialization
         }
 
-        /**
-         * @param descriptor the record state {@link Descriptor}
-         */
-        public Builder<I> setDescriptor(Descriptor descriptor) {
+        public Builder<I> setStateType(TypeUrl stateTypeUrl) {
+            checkNotNull(stateTypeUrl);
+            final Descriptor descriptor = (Descriptor) stateTypeUrl.getDescriptor();
             this.descriptor = checkNotNull(descriptor);
             return this;
         }
