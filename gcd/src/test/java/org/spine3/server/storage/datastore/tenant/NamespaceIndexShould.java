@@ -21,19 +21,36 @@
 package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
+import com.google.common.base.Function;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Collections2;
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
+import org.spine3.net.InternetDomain;
 import org.spine3.users.TenantId;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.spine3.test.Verify.assertContains;
+import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.test.Verify.assertSize;
 
 /**
@@ -42,6 +59,17 @@ import static org.spine3.test.Verify.assertSize;
 public class NamespaceIndexShould {
 
     private static final String TENANT_ID_STRING = "some-tenant";
+
+    @Test
+    public void not_accept_nulls() {
+        final Namespace defaultNamespace = Namespace.of("some-string");
+        final TenantId tenantId = TenantId.getDefaultInstance();
+
+        new NullPointerTester()
+                .setDefault(Namespace.class, defaultNamespace)
+                .setDefault(TenantId.class, tenantId)
+                .testInstanceMethods(new NamespaceIndex(mockDatastore()), NullPointerTester.Visibility.PACKAGE);
+    }
 
     @Test
     public void store_tenant_ids() {
@@ -59,7 +87,8 @@ public class NamespaceIndexShould {
         assertFalse(ids.isEmpty());
         assertSize(1, ids);
 
-        final TenantId actual = ids.iterator().next();
+        final TenantId actual = ids.iterator()
+                                   .next();
         assertEquals(newId, actual);
     }
 
@@ -98,11 +127,105 @@ public class NamespaceIndexShould {
         assertTrue(initialEmptySet.isEmpty());
 
         final TenantId fakeId = TenantId.newBuilder()
-                                       .setValue(TENANT_ID_STRING)
-                                       .build();
+                                        .setValue(TENANT_ID_STRING)
+                                        .build();
         final Namespace fakeNamespace = Namespace.of(fakeId);
 
         assertFalse(namespaceIndex.contains(fakeNamespace));
+    }
+
+    @Test(timeout = 5000L) // 5 second execution indicates a dead lock
+    public void synchronize_access_methods() throws InterruptedException {
+        // Initial data
+        final Collection<Key> keys = new LinkedList<>();
+        keys.add(mockKey("tenant1"));
+        keys.add(mockKey("tenant2"));
+        keys.add(mockKey("tenant3"));
+        final Collection<TenantId> initialTenantIds = Collections2.transform(keys, new Function<Key, TenantId>() {
+            @Override
+            public TenantId apply(@Nullable Key input) {
+                assertNotNull(input);
+                return TenantId.newBuilder()
+                               .setValue(input.getName())
+                               .build();
+            }
+        });
+
+        final NamespaceIndex.NamespaceQuery namespaceQuery = new NamespaceIndex.NamespaceQuery() {
+            @Override
+            public Iterator<Key> run() {
+                return keys.iterator();
+            }
+        };
+        // The tested object
+        final NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery);
+
+        // The test flow
+        final Runnable flow = new Runnable() {
+            @Override
+            public void run() {
+                // Initial value check
+                final Set<TenantId> initialIdsActual = namespaceIndex.getAll(); // sync
+                assertEquals(initialIdsActual.size(), initialTenantIds.size());
+                final TenantId[] elements = new TenantId[initialTenantIds.size()];
+                initialTenantIds.toArray(elements);
+                assertContainsAll(initialIdsActual, elements);
+
+                // Add new element
+                final TenantId newTenantId = TenantId.newBuilder()
+                                                     .setDomain(InternetDomain.newBuilder()
+                                                                              .setValue("my.tenant.com"))
+                                                     .build();
+                namespaceIndex.keep(newTenantId); // sync
+
+                // Check new value added
+                final boolean success = namespaceIndex.contains(Namespace.of(newTenantId)); // sync
+                assertTrue(success);
+
+                // Check returned set has newly added element
+                final Set<TenantId> updatedIds = namespaceIndex.getAll(); // sync
+                assertEquals(updatedIds.size(), initialTenantIds.size() + 1);
+                assertContains(newTenantId, updatedIds);
+            }
+        };
+
+        // Test execution threads
+        final Thread firstThread = new Thread(flow);
+        final Thread secondThread = new Thread(flow);
+
+        // Collect thread failures
+        final Map<Thread, Throwable> threadFailures = new HashMap<>(2);
+        final Thread.UncaughtExceptionHandler throwableCollector =
+                new Thread.UncaughtExceptionHandler() {
+                    @Override
+                    public void uncaughtException(Thread t, Throwable e) {
+                        threadFailures.put(t, e);
+                    }
+                };
+
+        firstThread.setUncaughtExceptionHandler(throwableCollector);
+        secondThread.setUncaughtExceptionHandler(throwableCollector);
+
+        // Start parallel execution
+        firstThread.start();
+        secondThread.start();
+
+        // Await both threads to complete
+        firstThread.join();
+        secondThread.join();
+
+        // Check for failures
+        // Throw if any, failing the test
+        for (Throwable failure : threadFailures.values()) {
+            fail(format("Test thread has thrown a Throwable. %s",
+                        Throwables.getStackTraceAsString(failure)));
+        }
+    }
+
+    private static Key mockKey(String name) {
+        final Key key = Key.newBuilder("some-proj", "some-kind", name)
+                           .build();
+        return key;
     }
 
     private static Datastore mockDatastore() {

@@ -87,6 +87,7 @@ public final class Namespace {
      */
     @Nullable
     static Namespace fromNameOf(Key key) {
+        // TODO:2017-04-14:dmytro.dashenkov: Bug: any namespace is converted into a string-based tenant ID.
         checkNotNull(key);
         final String namespace = key.getName();
         if (isNullOrEmpty(namespace)) {

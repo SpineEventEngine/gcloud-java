@@ -47,14 +47,17 @@ class NamespaceIndex implements TenantIndex {
 
     private static final Kind NAMESPACE_KIND = Kind.ofNamespace();
 
-    private final Datastore datastore;
-
     private final Set<Namespace> cache = new HashSet<>();
 
     private final Object lock = new Object();
+    private final NamespaceQuery namespaceQuery;
 
     NamespaceIndex(Datastore datastore) {
-        this.datastore = datastore;
+        this(new DefaultNamespaceQuery(datastore));
+    }
+
+    NamespaceIndex(NamespaceQuery namespaceQuery) {
+        this.namespaceQuery = checkNotNull(namespaceQuery);
     }
 
     /**
@@ -79,14 +82,15 @@ class NamespaceIndex implements TenantIndex {
     public Set<TenantId> getAll() {
         synchronized (lock) {
             fetchNamespaces();
-        }
-        final Set<TenantId> result = new HashSet<>(cache.size());
-        for (Namespace namespace : cache) {
-            if (namespace != null) {
-                result.add(namespace.toTenantId());
+
+            final Set<TenantId> result = new HashSet<>(cache.size());
+            for (Namespace namespace : cache) {
+                if (namespace != null) {
+                    result.add(namespace.toTenantId());
+                }
             }
+            return result;
         }
-        return result;
     }
 
     /**
@@ -131,10 +135,7 @@ class NamespaceIndex implements TenantIndex {
      * Fetches the namespaces from the Datastore into the in-mem cache.
      */
     private void fetchNamespaces() {
-        final Query<Key> query = Query.newKeyQueryBuilder()
-                                      .setKind(NAMESPACE_KIND.getValue())
-                                      .build();
-        final Iterator<Key> existingNamespaces = datastore.run(query);
+        final Iterator<Key> existingNamespaces = namespaceQuery.run();
         final Set<Namespace> newNamespaces = new HashSet<>();
         final Iterator<Namespace> extractedNamespaces =
                 Iterators.transform(existingNamespaces, new NamespaceUnpacker());
@@ -142,6 +143,46 @@ class NamespaceIndex implements TenantIndex {
 
         // Never delete tenants, only add new ones
         cache.addAll(newNamespaces);
+    }
+
+    /**
+     * A Datastore query retrieving all the existing namespaces in form of Datastore
+     * {@link Key keys}.
+     *
+     * <p>The {@code name} field of the {@link Key keys} contains the Datastore namespace name.
+     */
+    public interface NamespaceQuery {
+
+        /**
+         * Runs the Datastore query.
+         *
+         * @return an {@link Iterator} of the Datastore {@link Key keys} representing
+         * the namespaces.
+         */
+        Iterator<Key> run();
+    }
+
+    /**
+     * A default implementation of the {@link NamespaceQuery}.
+     *
+     * <p>Delegates to the Datastore {@link com.google.cloud.datastore.KeyQuery KeyQuery}.
+     */
+    private static class DefaultNamespaceQuery implements NamespaceQuery {
+
+        private final Datastore datastore;
+
+        private DefaultNamespaceQuery(Datastore datastore) {
+            this.datastore = checkNotNull(datastore);
+        }
+
+        @Override
+        public Iterator<Key> run() {
+            final Query<Key> query = Query.newKeyQueryBuilder()
+                                          .setKind(NAMESPACE_KIND.getValue())
+                                          .build();
+            final Iterator<Key> result = datastore.run(query);
+            return result;
+        }
     }
 
     /**
