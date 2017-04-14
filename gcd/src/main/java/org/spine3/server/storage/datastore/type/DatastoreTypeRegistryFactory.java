@@ -56,7 +56,23 @@ public class DatastoreTypeRegistryFactory {
     }
 
     /**
-     * Retrieves a default {@link ColumnTypeRegistry ColumnTypeRegistry&lt;? extends DatastoreColumnType&gt;}
+     * Retrieves a default
+     * {@link ColumnTypeRegistry ColumnTypeRegistry&lt;? extends DatastoreColumnType&gt;}.
+     *
+     * The returned registry contains the
+     * {@linkplain org.spine3.server.entity.storage.ColumnType column types} declarations for:
+     * <ul>
+     *     <li>{@code String}
+     *     <li>{@code Integer}
+     *     <li>{@code Long}
+     *     <li>{@code Boolean}
+     *     <li>{@link Timestamp} stored as {@link com.google.cloud.datastore.DateTime DateTime}
+     *     <li>{@link AbstractMessage Message} stored as a {@code String} retrieved form a
+     *     {@link org.spine3.base.Stringifier Stringifier}
+     *     <li>{@link Version} stored as an {@code int} version number
+     * </ul>
+     *
+     * @return the default {@code ColumnTypeRegistry} for storing the Entity Columns in Datastore
      */
     public static ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> defaultInstance() {
         return DEFAULT_REGISTRY;

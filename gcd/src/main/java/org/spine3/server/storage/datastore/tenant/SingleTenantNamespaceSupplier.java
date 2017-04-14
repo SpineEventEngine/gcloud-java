@@ -20,6 +20,10 @@
 
 package org.spine3.server.storage.datastore.tenant;
 
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  * A {@link NamespaceSupplier} for single-tenant storage factories.
  *
@@ -31,12 +35,10 @@ final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
 
     private final Namespace namespace;
 
-    SingleTenantNamespaceSupplier(Namespace namespace) {
-        super();
-        this.namespace = !namespace.getValue()
-                                   .isEmpty() ?
-                         namespace :
-                         NamespaceSingleton.INSTANCE.value;
+    SingleTenantNamespaceSupplier(@Nullable String namespace) {
+        this.namespace = isNullOrEmpty(namespace)
+                         ? NamespaceSingleton.INSTANCE.value
+                         : Namespace.of(namespace);
     }
 
     /**

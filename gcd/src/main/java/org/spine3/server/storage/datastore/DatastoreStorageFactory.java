@@ -218,10 +218,13 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     public static class Builder {
 
+        private static final String DEFAULT_NAMESPACE_ERROR_MESSAGE =
+                "Datastore namespace should not be configured explicitly for a multitenant storage.";
+
         private Datastore datastore;
         private boolean multitenant;
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
-        public Supplier<Namespace> namespaceSupplier;
+        private Supplier<Namespace> namespaceSupplier;
 
         private Builder() {
             // Avoid direct initialization
@@ -237,8 +240,12 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
 
         /**
-         * Switches the {@code DatastoreStorageFactory} that is being built to be or not
-         * to be multitenant.
+         * Enables the multitenancy support for the {@code DatastoreStorageFactory}.
+         *
+         * <p>By default this option is {@code false}.
+         *
+         * <p>If the multitenancy is enables, the passed {@link Datastore} should not have a {@code namespace}
+         * set explicitly.
          *
          * @param multitenant {@code true} if the {@code DatastoreStorageFactory} should
          *                    be multitenant or not
@@ -274,6 +281,14 @@ public class DatastoreStorageFactory implements StorageFactory {
          */
         public DatastoreStorageFactory build() {
             checkNotNull(datastore);
+            this.namespaceSupplier = createNamespaceSupplier();
+            if (typeRegistry == null) {
+                typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
+            }
+            return new DatastoreStorageFactory(this);
+        }
+
+        private Supplier<Namespace> createNamespaceSupplier() {
             final String defaultNamespace;
             if (multitenant) {
                 checkHasNoNamespace(datastore);
@@ -282,11 +297,9 @@ public class DatastoreStorageFactory implements StorageFactory {
                 defaultNamespace = datastore.getOptions()
                                             .getNamespace();
             }
-            this.namespaceSupplier = NamespaceSupplier.instance(multitenant, defaultNamespace);
-            if (typeRegistry == null) {
-                typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
-            }
-            return new DatastoreStorageFactory(this);
+            final Supplier<Namespace> result = NamespaceSupplier.instance(multitenant,
+                                                                          defaultNamespace);
+            return result;
         }
 
         private static void checkHasNoNamespace(Datastore datastore) {
@@ -294,7 +307,7 @@ public class DatastoreStorageFactory implements StorageFactory {
             final DatastoreOptions options = datastore.getOptions();
             final String namespace = options.getNamespace();
             checkArgument(isNullOrEmpty(namespace),
-                          "Datastore namespace should not be set explicitly.");
+                          DEFAULT_NAMESPACE_ERROR_MESSAGE);
         }
     }
 }

@@ -89,8 +89,8 @@ public class DatastoreWrapper {
      * Creates a new instance of {@code DatastoreWrapper}.
      *
      * @param datastore         {@link Datastore} to wrap
-     * @param namespaceSupplier an instance of {@link Supplier Supplier&lt;Namespace&gt;} to get the
-     *                          namespaces for the queries from
+     * @param namespaceSupplier the instance of {@link Supplier Namespace Supplier}, providing
+     *                          the namespaces for Datastore queries
      */
     protected DatastoreWrapper(Datastore datastore, Supplier<Namespace> namespaceSupplier) {
         this.namespaceSupplier = checkNotNull(namespaceSupplier);

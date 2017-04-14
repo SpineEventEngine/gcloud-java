@@ -49,7 +49,7 @@ public class DsNamespaceValidator {
      * Validates the given {@link Namespace} to match these constraints:
      * <ul>
      *     <li>be non-{@code null};
-     *     <li>be {@linkplain NamespaceIndex#exists(Namespace) present} in the Datastore.
+     *     <li>be {@linkplain NamespaceIndex#contains(Namespace) present} in the Datastore.
      * </ul>
      *
      * @param namespace the {@link Namespace} to validate
@@ -57,7 +57,7 @@ public class DsNamespaceValidator {
      */
     public void validate(Namespace namespace) throws IllegalStateException {
         checkNotNull(namespace);
-        final boolean found = namespaceIndex.exists(namespace);
+        final boolean found = namespaceIndex.contains(namespace);
         checkArgument(found,
                       "Namespace %s could not be found in the Datastore.",
                       namespace);

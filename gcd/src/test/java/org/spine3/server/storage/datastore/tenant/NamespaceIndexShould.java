@@ -86,7 +86,7 @@ public class NamespaceIndexShould {
         final Namespace newNamespace = Namespace.of(newId);
 
         namespaceIndex.keep(newId);
-        assertTrue(namespaceIndex.exists(newNamespace));
+        assertTrue(namespaceIndex.contains(newNamespace));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class NamespaceIndexShould {
                                        .build();
         final Namespace fakeNamespace = Namespace.of(fakeId);
 
-        assertFalse(namespaceIndex.exists(fakeNamespace));
+        assertFalse(namespaceIndex.contains(fakeNamespace));
     }
 
     private static Datastore mockDatastore() {

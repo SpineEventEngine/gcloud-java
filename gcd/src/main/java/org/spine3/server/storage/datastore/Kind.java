@@ -39,7 +39,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class Kind {
 
     private static final String INVALID_KIND_ERROR_MESSAGE =
-            "Datastore kind cannot start with \"__\". See https://cloud.google.com/datastore/docs/concepts/entities#kinds_and_identifiers for more info.";
+            "Datastore kind cannot start with \"__\". See " +
+                    "https://cloud.google.com/datastore/docs/concepts/entities#kinds_and_identifiers" +
+                    " for more info.";
     private static final String FORBIDDEN_PREFIX = "__";
 
     private static final String NAMESPACE_KIND = "__namespace__";

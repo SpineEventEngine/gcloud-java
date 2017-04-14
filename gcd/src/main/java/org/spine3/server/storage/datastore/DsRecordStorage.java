@@ -392,7 +392,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
 
         private Builder() {
-            // Avoid direct initialization
+            // Prevent direct initialization
         }
 
         /**
@@ -412,7 +412,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param multitenant {@code true} if the build storage should be
+         * @param multitenant {@code true} if the storage should be
          * {@link org.spine3.server.storage.Storage#isMultitenant multitenant} or not
          */
         public Builder<I> setMultitenant(boolean multitenant) {

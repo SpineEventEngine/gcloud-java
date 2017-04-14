@@ -51,16 +51,12 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
         if (multitenant) {
             return multitenant();
         } else {
-            final String namespace = defaultNamespace != null
-                                     ? defaultNamespace
-                                     : "";
-            final Namespace singleNamespace = Namespace.of(namespace);
-            return new SingleTenantNamespaceSupplier(singleNamespace);
+            return new SingleTenantNamespaceSupplier(defaultNamespace);
         }
     }
 
     public static NamespaceSupplier singleTenant() {
-        return new SingleTenantNamespaceSupplier(Namespace.of(""));
+        return new SingleTenantNamespaceSupplier(null);
     }
 
     @VisibleForTesting

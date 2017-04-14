@@ -107,7 +107,7 @@ class NamespaceIndex implements TenantIndex {
      * {@link TenantId} has been put into the index by a call to {@link #keep(TenantId)},
      * {@code false} otherwise
      */
-    boolean exists(Namespace namespace) {
+    boolean contains(Namespace namespace) {
         checkNotNull(namespace);
 
         if (namespace.getValue()

@@ -47,22 +47,25 @@ public class DatastoreTenants {
      * <p>An example of creating a multitenant
      * {@link org.spine3.server.BoundedContext BoundedContext} using the Datastore Storage:
      * <pre>
-     *     <code>
+     *     {@code
      *         final Datastore myDatastoreConfig = myDatastoreOptions.getService();
      *
      *         // Create DatastoreStorageFactories using this instance of Datastore
-     *         final Supplier{@literal <}StorageFactory{@literal >} dsStorageFactorySupplier = getDatastoreStorageFactorySupplier(myDatastoreConfig);
+     *         final Supplier<StorageFactory> dsStorageFactorySupplier =
+     *                                      getDatastoreStorageFactorySupplier(myDatastoreConfig);
      *
      *         // Use the same instance for the TenantIndex
      *         final TenantIndex myTenantIndex = DatastoreTenants.index(myDatastoreConfig);
      *
      *         // Pass both to the BoundedContext.Builder
-     *         final BoundedContext multitenantAppBc = BoundedContext.newBuilder()
-     *                                                               .setStorageFactorySupplier(dsStorageFactorySupplier)
-     *                                                               .setTenantIndex(myTenantIndex)
-     *                                                               // set other params
-     *                                                               .build();
-     *     </code>
+     *         final BoundedContext multitenantAppBc =
+     *                              BoundedContext.newBuilder()
+     *                                            .setStorageFactorySupplier(dsStorageFactorySupplier)
+     *                                            .setTenantIndex(myTenantIndex)
+     *                                            .setMultitenant(true)
+     *                                            // set other params
+     *                                            .build();
+     *     }
      * </pre>
      *
      * <p>A single-tenant app (or a single-tenant BoundedContext in a multitenant app) does not
