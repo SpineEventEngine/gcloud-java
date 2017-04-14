@@ -33,7 +33,6 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.spine3.server.storage.datastore.DsIdentifiers.of;
 
 /**
  * GAE Datastore implementation of the {@link ProjectionStorage}.
@@ -58,7 +57,7 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
         super(multitenant);
         this.recordStorage = recordStorage;
         this.propertyStorage = propertyStorage;
-        this.lastTimestampId = of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
+        this.lastTimestampId = DsIdentifiers.of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
     }
 
     @Override

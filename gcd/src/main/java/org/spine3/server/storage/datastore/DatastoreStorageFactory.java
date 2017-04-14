@@ -142,11 +142,13 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
+        final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
         final Descriptor descriptor = (Descriptor) typeUrl.getDescriptor();
         final DsRecordStorage<I> result = new DsRecordStorage<>(descriptor,
                                                                 getDatastore(),
                                                                 multitenant,
-                                                                typeRegistry);
+                                                                typeRegistry,
+                                                                idClass);
         return result;
     }
 
