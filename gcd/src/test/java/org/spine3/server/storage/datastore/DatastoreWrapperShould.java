@@ -132,12 +132,14 @@ public class DatastoreWrapperShould {
         final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
                                                                TestNamespaceSuppliers.multitenant());
         final String tenantId1 = "first-tenant-ID";
+        final String tenantId1Prefixed = "Vfirst-tenant-ID";
         final String tenantId2 = "second@tenant.id";
-        final String tenantId2Escaped = "second-at-tenant.id";
+        final String tenantIdPrefixed = "Esecond-at-tenant.id";
         final String tenantId3 = "third.id";
-        ensureNamespace(tenantId1, wrapper.getDatastore());
-        ensureNamespace(tenantId2Escaped, wrapper.getDatastore());
-        ensureNamespace(tenantId3, wrapper.getDatastore());
+        final String tenantId3Prefixed = "Dthird.id";
+        ensureNamespace(tenantId1Prefixed, wrapper.getDatastore());
+        ensureNamespace(tenantIdPrefixed, wrapper.getDatastore());
+        ensureNamespace(tenantId3Prefixed, wrapper.getDatastore());
         final TenantId id1 = TenantId.newBuilder()
                                      .setValue(tenantId1)
                                      .build();
@@ -150,9 +152,9 @@ public class DatastoreWrapperShould {
                                                               .setValue(tenantId3))
                                      .build();
 
-        checkTenantIdInKey(tenantId1, id1, wrapper);
-        checkTenantIdInKey(tenantId2Escaped, id2, wrapper);
-        checkTenantIdInKey(tenantId3, id3, wrapper);
+        checkTenantIdInKey(tenantId1Prefixed, id1, wrapper);
+        checkTenantIdInKey(tenantIdPrefixed, id2, wrapper);
+        checkTenantIdInKey(tenantId3Prefixed, id3, wrapper);
     }
 
     private static void checkTenantIdInKey(final String id, TenantId tenantId, final DatastoreWrapper wrapper) {

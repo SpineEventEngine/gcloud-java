@@ -138,15 +138,15 @@ public class NamespaceIndexShould {
     public void synchronize_access_methods() throws InterruptedException {
         // Initial data
         final Collection<Key> keys = new LinkedList<>();
-        keys.add(mockKey("tenant1"));
-        keys.add(mockKey("tenant2"));
-        keys.add(mockKey("tenant3"));
+        keys.add(mockKey("Vtenant1"));
+        keys.add(mockKey("Vtenant2"));
+        keys.add(mockKey("Vtenant3"));
         final Collection<TenantId> initialTenantIds = Collections2.transform(keys, new Function<Key, TenantId>() {
             @Override
             public TenantId apply(@Nullable Key input) {
                 assertNotNull(input);
                 return TenantId.newBuilder()
-                               .setValue(input.getName())
+                               .setValue(input.getName().substring(1))
                                .build();
             }
         });

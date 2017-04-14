@@ -58,14 +58,14 @@ public class NamespaceShould {
                                                                       .setValue(bGroupValue))
                                                 .build();
         final Namespace bGroupNamespaceFromTenantId = Namespace.of(bGroupTenantId);
-        final Namespace bGroupNamespaceFromString = Namespace.of(bGroupValue);
+        final Namespace cGroupNamespaceFromString = Namespace.of(bGroupValue); // Same string but other type
 
         new EqualsTester()
                 .addEqualityGroup(aGroupNamespaceFromTenantId,
                                   aGroupnamespaceFromString,
                                   duplicateAGroupnamespaceFromString)
-                .addEqualityGroup(bGroupNamespaceFromTenantId,
-                                  bGroupNamespaceFromString)
+                .addEqualityGroup(bGroupNamespaceFromTenantId)
+                .addEqualityGroup(cGroupNamespaceFromString)
                 .testEquals();
     }
 
@@ -91,9 +91,9 @@ public class NamespaceShould {
         final Namespace fromEmailId = Namespace.of(emailId);
         final Namespace fromStringId = Namespace.of(stringId);
 
-        assertEquals(fromDomainId, fromEmailId);
-        assertEquals(fromDomainId, fromStringId);
-        assertEquals(fromEmailId, fromStringId);
+        assertNotEquals(fromDomainId, fromEmailId);
+        assertNotEquals(fromDomainId, fromStringId);
+        assertNotEquals(fromEmailId, fromStringId);
 
         final TenantId domainIdRestored = fromDomainId.toTenantId();
         final TenantId emailIdRestored = fromEmailId.toTenantId();

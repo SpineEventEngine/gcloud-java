@@ -22,6 +22,7 @@ package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Key;
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMap;
 import org.spine3.net.EmailAddress;
 import org.spine3.net.InternetDomain;
 import org.spine3.users.TenantId;
@@ -44,11 +45,26 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  */
 public final class Namespace {
 
+    private static final char DOMAIN_PREFIX = 'D';
+    private static final char EMAIL_PREFIX = 'E';
+    private static final char STRING_VALUE_PREFIX = 'V';
+
+    private static final ImmutableMap<Character, TenantIdConverter> TYPE_PREFIX_TO_CONVERTER =
+            ImmutableMap.of(DOMAIN_PREFIX, TenantIdConverter.DOMAIN,
+                            EMAIL_PREFIX, TenantIdConverter.EMAIL,
+                            STRING_VALUE_PREFIX, TenantIdConverter.VALUE);
+
+    private static final int SIGNIFICANT_PART_START_INDEX = 1;
+
     private static final Pattern AT_SYMBOL_PATTERN = Pattern.compile("@", Pattern.LITERAL);
     private static final String AT_SYMBOL_REPLACEMENT = "-at-";
 
     private final String value;
     private final TenantIdConverter tenantIdConverter;
+
+    private Namespace() {
+        this("", TenantIdConverter.VALUE);
+    }
 
     private Namespace(String value, TenantIdConverter tenantIdConverter) {
         this.value = escapeIllegalCharacters(value);
@@ -62,7 +78,11 @@ public final class Namespace {
      * @return new instance of {@code Namespace}
      */
     static Namespace of(String datastoreNamespace) {
-        return new Namespace(datastoreNamespace, TenantIdConverter.VALUE);
+        if (datastoreNamespace.isEmpty()) {
+            return new Namespace();
+        } else {
+            return TenantIdConverter.VALUE.fromSignificantPart(datastoreNamespace);
+        }
     }
 
     /**
@@ -87,13 +107,19 @@ public final class Namespace {
      */
     @Nullable
     static Namespace fromNameOf(Key key) {
-        // TODO:2017-04-14:dmytro.dashenkov: Bug: any namespace is converted into a string-based tenant ID.
         checkNotNull(key);
         final String namespace = key.getName();
         if (isNullOrEmpty(namespace)) {
             return null;
         }
-        return of(namespace);
+
+        final char typePrefix = namespace.charAt(0);
+        TenantIdConverter tenantIdConverter = TYPE_PREFIX_TO_CONVERTER.get(typePrefix);
+        if (tenantIdConverter == null) {
+            tenantIdConverter = TenantIdConverter.VALUE;
+        }
+        final Namespace result = new Namespace(namespace, tenantIdConverter);
+        return result;
     }
 
     private static String escapeIllegalCharacters(String candidateNamespace) {
@@ -107,6 +133,13 @@ public final class Namespace {
      */
     public String getValue() {
         return value;
+    }
+
+    /**
+     * @return a string value of this {@code Namespace} without a type prefix
+     */
+    private String getSignificantPart() {
+        return value.substring(SIGNIFICANT_PART_START_INDEX);
     }
 
     /**
@@ -166,9 +199,9 @@ public final class Namespace {
          */
         DOMAIN {
             @Override
-            public TenantId toTenantId(Namespace namespace) {
+            TenantId toTenantId(Namespace namespace) {
                 final InternetDomain domain = InternetDomain.newBuilder()
-                                                            .setValue(namespace.getValue())
+                                                            .setValue(namespace.getSignificantPart())
                                                             .build();
                 final TenantId tenantId = TenantId.newBuilder()
                                                   .setDomain(domain)
@@ -177,11 +210,15 @@ public final class Namespace {
             }
 
             @Override
-            public Namespace toNamespace(TenantId tenantId) {
+            Namespace toNamespace(TenantId tenantId) {
                 final String value = tenantId.getDomain()
                                              .getValue();
-                final Namespace namespace = new Namespace(value, this);
-                return namespace;
+                return fromSignificantPart(value);
+            }
+
+            @Override
+            char getPrefix() {
+                return DOMAIN_PREFIX;
             }
         },
 
@@ -190,9 +227,9 @@ public final class Namespace {
          */
         EMAIL {
             @Override
-            public TenantId toTenantId(Namespace namespace) {
+            TenantId toTenantId(Namespace namespace) {
                 final EmailAddress email = EmailAddress.newBuilder()
-                                                       .setValue(namespace.getValue())
+                                                       .setValue(namespace.getSignificantPart())
                                                        .build();
                 final TenantId tenantId = TenantId.newBuilder()
                                                   .setEmail(email)
@@ -201,11 +238,15 @@ public final class Namespace {
             }
 
             @Override
-            public Namespace toNamespace(TenantId tenantId) {
+            Namespace toNamespace(TenantId tenantId) {
                 final String value = tenantId.getEmail()
                                        .getValue();
-                final Namespace namespace = new Namespace(value, this);
-                return namespace;
+                return fromSignificantPart(value);
+            }
+
+            @Override
+            char getPrefix() {
+                return EMAIL_PREFIX;
             }
         },
 
@@ -215,18 +256,22 @@ public final class Namespace {
          */
         VALUE {
             @Override
-            public TenantId toTenantId(Namespace namespace) {
+            TenantId toTenantId(Namespace namespace) {
                 final TenantId tenantId = TenantId.newBuilder()
-                                                  .setValue(namespace.getValue())
+                                                  .setValue(namespace.getSignificantPart())
                                                   .build();
                 return tenantId;
             }
 
             @Override
-            public Namespace toNamespace(TenantId tenantId) {
+            Namespace toNamespace(TenantId tenantId) {
                 final String value = tenantId.getValue();
-                final Namespace namespace = new Namespace(value, this);
-                return namespace;
+                return fromSignificantPart(value);
+            }
+
+            @Override
+            char getPrefix() {
+                return STRING_VALUE_PREFIX;
             }
         };
 
@@ -241,5 +286,12 @@ public final class Namespace {
         abstract TenantId toTenantId(Namespace namespace);
 
         abstract Namespace toNamespace(TenantId tenantId);
+
+        Namespace fromSignificantPart(String significantPart) {
+            final String value = getPrefix() + significantPart;
+            return new Namespace(value, this);
+        }
+
+        abstract char getPrefix();
     }
 }
