@@ -22,7 +22,6 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
-import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.base.Function;
@@ -72,7 +71,8 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
               checkNotNull(datastore),
               multitenant,
               ColumnTypeRegistry.<DatastoreColumnType<?, ?>>newBuilder()
-                                .build());
+                                .build(),
+              AggregateStateId.class);
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") // Overrides a pure method behavior
@@ -168,16 +168,5 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
                                                  .setFilter(filter)
                                                  .build();
         return query;
-    }
-
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // Overrides parent behavior
-    @Override
-    protected AggregateStateId unpackKey(Entity entity) {
-        final Key key = entity.getKey();
-        final String typeUrl = entity.getString(TYPE_URL_KEY);
-        final TypeUrl stateType = TypeUrl.parse(typeUrl);
-        final Object genericId = IdTransformer.idFromString(key.getName(), null);
-        final AggregateStateId aggregateStateId = AggregateStateId.of(genericId, stateType);
-        return aggregateStateId;
     }
 }

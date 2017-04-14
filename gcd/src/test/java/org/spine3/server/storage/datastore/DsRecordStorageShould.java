@@ -22,6 +22,7 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
@@ -35,9 +36,12 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageShould;
+import org.spine3.test.Tests;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
@@ -47,6 +51,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
 import static org.spine3.test.Verify.assertContainsKey;
 
@@ -116,9 +121,9 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
     }
 
     @SuppressWarnings("OverlyLongMethod")
-        // A complicated test case verifying right Datastore behavior on
-        // a low level of DatastoreWrapper and Datastore Entity/
-        // Additionally checks the standard predefined Datastore Column Types
+    // A complicated test case verifying right Datastore behavior on
+    // a low level of DatastoreWrapper and Datastore Entity/
+    // Additionally checks the standard predefined Datastore Column Types
     @Test
     public void persist_entity_Columns_beside_its_record() {
         final String counter = "counter";
@@ -184,12 +189,14 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
         assertEquals(entity.getCreationTime()
                            .getNanos() / Timestamps2.NANOS_PER_MICROSECOND,
                      // in Datastore max DateTime precision is 1 microsecond
-                     datastoreEntity.getDateTime(creationTime).getTimestampMicroseconds());
+                     datastoreEntity.getDateTime(creationTime)
+                                    .getTimestampMicroseconds());
         assertEquals(entity.isCounterEven(), datastoreEntity.getBoolean(counterEven));
         assertEquals(Json.toCompactJson(entity.getCounterState()), datastoreEntity.getString(counterState));
 
         // Check standard Columns
-        assertEquals(entity.getVersion().getNumber(), datastoreEntity.getLong(version));
+        assertEquals(entity.getVersion()
+                           .getNumber(), datastoreEntity.getLong(version));
         assertEquals(entity.isArchived(), datastoreEntity.getBoolean(archived));
         assertEquals(entity.isDeleted(), datastoreEntity.getBoolean(deleted));
     }
@@ -218,11 +225,34 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
                 .testBigDataOperations(getStorage());
     }
 
+    @Test
+    public void write_and_read_records_with_lifecycle_flags() {
+        final ProjectId id = newId();
+        final LifecycleFlags lifecycle = Tests.archived();
+        final EntityRecord record = EntityRecord.newBuilder()
+                                                .setState(AnyPacker.pack(newState(id)))
+                                                .setLifecycleFlags(lifecycle)
+                                                .setEntityId(AnyPacker.pack(id))
+                                                .build();
+        final TestConstCounterEntity entity = new TestConstCounterEntity(id);
+        entity.injectLifecycle(lifecycle);
+        final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.create(record,
+                                                                                         entity);
+        final RecordStorage<ProjectId> storage = getStorage();
+        storage.write(id, recordWithColumns);
+        final Optional<EntityRecord> restoredRecordOptional = storage.read(id);
+        assertTrue(restoredRecordOptional.isPresent());
+        final EntityRecord restoredRecord = restoredRecordOptional.get();
+        // Includes Lifecycle flags comparison
+        assertEquals(record, restoredRecord);
+    }
+
     @SuppressWarnings("unused") // Reflective access
     public static class TestConstCounterEntity extends AbstractVersionableEntity<ProjectId, Project> {
 
         private static final int COUNTER = 42;
         private final Timestamp creationTime;
+        private LifecycleFlags lifecycleFlags;
 
         protected TestConstCounterEntity(ProjectId id) {
             super(id);
@@ -259,9 +289,18 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
             return getState();
         }
 
+        @Override
+        public LifecycleFlags getLifecycleFlags() {
+            return lifecycleFlags == null ? super.getLifecycleFlags() : lifecycleFlags;
+        }
+
         private void injectState(Project state, Version version) {
             incrementState(state);
             advanceVersion(version);
+        }
+
+        private void injectLifecycle(LifecycleFlags flags) {
+            this.lifecycleFlags = flags;
         }
     }
 }

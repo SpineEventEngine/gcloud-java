@@ -63,9 +63,10 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final boolean multitenant;
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
     private final Supplier<Namespace> namespaceSupplier;
+    private final Class idClass;
 
     private DatastoreStorageFactory(Builder builder) {
-        this(builder.datastore, builder.multitenant, builder.typeRegistry, builder.namespaceSupplier);
+        this(builder.datastore, builder.multitenant, builder.typeRegistry, builder.namespaceSupplier, builder.idClass);
     }
 
     @VisibleForTesting
@@ -73,7 +74,9 @@ public class DatastoreStorageFactory implements StorageFactory {
     protected DatastoreStorageFactory(Datastore datastore,
                                       boolean multitenant,
                                       ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
-                                      Supplier<Namespace> namespaceSupplier) {
+                                      Supplier<Namespace> namespaceSupplier,
+                                      Class idClass) {
+        this.idClass = checkNotNull(idClass);
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
         this.namespaceSupplier = namespaceSupplier;
@@ -83,7 +86,9 @@ public class DatastoreStorageFactory implements StorageFactory {
     protected DatastoreStorageFactory(DatastoreWrapper datastore,
                                       boolean multitenant,
                                       ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
-                                      Supplier<Namespace> namespaceSupplier) {
+                                      Supplier<Namespace> namespaceSupplier,
+                                      Class idClass) {
+        this.idClass = checkNotNull(idClass);
         this.datastore = checkNotNull(datastore);
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
@@ -121,7 +126,8 @@ public class DatastoreStorageFactory implements StorageFactory {
                ? new DatastoreStorageFactory(getDatastore(),
                                              false,
                                              typeRegistry,
-                                             NamespaceSupplier.singleTenant())
+                                             NamespaceSupplier.singleTenant(),
+                                             idClass)
                : this;
     }
 
@@ -159,11 +165,13 @@ public class DatastoreStorageFactory implements StorageFactory {
         final Class<Message> messageClass =
                 getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
+        final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
         final DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
                                                          .setStateType(typeUrl)
                                                          .setDatastore(getDatastore())
                                                          .setMultitenant(isMultitenant())
                                                          .setColumnTypeRegistry(typeRegistry)
+                                                         .setIdClass(idClass)
                                                          .build();
 
         return result;
