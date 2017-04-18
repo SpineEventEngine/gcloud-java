@@ -20,41 +20,27 @@
 
 package org.spine3.server.storage.datastore;
 
-import org.junit.After;
-import org.junit.Before;
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.server.stand.StandStorage;
-import org.spine3.server.stand.StandStorageShould;
-import org.spine3.server.storage.RecordStorage;
 
-import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class DsStandStorageShould extends StandStorageShould {
+public class IndexesShould {
 
-    private static final TestDatastoreStorageFactory datastoreFactory
-            = TestDatastoreStorageFactory.getDefaultInstance();
-
-    @Before
-    public void setUp() throws Exception {
-        datastoreFactory.setUp();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        datastoreFactory.tearDown();
+    @Test
+    public void have_private_utility_ctor() {
+        assertHasPrivateParameterlessCtor(Indexes.class);
     }
 
     @Test
-    public void contain_record_storage() {
-        final RecordStorage<?> recordStorage = ((DsStandStorage) getStorage()).getRecordStorage();
-        assertNotNull(recordStorage);
-    }
-
-    @Override
-    protected StandStorage getStorage() {
-        return datastoreFactory.createStandStorage();
+    public void not_accept_nulls() {
+        new NullPointerTester()
+                .setDefault(Kind.class, Kind.of("arbitrary-kind"))
+                .setDefault(DatastoreWrapper.class, mock(DatastoreWrapper.class))
+                .testStaticMethods(Indexes.class, NullPointerTester.Visibility.PACKAGE);
     }
 }

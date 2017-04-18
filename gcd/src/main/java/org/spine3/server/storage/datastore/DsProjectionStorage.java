@@ -25,7 +25,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.validate.Validate;
@@ -34,7 +33,6 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.spine3.server.storage.datastore.DsIdentifiers.of;
 
 /**
  * GAE Datastore implementation of the {@link ProjectionStorage}.
@@ -59,7 +57,7 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
         super(multitenant);
         this.recordStorage = recordStorage;
         this.propertyStorage = propertyStorage;
-        this.lastTimestampId = of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
+        this.lastTimestampId = DsIdentifiers.of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
     }
 
     @Override
@@ -112,11 +110,6 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
     @Override
     protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
         return recordStorage().readAll(fieldMask);
-    }
-
-    @Override
-    protected void writeRecord(I id, EntityRecordWithStorageFields record) {
-        recordStorage.writeRecord(id, record);
     }
 
     @Override

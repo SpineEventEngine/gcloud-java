@@ -18,43 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore;
+package org.spine3.server.storage.datastore.type;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.spine3.server.stand.StandStorage;
-import org.spine3.server.stand.StandStorageShould;
-import org.spine3.server.storage.RecordStorage;
-
-import static org.junit.Assert.assertNotNull;
+import com.google.cloud.datastore.BaseEntity;
 
 /**
+ * An abstract base for implementing {@link DatastoreColumnType}.
+ *
+ * <p>This class provides the default implementation for the {@link #setNull setNull} method
+ * of {@link org.spine3.server.entity.storage.ColumnType}. Since this method implementation is the
+ * same for all the types within a Storage implementation, it's convenient to declare it once.
+ *
  * @author Dmytro Dashenkov
  */
-public class DsStandStorageShould extends StandStorageShould {
+public abstract class AbstractDatastoreColumnType<J, C> implements DatastoreColumnType<J, C> {
 
-    private static final TestDatastoreStorageFactory datastoreFactory
-            = TestDatastoreStorageFactory.getDefaultInstance();
-
-    @Before
-    public void setUp() throws Exception {
-        datastoreFactory.setUp();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        datastoreFactory.tearDown();
-    }
-
-    @Test
-    public void contain_record_storage() {
-        final RecordStorage<?> recordStorage = ((DsStandStorage) getStorage()).getRecordStorage();
-        assertNotNull(recordStorage);
-    }
-
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Delegates the call to the Datastore-native {@link BaseEntity.Builder#setNull setNull}.
+     */
     @Override
-    protected StandStorage getStorage() {
-        return datastoreFactory.createStandStorage();
+    public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {
+        storageRecord.setNull(columnIdentifier);
     }
 }

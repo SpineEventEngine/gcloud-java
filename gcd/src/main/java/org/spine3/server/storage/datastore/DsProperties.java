@@ -22,10 +22,8 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.protobuf.Message;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Stringifiers;
 import org.spine3.server.storage.LifecycleFlagField;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.aggregate.storage.AggregateField.aggregate_id;
@@ -47,7 +45,7 @@ class DsProperties {
      * Makes AggregateId property from given {@link Message} value.
      */
     static void addAggregateIdProperty(Object aggregateId, Entity.Builder entity) {
-        final String propertyValue = Identifiers.idToString(aggregateId);
+        final String propertyValue = Stringifiers.toString(aggregateId);
         entity.set(aggregate_id.toString(), propertyValue);
     }
 

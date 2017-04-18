@@ -26,13 +26,10 @@ import com.google.cloud.datastore.Key;
 import com.google.protobuf.Any;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -89,31 +86,12 @@ public class DatastoreWrapperShould {
     @Test
     public void support_big_bulk_reads() throws InterruptedException {
         final int bulkSize = 1001;
-        final int maxWritesPerCall = 500;
-        final int firstPartStart = 0;
-        final int firstPartEnd = firstPartStart + maxWritesPerCall;
-        final int secondPartStart = firstPartEnd;
-        final int secondPartEnd = secondPartStart + maxWritesPerCall;
-        final int thirdPartStart = secondPartEnd;
-        final int thirdPartEnd = bulkSize;
 
-
-        final TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(Given.testDatastore(),
-                                                                       false);
+        final TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(Given.testDatastore(), false);
         final Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
-        final List<Entity> sourceEntities = new ArrayList<>(entities.values());
+        final Collection<Entity> expectedEntities = entities.values();
 
-        final Entity[] firstPart = new Entity[maxWritesPerCall];
-        final Entity[] secondPart = new Entity[maxWritesPerCall];
-        final Entity[] thirdPart = new Entity[1]; // Only 1 element left.
-        // Change this when changing bulkSize
-        sourceEntities.subList(firstPartStart, firstPartEnd).toArray(firstPart);
-        sourceEntities.subList(secondPartStart, secondPartEnd).toArray(secondPart);
-        sourceEntities.subList(thirdPartStart, thirdPartEnd).toArray(thirdPart);
-
-        wrapper.createOrUpdate(firstPart);
-        wrapper.createOrUpdate(secondPart);
-        wrapper.createOrUpdate(thirdPart);
+        wrapper.createOrUpdate(expectedEntities);
 
         // Wait for some time to make sure the writing is complete
         try {
@@ -123,8 +101,8 @@ public class DatastoreWrapperShould {
         }
 
         final Collection<Entity> readEntities = wrapper.read(entities.keySet());
-        assertEquals(sourceEntities.size(), readEntities.size());
-        assertTrue(sourceEntities.containsAll(readEntities));
+        assertEquals(entities.size(), readEntities.size());
+        assertTrue(expectedEntities.containsAll(readEntities));
 
         wrapper.dropAllTables();
     }
@@ -141,13 +119,11 @@ public class DatastoreWrapperShould {
         }
 
         private static Map<Key, Entity> nEntities(int n, DatastoreWrapper wrapper) {
-
             final Map<Key, Entity> result = new HashMap<>(n);
             for (int i = 0; i < n; i++) {
                 final Any message = Any.getDefaultInstance();
-                final DatastoreRecordId recordId = new DatastoreRecordId(format("record-%s", i));
-                final Key key = DsIdentifiers.keyFor(wrapper, Kind.of(GENERIC_ENTITY_KIND),
-                                                     recordId);
+                final DatastoreRecordId recordId = new DatastoreRecordId(String.format("record-%s", i));
+                final Key key = DsIdentifiers.keyFor(wrapper, Kind.of(GENERIC_ENTITY_KIND), recordId);
                 final Entity entity = Entities.messageToEntity(message, key);
                 result.put(key, entity);
             }

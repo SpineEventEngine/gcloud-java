@@ -22,7 +22,6 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
-import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.base.Function;
@@ -35,7 +34,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
-import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.type.TypeUrl;
@@ -51,8 +50,8 @@ import static org.spine3.server.storage.datastore.Entities.activeEntity;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
- * A {@link org.spine3.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage}
- * delegates its operations.
+ * A {@link org.spine3.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage} delegates its
+ * operations.
  *
  * @author Dmytro Dashenkov
  */
@@ -71,7 +70,9 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         super(EntityRecord.getDescriptor(),
               datastore,
               multitenant,
-              ColumnTypeRegistry.<DatastoreColumnType>empty());
+              ColumnTypeRegistry.<DatastoreColumnType<?, ?>>newBuilder()
+                                .build(),
+              AggregateStateId.class);
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") // Overrides a pure method behavior
@@ -81,8 +82,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     }
 
     @Override
-    protected Entity entityRecordToEntity(AggregateStateId id,
-                                          EntityRecordWithStorageFields record) {
+    protected Entity entityRecordToEntity(AggregateStateId id, EntityRecordWithColumns record) {
         final Entity incompleteEntity = super.entityRecordToEntity(id, record);
         final String typeUrl = record.getRecord()
                                      .getState()
@@ -111,8 +111,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
         final Predicate<Entity> archivedAndDeletedFilter = activeEntity();
 
-        final ImmutableMap.Builder<AggregateStateId, EntityRecord> records =
-                new ImmutableMap.Builder<>();
+        final ImmutableMap.Builder<AggregateStateId, EntityRecord> records = new ImmutableMap.Builder<>();
         for (Entity entity : results) {
             if (!archivedAndDeletedFilter.apply(entity)) {
                 continue;
@@ -156,10 +155,9 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
-        // Ignore Storage Fields since StandStorage does not support them yet
+        // Ignore Entity Columns since StandStorage does not support them yet
     @Override
-    protected void populateFromStorageFields(Entity.Builder entity,
-                                             EntityRecordWithStorageFields record) {
+    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithColumns record) {
         // NOP
     }
 
@@ -170,16 +168,5 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
                                                  .setFilter(filter)
                                                  .build();
         return query;
-    }
-
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // Overrides parent behavior
-    @Override
-    protected AggregateStateId unpackKey(Entity entity) {
-        final Key key = entity.getKey();
-        final String typeUrl = entity.getString(TYPE_URL_KEY);
-        final TypeUrl stateType = TypeUrl.parse(typeUrl);
-        final Object genericId = IdTransformer.idFromString(key.getName(), null);
-        final AggregateStateId aggregateStateId = AggregateStateId.of(genericId, stateType);
-        return aggregateStateId;
     }
 }

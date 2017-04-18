@@ -23,13 +23,9 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import org.spine3.base.CommandId;
-import org.spine3.base.Event;
-import org.spine3.base.EventId;
-import org.spine3.server.stand.AggregateStateId;
+import org.spine3.base.Stringifiers;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.base.Identifiers.idToString;
 
 /**
  * Utilities for working with GAE Datastore record identifiers and keys.
@@ -65,15 +61,6 @@ public class DsIdentifiers {
         return new DatastoreRecordId(value);
     }
 
-    public static DatastoreRecordId of(Event event) {
-        return of(event.getContext().getEventId());
-    }
-
-    public static DatastoreRecordId of(EventId eventId) {
-        final String idString = idToString(eventId);
-        return of(idString);
-    }
-
     /**
      * Creates an instance of {@code DatastoreRecordId} for a
      * given {@link org.spine3.server.entity.Entity} identifier.
@@ -82,20 +69,7 @@ public class DsIdentifiers {
      * @return the Datastore record identifier
      */
     public static DatastoreRecordId ofEntityId(Object id) {
-        if (id instanceof AggregateStateId) {
-            return of((AggregateStateId) id);
-        }
-        final String idAsString = IdTransformer.idToString(id);
-        return of(idAsString);
-    }
-
-    public static DatastoreRecordId of(CommandId commandId) {
-        final String idAsString = idToString(commandId);
-        return of(idAsString);
-    }
-
-    public static DatastoreRecordId of(AggregateStateId id) {
-        final String idAsString = IdTransformer.idToString(id.getAggregateId());
+        final String idAsString = Stringifiers.toString(id);
         return of(idAsString);
     }
 }

@@ -26,6 +26,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
+import org.spine3.base.Stringifiers;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -54,26 +55,28 @@ public class Indexes {
      * @return an {@link Iterator} of the IDs matching given record kind
      */
     public static <I> Iterator<I> indexIterator(DatastoreWrapper datastore,
-                                                Kind kind) {
+                                                Kind kind,
+                                                Class<I> idType) {
         checkNotNull(datastore);
         checkNotNull(kind);
+        checkNotNull(idType);
 
         final EntityQuery.Builder query = Query.newEntityQueryBuilder()
                                                .setKind(kind.getValue());
         final Iterable<Entity> allEntities = datastore.read(query.build());
         final Iterator<I> idIterator = Iterators.transform(allEntities.iterator(),
-                                                           Indexes.<I>idExtractor());
+                                                           idExtractor(idType));
         return idIterator;
     }
 
-    private static <I> Function<Entity, I> idExtractor() {
+    private static <I> Function<Entity, I> idExtractor(final Class<I> idType) {
         return new Function<Entity, I>() {
             @Override
             public I apply(@Nullable Entity input) {
                 checkNotNull(input);
                 final Key key = input.getKey();
                 final String stringId = key.getName();
-                final I id = IdTransformer.idFromString(stringId, null);
+                final I id = Stringifiers.fromString(stringId, idType);
                 return id;
             }
         };

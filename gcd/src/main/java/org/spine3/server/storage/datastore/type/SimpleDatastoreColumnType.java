@@ -32,4 +32,9 @@ import org.spine3.server.entity.storage.SimpleColumnType;
 public abstract class SimpleDatastoreColumnType<T>
         extends SimpleColumnType<T, BaseEntity.Builder, String>
         implements DatastoreColumnType<T, T> {
+
+    @Override
+    public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {
+        storageRecord.setNull(columnIdentifier);
+    }
 }

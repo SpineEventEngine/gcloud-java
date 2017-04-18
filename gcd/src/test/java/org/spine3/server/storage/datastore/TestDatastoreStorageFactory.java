@@ -25,13 +25,11 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.server.storage.datastore.type.DatastoreTypeRegistry;
+import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Creates storages based on the local Google {@link Datastore}.
@@ -43,11 +41,10 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     private static final String DEFAULT_HOST = "localhost:8080";
     private static final String CREDENTIALS_FILE_PATH = "/spine-dev-62685282c0b9.json";
 
-    private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS =
-            DatastoreOptions.newBuilder()
-                            .setProjectId(DEFAULT_DATASET_NAME)
-                            .setHost(DEFAULT_HOST)
-                            .build();
+    private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = DatastoreOptions.newBuilder()
+                                                                                  .setProjectId(DEFAULT_DATASET_NAME)
+                                                                                  .setHost(DEFAULT_HOST)
+                                                                                  .build();
 
     // Set in the static context upon initialization,
     // used in class method context to avoid ambiguous calls to {@code System.getenv()}.
@@ -58,29 +55,25 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static DatastoreOptions generateTestOptions() {
         try {
-            final InputStream is =
-                    TestDatastoreStorageFactory.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+            final InputStream is = TestDatastoreStorageFactory.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
             final BufferedInputStream bufferedStream = new BufferedInputStream(is);
 
-            final ServiceAccountCredentials credentials =
-                    ServiceAccountCredentials.fromStream(bufferedStream);
+            final ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(bufferedStream);
             return DatastoreOptions.newBuilder()
                                    .setProjectId(DEFAULT_DATASET_NAME)
                                    .setCredentials(credentials)
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
             log().warn("Cannot find the configuration file {}", CREDENTIALS_FILE_PATH);
-            final DatastoreOptions defaultOptions =
-                    DatastoreOptions.newBuilder()
-                                    .setProjectId(DEFAULT_DATASET_NAME)
-                                    .build();
+            final DatastoreOptions defaultOptions = DatastoreOptions.newBuilder()
+                                                                    .setProjectId(DEFAULT_DATASET_NAME)
+                                                                    .build();
             return defaultOptions;
         }
     }
 
     /**
-     * Returns a default factory instance. A {@link Datastore} is created with
-     * default {@link DatastoreOptions}:
+     * Returns a default factory instance. A {@link Datastore} is created with default {@link DatastoreOptions}:
      *
      * <p>Dataset name: {@code spine-dev}
      *
@@ -88,10 +81,9 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      */
     static TestDatastoreStorageFactory getDefaultInstance() {
         final boolean onCi = "true".equals(System.getenv("CI"));
-        final String message =
-                onCi
-                ? "Running on CI. Connecting to remote Google Cloud Datastore"
-                : "Running on local machine. Connecting to a local Datastore emulator";
+        final String message = onCi
+                               ? "Running on CI. Connecting to remote Google Cloud Datastore"
+                               : "Running on local machine. Connecting to a local Datastore emulator";
         log().info(message);
         runsOnCi = onCi;
         return onCi
@@ -100,15 +92,12 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private TestDatastoreStorageFactory(Datastore datastore) {
-        super(datastore, false, DatastoreTypeRegistry.defaultInstance());
+        super(datastore, false, DatastoreTypeRegistryFactory.defaultInstance());
+        initDatastoreWrapper(getDatastore());
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    @Override
-    protected void initDatastoreWrapper(Datastore datastore) {
-        checkState(this.getDatastore() == null,
-                   "Datastore is already initialized.");
-        this.setDatastore(TestDatastoreWrapper.wrap(datastore, runsOnCi));
+    private void initDatastoreWrapper(DatastoreWrapper wrapper) {
+        this.setDatastore(TestDatastoreWrapper.wrap(wrapper.getDatastore(), runsOnCi));
     }
 
     /**

@@ -20,11 +20,13 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -33,13 +35,14 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
-import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.entity.storage.Column;
+import org.spine3.server.entity.storage.ColumnRecords;
+import org.spine3.server.entity.storage.ColumnType;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
-import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.type.TypeUrl;
@@ -58,7 +61,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DsIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static org.spine3.server.storage.datastore.Entities.activeEntity;
-import static org.spine3.server.storage.datastore.Entities.getEntityStatus;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -72,14 +74,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
-    private final ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry;
+    private final ColumnTypeRegistry<? extends ColumnType<?, ?, BaseEntity.Builder, String>> columnTypeRegistry;
+    private final Class<I> idClass;
 
     protected static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
-    protected static final String ID_CONVERSION_ERROR_MESSAGE =
-            "Entity had ID of an invalid type; could not " +
-                    "parse ID from String. " +
-                    "Note: custom conversion is not supported. " +
-                    "See org.spine3.base.Identifiers#idToString.";
+    protected static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
+            "parse ID from String. " +
+            "Note: custom conversion is not supported. " +
+            "See org.spine3.base.Identifiers#idToString.";
 
     private static final Function<Entity, EntityRecord> recordFromEntity
             = new Function<Entity, EntityRecord>() {
@@ -104,11 +106,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public DsRecordStorage(Descriptor descriptor,
                            DatastoreWrapper datastore,
                            boolean multitenant,
-                           ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry) {
+                           ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
+                           Class<I> idClass) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
+        this.idClass = checkNotNull(idClass);
     }
 
     @Override
@@ -135,15 +139,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return Optional.absent();
         }
 
-        final EntityRecord record = Entities.entityToMessage(response, RECORD_TYPE_URL);
-        final LifecycleFlags entityStatus = getEntityStatus(response);
-        // Avoid inequality of written and read records caused by empty {@code EntityStatus} object
-        final EntityRecord result = isDefault(entityStatus)
-                                    ? record
-                                    : EntityRecord.newBuilder(record)
-                                                  .setLifecycleFlags(entityStatus)
-                                                  .build();
-
+        final EntityRecord result = Entities.entityToMessage(response, RECORD_TYPE_URL);
         return Optional.of(result);
     }
 
@@ -153,8 +149,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids,
-                                                         final FieldMask fieldMask) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids, final FieldMask fieldMask) {
         final Function<Entity, EntityRecord> transformer = new Function<Entity, EntityRecord>() {
             @Nullable
             @Override
@@ -169,10 +164,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 final Message maskedState = FieldMasks.applyMask(fieldMask, state, typeUrl);
                 final Any wrappedState = AnyPacker.pack(maskedState);
 
-                final LifecycleFlags entityStatus = getEntityStatus(input);
                 final EntityRecord record = EntityRecord.newBuilder(readRecord)
                                                         .setState(wrappedState)
-                                                        .setLifecycleFlags(entityStatus)
                                                         .build();
                 return record;
             }
@@ -226,10 +219,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         final List<Entity> results = datastore.read(keys);
-        final Collection<Entity> filteredResults = Collections2.filter(results,
-                                                                       activeEntity());
-        final Collection<EntityRecord> records = Collections2.transform(filteredResults,
-                                                                        transformer);
+        final Collection<Entity> filteredResults = Collections2.filter(results, activeEntity());
+        final Collection<EntityRecord> records = Collections2.transform(filteredResults, transformer);
         return Collections.unmodifiableCollection(records);
     }
 
@@ -270,7 +261,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return query;
     }
 
-    protected Entity entityRecordToEntity(I id, EntityRecordWithStorageFields record) {
+    protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
         final EntityRecord entityRecord = record.getRecord();
         final Key key = keyFor(datastore,
                                kindFrom(entityRecord),
@@ -284,38 +275,17 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return completeEntity;
     }
 
-    protected void populateFromStorageFields(Entity.Builder entity,
-                                             EntityRecordWithStorageFields record) {
-        if (record.hasStorageFields()) {
-            final Map<String, Column.MemoizedValue<?>> storageFields = record.getStorageFields();
-            for (Map.Entry<String, Column.MemoizedValue<?>> field : storageFields.entrySet()) {
-                appendValue(entity, field.getValue(), columnTypeRegistry);
-            }
+    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithColumns record) {
+        if (record.hasColumns()) {
+            ColumnRecords.feedColumnsTo(entity,
+                                        record,
+                                        columnTypeRegistry,
+                                        Functions.<String>identity());
         }
-    }
-
-    private static <T, S> void appendValue(Entity.Builder entity,
-                                           Column.MemoizedValue<T> value,
-                                           ColumnTypeRegistry<DatastoreColumnType> columnTypeRegistry) {
-        if (value.isNull()) {
-            return;
-        }
-        final Column<T> storageColumn = value.getSourceColumn();
-
-        @SuppressWarnings("unchecked")
-        final DatastoreColumnType<T, S> columnType = columnTypeRegistry.get(storageColumn);
-        checkState(columnType != null,
-                   "Missing Column Type definition for type %s",
-                   storageColumn.getType());
-
-        final T initialValue = value.getValue();
-        checkNotNull(initialValue);
-        final S storedValue = columnType.convertColumnValue(initialValue);
-        columnType.setColumnValue(entity, storedValue, storageColumn.getName());
     }
 
     @Override
-    protected void writeRecord(I id, EntityRecordWithStorageFields entityStorageRecord) {
+    protected void writeRecord(I id, EntityRecordWithColumns entityStorageRecord) {
         checkNotNull(id, "ID is null.");
         checkNotNull(entityStorageRecord, "Message is null.");
 
@@ -324,11 +294,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected void writeRecords(Map<I, EntityRecordWithStorageFields> records) {
+    protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
         checkNotNull(records);
 
         final Collection<Entity> entitiesToWrite = new ArrayList<>(records.size());
-        for (Map.Entry<I, EntityRecordWithStorageFields> record : records.entrySet()) {
+        for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
             final Entity entity = entityRecordToEntity(record.getKey(), record.getValue());
             entitiesToWrite.add(entity);
         }
@@ -339,7 +309,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     public Iterator<I> index() {
         checkNotClosed();
         return Indexes.indexIterator(datastore,
-                                     getKind());
+                                     getKind(),
+                                     idClass);
     }
 
     @Nullable
@@ -347,10 +318,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return null;
     }
 
-    protected I unpackKey(Entity entity) {
-        final String stringId = entity.getKey()
-                                      .getName();
-        final I id = IdTransformer.idFromString(stringId, null);
+    protected final I unpackKey(Entity entity) {
+        final String stringId = entity.getKey().getName();
+        final I id = Stringifiers.fromString(stringId, idClass);
         return id;
     }
 
