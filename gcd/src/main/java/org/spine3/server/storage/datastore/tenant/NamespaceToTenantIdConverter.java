@@ -27,6 +27,8 @@ import org.spine3.users.TenantId;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * // TODO:2017-04-18:dmytro.dashenkov: Javadoc.
+ *
  * @author Dmytro Dashenkov
  */
 @SPI

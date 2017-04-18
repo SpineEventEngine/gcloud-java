@@ -353,6 +353,9 @@ public final class Namespace {
         };
 
         private static TenantIdConverter forTenantId(TenantId tenantId) {
+            if (isCustomConvertionExpected()) {
+                return PREDEFINED_VALUE;
+            }
             final TenantId.KindCase kindCase = tenantId.getKindCase();
             final String kindCaseName = kindCase.name();
             final TenantIdConverter converter = valueOf(kindCaseName);

@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore.tenant;
 
+import com.google.cloud.datastore.Key;
 import com.google.common.testing.EqualsTester;
 import org.junit.Test;
 import org.spine3.net.EmailAddress;
@@ -28,6 +29,7 @@ import org.spine3.users.TenantId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Dmytro Dashenkov
@@ -105,12 +107,20 @@ public class NamespaceShould {
     }
 
     @Test
+    public void return_null_if_key_is_empty() {
+        final Key emptyKey = Key.newBuilder("project", "my.type", 42)
+                                .build();
+        final Namespace namespace = Namespace.fromNameOf(emptyKey);
+        assertNull(namespace);
+    }
+
+    @Test
     public void convert_self_to_string_based_tenant_if_created_from_string() {
         final String namespaceString = "my.namespace";
 
         final TenantId expectedId = TenantId.newBuilder()
-                                          .setValue(namespaceString)
-                                          .build();
+                                            .setValue(namespaceString)
+                                            .build();
         final Namespace namespace = Namespace.of(namespaceString);
         final TenantId actualId = namespace.toTenantId();
         assertEquals(expectedId, actualId);
