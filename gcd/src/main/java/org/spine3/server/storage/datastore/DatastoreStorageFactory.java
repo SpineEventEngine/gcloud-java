@@ -65,7 +65,10 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final Supplier<Namespace> namespaceSupplier;
 
     private DatastoreStorageFactory(Builder builder) {
-        this(builder.datastore, builder.multitenant, builder.typeRegistry, builder.namespaceSupplier);
+        this(builder.datastore,
+             builder.multitenant,
+             builder.typeRegistry,
+             builder.namespaceSupplier);
     }
 
     @VisibleForTesting
@@ -132,8 +135,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     public StandStorage createStandStorage() {
         final DsStandStorageDelegate recordStorage =
                 new DsStandStorageDelegate(datastore, multitenant);
-        final DsStandStorage result =
-                new DsStandStorage(recordStorage, multitenant);
+        final DsStandStorage result = new DsStandStorage(recordStorage, multitenant);
         return result;
     }
 
@@ -161,12 +163,12 @@ public class DatastoreStorageFactory implements StorageFactory {
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
         final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
         final DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
-                                                         .setStateType(typeUrl)
-                                                         .setDatastore(getDatastore())
-                                                         .setMultitenant(isMultitenant())
-                                                         .setColumnTypeRegistry(typeRegistry)
-                                                         .setIdClass(idClass)
-                                                         .build();
+                .setStateType(typeUrl)
+                .setDatastore(getDatastore())
+                .setMultitenant(isMultitenant())
+                .setColumnTypeRegistry(typeRegistry)
+                .setIdClass(idClass)
+                .build();
 
         return result;
     }
@@ -175,7 +177,8 @@ public class DatastoreStorageFactory implements StorageFactory {
      * {@inheritDoc}
      */
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> entityClass) {
+    public <I> AggregateStorage<I> createAggregateStorage(
+            Class<? extends Aggregate<I, ?, ?>> entityClass) {
         checkNotNull(entityClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
         final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
@@ -244,8 +247,8 @@ public class DatastoreStorageFactory implements StorageFactory {
          *
          * <p>By default this option is {@code false}.
          *
-         * <p>If the multitenancy is enables, the passed {@link Datastore} should not have a {@code namespace}
-         * set explicitly.
+         * <p>If the multitenancy is enables, the passed {@link Datastore} should not have
+         * a {@code namespace} set explicitly.
          *
          * @param multitenant {@code true} if the {@code DatastoreStorageFactory} should
          *                    be multitenant or not
@@ -263,11 +266,12 @@ public class DatastoreStorageFactory implements StorageFactory {
          * <p>Default value is {@link DatastoreTypeRegistryFactory#defaultInstance()}.
          *
          * @param typeRegistry the type registry containing all the required
-         *                     {@linkplain org.spine3.server.entity.storage.ColumnType column types} to handle the
-         *                     existing Entity Columns
+         *                     {@linkplain org.spine3.server.entity.storage.ColumnType column types}
+         *                     to handle the existing Entity Columns
          * @return self for method chaining
          */
-        public Builder setTypeRegistry(ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
+        public Builder setTypeRegistry(
+                ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
             this.typeRegistry = checkNotNull(typeRegistry);
             return this;
         }
