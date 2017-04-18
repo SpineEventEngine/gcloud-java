@@ -43,7 +43,35 @@ import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.getNam
  *
  * <p>The primary usage of the namespaces is multitenancy.
  *
+ * <p>A namespace constructed from a {@link TenantId} will have a one capital letter type prefix
+ * depending on which field of the {@link TenantId} has the actual value. These prefixes are:
+ * <ul>
+ *     <li>{@code D} - for "Internet Domain";
+ *     <li>{@code E} - for "Email";
+ *     <li>{@code V} - for "String Value".
+ * </ul>
+ *
+ * <p>If a {@link NamespaceToTenantIdConverter} is
+ * {@linkplain DatastoreTenants#registerNamespaceConverter(NamespaceToTenantIdConverter) registered},
+ * then the converter is used and the prefixes are absent.
+ *
+ * <p>One should register a {@link NamespaceToTenantIdConverter} <b>if and only if</b>
+ * the used Datastore already contains namespaces to work with.
+ *
+ * <p>Please note, that for working with the Datastore namespaces, Spine requires one of the
+ * following conditions to be met:
+ * <ul>
+ *     <li>There are no namespaces in the Datastore at all. All the namespace manipulations are
+ *     preformed by the mean of the framework.
+ *     <li>All the present namespaces start with one of the prefixes listed above. In this case
+ *     the described {@link TenantId} conversion behavior will be applied.
+ *     <li>A custom {@link NamespaceToTenantIdConverter} is registered.
+ * </ul>
+ *
+ * <p>If none of the above conditions is met, runtime errors may happen.
+ *
  * @author Dmytro Dashenkov
+ * @see DatastoreTenants
  * @see NamespaceSupplier
  */
 public final class Namespace {
@@ -289,8 +317,10 @@ public final class Namespace {
          * <p>The difference to {@link #VALUE} is that the namespaces associated with this
          * converter have no type prefix, as they are defined by the user beforehand.
          *
-         * <p>This strategy uses a {@link org.spine3.base.Stringifier Stringifier&lt;TenantId&gt;}
-         * if it is registered, or thrown an exception if the it's not.
+         * <p>This strategy uses a
+         * {@link com.google.common.base.Converter Converter&lt;String, TenantId&gt;} if it is
+         * {@linkplain DatastoreTenants#getNamespaceConverter() registered}, or throws an exception
+         * if the it's not.
          */
         PREDEFINED_VALUE {
             @Override

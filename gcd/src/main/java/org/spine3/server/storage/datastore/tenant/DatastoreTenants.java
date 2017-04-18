@@ -84,6 +84,21 @@ public class DatastoreTenants {
         return index;
     }
 
+    /**
+     * Registers a {@link com.google.common.base.Converter Converter} from string datastore
+     * namespace into {@link org.spine3.users.TenantId TenantId}.
+     *
+     * <p>After this converter has been registered, all the Datastore namespace operations will use
+     * it instead of the {@linkplain Namespace default behavior}.
+     *
+     * <p>Note, that this method should be called only once. All the subsequent invocations will
+     * cause {@code IllegalStateException}s.
+     *
+     * @param converter the converter to use for the
+     *                  namespace-to-{@link org.spine3.users.TenantId TenantId} and vice versa
+     *                  conversions
+     * @see Namespace
+     */
     public static void registerNamespaceConverter(NamespaceToTenantIdConverter converter) {
         checkNotNull(converter);
         checkState(namespaceToTenantIdConverter == null,
@@ -91,6 +106,13 @@ public class DatastoreTenants {
         namespaceToTenantIdConverter = converter;
     }
 
+    /**
+     * Retrieves the registered {@link NamespaceToTenantIdConverter}.
+     *
+     * @return the {@linkplain #registerNamespaceConverter(NamespaceToTenantIdConverter) registered}
+     * {@link NamespaceToTenantIdConverter} wrapped into {@link Optional} or
+     * {@link Optional#absent() Optional.absent()} if the converter has never been registered
+     */
     static Optional<NamespaceToTenantIdConverter> getNamespaceConverter() {
         return Optional.fromNullable(namespaceToTenantIdConverter);
     }
