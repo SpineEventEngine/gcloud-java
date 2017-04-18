@@ -84,9 +84,9 @@ public class DatastoreTenantsShould {
 
         @SuppressWarnings({"serial", "ClassExtendsConcreteCollection"}) // For test purposes
         private static final List<Key> keys = new LinkedList<Key>() {{
-            add(mockKey("foo"));
-            add(mockKey("bar"));
-            add(mockKey("baz"));
+            add(mockKey("Vfoo"));
+            add(mockKey("Vbar"));
+            add(mockKey("Vbaz"));
         }};
         private final Iterator<Key> keyIterator = keys.iterator();
 

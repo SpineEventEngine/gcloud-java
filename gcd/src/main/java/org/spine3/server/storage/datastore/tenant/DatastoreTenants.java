@@ -21,9 +21,11 @@
 package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.common.base.Optional;
 import org.spine3.server.tenant.TenantIndex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A factory of the Datastore-specific Tenant related objects.
@@ -31,6 +33,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Dashenkov
  */
 public class DatastoreTenants {
+
+    private static NamespaceToTenantIdConverter namespaceToTenantIdConverter = null;
 
     private DatastoreTenants() {
         // Prevent the utility class initialization
@@ -78,5 +82,16 @@ public class DatastoreTenants {
         checkNotNull(datastore);
         final TenantIndex index = new NamespaceIndex(datastore);
         return index;
+    }
+
+    public static void registerNamespaceConverter(NamespaceToTenantIdConverter converter) {
+        checkNotNull(converter);
+        checkState(namespaceToTenantIdConverter == null,
+                   "A namespace converter has already been registered.");
+        namespaceToTenantIdConverter = converter;
+    }
+
+    static Optional<NamespaceToTenantIdConverter> getNamespaceConverter() {
+        return Optional.fromNullable(namespaceToTenantIdConverter);
     }
 }

@@ -134,11 +134,11 @@ public class DatastoreWrapperShould {
         final String tenantId1 = "first-tenant-ID";
         final String tenantId1Prefixed = "Vfirst-tenant-ID";
         final String tenantId2 = "second@tenant.id";
-        final String tenantIdPrefixed = "Esecond-at-tenant.id";
+        final String tenantId2Prefixed = "Esecond-at-tenant.id";
         final String tenantId3 = "third.id";
         final String tenantId3Prefixed = "Dthird.id";
         ensureNamespace(tenantId1Prefixed, wrapper.getDatastore());
-        ensureNamespace(tenantIdPrefixed, wrapper.getDatastore());
+        ensureNamespace(tenantId2Prefixed, wrapper.getDatastore());
         ensureNamespace(tenantId3Prefixed, wrapper.getDatastore());
         final TenantId id1 = TenantId.newBuilder()
                                      .setValue(tenantId1)
@@ -153,7 +153,7 @@ public class DatastoreWrapperShould {
                                      .build();
 
         checkTenantIdInKey(tenantId1Prefixed, id1, wrapper);
-        checkTenantIdInKey(tenantIdPrefixed, id2, wrapper);
+        checkTenantIdInKey(tenantId2Prefixed, id2, wrapper);
         checkTenantIdInKey(tenantId3Prefixed, id3, wrapper);
     }
 
