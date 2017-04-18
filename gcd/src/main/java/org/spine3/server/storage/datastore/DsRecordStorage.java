@@ -208,7 +208,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      *
      * <p>Allows the customization of the storage behavior in descendants.
      *
-     * @return the {@code TyprUrl} of the stored messages
+     * @return the {@link TypeUrl} of the stored messages
      */
     protected TypeUrl getTypeUrl() {
         return typeUrl;

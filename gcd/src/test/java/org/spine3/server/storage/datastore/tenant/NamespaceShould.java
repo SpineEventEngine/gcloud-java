@@ -51,8 +51,8 @@ public class NamespaceShould {
                                                 .setValue(aGroupValue)
                                                 .build();
         final Namespace aGroupNamespaceFromTenantId = Namespace.of(aGroupTenantId);
-        final Namespace aGroupnamespaceFromString = Namespace.of(aGroupValue);
-        final Namespace duplicateAGroupnamespaceFromString = Namespace.of(aGroupValue);
+        final Namespace aGroupNamespaceFromString = Namespace.of(aGroupValue);
+        final Namespace duplicateAGroupNamespaceFromString = Namespace.of(aGroupValue);
 
         final String bGroupValue = "namespace2";
         final TenantId bGroupTenantId = TenantId.newBuilder()
@@ -64,8 +64,8 @@ public class NamespaceShould {
 
         new EqualsTester()
                 .addEqualityGroup(aGroupNamespaceFromTenantId,
-                                  aGroupnamespaceFromString,
-                                  duplicateAGroupnamespaceFromString)
+                                  aGroupNamespaceFromString,
+                                  duplicateAGroupNamespaceFromString)
                 .addEqualityGroup(bGroupNamespaceFromTenantId)
                 .addEqualityGroup(cGroupNamespaceFromString)
                 .testEquals();

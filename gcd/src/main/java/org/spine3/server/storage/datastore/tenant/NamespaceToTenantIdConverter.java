@@ -30,9 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A {@link Converter} for {@link TenantId} and the string Datastore namespace.
  *
  * <p>Define this converter in case if there is a need to override
- * the {@linkplain Namespace default convertion behavior}.
+ * the {@linkplain Namespace default conversion behavior}.
  *
- * <p>The implementation of the convertion must be commutative, meaning that the restored
+ * <p>The implementation of the conversion must be commutative, meaning that the restored
  * {@link TenantId} values should be {@linkplain TenantId#equals(Object) equal} to the initial.
  *
  * @author Dmytro Dashenkov

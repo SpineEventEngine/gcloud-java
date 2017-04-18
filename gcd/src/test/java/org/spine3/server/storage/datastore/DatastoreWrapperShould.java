@@ -101,7 +101,7 @@ public class DatastoreWrapperShould {
         wrapper.rollbackTransaction();
     }
 
-    // Some variables act in different cases and should have self-explainatory names
+    // Some variables act in different cases and should have self-explanatory names
     @SuppressWarnings("UnnecessaryLocalVariable")
     @Test
     public void support_big_bulk_reads() throws InterruptedException {

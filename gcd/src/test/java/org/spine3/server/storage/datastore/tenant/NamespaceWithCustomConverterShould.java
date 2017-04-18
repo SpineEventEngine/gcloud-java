@@ -71,7 +71,7 @@ public class NamespaceWithCustomConverterShould {
      * An example of custom {@link NamespaceToTenantIdConverter}.
      *
      * <p>Note that this implementation uses the default
-     * {@link org.spine3.base.Stringifier Stringifier} for the convertion, which is not acceptable
+     * {@link org.spine3.base.Stringifier Stringifier} for the conversion, which is not acceptable
      * to use in production code, but good enough for these tests.
      */
     private static class CustomNamespaceConverter extends NamespaceToTenantIdConverter {
