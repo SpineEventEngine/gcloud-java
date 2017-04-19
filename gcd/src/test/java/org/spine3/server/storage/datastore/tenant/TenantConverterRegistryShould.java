@@ -27,7 +27,7 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 /**
  * @author Dmytro Dashenkov
  */
-public class TanantConverterRegistryShould {
+public class TenantConverterRegistryShould {
 
     @Test
     public void have_private_ctor() {

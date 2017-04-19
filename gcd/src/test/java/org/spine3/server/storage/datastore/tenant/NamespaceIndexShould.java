@@ -27,7 +27,6 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Collections2;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.net.InternetDomain;
@@ -43,6 +42,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Collections2.transform;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -139,22 +139,25 @@ public class NamespaceIndexShould {
         assertFalse(namespaceIndex.contains(fakeNamespace));
     }
 
-    @Test(timeout = 5000L) // 5 second execution indicates a dead lock
+    @Test(timeout = 5000L) // 5 second execution indicates a possible dead lock
     public void synchronize_access_methods() throws InterruptedException {
         // Initial data
         final Collection<Key> keys = new LinkedList<>();
         keys.add(mockKey("Vtenant1"));
         keys.add(mockKey("Vtenant2"));
         keys.add(mockKey("Vtenant3"));
-        final Collection<TenantId> initialTenantIds = Collections2.transform(keys, new Function<Key, TenantId>() {
-            @Override
-            public TenantId apply(@Nullable Key input) {
-                assertNotNull(input);
-                return TenantId.newBuilder()
-                               .setValue(input.getName().substring(1))
-                               .build();
-            }
-        });
+        final Function<Key, TenantId> keyTenantIdTransformer =
+                new Function<Key, TenantId>() {
+                    @Override
+                    public TenantId apply(@Nullable Key input) {
+                        assertNotNull(input);
+                        return TenantId.newBuilder()
+                                       .setValue(input.getName()
+                                                      .substring(1))
+                                       .build();
+                    }
+                };
+        final Collection<TenantId> initialTenantIds = transform(keys, keyTenantIdTransformer);
 
         final NamespaceIndex.NamespaceQuery namespaceQuery = new NamespaceIndex.NamespaceQuery() {
             @Override
@@ -177,15 +180,17 @@ public class NamespaceIndexShould {
                 assertContainsAll(initialIdsActual, elements);
 
                 // Add new element
+                final InternetDomain domain = InternetDomain.newBuilder()
+                                                            .setValue("my.tenant.com")
+                                                            .build();
                 final TenantId newTenantId = TenantId.newBuilder()
-                                                     .setDomain(InternetDomain.newBuilder()
-                                                                              .setValue("my.tenant.com"))
+                                                     .setDomain(domain)
                                                      .build();
                 namespaceIndex.keep(newTenantId); // sync
 
                 // Check new value added
-                final boolean success = namespaceIndex.contains(Namespace.of(newTenantId,
-                                                                             TEST_PROJECT_ID)); // sync
+                final boolean success = namespaceIndex.contains(Namespace.of(newTenantId,    // sync
+                                                                             TEST_PROJECT_ID));
                 assertTrue(success);
 
                 // Check returned set has newly added element

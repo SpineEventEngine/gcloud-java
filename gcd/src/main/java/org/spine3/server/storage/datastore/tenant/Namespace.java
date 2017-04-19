@@ -42,8 +42,8 @@ import static org.spine3.server.storage.datastore.tenant.TenantConverterRegistry
  *
  * <p>The primary usage of the namespaces is multitenancy.
  *
- * <p>A namespace constructed from a {@link TenantId} will have a one capital letter type prefix
- * depending on which field of the {@link TenantId} has the actual value. These prefixes are:
+ * <p>A namespace constructed from a {@link TenantId} by default will have a one capital letter type
+ * prefix depending on which field of the {@link TenantId} has the actual value. These prefixes are:
  * <ul>
  *     <li>{@code D} - for "Internet Domain";
  *     <li>{@code E} - for "Email";
@@ -51,8 +51,8 @@ import static org.spine3.server.storage.datastore.tenant.TenantConverterRegistry
  * </ul>
  *
  * <p>If a {@link NamespaceToTenantIdConverter} is
- * {@linkplain TenantConverterRegistry#registerNamespaceConverter registered}, then the converter is used
- * and the prefixes are absent.
+ * {@linkplain TenantConverterRegistry#registerNamespaceConverter registered}, then the converter
+ * is used and the prefixes are absent.
  *
  * <p>One should register a {@link NamespaceToTenantIdConverter} <b>if and only if</b>
  * the used Datastore already contains namespaces to work with.

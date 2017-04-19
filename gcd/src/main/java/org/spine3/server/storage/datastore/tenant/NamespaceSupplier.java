@@ -53,8 +53,8 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
     public static NamespaceSupplier instance(boolean multitenant,
                                              @Nullable String defaultNamespace,
                                              ProjectId projectId) {
+        checkNotNull(projectId);
         if (multitenant) {
-            checkNotNull(projectId);
             return multitenant(projectId);
         } else {
             return new SingleTenantNamespaceSupplier(defaultNamespace);

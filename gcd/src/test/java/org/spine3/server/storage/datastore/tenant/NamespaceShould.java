@@ -59,7 +59,7 @@ public class NamespaceShould {
     }
 
     @SuppressWarnings("LocalVariableNamingConvention")
-    // Required comprehensive naming
+        // Required comprehensive naming
     @Test
     public void support_equality() {
         final String aGroupValue = "namespace1";
