@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import org.spine3.annotations.Internal;
@@ -124,7 +125,8 @@ public class DatastoreTenants {
      * {@link NamespaceToTenantIdConverter} wrapped into {@link Optional} or
      * {@link Optional#absent() Optional.absent()} if the converter has never been registered
      */
-    static Optional<NamespaceToTenantIdConverter> getNamespaceConverter(ProjectId projectId) {
+    @VisibleForTesting
+    public static Optional<NamespaceToTenantIdConverter> getNamespaceConverter(ProjectId projectId) {
         checkNotNull(projectId);
         final NamespaceToTenantIdConverter converter = tenantIdConverters.get(projectId);
         return Optional.fromNullable(converter);

@@ -23,18 +23,23 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.ColumnType;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.datastore.tenant.DatastoreTenants;
+import org.spine3.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.server.storage.datastore.type.SimpleDatastoreColumnType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.spine3.server.storage.datastore.TestDatastoreStorageFactory.TestingDatastoreSingleton.INSTANCE;
@@ -122,6 +127,34 @@ public class DatastoreStorageFactoryBuilderShould {
                                               .getDatastoreOptions()
                                               .getNamespace();
         assertEquals(namespace, actualNamespace);
+    }
+
+    @Test
+    public void register_custom_tenant_id_converter_upon_build() {
+        final ProjectId withCustomConverter = ProjectId.of("customized");
+        final ProjectId withDefaultConverter = ProjectId.of("defaulted");
+
+        final DatastoreOptions options =
+                DatastoreOptions.newBuilder()
+                                .setProjectId(withCustomConverter.getValue())
+                                .build();
+        final NamespaceToTenantIdConverter converter = mock(NamespaceToTenantIdConverter.class);
+        final DatastoreStorageFactory factory =
+                DatastoreStorageFactory.newBuilder()
+                                       .setMultitenant(true)
+                                       .setDatastore(options.getService())
+                                       .setNamespaceToTenantIdConverter(converter)
+                                       .build();
+        assertNotNull(factory);
+
+        final Optional<NamespaceToTenantIdConverter> restoredConverter =
+                DatastoreTenants.getNamespaceConverter(withCustomConverter);
+        assertTrue(restoredConverter.isPresent());
+        assertSame(converter, restoredConverter.get());
+
+        final Optional<NamespaceToTenantIdConverter> absentConverter =
+                DatastoreTenants.getNamespaceConverter(withDefaultConverter);
+        assertFalse(absentConverter.isPresent());
     }
 
     private static Datastore mockDatastore() {
