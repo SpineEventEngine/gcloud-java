@@ -38,7 +38,7 @@ import java.io.InputStream;
 @SuppressWarnings("CallToSystemGetenv")
 class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
-    public static final String DEFAULT_DATASET_NAME = "spine-dev";
+    public static final String DEFAULT_DATASET_NAME = Given.TEST_PROJECT_ID_VALUE;
     private static final String DEFAULT_HOST = "localhost:8080";
     private static final String CREDENTIALS_FILE_PATH = "/spine-dev-62685282c0b9.json";
 
@@ -96,7 +96,7 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         super(datastore,
               false,
               DatastoreTypeRegistryFactory.defaultInstance(),
-              NamespaceSupplier.singleTenant());
+              NamespaceSupplier.singleTenant(), null);
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")

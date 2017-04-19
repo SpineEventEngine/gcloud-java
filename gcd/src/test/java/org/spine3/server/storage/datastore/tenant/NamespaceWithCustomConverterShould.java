@@ -21,21 +21,30 @@
 package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Key;
+import com.google.common.base.Converter;
+import com.google.common.base.Optional;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spine3.base.Stringifiers;
+import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.users.TenantId;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.getNamespaceConverter;
+import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.registerNamespaceConverter;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class NamespaceWithCustomConverterShould {
 
+    private static final ProjectId PROJECT_ID = ProjectId.of("ARBITRARYPROJECT");
+
     @BeforeClass
     public static void setUp() {
-        DatastoreTenants.registerNamespaceConverter(new CustomNamespaceConverter());
+        registerNamespaceConverter(PROJECT_ID, new CustomNamespaceConverter());
     }
 
     @Test
@@ -44,8 +53,13 @@ public class NamespaceWithCustomConverterShould {
         final TenantId tenantId = TenantId.newBuilder()
                                           .setValue(ns)
                                           .build();
-        final Namespace namespace = Namespace.of(tenantId);
-        assertEquals(Stringifiers.toString(tenantId), namespace.getValue());
+        final Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
+        final Optional<? extends Converter<String, TenantId>> converter =
+                getNamespaceConverter(PROJECT_ID);
+        assertTrue(converter.isPresent());
+        assertEquals(converter.get()
+                              .reverse()
+                              .convert(tenantId), namespace.getValue());
     }
 
     @Test
@@ -53,7 +67,8 @@ public class NamespaceWithCustomConverterShould {
         final String ns = "my.test.namespace.from.key";
         final Key key = Key.newBuilder("my-project", "some.kind", ns)
                            .build();
-        final Namespace namespace = Namespace.fromNameOf(key);
+        final Namespace namespace = Namespace.fromNameOf(key, PROJECT_ID);
+        assertNotNull(namespace);
         assertEquals(ns, namespace.getValue());
     }
 
@@ -63,7 +78,7 @@ public class NamespaceWithCustomConverterShould {
         final TenantId tenantId = TenantId.newBuilder()
                                           .setValue(ns)
                                           .build();
-        final Namespace namespace = Namespace.of(tenantId);
+        final Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
         assertEquals(tenantId, namespace.toTenantId());
     }
 

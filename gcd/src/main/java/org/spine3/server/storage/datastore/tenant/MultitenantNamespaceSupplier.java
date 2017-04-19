@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore.tenant;
 
+import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.server.tenant.TenantFunction;
 import org.spine3.users.TenantId;
 
@@ -34,13 +35,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
-    static MultitenantNamespaceSupplier instance() {
-        return Singleton.INSTANCE.value;
+    private final ProjectId projectId;
+
+    static NamespaceSupplier forProject(ProjectId projectId) {
+        return new MultitenantNamespaceSupplier(projectId);
     }
 
-    private MultitenantNamespaceSupplier() {
+    private MultitenantNamespaceSupplier(ProjectId projectId) {
         super();
-        // Prevent direct initialization
+        this.projectId = checkNotNull(projectId);
     }
 
     /**
@@ -53,7 +56,7 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
         final TenantIdRetriever retriever = new TenantIdRetriever();
         final TenantId tenantId = retriever.execute();
         checkNotNull(tenantId);
-        final Namespace result = Namespace.of(tenantId);
+        final Namespace result = Namespace.of(tenantId, projectId);
         return result;
     }
 
@@ -83,11 +86,5 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
             checkNotNull(input);
             return input;
         }
-    }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final MultitenantNamespaceSupplier value = new MultitenantNamespaceSupplier();
     }
 }

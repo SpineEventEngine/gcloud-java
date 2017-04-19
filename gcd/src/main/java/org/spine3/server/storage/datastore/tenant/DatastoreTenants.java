@@ -22,10 +22,15 @@ package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
+import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.server.tenant.TenantIndex;
+
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.synchronizedMap;
 
 /**
  * A factory of the Datastore-specific Tenant related objects.
@@ -34,7 +39,8 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class DatastoreTenants {
 
-    private static NamespaceToTenantIdConverter namespaceToTenantIdConverter = null;
+    private static final Map<ProjectId, NamespaceToTenantIdConverter> tenantIdConverters =
+            synchronizedMap(Maps.<ProjectId, NamespaceToTenantIdConverter>newHashMap());
 
     private DatastoreTenants() {
         // Prevent the utility class initialization
@@ -99,21 +105,26 @@ public class DatastoreTenants {
      *                  conversions
      * @see Namespace
      */
-    public static void registerNamespaceConverter(NamespaceToTenantIdConverter converter) {
+    public static void registerNamespaceConverter(ProjectId projectId,
+                                                  NamespaceToTenantIdConverter converter) {
+        checkNotNull(projectId);
         checkNotNull(converter);
-        checkState(namespaceToTenantIdConverter == null,
+        final NamespaceToTenantIdConverter pastConverter = tenantIdConverters.put(projectId,
+                                                                                  converter);
+        checkState(pastConverter == null,
                    "A namespace converter has already been registered.");
-        namespaceToTenantIdConverter = converter;
     }
 
     /**
      * Retrieves the registered {@link NamespaceToTenantIdConverter}.
      *
-     * @return the {@linkplain #registerNamespaceConverter(NamespaceToTenantIdConverter) registered}
+     * @return the {@linkplain #registerNamespaceConverter registered}
      * {@link NamespaceToTenantIdConverter} wrapped into {@link Optional} or
      * {@link Optional#absent() Optional.absent()} if the converter has never been registered
      */
-    static Optional<NamespaceToTenantIdConverter> getNamespaceConverter() {
-        return Optional.fromNullable(namespaceToTenantIdConverter);
+    static Optional<NamespaceToTenantIdConverter> getNamespaceConverter(ProjectId projectId) {
+        checkNotNull(projectId);
+        final NamespaceToTenantIdConverter converter = tenantIdConverters.get(projectId);
+        return Optional.fromNullable(converter);
     }
 }

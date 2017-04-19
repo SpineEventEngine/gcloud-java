@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
@@ -30,6 +31,8 @@ import com.google.common.collect.Collections2;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.net.InternetDomain;
+import org.spine3.server.storage.datastore.Given;
+import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
@@ -49,6 +52,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.spine3.server.storage.datastore.Given.TEST_PROJECT_ID;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.test.Verify.assertSize;
@@ -68,7 +72,8 @@ public class NamespaceIndexShould {
         new NullPointerTester()
                 .setDefault(Namespace.class, defaultNamespace)
                 .setDefault(TenantId.class, tenantId)
-                .testInstanceMethods(new NamespaceIndex(mockDatastore()), NullPointerTester.Visibility.PACKAGE);
+                .testInstanceMethods(new NamespaceIndex(mockDatastore()),
+                                     NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
@@ -112,7 +117,7 @@ public class NamespaceIndexShould {
         final TenantId newId = TenantId.newBuilder()
                                        .setValue(TENANT_ID_STRING)
                                        .build();
-        final Namespace newNamespace = Namespace.of(newId);
+        final Namespace newNamespace = Namespace.of(newId, Given.TEST_PROJECT_ID);
 
         namespaceIndex.keep(newId);
         assertTrue(namespaceIndex.contains(newNamespace));
@@ -129,7 +134,7 @@ public class NamespaceIndexShould {
         final TenantId fakeId = TenantId.newBuilder()
                                         .setValue(TENANT_ID_STRING)
                                         .build();
-        final Namespace fakeNamespace = Namespace.of(fakeId);
+        final Namespace fakeNamespace = Namespace.of(fakeId, ProjectId.of("fake-prj"));
 
         assertFalse(namespaceIndex.contains(fakeNamespace));
     }
@@ -158,7 +163,7 @@ public class NamespaceIndexShould {
             }
         };
         // The tested object
-        final NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery);
+        final NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery, TEST_PROJECT_ID);
 
         // The test flow
         final Runnable flow = new Runnable() {
@@ -179,7 +184,8 @@ public class NamespaceIndexShould {
                 namespaceIndex.keep(newTenantId); // sync
 
                 // Check new value added
-                final boolean success = namespaceIndex.contains(Namespace.of(newTenantId)); // sync
+                final boolean success = namespaceIndex.contains(Namespace.of(newTenantId,
+                                                                             TEST_PROJECT_ID)); // sync
                 assertTrue(success);
 
                 // Check returned set has newly added element
@@ -230,6 +236,9 @@ public class NamespaceIndexShould {
 
     private static Datastore mockDatastore() {
         final Datastore datastore = mock(Datastore.class);
+        final DatastoreOptions options = mock(DatastoreOptions.class);
+        when(datastore.getOptions()).thenReturn(options);
+        when(options.getProjectId()).thenReturn("some-project-id-NamespaceIndexShould");
         final QueryResults results = mock(QueryResults.class);
         when(datastore.run(any(Query.class))).thenReturn(results);
         return datastore;

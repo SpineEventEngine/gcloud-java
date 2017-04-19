@@ -21,11 +21,15 @@
 package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.KeyQuery;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
 import org.spine3.server.storage.datastore.Kind;
+import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.server.tenant.TenantIndex;
 import org.spine3.users.TenantId;
 
@@ -36,6 +40,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.getNamespaceConverter;
 
 /**
  * A DAO for the Datastore {@link Namespace Namespaces}.
@@ -52,12 +57,15 @@ class NamespaceIndex implements TenantIndex {
     private final Object lock = new Object();
     private final NamespaceQuery namespaceQuery;
 
+    private final ProjectId projectId;
+
     NamespaceIndex(Datastore datastore) {
-        this(new DefaultNamespaceQuery(datastore));
+        this(new DefaultNamespaceQuery(datastore), ProjectId.of(datastore));
     }
 
-    NamespaceIndex(NamespaceQuery namespaceQuery) {
+    NamespaceIndex(NamespaceQuery namespaceQuery, ProjectId projectId) {
         this.namespaceQuery = checkNotNull(namespaceQuery);
+        this.projectId = projectId;
     }
 
     /**
@@ -71,7 +79,7 @@ class NamespaceIndex implements TenantIndex {
     public void keep(TenantId id) {
         checkNotNull(id);
         synchronized (lock) {
-            cache.add(Namespace.of(id));
+            cache.add(Namespace.of(id, projectId));
         }
     }
 
@@ -103,11 +111,11 @@ class NamespaceIndex implements TenantIndex {
 
     /**
      * Checks if the Datastore has the given {@linkplain Namespace}, i.e. there is at least one
-     * {@linkplain com.google.cloud.datastore.Entity Entity} in this {@linkplain Namespace}.
+     * {@linkplain Entity Entity} in this {@linkplain Namespace}.
      *
      * @param namespace the {@linkplain Namespace} yo look for
      * @return {@code true} if there is at least one
-     * {@linkplain com.google.cloud.datastore.Entity Entity} in this {@linkplain Namespace} or the corresponding
+     * {@linkplain Entity Entity} in this {@linkplain Namespace} or the corresponding
      * {@link TenantId} has been put into the index by a call to {@link #keep(TenantId)},
      * {@code false} otherwise
      */
@@ -165,7 +173,7 @@ class NamespaceIndex implements TenantIndex {
     /**
      * A default implementation of the {@link NamespaceQuery}.
      *
-     * <p>Delegates to the Datastore {@link com.google.cloud.datastore.KeyQuery KeyQuery}.
+     * <p>Delegates to the Datastore {@link KeyQuery KeyQuery}.
      */
     private static class DefaultNamespaceQuery implements NamespaceQuery {
 
@@ -188,7 +196,7 @@ class NamespaceIndex implements TenantIndex {
     /**
      * A function retrieving a {@link Namespace} from a given {@link Key}.
      */
-    private static class NamespaceUnpacker implements Function<Key, Namespace> {
+    private class NamespaceUnpacker implements Function<Key, Namespace> {
 
         /**
          * Retrieves a {@link Namespace} from a given {@link Key}.
@@ -201,7 +209,7 @@ class NamespaceIndex implements TenantIndex {
         @Override
         public Namespace apply(@Nullable Key key) {
             checkNotNull(key);
-            return Namespace.fromNameOf(key);
+            return Namespace.fromNameOf(key, projectId);
         }
     }
 }

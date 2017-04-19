@@ -35,9 +35,12 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.datastore.tenant.Namespace;
 import org.spine3.server.storage.datastore.tenant.NamespaceSupplier;
+import org.spine3.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.type.TypeUrl;
+
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -63,12 +66,14 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final boolean multitenant;
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
     private final Supplier<Namespace> namespaceSupplier;
+    private final NamespaceToTenantIdConverter namespaceToTenantIdConverter;
 
     private DatastoreStorageFactory(Builder builder) {
         this(builder.datastore,
              builder.multitenant,
              builder.typeRegistry,
-             builder.namespaceSupplier);
+             builder.namespaceSupplier,
+             builder.namespaceToTenantIdConverter);
     }
 
     @VisibleForTesting
@@ -76,21 +81,25 @@ public class DatastoreStorageFactory implements StorageFactory {
     protected DatastoreStorageFactory(Datastore datastore,
                                       boolean multitenant,
                                       ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
-                                      Supplier<Namespace> namespaceSupplier) {
+                                      Supplier<Namespace> namespaceSupplier,
+                                      @Nullable NamespaceToTenantIdConverter namespaceConverter) {
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
         this.namespaceSupplier = namespaceSupplier;
         this.datastore = createDatastoreWrapper(datastore);
+        this.namespaceToTenantIdConverter = namespaceConverter;
     }
 
     protected DatastoreStorageFactory(DatastoreWrapper datastore,
                                       boolean multitenant,
                                       ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
-                                      Supplier<Namespace> namespaceSupplier) {
+                                      Supplier<Namespace> namespaceSupplier,
+                                      @Nullable NamespaceToTenantIdConverter namespaceConverter) {
         this.datastore = checkNotNull(datastore);
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
         this.namespaceSupplier = namespaceSupplier;
+        this.namespaceToTenantIdConverter = namespaceConverter;
     }
 
     protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
@@ -124,7 +133,7 @@ public class DatastoreStorageFactory implements StorageFactory {
                ? new DatastoreStorageFactory(getDatastore(),
                                              false,
                                              typeRegistry,
-                                             NamespaceSupplier.singleTenant())
+                                             NamespaceSupplier.singleTenant(), namespaceToTenantIdConverter)
                : this;
     }
 
@@ -209,6 +218,10 @@ public class DatastoreStorageFactory implements StorageFactory {
         return datastore;
     }
 
+    public NamespaceToTenantIdConverter getNamespaceToTenantIdConverter() {
+        return namespaceToTenantIdConverter;
+    }
+
     /**
      * Creates new instance of {@link Builder}.
      */
@@ -223,11 +236,14 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         private static final String DEFAULT_NAMESPACE_ERROR_MESSAGE =
                 "Datastore namespace should not be configured explicitly for a multitenant storage.";
+        private static final String REDUNDANT_TENANT_ID_CONVERTER_ERROR_MESSAGE =
+                "Setting a custom NamespaceToTenantIdConverter to a single-tenant storage factory is redundant.";
 
         private Datastore datastore;
         private boolean multitenant;
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
         private Supplier<Namespace> namespaceSupplier;
+        public NamespaceToTenantIdConverter namespaceToTenantIdConverter;
 
         private Builder() {
             // Avoid direct initialization
@@ -277,6 +293,21 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
 
         /**
+         * Sets a {@link NamespaceToTenantIdConverter} for converting the Datastore namespaces and
+         * the {@link org.spine3.users.TenantId Tenant IDs} back and forth.
+         *
+         * <p>Setting this parameter is reasonable (but not required) only if the storage is
+         * multitenant. Otherwise, an exception will be thrown on {@linkplain #build() build}.
+         *
+         * @param converter a custom converter for the Tenant IDs
+         * @return self for method chaining
+         */
+        public Builder setNamespaceToTenantIdConverter(NamespaceToTenantIdConverter converter) {
+            this.namespaceToTenantIdConverter = checkNotNull(converter);
+            return this;
+        }
+
+        /**
          * Creates a new instance of {@code DatastoreStorageFactory} with the passed parameters.
          *
          * <p>Precondition of a successful build is that the {@code datastore} field has been set.
@@ -288,6 +319,10 @@ public class DatastoreStorageFactory implements StorageFactory {
             this.namespaceSupplier = createNamespaceSupplier();
             if (typeRegistry == null) {
                 typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
+            }
+            if (!multitenant) {
+                checkArgument(namespaceToTenantIdConverter == null,
+                              REDUNDANT_TENANT_ID_CONVERTER_ERROR_MESSAGE);
             }
             return new DatastoreStorageFactory(this);
         }
@@ -302,7 +337,8 @@ public class DatastoreStorageFactory implements StorageFactory {
                                             .getNamespace();
             }
             final Supplier<Namespace> result = NamespaceSupplier.instance(multitenant,
-                                                                          defaultNamespace);
+                                                                          defaultNamespace,
+                                                                          ProjectId.of(datastore));
             return result;
         }
 

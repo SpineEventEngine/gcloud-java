@@ -129,8 +129,10 @@ public class DatastoreWrapperShould {
 
     @Test
     public void generate_key_factories_aware_of_tenancy() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
-                                                               TestNamespaceSuppliers.multitenant());
+        final ProjectId projectId = ProjectId.of(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME);
+        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(
+                Given.testDatastore(),
+                TestNamespaceSuppliers.multitenant(projectId));
         final String tenantId1 = "first-tenant-ID";
         final String tenantId1Prefixed = "Vfirst-tenant-ID";
         final String tenantId2 = "second@tenant.id";

@@ -22,24 +22,40 @@ package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Key;
 import com.google.common.testing.EqualsTester;
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.net.EmailAddress;
 import org.spine3.net.InternetDomain;
+import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.users.TenantId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
+import static org.spine3.server.storage.datastore.Given.TEST_PROJECT_ID;
+import static org.spine3.server.storage.datastore.Given.TEST_PROJECT_ID_VALUE;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class NamespaceShould {
 
+    @Test
+    public void not_accept_nulls() {
+        new NullPointerTester()
+                .setDefault(ProjectId.class, TEST_PROJECT_ID)
+                .setDefault(TenantId.class, TenantId.getDefaultInstance())
+                .setDefault(Key.class, Key.newBuilder(TEST_PROJECT_ID_VALUE,
+                                                      "kind",
+                                                      "name")
+                                          .build())
+                .testStaticMethods(Namespace.class, NullPointerTester.Visibility.PACKAGE);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_empty_TenantIds() {
         final TenantId emptyId = TenantId.getDefaultInstance();
-        Namespace.of(emptyId);
+        Namespace.of(emptyId, ProjectId.of("no-matter-what"));
     }
 
     @SuppressWarnings("LocalVariableNamingConvention")
@@ -50,7 +66,7 @@ public class NamespaceShould {
         final TenantId aGroupTenantId = TenantId.newBuilder()
                                                 .setValue(aGroupValue)
                                                 .build();
-        final Namespace aGroupNamespaceFromTenantId = Namespace.of(aGroupTenantId);
+        final Namespace aGroupNamespaceFromTenantId = Namespace.of(aGroupTenantId, TEST_PROJECT_ID);
         final Namespace aGroupNamespaceFromString = Namespace.of(aGroupValue);
         final Namespace duplicateAGroupNamespaceFromString = Namespace.of(aGroupValue);
 
@@ -59,12 +75,13 @@ public class NamespaceShould {
                                                 .setEmail(EmailAddress.newBuilder()
                                                                       .setValue(bGroupValue))
                                                 .build();
-        final Namespace bGroupNamespaceFromTenantId = Namespace.of(bGroupTenantId);
-        final Namespace cGroupNamespaceFromString = Namespace.of(bGroupValue); // Same string but other type
+        final Namespace bGroupNamespaceFromTenantId = Namespace.of(bGroupTenantId, TEST_PROJECT_ID);
+        // Same string but other type
+        final Namespace cGroupNamespaceFromString = Namespace.of(bGroupValue);
 
         new EqualsTester()
-                .addEqualityGroup(aGroupNamespaceFromTenantId,
-                                  aGroupNamespaceFromString,
+                .addEqualityGroup(aGroupNamespaceFromTenantId)
+                .addEqualityGroup(aGroupNamespaceFromString,
                                   duplicateAGroupNamespaceFromString)
                 .addEqualityGroup(bGroupNamespaceFromTenantId)
                 .addEqualityGroup(cGroupNamespaceFromString)
@@ -89,9 +106,9 @@ public class NamespaceShould {
         assertNotEquals(domainId, stringId);
         assertNotEquals(emailId, stringId);
 
-        final Namespace fromDomainId = Namespace.of(domainId);
-        final Namespace fromEmailId = Namespace.of(emailId);
-        final Namespace fromStringId = Namespace.of(stringId);
+        final Namespace fromDomainId = Namespace.of(domainId, TEST_PROJECT_ID);
+        final Namespace fromEmailId = Namespace.of(emailId, TEST_PROJECT_ID);
+        final Namespace fromStringId = Namespace.of(stringId, TEST_PROJECT_ID);
 
         assertNotEquals(fromDomainId, fromEmailId);
         assertNotEquals(fromDomainId, fromStringId);
@@ -108,9 +125,10 @@ public class NamespaceShould {
 
     @Test
     public void return_null_if_key_is_empty() {
-        final Key emptyKey = Key.newBuilder("project", "my.type", 42)
+        final ProjectId projectId = ProjectId.of("project");
+        final Key emptyKey = Key.newBuilder(projectId.getValue(), "my.type", 42)
                                 .build();
-        final Namespace namespace = Namespace.fromNameOf(emptyKey);
+        final Namespace namespace = Namespace.fromNameOf(emptyKey, projectId);
         assertNull(namespace);
     }
 

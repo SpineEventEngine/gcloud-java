@@ -18,20 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.tenant;
-
-import org.spine3.server.storage.datastore.ProjectId;
+package org.spine3.server.storage.datastore;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class TestNamespaceSuppliers {
+public class Given {
 
-    public static NamespaceSupplier singleTenant() {
-        return NamespaceSupplier.singleTenant();
-    }
-
-    public static NamespaceSupplier multitenant(ProjectId projectId) {
-        return NamespaceSupplier.multitenant(projectId);
-    }
+    public static final String TEST_PROJECT_ID_VALUE = "spine-dev";
+    public static final ProjectId TEST_PROJECT_ID = ProjectId.of(TEST_PROJECT_ID_VALUE);
 }

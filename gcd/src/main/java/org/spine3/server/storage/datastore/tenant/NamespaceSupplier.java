@@ -24,9 +24,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import org.spine3.annotations.Internal;
 import org.spine3.server.storage.datastore.DatastoreStorageFactory;
+import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A supplier for the {@linkplain Namespace namespaces}, based on the current multitenancy configuration and
@@ -47,9 +50,12 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
      *
      * @see org.spine3.server.storage.StorageFactory#isMultitenant
      */
-    public static NamespaceSupplier instance(boolean multitenant, @Nullable String defaultNamespace) {
+    public static NamespaceSupplier instance(boolean multitenant,
+                                             @Nullable String defaultNamespace,
+                                             @Nullable ProjectId projectId) {
         if (multitenant) {
-            return multitenant();
+            checkNotNull(projectId);
+            return multitenant(projectId);
         } else {
             return new SingleTenantNamespaceSupplier(defaultNamespace);
         }
@@ -60,8 +66,8 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
     }
 
     @VisibleForTesting
-    static NamespaceSupplier multitenant() {
-        return MultitenantNamespaceSupplier.instance();
+    static NamespaceSupplier multitenant(ProjectId projectId) {
+        return MultitenantNamespaceSupplier.forProject(projectId);
     }
 
     /**

@@ -22,6 +22,7 @@ package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
@@ -70,6 +71,9 @@ public class DatastoreTenantsShould {
 
     private static Datastore mockDatastore() {
         final Datastore datastore = mock(Datastore.class);
+        final DatastoreOptions options = mock(DatastoreOptions.class);
+        when(datastore.getOptions()).thenReturn(options);
+        when(options.getProjectId()).thenReturn("some-project-id-DatastoreTenantsShould");
         when(datastore.run(any(Query.class))).thenReturn(new MockKeyQueryResults());
         return datastore;
     }
