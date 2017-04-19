@@ -24,8 +24,6 @@ import com.google.cloud.datastore.Key;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import org.spine3.net.EmailAddress;
-import org.spine3.net.InternetDomain;
 import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.users.TenantId;
 
@@ -77,16 +75,14 @@ import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.getNam
  */
 public final class Namespace {
 
-    private static final String DOMAIN_PREFIX = "D";
-    private static final String EMAIL_PREFIX = "E";
-    private static final String STRING_VALUE_PREFIX = "V";
+    static final String DOMAIN_PREFIX = "D";
+    static final String EMAIL_PREFIX = "E";
+    static final String STRING_VALUE_PREFIX = "V";
 
     private static final ImmutableMap<String, TenantIdConverterType> TYPE_PREFIX_TO_CONVERTER =
             ImmutableMap.of(DOMAIN_PREFIX, TenantIdConverterType.DOMAIN,
                             EMAIL_PREFIX, TenantIdConverterType.EMAIL,
                             STRING_VALUE_PREFIX, TenantIdConverterType.VALUE);
-
-    private static final int SIGNIFICANT_PART_START_INDEX = 1;
 
     private static final Pattern AT_SYMBOL_PATTERN = Pattern.compile("@", Pattern.LITERAL);
     private static final String AT_SYMBOL_REPLACEMENT = "-at-";
@@ -245,31 +241,26 @@ public final class Namespace {
         /**
          * Converts the given {@code Namespace} into a {@link TenantId} which has a {@code domain}.
          */
-        DOMAIN(new DomainNamespaceToTenantIdConverter()),
+        DOMAIN(NamespaceConverters.forDomain()),
         /**
          * Converts the given {@code Namespace} into a {@link TenantId} which has an {@code email}.
          */
-        EMAIL(new EmailNamespaceToTenantIdConverter()),
+        EMAIL(NamespaceConverters.forEmail()),
 
         /**
          * Converts the given {@code Namespace} into a {@link TenantId} which represents a string
          * value.
          */
-        VALUE(new StringValueNamespaceToTenantIdConverter()),
+        VALUE(NamespaceConverters.forStringValue()),
 
         /**
-         * Converts the given {@code Namespace} into a {@link TenantId} which represents a string
-         * value.
+         * Flags a custom user-defined converter.
          *
-         * <p>The difference to {@link #VALUE} is that the namespaces associated with this
-         * converter have no type prefix, as they are defined by the user beforehand.
-         *
-         * <p>This strategy uses a
-         * {@link com.google.common.base.Converter Converter&lt;String, TenantId&gt;} if it is
-         * {@linkplain DatastoreTenants#getNamespaceConverter registered}, or throws an exception
-         * if the it's not.
+         * <p>The {@link #namespaceConverter} field of this object has
+         * {@linkplain NamespaceConverters#stub() stub} value, which thrown
+         * {@link UnsupportedOperationException} on any call.
          */
-        PREDEFINED_VALUE(new StubNamespaceToTenantIdConverter()),
+        PREDEFINED_VALUE(NamespaceConverters.stub()),
 
         /**
          * Represents a custom user-defined namespace for a single-tenant storage.
@@ -277,7 +268,7 @@ public final class Namespace {
          * The conversion performed by the converter of this object acts with the string value of
          * a {@link TenantId} and performs no action on the namespace string itself.
          */
-        CUSTOM(new EmptyNamespaceConverter());
+        CUSTOM(NamespaceConverters.forCustomNamespace());
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         // This enum is ancillary and is not to be serialized
@@ -300,139 +291,5 @@ public final class Namespace {
         }
     }
 
-    /**
-     * A converter for the framework-defined namespaces, which are stored with a type prefix.
-     */
-    abstract static class PrefixedNamespaceToTenantIddConverter
-            extends NamespaceToTenantIdConverter {
 
-        private final String prefix;
-
-        PrefixedNamespaceToTenantIddConverter(String prefix) {
-            super();
-            this.prefix = prefix;
-        }
-
-        @Override
-        protected String toString(TenantId tenantId) {
-            return prefix + toSignificantString(tenantId);
-        }
-
-        @Override
-        protected final TenantId toTenantId(String namespace) {
-            final String significantNamespacePart =
-                    namespace.substring(SIGNIFICANT_PART_START_INDEX);
-            return significantStringToTenantId(significantNamespacePart);
-        }
-
-        abstract TenantId significantStringToTenantId(String namespace);
-        abstract String toSignificantString(TenantId tenantId);
-    }
-
-    private static class DomainNamespaceToTenantIdConverter
-            extends PrefixedNamespaceToTenantIddConverter {
-
-        private DomainNamespaceToTenantIdConverter() {
-            super(DOMAIN_PREFIX);
-        }
-
-        @Override
-        protected String toSignificantString(TenantId tenantId) {
-            final String value = tenantId.getDomain()
-                                         .getValue();
-            return value;
-        }
-
-        @Override
-        protected TenantId significantStringToTenantId(String namespace) {
-            final InternetDomain domain = InternetDomain.newBuilder()
-                                                        .setValue(namespace)
-                                                        .build();
-            final TenantId tenantId = TenantId.newBuilder()
-                                              .setDomain(domain)
-                                              .build();
-            return tenantId;
-        }
-    }
-
-    private static class EmailNamespaceToTenantIdConverter
-            extends PrefixedNamespaceToTenantIddConverter {
-
-        private EmailNamespaceToTenantIdConverter() {
-            super(EMAIL_PREFIX);
-        }
-
-        @Override
-        protected String toSignificantString(TenantId tenantId) {
-            final String value = tenantId.getEmail()
-                                         .getValue();
-            return value;
-        }
-
-        @Override
-        protected TenantId significantStringToTenantId(String namespace) {
-            final EmailAddress email = EmailAddress.newBuilder()
-                                                   .setValue(namespace)
-                                                   .build();
-            final TenantId tenantId = TenantId.newBuilder()
-                                              .setEmail(email)
-                                              .build();
-            return tenantId;
-        }
-    }
-
-    private static class StringValueNamespaceToTenantIdConverter
-            extends PrefixedNamespaceToTenantIddConverter {
-
-        private StringValueNamespaceToTenantIdConverter() {
-            super(STRING_VALUE_PREFIX);
-        }
-
-        @Override
-        protected String toSignificantString(TenantId tenantId) {
-            final String value = tenantId.getValue();
-            return value;
-        }
-
-        @Override
-        protected TenantId significantStringToTenantId(String namespace) {
-            final TenantId tenantId = TenantId.newBuilder()
-                                              .setValue(namespace)
-                                              .build();
-            return tenantId;
-        }
-    }
-
-    private static class StubNamespaceToTenantIdConverter extends NamespaceToTenantIdConverter {
-        @Override
-        protected String toString(TenantId tenantId) {
-            throw stubUsage();
-        }
-
-        @Override
-        protected TenantId toTenantId(String namespace) {
-            throw stubUsage();
-        }
-
-        private static UnsupportedOperationException stubUsage() {
-            throw new UnsupportedOperationException("Use custom converter instead.");
-        }
-    }
-
-    private static class EmptyNamespaceConverter extends NamespaceToTenantIdConverter {
-
-        @Override
-        protected String toString(TenantId tenantId) {
-            final String ns = tenantId.getValue();
-            return ns;
-        }
-
-        @Override
-        protected TenantId toTenantId(String namespace) {
-            final TenantId tenantId = TenantId.newBuilder()
-                                              .setValue(namespace)
-                                              .build();
-            return tenantId;
-        }
-    }
 }
