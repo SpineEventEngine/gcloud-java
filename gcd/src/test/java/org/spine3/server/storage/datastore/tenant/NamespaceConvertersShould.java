@@ -23,6 +23,7 @@ package org.spine3.server.storage.datastore.tenant;
 import org.junit.Test;
 import org.spine3.users.TenantId;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
@@ -37,7 +38,7 @@ public class NamespaceConvertersShould {
     }
 
     @Test
-    public void create_stub_faily_converter() {
+    public void create_stub_faulty_converter() {
         final NamespaceToTenantIdConverter converter = NamespaceConverters.stub();
         try {
             converter.convert("");
@@ -51,5 +52,18 @@ public class NamespaceConvertersShould {
             fail();
         } catch (UnsupportedOperationException ignored) {
         }
+    }
+
+    @Test
+    public void create_custom_namespace_converter() {
+        final NamespaceToTenantIdConverter converter = NamespaceConverters.forCustomNamespace();
+        final Namespace namespace = Namespace.of("namespace");
+        final TenantId fromInternalConverter = namespace.toTenantId();
+        final TenantId fromExternalConverter = converter.convert(namespace.getValue());
+
+        assertEquals(fromInternalConverter, fromExternalConverter);
+
+        final String restored = converter.reverse().convert(fromExternalConverter);
+        assertEquals(namespace.getValue(), restored);
     }
 }
