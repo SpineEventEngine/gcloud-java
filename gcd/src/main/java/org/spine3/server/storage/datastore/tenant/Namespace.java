@@ -91,7 +91,7 @@ public final class Namespace {
     private final NamespaceToTenantIdConverter converter;
 
     private Namespace() {
-        this("", TenantIdConverterType.VALUE.namespaceConverter);
+        this("", TenantIdConverterType.CUSTOM.namespaceConverter);
     }
 
     private Namespace(String value,

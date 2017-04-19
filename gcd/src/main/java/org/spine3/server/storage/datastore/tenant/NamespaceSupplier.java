@@ -52,7 +52,7 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
      */
     public static NamespaceSupplier instance(boolean multitenant,
                                              @Nullable String defaultNamespace,
-                                             @Nullable ProjectId projectId) {
+                                             ProjectId projectId) {
         if (multitenant) {
             checkNotNull(projectId);
             return multitenant(projectId);
