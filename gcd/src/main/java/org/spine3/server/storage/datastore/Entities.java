@@ -30,7 +30,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.storage.EntityField;
 import org.spine3.type.TypeUrl;
 
@@ -157,17 +156,6 @@ class Entities {
         return entity;
     }
 
-    static LifecycleFlags getLifecycleFlags(Entity entity) {
-        checkNotNull(entity);
-        final boolean archived = isArchived(entity);
-        final boolean deleted = isDeleted(entity);
-        final LifecycleFlags result = LifecycleFlags.newBuilder()
-                                                  .setArchived(archived)
-                                                  .setDeleted(deleted)
-                                                  .build();
-        return result;
-    }
-
     static Predicate<Entity> activeEntity() {
         return NOT_ARCHIVED_OR_DELETED;
     }
@@ -185,7 +173,7 @@ class Entities {
             return message;
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
             throw new IllegalStateException("Couldn't invoke static method "
-                    + DEFAULT_MESSAGE_FACTORY_METHOD_NAME + " from class "
+                    + DEFAULT_MESSAGE_FACTORY_METHOD_NAME + " of class "
                     + messageClass.getCanonicalName(), e);
         }
     }
