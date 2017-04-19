@@ -173,13 +173,12 @@ public class DatastoreStorageFactory implements StorageFactory {
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
         final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
         final DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
-                .setStateType(typeUrl)
-                .setDatastore(getDatastore())
-                .setMultitenant(isMultitenant())
-                .setColumnTypeRegistry(typeRegistry)
-                .setIdClass(idClass)
-                .build();
-
+                                                         .setStateType(typeUrl)
+                                                         .setDatastore(getDatastore())
+                                                         .setMultitenant(isMultitenant())
+                                                         .setColumnTypeRegistry(typeRegistry)
+                                                         .setIdClass(idClass)
+                                                         .build();
         return result;
     }
 
