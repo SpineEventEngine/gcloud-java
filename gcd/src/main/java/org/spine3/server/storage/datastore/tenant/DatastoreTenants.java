@@ -21,18 +21,9 @@
 package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
-import org.spine3.annotations.Internal;
-import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.server.tenant.TenantIndex;
 
-import java.util.Map;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Collections.synchronizedMap;
 
 /**
  * A factory of the Datastore-specific Tenant related objects.
@@ -40,9 +31,6 @@ import static java.util.Collections.synchronizedMap;
  * @author Dmytro Dashenkov
  */
 public class DatastoreTenants {
-
-    private static final Map<ProjectId, NamespaceToTenantIdConverter> tenantIdConverters =
-            synchronizedMap(Maps.<ProjectId, NamespaceToTenantIdConverter>newHashMap());
 
     private DatastoreTenants() {
         // Prevent the utility class initialization
@@ -90,45 +78,5 @@ public class DatastoreTenants {
         checkNotNull(datastore);
         final TenantIndex index = new NamespaceIndex(datastore);
         return index;
-    }
-
-    /**
-     * Registers a {@link com.google.common.base.Converter Converter} from string datastore
-     * namespace into {@link org.spine3.users.TenantId TenantId} for the given {@link ProjectId}.
-     *
-     * <p>After this converter has been registered, all the Datastore namespace operations will use
-     * it instead of the {@linkplain Namespace default behavior}.
-     *
-     * <p>Note, that this method should be called only once per one instance of {@link ProjectId}.
-     * All the subsequent invocations will cause {@code IllegalStateException}s.
-     *
-     * @param converter the converter to use for the
-     *                  namespace-to-{@link org.spine3.users.TenantId TenantId} and vice versa
-     *                  conversions
-     * @see Namespace
-     */
-    @Internal
-    public static void registerNamespaceConverter(ProjectId projectId,
-                                                  NamespaceToTenantIdConverter converter) {
-        checkNotNull(projectId);
-        checkNotNull(converter);
-        final NamespaceToTenantIdConverter pastConverter = tenantIdConverters.put(projectId,
-                                                                                  converter);
-        checkState(pastConverter == null,
-                   "A namespace converter has already been registered.");
-    }
-
-    /**
-     * Retrieves the registered {@link NamespaceToTenantIdConverter}.
-     *
-     * @return the {@linkplain #registerNamespaceConverter registered}
-     * {@link NamespaceToTenantIdConverter} wrapped into {@link Optional} or
-     * {@link Optional#absent() Optional.absent()} if the converter has never been registered
-     */
-    @VisibleForTesting
-    public static Optional<NamespaceToTenantIdConverter> getNamespaceConverter(ProjectId projectId) {
-        checkNotNull(projectId);
-        final NamespaceToTenantIdConverter converter = tenantIdConverters.get(projectId);
-        return Optional.fromNullable(converter);
     }
 }

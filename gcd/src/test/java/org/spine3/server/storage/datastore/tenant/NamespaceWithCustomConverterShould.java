@@ -32,8 +32,8 @@ import org.spine3.users.TenantId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.getNamespaceConverter;
-import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.registerNamespaceConverter;
+import static org.spine3.server.storage.datastore.tenant.TenantConverterRegistry.getNamespaceConverter;
+import static org.spine3.server.storage.datastore.tenant.TenantConverterRegistry.registerNamespaceConverter;
 
 /**
  * @author Dmytro Dashenkov

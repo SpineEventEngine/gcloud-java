@@ -30,8 +30,8 @@ import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.ColumnType;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.datastore.tenant.DatastoreTenants;
 import org.spine3.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
+import org.spine3.server.storage.datastore.tenant.TenantConverterRegistry;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.server.storage.datastore.type.SimpleDatastoreColumnType;
 
@@ -148,12 +148,12 @@ public class DatastoreStorageFactoryBuilderShould {
         assertNotNull(factory);
 
         final Optional<NamespaceToTenantIdConverter> restoredConverter =
-                DatastoreTenants.getNamespaceConverter(withCustomConverter);
+                TenantConverterRegistry.getNamespaceConverter(withCustomConverter);
         assertTrue(restoredConverter.isPresent());
         assertSame(converter, restoredConverter.get());
 
         final Optional<NamespaceToTenantIdConverter> absentConverter =
-                DatastoreTenants.getNamespaceConverter(withDefaultConverter);
+                TenantConverterRegistry.getNamespaceConverter(withDefaultConverter);
         assertFalse(absentConverter.isPresent());
     }
 

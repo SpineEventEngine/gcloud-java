@@ -26,7 +26,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyQuery;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
 import org.spine3.server.storage.datastore.Kind;
 import org.spine3.server.storage.datastore.ProjectId;
@@ -40,7 +39,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.getNamespaceConverter;
 
 /**
  * A DAO for the Datastore {@link Namespace Namespaces}.

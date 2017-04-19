@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.regex.Matcher.quoteReplacement;
-import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.getNamespaceConverter;
+import static org.spine3.server.storage.datastore.tenant.TenantConverterRegistry.getNamespaceConverter;
 
 /**
  * A value object representing the Datastore
@@ -51,7 +51,7 @@ import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.getNam
  * </ul>
  *
  * <p>If a {@link NamespaceToTenantIdConverter} is
- * {@linkplain DatastoreTenants#registerNamespaceConverter registered}, then the converter is used
+ * {@linkplain TenantConverterRegistry#registerNamespaceConverter registered}, then the converter is used
  * and the prefixes are absent.
  *
  * <p>One should register a {@link NamespaceToTenantIdConverter} <b>if and only if</b>
