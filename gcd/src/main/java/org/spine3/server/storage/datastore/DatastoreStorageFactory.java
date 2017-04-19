@@ -33,6 +33,7 @@ import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.datastore.tenant.DatastoreTenants;
 import org.spine3.server.storage.datastore.tenant.Namespace;
 import org.spine3.server.storage.datastore.tenant.NamespaceSupplier;
 import org.spine3.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
@@ -324,6 +325,12 @@ public class DatastoreStorageFactory implements StorageFactory {
                 checkArgument(namespaceToTenantIdConverter == null,
                               REDUNDANT_TENANT_ID_CONVERTER_ERROR_MESSAGE);
             }
+            if (namespaceToTenantIdConverter != null) {
+                final ProjectId projectId = ProjectId.of(datastore);
+                DatastoreTenants.registerNamespaceConverter(projectId,
+                                                            namespaceToTenantIdConverter);
+            }
+
             return new DatastoreStorageFactory(this);
         }
 

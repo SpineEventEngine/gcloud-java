@@ -23,6 +23,7 @@ package org.spine3.server.storage.datastore.tenant;
 import com.google.cloud.datastore.Datastore;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import org.spine3.annotations.Internal;
 import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.server.tenant.TenantIndex;
 
@@ -92,19 +93,20 @@ public class DatastoreTenants {
 
     /**
      * Registers a {@link com.google.common.base.Converter Converter} from string datastore
-     * namespace into {@link org.spine3.users.TenantId TenantId}.
+     * namespace into {@link org.spine3.users.TenantId TenantId} for the given {@link ProjectId}.
      *
      * <p>After this converter has been registered, all the Datastore namespace operations will use
      * it instead of the {@linkplain Namespace default behavior}.
      *
-     * <p>Note, that this method should be called only once. All the subsequent invocations will
-     * cause {@code IllegalStateException}s.
+     * <p>Note, that this method should be called only once per one instance of {@link ProjectId}.
+     * All the subsequent invocations will cause {@code IllegalStateException}s.
      *
      * @param converter the converter to use for the
      *                  namespace-to-{@link org.spine3.users.TenantId TenantId} and vice versa
      *                  conversions
      * @see Namespace
      */
+    @Internal
     public static void registerNamespaceConverter(ProjectId projectId,
                                                   NamespaceToTenantIdConverter converter) {
         checkNotNull(projectId);
