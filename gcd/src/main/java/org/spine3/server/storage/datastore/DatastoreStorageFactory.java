@@ -219,10 +219,6 @@ public class DatastoreStorageFactory implements StorageFactory {
         return datastore;
     }
 
-    public NamespaceToTenantIdConverter getNamespaceToTenantIdConverter() {
-        return namespaceToTenantIdConverter;
-    }
-
     /**
      * Creates new instance of {@link Builder}.
      */
