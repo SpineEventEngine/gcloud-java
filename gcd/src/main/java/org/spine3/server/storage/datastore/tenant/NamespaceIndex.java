@@ -111,7 +111,7 @@ class NamespaceIndex implements TenantIndex {
      * Checks if the Datastore has the given {@linkplain Namespace}, i.e. there is at least one
      * {@linkplain Entity Entity} in this {@linkplain Namespace}.
      *
-     * @param namespace the {@linkplain Namespace} yo look for
+     * @param namespace the {@linkplain Namespace} to look for
      * @return {@code true} if there is at least one
      * {@linkplain Entity Entity} in this {@linkplain Namespace} or the corresponding
      * {@link TenantId} has been put into the index by a call to {@link #keep(TenantId)},
@@ -201,7 +201,7 @@ class NamespaceIndex implements TenantIndex {
          *
          * @param key a Datastore {@link Key} representing a Datastore namespace
          * @return the result of call to {@link Key#getName()} or {@code null} if the
-         * {@link Key} has no name (i.e. for the default namespace)
+         * {@link Key} has no name (i.e. the namespace is default)
          */
         @Nullable
         @Override

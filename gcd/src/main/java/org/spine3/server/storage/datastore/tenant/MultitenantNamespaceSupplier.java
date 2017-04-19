@@ -69,7 +69,7 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
         /**
          * Creates a new instance of {@code TenantIdRetriever}.
          *
-         * @throws IllegalStateException if the application is has a single tenant
+         * @throws IllegalStateException if the application has a single tenant
          */
         private TenantIdRetriever() throws IllegalStateException {
             super(true);

@@ -61,7 +61,7 @@ import static org.spine3.server.storage.datastore.tenant.TenantConverterRegistry
  * following conditions to be met:
  * <ul>
  *     <li>There are no namespaces in the Datastore at all. All the namespace manipulations are
- *     preformed by the mean of the framework.
+ *     preformed by the means of the framework.
  *     <li>All the present namespaces start with one of the prefixes listed above. In this case
  *     the described {@link TenantId} conversion behavior will be applied.
  *     <li>A custom {@link NamespaceToTenantIdConverter} is registered.
@@ -242,6 +242,7 @@ public final class Namespace {
          * Converts the given {@code Namespace} into a {@link TenantId} which has a {@code domain}.
          */
         DOMAIN(NamespaceConverters.forDomain()),
+
         /**
          * Converts the given {@code Namespace} into a {@link TenantId} which has an {@code email}.
          */
@@ -271,7 +272,7 @@ public final class Namespace {
         CUSTOM(NamespaceConverters.forCustomNamespace());
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        // This enum is ancillary and is not to be serialized
+            // This enum is ancillary and is not to be serialized
         private final NamespaceToTenantIdConverter namespaceConverter;
 
         private static TenantIdConverterType forTenantId(

@@ -259,7 +259,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          *
          * <p>By default this option is {@code false}.
          *
-         * <p>If the multitenancy is enables, the passed {@link Datastore} should not have
+         * <p>If the multitenancy is enabled, the passed {@link Datastore} should not have
          * a {@code namespace} set explicitly.
          *
          * @param multitenant {@code true} if the {@code DatastoreStorageFactory} should
