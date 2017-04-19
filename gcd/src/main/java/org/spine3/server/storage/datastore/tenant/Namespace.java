@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.regex.Matcher.quoteReplacement;
-import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.*;
+import static org.spine3.server.storage.datastore.tenant.DatastoreTenants.getNamespaceConverter;
 
 /**
  * A value object representing the Datastore
@@ -309,6 +309,7 @@ public final class Namespace {
         private final String prefix;
 
         PrefixedNamespaceToTenantIddConverter(String prefix) {
+            super();
             this.prefix = prefix;
         }
 
