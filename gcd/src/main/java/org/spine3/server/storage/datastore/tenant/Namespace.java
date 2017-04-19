@@ -81,10 +81,10 @@ public final class Namespace {
     private static final String EMAIL_PREFIX = "E";
     private static final String STRING_VALUE_PREFIX = "V";
 
-    private static final ImmutableMap<String, TenantIdConverter> TYPE_PREFIX_TO_CONVERTER =
-            ImmutableMap.of(DOMAIN_PREFIX, TenantIdConverter.DOMAIN,
-                            EMAIL_PREFIX, TenantIdConverter.EMAIL,
-                            STRING_VALUE_PREFIX, TenantIdConverter.VALUE);
+    private static final ImmutableMap<String, TenantIdConverterType> TYPE_PREFIX_TO_CONVERTER =
+            ImmutableMap.of(DOMAIN_PREFIX, TenantIdConverterType.DOMAIN,
+                            EMAIL_PREFIX, TenantIdConverterType.EMAIL,
+                            STRING_VALUE_PREFIX, TenantIdConverterType.VALUE);
 
     private static final int SIGNIFICANT_PART_START_INDEX = 1;
 
@@ -92,19 +92,16 @@ public final class Namespace {
     private static final String AT_SYMBOL_REPLACEMENT = "-at-";
 
     private final String value;
-    private final TenantIdConverter tenantIdConverter;
-    private final NamespaceToTenantIdConverter customConverter;
+    private final NamespaceToTenantIdConverter converter;
 
     private Namespace() {
-        this("", TenantIdConverter.VALUE, null);
+        this("", TenantIdConverterType.VALUE.namespaceConverter);
     }
 
     private Namespace(String value,
-                      TenantIdConverter tenantIdConverter,
-                      @Nullable NamespaceToTenantIdConverter customConverter) {
+                      NamespaceToTenantIdConverter customConverter) {
         this.value = escapeIllegalCharacters(value);
-        this.tenantIdConverter = tenantIdConverter;
-        this.customConverter = customConverter;
+        this.converter = customConverter;
     }
 
     /**
@@ -117,7 +114,8 @@ public final class Namespace {
         if (datastoreNamespace.isEmpty()) {
             return new Namespace();
         } else {
-            return TenantIdConverter.EMPTY.fromSignificantPart(datastoreNamespace);
+            return new Namespace(datastoreNamespace,
+                                 TenantIdConverterType.CUSTOM.namespaceConverter);
         }
     }
 
@@ -134,12 +132,13 @@ public final class Namespace {
         final Optional<NamespaceToTenantIdConverter> customConverter =
                 getNamespaceConverter(projectId);
 
-        final TenantIdConverter tenantIdConverter =
-                TenantIdConverter.forTenantId(id, customConverter.orNull());
+        final TenantIdConverterType tenantIdConverterType =
+                TenantIdConverterType.forTenantId(id, customConverter.orNull());
         final NamespaceToTenantIdConverter converter = customConverter
-                .or(tenantIdConverter.namespaceConverter);
+                .or(tenantIdConverterType.namespaceConverter);
         final String ns = converter.toString(id);
-        return new Namespace(ns, tenantIdConverter, customConverter.orNull());
+        return new Namespace(ns,
+                             customConverter.or(tenantIdConverterType.namespaceConverter));
     }
 
     /**
@@ -161,20 +160,20 @@ public final class Namespace {
             return null;
         }
 
-        final TenantIdConverter tenantIdConverter;
+        final TenantIdConverterType tenantIdConverterType;
         if (customConverter.isPresent()) {
-            tenantIdConverter = TenantIdConverter.PREDEFINED_VALUE;
+            tenantIdConverterType = TenantIdConverterType.PREDEFINED_VALUE;
         } else {
             final String typePrefix = String.valueOf(namespace.charAt(0));
-            tenantIdConverter = TYPE_PREFIX_TO_CONVERTER.get(typePrefix);
-            checkState(tenantIdConverter != null,
+            tenantIdConverterType = TYPE_PREFIX_TO_CONVERTER.get(typePrefix);
+            checkState(tenantIdConverterType != null,
                        "Could not determine a TenantId converter for namespace %s.",
                        namespace);
         }
 
+        final NamespaceToTenantIdConverter defaultConverter = tenantIdConverterType.namespaceConverter;
         final Namespace result = new Namespace(namespace,
-                                               tenantIdConverter,
-                                               customConverter.orNull());
+                                               customConverter.or(defaultConverter));
         return result;
     }
 
@@ -189,13 +188,6 @@ public final class Namespace {
      */
     public String getValue() {
         return value;
-    }
-
-    /**
-     * @return a string value of this {@code Namespace} without a type prefix
-     */
-    private String getSignificantPart() {
-        return value.substring(SIGNIFICANT_PART_START_INDEX);
     }
 
     /**
@@ -218,15 +210,8 @@ public final class Namespace {
      * @return a {@link TenantId} represented by this {@code Namespace}
      */
     TenantId toTenantId() {
-        final NamespaceToTenantIdConverter converter = isCustomConversionExpected()
-                                                       ? customConverter
-                                                       : tenantIdConverter.namespaceConverter;
         final TenantId tenantId = converter.convert(getValue());
         return tenantId;
-    }
-
-    private boolean isCustomConversionExpected() {
-        return customConverter != null;
     }
 
     @Override
@@ -252,40 +237,25 @@ public final class Namespace {
     }
 
     /**
-     * The converter of the {@code Namespace} into a {@link TenantId} of the specific type.
+     * An enumeration of converters of the {@code Namespace} into a {@link TenantId} of the specific
+     * type.
      */
-    private enum TenantIdConverter {
+    private enum TenantIdConverterType {
 
         /**
          * Converts the given {@code Namespace} into a {@link TenantId} which has a {@code domain}.
          */
-        DOMAIN(new DomainNamespaceToTenantIdConverter()) {
-            @Override
-            String getPrefix() {
-                return DOMAIN_PREFIX;
-            }
-        },
-
+        DOMAIN(new DomainNamespaceToTenantIdConverter()),
         /**
          * Converts the given {@code Namespace} into a {@link TenantId} which has an {@code email}.
          */
-        EMAIL(new EmailNamespaceToTenantIdConverter()) {
-            @Override
-            String getPrefix() {
-                return EMAIL_PREFIX;
-            }
-        },
+        EMAIL(new EmailNamespaceToTenantIdConverter()),
 
         /**
          * Converts the given {@code Namespace} into a {@link TenantId} which represents a string
          * value.
          */
-        VALUE(new StringValueNamespaceToTenantIdConverter()) {
-            @Override
-            String getPrefix() {
-                return STRING_VALUE_PREFIX;
-            }
-        },
+        VALUE(new StringValueNamespaceToTenantIdConverter()),
 
         /**
          * Converts the given {@code Namespace} into a {@link TenantId} which represents a string
@@ -299,39 +269,21 @@ public final class Namespace {
          * {@linkplain DatastoreTenants#getNamespaceConverter registered}, or throws an exception
          * if the it's not.
          */
-        PREDEFINED_VALUE(new StubNamespaceToTenantIdConverter()) {
-            @Override
-            String getPrefix() {
-                return "";
-            }
-        },
+        PREDEFINED_VALUE(new StubNamespaceToTenantIdConverter()),
 
-        EMPTY(new NamespaceToTenantIdConverter() {
-            @Override
-            protected String toString(TenantId tenantId) {
-                final String ns = tenantId.getValue();
-                return ns;
-            }
-
-            @Override
-            protected TenantId toTenantId(String namespace) {
-                final TenantId tenantId = TenantId.newBuilder()
-                                                  .setValue(namespace)
-                                                  .build();
-                return tenantId;
-            }
-        }) {
-            @Override
-            String getPrefix() {
-                return "";
-            }
-        };
+        /**
+         * Represents a custom user-defined namespace for a single-tenant storage.
+         *
+         * The conversion performed by the converter of this object acts with the string value of
+         * a {@link TenantId} and performs no action on the namespace string itself.
+         */
+        CUSTOM(new EmptyNamespaceConverter());
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         // This enum is ancillary and is not to be serialized
         private final NamespaceToTenantIdConverter namespaceConverter;
 
-        private static TenantIdConverter forTenantId(
+        private static TenantIdConverterType forTenantId(
                 TenantId tenantId,
                 @Nullable NamespaceToTenantIdConverter customConverter) {
             if (customConverter != null) {
@@ -339,22 +291,18 @@ public final class Namespace {
             }
             final TenantId.KindCase kindCase = tenantId.getKindCase();
             final String kindCaseName = kindCase.name();
-            final TenantIdConverter converter = valueOf(kindCaseName);
+            final TenantIdConverterType converter = valueOf(kindCaseName);
             return converter;
         }
 
-        TenantIdConverter(NamespaceToTenantIdConverter namespaceConverter) {
+        TenantIdConverterType(NamespaceToTenantIdConverter namespaceConverter) {
             this.namespaceConverter = namespaceConverter;
         }
-
-        Namespace fromSignificantPart(String significantPart) {
-            final String value = getPrefix() + significantPart;
-            return new Namespace(value, this, null);
-        }
-
-        abstract String getPrefix();
     }
 
+    /**
+     * A converter for the framework-defined namespaces, which are stored with a type prefix.
+     */
     abstract static class PrefixedNamespaceToTenantIddConverter
             extends NamespaceToTenantIdConverter {
 
@@ -366,19 +314,18 @@ public final class Namespace {
 
         @Override
         protected String toString(TenantId tenantId) {
-            return prefix + toString0(tenantId);
+            return prefix + toSignificantString(tenantId);
         }
 
         @Override
         protected final TenantId toTenantId(String namespace) {
             final String significantNamespacePart =
                     namespace.substring(SIGNIFICANT_PART_START_INDEX);
-            return toTenantId0(significantNamespacePart);
+            return significantStringToTenantId(significantNamespacePart);
         }
 
-        // TODO:2017-04-19:dmytro.dashenkov: Rename.
-        abstract TenantId toTenantId0(String namespace);
-        abstract String toString0(TenantId tenantId);
+        abstract TenantId significantStringToTenantId(String namespace);
+        abstract String toSignificantString(TenantId tenantId);
     }
 
     private static class DomainNamespaceToTenantIdConverter
@@ -389,14 +336,14 @@ public final class Namespace {
         }
 
         @Override
-        protected String toString0(TenantId tenantId) {
+        protected String toSignificantString(TenantId tenantId) {
             final String value = tenantId.getDomain()
                                          .getValue();
             return value;
         }
 
         @Override
-        protected TenantId toTenantId0(String namespace) {
+        protected TenantId significantStringToTenantId(String namespace) {
             final InternetDomain domain = InternetDomain.newBuilder()
                                                         .setValue(namespace)
                                                         .build();
@@ -415,14 +362,14 @@ public final class Namespace {
         }
 
         @Override
-        protected String toString0(TenantId tenantId) {
+        protected String toSignificantString(TenantId tenantId) {
             final String value = tenantId.getEmail()
                                          .getValue();
             return value;
         }
 
         @Override
-        protected TenantId toTenantId0(String namespace) {
+        protected TenantId significantStringToTenantId(String namespace) {
             final EmailAddress email = EmailAddress.newBuilder()
                                                    .setValue(namespace)
                                                    .build();
@@ -441,13 +388,13 @@ public final class Namespace {
         }
 
         @Override
-        protected String toString0(TenantId tenantId) {
+        protected String toSignificantString(TenantId tenantId) {
             final String value = tenantId.getValue();
             return value;
         }
 
         @Override
-        protected TenantId toTenantId0(String namespace) {
+        protected TenantId significantStringToTenantId(String namespace) {
             final TenantId tenantId = TenantId.newBuilder()
                                               .setValue(namespace)
                                               .build();
@@ -455,8 +402,7 @@ public final class Namespace {
         }
     }
 
-    private static class StubNamespaceToTenantIdConverter
-            extends NamespaceToTenantIdConverter {
+    private static class StubNamespaceToTenantIdConverter extends NamespaceToTenantIdConverter {
         @Override
         protected String toString(TenantId tenantId) {
             throw stubUsage();
@@ -469,6 +415,23 @@ public final class Namespace {
 
         private static UnsupportedOperationException stubUsage() {
             throw new UnsupportedOperationException("Use custom converter instead.");
+        }
+    }
+
+    private static class EmptyNamespaceConverter extends NamespaceToTenantIdConverter {
+
+        @Override
+        protected String toString(TenantId tenantId) {
+            final String ns = tenantId.getValue();
+            return ns;
+        }
+
+        @Override
+        protected TenantId toTenantId(String namespace) {
+            final TenantId tenantId = TenantId.newBuilder()
+                                              .setValue(namespace)
+                                              .build();
+            return tenantId;
         }
     }
 }
