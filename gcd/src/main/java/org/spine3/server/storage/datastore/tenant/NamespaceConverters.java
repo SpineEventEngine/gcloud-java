@@ -41,22 +41,66 @@ final class NamespaceConverters {
         // Prevent static class initialization
     }
 
+    /**
+     * Creates a converter for a namespace and a {@link TenantId} which has the {@code domain}
+     * field.
+     *
+     * <p>Appends the {@link Namespace#DOMAIN_PREFIX "D"} prefix to the result namespace string.
+     *
+     * @return new instance of the domain-based {@link TenantId} converter
+     */
     static NamespaceToTenantIdConverter forDomain() {
         return new DomainNamespaceToTenantIdConverter();
     }
 
+    /**
+     * Creates a converter for a namespace and a {@link TenantId} which has the {@code email}
+     * field.
+     *
+     * <p>Appends the {@link Namespace#EMAIL_PREFIX "E"} prefix to the result namespace string.
+     *
+     * @return new instance of the email-based {@link TenantId} converter
+     */
     static NamespaceToTenantIdConverter forEmail() {
         return new EmailNamespaceToTenantIdConverter();
     }
 
+    /**
+     * Creates a converter for a namespace and a {@link TenantId} which has the string {@code value}
+     * field.
+     *
+     * <p>Appends the {@link Namespace#STRING_VALUE_PREFIX "V"} prefix to the result namespace
+     * string.
+     *
+     * @return new instance of the string-based {@link TenantId} converter
+     */
     static NamespaceToTenantIdConverter forStringValue() {
         return new StringValueNamespaceToTenantIdConverter();
     }
 
+    /**
+     * Creates a converter for a custom user-defined namespace, which appears in a single-tenant
+     * storage and a {@link TenantId} which has the string {@code value} field.
+     *
+     * <p>The difference to the {@link #forStringValue() NamespaceConverters.forStringValue()} is
+     * that this implementation does not append any type prefix to the result namespace string.
+     *
+     * @return new instance of the domain-based {@link TenantId} converter
+     */
     static NamespaceToTenantIdConverter forCustomNamespace() {
         return new CustomNamespaceConverter();
     }
 
+    /**
+     * Creates a stub {@link NamespaceToTenantIdConverter}.
+     *
+     * <p>This implementation throws {@link UnsupportedOperationException} on any operation.
+     *
+     * <p>The result of this method should be used if there is a custom user-defined
+     * {@link NamespaceToTenantIdConverter converter} which should be used instead.
+     *
+     * @return a stub instance of {@link NamespaceToTenantIdConverter}
+     */
     static NamespaceToTenantIdConverter stub() {
         return new StubNamespaceToTenantIdConverter();
     }
@@ -87,6 +131,7 @@ final class NamespaceConverters {
         }
 
         abstract TenantId significantStringToTenantId(String namespace);
+
         abstract String toSignificantString(TenantId tenantId);
     }
 
