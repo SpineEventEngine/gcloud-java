@@ -41,7 +41,7 @@ import static java.util.Collections.synchronizedMap;
  * @author Dmytro Dashenkov
  */
 @Internal
-public class TenantConverterRegistry {
+public final class TenantConverterRegistry {
 
     private static final Map<ProjectId, NamespaceToTenantIdConverter> tenantIdConverters =
             synchronizedMap(Maps.<ProjectId, NamespaceToTenantIdConverter>newHashMap());

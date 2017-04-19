@@ -44,7 +44,7 @@ import java.util.Date;
  *
  * @author Dmytro Dashenkov
  */
-class DsColumnTypes {
+final class DsColumnTypes {
 
     private DsColumnTypes() {
         // Prevent instantiation of a utility class

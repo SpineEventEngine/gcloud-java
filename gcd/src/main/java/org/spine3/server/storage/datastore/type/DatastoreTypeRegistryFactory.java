@@ -38,7 +38,7 @@ import static org.spine3.server.storage.datastore.type.DsColumnTypes.versionType
  *
  * @author Dmytro Dashenkov
  */
-public class DatastoreTypeRegistryFactory {
+public final class DatastoreTypeRegistryFactory {
 
     private static final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> DEFAULT_REGISTRY =
             ColumnTypeRegistry.<DatastoreColumnType<?, ?>>newBuilder()

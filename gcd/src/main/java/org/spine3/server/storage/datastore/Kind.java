@@ -84,7 +84,7 @@ public final class Kind {
     }
 
     /**
-     * Produces a {@code Kind} representing the datastore namespace kind.
+     * Produces a {@code Kind} representing the Datastore namespace kind.
      */
     @Internal
     public static Kind ofNamespace() {

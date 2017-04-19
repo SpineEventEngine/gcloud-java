@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-public class ProjectId {
+public final class ProjectId {
 
     private final String value;
 
