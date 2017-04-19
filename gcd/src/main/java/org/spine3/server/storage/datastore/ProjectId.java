@@ -28,7 +28,7 @@ import com.google.common.base.Objects;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value-type representing the Datastore project ID.
+ * A value-type representing the GAE project ID.
  *
  * @author Dmytro Dashenkov
  */
@@ -40,11 +40,24 @@ public class ProjectId {
         this.value = value;
     }
 
+    /**
+     * Creates a new instance of {@code ProjectId} with the passed value.
+     *
+     * @param projectId the actual project ID value
+     * @return new instance of {@code ProjectId}
+     */
     public static ProjectId of(String projectId) {
         final ProjectId result = new ProjectId(checkNotNull(projectId));
         return result;
     }
 
+    /**
+     * Creates new instance of {@code ProjectId} with the value taken from the passed
+     * {@linkplain Datastore Datastore config}.
+     *
+     * @param datastore the {@link Datastore} instance to take the value from
+     * @return new instance of {@code ProjectId}
+     */
     public static ProjectId of(Datastore datastore) {
         checkNotNull(datastore);
         final DatastoreOptions options = datastore.getOptions();
@@ -52,6 +65,9 @@ public class ProjectId {
         return of(value);
     }
 
+    /**
+     * @return the string value of the GAE project ID
+     */
     public String getValue() {
         return value;
     }
