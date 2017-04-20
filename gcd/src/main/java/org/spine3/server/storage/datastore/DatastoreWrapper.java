@@ -23,6 +23,7 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
+import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.DatastoreReaderWriter;
 import com.google.cloud.datastore.DatastoreWriter;
@@ -39,11 +40,14 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.server.storage.datastore.tenant.DsNamespaceValidator;
+import org.spine3.server.storage.datastore.tenant.Namespace;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -52,6 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Math.min;
@@ -71,26 +76,41 @@ public class DatastoreWrapper {
     private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
     private static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
-    private static final Map<String, KeyFactory> keyFactories = new HashMap<>();
+    private static final Map<Kind, KeyFactory> keyFactories = new HashMap<>();
 
+    private final Supplier<Namespace> namespaceSupplier;
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
 
-    protected DatastoreWrapper(Datastore datastore) {
-        this.datastore = datastore;
+    private DsNamespaceValidator namespaceValidator;
+
+    /**
+     * Creates a new instance of {@code DatastoreWrapper}.
+     *
+     * @param datastore         {@link Datastore} to wrap
+     * @param namespaceSupplier the instance of {@link Supplier Namespace Supplier}, providing
+     *                          the namespaces for Datastore queries
+     */
+    protected DatastoreWrapper(Datastore datastore, Supplier<Namespace> namespaceSupplier) {
+        this.namespaceSupplier = checkNotNull(namespaceSupplier);
+        this.datastore = checkNotNull(datastore);
         this.actor = datastore;
     }
 
     /**
-     * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns the instance.
+     * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns
+     * the instance.
      *
-     * @param datastore {@link Datastore} to wrap
+     * @param datastore         {@link Datastore} to wrap
+     * @param namespaceSupplier an instance of {@link Supplier Supplier&lt;Namespace&gt;} to get the
+     *                          namespaces for the queries from
      * @return new instance of {@code DatastoreWrapper}
      */
     @SuppressWarnings("WeakerAccess") // Part of API
-    protected static DatastoreWrapper wrap(Datastore datastore) {
-        return new DatastoreWrapper(datastore);
+    protected static DatastoreWrapper wrap(Datastore datastore,
+                                           Supplier<Namespace> namespaceSupplier) {
+        return new DatastoreWrapper(datastore, namespaceSupplier);
     }
 
     /**
@@ -169,7 +189,8 @@ public class DatastoreWrapper {
      * Retrieves an {@link Entity} for each of the given keys.
      *
      * @param keys {@link Key Keys} to search for
-     * @return A list of found entities in the order of keys (including {@code null} values for nonexistent keys)
+     * @return A list of found entities in the order of keys (including {@code null} values for
+     * nonexistent keys)
      * @see DatastoreReader#fetch(Key...)
      */
     public List<Entity> read(Iterable<Key> keys) {
@@ -186,44 +207,35 @@ public class DatastoreWrapper {
     /**
      * Queries the Datastore with the given arguments.
      *
-     * <p>As the Datastore may return a partial result set for {@link EntityQuery}, {@link KeyQuery}
-     * and {@link ProjectionEntityQuery}, it is required to repeat a query with the adjusted cursor position.
+     * <p>As the Datastore may return a partial result set for {@link EntityQuery},
+     * {@link KeyQuery} and {@link ProjectionEntityQuery}, it is required to repeat a query with
+     * the adjusted cursor position.
      *
-     * <p>Therefore, an execution of this method may in fact result in several queries to the Datastore instance.
+     * <p>Therefore, an execution of this method may in fact result in several queries to
+     * the Datastore instance.
      *
      * @param query {@link Query} to execute upon the Datastore
      * @return results fo the query packed in a {@link List}
      * @see DatastoreReader#run(Query)
      */
-    public List<Entity> read(Query<Entity> query) {
-        QueryResults<Entity> queryResults = actor.run(query);
+    public List<Entity> read(StructuredQuery<Entity> query) {
+        final Namespace namespace = getNamespace();
+        final StructuredQuery<Entity> queryWithNamespace = query.toBuilder()
+                                                                .setNamespace(namespace.getValue())
+                                                                .build();
+        QueryResults<Entity> queryResults = actor.run(queryWithNamespace);
         final List<Entity> resultsAsList = newLinkedList();
 
         while (queryResults != null && queryResults.hasNext()) {
             Iterators.addAll(resultsAsList, queryResults);
 
             final Cursor cursorAfter = queryResults.getCursorAfter();
-            final Query<Entity> queryForMoreResults;
+            final Query<Entity> queryForMoreResults =
+                    queryWithNamespace.toBuilder()
+                                      .setStartCursor(cursorAfter)
+                                      .build();
 
-            /**
-             * The generic {@link Query} cannot be transformed into the {@code Builder} instance due to different
-             * nature of builders per {@code Query} subclass.
-             *
-             * <p>That's why the only way to repeat the same query with the cursor position adjusted is
-             * to cast the {@code Query} instance to its subclass. Subclass instances may be transformed into
-             * the {@code Builder}s, allowing to inject a new {@code startCursor} value.
-             **/
-
-            if (query instanceof StructuredQuery) {
-                final StructuredQuery<Entity> structuredQuery = (StructuredQuery<Entity>) query;
-                queryForMoreResults = structuredQuery.toBuilder()
-                                                     .setStartCursor(cursorAfter)
-                                                     .build();
-            } else {
-                queryForMoreResults = null;
-            }
-
-            queryResults = queryForMoreResults == null ? null : actor.run(queryForMoreResults);
+            queryResults = actor.run(queryForMoreResults);
         }
 
         return resultsAsList;
@@ -244,9 +256,11 @@ public class DatastoreWrapper {
      * @param table kind (a.k.a. type, table, etc.) of the records to delete
      */
     void dropTable(String table) {
-        final Query<Entity> query = Query.newEntityQueryBuilder()
-                                         .setKind(table)
-                                         .build();
+        final Namespace namespace = getNamespace();
+        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+                                                   .setNamespace(namespace.getValue())
+                                                   .setKind(table)
+                                                   .build();
         final List<Entity> entities = read(query);
         final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
             @Nullable
@@ -350,20 +364,27 @@ public class DatastoreWrapper {
     }
 
     /**
-     * Retrieves an instance of {@link KeyFactory} unique for given Kind of data.
-     *
-     * <p>Retrieved instances are the same across all instances of {@code DatastoreWrapper}.
+     * Retrieves an instance of {@link KeyFactory} unique for given Kind of data regarding the current namespace.
      *
      * @param kind kind of {@link Entity} to generate keys for
      * @return an instance of {@link KeyFactory} for given kind
      */
-    public KeyFactory getKeyFactory(String kind) {
+    public KeyFactory getKeyFactory(Kind kind) {
         KeyFactory keyFactory = keyFactories.get(kind);
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
         }
+        final Namespace namespace = getNamespace();
+        keyFactory.setNamespace(namespace.getValue());
 
         return keyFactory;
+    }
+
+    public DatastoreOptions getDatastoreOptions() {
+        final DatastoreOptions options = datastore.getOptions()
+                                                  .toBuilder()
+                                                  .build();
+        return options;
     }
 
     @VisibleForTesting
@@ -371,9 +392,9 @@ public class DatastoreWrapper {
         return datastore;
     }
 
-    private KeyFactory initKeyFactory(String kind) {
+    private KeyFactory initKeyFactory(Kind kind) {
         final KeyFactory keyFactory = datastore.newKeyFactory()
-                                               .setKind(kind);
+                                               .setKind(kind.getValue());
         keyFactories.put(kind, keyFactory);
         return keyFactory;
     }
@@ -420,6 +441,19 @@ public class DatastoreWrapper {
             final Entity[] part = Arrays.copyOfRange(entities, partHead, partTail);
             writeSmallBulk(part);
         }
+    }
+
+    private Namespace getNamespace() {
+        final Namespace namespace = namespaceSupplier.get();
+        namespaceValidator().validate(namespace);
+        return namespace;
+    }
+
+    private DsNamespaceValidator namespaceValidator() {
+        if (namespaceValidator == null) {
+            namespaceValidator = new DsNamespaceValidator(getDatastore());
+        }
+        return namespaceValidator;
     }
 
     private void writeSmallBulk(Entity[] entities) {

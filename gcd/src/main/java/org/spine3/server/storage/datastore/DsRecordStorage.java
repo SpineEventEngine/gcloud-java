@@ -103,7 +103,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param descriptor the descriptor of the type of messages to save to the storage
      * @param datastore  the Datastore implementation to use
      */
-    public DsRecordStorage(Descriptor descriptor,
+    protected DsRecordStorage(Descriptor descriptor,
                            DatastoreWrapper datastore,
                            boolean multitenant,
                            ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
@@ -113,6 +113,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.datastore = datastore;
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
         this.idClass = checkNotNull(idClass);
+    }
+
+    private DsRecordStorage(Builder<I> builder) {
+        this(builder.descriptor,
+             builder.datastore,
+             builder.multitenant,
+             builder.columnTypeRegistry,
+             builder.idClass);
     }
 
     @Override
@@ -200,7 +208,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      *
      * <p>Allows the customization of the storage behavior in descendants.
      *
-     * @return the {@code TyprUrl} of the stored messages
+     * @return the {@link TypeUrl} of the stored messages
      */
     protected TypeUrl getTypeUrl() {
         return typeUrl;
@@ -319,7 +327,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     protected final I unpackKey(Entity entity) {
-        final String stringId = entity.getKey().getName();
+        final String stringId = entity.getKey()
+                                      .getName();
         final I id = Stringifiers.fromString(stringId, idClass);
         return id;
     }
@@ -355,6 +364,82 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     protected Kind getKind() {
         return kindFrom(typeUrl);
+    }
+
+    /**
+     * Creates new instance of the {@link Builder}.
+     *
+     * @param <I> the ID type of the instances built by the created {@link Builder}
+     * @return new instance of the {@link Builder}
+     */
+    public static <I> Builder<I> newBuilder() {
+        return new Builder<>();
+    }
+
+    /**
+     * A builder for the {@code DsRecordStorage}.
+     */
+    public static class Builder<I> {
+
+        private Descriptor descriptor;
+        private DatastoreWrapper datastore;
+        private boolean multitenant;
+        private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
+        private Class<I> idClass;
+
+        private Builder() {
+            // Prevent direct initialization
+        }
+
+        public Builder<I> setStateType(TypeUrl stateTypeUrl) {
+            checkNotNull(stateTypeUrl);
+            final Descriptor descriptor = (Descriptor) stateTypeUrl.getDescriptor();
+            this.descriptor = checkNotNull(descriptor);
+            return this;
+        }
+
+        /**
+         * @param datastore the {@link DatastoreWrapper} to use in this storage
+         */
+        public Builder<I> setDatastore(DatastoreWrapper datastore) {
+            this.datastore = checkNotNull(datastore);
+            return this;
+        }
+
+        /**
+         * @param multitenant {@code true} if the storage should be
+         * {@link org.spine3.server.storage.Storage#isMultitenant multitenant} or not
+         */
+        public Builder<I> setMultitenant(boolean multitenant) {
+            this.multitenant = multitenant;
+            return this;
+        }
+
+        /**
+         * @param columnTypeRegistry the registry of the Entity
+         * {@link org.spine3.server.entity.storage.Column Columns} types
+         */
+        public Builder<I> setColumnTypeRegistry(
+                ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
+            this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
+            return this;
+        }
+
+        public Builder<I> setIdClass(Class<I> idClass) {
+            this.idClass = checkNotNull(idClass);
+            return this;
+        }
+
+        /**
+         * Creates new instance of the {@code DsRecordStorage}.
+         */
+        public DsRecordStorage<I> build() {
+            checkNotNull(descriptor, "State descriptor is not set.");
+            checkNotNull(datastore, "Datastore is not set.");
+            checkNotNull(columnTypeRegistry, "Column type registry is not set.");
+            final DsRecordStorage<I> storage = new DsRecordStorage<>(this);
+            return storage;
+        }
     }
 
     /**

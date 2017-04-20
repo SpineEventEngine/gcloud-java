@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Dashenkov.
  * @see org.spine3.server.storage.Storage#index()
  */
-public class Indexes {
+public final class Indexes {
 
     private Indexes() {
         // Prevent instantiation of this utility class.

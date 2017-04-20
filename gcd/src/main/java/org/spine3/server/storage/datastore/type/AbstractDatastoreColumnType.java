@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
+import org.spine3.annotations.SPI;
 
 /**
  * An abstract base for implementing {@link DatastoreColumnType}.
@@ -31,6 +32,7 @@ import com.google.cloud.datastore.BaseEntity;
  *
  * @author Dmytro Dashenkov
  */
+@SPI
 public abstract class AbstractDatastoreColumnType<J, C> implements DatastoreColumnType<J, C> {
 
     /**

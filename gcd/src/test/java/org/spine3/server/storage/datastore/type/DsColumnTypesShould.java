@@ -127,15 +127,15 @@ public class DsColumnTypesShould {
     }
 
     @Test
-    public void provide_message_to_json_type() {
+    public void provide_message_to_string_type() {
         final DatastoreColumnType<AbstractMessage, String> type = DsColumnTypes.messageType();
 
         final AbstractMessage value = Sample.messageOfType(Project.class);
-        final String jsonMessage = Json.toJson(value);
+        final String stringMessage = Json.toCompactJson(value); // default Stringifier behavior
 
-        setDatastoreType(type, value, jsonMessage);
+        setDatastoreType(type, value, stringMessage);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(jsonMessage));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(stringMessage));
     }
 
     private <T> void setSimpleType(SimpleDatastoreColumnType<T> type, T value) {

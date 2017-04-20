@@ -22,19 +22,28 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
+import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.ColumnType;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
+import org.spine3.server.storage.datastore.tenant.TenantConverterRegistry;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.spine3.server.storage.datastore.type.SimpleDatastoreColumnType;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.spine3.server.storage.datastore.TestDatastoreStorageFactory.TestingDatastoreSingleton.INSTANCE;
+import static org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -77,9 +86,9 @@ public class DatastoreStorageFactoryBuilderShould {
         final StorageFactory factory =
                 DatastoreStorageFactory.newBuilder()
                                        .setDatastore(mockDatastore())
-                                       .setTypeRegistry(DatastoreTypeRegistryFactory.predefinedValuesAnd()
-                                                                                    .put(Byte.class, new MockByteColumnType())
-                                                                                    .build())
+                                       .setTypeRegistry(predefinedValuesAnd()
+                                                                .put(Byte.class, new MockByteColumnType())
+                                                                .build())
                                        .build();
         final ColumnTypeRegistry<?> registry = factory.getTypeRegistry();
         assertNotNull(registry);
@@ -87,13 +96,73 @@ public class DatastoreStorageFactoryBuilderShould {
         assertNotNull(type);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void ensure_datastore_has_no_namespace_if_multitenant() {
+        final DatastoreOptions options =
+                DatastoreOptions.newBuilder()
+                                .setNamespace("non-null-or-empty-namespace")
+                                .setProjectId(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME)
+                                .build();
+        DatastoreStorageFactory.newBuilder()
+                               .setMultitenant(true)
+                               .setDatastore(options.getService())
+                               .build();
+    }
+
+    @Test
+    public void allow_custom_namespace_for_single_tenant_instances() {
+        final String namespace = "my.custom.namespace";
+        final DatastoreOptions options =
+                DatastoreOptions.newBuilder()
+                                .setProjectId(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME)
+                                .setNamespace(namespace)
+                                .build();
+        final DatastoreStorageFactory factory =
+                DatastoreStorageFactory.newBuilder()
+                                       .setMultitenant(false)
+                                       .setDatastore(options.getService())
+                                       .build();
+        assertNotNull(factory);
+        final String actualNamespace = factory.getDatastore()
+                                              .getDatastoreOptions()
+                                              .getNamespace();
+        assertEquals(namespace, actualNamespace);
+    }
+
+    @Test
+    public void register_custom_tenant_id_converter_upon_build() {
+        final ProjectId withCustomConverter = ProjectId.of("customized");
+        final ProjectId withDefaultConverter = ProjectId.of("defaulted");
+
+        final DatastoreOptions options =
+                DatastoreOptions.newBuilder()
+                                .setProjectId(withCustomConverter.getValue())
+                                .build();
+        final NamespaceToTenantIdConverter converter = mock(NamespaceToTenantIdConverter.class);
+        final DatastoreStorageFactory factory =
+                DatastoreStorageFactory.newBuilder()
+                                       .setMultitenant(true)
+                                       .setDatastore(options.getService())
+                                       .setNamespaceToTenantIdConverter(converter)
+                                       .build();
+        assertNotNull(factory);
+
+        final Optional<NamespaceToTenantIdConverter> restoredConverter =
+                TenantConverterRegistry.getNamespaceConverter(withCustomConverter);
+        assertTrue(restoredConverter.isPresent());
+        assertSame(converter, restoredConverter.get());
+
+        final Optional<NamespaceToTenantIdConverter> absentConverter =
+                TenantConverterRegistry.getNamespaceConverter(withDefaultConverter);
+        assertFalse(absentConverter.isPresent());
+    }
+
     private static Datastore mockDatastore() {
-        return mock(Datastore.class);
+        return INSTANCE.value;
     }
 
     private static <T> Column<T> mockColumn(Class<T> type) {
-        @SuppressWarnings("unchecked")
-        final Column<T> mock = mock(Column.class);
+        @SuppressWarnings("unchecked") final Column<T> mock = mock(Column.class);
         when(mock.getType()).thenReturn(type);
         return mock;
     }

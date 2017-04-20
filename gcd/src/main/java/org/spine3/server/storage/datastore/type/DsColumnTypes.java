@@ -24,8 +24,9 @@ import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.DateTime;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Stringifier;
+import org.spine3.base.Stringifiers;
 import org.spine3.base.Version;
-import org.spine3.json.Json;
 import org.spine3.protobuf.Timestamps2;
 
 import java.util.Date;
@@ -43,7 +44,7 @@ import java.util.Date;
  *
  * @author Dmytro Dashenkov
  */
-class DsColumnTypes {
+final class DsColumnTypes {
 
     private DsColumnTypes() {
         // Prevent instantiation of a utility class
@@ -95,8 +96,7 @@ class DsColumnTypes {
 
     /**
      * @return new instance of {@link DatastoreColumnType} storing {@link AbstractMessage} as its
-     * {@link Json} {@code String} representation
-     * @see Json
+     * {@code String} representation taken from a {@link Stringifier}
      */
     static DatastoreColumnType<AbstractMessage, String> messageType() {
         return new MessageType();
@@ -185,7 +185,7 @@ class DsColumnTypes {
 
         @Override
         public String convertColumnValue(AbstractMessage fieldValue) {
-            return Json.toJson(fieldValue);
+            return Stringifiers.toString(fieldValue);
         }
 
         @Override

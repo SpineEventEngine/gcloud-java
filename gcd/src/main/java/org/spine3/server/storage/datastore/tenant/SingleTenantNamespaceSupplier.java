@@ -18,25 +18,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.type;
+package org.spine3.server.storage.datastore.tenant;
 
-import com.google.cloud.datastore.BaseEntity;
-import org.spine3.annotations.SPI;
-import org.spine3.server.entity.storage.SimpleColumnType;
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
- * A base for implementing {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface for Datastore
- * storage regardless the type conversion.
+ * A {@link NamespaceSupplier} for single-tenant storage factories.
  *
  * @author Dmytro Dashenkov
  */
-@SPI
-public abstract class SimpleDatastoreColumnType<T>
-        extends SimpleColumnType<T, BaseEntity.Builder, String>
-        implements DatastoreColumnType<T, T> {
+final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
 
+    private static final String DEFAULT_NAMESPACE = "";
+
+    private final Namespace namespace;
+
+    SingleTenantNamespaceSupplier(@Nullable String namespace) {
+        super();
+        this.namespace = isNullOrEmpty(namespace)
+                         ? NamespaceSingleton.INSTANCE.value
+                         : Namespace.of(namespace);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return the {@link Namespace} representing the empty string
+     */
     @Override
-    public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {
-        storageRecord.setNull(columnIdentifier);
+    public Namespace get() {
+        return namespace;
+    }
+
+    private enum NamespaceSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Namespace value = Namespace.of(DEFAULT_NAMESPACE);
     }
 }

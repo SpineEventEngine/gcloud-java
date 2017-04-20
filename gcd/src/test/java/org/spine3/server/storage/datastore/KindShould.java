@@ -20,9 +20,11 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.type.TypeName;
@@ -43,6 +45,22 @@ public class KindShould {
                 .setDefault(Message.class, Any.getDefaultInstance())
                 .setDefault(TypeName.class, TypeName.of(Any.class))
                 .testStaticMethods(Kind.class, NullPointerTester.Visibility.PACKAGE);
+    }
+
+    @Test
+    public void support_equality() {
+        final Kind anyFromDesc = Kind.of(Any.getDescriptor());
+        final Kind anyFromTypeUrl = Kind.of(TypeUrl.of(Any.class));
+        final Kind anyFromString = Kind.of("google.protobuf.Any");
+
+        final Kind fieldMaskFromInstance = Kind.of(FieldMask.getDefaultInstance());
+        final Kind fieldMaskFromTypeName = Kind.of(TypeName.of(FieldMask.class));
+        final Kind fieldMaskFromDesc = Kind.of(FieldMask.getDescriptor());
+
+        new EqualsTester()
+                .addEqualityGroup(anyFromDesc, anyFromString, anyFromTypeUrl)
+                .addEqualityGroup(fieldMaskFromDesc, fieldMaskFromInstance, fieldMaskFromTypeName)
+                .testEquals();
     }
 
     @Test(expected = IllegalArgumentException.class)

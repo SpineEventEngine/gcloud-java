@@ -18,25 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.type;
-
-import com.google.cloud.datastore.BaseEntity;
-import org.spine3.annotations.SPI;
-import org.spine3.server.entity.storage.SimpleColumnType;
-
 /**
- * A base for implementing {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface for Datastore
- * storage regardless the type conversion.
+ * This package contains the types which work with the Datastore-specific Tenant policy implementation.
  *
- * @author Dmytro Dashenkov
+ * @see org.spine3.server.storage.datastore.tenant.DatastoreTenants
  */
-@SPI
-public abstract class SimpleDatastoreColumnType<T>
-        extends SimpleColumnType<T, BaseEntity.Builder, String>
-        implements DatastoreColumnType<T, T> {
+@ParametersAreNonnullByDefault
+package org.spine3.server.storage.datastore.tenant;
 
-    @Override
-    public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {
-        storageRecord.setNull(columnIdentifier);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
