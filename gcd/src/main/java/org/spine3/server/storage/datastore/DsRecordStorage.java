@@ -22,9 +22,9 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Optional;
@@ -35,16 +35,17 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.storage.ColumnRecords;
 import org.spine3.server.entity.storage.ColumnType;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
+import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
+import org.spine3.string.Stringifiers;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -192,6 +193,12 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return queryAll(typeUrl, fieldMask);
     }
 
+    @Override
+    protected Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask) {
+        // TODO:2017-04-25:dmytro.dashenkov: Implement.
+        return null;
+    }
+
     /**
      * Provides an access to the GAE Datastore with an API, specific to the Spine framework.
      *
@@ -234,7 +241,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     protected Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
                                             FieldMask fieldMask) {
-        final EntityQuery query = buildAllQuery(typeUrl);
+        final StructuredQuery<Entity> query = buildAllQuery(typeUrl);
 
         final List<Entity> results = datastore.read(query);
 
@@ -261,9 +268,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return records.build();
     }
 
-    protected EntityQuery buildAllQuery(TypeUrl typeUrl) {
+    protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
         final String entityKind = kindFrom(typeUrl).getValue();
-        final EntityQuery query = Query.newEntityQueryBuilder()
+        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                        .setKind(entityKind)
                                        .build();
         return query;

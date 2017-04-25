@@ -23,6 +23,7 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -105,7 +106,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
     protected Map<AggregateStateId, EntityRecord> queryAllByType(TypeUrl typeUrl,
                                                                  FieldMask fieldMask) {
-        final EntityQuery query = buildByTypeQuery(typeUrl);
+        final StructuredQuery<Entity> query = buildByTypeQuery(typeUrl);
 
         final List<Entity> results = getDatastore().read(query);
 
@@ -161,10 +162,10 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         // NOP
     }
 
-    private EntityQuery buildByTypeQuery(TypeUrl typeUrl) {
-        final EntityQuery incompleteQuery = buildAllQuery(typeUrl);
+    private StructuredQuery<Entity> buildByTypeQuery(TypeUrl typeUrl) {
+        final StructuredQuery<Entity> incompleteQuery = buildAllQuery(typeUrl);
         final Filter filter = eq(TYPE_URL_KEY, typeUrl.value());
-        final EntityQuery query = incompleteQuery.toBuilder()
+        final StructuredQuery<Entity> query = incompleteQuery.toBuilder()
                                                  .setFilter(filter)
                                                  .build();
         return query;

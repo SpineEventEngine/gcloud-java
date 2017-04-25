@@ -32,11 +32,11 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import org.spine3.base.Stringifiers;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.string.Stringifiers;
+import org.spine3.time.Timestamps2;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 

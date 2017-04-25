@@ -25,13 +25,13 @@ import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.projection.ProjectionStorageShould;
 import org.spine3.test.projection.Project;
 import org.spine3.testdata.Sample;
+import org.spine3.time.Time;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -48,7 +48,7 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
         return EntityRecord.newBuilder()
                 .setState(
                         AnyPacker.pack(Sample.messageOfType(Project.class)))
-                .setVersion(Version.newBuilder().setNumber(42).setTimestamp(Timestamps2.getCurrentTime()))
+                .setVersion(Version.newBuilder().setNumber(42).setTimestamp(Time.getCurrentTime()))
                 .build();
     }
 
