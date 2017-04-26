@@ -32,6 +32,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -214,6 +215,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         Filter predicate = null;
         final Map<Column<?>, Object> columns = Maps.newHashMap(entityQuery.getParameters());
 
+        boolean handlesLifecycle = false;
         for (Entry<Column<?>, Object> column : columns.entrySet()) {
             final Object value = column.getValue();
             final Column<?> metadata = column.getKey();
@@ -225,7 +227,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             predicate = predicate == null
                         ? filter
                         : and(predicate, filter);
-
+            if (columnName.equals("archived") || column.equals("deleted")) {
+                handlesLifecycle = true;
+                // TODO:2017-04-26:dmytro.dashenkov: Refactor.
+            }
         }
 
         if (predicate != null) {
@@ -233,7 +238,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         final StructuredQuery<Entity> buildDatastoreQuery = datastoreQuery.build();
-        return queryAll(typeUrl, buildDatastoreQuery, fieldMask);
+        final Predicate<Entity> resultPredicate = handlesLifecycle
+                                                  ? Predicates.<Entity>alwaysTrue()
+                                                  : activeEntity();
+        return queryAll(typeUrl,
+                        buildDatastoreQuery,
+                        fieldMask,
+                        resultPredicate);
     }
 
     /**
@@ -279,13 +290,18 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     protected Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
                                             StructuredQuery<Entity> query,
                                             FieldMask fieldMask) {
-        final List<Entity> results = datastore.read(query);
+        return queryAll(typeUrl, query, fieldMask, activeEntity());
+    }
 
-        final Predicate<Entity> archivedAndDeletedFilter = activeEntity();
+    protected Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
+                                            StructuredQuery<Entity> query,
+                                            FieldMask fieldMask,
+                                            Predicate<Entity> resultFilter) {
+        final List<Entity> results = datastore.read(query);
 
         final ImmutableMap.Builder<I, EntityRecord> records = new ImmutableMap.Builder<>();
         for (Entity entity : results) {
-            if (!archivedAndDeletedFilter.apply(entity)) {
+            if (!resultFilter.apply(entity)) {
                 continue;
             }
             final IdRecordPair<I> recordPair = getRecordFromEntity(entity);
