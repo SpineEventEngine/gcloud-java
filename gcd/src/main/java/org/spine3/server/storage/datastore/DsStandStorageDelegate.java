@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Query;
@@ -155,12 +156,13 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         return idIterator;
     }
 
-//    @SuppressWarnings("MethodDoesntCallSuperMethod")
-//        // Ignore Entity Columns since StandStorage does not support them yet
-//    @Override
-//    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithColumns record) {
-//        // NOP
-//    }
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+        // Ignore Entity Columns since StandStorage does not support them yet
+    @Override
+    protected void populateFromStorageFields(BaseEntity.Builder entity,
+                                             EntityRecordWithColumns record) {
+        // NOP
+    }
 
     private StructuredQuery<Entity> buildByTypeQuery(TypeUrl typeUrl) {
         final StructuredQuery<Entity> incompleteQuery = buildAllQuery(typeUrl);
