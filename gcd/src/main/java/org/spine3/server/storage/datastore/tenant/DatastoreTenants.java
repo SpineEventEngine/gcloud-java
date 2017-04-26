@@ -69,14 +69,16 @@ public final class DatastoreTenants {
      * </pre>
      *
      * <p>A single-tenant app (or a single-tenant BoundedContext in a multitenant app) does not
-     * require a {@code TenantIndex} to be set explicitly.
+     * require a {@code TenantIndex} to be set explicitly, so this method assumes that it is an a
+     * single tenant context.
      *
      * @param datastore the {@link Datastore} to get the {@link TenantIndex} for
      * @return a new instance of the {@link TenantIndex}
      */
     public static TenantIndex index(Datastore datastore) {
         checkNotNull(datastore);
-        final TenantIndex index = new NamespaceIndex(datastore);
+        // We assume we are in a single-tenant execution environment
+        final TenantIndex index = new NamespaceIndex(datastore, true);
         return index;
     }
 }

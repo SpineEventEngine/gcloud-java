@@ -52,6 +52,11 @@ final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
         return namespace;
     }
 
+    @Override
+    public boolean isMultitenant() {
+        return false;
+    }
+
     private enum NamespaceSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
