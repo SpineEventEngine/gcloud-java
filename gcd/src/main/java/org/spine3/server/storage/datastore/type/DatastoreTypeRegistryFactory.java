@@ -68,7 +68,7 @@ public final class DatastoreTypeRegistryFactory {
      *     <li>{@code Boolean}
      *     <li>{@link Timestamp} stored as {@link com.google.cloud.datastore.DateTime DateTime}
      *     <li>{@link AbstractMessage Message} stored as a {@code String} retrieved form a
-     *     {@link org.spine3.base.Stringifier Stringifier}
+     *     {@link org.spine3.string.Stringifier Stringifier}
      *     <li>{@link Version} stored as an {@code int} version number
      * </ul>
      *

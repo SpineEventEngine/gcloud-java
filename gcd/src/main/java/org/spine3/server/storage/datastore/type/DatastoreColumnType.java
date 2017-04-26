@@ -22,7 +22,7 @@ package org.spine3.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.StructuredQuery;
+import com.google.cloud.datastore.Value;
 import org.spine3.annotations.SPI;
 import org.spine3.server.entity.storage.ColumnType;
 
@@ -36,5 +36,5 @@ import org.spine3.server.entity.storage.ColumnType;
 @SPI
 public interface DatastoreColumnType<J, C> extends ColumnType<J, C, BaseEntity.Builder, String> {
 
-    void setQueryParam(StructuredQuery.Builder<Entity> query, C value, String columnIdentifier);
+    Value<?> toValue(C data);
 }

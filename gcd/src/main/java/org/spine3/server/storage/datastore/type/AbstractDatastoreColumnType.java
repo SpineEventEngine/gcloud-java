@@ -21,6 +21,7 @@
 package org.spine3.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
+import com.google.cloud.datastore.Value;
 import org.spine3.annotations.SPI;
 
 /**
@@ -43,5 +44,11 @@ public abstract class AbstractDatastoreColumnType<J, C> implements DatastoreColu
     @Override
     public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {
         storageRecord.setNull(columnIdentifier);
+    }
+
+    @Override
+    public void setColumnValue(BaseEntity.Builder storageRecord, C value, String columnIdentifier) {
+        final Value<?> dsValue = toValue(value);
+        storageRecord.set(columnIdentifier, dsValue);
     }
 }

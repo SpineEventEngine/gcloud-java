@@ -25,6 +25,9 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.cloud.datastore.StructuredQuery.Filter;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.cloud.datastore.Value;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Optional;
@@ -36,8 +39,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.client.EntityId;
-import org.spine3.client.EntityIdFilter;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -61,6 +62,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
+import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.storage.datastore.DsIdentifiers.keyFor;
@@ -79,7 +82,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
-//    private final ColumnTypeRegistry<? extends ColumnType<?, ?, BaseEntity.Builder, String>> columnTypeRegistry;
+
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
     private final Class<I> idClass;
 
@@ -110,10 +113,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param datastore  the Datastore implementation to use
      */
     protected DsRecordStorage(Descriptor descriptor,
-                           DatastoreWrapper datastore,
-                           boolean multitenant,
-                           ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
-                           Class<I> idClass) {
+                              DatastoreWrapper datastore,
+                              boolean multitenant,
+                              ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
+                              Class<I> idClass) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
@@ -201,47 +204,36 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask) {
-        final StructuredQuery<Entity> datastoreQuery = byColumnQuery(query);
-        return queryAll(typeUrl, datastoreQuery, fieldMask);
-    }
-
-    private StructuredQuery<Entity> byColumnQuery(EntityQuery query) {
-        final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder();
-        final EntityIdFilter idFilter = query.getIds();
-        final Collection<EntityId> entityIds = idFilter.getIdsList();
-        final Collection<Key> keys = new LinkedList<>();
-        for (EntityId id : entityIds) {
-            final Key key = keyFor(datastore,
-                                   kindFrom(typeUrl),
-                                   ofEntityId(id));
-            keys.add(key);
-        }
-        return null;
+        return queryByColumns(query, fieldMask);
     }
 
     @SuppressWarnings("unchecked") // Precise column type is undefined
-    private Iterable<EntityRecord> queryByColumns(EntityQuery filters) {
-        final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder();
-        final Map<Column<?>, Object> columns = Maps.newHashMap(filters.getParameters());
-        final Iterator<Entry<Column<?>, Object>> columnsIterator = columns.entrySet()
-                                                                                      .iterator();
-        while (columnsIterator.hasNext()) {
-            final Entry<Column<?>, Collection<Object>> column = columnsIterator.next();
-            final Collection<Object> values = column.getValue();
-            if (values.isEmpty()) {
-                columnsIterator.remove();
-                continue;
-            }
-            if (values.size() == 1) {
-                final Column<?> metadata = column.getKey();
-                final String columnName = metadata.getName();
-                final Object columnValue = values.iterator()
-                                                 .next();
-                final DatastoreColumnType columnType = columnTypeRegistry.get(metadata);
-                final Object transformed = columnType.convertColumnValue(columnValue);
-                columnType.setQueryParam(datastoreQuery, transformed, columnName);
-            }
+    private Map<I, EntityRecord> queryByColumns(EntityQuery entityQuery, FieldMask fieldMask) {
+        final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
+                                                                    .setKind(getKind().getValue());
+        Filter predicate = null;
+        final Map<Column<?>, Object> columns = Maps.newHashMap(entityQuery.getParameters());
+
+        for (Entry<Column<?>, Object> column : columns.entrySet()) {
+            final Object value = column.getValue();
+            final Column<?> metadata = column.getKey();
+            final DatastoreColumnType columnType = columnTypeRegistry.get(metadata);
+            final Object transformed = columnType.convertColumnValue(value);
+            final Value<?> dsValue = columnType.toValue(transformed);
+            final String columnName = metadata.getName();
+            final PropertyFilter filter = eq(columnName, dsValue);
+            predicate = predicate == null
+                        ? filter
+                        : and(predicate, filter);
+
         }
+
+        if (predicate != null) {
+            datastoreQuery.setFilter(predicate);
+        }
+
+        final StructuredQuery<Entity> buildDatastoreQuery = datastoreQuery.build();
+        return queryAll(typeUrl, buildDatastoreQuery, fieldMask);
     }
 
     /**
@@ -315,8 +307,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
         final String entityKind = kindFrom(typeUrl).getValue();
         final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                       .setKind(entityKind)
-                                       .build();
+                                                   .setKind(entityKind)
+                                                   .build();
         return query;
     }
 
@@ -459,7 +451,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         /**
          * @param multitenant {@code true} if the storage should be
-         * {@link org.spine3.server.storage.Storage#isMultitenant multitenant} or not
+         *                    {@link org.spine3.server.storage.Storage#isMultitenant multitenant} or not
          */
         public Builder<I> setMultitenant(boolean multitenant) {
             this.multitenant = multitenant;
@@ -468,7 +460,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         /**
          * @param columnTypeRegistry the registry of the Entity
-         * {@link org.spine3.server.entity.storage.Column Columns} types
+         *                           {@link org.spine3.server.entity.storage.Column Columns} types
          */
         public Builder<I> setColumnTypeRegistry(
                 ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {

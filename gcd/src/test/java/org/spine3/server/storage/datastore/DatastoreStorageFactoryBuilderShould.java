@@ -23,6 +23,7 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.Value;
 import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
@@ -171,6 +172,11 @@ public class DatastoreStorageFactoryBuilderShould {
         @Override
         public void setColumnValue(BaseEntity.Builder storageRecord, Byte value, String columnIdentifier) {
             // NOP
+        }
+        @Override
+        public Value<?> toValue(Byte data) {
+            // NOP
+            return null;
         }
     }
 }

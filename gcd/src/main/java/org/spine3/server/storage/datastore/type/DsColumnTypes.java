@@ -21,7 +21,12 @@
 package org.spine3.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
+import com.google.cloud.datastore.BooleanValue;
 import com.google.cloud.datastore.DateTime;
+import com.google.cloud.datastore.DateTimeValue;
+import com.google.cloud.datastore.LongValue;
+import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.Value;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Version;
@@ -111,6 +116,11 @@ final class DsColumnTypes {
                                    String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
+
+        @Override
+        public Value<?> toValue(String data) {
+            return StringValue.of(data);
+        }
     }
 
     private static class IntegerColumnType
@@ -121,6 +131,11 @@ final class DsColumnTypes {
                                    Integer value,
                                    String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
+        }
+
+        @Override
+        public Value<?> toValue(Integer data) {
+            return LongValue.of(data);
         }
     }
 
@@ -133,6 +148,11 @@ final class DsColumnTypes {
                                    String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
+
+        @Override
+        public Value<?> toValue(Long data) {
+            return LongValue.of(data);
+        }
     }
 
     private static class BooleanColumnType
@@ -143,6 +163,11 @@ final class DsColumnTypes {
                                    Boolean value,
                                    String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
+        }
+
+        @Override
+        public Value<?> toValue(Boolean data) {
+            return BooleanValue.of(data);
         }
     }
 
@@ -161,6 +186,11 @@ final class DsColumnTypes {
                                    String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
+
+        @Override
+        public Value<?> toValue(DateTime data) {
+            return DateTimeValue.of(data);
+        }
     }
 
     private static class VersionColumnType
@@ -177,6 +207,11 @@ final class DsColumnTypes {
                                    String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
         }
+
+        @Override
+        public Value<?> toValue(Integer data) {
+            return LongValue.of(data);
+        }
     }
 
     private static class MessageType
@@ -192,6 +227,11 @@ final class DsColumnTypes {
                                    String value,
                                    String columnIdentifier) {
             storageRecord.set(columnIdentifier, value);
+        }
+
+        @Override
+        public Value<?> toValue(String data) {
+            return StringValue.of(data);
         }
     }
 }

@@ -20,9 +20,7 @@
 
 package org.spine3.server.storage.datastore.type;
 
-import com.google.cloud.datastore.BaseEntity;
 import org.spine3.annotations.SPI;
-import org.spine3.server.entity.storage.SimpleColumnType;
 
 /**
  * A base for implementing {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface for Datastore
@@ -31,12 +29,10 @@ import org.spine3.server.entity.storage.SimpleColumnType;
  * @author Dmytro Dashenkov
  */
 @SPI
-public abstract class SimpleDatastoreColumnType<T>
-        extends SimpleColumnType<T, BaseEntity.Builder, String>
-        implements DatastoreColumnType<T, T> {
+public abstract class SimpleDatastoreColumnType<T> extends AbstractDatastoreColumnType<T, T> {
 
     @Override
-    public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {
-        storageRecord.setNull(columnIdentifier);
+    public T convertColumnValue(T fieldValue) {
+        return fieldValue;
     }
 }
