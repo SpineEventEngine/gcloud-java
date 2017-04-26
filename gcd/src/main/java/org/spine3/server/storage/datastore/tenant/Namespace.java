@@ -162,7 +162,7 @@ public final class Namespace {
             tenantIdConverterType = TenantIdConverterType.SINGLE_CUSTOM;
         } else if (customConverter.isPresent()) {
             tenantIdConverterType = TenantIdConverterType.PREDEFINED_VALUE;
-        } else  {
+        } else {
             final String typePrefix = String.valueOf(namespace.charAt(0));
             tenantIdConverterType = TYPE_PREFIX_TO_CONVERTER.get(typePrefix);
             checkState(tenantIdConverterType != null,
@@ -294,6 +294,5 @@ public final class Namespace {
             this.namespaceConverter = namespaceConverter;
         }
     }
-
 
 }
