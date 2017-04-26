@@ -77,6 +77,7 @@ public final class DatastoreTenants {
      */
     public static TenantIndex index(Datastore datastore) {
         checkNotNull(datastore);
+        // We assume a single-tenant execution environment
         final TenantIndex index = new NamespaceIndex(datastore, true);
         return index;
     }
