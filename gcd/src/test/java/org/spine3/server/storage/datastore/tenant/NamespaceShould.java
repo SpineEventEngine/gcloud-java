@@ -31,6 +31,7 @@ import org.spine3.users.TenantId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.spine3.server.storage.datastore.Given.TEST_PROJECT_ID;
 import static org.spine3.server.storage.datastore.Given.TEST_PROJECT_ID_VALUE;
@@ -128,8 +129,26 @@ public class NamespaceShould {
         final ProjectId projectId = ProjectId.of("project");
         final Key emptyKey = Key.newBuilder(projectId.getValue(), "my.type", 42)
                                 .build();
-        final Namespace namespace = Namespace.fromNameOf(emptyKey, projectId);
+        final Namespace namespace = Namespace.fromNameOf(emptyKey, false);
         assertNull(namespace);
+    }
+
+    @Test
+    public void construct_from_Key_in_single_tenant() {
+        checkConstructFromKey("my.test.single.tenant.namespace.from.key", false);
+    }
+
+    @Test
+    public void construct_from_Key_in_multitenant() {
+        checkConstructFromKey("Vmy.test.single.tenant.namespace.from.key", true);
+    }
+
+    private static void checkConstructFromKey(String ns, boolean multitenant) {
+        final Key key = Key.newBuilder("my-simple-project", "any.kind", ns)
+                           .build();
+        final Namespace namespace = Namespace.fromNameOf(key, multitenant);
+        assertNotNull(namespace);
+        assertEquals(ns, namespace.getValue());
     }
 
     @Test

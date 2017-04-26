@@ -91,7 +91,7 @@ public final class Namespace {
     private final NamespaceToTenantIdConverter converter;
 
     private Namespace() {
-        this("", TenantIdConverterType.CUSTOM.namespaceConverter);
+        this("", TenantIdConverterType.SINGLE_CUSTOM.namespaceConverter);
     }
 
     private Namespace(String value,
@@ -111,7 +111,7 @@ public final class Namespace {
             return new Namespace();
         } else {
             return new Namespace(datastoreNamespace,
-                                 TenantIdConverterType.CUSTOM.namespaceConverter);
+                                 TenantIdConverterType.SINGLE_CUSTOM.namespaceConverter);
         }
     }
 
@@ -145,10 +145,11 @@ public final class Namespace {
      * {@code null} or empty
      */
     @Nullable
-    static Namespace fromNameOf(Key key, ProjectId projectId) {
+    static Namespace fromNameOf(Key key, boolean multitenant) {
         checkNotNull(key);
-        checkNotNull(projectId);
 
+        final String projectIdString = key.getProjectId();
+        final ProjectId projectId = ProjectId.of(projectIdString);
         final Optional<NamespaceToTenantIdConverter> customConverter =
                 getNamespaceConverter(projectId);
         final String namespace = key.getName();
@@ -157,9 +158,11 @@ public final class Namespace {
         }
 
         final TenantIdConverterType tenantIdConverterType;
-        if (customConverter.isPresent()) {
+        if (!multitenant) {
+            tenantIdConverterType = TenantIdConverterType.SINGLE_CUSTOM;
+        } else if (customConverter.isPresent()) {
             tenantIdConverterType = TenantIdConverterType.PREDEFINED_VALUE;
-        } else {
+        } else  {
             final String typePrefix = String.valueOf(namespace.charAt(0));
             tenantIdConverterType = TYPE_PREFIX_TO_CONVERTER.get(typePrefix);
             checkState(tenantIdConverterType != null,
@@ -269,7 +272,7 @@ public final class Namespace {
          * The conversion performed by the converter of this object acts with the string value of
          * a {@link TenantId} and performs no action on the namespace string itself.
          */
-        CUSTOM(NamespaceConverters.forCustomNamespace());
+        SINGLE_CUSTOM(NamespaceConverters.forCustomNamespace());
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
             // This enum is ancillary and is not to be serialized

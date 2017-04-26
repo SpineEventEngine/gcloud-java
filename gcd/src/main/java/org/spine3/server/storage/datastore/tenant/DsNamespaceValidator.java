@@ -41,8 +41,8 @@ public class DsNamespaceValidator {
      *
      * @param datastore the {@link Datastore} to validate the {@linkplain Namespace namespaces} upon
      */
-    public DsNamespaceValidator(Datastore datastore) {
-        this.namespaceIndex = new NamespaceIndex(datastore);
+    public DsNamespaceValidator(Datastore datastore, boolean multitenant) {
+        this.namespaceIndex = new NamespaceIndex(datastore, multitenant);
     }
 
     /**

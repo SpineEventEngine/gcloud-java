@@ -81,4 +81,6 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
         // Overrides to provide a descriptive documentation
     @Override
     public abstract Namespace get();
+
+    public abstract boolean isMultitenant();
 }
