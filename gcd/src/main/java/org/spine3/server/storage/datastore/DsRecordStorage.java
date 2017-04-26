@@ -31,15 +31,18 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.spine3.client.EntityId;
+import org.spine3.client.EntityIdFilter;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
+import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.ColumnRecords;
-import org.spine3.server.entity.storage.ColumnType;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
@@ -56,6 +59,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -75,7 +79,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
-    private final ColumnTypeRegistry<? extends ColumnType<?, ?, BaseEntity.Builder, String>> columnTypeRegistry;
+//    private final ColumnTypeRegistry<? extends ColumnType<?, ?, BaseEntity.Builder, String>> columnTypeRegistry;
+    private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
     private final Class<I> idClass;
 
     protected static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
@@ -190,13 +195,53 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Map<I, EntityRecord> readAllRecords(final FieldMask fieldMask) {
-        return queryAll(typeUrl, fieldMask);
+        final StructuredQuery<Entity> allQuery = buildAllQuery(typeUrl);
+        return queryAll(typeUrl, allQuery, fieldMask);
     }
 
     @Override
     protected Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask) {
-        // TODO:2017-04-25:dmytro.dashenkov: Implement.
+        final StructuredQuery<Entity> datastoreQuery = byColumnQuery(query);
+        return queryAll(typeUrl, datastoreQuery, fieldMask);
+    }
+
+    private StructuredQuery<Entity> byColumnQuery(EntityQuery query) {
+        final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder();
+        final EntityIdFilter idFilter = query.getIds();
+        final Collection<EntityId> entityIds = idFilter.getIdsList();
+        final Collection<Key> keys = new LinkedList<>();
+        for (EntityId id : entityIds) {
+            final Key key = keyFor(datastore,
+                                   kindFrom(typeUrl),
+                                   ofEntityId(id));
+            keys.add(key);
+        }
         return null;
+    }
+
+    @SuppressWarnings("unchecked") // Precise column type is undefined
+    private Iterable<EntityRecord> queryByColumns(EntityQuery filters) {
+        final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder();
+        final Map<Column<?>, Object> columns = Maps.newHashMap(filters.getParameters());
+        final Iterator<Entry<Column<?>, Object>> columnsIterator = columns.entrySet()
+                                                                                      .iterator();
+        while (columnsIterator.hasNext()) {
+            final Entry<Column<?>, Collection<Object>> column = columnsIterator.next();
+            final Collection<Object> values = column.getValue();
+            if (values.isEmpty()) {
+                columnsIterator.remove();
+                continue;
+            }
+            if (values.size() == 1) {
+                final Column<?> metadata = column.getKey();
+                final String columnName = metadata.getName();
+                final Object columnValue = values.iterator()
+                                                 .next();
+                final DatastoreColumnType columnType = columnTypeRegistry.get(metadata);
+                final Object transformed = columnType.convertColumnValue(columnValue);
+                columnType.setQueryParam(datastoreQuery, transformed, columnName);
+            }
+        }
     }
 
     /**
@@ -240,9 +285,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     protected Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
+                                            StructuredQuery<Entity> query,
                                             FieldMask fieldMask) {
-        final StructuredQuery<Entity> query = buildAllQuery(typeUrl);
-
         final List<Entity> results = datastore.read(query);
 
         final Predicate<Entity> archivedAndDeletedFilter = activeEntity();
@@ -290,7 +334,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return completeEntity;
     }
 
-    protected void populateFromStorageFields(Entity.Builder entity, EntityRecordWithColumns record) {
+    protected void populateFromStorageFields(BaseEntity.Builder entity, EntityRecordWithColumns record) {
         if (record.hasColumns()) {
             ColumnRecords.feedColumnsTo(entity,
                                         record,
@@ -313,7 +357,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         checkNotNull(records);
 
         final Collection<Entity> entitiesToWrite = new ArrayList<>(records.size());
-        for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
+        for (Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
             final Entity entity = entityRecordToEntity(record.getKey(), record.getValue());
             entitiesToWrite.add(entity);
         }
