@@ -62,11 +62,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Predicates.and;
 import static org.spine3.server.storage.datastore.DsIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static org.spine3.server.storage.datastore.Entities.activeEntity;
@@ -210,6 +212,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @SuppressWarnings("unchecked") // Precise column type is undefined
     private Map<I, EntityRecord> queryByColumns(EntityQuery entityQuery, FieldMask fieldMask) {
+        // TODO:2017-04-26:dmytro.dashenkov: Refactor.
         final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                                     .setKind(getKind().getValue());
         Filter predicate = null;
@@ -233,14 +236,35 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             }
         }
 
+        boolean idsHandled = false;
+        final Set<Object> ids = entityQuery.getIds();
+        if (ids.isEmpty()) {
+            idsHandled = true;
+        } else if (ids.size() == 1) {
+            idsHandled = true;
+            final Key key = keyFor(datastore,
+                                   kindFrom(typeUrl),
+                                   ofEntityId(ids.iterator().next()));
+            final PropertyFilter filter = PropertyFilter.eq("__key__", key);
+            if (predicate == null) {
+                predicate = filter;
+            } else {
+                predicate = and(predicate, filter);
+            }
+        }
+
         if (predicate != null) {
             datastoreQuery.setFilter(predicate);
         }
 
         final StructuredQuery<Entity> buildDatastoreQuery = datastoreQuery.build();
-        final Predicate<Entity> resultPredicate = handlesLifecycle
-                                                  ? Predicates.<Entity>alwaysTrue()
-                                                  : activeEntity();
+        final Predicate<Entity> idPredicate = idsHandled
+                                              ? Predicates.<Entity>alwaysTrue()
+                                              : new IdFilter(ids);
+        final Predicate<Entity> lifecyclePredicate = handlesLifecycle
+                                                     ? Predicates.<Entity>alwaysTrue()
+                                                     : activeEntity();
+        final Predicate<Entity> resultPredicate = and(idPredicate, lifecyclePredicate);
         return queryAll(typeUrl,
                         buildDatastoreQuery,
                         fieldMask,
@@ -522,6 +546,25 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         protected EntityRecord getRecord() {
             return record;
+        }
+    }
+
+    private class IdFilter implements Predicate<Entity> {
+
+        private final Set<Object> acceptedIds;
+
+        private IdFilter(Set<Object> acceptedIds) {
+            this.acceptedIds = acceptedIds;
+        }
+
+        @Override
+        public boolean apply(@Nullable Entity input) {
+            if (input == null) {
+                return false;
+            }
+            final Object id = unpackKey(input);
+            final boolean result = acceptedIds.contains(id);
+            return result;
         }
     }
 }
