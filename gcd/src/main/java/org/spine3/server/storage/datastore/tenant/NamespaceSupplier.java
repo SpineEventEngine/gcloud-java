@@ -82,5 +82,10 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
     @Override
     public abstract Namespace get();
 
+    /**
+     * Shown if this instance of {@code NamespaceSupplier} is multitenant or not.
+     *
+     * @return {@code true} if this supplier is multitenant, {@code false} otherwise
+     */
     public abstract boolean isMultitenant();
 }
