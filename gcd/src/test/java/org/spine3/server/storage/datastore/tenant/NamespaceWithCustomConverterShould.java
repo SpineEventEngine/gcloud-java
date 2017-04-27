@@ -25,7 +25,7 @@ import com.google.common.base.Converter;
 import com.google.common.base.Optional;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.spine3.base.Stringifiers;
+import org.spine3.string.Stringifiers;
 import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.users.TenantId;
 
@@ -86,7 +86,7 @@ public class NamespaceWithCustomConverterShould {
      * An example of custom {@link NamespaceToTenantIdConverter}.
      *
      * <p>Note that this implementation uses the default
-     * {@link org.spine3.base.Stringifier Stringifier} for the conversion, which is not acceptable
+     * {@link org.spine3.string.Stringifier Stringifier} for the conversion, which is not acceptable
      * to use in production code, but good enough for these tests.
      */
     private static class CustomNamespaceConverter extends NamespaceToTenantIdConverter {

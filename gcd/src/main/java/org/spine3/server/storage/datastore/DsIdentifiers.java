@@ -23,7 +23,7 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import org.spine3.base.Stringifiers;
+import org.spine3.string.Stringifiers;
 
 import static com.google.common.base.Preconditions.checkState;
 

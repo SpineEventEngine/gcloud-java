@@ -24,10 +24,9 @@ import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.DateTime;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Stringifier;
-import org.spine3.base.Stringifiers;
+import com.google.protobuf.util.Timestamps;
 import org.spine3.base.Version;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.string.Stringifiers;
 
 import java.util.Date;
 
@@ -96,7 +95,7 @@ final class DsColumnTypes {
 
     /**
      * @return new instance of {@link DatastoreColumnType} storing {@link AbstractMessage} as its
-     * {@code String} representation taken from a {@link Stringifier}
+     * {@code String} representation taken from a {@link org.spine3.string.Stringifier}
      */
     static DatastoreColumnType<AbstractMessage, String> messageType() {
         return new MessageType();
@@ -151,8 +150,8 @@ final class DsColumnTypes {
 
         @Override
         public DateTime convertColumnValue(Timestamp fieldValue) {
-            final Date intermediate = new Date(
-                    fieldValue.getNanos() / Timestamps2.NANOS_PER_MILLISECOND);
+            final long millis = Timestamps.toMillis(fieldValue);
+            final Date intermediate = new Date(millis);
             return DateTime.copyFrom(intermediate);
         }
 
