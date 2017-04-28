@@ -26,7 +26,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
-import org.spine3.base.Stringifiers;
+import org.spine3.string.Stringifiers;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;

@@ -35,7 +35,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.base.Stringifiers;
+import org.spine3.string.Stringifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
