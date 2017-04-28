@@ -130,8 +130,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final String stringId = Stringifiers.toString(id);
         String eventId = Stringifiers.toString(record.getEvent()
-                                                     .getContext()
-                                                     .getEventId());
+                                                     .getId());
         if (eventId.isEmpty()) {
             // Snapshots have no Event IDs.
             eventId = SNAPSHOT + stringId;
@@ -275,7 +274,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                                                       .setKind(stateTypeName.value())
                                                       .build();
         final List<Entity> allRecords = datastore.read(allQuery);
-        final Iterator<I> index = Iterators.transform(allRecords.iterator(), new IndexTransformer<>(idClass));
+        final Iterator<I> index = Iterators.transform(allRecords.iterator(),
+                                                      new IndexTransformer<>(idClass));
         return index;
     }
 
