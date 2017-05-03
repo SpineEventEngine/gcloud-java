@@ -232,7 +232,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                         : and(predicate, filter);
             if (columnName.equals("archived") || column.equals("deleted")) {
                 handlesLifecycle = true;
-                // TODO:2017-04-26:dmytro.dashenkov: Refactor.
             }
         }
 
