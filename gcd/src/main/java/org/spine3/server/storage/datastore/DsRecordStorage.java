@@ -35,7 +35,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
@@ -68,7 +67,9 @@ import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Predicates.and;
+import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.server.storage.LifecycleFlagField.archived;
+import static org.spine3.server.storage.LifecycleFlagField.deleted;
 import static org.spine3.server.storage.datastore.DsIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static org.spine3.server.storage.datastore.Entities.activeEntity;
@@ -210,15 +211,52 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return queryByColumns(query, fieldMask);
     }
 
-    @SuppressWarnings("unchecked") // Precise column type is undefined
     private Map<I, EntityRecord> queryByColumns(EntityQuery entityQuery, FieldMask fieldMask) {
         // TODO:2017-04-26:dmytro.dashenkov: Refactor.
         final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                                     .setKind(getKind().getValue());
-        Filter predicate = null;
-        final Map<Column<?>, Object> columns = Maps.newHashMap(entityQuery.getParameters());
+        final Map<Column<?>, Object> columns = newHashMap(entityQuery.getParameters());
+        Filter predicate = buildColumnPredicate(columns);
 
-        boolean handlesLifecycle = false;
+        boolean idsHandled = false;
+        final Set<Object> ids = entityQuery.getIds();
+        if (ids.isEmpty()) {
+            idsHandled = true;
+        } else if (ids.size() == 1) {
+            idsHandled = true;
+            final Object singleId = ids.iterator().next();
+            final Filter idFilter = buildSingleIdPredicate(singleId);
+            predicate = predicate == null
+                        ? idFilter
+                        : and(predicate, idFilter);
+        }
+
+        if (predicate != null) {
+            datastoreQuery.setFilter(predicate);
+        }
+
+        final StructuredQuery<Entity> buildDatastoreQuery = datastoreQuery.build();
+        final Predicate<Entity> inMemFilter = buildMemoryPredicate(!idsHandled,
+                                                                   ids);
+        return queryAll(typeUrl,
+                        buildDatastoreQuery,
+                        fieldMask,
+                        inMemFilter);
+    }
+
+    private Predicate<Entity> buildMemoryPredicate(boolean handleIds,
+                                                   Set<Object> ids) {
+        final Predicate<Entity> idPredicate = handleIds
+                                              ? new IdFilter(ids)
+                                              : Predicates.<Entity>alwaysTrue();
+        return idPredicate;
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked") // Precise column type is undefined
+    private Filter buildColumnPredicate(Map<Column<?>, Object> columns) {
+        Filter predicate = null;
+        boolean handleLifecycle = true;
         for (Entry<Column<?>, Object> column : columns.entrySet()) {
             final Object value = column.getValue();
             final Column<?> metadata = column.getKey();
@@ -230,44 +268,27 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             predicate = predicate == null
                         ? filter
                         : and(predicate, filter);
-            if (columnName.equals("archived") || column.equals("deleted")) {
-                handlesLifecycle = true;
+            if (archived.name().equals(columnName)
+                    || deleted.name().equals(columnName)) {
+                handleLifecycle = false;
             }
         }
-
-        boolean idsHandled = false;
-        final Set<Object> ids = entityQuery.getIds();
-        if (ids.isEmpty()) {
-            idsHandled = true;
-        } else if (ids.size() == 1) {
-            idsHandled = true;
-            final Key key = keyFor(datastore,
-                                   kindFrom(typeUrl),
-                                   ofEntityId(ids.iterator().next()));
-            final PropertyFilter filter = PropertyFilter.eq("__key__", key);
-            if (predicate == null) {
-                predicate = filter;
-            } else {
-                predicate = and(predicate, filter);
-            }
+        if (handleLifecycle) {
+            final Filter archivedFilter = eq(archived.name(), false);
+            final Filter deletedFilter = eq(deleted.name(), false);
+            predicate = predicate == null
+                        ? and(archivedFilter, deletedFilter)
+                        : and(predicate, archivedFilter, deletedFilter);
         }
+        return predicate;
+    }
 
-        if (predicate != null) {
-            datastoreQuery.setFilter(predicate);
-        }
-
-        final StructuredQuery<Entity> buildDatastoreQuery = datastoreQuery.build();
-        final Predicate<Entity> idPredicate = idsHandled
-                                              ? Predicates.<Entity>alwaysTrue()
-                                              : new IdFilter(ids);
-        final Predicate<Entity> lifecyclePredicate = handlesLifecycle
-                                                     ? Predicates.<Entity>alwaysTrue()
-                                                     : activeEntity();
-        final Predicate<Entity> resultPredicate = and(idPredicate, lifecyclePredicate);
-        return queryAll(typeUrl,
-                        buildDatastoreQuery,
-                        fieldMask,
-                        resultPredicate);
+    private Filter buildSingleIdPredicate(Object id) {
+        final Key key = keyFor(datastore,
+                               kindFrom(typeUrl),
+                               ofEntityId(id));
+        final PropertyFilter filter = PropertyFilter.eq("__key__", key);
+        return filter;
     }
 
     /**
