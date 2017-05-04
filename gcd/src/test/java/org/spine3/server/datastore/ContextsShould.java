@@ -59,7 +59,7 @@ public class ContextsShould {
     @Test
     public void produce_BoundedContext_Builder_for_given_storage_factory() {
         final DatastoreStorageFactory factory = givenFactory();
-        final BoundedContext.Builder builder = Contexts.from(factory);
+        final BoundedContext.Builder builder = Contexts.onTopOf(factory);
         final Optional<Supplier<StorageFactory>> supplierOptional =
                 builder.getStorageFactorySupplier();
         assertTrue(supplierOptional.isPresent());
@@ -71,11 +71,12 @@ public class ContextsShould {
     }
 
     private static DatastoreStorageFactory givenFactory() {
-        final DatastoreStorageFactory result = DatastoreStorageFactory.newBuilder()
-                .setDatastore(givenDatastore())
-                .setMultitenant(true)
-                .setTypeRegistry(defaultInstance())
-                .build();
+        final DatastoreStorageFactory result =
+                DatastoreStorageFactory.newBuilder()
+                                       .setDatastore(givenDatastore())
+                                       .setMultitenant(true)
+                                       .setTypeRegistry(defaultInstance())
+                                       .build();
         return result;
     }
 

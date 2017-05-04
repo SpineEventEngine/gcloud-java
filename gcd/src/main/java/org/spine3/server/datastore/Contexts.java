@@ -46,22 +46,21 @@ public final class Contexts {
      * Creates new instance of the {@link BoundedContext.Builder} based of the passed
      * {@link DatastoreStorageFactory}.
      *
-     * <p>The result builder will have the next parameters set:
+     * <p>The returned instance has the following attributes pre-configured:
      * <ul>
      *     <li>{@link BoundedContext.Builder#setStorageFactorySupplier(Supplier) StorageFactory};
      *     <li>{@link BoundedContext.Builder#setTenantIndex(TenantIndex) TenantIndex};
      *     <li>{@linkplain BoundedContext.Builder#setMultitenant(boolean) multitenancy}.
      * </ul>
      *
-     * <p>For the most applications this config will be convenient if the passed
-     * {@link DatastoreStorageFactory} is configured properly. Though, the successive calls to
-     * the corresponding {@link BoundedContext.Builder Builder} methods may override this
-     * configuration.
+     * <p>In a majority of use cases the configuration of the produced
+     * {@link BoundedContext.Builder builder} is enough for operation. However, it is still possible
+     * to use the returned instance for further customization.
      *
      * @param storageFactory the {@link StorageFactory} to use in the result {@link BoundedContext}
      * @return new instance of the {@link BoundedContext.Builder} with the specified parameters
      */
-    public static BoundedContext.Builder from(DatastoreStorageFactory storageFactory) {
+    public static BoundedContext.Builder onTopOf(DatastoreStorageFactory storageFactory) {
         checkNotNull(storageFactory);
         final Datastore datastore = storageFactory.getDatastore()
                                                   .getDatastoreOptions()

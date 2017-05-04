@@ -19,7 +19,7 @@
  */
 
 /**
- * This package contains components for working with the aspects of using the Google Cloud Datastore
+ * This package contains components for working with the aspects of Google Cloud Datastore usage
  * beyond the {@linkplain org.spine3.server.storage.Storage storage} itself.
  */
 @ParametersAreNonnullByDefault
