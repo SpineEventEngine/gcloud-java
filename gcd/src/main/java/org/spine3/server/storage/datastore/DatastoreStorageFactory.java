@@ -24,6 +24,7 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import org.spine3.annotations.Internal;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
@@ -213,6 +214,10 @@ public class DatastoreStorageFactory implements StorageFactory {
         // NOP
     }
 
+    /**
+     * @return an instance of a wrapper on the passed {@link Datastore}
+     */
+    @Internal
     public DatastoreWrapper getDatastore() {
         return datastore;
     }
