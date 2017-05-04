@@ -29,6 +29,8 @@ import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 import org.spine3.server.storage.datastore.tenant.DatastoreTenants;
 import org.spine3.server.tenant.TenantIndex;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A factory fot the instances of {@link BoundedContext} based on Datastore.
  *
@@ -60,6 +62,7 @@ public final class Contexts {
      * @return new instance of the {@link BoundedContext.Builder} with the specified parameters
      */
     public static BoundedContext.Builder from(DatastoreStorageFactory storageFactory) {
+        checkNotNull(storageFactory);
         final Datastore datastore = storageFactory.getDatastore()
                                                   .getDatastoreOptions()
                                                   .getService();
