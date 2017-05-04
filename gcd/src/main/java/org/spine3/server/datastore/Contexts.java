@@ -32,18 +32,18 @@ import org.spine3.server.tenant.TenantIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A factory fot the instances of {@link BoundedContext} based on Datastore.
+ * A factory for the instances of {@link BoundedContext} based on Datastore.
  *
  * @author Dmytro Dashenkov
  */
 public final class Contexts {
 
     private Contexts() {
-        // Prevent initialization of this utility class
+        // Prevent initialization of this utility class.
     }
 
     /**
-     * Creates new instance of the {@link BoundedContext.Builder} based of the passed
+     * Creates new instance of the {@link BoundedContext.Builder} based on the passed
      * {@link DatastoreStorageFactory}.
      *
      * <p>The returned instance has the following attributes pre-configured:
@@ -58,7 +58,7 @@ public final class Contexts {
      * to use the returned instance for further customization.
      *
      * @param storageFactory the {@link StorageFactory} to use in the result {@link BoundedContext}
-     * @return new instance of the {@link BoundedContext.Builder} with the specified parameters
+     * @return new instance of {@link BoundedContext.Builder} with the specified parameters
      */
     public static BoundedContext.Builder onTopOf(DatastoreStorageFactory storageFactory) {
         checkNotNull(storageFactory);

@@ -76,6 +76,10 @@ public class TestDatastoreFactory {
         return TestingDatastoreSingleton.INSTANCE.value;
     }
 
+    private TestDatastoreFactory() {
+        // Prevent this test utility class from being instantiated.
+    }
+
     enum DefaultDatastoreSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")

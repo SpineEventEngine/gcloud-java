@@ -23,14 +23,15 @@ package org.spine3.server.storage.datastore.tenant;
 import org.spine3.server.tenant.TenantIndex;
 
 /**
- * A test utility exposing some of the package-private implementation details for tests.
+ * A test utility exposing some of the package-private implementation details of
+ * {@link NamespaceIndex} for tests.
  *
  * @author Dmytro Dashenkov
  */
 public final class TestNamespaceIndex {
 
     private TestNamespaceIndex() {
-        // Prevent this test utility of being initialized.
+        // Prevent this test utility from being instantiated.
     }
 
     public static Class<? extends TenantIndex> getType() {
