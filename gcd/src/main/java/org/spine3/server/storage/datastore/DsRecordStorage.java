@@ -94,6 +94,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     protected static final String ID_CONVERSION_ERROR_MESSAGE =
             "Entity had ID of an invalid type; could not parse ID from String. " +
             "Note: custom conversion is not supported. See org.spine3.base.Identifiers#idToString.";
+    private static final String KEY_PROPERTY = "__key__";
 
     private static final Function<Entity, EntityRecord> recordFromEntity
             = new Function<Entity, EntityRecord>() {
@@ -278,7 +279,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final Key key = keyFor(datastore,
                                kindFrom(typeUrl),
                                ofEntityId(id));
-        final PropertyFilter filter = PropertyFilter.eq("__key__", key);
+        final PropertyFilter filter = PropertyFilter.eq(KEY_PROPERTY, key);
         return filter;
     }
 
@@ -307,7 +308,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private Iterable<EntityRecord> lookup(
             Iterable<I> ids,
             Function<Entity, EntityRecord> transformer) {
-
         final Collection<Key> keys = new LinkedList<>();
         for (I id : ids) {
             final Key key = keyFor(datastore,
@@ -315,7 +315,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                    ofEntityId(id));
             keys.add(key);
         }
-
         final List<Entity> results = datastore.read(keys);
         final Collection<Entity> filteredResults = Collections2.filter(results, activeEntity());
         final Collection<EntityRecord> records = Collections2.transform(filteredResults, transformer);
@@ -482,7 +481,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         private Class<I> idClass;
 
         private Builder() {
-            // Prevent direct initialization
+            // Prevent direct initialization.
         }
 
         public Builder<I> setStateType(TypeUrl stateTypeUrl) {
