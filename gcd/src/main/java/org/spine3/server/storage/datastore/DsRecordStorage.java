@@ -91,10 +91,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final Class<I> idClass;
 
     protected static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
-    protected static final String ID_CONVERSION_ERROR_MESSAGE = "Entity had ID of an invalid type; could not " +
-            "parse ID from String. " +
-            "Note: custom conversion is not supported. " +
-            "See org.spine3.base.Identifiers#idToString.";
+    protected static final String ID_CONVERSION_ERROR_MESSAGE =
+            "Entity had ID of an invalid type; could not parse ID from String. " +
+            "Note: custom conversion is not supported. See org.spine3.base.Identifiers#idToString.";
 
     private static final Function<Entity, EntityRecord> recordFromEntity
             = new Function<Entity, EntityRecord>() {
@@ -212,7 +211,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Map<I, EntityRecord> queryByColumns(EntityQuery entityQuery, FieldMask fieldMask) {
-        // TODO:2017-04-26:dmytro.dashenkov: Refactor.
         final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                                     .setKind(getKind().getValue());
         final Map<Column<?>, Object> columns = newHashMap(entityQuery.getParameters());
@@ -226,18 +224,12 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             idsHandled = true;
             final Object singleId = ids.iterator().next();
             final Filter idFilter = buildSingleIdPredicate(singleId);
-            predicate = predicate == null
-                        ? idFilter
-                        : and(predicate, idFilter);
+            predicate = and(predicate, idFilter);
         }
 
-        if (predicate != null) {
-            datastoreQuery.setFilter(predicate);
-        }
-
-        final StructuredQuery<Entity> buildDatastoreQuery = datastoreQuery.build();
-        final Predicate<Entity> inMemFilter = buildMemoryPredicate(!idsHandled,
-                                                                   ids);
+        final StructuredQuery<Entity> buildDatastoreQuery = datastoreQuery.setFilter(predicate)
+                                                                          .build();
+        final Predicate<Entity> inMemFilter = buildMemoryPredicate(!idsHandled, ids);
         return queryAll(typeUrl,
                         buildDatastoreQuery,
                         fieldMask,
@@ -252,7 +244,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return idPredicate;
     }
 
-    @Nullable
     @SuppressWarnings("unchecked") // Precise column type is undefined
     private Filter buildColumnPredicate(Map<Column<?>, Object> columns) {
         Filter predicate = null;
