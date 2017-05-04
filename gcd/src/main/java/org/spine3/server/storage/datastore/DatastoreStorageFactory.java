@@ -56,6 +56,7 @@ import static org.spine3.util.Reflection.getGenericParameterType;
  * @author Alexander Litus
  * @author Mikhail Mikhaylov
  * @author Dmytro Dashenkov
+ * @see org.spine3.server.datastore.Contexts#from for the recommended usage description
  */
 @SuppressWarnings("WeakerAccess") // Part of API
 public class DatastoreStorageFactory implements StorageFactory {
