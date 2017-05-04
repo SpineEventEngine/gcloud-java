@@ -24,6 +24,7 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import org.spine3.annotations.Internal;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
@@ -55,6 +56,7 @@ import static org.spine3.util.Reflection.getGenericParameterType;
  * @author Alexander Litus
  * @author Mikhail Mikhaylov
  * @author Dmytro Dashenkov
+ * @see org.spine3.server.datastore.Contexts#onTopOf for the recommended usage description
  */
 @SuppressWarnings("WeakerAccess") // Part of API
 public class DatastoreStorageFactory implements StorageFactory {
@@ -213,6 +215,10 @@ public class DatastoreStorageFactory implements StorageFactory {
         // NOP
     }
 
+    /**
+     * @return an instance of a wrapper of the passed {@link Datastore}
+     */
+    @Internal
     public DatastoreWrapper getDatastore() {
         return datastore;
     }

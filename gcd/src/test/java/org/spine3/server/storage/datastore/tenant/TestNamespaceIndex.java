@@ -18,13 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3.server.storage.datastore.tenant;
+
+import org.spine3.server.tenant.TenantIndex;
+
 /**
- * This package contains implementations of
- * {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface used for the GAE
- * storage.
+ * A test utility exposing some of the package-private implementation details of
+ * {@link NamespaceIndex} for tests.
+ *
+ * @author Dmytro Dashenkov
  */
+public final class TestNamespaceIndex {
 
-@ParametersAreNonnullByDefault
-package org.spine3.server.storage.datastore.type;
+    private TestNamespaceIndex() {
+        // Prevent this test utility from being instantiated.
+    }
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    public static Class<? extends TenantIndex> getType() {
+        return NamespaceIndex.class;
+    }
+}

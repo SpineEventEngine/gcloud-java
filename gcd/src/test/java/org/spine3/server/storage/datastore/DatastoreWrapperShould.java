@@ -186,8 +186,8 @@ public class DatastoreWrapperShould {
         private static Datastore testDatastore() {
             final boolean onCi = "true".equals(System.getenv("CI"));
             return onCi
-                   ? TestDatastoreStorageFactory.TestingDatastoreSingleton.INSTANCE.value
-                   : TestDatastoreStorageFactory.DefaultDatastoreSingleton.INSTANCE.value;
+                   ? TestDatastoreFactory.getTestRemoteDatastore()
+                   : TestDatastoreFactory.getLocalDatastore();
         }
 
         private static Map<Key, Entity> nEntities(int n, DatastoreWrapper wrapper) {
