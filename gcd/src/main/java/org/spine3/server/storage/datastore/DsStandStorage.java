@@ -87,7 +87,8 @@ public class DsStandStorage extends StandStorage {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids,
+                                                         FieldMask fieldMask) {
         return recordStorage.readMultiple(ids, fieldMask);
     }
 

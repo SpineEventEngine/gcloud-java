@@ -145,7 +145,9 @@ public class DsColumnTypesShould {
         type.setColumnValue(entity, storedValue, RANDOM_COLUMN_LABEL);
     }
 
-    private <J, S> void setDatastoreType(DatastoreColumnType<J, S> type, J value, S expectedStoredValue) {
+    private <J, S> void setDatastoreType(DatastoreColumnType<J, S> type,
+                                         J value,
+                                         S expectedStoredValue) {
         final S storedValue = type.convertColumnValue(value);
         assertEquals(expectedStoredValue, storedValue);
 

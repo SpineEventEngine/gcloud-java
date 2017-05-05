@@ -34,7 +34,8 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A utility for generating the {@linkplain org.spine3.server.storage.Storage#index() storage ID indexes}.
+ * A utility for generating the
+ * {@linkplain org.spine3.server.storage.Storage#index() storage ID indexes}.
  *
  * @author Dmytro Dashenkov.
  * @see org.spine3.server.storage.Storage#index()

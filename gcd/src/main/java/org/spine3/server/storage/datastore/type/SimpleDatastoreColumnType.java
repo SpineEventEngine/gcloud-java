@@ -23,8 +23,8 @@ package org.spine3.server.storage.datastore.type;
 import org.spine3.annotations.SPI;
 
 /**
- * A base for implementing {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface for Datastore
- * storage regardless the type conversion.
+ * A base for implementing {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface
+ * for Datastore storage regardless the type conversion.
  *
  * @author Dmytro Dashenkov
  */
