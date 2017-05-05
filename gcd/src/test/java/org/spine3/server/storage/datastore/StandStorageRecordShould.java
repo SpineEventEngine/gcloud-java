@@ -39,10 +39,9 @@ public class StandStorageRecordShould {
 
     @Test
     public void have_protected_constructor_for_extension() {
-        final AggregateStateId somedId = AggregateStateId.of(newUuid(),
-                                                             TypeUrl.from(Any.getDescriptor()));
+        final AggregateStateId someId = AggregateStateId.of(newUuid(), TypeUrl.from(Any.getDescriptor()));
         final boolean matches = hasProtectedConstructorWithSingleParam(
-                StandStorageRecord.class, somedId);
+                StandStorageRecord.class, someId);
         assertTrue(matches);
     }
 

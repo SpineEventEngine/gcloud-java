@@ -128,6 +128,16 @@ public class DatastoreStorageFactoryShould {
                                .build();
     }
 
+    @Test
+    public void do_nothing_on_close() throws Exception {
+        final DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
+                                                                       .setDatastore(datastore)
+                                                                       .build();
+        factory.close();
+        // Multiple calls are allowed as no action is performed
+        factory.close();
+    }
+
     private static class TestEntity extends AbstractEntity<String, StringValue> {
 
         private TestEntity(String id) {

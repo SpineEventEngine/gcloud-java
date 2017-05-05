@@ -19,9 +19,9 @@
  */
 
 /**
- * This package contains impelemntations of
- * {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface used for
- * the GAE storage.
+ * This package contains implementations of
+ * {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface used for the GAE
+ * storage.
  */
 
 @ParametersAreNonnullByDefault

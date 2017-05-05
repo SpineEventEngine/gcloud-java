@@ -20,16 +20,12 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.server.storage.datastore.tenant.NamespaceSupplier;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
-
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Creates storages based on the local Google {@link Datastore}.
@@ -37,40 +33,12 @@ import java.io.InputStream;
 @SuppressWarnings("CallToSystemGetenv")
 class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
-    private static final String DEFAULT_DATASET_NAME = "spine-dev";
-    private static final String DEFAULT_HOST = "localhost:8080";
-    private static final String CREDENTIALS_FILE_PATH = "/spine-dev-62685282c0b9.json";
-
-    private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = DatastoreOptions.newBuilder()
-                                                                                  .setProjectId(DEFAULT_DATASET_NAME)
-                                                                                  .setHost(DEFAULT_HOST)
-                                                                                  .build();
+    public static final String DEFAULT_DATASET_NAME = Given.TEST_PROJECT_ID_VALUE;
 
     // Set in the static context upon initialization,
     // used in class method context to avoid ambiguous calls to {@code System.getenv()}.
     @SuppressWarnings("StaticNonFinalField")
     private static boolean runsOnCi = false;
-
-    private static final DatastoreOptions TESTING_OPTIONS = generateTestOptions();
-
-    private static DatastoreOptions generateTestOptions() {
-        try {
-            final InputStream is = TestDatastoreStorageFactory.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-            final BufferedInputStream bufferedStream = new BufferedInputStream(is);
-
-            final ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(bufferedStream);
-            return DatastoreOptions.newBuilder()
-                                   .setProjectId(DEFAULT_DATASET_NAME)
-                                   .setCredentials(credentials)
-                                   .build();
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
-            log().warn("Cannot find the configuration file {}", CREDENTIALS_FILE_PATH);
-            final DatastoreOptions defaultOptions = DatastoreOptions.newBuilder()
-                                                                    .setProjectId(DEFAULT_DATASET_NAME)
-                                                                    .build();
-            return defaultOptions;
-        }
-    }
 
     /**
      * Returns a default factory instance. A {@link Datastore} is created with default {@link DatastoreOptions}:
@@ -92,12 +60,17 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private TestDatastoreStorageFactory(Datastore datastore) {
-        super(datastore, false, DatastoreTypeRegistryFactory.defaultInstance());
-        initDatastoreWrapper(getDatastore());
+        super(datastore,
+              false,
+              DatastoreTypeRegistryFactory.defaultInstance(),
+              NamespaceSupplier.singleTenant(), null);
     }
 
-    private void initDatastoreWrapper(DatastoreWrapper wrapper) {
-        this.setDatastore(TestDatastoreWrapper.wrap(wrapper.getDatastore(), runsOnCi));
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+        // Overrides the behavior for tests
+    @Override
+    protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
+        return TestDatastoreWrapper.wrap(datastore, runsOnCi);
     }
 
     /**
@@ -134,27 +107,17 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final TestDatastoreStorageFactory value =
-                new TestDatastoreStorageFactory(DefaultDatastoreSingleton.INSTANCE.value);
+                new TestDatastoreStorageFactory(TestDatastoreFactory.getLocalDatastore());
     }
 
     private enum TestingInstanceSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final TestDatastoreStorageFactory value =
-                new TestDatastoreStorageFactory(TestingDatastoreSingleton.INSTANCE.value);
+                new TestDatastoreStorageFactory(TestDatastoreFactory.getTestRemoteDatastore());
     }
 
-    enum DefaultDatastoreSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        final Datastore value = DEFAULT_LOCAL_OPTIONS.getService();
-    }
 
-    enum TestingDatastoreSingleton {
-        INSTANCE;
-        @SuppressWarnings({"NonSerializableFieldInSerializableClass", "PackageVisibleField"})
-        final Datastore value = TESTING_OPTIONS.getService();
-    }
 
     private static Logger log() {
         return LogSingleton.INSTANCE.value;

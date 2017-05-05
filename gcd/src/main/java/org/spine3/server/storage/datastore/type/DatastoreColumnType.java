@@ -22,6 +22,7 @@ package org.spine3.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Entity;
+import org.spine3.annotations.SPI;
 import org.spine3.server.entity.storage.ColumnType;
 
 /**
@@ -32,5 +33,6 @@ import org.spine3.server.entity.storage.ColumnType;
  *
  * @author Dmytro Dashenkov
  */
+@SPI
 public interface DatastoreColumnType<J, C> extends ColumnType<J, C, BaseEntity.Builder, String> {
 }

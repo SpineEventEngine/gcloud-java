@@ -24,14 +24,15 @@ import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.DateTime;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.json.Json;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.storage.Project;
 import org.spine3.testdata.Sample;
+import org.spine3.time.Time;
 
 import java.util.Date;
 
@@ -102,10 +103,9 @@ public class DsColumnTypesShould {
     @Test
     public void provide_timestamp_to_date_time_type() {
         final DatastoreColumnType<Timestamp, DateTime> type = DsColumnTypes.timestampType();
-        final Timestamp value = Timestamps2.getCurrentTime();
+        final Timestamp value = Time.getCurrentTime();
 
-        final long nanos = value.getNanos();
-        final Date date = new Date(nanos / Timestamps2.NANOS_PER_MILLISECOND);
+        final Date date = new Date(Timestamps.toMillis(value));
         final DateTime dateTime = DateTime.copyFrom(date);
 
         setDatastoreType(type, value, dateTime);
@@ -127,15 +127,15 @@ public class DsColumnTypesShould {
     }
 
     @Test
-    public void provide_message_to_json_type() {
+    public void provide_message_to_string_type() {
         final DatastoreColumnType<AbstractMessage, String> type = DsColumnTypes.messageType();
 
         final AbstractMessage value = Sample.messageOfType(Project.class);
-        final String jsonMessage = Json.toJson(value);
+        final String stringMessage = Json.toCompactJson(value); // default Stringifier behavior
 
-        setDatastoreType(type, value, jsonMessage);
+        setDatastoreType(type, value, stringMessage);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(jsonMessage));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(stringMessage));
     }
 
     private <T> void setSimpleType(SimpleDatastoreColumnType<T> type, T value) {

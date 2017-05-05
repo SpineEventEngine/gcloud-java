@@ -18,25 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.type;
-
-import com.google.cloud.datastore.BaseEntity;
-import org.spine3.annotations.SPI;
-import org.spine3.server.entity.storage.SimpleColumnType;
+package org.spine3.server.storage.datastore;
 
 /**
- * A base for implementing {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface
- * for Datastore storage regardless the type conversion.
- *
  * @author Dmytro Dashenkov
  */
-@SPI
-public abstract class SimpleDatastoreColumnType<T>
-        extends SimpleColumnType<T, BaseEntity.Builder, String>
-        implements DatastoreColumnType<T, T> {
+public class Given {
 
-    @Override
-    public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {
-        storageRecord.setNull(columnIdentifier);
-    }
+    public static final String TEST_PROJECT_ID_VALUE = "spine-dev";
+    public static final ProjectId TEST_PROJECT_ID = ProjectId.of(TEST_PROJECT_ID_VALUE);
 }

@@ -18,25 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.type;
+package org.spine3.server.storage.datastore.tenant;
 
-import com.google.cloud.datastore.BaseEntity;
-import org.spine3.annotations.SPI;
-import org.spine3.server.entity.storage.SimpleColumnType;
+import org.spine3.server.tenant.TenantIndex;
 
 /**
- * A base for implementing {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface
- * for Datastore storage regardless the type conversion.
+ * A test utility exposing some of the package-private implementation details of
+ * {@link NamespaceIndex} for tests.
  *
  * @author Dmytro Dashenkov
  */
-@SPI
-public abstract class SimpleDatastoreColumnType<T>
-        extends SimpleColumnType<T, BaseEntity.Builder, String>
-        implements DatastoreColumnType<T, T> {
+public final class TestNamespaceIndex {
 
-    @Override
-    public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {
-        storageRecord.setNull(columnIdentifier);
+    private TestNamespaceIndex() {
+        // Prevent this test utility from being instantiated.
+    }
+
+    public static Class<? extends TenantIndex> getType() {
+        return NamespaceIndex.class;
     }
 }

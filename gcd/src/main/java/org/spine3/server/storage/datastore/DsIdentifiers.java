@@ -23,7 +23,7 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import org.spine3.base.Stringifiers;
+import org.spine3.string.Stringifiers;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -50,7 +50,7 @@ public class DsIdentifiers {
      * @return the Datastore {@code Key} instance
      */
     static Key keyFor(DatastoreWrapper datastore, Kind kind, DatastoreRecordId recordId) {
-        final KeyFactory keyFactory = datastore.getKeyFactory(kind.getValue());
+        final KeyFactory keyFactory = datastore.getKeyFactory(kind);
         final Key key = keyFactory.newKey(recordId.getValue());
 
         return key;

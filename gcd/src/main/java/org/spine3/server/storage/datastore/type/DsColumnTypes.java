@@ -24,9 +24,9 @@ import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.DateTime;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.spine3.base.Version;
-import org.spine3.json.Json;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.string.Stringifiers;
 
 import java.util.Date;
 
@@ -43,7 +43,7 @@ import java.util.Date;
  *
  * @author Dmytro Dashenkov
  */
-class DsColumnTypes {
+final class DsColumnTypes {
 
     private DsColumnTypes() {
         // Prevent instantiation of a utility class
@@ -95,8 +95,7 @@ class DsColumnTypes {
 
     /**
      * @return new instance of {@link DatastoreColumnType} storing {@link AbstractMessage} as its
-     * {@link Json} {@code String} representation
-     * @see Json
+     * {@code String} representation taken from a {@link org.spine3.string.Stringifier}
      */
     static DatastoreColumnType<AbstractMessage, String> messageType() {
         return new MessageType();
@@ -151,8 +150,8 @@ class DsColumnTypes {
 
         @Override
         public DateTime convertColumnValue(Timestamp fieldValue) {
-            final Date intermediate = new Date(
-                    fieldValue.getNanos() / Timestamps2.NANOS_PER_MILLISECOND);
+            final long millis = Timestamps.toMillis(fieldValue);
+            final Date intermediate = new Date(millis);
             return DateTime.copyFrom(intermediate);
         }
 
@@ -185,7 +184,7 @@ class DsColumnTypes {
 
         @Override
         public String convertColumnValue(AbstractMessage fieldValue) {
-            return Json.toJson(fieldValue);
+            return Stringifiers.toString(fieldValue);
         }
 
         @Override

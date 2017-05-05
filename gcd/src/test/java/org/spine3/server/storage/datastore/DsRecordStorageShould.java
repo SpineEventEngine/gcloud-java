@@ -25,6 +25,7 @@ import com.google.cloud.datastore.Key;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +34,6 @@ import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.json.Json;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.LifecycleFlags;
@@ -54,6 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
 import static org.spine3.test.Verify.assertContainsKey;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Dmytro Dashenkov
@@ -138,7 +139,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
 
         final ProjectId id = newId();
         final Project state = (Project) newState(id);
-        final Version versionValue = Versions.newVersion(5, Timestamps2.getCurrentTime());
+        final Version versionValue = Versions.newVersion(5, getCurrentTime());
         final TestConstCounterEntity entity = new TestConstCounterEntity(id);
         entity.injectState(state, versionValue);
         final EntityRecord record = EntityRecord.newBuilder()
@@ -186,13 +187,12 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
         assertEquals(entity.getCounterVersion()
                            .getNumber(), datastoreEntity.getLong(counterVersion));
 
-        assertEquals(entity.getCreationTime()
-                           .getNanos() / Timestamps2.NANOS_PER_MICROSECOND,
+        assertEquals(Timestamps.toMicros(entity.getCreationTime()),
                      // in Datastore max DateTime precision is 1 microsecond
                      datastoreEntity.getDateTime(creationTime)
                                     .getTimestampMicroseconds());
         assertEquals(entity.isCounterEven(), datastoreEntity.getBoolean(counterEven));
-        assertEquals(Json.toJson(entity.getCounterState()), datastoreEntity.getString(counterState));
+        assertEquals(Json.toCompactJson(entity.getCounterState()), datastoreEntity.getString(counterState));
 
         // Check standard Columns
         assertEquals(entity.getVersion()
@@ -256,7 +256,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
 
         protected TestConstCounterEntity(ProjectId id) {
             super(id);
-            this.creationTime = Timestamps2.getCurrentTime();
+            this.creationTime = getCurrentTime();
         }
 
         public int getCounter() {

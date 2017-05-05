@@ -18,30 +18,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore.type;
+package org.spine3.server.storage.datastore.tenant;
 
-import com.google.cloud.datastore.BaseEntity;
-import org.spine3.annotations.SPI;
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
- * An abstract base for implementing {@link DatastoreColumnType}.
- *
- * <p>This class provides the default implementation for the {@link #setNull setNull} method
- * of {@link org.spine3.server.entity.storage.ColumnType}. Since this method implementation is the
- * same for all the types within a Storage implementation, it's convenient to declare it once.
+ * A {@link NamespaceSupplier} for single-tenant storage factories.
  *
  * @author Dmytro Dashenkov
  */
-@SPI
-public abstract class AbstractDatastoreColumnType<J, C> implements DatastoreColumnType<J, C> {
+final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
+
+    private static final String DEFAULT_NAMESPACE = "";
+
+    private final Namespace namespace;
+
+    SingleTenantNamespaceSupplier(@Nullable String namespace) {
+        super();
+        this.namespace = isNullOrEmpty(namespace)
+                         ? NamespaceSingleton.INSTANCE.value
+                         : Namespace.of(namespace);
+    }
 
     /**
      * {@inheritDoc}
      *
-     * <p>Delegates the call to the Datastore-native {@link BaseEntity.Builder#setNull setNull}.
+     * @return the {@link Namespace} representing the empty string
      */
     @Override
-    public void setNull(BaseEntity.Builder storageRecord, String columnIdentifier) {
-        storageRecord.setNull(columnIdentifier);
+    public Namespace get() {
+        return namespace;
+    }
+
+    @Override
+    public boolean isMultitenant() {
+        return false;
+    }
+
+    private enum NamespaceSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Namespace value = Namespace.of(DEFAULT_NAMESPACE);
     }
 }

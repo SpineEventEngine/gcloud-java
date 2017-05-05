@@ -26,7 +26,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
-import org.spine3.base.Stringifiers;
+import org.spine3.string.Stringifiers;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Dashenkov.
  * @see org.spine3.server.storage.Storage#index()
  */
-public class Indexes {
+public final class Indexes {
 
     private Indexes() {
         // Prevent instantiation of this utility class.
