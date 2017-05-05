@@ -23,8 +23,8 @@ package org.spine3.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Supplier;
 import com.google.protobuf.Message;
+import org.spine3.annotations.Internal;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
@@ -33,7 +33,6 @@ import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.datastore.tenant.Namespace;
 import org.spine3.server.storage.datastore.tenant.NamespaceSupplier;
 import org.spine3.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
 import org.spine3.server.storage.datastore.tenant.TenantConverterRegistry;
@@ -57,6 +56,7 @@ import static org.spine3.util.Reflection.getGenericParameterType;
  * @author Alexander Litus
  * @author Mikhail Mikhaylov
  * @author Dmytro Dashenkov
+ * @see org.spine3.server.datastore.Contexts#onTopOf for the recommended usage description
  */
 @SuppressWarnings("WeakerAccess") // Part of API
 public class DatastoreStorageFactory implements StorageFactory {
@@ -66,7 +66,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final DatastoreWrapper datastore;
     private final boolean multitenant;
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
-    private final Supplier<Namespace> namespaceSupplier;
+    private final NamespaceSupplier namespaceSupplier;
     private final NamespaceToTenantIdConverter namespaceToTenantIdConverter;
 
     private DatastoreStorageFactory(Builder builder) {
@@ -82,7 +82,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     protected DatastoreStorageFactory(Datastore datastore,
                                       boolean multitenant,
                                       ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
-                                      Supplier<Namespace> namespaceSupplier,
+                                      NamespaceSupplier namespaceSupplier,
                                       @Nullable NamespaceToTenantIdConverter namespaceConverter) {
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
@@ -94,7 +94,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     protected DatastoreStorageFactory(DatastoreWrapper datastore,
                                       boolean multitenant,
                                       ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
-                                      Supplier<Namespace> namespaceSupplier,
+                                      NamespaceSupplier namespaceSupplier,
                                       @Nullable NamespaceToTenantIdConverter namespaceConverter) {
         this.datastore = checkNotNull(datastore);
         this.multitenant = multitenant;
@@ -134,7 +134,8 @@ public class DatastoreStorageFactory implements StorageFactory {
                ? new DatastoreStorageFactory(getDatastore(),
                                              false,
                                              typeRegistry,
-                                             NamespaceSupplier.singleTenant(), namespaceToTenantIdConverter)
+                                             NamespaceSupplier.singleTenant(),
+                                             namespaceToTenantIdConverter)
                : this;
     }
 
@@ -214,6 +215,10 @@ public class DatastoreStorageFactory implements StorageFactory {
         // NOP
     }
 
+    /**
+     * @return an instance of a wrapper of the passed {@link Datastore}
+     */
+    @Internal
     public DatastoreWrapper getDatastore() {
         return datastore;
     }
@@ -238,8 +243,8 @@ public class DatastoreStorageFactory implements StorageFactory {
         private Datastore datastore;
         private boolean multitenant;
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
-        private Supplier<Namespace> namespaceSupplier;
-        public NamespaceToTenantIdConverter namespaceToTenantIdConverter;
+        private NamespaceSupplier namespaceSupplier;
+        private NamespaceToTenantIdConverter namespaceToTenantIdConverter;
 
         private Builder() {
             // Avoid direct initialization
@@ -329,7 +334,7 @@ public class DatastoreStorageFactory implements StorageFactory {
             return new DatastoreStorageFactory(this);
         }
 
-        private Supplier<Namespace> createNamespaceSupplier() {
+        private NamespaceSupplier createNamespaceSupplier() {
             final String defaultNamespace;
             if (multitenant) {
                 checkHasNoNamespace(datastore);
@@ -338,9 +343,9 @@ public class DatastoreStorageFactory implements StorageFactory {
                 defaultNamespace = datastore.getOptions()
                                             .getNamespace();
             }
-            final Supplier<Namespace> result = NamespaceSupplier.instance(multitenant,
-                                                                          defaultNamespace,
-                                                                          ProjectId.of(datastore));
+            final NamespaceSupplier result = NamespaceSupplier.instance(multitenant,
+                                                                        defaultNamespace,
+                                                                        ProjectId.of(datastore));
             return result;
         }
 

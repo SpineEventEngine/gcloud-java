@@ -29,6 +29,7 @@ import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Value;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.spine3.base.Version;
 import org.spine3.string.Stringifiers;
 
@@ -176,7 +177,8 @@ final class DsColumnTypes {
 
         @Override
         public DateTime convertColumnValue(Timestamp fieldValue) {
-            final Date intermediate = new Date(toMillis(fieldValue));
+            final long millis = Timestamps.toMillis(fieldValue);
+            final Date intermediate = new Date(millis);
             return DateTime.copyFrom(intermediate);
         }
 

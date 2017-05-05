@@ -60,6 +60,11 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
         return result;
     }
 
+    @Override
+    public boolean isMultitenant() {
+        return true;
+    }
+
     /**
      * A function declosuring the current tenant {@linkplain TenantId ID}.
      *

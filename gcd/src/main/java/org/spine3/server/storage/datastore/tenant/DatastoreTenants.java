@@ -39,6 +39,11 @@ public final class DatastoreTenants {
     /**
      * Creates a {@link TenantIndex} for the given {@link Datastore}.
      *
+     *
+     * <p>This method is intended for a manual {@code BoundedContext} configuration. To automate
+     * the setup routine please use
+     * {@link org.spine3.server.datastore.Contexts#onTopOf Contexts.onTopOf()} method.
+     *
      * <p>In a multitenant application it's necessary to pass an instance of
      * the {@link TenantIndex} to a
      * {@link org.spine3.server.BoundedContext.Builder BoundedContext.Builder}
@@ -69,14 +74,17 @@ public final class DatastoreTenants {
      * </pre>
      *
      * <p>A single-tenant app (or a single-tenant BoundedContext in a multitenant app) does not
-     * require a {@code TenantIndex} to be set explicitly.
+     * require a {@code TenantIndex} to be set explicitly, so this method assumes that it is an a
+     * single tenant context.
      *
      * @param datastore the {@link Datastore} to get the {@link TenantIndex} for
      * @return a new instance of the {@link TenantIndex}
+     * @see org.spine3.server.datastore.Contexts
      */
     public static TenantIndex index(Datastore datastore) {
         checkNotNull(datastore);
-        final TenantIndex index = new NamespaceIndex(datastore);
+        // We assume we are in a single-tenant execution environment
+        final TenantIndex index = new NamespaceIndex(datastore, true);
         return index;
     }
 }

@@ -39,6 +39,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.spine3.string.Stringifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -49,7 +50,6 @@ import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
-import org.spine3.string.Stringifiers;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;

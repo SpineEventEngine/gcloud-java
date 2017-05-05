@@ -55,6 +55,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
 import static org.spine3.test.Verify.assertContainsKey;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Dmytro Dashenkov
@@ -139,7 +140,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
 
         final ProjectId id = newId();
         final Project state = (Project) newState(id);
-        final Version versionValue = Versions.newVersion(5, Time.getCurrentTime());
+        final Version versionValue = Versions.newVersion(5, getCurrentTime());
         final TestConstCounterEntity entity = new TestConstCounterEntity(id);
         entity.injectState(state, versionValue);
         final EntityRecord record = EntityRecord.newBuilder()
@@ -256,7 +257,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
 
         protected TestConstCounterEntity(ProjectId id) {
             super(id);
-            this.creationTime = Time.getCurrentTime();
+            this.creationTime = getCurrentTime();
         }
 
         public int getCounter() {

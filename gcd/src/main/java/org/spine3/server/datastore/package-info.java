@@ -19,12 +19,10 @@
  */
 
 /**
- * This package contains implementations of
- * {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface used for the GAE
- * storage.
+ * This package contains components for working with the aspects of Google Cloud Datastore usage
+ * beyond the {@linkplain org.spine3.server.storage.Storage storage} itself.
  */
-
 @ParametersAreNonnullByDefault
-package org.spine3.server.storage.datastore.type;
+package org.spine3.server.datastore;
 
 import javax.annotation.ParametersAreNonnullByDefault;

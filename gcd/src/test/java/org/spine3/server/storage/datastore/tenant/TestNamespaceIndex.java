@@ -20,46 +20,21 @@
 
 package org.spine3.server.storage.datastore.tenant;
 
-import javax.annotation.Nullable;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
+import org.spine3.server.tenant.TenantIndex;
 
 /**
- * A {@link NamespaceSupplier} for single-tenant storage factories.
+ * A test utility exposing some of the package-private implementation details of
+ * {@link NamespaceIndex} for tests.
  *
  * @author Dmytro Dashenkov
  */
-final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
+public final class TestNamespaceIndex {
 
-    private static final String DEFAULT_NAMESPACE = "";
-
-    private final Namespace namespace;
-
-    SingleTenantNamespaceSupplier(@Nullable String namespace) {
-        super();
-        this.namespace = isNullOrEmpty(namespace)
-                         ? NamespaceSingleton.INSTANCE.value
-                         : Namespace.of(namespace);
+    private TestNamespaceIndex() {
+        // Prevent this test utility from being instantiated.
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return the {@link Namespace} representing the empty string
-     */
-    @Override
-    public Namespace get() {
-        return namespace;
-    }
-
-    @Override
-    public boolean isMultitenant() {
-        return false;
-    }
-
-    private enum NamespaceSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Namespace value = Namespace.of(DEFAULT_NAMESPACE);
+    public static Class<? extends TenantIndex> getType() {
+        return NamespaceIndex.class;
     }
 }

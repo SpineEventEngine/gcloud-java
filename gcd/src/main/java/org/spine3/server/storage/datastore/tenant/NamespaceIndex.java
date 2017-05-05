@@ -57,13 +57,18 @@ class NamespaceIndex implements TenantIndex {
 
     private final ProjectId projectId;
 
-    NamespaceIndex(Datastore datastore) {
-        this(new DefaultNamespaceQuery(datastore), ProjectId.of(datastore));
+    private final boolean multitenant;
+
+    NamespaceIndex(Datastore datastore, boolean multitenant) {
+        this(new DefaultNamespaceQuery(datastore),
+             ProjectId.of(datastore),
+             multitenant);
     }
 
-    NamespaceIndex(NamespaceQuery namespaceQuery, ProjectId projectId) {
+    NamespaceIndex(NamespaceQuery namespaceQuery, ProjectId projectId, boolean multitenant) {
         this.namespaceQuery = checkNotNull(namespaceQuery);
         this.projectId = projectId;
+        this.multitenant = multitenant;
     }
 
     /**
@@ -144,7 +149,7 @@ class NamespaceIndex implements TenantIndex {
         final Iterator<Key> existingNamespaces = namespaceQuery.run();
         final Set<Namespace> newNamespaces = new HashSet<>();
         final Iterator<Namespace> extractedNamespaces =
-                Iterators.transform(existingNamespaces, new NamespaceUnpacker());
+                Iterators.transform(existingNamespaces, new NamespaceUnpacker(multitenant));
         Iterators.addAll(newNamespaces, extractedNamespaces);
 
         // Never delete tenants, only add new ones
@@ -194,7 +199,13 @@ class NamespaceIndex implements TenantIndex {
     /**
      * A function retrieving a {@link Namespace} from a given {@link Key}.
      */
-    private class NamespaceUnpacker implements Function<Key, Namespace> {
+    private static class NamespaceUnpacker implements Function<Key, Namespace> {
+
+        private final boolean multitenant;
+
+        private NamespaceUnpacker(boolean multitenant) {
+            this.multitenant = multitenant;
+        }
 
         /**
          * Retrieves a {@link Namespace} from a given {@link Key}.
@@ -207,7 +218,7 @@ class NamespaceIndex implements TenantIndex {
         @Override
         public Namespace apply(@Nullable Key key) {
             checkNotNull(key);
-            return Namespace.fromNameOf(key, projectId);
+            return Namespace.fromNameOf(key, multitenant);
         }
     }
 }

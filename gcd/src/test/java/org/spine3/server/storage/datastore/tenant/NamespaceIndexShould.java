@@ -72,13 +72,13 @@ public class NamespaceIndexShould {
         new NullPointerTester()
                 .setDefault(Namespace.class, defaultNamespace)
                 .setDefault(TenantId.class, tenantId)
-                .testInstanceMethods(new NamespaceIndex(mockDatastore()),
+                .testInstanceMethods(new NamespaceIndex(mockDatastore(), true),
                                      NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
     public void store_tenant_ids() {
-        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore());
+        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
         final Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
@@ -99,7 +99,7 @@ public class NamespaceIndexShould {
 
     @Test
     public void do_nothing_on_close() {
-        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore());
+        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), false);
 
         namespaceIndex.close();
         namespaceIndex.close();
@@ -108,7 +108,7 @@ public class NamespaceIndexShould {
 
     @Test
     public void find_existing_namespaces() {
-        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore());
+        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
         // Ensure no namespace has been kept
         final Set<TenantId> initialEmptySet = namespaceIndex.getAll();
@@ -125,7 +125,7 @@ public class NamespaceIndexShould {
 
     @Test
     public void not_find_non_existing_namespaces() {
-        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore());
+        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
         // Ensure no namespace has been kept
         final Set<TenantId> initialEmptySet = namespaceIndex.getAll();
@@ -166,7 +166,9 @@ public class NamespaceIndexShould {
             }
         };
         // The tested object
-        final NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery, TEST_PROJECT_ID);
+        final NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery,
+                                                                 TEST_PROJECT_ID,
+                                                                 true);
 
         // The test flow
         final Runnable flow = new Runnable() {

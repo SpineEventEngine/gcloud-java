@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.storage.datastore.tenant.DsNamespaceValidator;
 import org.spine3.server.storage.datastore.tenant.Namespace;
+import org.spine3.server.storage.datastore.tenant.NamespaceSupplier;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -78,7 +79,7 @@ public class DatastoreWrapper {
 
     private static final Map<Kind, KeyFactory> keyFactories = new HashMap<>();
 
-    private final Supplier<Namespace> namespaceSupplier;
+    private final NamespaceSupplier namespaceSupplier;
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
@@ -92,7 +93,7 @@ public class DatastoreWrapper {
      * @param namespaceSupplier the instance of {@link Supplier Namespace Supplier}, providing
      *                          the namespaces for Datastore queries
      */
-    protected DatastoreWrapper(Datastore datastore, Supplier<Namespace> namespaceSupplier) {
+    protected DatastoreWrapper(Datastore datastore, NamespaceSupplier namespaceSupplier) {
         this.namespaceSupplier = checkNotNull(namespaceSupplier);
         this.datastore = checkNotNull(datastore);
         this.actor = datastore;
@@ -109,7 +110,7 @@ public class DatastoreWrapper {
      */
     @SuppressWarnings("WeakerAccess") // Part of API
     protected static DatastoreWrapper wrap(Datastore datastore,
-                                           Supplier<Namespace> namespaceSupplier) {
+                                           NamespaceSupplier namespaceSupplier) {
         return new DatastoreWrapper(datastore, namespaceSupplier);
     }
 
@@ -451,7 +452,8 @@ public class DatastoreWrapper {
 
     private DsNamespaceValidator namespaceValidator() {
         if (namespaceValidator == null) {
-            namespaceValidator = new DsNamespaceValidator(getDatastore());
+            namespaceValidator = new DsNamespaceValidator(getDatastore(),
+                                                          namespaceSupplier.isMultitenant());
         }
         return namespaceValidator;
     }

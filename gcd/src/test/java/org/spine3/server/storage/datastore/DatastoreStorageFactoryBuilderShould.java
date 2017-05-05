@@ -43,7 +43,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.spine3.server.storage.datastore.TestDatastoreStorageFactory.TestingDatastoreSingleton.INSTANCE;
 import static org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
@@ -159,7 +158,7 @@ public class DatastoreStorageFactoryBuilderShould {
     }
 
     private static Datastore mockDatastore() {
-        return INSTANCE.value;
+        return TestDatastoreFactory.getLocalDatastore();
     }
 
     private static <T> Column<T> mockColumn(Class<T> type) {

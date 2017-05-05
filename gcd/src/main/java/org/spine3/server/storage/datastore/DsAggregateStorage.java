@@ -274,7 +274,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                                                       .setKind(stateTypeName.value())
                                                       .build();
         final List<Entity> allRecords = datastore.read(allQuery);
-        final Iterator<I> index = Iterators.transform(allRecords.iterator(), new IndexTransformer<>(idClass));
+        final Iterator<I> index = Iterators.transform(allRecords.iterator(),
+                                                      new IndexTransformer<>(idClass));
         return index;
     }
 

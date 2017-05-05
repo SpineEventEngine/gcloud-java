@@ -34,6 +34,7 @@ import org.spine3.testdata.Sample;
 import org.spine3.time.Time;
 
 import static org.junit.Assert.assertNotNull;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Mikhail Mikhaylov
@@ -48,7 +49,7 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
         return EntityRecord.newBuilder()
                 .setState(
                         AnyPacker.pack(Sample.messageOfType(Project.class)))
-                .setVersion(Version.newBuilder().setNumber(42).setTimestamp(Time.getCurrentTime()))
+                .setVersion(Version.newBuilder().setNumber(42).setTimestamp(getCurrentTime()))
                 .build();
     }
 

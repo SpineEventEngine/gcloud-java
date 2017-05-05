@@ -25,6 +25,7 @@ import com.google.common.base.Converter;
 import com.google.common.base.Optional;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.spine3.string.Stringifiers;
 import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.string.Stringifiers;
 import org.spine3.users.TenantId;
@@ -40,7 +41,7 @@ import static org.spine3.server.storage.datastore.tenant.TenantConverterRegistry
  */
 public class NamespaceWithCustomConverterShould {
 
-    private static final ProjectId PROJECT_ID = ProjectId.of("ARBITRARYPROJECT");
+    private static final ProjectId PROJECT_ID = ProjectId.of("arbitraryproject");
 
     @BeforeClass
     public static void setUp() {
@@ -65,9 +66,9 @@ public class NamespaceWithCustomConverterShould {
     @Test
     public void construct_from_Key() {
         final String ns = "my.test.namespace.from.key";
-        final Key key = Key.newBuilder("my-project", "some.kind", ns)
+        final Key key = Key.newBuilder(PROJECT_ID.getValue(), "some.kind", ns)
                            .build();
-        final Namespace namespace = Namespace.fromNameOf(key, PROJECT_ID);
+        final Namespace namespace = Namespace.fromNameOf(key, true);
         assertNotNull(namespace);
         assertEquals(ns, namespace.getValue());
     }
