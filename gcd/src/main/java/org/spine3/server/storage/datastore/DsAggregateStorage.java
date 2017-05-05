@@ -130,8 +130,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final String stringId = Stringifiers.toString(id);
         String eventId = Stringifiers.toString(record.getEvent()
-                                                     .getContext()
-                                                     .getEventId());
+                                                     .getId());
         if (eventId.isEmpty()) {
             // Snapshots have no Event IDs.
             eventId = SNAPSHOT + stringId;

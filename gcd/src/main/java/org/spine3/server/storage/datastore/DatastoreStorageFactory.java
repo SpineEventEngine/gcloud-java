@@ -49,7 +49,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.spine3.server.entity.Entity.GenericParameter.ID;
 import static org.spine3.server.entity.Entity.GenericParameter.STATE;
-import static org.spine3.server.reflect.Classes.getGenericParameterType;
+import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
  * Creates storages based on GAE {@link Datastore}.
