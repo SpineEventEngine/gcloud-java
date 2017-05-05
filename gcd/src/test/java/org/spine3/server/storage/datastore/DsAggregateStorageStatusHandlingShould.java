@@ -34,7 +34,7 @@ import org.spine3.test.aggregate.ProjectId;
  * @author Dmytro Dashenkov.
  */
 public class DsAggregateStorageStatusHandlingShould
-        extends AggregateStorageVisibilityHandlingShould {
+       extends AggregateStorageVisibilityHandlingShould {
 
     private static final TestDatastoreStorageFactory datastoreFactory;
 

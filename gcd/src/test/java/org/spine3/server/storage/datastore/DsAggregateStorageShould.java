@@ -66,7 +66,7 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     }
 
     @SuppressWarnings("ConstantConditions")
-    // passing null because this parameter isn't used in this implementation
+        // passing null because this parameter isn't used in this implementation
     @Override
     protected AggregateStorage<ProjectId> getStorage() {
         return datastoreFactory.createAggregateStorage(TestAggregate.class);
