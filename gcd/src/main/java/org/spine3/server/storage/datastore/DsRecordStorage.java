@@ -33,13 +33,11 @@ import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.string.Stringifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -50,6 +48,7 @@ import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
+import org.spine3.string.Stringifiers;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -67,6 +66,8 @@ import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Collections2.filter;
+import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.server.storage.LifecycleFlagField.archived;
 import static org.spine3.server.storage.LifecycleFlagField.deleted;
@@ -170,7 +171,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids, final FieldMask fieldMask) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids,
+                                                         final FieldMask fieldMask) {
         final Function<Entity, EntityRecord> transformer = new Function<Entity, EntityRecord>() {
             @Nullable
             @Override
@@ -316,8 +318,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             keys.add(key);
         }
         final List<Entity> results = datastore.read(keys);
-        final Collection<Entity> filteredResults = Collections2.filter(results, activeEntity());
-        final Collection<EntityRecord> records = Collections2.transform(filteredResults, transformer);
+        final Collection<Entity> filteredResults = filter(results, activeEntity());
+        final Collection<EntityRecord> records = transform(filteredResults, transformer);
         return Collections.unmodifiableCollection(records);
     }
 
@@ -376,7 +378,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return completeEntity;
     }
 
-    protected void populateFromStorageFields(BaseEntity.Builder entity, EntityRecordWithColumns record) {
+    protected void populateFromStorageFields(BaseEntity.Builder entity,
+                                             EntityRecordWithColumns record) {
         if (record.hasColumns()) {
             ColumnRecords.feedColumnsTo(entity,
                                         record,
@@ -501,7 +504,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         /**
          * @param multitenant {@code true} if the storage should be
-         *                    {@link org.spine3.server.storage.Storage#isMultitenant multitenant} or not
+         *                    {@link org.spine3.server.storage.Storage#isMultitenant multitenant}
+         *                    or not
          */
         public Builder<I> setMultitenant(boolean multitenant) {
             this.multitenant = multitenant;
