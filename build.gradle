@@ -162,7 +162,7 @@ task startDatastore {
 
 startDatastore.doLast {
     // Start Datastore emulator with the CLI command
-    "${IS_WINDOWS ? '' : '.'}${File.separatorChar}script${File.separatorChar}start-datastore.${IS_WINDOWS ? 'bat' : 'sh'}".execute()
+    ".${File.separatorChar}script${File.separatorChar}start-datastore.${IS_WINDOWS ? 'bat' : 'sh'}".execute()
 }
 
 tasks["check"].dependsOn startDatastore

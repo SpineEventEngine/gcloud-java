@@ -28,7 +28,8 @@ import org.spine3.server.entity.storage.ColumnType;
 /**
  * The contract of a {@link ColumnType} used by the Datastore storage.
  *
- * <p>Uses {@link Entity.Builder} as the record type and {@code String} as the column identifier type.
+ * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
+ * the column identifier type.
  *
  * @author Dmytro Dashenkov
  */
