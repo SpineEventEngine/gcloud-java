@@ -279,7 +279,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final Key key = keyFor(datastore,
                                kindFrom(typeUrl),
                                ofEntityId(id));
-        final PropertyFilter filter = PropertyFilter.eq(KEY_PROPERTY, key);
+        final PropertyFilter filter = eq(KEY_PROPERTY, key);
         return filter;
     }
 
