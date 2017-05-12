@@ -20,7 +20,7 @@
 
 package org.spine3.server.storage.datastore.type;
 
-import org.spine3.annotations.SPI;
+import org.spine3.annotation.SPI;
 
 /**
  * A base for implementing {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface

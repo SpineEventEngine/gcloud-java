@@ -22,7 +22,7 @@ package org.spine3.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Value;
-import org.spine3.annotations.SPI;
+import org.spine3.annotation.SPI;
 
 /**
  * An abstract base for implementing {@link DatastoreColumnType}.

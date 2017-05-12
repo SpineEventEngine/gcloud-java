@@ -21,7 +21,7 @@
 package org.spine3.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Datastore;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
