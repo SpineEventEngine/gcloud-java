@@ -142,6 +142,13 @@ public class DsColumnTypesShould {
         verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(stringMessage)));
     }
 
+    @Test
+    public void set_null_value() {
+        final SimpleDatastoreColumnType<Boolean> type = DsColumnTypes.booleanType();
+        type.setNull(entity, RANDOM_COLUMN_LABEL);
+        verify(entity).setNull(eq(RANDOM_COLUMN_LABEL));
+    }
+
     private <T> void setSimpleType(SimpleDatastoreColumnType<T> type, T value) {
         final T storedValue = type.convertColumnValue(value);
         assertEquals(value, storedValue);
