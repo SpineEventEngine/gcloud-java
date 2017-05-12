@@ -218,7 +218,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                                     .setKind(getKind().getValue());
         final Map<Column<?>, Object> columns = newHashMap(entityQuery.getParameters());
-        Filter predicate = buildColumnPredicate(columns);
+        Filter filter = buildColumnFilter(columns);
 
         boolean idsHandled = false;
         final Set<I> ids = entityQuery.getIds();
@@ -227,11 +227,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         } else if (ids.size() == 1) {
             idsHandled = true;
             final Object singleId = ids.iterator().next();
-            final Filter idFilter = buildSingleIdPredicate(singleId);
-            predicate = and(predicate, idFilter);
+            final Filter idFilter = buildSingleIdFilter(singleId);
+            filter = and(filter, idFilter);
         }
 
-        final StructuredQuery<Entity> buildDatastoreQuery = datastoreQuery.setFilter(predicate)
+        final StructuredQuery<Entity> buildDatastoreQuery = datastoreQuery.setFilter(filter)
                                                                           .build();
         final Predicate<Entity> inMemFilter = buildMemoryPredicate(!idsHandled, ids);
         return queryAll(typeUrl,
@@ -248,8 +248,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return idPredicate;
     }
 
-    @SuppressWarnings("unchecked") // Precise column type is undefined
-    private Filter buildColumnPredicate(Map<Column<?>, Object> columns) {
+    @SuppressWarnings("unchecked") // Exact column type is unknown at this stage.
+    private Filter buildColumnFilter(Map<Column<?>, Object> columns) {
         Filter predicate = null;
         boolean handleLifecycle = true;
         for (Entry<Column<?>, Object> column : columns.entrySet()) {
@@ -278,7 +278,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return predicate;
     }
 
-    private Filter buildSingleIdPredicate(Object id) {
+    private Filter buildSingleIdFilter(Object id) {
         final Key key = keyFor(datastore,
                                kindFrom(typeUrl),
                                ofEntityId(id));
