@@ -22,6 +22,8 @@ package org.spine3.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.DateTime;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -52,7 +54,7 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 public class DsColumnTypesShould {
 
     private static final String RANDOM_COLUMN_LABEL = "some-column";
-    private BaseEntity.Builder<?, ?> entity;
+    private BaseEntity.Builder<Key, Entity.Builder> entity;
 
     @Before
     public void setUp() {
@@ -165,7 +167,8 @@ public class DsColumnTypesShould {
         type.setColumnValue(entity, storedValue, RANDOM_COLUMN_LABEL);
     }
 
-    private static BaseEntity.Builder mockEntity() {
+    @SuppressWarnings("unchecked") // Because of mocking
+    private static BaseEntity.Builder<Key, Entity.Builder> mockEntity() {
         return mock(BaseEntity.Builder.class);
     }
 }

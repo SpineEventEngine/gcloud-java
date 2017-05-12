@@ -372,7 +372,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return completeEntity;
     }
 
-    protected void populateFromStorageFields(BaseEntity.Builder entity,
+    protected void populateFromStorageFields(BaseEntity.Builder<Key, Entity.Builder> entity,
                                              EntityRecordWithColumns record) {
         if (record.hasColumns()) {
             ColumnRecords.feedColumnsTo(entity,
