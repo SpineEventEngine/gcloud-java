@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.datastore.type;
 
-import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.BooleanValue;
 import com.google.cloud.datastore.DateTime;
 import com.google.cloud.datastore.DateTimeValue;
@@ -34,8 +33,6 @@ import org.spine3.base.Version;
 import org.spine3.string.Stringifiers;
 
 import java.util.Date;
-
-import static com.google.protobuf.util.Timestamps.toMillis;
 
 /**
  * A utility for creating the basic {@link DatastoreColumnType} implementations for
@@ -112,13 +109,6 @@ final class DsColumnTypes {
             extends SimpleDatastoreColumnType<String> {
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   String value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
-        }
-
-        @Override
         public Value<?> toValue(String data) {
             return StringValue.of(data);
         }
@@ -126,13 +116,6 @@ final class DsColumnTypes {
 
     private static class IntegerColumnType
             extends SimpleDatastoreColumnType<Integer> {
-
-        @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   Integer value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
-        }
 
         @Override
         public Value<?> toValue(Integer data) {
@@ -144,13 +127,6 @@ final class DsColumnTypes {
             extends SimpleDatastoreColumnType<Long> {
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   Long value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
-        }
-
-        @Override
         public Value<?> toValue(Long data) {
             return LongValue.of(data);
         }
@@ -158,13 +134,6 @@ final class DsColumnTypes {
 
     private static class BooleanColumnType
             extends SimpleDatastoreColumnType<Boolean> {
-
-        @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   Boolean value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
-        }
 
         @Override
         public Value<?> toValue(Boolean data) {
@@ -183,13 +152,6 @@ final class DsColumnTypes {
         }
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   DateTime value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
-        }
-
-        @Override
         public Value<?> toValue(DateTime data) {
             return DateTimeValue.of(data);
         }
@@ -204,13 +166,6 @@ final class DsColumnTypes {
         }
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   Integer value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
-        }
-
-        @Override
         public Value<?> toValue(Integer data) {
             return LongValue.of(data);
         }
@@ -222,13 +177,6 @@ final class DsColumnTypes {
         @Override
         public String convertColumnValue(AbstractMessage fieldValue) {
             return Stringifiers.toString(fieldValue);
-        }
-
-        @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   String value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
         }
 
         @Override

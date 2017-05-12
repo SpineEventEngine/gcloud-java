@@ -35,7 +35,7 @@ import org.spine3.server.entity.storage.ColumnType;
  * @author Dmytro Dashenkov
  */
 @SPI
-public interface DatastoreColumnType<J, C> extends ColumnType<J, C, BaseEntity.Builder, String> {
+public interface DatastoreColumnType<J, C> extends ColumnType<J, C, BaseEntity.Builder<? , ?>, String> {
 
     Value<?> toValue(C data);
 }
