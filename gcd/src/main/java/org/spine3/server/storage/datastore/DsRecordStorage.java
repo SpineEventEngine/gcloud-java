@@ -28,6 +28,7 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Value;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Optional;
@@ -91,8 +92,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
     private final Class<I> idClass;
 
-    protected static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
-    protected static final String ID_CONVERSION_ERROR_MESSAGE =
+    private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
+    private static final String ID_CONVERSION_ERROR_MESSAGE =
             "Entity had ID of an invalid type; could not parse ID from String. " +
             "Note: custom conversion is not supported. See org.spine3.base.Identifiers#idToString.";
     private static final String KEY_PROPERTY = "__key__";
@@ -209,18 +210,18 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask) {
+    protected Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
         return queryByColumns(query, fieldMask);
     }
 
-    private Map<I, EntityRecord> queryByColumns(EntityQuery entityQuery, FieldMask fieldMask) {
+    private Map<I, EntityRecord> queryByColumns(EntityQuery<I> entityQuery, FieldMask fieldMask) {
         final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                                     .setKind(getKind().getValue());
         final Map<Column<?>, Object> columns = newHashMap(entityQuery.getParameters());
         Filter predicate = buildColumnPredicate(columns);
 
         boolean idsHandled = false;
-        final Set<Object> ids = entityQuery.getIds();
+        final Set<I> ids = entityQuery.getIds();
         if (ids.isEmpty()) {
             idsHandled = true;
         } else if (ids.size() == 1) {
@@ -240,7 +241,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Predicate<Entity> buildMemoryPredicate(boolean handleIds,
-                                                   Set<Object> ids) {
+                                                   Set<I> ids) {
         final Predicate<Entity> idPredicate = handleIds
                                               ? new IdFilter(ids)
                                               : Predicates.<Entity>alwaysTrue();
@@ -303,7 +304,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      *
      * @return the {@link TypeUrl} of the stored messages
      */
-    protected TypeUrl getTypeUrl() {
+    @VisibleForTesting // Otherwise this getter is not used
+    TypeUrl getTypeUrl() {
         return typeUrl;
     }
 
@@ -323,13 +325,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return Collections.unmodifiableCollection(records);
     }
 
-    protected Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
+    private Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
                                             StructuredQuery<Entity> query,
                                             FieldMask fieldMask) {
         return queryAll(typeUrl, query, fieldMask, activeEntity());
     }
 
-    protected Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
+    private Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
                                             StructuredQuery<Entity> query,
                                             FieldMask fieldMask,
                                             Predicate<Entity> resultFilter) {
@@ -354,14 +356,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         return records.build();
-    }
-
-    protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
-        final String entityKind = kindFrom(typeUrl).getValue();
-        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                                   .setKind(entityKind)
-                                                   .build();
-        return query;
     }
 
     protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
@@ -422,13 +416,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return null;
     }
 
-    protected final I unpackKey(Entity entity) {
-        final String stringId = entity.getKey()
-                                      .getName();
-        final I id = Stringifiers.fromString(stringId, idClass);
-        return id;
-    }
-
     private Kind kindFrom(EntityRecord record) {
         final Kind defaultKind = getDefaultKind();
         if (defaultKind != null) {
@@ -448,7 +435,18 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return Kind.of(typeUrl);
     }
 
-    protected IdRecordPair<I> getRecordFromEntity(Entity entity) {
+    protected Kind getKind() {
+        return kindFrom(typeUrl);
+    }
+
+    I unpackKey(Entity entity) {
+        final String stringId = entity.getKey()
+                                      .getName();
+        final I id = Stringifiers.fromString(stringId, idClass);
+        return id;
+    }
+
+    IdRecordPair<I> getRecordFromEntity(Entity entity) {
         // Retrieve ID
         final I id = unpackKey(entity);
         checkState(id != null, ID_CONVERSION_ERROR_MESSAGE);
@@ -458,8 +456,12 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return new IdRecordPair<>(id, record);
     }
 
-    protected Kind getKind() {
-        return kindFrom(typeUrl);
+    StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
+        final String entityKind = kindFrom(typeUrl).getValue();
+        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+                                                   .setKind(entityKind)
+                                                   .build();
+        return query;
     }
 
     /**
@@ -565,9 +567,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private class IdFilter implements Predicate<Entity> {
 
-        private final Set<Object> acceptedIds;
+        private final Set<?> acceptedIds;
 
-        private IdFilter(Set<Object> acceptedIds) {
+        private IdFilter(Set<?> acceptedIds) {
             this.acceptedIds = acceptedIds;
         }
 
