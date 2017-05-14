@@ -20,7 +20,8 @@
 
 package org.spine3.server.storage.datastore.type;
 
-import com.google.cloud.datastore.BaseEntity;
+import com.google.cloud.datastore.LongValue;
+import com.google.cloud.datastore.Value;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.Version;
@@ -92,10 +93,8 @@ public class DatastoreTypeRegistryFactoryShould {
 
     private static class ByteColumnType extends SimpleDatastoreColumnType<Byte> {
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   Byte value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
+        public Value<?> toValue(Byte data) {
+            return LongValue.of(data);
         }
     }
 
@@ -107,10 +106,8 @@ public class DatastoreTypeRegistryFactoryShould {
         }
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   Integer value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
+        public Value<?> toValue(Integer data) {
+            return LongValue.of(data);
         }
     }
 }

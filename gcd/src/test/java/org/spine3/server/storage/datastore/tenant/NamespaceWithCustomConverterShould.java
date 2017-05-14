@@ -27,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spine3.string.Stringifiers;
 import org.spine3.server.storage.datastore.ProjectId;
+import org.spine3.string.Stringifiers;
 import org.spine3.users.TenantId;
 
 import static org.junit.Assert.assertEquals;

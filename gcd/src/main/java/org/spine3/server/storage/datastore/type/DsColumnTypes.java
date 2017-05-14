@@ -20,8 +20,12 @@
 
 package org.spine3.server.storage.datastore.type;
 
-import com.google.cloud.datastore.BaseEntity;
+import com.google.cloud.datastore.BooleanValue;
 import com.google.cloud.datastore.DateTime;
+import com.google.cloud.datastore.DateTimeValue;
+import com.google.cloud.datastore.LongValue;
+import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.Value;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -95,7 +99,7 @@ final class DsColumnTypes {
 
     /**
      * @return new instance of {@link DatastoreColumnType} storing {@link AbstractMessage} as its
-     * {@code String} representation taken from a {@link org.spine3.string.Stringifier}
+     * {@code String} representation taken from a {@link org.spine3.string.Stringifier Stringifier}
      */
     static DatastoreColumnType<AbstractMessage, String> messageType() {
         return new MessageType();
@@ -105,10 +109,8 @@ final class DsColumnTypes {
             extends SimpleDatastoreColumnType<String> {
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   String value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
+        public Value<?> toValue(String data) {
+            return StringValue.of(data);
         }
     }
 
@@ -116,10 +118,8 @@ final class DsColumnTypes {
             extends SimpleDatastoreColumnType<Integer> {
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   Integer value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
+        public Value<?> toValue(Integer data) {
+            return LongValue.of(data);
         }
     }
 
@@ -127,10 +127,8 @@ final class DsColumnTypes {
             extends SimpleDatastoreColumnType<Long> {
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   Long value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
+        public Value<?> toValue(Long data) {
+            return LongValue.of(data);
         }
     }
 
@@ -138,10 +136,8 @@ final class DsColumnTypes {
             extends SimpleDatastoreColumnType<Boolean> {
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   Boolean value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
+        public Value<?> toValue(Boolean data) {
+            return BooleanValue.of(data);
         }
     }
 
@@ -156,10 +152,8 @@ final class DsColumnTypes {
         }
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   DateTime value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
+        public Value<?> toValue(DateTime data) {
+            return DateTimeValue.of(data);
         }
     }
 
@@ -172,10 +166,8 @@ final class DsColumnTypes {
         }
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   Integer value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
+        public Value<?> toValue(Integer data) {
+            return LongValue.of(data);
         }
     }
 
@@ -188,10 +180,8 @@ final class DsColumnTypes {
         }
 
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord,
-                                   String value,
-                                   String columnIdentifier) {
-            storageRecord.set(columnIdentifier, value);
+        public Value<?> toValue(String data) {
+            return StringValue.of(data);
         }
     }
 }

@@ -21,7 +21,7 @@
 package org.spine3.server.storage.datastore.tenant;
 
 import com.google.common.base.Converter;
-import org.spine3.annotations.SPI;
+import org.spine3.annotation.SPI;
 import org.spine3.users.TenantId;
 
 import static com.google.common.base.Preconditions.checkNotNull;

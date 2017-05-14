@@ -23,7 +23,7 @@ package org.spine3.server.storage.datastore;
 import com.google.common.base.Objects;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 

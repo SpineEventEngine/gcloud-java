@@ -32,7 +32,6 @@ import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
-import org.spine3.json.Json;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
@@ -52,6 +51,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.json.Json.toCompactJson;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
 import static org.spine3.test.Verify.assertContainsKey;
 import static org.spine3.time.Time.getCurrentTime;
@@ -59,14 +59,16 @@ import static org.spine3.time.Time.getCurrentTime;
 /**
  * @author Dmytro Dashenkov
  */
-public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsRecordStorage<ProjectId>> {
+public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
+                                                               DsRecordStorage<ProjectId>> {
 
     private static final TestDatastoreStorageFactory datastoreFactory
             = TestDatastoreStorageFactory.getDefaultInstance();
 
     @Override
     protected DsRecordStorage<ProjectId> getStorage() {
-        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(TestConstCounterEntity.class);
+        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(
+                TestConstCounterEntity.class);
     }
 
     @Override
@@ -90,7 +92,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
 
     private EntityRecordWithColumns newRecordWithColumns() {
         final EntityRecord record = newStorageRecord();
-        final EntityRecordWithColumns recordWithColumns = create(record, new TestConstCounterEntity(newId()));
+        final TestConstCounterEntity entity = new TestConstCounterEntity(newId());
+        final EntityRecordWithColumns recordWithColumns = create(record, entity);
         return recordWithColumns;
     }
 
@@ -177,8 +180,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
         final Entity datastoreEntity = datastore.read(key);
 
         // Check entity record
-        final EntityRecord readRecord = Entities.entityToMessage(datastoreEntity,
-                                                                 TypeUrl.from(EntityRecord.getDescriptor()));
+        final TypeUrl recordType = TypeUrl.from(EntityRecord.getDescriptor());
+        final EntityRecord readRecord = Entities.entityToMessage(datastoreEntity, recordType);
         assertEquals(record, readRecord);
 
         // Check custom Columns
@@ -192,18 +195,19 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
                      datastoreEntity.getDateTime(creationTime)
                                     .getTimestampMicroseconds());
         assertEquals(entity.isCounterEven(), datastoreEntity.getBoolean(counterEven));
-        assertEquals(Json.toCompactJson(entity.getCounterState()), datastoreEntity.getString(counterState));
+        assertEquals(toCompactJson(entity.getCounterState()),
+                     datastoreEntity.getString(counterState));
 
         // Check standard Columns
-        assertEquals(entity.getVersion()
-                           .getNumber(), datastoreEntity.getLong(version));
+        assertEquals(entity.getVersion().getNumber(), datastoreEntity.getLong(version));
         assertEquals(entity.isArchived(), datastoreEntity.getBoolean(archived));
         assertEquals(entity.isDeleted(), datastoreEntity.getBoolean(deleted));
     }
 
     @Test
     public void pass_big_data_speed_test() {
-        // Default bulk size is 500 records - the maximum records that could be written within one write operation
+        // Default bulk size is 500 records - the maximum records that could be written within
+        // one write operation
         final long maxReadTime = 1000;
         final long maxWriteTime = 9500;
 
@@ -236,8 +240,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
                                                 .build();
         final TestConstCounterEntity entity = new TestConstCounterEntity(id);
         entity.injectLifecycle(lifecycle);
-        final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.create(record,
-                                                                                         entity);
+        final EntityRecordWithColumns recordWithColumns = create(record, entity);
         final RecordStorage<ProjectId> storage = getStorage();
         storage.write(id, recordWithColumns);
         final Optional<EntityRecord> restoredRecordOptional = storage.read(id);
@@ -248,7 +251,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId, DsReco
     }
 
     @SuppressWarnings("unused") // Reflective access
-    public static class TestConstCounterEntity extends AbstractVersionableEntity<ProjectId, Project> {
+    public static class TestConstCounterEntity
+                  extends AbstractVersionableEntity<ProjectId, Project> {
 
         private static final int COUNTER = 42;
         private final Timestamp creationTime;

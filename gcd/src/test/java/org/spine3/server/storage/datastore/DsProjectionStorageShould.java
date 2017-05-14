@@ -31,6 +31,7 @@ import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.projection.ProjectionStorageShould;
 import org.spine3.test.projection.Project;
 import org.spine3.testdata.Sample;
+import org.spine3.time.Time;
 
 import static org.junit.Assert.assertNotNull;
 import static org.spine3.time.Time.getCurrentTime;

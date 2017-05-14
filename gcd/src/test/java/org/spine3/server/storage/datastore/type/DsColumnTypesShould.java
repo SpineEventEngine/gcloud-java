@@ -22,6 +22,8 @@ package org.spine3.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.DateTime;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -36,6 +38,10 @@ import org.spine3.time.Time;
 
 import java.util.Date;
 
+import static com.google.cloud.datastore.BooleanValue.of;
+import static com.google.cloud.datastore.DateTimeValue.of;
+import static com.google.cloud.datastore.LongValue.of;
+import static com.google.cloud.datastore.StringValue.of;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -48,7 +54,7 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 public class DsColumnTypesShould {
 
     private static final String RANDOM_COLUMN_LABEL = "some-column";
-    private BaseEntity.Builder entity;
+    private BaseEntity.Builder<Key, Entity.Builder> entity;
 
     @Before
     public void setUp() {
@@ -67,7 +73,7 @@ public class DsColumnTypesShould {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(value));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
     }
 
     @Test
@@ -77,7 +83,7 @@ public class DsColumnTypesShould {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq((long) value));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
     }
 
     @Test
@@ -87,7 +93,7 @@ public class DsColumnTypesShould {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(value));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
     }
 
     @Test
@@ -97,7 +103,7 @@ public class DsColumnTypesShould {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(value));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
     }
 
     @Test
@@ -110,7 +116,7 @@ public class DsColumnTypesShould {
 
         setDatastoreType(type, value, dateTime);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(dateTime));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(dateTime)));
     }
 
     @Test
@@ -123,7 +129,7 @@ public class DsColumnTypesShould {
 
         setDatastoreType(type, value, number);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq((long) number));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(number)));
     }
 
     @Test
@@ -135,7 +141,14 @@ public class DsColumnTypesShould {
 
         setDatastoreType(type, value, stringMessage);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(stringMessage));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(stringMessage)));
+    }
+
+    @Test
+    public void set_null_value() {
+        final SimpleDatastoreColumnType<Boolean> type = DsColumnTypes.booleanType();
+        type.setNull(entity, RANDOM_COLUMN_LABEL);
+        verify(entity).setNull(eq(RANDOM_COLUMN_LABEL));
     }
 
     private <T> void setSimpleType(SimpleDatastoreColumnType<T> type, T value) {
@@ -154,7 +167,8 @@ public class DsColumnTypesShould {
         type.setColumnValue(entity, storedValue, RANDOM_COLUMN_LABEL);
     }
 
-    private static BaseEntity.Builder mockEntity() {
+    @SuppressWarnings("unchecked") // Because of mocking
+    private static BaseEntity.Builder<Key, Entity.Builder> mockEntity() {
         return mock(BaseEntity.Builder.class);
     }
 }

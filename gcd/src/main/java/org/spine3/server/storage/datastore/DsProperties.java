@@ -22,8 +22,8 @@ package org.spine3.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.protobuf.Message;
-import org.spine3.string.Stringifiers;
 import org.spine3.server.storage.LifecycleFlagField;
+import org.spine3.string.Stringifiers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.aggregate.storage.AggregateField.aggregate_id;

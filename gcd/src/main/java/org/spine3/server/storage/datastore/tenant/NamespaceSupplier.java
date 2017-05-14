@@ -22,7 +22,7 @@ package org.spine3.server.storage.datastore.tenant;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 import org.spine3.server.storage.datastore.ProjectId;
 import org.spine3.users.TenantId;
