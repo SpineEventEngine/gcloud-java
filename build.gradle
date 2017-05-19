@@ -123,6 +123,11 @@ subprojects {
         classifier "test"
     }
 
+    task javadocJar(type: Jar, dependsOn: 'javadoc') {
+        from ("$projectDir/build/docs/javadoc")
+        classifier "javadoc"
+    }
+
     publishing {
         repositories {
             maven {
