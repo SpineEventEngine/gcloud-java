@@ -123,6 +123,16 @@ class DsEventStorage extends EventStorage {
         return startTimeFilter;
     }
 
+    /**
+     * Retrieves the default {@link DatastoreColumnType} implementation for {@link Timestamp}.
+     *
+     * <p>The method uses Entity Column declared with {@link EventEntity#getCreated()} method and
+     * the {@link DatastoreTypeRegistryFactory#defaultInstance()} to retrieve the resulting Column
+     * Type.
+     *
+     * <p>This method should only be used to get the Column Type for the column declared with
+     * {@link EventEntity#getCreated()} method as a part of {@link EventStreamQuery} processing.
+     */
     private static DatastoreColumnType<Timestamp, DateTime> getTimestampColumnType() {
         final Class<EventEntity> eventEntityClass = EventEntity.class;
         final Method getter;
