@@ -109,13 +109,15 @@ class DsEventStorage extends EventStorage {
         }
     }
 
-    private static Filter afterFilter(Timestamp after, DatastoreColumnType<Timestamp, DateTime> columnType) {
+    private static Filter afterFilter(Timestamp after,
+                                      DatastoreColumnType<Timestamp, DateTime> columnType) {
         final Value<?> value = columnType.toValue(columnType.convertColumnValue(after));
         final Filter startTimeFilter = gt(EventEntity.CREATED_TIME_COLUMN, value);
         return startTimeFilter;
     }
 
-    private static Filter beforeFilter(Timestamp before, DatastoreColumnType<Timestamp, DateTime> columnType) {
+    private static Filter beforeFilter(Timestamp before,
+                                       DatastoreColumnType<Timestamp, DateTime> columnType) {
         final Value<?> value = columnType.toValue(columnType.convertColumnValue(before));
         final Filter startTimeFilter = lt(EventEntity.CREATED_TIME_COLUMN, value);
         return startTimeFilter;
@@ -141,7 +143,8 @@ class DsEventStorage extends EventStorage {
     private Map<EventId, EntityRecord> processResults(List<Entity> entities) {
         final ImmutableMap.Builder<EventId, EntityRecord> records = new ImmutableMap.Builder<>();
         for (Entity entity : entities) {
-            final IdRecordPair<EventId> recordPair = getDelegateStorage().getRecordFromEntity(entity);
+            final IdRecordPair<EventId> recordPair =
+                    getDelegateStorage().getRecordFromEntity(entity);
             records.put(recordPair.getId(), recordPair.getRecord());
         }
         return records.build();
