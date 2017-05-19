@@ -113,6 +113,10 @@ subprojects {
         }
     }
 
+    task generateJavadocs(type: Javadoc) {
+        source = sourceSets.main.allJava
+    }
+
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
         classifier "sources"
