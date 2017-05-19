@@ -35,7 +35,7 @@ import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.event.EventEntity;
 import org.spine3.server.event.EventStreamQuery;
-import org.spine3.server.storage.EventStorage;
+import org.spine3.server.storage.EventRecordStorage;
 import org.spine3.server.storage.datastore.DsRecordStorage.IdRecordPair;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
@@ -55,9 +55,9 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
  * {@inheritDoc}
  */
 @Deprecated
-class DsEventStorage extends EventStorage {
+class DsEventRecordStorage extends EventRecordStorage {
 
-    protected DsEventStorage(DsRecordStorage<EventId> storage) {
+    protected DsEventRecordStorage(DsRecordStorage<EventId> storage) {
         super(storage);
     }
 
