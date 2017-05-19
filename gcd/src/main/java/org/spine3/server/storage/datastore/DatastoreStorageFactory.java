@@ -25,12 +25,14 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
+import org.spine3.base.EventId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
+import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.datastore.tenant.NamespaceSupplier;
@@ -162,6 +164,11 @@ public class DatastoreStorageFactory implements StorageFactory {
                                                                         aClass,
                                                                         multitenant);
         return result;
+    }
+
+    @Override
+    public EventStorage createEventStorage(RecordStorage<EventId> delegate) {
+        return new DsEventStorage((DsRecordStorage<EventId>) delegate);
     }
 
     /**
