@@ -181,6 +181,16 @@ class DsEventRecordStorage extends EventRecordStorage {
         return getDefaultColumnType(EventEntity.class, "getCreated");
     }
 
+    /**
+     * Retrieves the default {@link DatastoreColumnType} implementation for {@link String}.
+     *
+     * <p>The method uses Entity Column declared with {@link EventEntity#getType()} method and
+     * the {@link DatastoreTypeRegistryFactory#defaultInstance()} to retrieve the resulting Column
+     * Type.
+     *
+     * <p>This method should only be used to get the Column Type for the column declared with
+     * {@link EventEntity#getType()} method as a part of {@link EventStreamQuery} processing.
+     */
     private static SimpleDatastoreColumnType<String> getStringColumnType() {
         return getDefaultColumnType(EventEntity.class, "getType");
     }
