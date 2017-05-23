@@ -26,6 +26,7 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.Value;
+import com.google.common.base.Function;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
@@ -45,7 +46,6 @@ import org.spine3.type.TypeName;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +53,8 @@ import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.gt;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.singleton;
@@ -102,16 +104,30 @@ class DsEventRecordStorage extends EventRecordStorage {
         }
     }
 
+    /**
+     * Merges the given type {@linkplain Filter filters} and the given time
+     * {@linkplain Filter filter} into an {@linkplain Iterable} of
+     * {@linkplain com.google.cloud.datastore.StructuredQuery.CompositeFilter#and composite filters}.
+     *
+     * <p>If the passed time filter is {@code null}, then the given type filers are returned.
+     *
+     * @param typeFilters type filters to merge
+     * @param timeFilter  time filter to merge with
+     * @return an {@link Iterable} of {@linkplain Filter filters} regarding all the passed filters
+     */
     private static Iterable<Filter> mergeFilters(Iterable<Filter> typeFilters,
-                                                 @Nullable Filter timeFilter) {
+                                                 @Nullable final Filter timeFilter) {
         if (timeFilter == null) {
             return typeFilters;
         }
 
-        final Collection<Filter> result = new LinkedList<>();
-        for (Filter type : typeFilters) {
-            result.add(and(timeFilter, type));
-        }
+        final Iterable<Filter> result = transform(typeFilters, new Function<Filter, Filter>() {
+            @Override
+            public Filter apply(@Nullable Filter filter) {
+                checkNotNull(filter);
+                return and(filter, timeFilter);
+            }
+        });
         return result;
     }
 
