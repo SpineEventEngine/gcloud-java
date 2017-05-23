@@ -26,7 +26,7 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.Value;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Function;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
@@ -34,22 +34,30 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.event.EventEntity;
+import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.storage.EventRecordStorage;
 import org.spine3.server.storage.datastore.DsRecordStorage.IdRecordPair;
 import org.spine3.server.storage.datastore.type.DatastoreColumnType;
 import org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory;
+import org.spine3.server.storage.datastore.type.SimpleDatastoreColumnType;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
+import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.gt;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Collections.singleton;
 
 /**
  * {@inheritDoc}
@@ -63,31 +71,68 @@ class DsEventRecordStorage extends EventRecordStorage {
 
     @Override
     protected Map<EventId, EntityRecord> readRecords(EventStreamQuery query) {
-        final StructuredQuery<Entity> entityQuery = buildQuery(query);
+        final Iterable<StructuredQuery<Entity>> queries = buildQueries(query);
         final DatastoreWrapper datastore = getDelegateStorage().getDatastore();
-        final List<Entity> readEntities = datastore.read(entityQuery);
-        if (readEntities.isEmpty()) {
-            return Collections.emptyMap();
+        final Map<EventId, EntityRecord> result = newHashMap();
+        for (StructuredQuery<Entity> entityQuery : queries) {
+            final List<Entity> readEntities = datastore.read(entityQuery);
+            dumpResultsTo(result, readEntities);
         }
-        final Map<EventId, EntityRecord> result = processResults(readEntities);
         return result;
     }
 
-    private static StructuredQuery<Entity> buildQuery(EventStreamQuery sourceQuery) {
+    private static Iterable<StructuredQuery<Entity>> buildQueries(EventStreamQuery sourceQuery) {
         final Kind kind = Kind.of(TypeName.of(Event.class));
-        final Filter filter = buildFilter(sourceQuery);
+        final Filter timeFilter = buildTimeFilter(sourceQuery);
         final StructuredQuery.Builder<Entity> entityQuery = Query.newEntityQueryBuilder()
                                                                  .setKind(kind.getValue());
-        if (filter == null) {
-            return entityQuery.build();
+        final Collection<Filter> typeFilters = buildTypeFilters(sourceQuery);
+        if (typeFilters.isEmpty()) {
+            if (timeFilter != null) {
+                entityQuery.setFilter(timeFilter);
+            }
+            return singleton(entityQuery.build());
         } else {
-            return entityQuery.setFilter(filter)
-                              .build();
+            final Collection<StructuredQuery<Entity>> result = newLinkedList();
+            final Iterable<Filter> filters = mergeFilters(typeFilters, timeFilter);
+            for (Filter filter : filters) {
+                final StructuredQuery<Entity> query = entityQuery.setFilter(filter)
+                                                                 .build();
+                result.add(query);
+            }
+            return result;
         }
     }
 
+    /**
+     * Merges the given type {@linkplain Filter filters} and the given time
+     * {@linkplain Filter filter} into an {@linkplain Iterable} of
+     * {@linkplain com.google.cloud.datastore.StructuredQuery.CompositeFilter#and composite filters}.
+     *
+     * <p>If the passed time filter is {@code null}, then the given type filers are returned.
+     *
+     * @param typeFilters type filters to merge
+     * @param timeFilter  time filter to merge with
+     * @return an {@link Iterable} of {@linkplain Filter filters} regarding all the passed filters
+     */
+    private static Iterable<Filter> mergeFilters(Iterable<Filter> typeFilters,
+                                                 @Nullable final Filter timeFilter) {
+        if (timeFilter == null) {
+            return typeFilters;
+        }
+
+        final Iterable<Filter> result = transform(typeFilters, new Function<Filter, Filter>() {
+            @Override
+            public Filter apply(@Nullable Filter filter) {
+                checkNotNull(filter);
+                return and(filter, timeFilter);
+            }
+        });
+        return result;
+    }
+
     @Nullable
-    private static Filter buildFilter(EventStreamQuery query) {
+    private static Filter buildTimeFilter(EventStreamQuery query) {
         if (!query.hasBefore() && !query.hasAfter()) {
             return null;
         }
@@ -109,6 +154,16 @@ class DsEventRecordStorage extends EventRecordStorage {
         }
     }
 
+    private static Collection<Filter> buildTypeFilters(EventStreamQuery query) {
+        final Collection<Filter> result = newLinkedList();
+        final SimpleDatastoreColumnType<String> columnType = getStringColumnType();
+        for (EventFilter filter : query.getFilterList()) {
+            final Filter typeFilter = typeFilter(filter.getEventType(), columnType);
+            result.add(typeFilter);
+        }
+        return result;
+    }
+
     private static Filter afterFilter(Timestamp after,
                                       DatastoreColumnType<Timestamp, DateTime> columnType) {
         final Value<?> value = columnType.toValue(columnType.convertColumnValue(after));
@@ -123,6 +178,12 @@ class DsEventRecordStorage extends EventRecordStorage {
         return startTimeFilter;
     }
 
+    private static Filter typeFilter(String type, SimpleDatastoreColumnType<String> columnType) {
+        final Value<?> value = columnType.toValue(columnType.convertColumnValue(type));
+        final Filter typeFilter = eq(EventEntity.TYPE_COLUMN, value);
+        return typeFilter;
+    }
+
     /**
      * Retrieves the default {@link DatastoreColumnType} implementation for {@link Timestamp}.
      *
@@ -134,30 +195,44 @@ class DsEventRecordStorage extends EventRecordStorage {
      * {@link EventEntity#getCreated()} method as a part of {@link EventStreamQuery} processing.
      */
     private static DatastoreColumnType<Timestamp, DateTime> getTimestampColumnType() {
-        final Class<EventEntity> eventEntityClass = EventEntity.class;
+        return getDefaultColumnType(EventEntity.class, "getCreated");
+    }
+
+    /**
+     * Retrieves the default {@link DatastoreColumnType} implementation for {@link String}.
+     *
+     * <p>The method uses Entity Column declared with {@link EventEntity#getType()} method and
+     * the {@link DatastoreTypeRegistryFactory#defaultInstance()} to retrieve the resulting Column
+     * Type.
+     *
+     * <p>This method should only be used to get the Column Type for the column declared with
+     * {@link EventEntity#getType()} method as a part of {@link EventStreamQuery} processing.
+     */
+    private static SimpleDatastoreColumnType<String> getStringColumnType() {
+        return getDefaultColumnType(EventEntity.class, "getType");
+    }
+
+    private static <T extends DatastoreColumnType<?, ?>> T getDefaultColumnType(
+            Class<? extends org.spine3.server.entity.Entity> cls, String getterName) {
         final Method getter;
         try {
-            getter = eventEntityClass.getMethod("getCreated");
+            getter = cls.getMethod(getterName);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
-        final Column<Timestamp> column = Column.from(getter);
+        final Column<?> column = Column.from(getter);
         final ColumnTypeRegistry registry = DatastoreTypeRegistryFactory.defaultInstance();
-
-        @SuppressWarnings("unchecked")
-        final DatastoreColumnType<Timestamp, DateTime> timestampType =
-                (DatastoreColumnType<Timestamp, DateTime>) registry.get(column);
-        return timestampType;
+        @SuppressWarnings("unchecked") // Checked for the default column type registry
+        final T result = (T) registry.get(column);
+        return result;
     }
 
-    private Map<EventId, EntityRecord> processResults(List<Entity> entities) {
-        final ImmutableMap.Builder<EventId, EntityRecord> records = new ImmutableMap.Builder<>();
-        for (Entity entity : entities) {
+    private void dumpResultsTo(Map<EventId, EntityRecord> destination, List<Entity> results) {
+        for (Entity entity : results) {
             final IdRecordPair<EventId> recordPair =
                     getDelegateStorage().getRecordFromEntity(entity);
-            records.put(recordPair.getId(), recordPair.getRecord());
+            destination.put(recordPair.getId(), recordPair.getRecord());
         }
-        return records.build();
     }
 
     @Override
