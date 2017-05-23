@@ -45,7 +45,6 @@ import org.spine3.type.TypeName;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +53,8 @@ import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.gt;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
+import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.singleton;
 
 /**
@@ -70,7 +71,7 @@ class DsEventRecordStorage extends EventRecordStorage {
     protected Map<EventId, EntityRecord> readRecords(EventStreamQuery query) {
         final Iterable<StructuredQuery<Entity>> queries = buildQueries(query);
         final DatastoreWrapper datastore = getDelegateStorage().getDatastore();
-        final Map<EventId, EntityRecord> result = new HashMap<>();
+        final Map<EventId, EntityRecord> result = newHashMap();
         for (StructuredQuery<Entity> entityQuery : queries) {
             final List<Entity> readEntities = datastore.read(entityQuery);
             dumpResultsTo(result, readEntities);
@@ -90,7 +91,7 @@ class DsEventRecordStorage extends EventRecordStorage {
             }
             return singleton(entityQuery.build());
         } else {
-            final Collection<StructuredQuery<Entity>> result = new LinkedList<>();
+            final Collection<StructuredQuery<Entity>> result = newLinkedList();
             final Iterable<Filter> filters = mergeFilters(typeFilters, timeFilter);
             for (Filter filter : filters) {
                 final StructuredQuery<Entity> query = entityQuery.setFilter(filter)
@@ -138,7 +139,7 @@ class DsEventRecordStorage extends EventRecordStorage {
     }
 
     private static Collection<Filter> buildTypeFilters(EventStreamQuery query) {
-        final Collection<Filter> result = new LinkedList<>();
+        final Collection<Filter> result = newLinkedList();
         final SimpleDatastoreColumnType<String> columnType = getStringColumnType();
         for (EventFilter filter : query.getFilterList()) {
             final Filter typeFilter = typeFilter(filter.getEventType(), columnType);
