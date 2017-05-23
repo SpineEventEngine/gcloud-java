@@ -113,7 +113,7 @@ subprojects {
         }
     }
 
-    task generateJavadocs(type: Javadoc) {
+    javadoc {
         source = sourceSets.main.allJava
     }
 
