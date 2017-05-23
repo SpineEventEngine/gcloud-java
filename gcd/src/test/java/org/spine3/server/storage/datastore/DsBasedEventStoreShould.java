@@ -21,19 +21,29 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import org.junit.After;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStoreShould;
+
+import static org.spine3.server.storage.datastore.TestDatastoreStorageFactory.getDefaultInstance;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class DsBasedEventStoreShould extends EventStoreShould {
 
+    private static final TestDatastoreStorageFactory datastoreFactory = getDefaultInstance();
+
+    @After
+    public void tearDown() throws Exception {
+        datastoreFactory.tearDown();
+    }
+
     @Override
     protected EventStore creteStore() {
         return EventStore.newBuilder()
                          .setStreamExecutor(MoreExecutors.directExecutor())
-                         .setStorageFactory(TestDatastoreStorageFactory.getDefaultInstance())
+                         .setStorageFactory(datastoreFactory)
                          .withDefaultLogger()
                          .build();
     }
