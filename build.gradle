@@ -113,6 +113,10 @@ subprojects {
         }
     }
 
+    javadoc {
+        source = sourceSets.main.allJava
+    }
+
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
         classifier "sources"
@@ -121,6 +125,11 @@ subprojects {
     task testOutputJar(type: Jar) {
         from sourceSets.test.output
         classifier "test"
+    }
+
+    task javadocJar(type: Jar, dependsOn: 'javadoc') {
+        from ("$projectDir/build/docs/javadoc")
+        classifier "javadoc"
     }
 
     publishing {
