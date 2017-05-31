@@ -194,7 +194,7 @@ public class DatastoreWrapper {
      * @param keys {@link Key Keys} to search for
      * @return A list of found entities in the order of keys (including {@code null} values for
      * nonexistent keys)
-     * @see DatastoreReader#fetch(Key...)
+     * @see DatastoreReader#get(Key...)
      */
     public List<Entity> read(Iterable<Key> keys) {
         final List<Key> keysList = newLinkedList(keys);
