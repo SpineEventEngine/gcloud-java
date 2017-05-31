@@ -54,7 +54,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -66,6 +65,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newLinkedList;
 import static java.util.Collections.unmodifiableCollection;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.entity.FieldMasks.applyMask;
@@ -222,11 +222,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return lookup(entityQuery.getIds(), fieldMask);
         }
 
-        boolean idsHandled = false;
         final Set<I> ids = entityQuery.getIds();
-        if (ids.isEmpty()) {
-            idsHandled = true;
-        }
 
         final Collection<StructuredQuery<Entity>> queries = Collections2.transform(
                 filters,
@@ -240,7 +236,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 }
         );
 
-        final Predicate<Entity> inMemFilter = buildMemoryPredicate(!idsHandled, ids);
+        final Predicate<Entity> inMemFilter = buildMemoryPredicate(ids);
         final Map<I, EntityRecord> result = newHashMap();
         for (StructuredQuery<Entity> query : queries) {
             final Map<I, EntityRecord> records = queryAll(typeUrl, query, fieldMask, inMemFilter);
@@ -249,11 +245,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return result;
     }
 
-    private Predicate<Entity> buildMemoryPredicate(boolean handleIds,
-                                                   Set<I> ids) {
-        final Predicate<Entity> idPredicate = handleIds
-                                              ? new IdFilter(ids)
-                                              : Predicates.<Entity>alwaysTrue();
+    private Predicate<Entity> buildMemoryPredicate(Set<I> ids) {
+        final Predicate<Entity> idPredicate = new IdFilter(ids);
         return idPredicate;
     }
 
@@ -287,14 +280,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return typeUrl;
     }
 
-    private Map<I, EntityRecord> lookup(Iterable<I> ids, FieldMask fieldMask) {
-        final Collection<Key> keys = new LinkedList<>();
-        for (I id : ids) {
-            final Key key = keyFor(datastore,
-                                   kindFrom(typeUrl),
-                                   ofEntityId(id));
-            keys.add(key);
+    private Map<I, EntityRecord> lookup(Collection<I> ids, FieldMask fieldMask) {
+        if (ids.isEmpty()) {
+            return readAllRecords(fieldMask);
         }
+        final Collection<Key> keys = toKeys(ids);
         final Collection<Entity> records = datastore.read(keys);
         final Map<I, EntityRecord> results = toRecordMap(records,
                                                          Predicates.<Entity>alwaysTrue(),
@@ -305,13 +295,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private <T> Iterable<T> lookup(Iterable<I> ids,
                                    Function<Entity, T> transformer) {
-        final Collection<Key> keys = new LinkedList<>();
-        for (I id : ids) {
-            final Key key = keyFor(datastore,
-                                   kindFrom(typeUrl),
-                                   ofEntityId(id));
-            keys.add(key);
-        }
+        final Collection<Key> keys = toKeys(ids);
         final List<Entity> results = datastore.read(keys);
         final Collection<Entity> filteredResults = filter(results, activeEntity());
         final Collection<T> records = transform(filteredResults, transformer);
@@ -463,6 +447,17 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return query;
     }
 
+    private Collection<Key> toKeys(Iterable<I> ids) {
+        final Collection<Key> keys = newLinkedList();
+        for (I id : ids) {
+            final Key key = keyFor(datastore,
+                                   kindFrom(typeUrl),
+                                   ofEntityId(id));
+            keys.add(key);
+        }
+        return keys;
+    }
+
     /**
      * Creates new instance of the {@link Builder}.
      *
@@ -576,6 +571,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         public boolean apply(@Nullable Entity input) {
             if (input == null) {
                 return false;
+            }
+            if (acceptedIds.isEmpty()) {
+                return true;
             }
             final Object id = unpackKey(input);
             final boolean result = acceptedIds.contains(id);

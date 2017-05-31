@@ -74,10 +74,10 @@ final class DsQueries {
         // Prevent utility class fromm being initialized.
     }
 
-    static Collection<Filter> fromParams(
-            Collection<CompositeQueryParameter> parameters,
-            ColumnHandler columnHandler) {
+    static Collection<Filter> fromParams(Collection<CompositeQueryParameter> parameters,
+                                         ColumnHandler columnHandler) {
         checkNotNull(parameters);
+        checkNotNull(columnHandler);
 
         final Collection<Filter> results;
         if (parameters.isEmpty()) {
@@ -180,9 +180,12 @@ final class DsQueries {
             }
         }
 
+        @SuppressWarnings("MethodWithMultipleLoops")
+            // Complex but highly tied logic that can't be split.
         private static AssembledColumnFilter buildConjunctionTree(
                 @Nullable CompositeQueryParameter constant,
                 Iterable<CompositeQueryParameter> parameters) {
+
             final AssembledColumnFilter lastSequentialNode;
             final AssembledColumnFilter head;
             if (constant != null) {
@@ -254,7 +257,7 @@ final class DsQueries {
         }
 
         @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-        // Only non-faulty values are used.
+            // Only non-faulty values are used.
         private Filter toFilter(ColumnHandler handler) {
             final Value<?> value = handler.toValue(column, columnFilter);
             final String columnIdentifier = columnFilter.getColumnName();
@@ -319,7 +322,7 @@ final class DsQueries {
         }
     }
 
-    public interface ConjunctionProcessor {
+    private interface ConjunctionProcessor {
 
         void process(Iterable<AssembledColumnFilter> conjunctiveParameter);
     }
