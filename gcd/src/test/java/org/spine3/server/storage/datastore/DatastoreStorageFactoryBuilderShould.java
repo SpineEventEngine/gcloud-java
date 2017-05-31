@@ -161,8 +161,8 @@ public class DatastoreStorageFactoryBuilderShould {
         return TestDatastoreFactory.getLocalDatastore();
     }
 
-    private static <T> Column<T> mockColumn(Class<T> type) {
-        @SuppressWarnings("unchecked") final Column<T> mock = mock(Column.class);
+    private static <T> Column mockColumn(Class<T> type) {
+        @SuppressWarnings("unchecked") final Column mock = mock(Column.class);
         when(mock.getType()).thenReturn(type);
         return mock;
     }

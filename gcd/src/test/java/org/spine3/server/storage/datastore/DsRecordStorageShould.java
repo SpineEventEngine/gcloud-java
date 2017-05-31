@@ -151,7 +151,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
                                                 .setVersion(versionValue)
                                                 .build();
         final EntityRecordWithColumns recordWithColumns = create(record, entity);
-        final Map<String, Column<?>> columns = recordWithColumns.getColumns();
+        final Map<String, Column> columns = recordWithColumns.getColumns();
         assertNotNull(columns);
 
         // Custom Columns

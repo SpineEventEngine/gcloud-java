@@ -85,8 +85,8 @@ public class DatastoreTypeRegistryFactoryShould {
         assertThat(byteColumnType, instanceOf(CustomStringType.class));
     }
 
-    private static Column<?> mockColumn(Class type) {
-        final Column<?> column = mock(Column.class);
+    private static Column mockColumn(Class type) {
+        final Column column = mock(Column.class);
         when(column.getType()).thenReturn(type);
         return column;
     }

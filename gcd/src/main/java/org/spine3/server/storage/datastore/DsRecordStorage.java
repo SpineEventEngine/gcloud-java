@@ -45,6 +45,7 @@ import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.ColumnRecords;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
+import org.spine3.server.entity.storage.CompositeQueryParameter;
 import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
@@ -217,8 +218,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private Map<I, EntityRecord> queryByColumns(EntityQuery<I> entityQuery, FieldMask fieldMask) {
         final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                                     .setKind(getKind().getValue());
-        final Map<Column<?>, Object> columns = newHashMap(entityQuery.getParameters());
-        Filter filter = buildColumnFilter(columns);
+        final Iterable<CompositeQueryParameter> params = entityQuery.getParameters();
+        Filter filter = buildColumnFilters(params);
 
         boolean idsHandled = false;
         final Set<I> ids = entityQuery.getIds();
@@ -249,12 +250,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @SuppressWarnings("unchecked") // Exact column type is unknown at this stage.
-    private Filter buildColumnFilter(Map<Column<?>, Object> columns) {
+    private Collection<Filter> buildColumnFilters(Iterable<CompositeQueryParameter> compositeParameters) {
         Filter predicate = null;
         boolean handleLifecycle = true;
-        for (Entry<Column<?>, Object> column : columns.entrySet()) {
+        for (CompositeQueryParameter column : compositeParameters) {
+            column.get
             final Object value = column.getValue();
-            final Column<?> metadata = column.getKey();
+            final Column metadata = column.getKey();
             final DatastoreColumnType columnType = columnTypeRegistry.get(metadata);
             final Object transformed = columnType.convertColumnValue(value);
             final Value<?> dsValue = columnType.toValue(transformed);
