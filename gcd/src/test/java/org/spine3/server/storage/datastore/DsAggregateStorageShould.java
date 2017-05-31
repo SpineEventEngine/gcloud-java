@@ -32,6 +32,8 @@ import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.aggregate.AggregateStorageShould;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.storage.Project;
+import org.spine3.test.storage.ProjectValidatingBuilder;
+import org.spine3.validate.ValidatingBuilder;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -74,7 +76,7 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
 
     @Override
     protected <Id> AggregateStorage<Id> getStorage(
-            Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aClass) {
+            Class<? extends Aggregate<Id, ? extends Message, ? extends ValidatingBuilder<?, ?>>> aClass) {
         return datastoreFactory.createAggregateStorage(aClass);
     }
 
@@ -93,7 +95,7 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     }
 
     private static class TestAggregateWithIdLong
-            extends Aggregate<Long, Project, org.spine3.test.storage.Project.Builder> {
+            extends Aggregate<Long, Project, ProjectValidatingBuilder> {
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }

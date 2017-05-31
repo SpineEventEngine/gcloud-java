@@ -53,7 +53,7 @@ final class ColumnHandler {
         final Object filterValueUnpacked = TypeConverter.toObject(filterValue, column.getType());
 
         @SuppressWarnings("unchecked") // Concrete type is unknown on compile time.
-        final Value<?> result = type.toValue(filterValueUnpacked);
+        final Value<?> result = type.toValue(type.convertColumnValue(filterValueUnpacked));
         return result;
     }
 }

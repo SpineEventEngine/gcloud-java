@@ -27,13 +27,13 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
-import com.google.cloud.datastore.Value;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -42,7 +42,6 @@ import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
-import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.ColumnRecords;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.entity.storage.CompositeQueryParameter;
@@ -64,15 +63,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
+import static com.google.api.client.util.Maps.newHashMap;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Collections2.transform;
-import static com.google.common.collect.Maps.newHashMap;
-import static org.spine3.server.storage.LifecycleFlagField.archived;
-import static org.spine3.server.storage.LifecycleFlagField.deleted;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.spine3.server.storage.datastore.DsIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static org.spine3.server.storage.datastore.Entities.activeEntity;
@@ -91,14 +88,15 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final TypeUrl typeUrl;
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
+    private final ColumnHandler columnHandler;
     private final Class<I> idClass;
 
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
     private static final String ID_CONVERSION_ERROR_MESSAGE =
             "Entity had ID of an invalid type; could not parse ID from String. " +
             "Note: custom conversion is not supported. See org.spine3.base.Identifiers#idToString.";
-    private static final String KEY_PROPERTY = "__key__";
 
+    private static final String KEY_PROPERTY = "__key__";
     private static final Function<Entity, EntityRecord> recordFromEntity
             = new Function<Entity, EntityRecord>() {
         @Nullable
@@ -129,6 +127,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.datastore = datastore;
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
         this.idClass = checkNotNull(idClass);
+        this.columnHandler = new ColumnHandler(this.columnTypeRegistry);
     }
 
     private DsRecordStorage(Builder<I> builder) {
@@ -219,26 +218,38 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                                     .setKind(getKind().getValue());
         final Iterable<CompositeQueryParameter> params = entityQuery.getParameters();
-        Filter filter = buildColumnFilters(params);
+        final Collection<Filter> filters = buildColumnFilters(params);
 
         boolean idsHandled = false;
         final Set<I> ids = entityQuery.getIds();
         if (ids.isEmpty()) {
             idsHandled = true;
         } else if (ids.size() == 1) {
-            idsHandled = true;
-            final Object singleId = ids.iterator().next();
-            final Filter idFilter = buildSingleIdFilter(singleId);
-            filter = and(filter, idFilter);
+//            idsHandled = true;
+//            final Object singleId = ids.iterator().next();
+//            final Filter idFilter = buildSingleIdFilter(singleId);
+//            filter = and(filter, idFilter);
         }
 
-        final StructuredQuery<Entity> buildDatastoreQuery = datastoreQuery.setFilter(filter)
-                                                                          .build();
+        final Collection<StructuredQuery<Entity>> queries = Collections2.transform(
+                filters,
+                new Function<Filter, StructuredQuery<Entity>>() {
+                    @Override
+                    public StructuredQuery<Entity> apply(@Nullable Filter input) {
+                        checkNotNull(input);
+                        return datastoreQuery.setFilter(input)
+                                             .build();
+                    }
+                }
+        );
+
         final Predicate<Entity> inMemFilter = buildMemoryPredicate(!idsHandled, ids);
-        return queryAll(typeUrl,
-                        buildDatastoreQuery,
-                        fieldMask,
-                        inMemFilter);
+        final Map<I, EntityRecord> result = newHashMap();
+        for (StructuredQuery<Entity> query : queries) {
+            final Map<I, EntityRecord> records = queryAll(typeUrl, query, fieldMask, inMemFilter);
+            result.putAll(records);
+        }
+        return result;
     }
 
     private Predicate<Entity> buildMemoryPredicate(boolean handleIds,
@@ -249,34 +260,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return idPredicate;
     }
 
-    @SuppressWarnings("unchecked") // Exact column type is unknown at this stage.
-    private Collection<Filter> buildColumnFilters(Iterable<CompositeQueryParameter> compositeParameters) {
-        Filter predicate = null;
-        boolean handleLifecycle = true;
-        for (CompositeQueryParameter column : compositeParameters) {
-            column.get
-            final Object value = column.getValue();
-            final Column metadata = column.getKey();
-            final DatastoreColumnType columnType = columnTypeRegistry.get(metadata);
-            final Object transformed = columnType.convertColumnValue(value);
-            final Value<?> dsValue = columnType.toValue(transformed);
-            final String columnName = metadata.getName();
-            final PropertyFilter filter = eq(columnName, dsValue);
-            predicate = predicate == null
-                        ? filter
-                        : and(predicate, filter);
-            if (archived.name().equals(columnName)
-                    || deleted.name().equals(columnName)) {
-                handleLifecycle = false;
-            }
-        }
-        if (handleLifecycle) {
-            final Filter archivedFilter = eq(archived.name(), false);
-            final Filter deletedFilter = eq(deleted.name(), false);
-            predicate = predicate == null
-                        ? and(archivedFilter, deletedFilter)
-                        : and(predicate, archivedFilter, deletedFilter);
-        }
+    private Collection<Filter> buildColumnFilters(
+            Iterable<CompositeQueryParameter> compositeParameters) {
+        final Collection<CompositeQueryParameter> params = newArrayList(compositeParameters);
+        final Collection<Filter> predicate = DatastoreQueries.fromParams(params, columnHandler);
         return predicate;
     }
 
@@ -328,15 +315,15 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
-                                            StructuredQuery<Entity> query,
-                                            FieldMask fieldMask) {
+                                          StructuredQuery<Entity> query,
+                                          FieldMask fieldMask) {
         return queryAll(typeUrl, query, fieldMask, activeEntity());
     }
 
     private Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
-                                            StructuredQuery<Entity> query,
-                                            FieldMask fieldMask,
-                                            Predicate<Entity> resultFilter) {
+                                          StructuredQuery<Entity> query,
+                                          FieldMask fieldMask,
+                                          Predicate<Entity> resultFilter) {
         final List<Entity> results = datastore.read(query);
 
         final ImmutableMap.Builder<I, EntityRecord> records = new ImmutableMap.Builder<>();

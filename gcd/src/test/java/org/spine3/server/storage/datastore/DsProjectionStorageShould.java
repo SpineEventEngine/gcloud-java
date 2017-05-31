@@ -30,8 +30,8 @@ import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.projection.ProjectionStorageShould;
 import org.spine3.test.projection.Project;
+import org.spine3.test.projection.ProjectValidatingBuilder;
 import org.spine3.testdata.Sample;
-import org.spine3.time.Time;
 
 import static org.junit.Assert.assertNotNull;
 import static org.spine3.time.Time.getCurrentTime;
@@ -75,7 +75,9 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
         assertNotNull(propertyStorage);
     }
 
-    private static class TestProjection extends Projection<String, Project> {
+    private static class TestProjection extends Projection<String,
+                                                Project,
+                                                ProjectValidatingBuilder> {
         private TestProjection(String id) {
             super(id);
         }

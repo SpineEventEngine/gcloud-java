@@ -20,10 +20,6 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.StructuredQuery;
-import com.google.cloud.datastore.StructuredQuery.Builder;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.Value;
 import com.google.common.base.Function;
@@ -31,6 +27,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.spine3.client.ColumnFilter;
 import org.spine3.server.entity.storage.Column;
@@ -38,7 +35,6 @@ import org.spine3.server.entity.storage.CompositeQueryParameter;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -78,37 +74,22 @@ final class DatastoreQueries {
         // Prevent utility class fromm being initialized.
     }
 
-    static Collection<StructuredQuery<Entity>> fromColumnParameters(
+    static Collection<Filter> fromParams(
             Collection<CompositeQueryParameter> parameters,
-            ColumnHandler columnHandler,
-            Kind kind) {
+            ColumnHandler columnHandler) {
         checkNotNull(parameters);
 
-        final Collection<StructuredQuery<Entity>> results;
+        final Collection<Filter> results;
         if (parameters.isEmpty()) {
             results = emptySet();
         } else {
-            final Builder<Entity> template = Query.newEntityQueryBuilder()
-                                                  .setKind(kind.getValue());
-            final Iterable<Filter> filters = toFilters(parameters, columnHandler);
-            results = concat(template, filters);
+            results = toFilters(parameters, columnHandler);
         }
         return results;
     }
 
-    private static Collection<StructuredQuery<Entity>> concat(Builder<Entity> template,
-                                                              Iterable<Filter> filters) {
-        final Collection<StructuredQuery<Entity>> results = newLinkedList();
-        for (Filter filter : filters) {
-            final StructuredQuery<Entity> query = template.setFilter(filter)
-                                                          .build();
-            results.add(query);
-        }
-        return results;
-    }
-
-    private static Iterable<Filter> toFilters(Collection<CompositeQueryParameter> parameters,
-                                              final ColumnHandler columnHandler) {
+    private static Collection<Filter> toFilters(Collection<CompositeQueryParameter> parameters,
+                                                final ColumnHandler columnHandler) {
         final FluentIterable<CompositeQueryParameter> params = from(parameters);
         final FluentIterable<CompositeQueryParameter> conjunctionParams =
                 params.filter(isConjunctive);
@@ -179,7 +160,7 @@ final class DatastoreQueries {
                                      ConjunctionProcessor processor) {
             final AssembledColumnFilter expressionTree = buildConjunctionTree(constant,
                                                                               parameters);
-            traverse(expressionTree, Collections.<AssembledColumnFilter>emptyList(), processor);
+            traverse(expressionTree, Lists.<AssembledColumnFilter>newLinkedList(), processor);
         }
 
         private static <T> Collection<T> newCollection(Collection<T> oldOne) {
@@ -189,7 +170,7 @@ final class DatastoreQueries {
         private static void traverse(AssembledColumnFilter node,
                                      Collection<AssembledColumnFilter> prefix,
                                      ConjunctionProcessor processor) {
-            prefix.add(node);
+            node.appendTo(prefix);
             if (node.subtrees.isEmpty()) {
                 processor.process(prefix);
             } else {
@@ -273,7 +254,7 @@ final class DatastoreQueries {
         }
 
         @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-            // Only non-faulty values are used.
+        // Only non-faulty values are used.
         private Filter toFilter(ColumnHandler handler) {
             final Value<?> value = handler.toValue(column, columnFilter);
             final String columnIdentifier = columnFilter.getColumnName();
@@ -292,6 +273,10 @@ final class DatastoreQueries {
                     throw new IllegalStateException(columnFilter.getOperator()
                                                                 .name());
             }
+        }
+
+        void appendTo(Collection<AssembledColumnFilter> collection) {
+            collection.add(this);
         }
 
         @Override
@@ -327,6 +312,10 @@ final class DatastoreQueries {
         @Override
         public int hashCode() {
             return 0;
+        }
+
+        @Override
+        void appendTo(Collection<AssembledColumnFilter> collection) {
         }
     }
 

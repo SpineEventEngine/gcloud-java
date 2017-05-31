@@ -299,8 +299,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         }
 
         private void injectState(Project state, Version version) {
-            incrementState(state);
-            advanceVersion(version);
+            updateState(state);
         }
 
         private void injectLifecycle(LifecycleFlags flags) {

@@ -23,11 +23,12 @@ package org.spine3.server.storage.datastore;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.storage.Project;
+import org.spine3.test.storage.ProjectValidatingBuilder;
 
 /**
  * @author Dmytro Dashenkov.
  */
-class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+class TestAggregate extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
     protected TestAggregate(ProjectId id) {
         super(id);
     }
