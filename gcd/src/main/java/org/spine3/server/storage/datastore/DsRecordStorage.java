@@ -26,7 +26,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
-import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
@@ -41,7 +40,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.storage.ColumnRecords;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.entity.storage.CompositeQueryParameter;
@@ -55,7 +53,6 @@ import org.spine3.type.TypeUrl;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,12 +61,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import static com.google.api.client.util.Maps.newHashMap;
-import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.unmodifiableCollection;
+import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.entity.FieldMasks.applyMask;
 import static org.spine3.server.storage.datastore.DsIdentifiers.keyFor;
 import static org.spine3.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static org.spine3.server.storage.datastore.Entities.activeEntity;
@@ -96,7 +95,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             "Entity had ID of an invalid type; could not parse ID from String. " +
             "Note: custom conversion is not supported. See org.spine3.base.Identifiers#idToString.";
 
-    private static final String KEY_PROPERTY = "__key__";
     private static final Function<Entity, EntityRecord> recordFromEntity
             = new Function<Entity, EntityRecord>() {
         @Nullable
@@ -183,9 +181,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 }
 
                 final EntityRecord readRecord = Entities.entityToMessage(input, RECORD_TYPE_URL);
-                final Message state = AnyPacker.unpack(readRecord.getState());
+                final Message state = unpack(readRecord.getState());
                 final TypeUrl typeUrl = TypeUrl.from(state.getDescriptorForType());
-                final Message maskedState = FieldMasks.applyMask(fieldMask, state, typeUrl);
+                final Message maskedState = applyMask(fieldMask, state, typeUrl);
                 final Any wrappedState = AnyPacker.pack(maskedState);
 
                 final EntityRecord record = EntityRecord.newBuilder(readRecord)
@@ -220,15 +218,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final Iterable<CompositeQueryParameter> params = entityQuery.getParameters();
         final Collection<Filter> filters = buildColumnFilters(params);
 
+        if (filters.isEmpty()) {
+            return lookup(entityQuery.getIds(), fieldMask);
+        }
+
         boolean idsHandled = false;
         final Set<I> ids = entityQuery.getIds();
         if (ids.isEmpty()) {
             idsHandled = true;
-        } else if (ids.size() == 1) {
-//            idsHandled = true;
-//            final Object singleId = ids.iterator().next();
-//            final Filter idFilter = buildSingleIdFilter(singleId);
-//            filter = and(filter, idFilter);
         }
 
         final Collection<StructuredQuery<Entity>> queries = Collections2.transform(
@@ -267,14 +264,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return predicate;
     }
 
-    private Filter buildSingleIdFilter(Object id) {
-        final Key key = keyFor(datastore,
-                               kindFrom(typeUrl),
-                               ofEntityId(id));
-        final PropertyFilter filter = eq(KEY_PROPERTY, key);
-        return filter;
-    }
-
     /**
      * Provides an access to the GAE Datastore with an API, specific to the Spine framework.
      *
@@ -298,9 +287,24 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return typeUrl;
     }
 
-    private Iterable<EntityRecord> lookup(
-            Iterable<I> ids,
-            Function<Entity, EntityRecord> transformer) {
+    private Map<I, EntityRecord> lookup(Iterable<I> ids, FieldMask fieldMask) {
+        final Collection<Key> keys = new LinkedList<>();
+        for (I id : ids) {
+            final Key key = keyFor(datastore,
+                                   kindFrom(typeUrl),
+                                   ofEntityId(id));
+            keys.add(key);
+        }
+        final Collection<Entity> records = datastore.read(keys);
+        final Map<I, EntityRecord> results = toRecordMap(records,
+                                                         Predicates.<Entity>alwaysTrue(),
+                                                         typeUrl,
+                                                         fieldMask);
+        return results;
+    }
+
+    private <T> Iterable<T> lookup(Iterable<I> ids,
+                                   Function<Entity, T> transformer) {
         final Collection<Key> keys = new LinkedList<>();
         for (I id : ids) {
             final Key key = keyFor(datastore,
@@ -310,8 +314,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
         final List<Entity> results = datastore.read(keys);
         final Collection<Entity> filteredResults = filter(results, activeEntity());
-        final Collection<EntityRecord> records = transform(filteredResults, transformer);
-        return Collections.unmodifiableCollection(records);
+        final Collection<T> records = transform(filteredResults, transformer);
+        return unmodifiableCollection(records);
     }
 
     private Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
@@ -325,18 +329,24 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                           FieldMask fieldMask,
                                           Predicate<Entity> resultFilter) {
         final List<Entity> results = datastore.read(query);
+        return toRecordMap(results, resultFilter, typeUrl, fieldMask);
+    }
 
+    private Map<I, EntityRecord> toRecordMap(Iterable<Entity> queryResults,
+                                             Predicate<Entity> filter,
+                                             TypeUrl typeUrl,
+                                             FieldMask fieldMask) {
         final ImmutableMap.Builder<I, EntityRecord> records = new ImmutableMap.Builder<>();
-        for (Entity entity : results) {
-            if (!resultFilter.apply(entity)) {
+        for (Entity entity : queryResults) {
+            if (!filter.apply(entity)) {
                 continue;
             }
             final IdRecordPair<I> recordPair = getRecordFromEntity(entity);
             EntityRecord record = recordPair.getRecord();
 
             if (!isDefault(fieldMask)) {
-                Message state = AnyPacker.unpack(record.getState());
-                state = FieldMasks.applyMask(fieldMask, state, typeUrl);
+                Message state = unpack(record.getState());
+                state = applyMask(fieldMask, state, typeUrl);
                 record = EntityRecord.newBuilder(record)
                                      .setState(AnyPacker.pack(state))
                                      .build();
@@ -411,7 +421,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return defaultKind;
         }
         final Any packedState = record.getState();
-        final Message state = AnyPacker.unpack(packedState);
+        final Message state = unpack(packedState);
         final Kind kind = Kind.of(state);
         return kind;
     }
