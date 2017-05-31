@@ -58,7 +58,7 @@ import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
 /**
  * @author Dmytro Dashenkov
  */
-final class DatastoreQueries {
+final class DsQueries {
 
     private static final Predicate<CompositeQueryParameter> isConjunctive =
             new Predicate<CompositeQueryParameter>() {
@@ -70,7 +70,7 @@ final class DatastoreQueries {
 
     private static final Predicate<CompositeQueryParameter> isDisjunctive = not(isConjunctive);
 
-    private DatastoreQueries() {
+    private DsQueries() {
         // Prevent utility class fromm being initialized.
     }
 
@@ -97,20 +97,20 @@ final class DatastoreQueries {
                 params.filter(isDisjunctive);
         final Optional<CompositeQueryParameter> firstParam = conjunctionParams.first();
         final Optional<CompositeQueryParameter> mergedConjunctiveParams =
-                firstParam.transform(new Conjuncter(conjunctionParams.skip(1)));
+                firstParam.transform(new ParameterShrinker(conjunctionParams.skip(1)));
         final Collection<Filter> filters = newLinkedList();
-        ExpresionExpander.multiply(mergedConjunctiveParams.orNull(),
-                                   disjunctionParams,
-                                   new ColumnFiltersConjuncter(columnHandler, filters));
+        ExpressionExpander.multiply(mergedConjunctiveParams.orNull(),
+                                    disjunctionParams,
+                                    new ColumnFilterShrinker(columnHandler, filters));
         return filters;
     }
 
-    private static class Conjuncter implements Function<CompositeQueryParameter,
-            CompositeQueryParameter> {
+    private static class ParameterShrinker
+            implements Function<CompositeQueryParameter, CompositeQueryParameter> {
 
         private final Iterable<CompositeQueryParameter> otherParams;
 
-        private Conjuncter(Iterable<CompositeQueryParameter> otherParams) {
+        private ParameterShrinker(Iterable<CompositeQueryParameter> otherParams) {
             this.otherParams = otherParams;
         }
 
@@ -122,13 +122,13 @@ final class DatastoreQueries {
         }
     }
 
-    private static class ColumnFiltersConjuncter implements ConjunctionProcessor {
+    private static class ColumnFilterShrinker implements ConjunctionProcessor {
 
         private final ColumnHandler columnHandler;
         private final Collection<Filter> filters;
 
-        private ColumnFiltersConjuncter(ColumnHandler columnHandler,
-                                        Collection<Filter> filters) {
+        private ColumnFilterShrinker(ColumnHandler columnHandler,
+                                     Collection<Filter> filters) {
             this.columnHandler = columnHandler;
             this.filters = filters;
         }
@@ -153,7 +153,7 @@ final class DatastoreQueries {
         }
     }
 
-    private static class ExpresionExpander {
+    private static class ExpressionExpander {
 
         private static void multiply(@Nullable CompositeQueryParameter constant,
                                      Iterable<CompositeQueryParameter> parameters,

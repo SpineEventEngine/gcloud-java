@@ -263,7 +263,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private Collection<Filter> buildColumnFilters(
             Iterable<CompositeQueryParameter> compositeParameters) {
         final Collection<CompositeQueryParameter> params = newArrayList(compositeParameters);
-        final Collection<Filter> predicate = DatastoreQueries.fromParams(params, columnHandler);
+        final Collection<Filter> predicate = DsQueries.fromParams(params, columnHandler);
         return predicate;
     }
 
