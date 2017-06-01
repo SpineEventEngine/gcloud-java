@@ -98,12 +98,12 @@ final class DsFilters {
      * </ul>
      *
      * <p><i>Example:</i>
-     * <p>Given query predicates {@code p1}, {@code p2}, {@code p3}, {@code p4}, {@code p5}. These
-     * predicates are passed into the method in the following construction:
+     * <p>Given query predicates {@code p1}, {@code p2}, {@code p3}, {@code p4}, {@code p5} passed
+     * into the method within the following construction:
      * {@code p1 & (p2 | p3) & (p4 | p5)}. Then the resulting {@code Collection} of {@link Filter}s
      * will be constructed as
      * {@code (p1 & p2 & p4) | (p1 & p2 & p5) | (p1 & p3 & p4) | (p1 & p3 & p5)}, where the separate
-     * conjunctive groups are placed into a single {@link Filter} instance per one group. In other
+     * conjunctive groups are placed into a single {@link Filter} instances one per group. In other
      * words, the predicate expression is brought into the
      * <a href="https://en.wikipedia.org/wiki/Disjunctive_normal_form">disjunctive normal form</a>.
      *
@@ -202,7 +202,7 @@ final class DsFilters {
      *
      * </pre>
      *
-     * <p>Despite the severe data duplication which can be noticed on the schema, the tree gives
+     * <p>Despite the severe data duplication, which can be noticed on the schema, the tree gives
      * a handy way to {@linkplain ColumnFilterNode#traverse traverse} over.
      *
      * @param constant   the single non-disjunctive query parameter
@@ -385,6 +385,8 @@ final class DsFilters {
          *
          * @param processor the result processor
          */
+        @SuppressWarnings("MethodWithMultipleLoops")
+            // To make the traversal algorithm more obvious.
         private void traverse(ConjunctionProcessor processor) {
             final Queue<ColumnFilterNode> nodes = new LinkedList<>();
             final Queue<Queue<ColumnFilterNode>> paths = new LinkedList<>();
@@ -411,17 +413,6 @@ final class DsFilters {
 
         private boolean isLeaf() {
             return subtrees.isEmpty();
-        }
-
-        /**
-         * Appends this instance to the given path in the tree.
-         *
-         * <p>The path is represented by a {@link Queue} of nodes.
-         *
-         * <p>In th general case, the method just enqueues current node into the given path.
-         */
-        void appendTo(Queue<ColumnFilterNode> path) {
-            path.offer(this);
         }
 
         @Override
@@ -460,17 +451,6 @@ final class DsFilters {
         @Override
         public int hashCode() {
             return 0;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * <p>This implementation performs no action so that no instances of
-         * {@link ColumnFilterTreeHead} is found in a path.
-         */
-        @Override
-        void appendTo(Queue<ColumnFilterNode> path) {
-            // NoOp
         }
     }
 
