@@ -284,6 +284,10 @@ final class DsFilters {
         return filters;
     }
 
+    /**
+     * A function performing the {@linkplain CompositeQueryParameter#conjunct conjunction} operation
+     * on the {@link CompositeQueryParameter} instances.
+     */
     private static class ParameterShrinker
             implements Function<CompositeQueryParameter, CompositeQueryParameter> {
 
@@ -301,6 +305,18 @@ final class DsFilters {
         }
     }
 
+    /**
+     * An implementation of {@link ConjunctionProcessor} performing sequential {@link Filter}
+     * conjunction.
+     *
+     * <p>The processor polls all the {@link ColumnFilterNode} instances, transforms them into
+     * {@link Filter} instances and merges with
+     * the {@link com.google.cloud.datastore.StructuredQuery.CompositeFilter#and
+     * StructuredQuery.CompositeFilter.and()} operation. The result is then collected into
+     * {@code Collection} passed on the instance creation.
+     *
+     * <p>The {@link Queue} passed to the function becomes empty after the processing.
+     */
     private static class ColumnFilterShrinker implements ConjunctionProcessor {
 
         private final ColumnHandler columnHandler;
@@ -321,7 +337,6 @@ final class DsFilters {
             } else {
                 return;
             }
-
             while (!columnFilters.isEmpty()) {
                 final Filter propFilter = columnFilters.poll()
                                                        .toFilter(columnHandler);
