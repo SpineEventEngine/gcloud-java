@@ -32,12 +32,19 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A wrapper above the {@link ColumnTypeRegistry} preforming the transformations defined by
+ * the {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface.
+ *
  * @author Dmytro Dashenkov
  */
 final class ColumnHandler {
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType> registry;
 
+    /**
+     * Creates a new instance of {@code ColumnHandler} on top of the given
+     * {@link ColumnTypeRegistry}.
+     */
     static ColumnHandler wrap(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
         return new ColumnHandler(registry);
     }
@@ -46,6 +53,14 @@ final class ColumnHandler {
         this.registry = registry;
     }
 
+    /**
+     * Extracts the filter parameter from the given {@link ColumnFilter} and converts it into
+     * the Datastore {@link Value}.
+     *
+     * @param column       the {@link Column} targeted by the given filter
+     * @param columnFilter the filter
+     * @return new instance of {@link Value} representing the value of the given filter
+     */
     Value<?> toValue(Column column, ColumnFilter columnFilter) {
         checkNotNull(column);
         checkNotNull(columnFilter);
