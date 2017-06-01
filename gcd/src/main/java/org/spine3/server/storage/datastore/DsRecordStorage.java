@@ -125,7 +125,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.datastore = datastore;
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
         this.idClass = checkNotNull(idClass);
-        this.columnHandler = new ColumnHandler(this.columnTypeRegistry);
+        this.columnHandler = ColumnHandler.wrap(this.columnTypeRegistry);
     }
 
     private DsRecordStorage(Builder<I> builder) {

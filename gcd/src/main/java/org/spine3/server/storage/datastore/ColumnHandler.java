@@ -38,7 +38,11 @@ final class ColumnHandler {
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType> registry;
 
-    ColumnHandler(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
+    static ColumnHandler wrap(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
+        return new ColumnHandler(registry);
+    }
+
+    private ColumnHandler(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
         this.registry = registry;
     }
 
