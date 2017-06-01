@@ -24,38 +24,47 @@ import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import org.junit.Test;
-import org.spine3.base.Version;
 import org.spine3.client.ColumnFilter;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.EntityWithLifecycle;
-import org.spine3.server.entity.VersionableEntity;
+import org.spine3.server.entity.TestEntityWithStringColumn;
 import org.spine3.server.entity.storage.Column;
 import org.spine3.server.entity.storage.CompositeQueryParameter;
+import org.spine3.test.storage.Project;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.Filter;
 import static com.google.common.collect.ImmutableMultimap.of;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.spine3.client.ColumnFilters.eq;
+import static org.spine3.client.ColumnFilters.ge;
+import static org.spine3.client.ColumnFilters.gt;
+import static org.spine3.client.ColumnFilters.le;
+import static org.spine3.client.ColumnFilters.lt;
 import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static org.spine3.server.entity.storage.TestCompositeQueryParameterFactory.createParams;
-import static org.spine3.server.storage.EntityField.version;
 import static org.spine3.server.storage.LifecycleFlagField.archived;
 import static org.spine3.server.storage.LifecycleFlagField.deleted;
+import static org.spine3.server.storage.datastore.ColumnHandler.wrap;
+import static org.spine3.server.storage.datastore.DsFilters.fromParams;
 import static org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertContainsAll;
+import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class DsFiltersShould {
 
-    private static final String VERSION_GETTER_NAME = "getVersion";
+    private static final String ID_STRING_GETTER_NAME = "getIdString";
+    private static final String ID_STRING_COLUMN_NAME = "idString";
     private static final String DELETED_GETTER_NAME = "isDeleted";
     private static final String ARCHIVED_GETTER_NAME = "isArchived";
 
@@ -66,93 +75,93 @@ public class DsFiltersShould {
 
     @Test
     public void generate_filters_from_composite_query_params() {
-        final int versionValue = 42;
-        final Version versionColumnValue = Version.newBuilder()
-                                                  .setNumber(versionValue)
-                                                  .build();
+        final String idStringValue = "42";
         final boolean archivedValue = true;
         final boolean deletedValue = true;
         final Multimap<Column, ColumnFilter> conjunctiveFilters = of(
-                column(VersionableEntity.class, VERSION_GETTER_NAME), eq(version.name(),
-                                                                         versionColumnValue)
+                column(TestEntity.class, ID_STRING_GETTER_NAME), gt(ID_STRING_COLUMN_NAME,
+                                                                           idStringValue)
         );
         final Multimap<Column, ColumnFilter> disjunctiveFilters = of(
-                column(EntityWithLifecycle.class, DELETED_GETTER_NAME), eq(deleted.name(),
-                                                                           deletedValue),
-                column(EntityWithLifecycle.class, ARCHIVED_GETTER_NAME), eq(archived.name(),
-                                                                            archivedValue)
+                column(TestEntity.class, DELETED_GETTER_NAME), eq(deleted.name(), deletedValue),
+                column(TestEntity.class, ARCHIVED_GETTER_NAME), eq(archived.name(), archivedValue)
         );
-        final Collection<CompositeQueryParameter> parameter = ImmutableSet.of(
+        final Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(conjunctiveFilters, ALL),
                 createParams(disjunctiveFilters, EITHER)
         );
 
-        final ColumnHandler columnHandler = ColumnHandler.wrap(defaultInstance());
-        final Collection<Filter> filters = DsFilters.fromParams(parameter, columnHandler);
-        assertContainsAll(filters, and(PropertyFilter.eq(version.name(), versionValue),
+        final ColumnHandler columnHandler = wrap(defaultInstance());
+        final Collection<Filter> filters = fromParams(parameters, columnHandler);
+        assertContainsAll(filters, and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
                                        PropertyFilter.eq(archived.name(), archivedValue)),
-                                   and(PropertyFilter.eq(version.name(), versionValue),
+                                   and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
                                        PropertyFilter.eq(deleted.name(), deletedValue)));
     }
 
     @Test
     public void generate_filters_from_single_parameter() {
-        final int versionValue = 314;
-        final Version versionColumnValue = Version.newBuilder()
-                                                  .setNumber(versionValue)
-                                                  .build();
+        final String versionValue = "314";
         final Multimap<Column, ColumnFilter> singleFilter = of(
-                column(VersionableEntity.class, VERSION_GETTER_NAME), eq(version.name(),
-                                                                         versionColumnValue)
+                column(TestEntity.class, ID_STRING_GETTER_NAME), le(ID_STRING_COLUMN_NAME,
+                                                                    versionValue)
         );
-        final Collection<CompositeQueryParameter> parameter = ImmutableSet.of(
+        final Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(singleFilter, ALL)
         );
 
-        final ColumnHandler columnHandler = ColumnHandler.wrap(defaultInstance());
-        final Collection<Filter> filters = DsFilters.fromParams(parameter, columnHandler);
-        assertContainsAll(filters, PropertyFilter.eq(version.name(), versionValue));
+        final ColumnHandler columnHandler = wrap(defaultInstance());
+        final Collection<Filter> filters = fromParams(parameters, columnHandler);
+        assertContainsAll(filters, PropertyFilter.le(ID_STRING_COLUMN_NAME, versionValue));
     }
 
     @Test
-    public void generate_filters_for_two_disjunctive_groups() {
-        final int versionValue1 = 271;
-        final int versionValue2 = 1;
-        final Version versionColumnValue1 = Version.newBuilder()
-                                                   .setNumber(versionValue1)
-                                                   .build();
-        final Version versionColumnValue2 = Version.newBuilder()
-                                                   .setNumber(versionValue2)
-                                                   .build();
+    public void generate_filters_for_multiple_disjunctive_groups() {
+        final String greaterBoundDefiner = "271";
+        final String standaloneValue = "100";
+        final String lessBoundDefiner = "42";
         final boolean archivedValue = true;
         final boolean deletedValue = true;
+        final Column idStringColumn = column(TestEntity.class, ID_STRING_GETTER_NAME);
         final Multimap<Column, ColumnFilter> versionFilters = of(
-                column(VersionableEntity.class, VERSION_GETTER_NAME), eq(version.name(),
-                                                                         versionColumnValue1),
-                column(VersionableEntity.class, VERSION_GETTER_NAME), eq(version.name(),
-                                                                         versionColumnValue2)
+                idStringColumn, ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
+                idStringColumn, eq(ID_STRING_COLUMN_NAME, standaloneValue),
+                idStringColumn, lt(ID_STRING_COLUMN_NAME, lessBoundDefiner)
         );
         final Multimap<Column, ColumnFilter> lifecycleFilters = of(
-                column(EntityWithLifecycle.class, DELETED_GETTER_NAME), eq(deleted.name(),
-                                                                           deletedValue),
-                column(EntityWithLifecycle.class, ARCHIVED_GETTER_NAME), eq(archived.name(),
-                                                                            archivedValue)
+                column(TestEntity.class, DELETED_GETTER_NAME), eq(deleted.name(),
+                                                                  deletedValue),
+                column(TestEntity.class, ARCHIVED_GETTER_NAME), eq(archived.name(),
+                                                                   archivedValue)
         );
-        final Collection<CompositeQueryParameter> parameter = ImmutableSet.of(
+        final Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(versionFilters, EITHER),
                 createParams(lifecycleFilters, EITHER)
         );
+        final ColumnHandler columnHandler = wrap(defaultInstance());
+        final Collection<Filter> filters = fromParams(parameters, columnHandler);
+        assertContainsAll(filters,
+                          and(PropertyFilter.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
+                              PropertyFilter.eq(archived.name(), archivedValue)),
+                          and(PropertyFilter.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
+                              PropertyFilter.eq(deleted.name(), deletedValue)),
+                          and(PropertyFilter.eq(ID_STRING_COLUMN_NAME, standaloneValue),
+                              PropertyFilter.eq(archived.name(), archivedValue)),
+                          and(PropertyFilter.eq(ID_STRING_COLUMN_NAME, standaloneValue),
+                              PropertyFilter.eq(deleted.name(), deletedValue)),
+                          and(PropertyFilter.lt(ID_STRING_COLUMN_NAME, lessBoundDefiner),
+                              PropertyFilter.eq(archived.name(), archivedValue)),
+                          and(PropertyFilter.lt(ID_STRING_COLUMN_NAME, lessBoundDefiner),
+                              PropertyFilter.eq(deleted.name(), deletedValue)));
+    }
 
-        final ColumnHandler columnHandler = ColumnHandler.wrap(defaultInstance());
-        final Collection<Filter> filters = DsFilters.fromParams(parameter, columnHandler);
-        assertContainsAll(filters, and(PropertyFilter.eq(version.name(), versionValue1),
-                                       PropertyFilter.eq(archived.name(), archivedValue)),
-                                   and(PropertyFilter.eq(version.name(), versionValue1),
-                                       PropertyFilter.eq(deleted.name(), deletedValue)),
-                                   and(PropertyFilter.eq(version.name(), versionValue2),
-                                       PropertyFilter.eq(archived.name(), archivedValue)),
-                                   and(PropertyFilter.eq(version.name(), versionValue2),
-                                       PropertyFilter.eq(deleted.name(), deletedValue)));
+    @Test
+    public void generate_filters_from_empty_params() {
+        final Collection<CompositeQueryParameter> parameters = Collections.emptySet();
+        final Collection<Filter> filters = fromParams(parameters,
+                                                      wrap(defaultInstance()));
+        assertNotNull(filters);
+        assertSize(0, filters);
     }
 
     private static Column column(Class<? extends Entity> cls, String methodName) {
@@ -164,5 +173,19 @@ public class DsFiltersShould {
         }
         final Column column = Column.from(method);
         return column;
+    }
+
+    private static class TestEntity
+            extends AbstractVersionableEntity<String, Project>
+            implements TestEntityWithStringColumn {
+
+        protected TestEntity(String id) {
+            super(id);
+        }
+
+        @Override
+        public String getIdString() {
+            return getId();
+        }
     }
 }
