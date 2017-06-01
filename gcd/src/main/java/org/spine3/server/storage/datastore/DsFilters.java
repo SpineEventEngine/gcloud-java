@@ -27,7 +27,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.spine3.client.ColumnFilter;
 import org.spine3.server.entity.storage.Column;
@@ -171,32 +170,11 @@ final class DsFilters {
                                  ConjunctionProcessor processor) {
         final ColumnFilterNode expressionTree = buildConjunctionTree(constant,
                                                                      parameters);
-        traverse(expressionTree, Lists.<ColumnFilterNode>newLinkedList(), processor);
+        expressionTree.traverse(processor);
     }
 
     private static <T> Queue<T> newPath(Collection<T> oldOne) {
         return new LinkedList<>(oldOne);
-    }
-
-    /**
-     * Traverses the tree of the {@linkplain ColumnFilterNode column filters} recursively,
-     * passing all the found paths from the tree top to a leaf to the given result processor.
-     *
-     * @param node      the tree node to start the traversal from
-     * @param prefix    the path to the current node from the top
-     * @param processor the result processor
-     */
-    private static void traverse(ColumnFilterNode node,
-                                 Queue<ColumnFilterNode> prefix,
-                                 ConjunctionProcessor processor) {
-        node.appendTo(prefix);
-        if (node.subtrees.isEmpty()) {
-            processor.process(prefix);
-        } else {
-            for (ColumnFilterNode successor : node.subtrees) {
-                traverse(successor, newPath(prefix), processor);
-            }
-        }
     }
 
     /**
@@ -225,7 +203,7 @@ final class DsFilters {
      * </pre>
      *
      * <p>Despite the severe data duplication which can be noticed on the schema, the tree gives
-     * a handy way to {@linkplain #traverse traverse} over.
+     * a handy way to {@linkplain ColumnFilterNode#traverse traverse} over.
      *
      * @param constant   the single non-disjunctive query parameter
      * @param parameters the disjunctive query parameters
@@ -398,6 +376,41 @@ final class DsFilters {
                     throw new IllegalStateException(columnFilter.getOperator()
                                                                 .name());
             }
+        }
+
+        /**
+         * Traverses the tree of the {@linkplain ColumnFilterNode column filters} starting from
+         * the current node, passing all the found paths from the tree top to a leaf to the given
+         * result processor.
+         *
+         * @param processor the result processor
+         */
+        private void traverse(ConjunctionProcessor processor) {
+            final Queue<ColumnFilterNode> nodes = new LinkedList<>();
+            final Queue<Queue<ColumnFilterNode>> paths = new LinkedList<>();
+            nodes.offer(this);
+            // Initial path is intentionally left empty.
+            paths.offer(new LinkedList<ColumnFilterNode>());
+
+            while (!nodes.isEmpty()) {
+                final ColumnFilterNode node = nodes.poll();
+                final Queue<ColumnFilterNode> path = paths.poll();
+
+                if (node.isLeaf()) {
+                    processor.process(path);
+                } else {
+                    for (ColumnFilterNode child : node.subtrees) {
+                        final Queue<ColumnFilterNode> childPath = newPath(path);
+                        childPath.offer(child);
+                        nodes.offer(child);
+                        paths.offer(childPath);
+                    }
+                }
+            }
+        }
+
+        private boolean isLeaf() {
+            return subtrees.isEmpty();
         }
 
         /**
