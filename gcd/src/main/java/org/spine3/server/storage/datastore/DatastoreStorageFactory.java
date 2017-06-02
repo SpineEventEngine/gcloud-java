@@ -46,9 +46,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.spine3.server.entity.Entity.GenericParameter.ID;
-import static org.spine3.server.entity.Entity.GenericParameter.STATE;
-import static org.spine3.util.Reflection.getGenericParameterType;
+import static org.spine3.server.entity.Entity.TypeInfo.getIdClass;
+import static org.spine3.server.entity.Entity.TypeInfo.getStateClass;
 
 /**
  * Creates storages based on GAE {@link Datastore}.
@@ -60,8 +59,6 @@ import static org.spine3.util.Reflection.getGenericParameterType;
  */
 @SuppressWarnings("WeakerAccess") // Part of API
 public class DatastoreStorageFactory implements StorageFactory {
-
-    private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
 
     private final DatastoreWrapper datastore;
     private final boolean multitenant;
@@ -169,10 +166,9 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        final Class<Message> messageClass =
-                getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
+        final Class<Message> messageClass = getStateClass(entityClass);
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
-        final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
+        final Class<I> idClass = getIdClass(entityClass);
         final DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
                                                          .setStateType(typeUrl)
                                                          .setDatastore(getDatastore())
@@ -191,9 +187,8 @@ public class DatastoreStorageFactory implements StorageFactory {
             Class<? extends Aggregate<I, ?, ?>> entityClass) {
         checkNotNull(entityClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
-        final Class<I> idClass = getGenericParameterType(entityClass, ID.getIndex());
-        final Class<? extends Message> stateClass =
-                getGenericParameterType(entityClass, STATE.getIndex());
+        final Class<I> idClass = getIdClass(entityClass);
+        final Class<? extends Message> stateClass = getStateClass(entityClass);
         final DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(),
                                                                       propertyStorage,
                                                                       multitenant,
