@@ -51,7 +51,6 @@ import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static org.spine3.server.entity.storage.TestCompositeQueryParameterFactory.createParams;
 import static org.spine3.server.storage.LifecycleFlagField.archived;
 import static org.spine3.server.storage.LifecycleFlagField.deleted;
-import static org.spine3.server.storage.datastore.ColumnHandler.wrap;
 import static org.spine3.server.storage.datastore.DsFilters.fromParams;
 import static org.spine3.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -91,8 +90,8 @@ public class DsFiltersShould {
                 createParams(disjunctiveFilters, EITHER)
         );
 
-        final ColumnHandler columnHandler = wrap(defaultInstance());
-        final Collection<Filter> filters = fromParams(parameters, columnHandler);
+        final ColumnTypeConverter columnTypeConverter = ColumnTypeConverter.of(defaultInstance());
+        final Collection<Filter> filters = fromParams(parameters, columnTypeConverter);
         assertContainsAll(filters, and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
                                        PropertyFilter.eq(archived.name(), archivedValue)),
                                    and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
@@ -110,8 +109,8 @@ public class DsFiltersShould {
                 createParams(singleFilter, ALL)
         );
 
-        final ColumnHandler columnHandler = wrap(defaultInstance());
-        final Collection<Filter> filters = fromParams(parameters, columnHandler);
+        final ColumnTypeConverter columnTypeConverter = ColumnTypeConverter.of(defaultInstance());
+        final Collection<Filter> filters = fromParams(parameters, columnTypeConverter);
         assertContainsAll(filters, PropertyFilter.le(ID_STRING_COLUMN_NAME, versionValue));
     }
 
@@ -138,8 +137,8 @@ public class DsFiltersShould {
                 createParams(versionFilters, EITHER),
                 createParams(lifecycleFilters, EITHER)
         );
-        final ColumnHandler columnHandler = wrap(defaultInstance());
-        final Collection<Filter> filters = fromParams(parameters, columnHandler);
+        final ColumnTypeConverter columnTypeConverter = ColumnTypeConverter.of(defaultInstance());
+        final Collection<Filter> filters = fromParams(parameters, columnTypeConverter);
         assertContainsAll(filters,
                           and(PropertyFilter.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
                               PropertyFilter.eq(archived.name(), archivedValue)),
@@ -159,7 +158,7 @@ public class DsFiltersShould {
     public void generate_filters_from_empty_params() {
         final Collection<CompositeQueryParameter> parameters = Collections.emptySet();
         final Collection<Filter> filters = fromParams(parameters,
-                                                      wrap(defaultInstance()));
+                                                      ColumnTypeConverter.of(defaultInstance()));
         assertNotNull(filters);
         assertSize(0, filters);
     }

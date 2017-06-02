@@ -70,7 +70,8 @@ final class DsFilters {
             new Predicate<CompositeQueryParameter>() {
                 @Override
                 public boolean apply(@Nullable CompositeQueryParameter input) {
-                    return input != null && input.getOperator() == ALL;
+                    checkNotNull(input);
+                    return input.getOperator() == ALL;
                 }
             };
 
@@ -87,7 +88,7 @@ final class DsFilters {
 
     /**
      * Converts the given {@link CompositeQueryParameter} instances into the Datastore
-     * {@link Filter}s.
+     * {@linkplain Filter Filters}.
      *
      * <p>The returned {@code Collection} contains the same predicate as the passed
      * {@code Collection} of query parameters. The difference is in
@@ -98,13 +99,16 @@ final class DsFilters {
      * </ul>
      *
      * <p><i>Example:</i>
+     *
      * <p>Given query predicates {@code p1}, {@code p2}, {@code p3}, {@code p4}, {@code p5} passed
-     * into the method within the following construction:
-     * {@code p1 & (p2 | p3) & (p4 | p5)}. Then the resulting {@code Collection} of {@link Filter}s
-     * will be constructed as
-     * {@code (p1 & p2 & p4) | (p1 & p2 & p5) | (p1 & p3 & p4) | (p1 & p3 & p5)}, where the separate
-     * conjunctive groups are placed into a single {@link Filter} instances one per group. In other
-     * words, the predicate expression is brought into the
+     * into the method within the following construction: {@code p1 & (p2 | p3) & (p4 | p5)}. Then
+     * the resulting {@code Collection} of {@linkplain Filter Filters} will be constructed as
+     * {@code (p1 & p2 & p4) | (p1 & p2 & p5) | (p1 & p3 & p4) | (p1 & p3 & p5)}.
+     *
+     * <p>The separate conjunctive groups (e.g. {@code (p1 & p2 & p4)}) in the result
+     * {@code Collection} are placed into a single {@link Filter} instances one per group.
+     *
+     * <p>In other words, the predicate expression is brought into the
      * <a href="https://en.wikipedia.org/wiki/Disjunctive_normal_form">disjunctive normal form</a>.
      *
      * <p>Note that by the convention, the separate
@@ -117,20 +121,20 @@ final class DsFilters {
      * is returned.
      *
      * @param parameters    the {@linkplain CompositeQueryParameter query parameters} to convert
-     * @param columnHandler an instance of {@linkplain ColumnHandler} performing the required type
+     * @param columnTypeConverter an instance of {@linkplain ColumnTypeConverter} performing the required type
      *                      conventions
      * @return the equivalent expression of in Datastore {@link Filter} instances
      */
     static Collection<Filter> fromParams(Collection<CompositeQueryParameter> parameters,
-                                         ColumnHandler columnHandler) {
+                                         ColumnTypeConverter columnTypeConverter) {
         checkNotNull(parameters);
-        checkNotNull(columnHandler);
+        checkNotNull(columnTypeConverter);
 
         final Collection<Filter> results;
         if (parameters.isEmpty()) {
             results = emptySet();
         } else {
-            results = toFilters(parameters, columnHandler);
+            results = toFilters(parameters, columnTypeConverter);
         }
         return results;
     }
@@ -143,7 +147,7 @@ final class DsFilters {
      * parentheses are opened and the {@linkplain #multiply logical multiplication} is performed.
      */
     private static Collection<Filter> toFilters(Collection<CompositeQueryParameter> parameters,
-                                                final ColumnHandler columnHandler) {
+                                                final ColumnTypeConverter columnTypeConverter) {
         final FluentIterable<CompositeQueryParameter> params = from(parameters);
         final FluentIterable<CompositeQueryParameter> conjunctionParams =
                 params.filter(isConjunctive);
@@ -153,7 +157,7 @@ final class DsFilters {
         final Optional<CompositeQueryParameter> mergedConjunctiveParams =
                 firstParam.transform(new ParameterShrinker(conjunctionParams.skip(1)));
         final Collection<Filter> filters = newLinkedList();
-        final ConjunctionProcessor processor = new ColumnFilterShrinker(columnHandler, filters);
+        final ConjunctionProcessor processor = new ColumnFilterShrinker(columnTypeConverter, filters);
         multiply(mergedConjunctiveParams.orNull(), disjunctionParams, processor);
         return filters;
     }
@@ -297,12 +301,12 @@ final class DsFilters {
      */
     private static class ColumnFilterShrinker implements ConjunctionProcessor {
 
-        private final ColumnHandler columnHandler;
+        private final ColumnTypeConverter columnTypeConverter;
         private final Collection<Filter> filters;
 
-        private ColumnFilterShrinker(ColumnHandler columnHandler,
+        private ColumnFilterShrinker(ColumnTypeConverter columnTypeConverter,
                                      Collection<Filter> filters) {
-            this.columnHandler = columnHandler;
+            this.columnTypeConverter = columnTypeConverter;
             this.filters = filters;
         }
 
@@ -311,13 +315,13 @@ final class DsFilters {
             Filter filter;
             if (!columnFilters.isEmpty()) {
                 filter = columnFilters.poll()
-                                      .toFilter(columnHandler);
+                                      .toFilter(columnTypeConverter);
             } else {
                 return;
             }
             while (!columnFilters.isEmpty()) {
                 final Filter propFilter = columnFilters.poll()
-                                                       .toFilter(columnHandler);
+                                                       .toFilter(columnTypeConverter);
                 filter = and(filter, propFilter);
             }
             filters.add(filter);
@@ -358,7 +362,7 @@ final class DsFilters {
 
         @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
             // Only non-faulty values are used.
-        private Filter toFilter(ColumnHandler handler) {
+        private Filter toFilter(ColumnTypeConverter handler) {
             final Value<?> value = handler.toValue(column, columnFilter);
             final String columnIdentifier = columnFilter.getColumnName();
             switch (columnFilter.getOperator()) {

@@ -32,24 +32,24 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A wrapper above the {@link ColumnTypeRegistry} preforming the transformations defined by
+ * A wrapper above the {@link ColumnTypeRegistry} performing the transformations defined by
  * the {@link org.spine3.server.entity.storage.ColumnType ColumnType} interface.
  *
  * @author Dmytro Dashenkov
  */
-final class ColumnHandler {
+final class ColumnTypeConverter {
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType> registry;
 
     /**
-     * Creates a new instance of {@code ColumnHandler} on top of the given
+     * Creates a new instance of {@code ColumnTypeConverter} on top of the given
      * {@link ColumnTypeRegistry}.
      */
-    static ColumnHandler wrap(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
-        return new ColumnHandler(registry);
+    static ColumnTypeConverter of(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
+        return new ColumnTypeConverter(registry);
     }
 
-    private ColumnHandler(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
+    private ColumnTypeConverter(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
         this.registry = registry;
     }
 
