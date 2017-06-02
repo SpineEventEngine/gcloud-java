@@ -131,18 +131,6 @@ subprojects {
         from ("$projectDir/build/docs/javadoc")
         classifier "javadoc"
     }
-
-    publishing {
-        repositories {
-            maven {
-                credentials {
-                    username = "${repositoryUserName}"
-                    password = "${repositoryUserPassword}"
-                }
-                url = project.MAVEN_REPOSITORY_URL
-            }
-        }
-    }
 }
 
 task codeCoverageReport(type: JacocoReport) {
