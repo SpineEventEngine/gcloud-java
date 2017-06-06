@@ -1,6 +1,6 @@
 project.ext {
-    SPINE_VERSION = '0.9.14-SNAPSHOT'
-    GAE_JAVA_VERSION = "0.9.14-SNAPSHOT"
+    SPINE_VERSION = '0.9.18-SNAPSHOT'
+    GAE_JAVA_VERSION = "0.9.18-SNAPSHOT"
     PROTOBUF_VERSION = '3.2.0'
     SLf4J_VERSION = "1.7.21"
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
@@ -43,7 +43,7 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
     apply plugin: 'jacoco'
-    group = 'org.spine3'
+    group = 'io.spine'
     version = project.GAE_JAVA_VERSION
 
     repositories {
@@ -73,19 +73,19 @@ subprojects {
     dependencies {
         // when Spine can be used for evaluation in real projects.
         // Spine
-        compile (group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true) {
+        compile (group: 'io.spine', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true) {
             exclude group: 'com.google.protobuf', module: 'protobuf-lite'
             exclude group: 'io.grpc'
         }
-        compile group: 'org.spine3', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true
+        compile group: 'io.spine', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true
 
         // Spine for tests
-        testCompile (group: 'org.spine3', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true, classifier: 'test') {
+        testCompile (group: 'io.spine', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true, classifier: 'test') {
             exclude group: 'com.google.protobuf', module: 'protobuf-lite'
             exclude group: 'io.grpc'
         }
-        testCompile group: 'org.spine3', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
-        testCompile group: 'org.spine3', name: 'spine-testutil-core', version: project.SPINE_VERSION, changing: true
+        testCompile group: 'io.spine', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
+        testCompile group: 'io.spine', name: 'spine-testutil-core', version: project.SPINE_VERSION, changing: true
 
         // Guava
         compile group: 'com.google.guava', name: 'guava', version: GUAVA_VERSION

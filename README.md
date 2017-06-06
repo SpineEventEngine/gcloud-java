@@ -29,4 +29,4 @@ The launched emulator will run at `localhost:8080` and will not have any persist
 To change the configuration see `./script/start-datastore.*` scripts.
 
 The datastore is cleaned up after each test.
-See test classes under `./gcd/src/test/java/...` and `org.spine3.server.storage.datastore.TestDatastoreStorageFactory#clear`.
+See test classes under `./gcd/src/test/java/...` and `io.spine.server.storage.datastore.TestDatastoreStorageFactory#clear`.
