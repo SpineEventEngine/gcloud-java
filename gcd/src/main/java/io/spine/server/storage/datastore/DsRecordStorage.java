@@ -32,7 +32,6 @@ import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -66,13 +65,13 @@ import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
-import static java.util.Collections.unmodifiableCollection;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.validate.Validate.isDefault;
+import static java.util.Collections.unmodifiableCollection;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -224,7 +223,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         final Set<I> ids = entityQuery.getIds();
 
-        final Collection<StructuredQuery<Entity>> queries = Collections2.transform(
+        final Collection<StructuredQuery<Entity>> queries = transform(
                 filters,
                 new Function<Filter, StructuredQuery<Entity>>() {
                     @Override
