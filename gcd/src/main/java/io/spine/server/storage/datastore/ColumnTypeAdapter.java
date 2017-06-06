@@ -37,19 +37,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-final class ColumnTypeConverter {
+final class ColumnTypeAdapter {
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType> registry;
 
     /**
-     * Creates a new instance of {@code ColumnTypeConverter} on top of the given
+     * Creates a new instance of {@code ColumnTypeAdapter} on top of the given
      * {@link ColumnTypeRegistry}.
      */
-    static ColumnTypeConverter of(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
-        return new ColumnTypeConverter(registry);
+    static ColumnTypeAdapter of(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
+        return new ColumnTypeAdapter(registry);
     }
 
-    private ColumnTypeConverter(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
+    private ColumnTypeAdapter(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
         this.registry = registry;
     }
 

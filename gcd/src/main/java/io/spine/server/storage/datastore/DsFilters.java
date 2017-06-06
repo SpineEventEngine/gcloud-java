@@ -121,20 +121,20 @@ final class DsFilters {
      * is returned.
      *
      * @param parameters    the {@linkplain CompositeQueryParameter query parameters} to convert
-     * @param columnTypeConverter an instance of {@linkplain ColumnTypeConverter} performing the required type
+     * @param columnTypeAdapter an instance of {@linkplain ColumnTypeAdapter} performing the required type
      *                      conventions
      * @return the equivalent expression of in Datastore {@link Filter} instances
      */
     static Collection<Filter> fromParams(Collection<CompositeQueryParameter> parameters,
-                                         ColumnTypeConverter columnTypeConverter) {
+                                         ColumnTypeAdapter columnTypeAdapter) {
         checkNotNull(parameters);
-        checkNotNull(columnTypeConverter);
+        checkNotNull(columnTypeAdapter);
 
         final Collection<Filter> results;
         if (parameters.isEmpty()) {
             results = emptySet();
         } else {
-            results = toFilters(parameters, columnTypeConverter);
+            results = toFilters(parameters, columnTypeAdapter);
         }
         return results;
     }
@@ -147,7 +147,7 @@ final class DsFilters {
      * parentheses are opened and the {@linkplain #multiply logical multiplication} is performed.
      */
     private static Collection<Filter> toFilters(Collection<CompositeQueryParameter> parameters,
-                                                final ColumnTypeConverter columnTypeConverter) {
+                                                final ColumnTypeAdapter columnTypeAdapter) {
         final FluentIterable<CompositeQueryParameter> params = from(parameters);
         final FluentIterable<CompositeQueryParameter> conjunctionParams =
                 params.filter(isConjunctive);
@@ -155,9 +155,9 @@ final class DsFilters {
                 params.filter(isDisjunctive);
         final Optional<CompositeQueryParameter> firstParam = conjunctionParams.first();
         final Optional<CompositeQueryParameter> mergedConjunctiveParams =
-                firstParam.transform(new ParameterShrinker(conjunctionParams.skip(1)));
+                firstParam.transform(new ParameterReducer(conjunctionParams.skip(1)));
         final Collection<Filter> filters = newLinkedList();
-        final ConjunctionProcessor processor = new ColumnFilterShrinker(columnTypeConverter, filters);
+        final ConjunctionProcessor processor = new ColumnFilterReducer(columnTypeAdapter, filters);
         multiply(mergedConjunctiveParams.orNull(), disjunctionParams, processor);
         return filters;
     }
@@ -270,12 +270,12 @@ final class DsFilters {
      * A function performing the {@linkplain CompositeQueryParameter#conjunct conjunction} operation
      * on the {@link CompositeQueryParameter} instances.
      */
-    private static class ParameterShrinker
+    private static class ParameterReducer
             implements Function<CompositeQueryParameter, CompositeQueryParameter> {
 
         private final Iterable<CompositeQueryParameter> otherParams;
 
-        private ParameterShrinker(Iterable<CompositeQueryParameter> otherParams) {
+        private ParameterReducer(Iterable<CompositeQueryParameter> otherParams) {
             this.otherParams = otherParams;
         }
 
@@ -299,14 +299,14 @@ final class DsFilters {
      *
      * <p>The {@link Queue} passed to the function becomes empty after the processing.
      */
-    private static class ColumnFilterShrinker implements ConjunctionProcessor {
+    private static class ColumnFilterReducer implements ConjunctionProcessor {
 
-        private final ColumnTypeConverter columnTypeConverter;
+        private final ColumnTypeAdapter columnTypeAdapter;
         private final Collection<Filter> filters;
 
-        private ColumnFilterShrinker(ColumnTypeConverter columnTypeConverter,
-                                     Collection<Filter> filters) {
-            this.columnTypeConverter = columnTypeConverter;
+        private ColumnFilterReducer(ColumnTypeAdapter columnTypeAdapter,
+                                    Collection<Filter> filters) {
+            this.columnTypeAdapter = columnTypeAdapter;
             this.filters = filters;
         }
 
@@ -315,13 +315,13 @@ final class DsFilters {
             Filter filter;
             if (!columnFilters.isEmpty()) {
                 filter = columnFilters.poll()
-                                      .toFilter(columnTypeConverter);
+                                      .toFilter(columnTypeAdapter);
             } else {
                 return;
             }
             while (!columnFilters.isEmpty()) {
                 final Filter propFilter = columnFilters.poll()
-                                                       .toFilter(columnTypeConverter);
+                                                       .toFilter(columnTypeAdapter);
                 filter = and(filter, propFilter);
             }
             filters.add(filter);
@@ -362,7 +362,7 @@ final class DsFilters {
 
         @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
             // Only non-faulty values are used.
-        private Filter toFilter(ColumnTypeConverter handler) {
+        private Filter toFilter(ColumnTypeAdapter handler) {
             final Value<?> value = handler.toValue(column, columnFilter);
             final String columnIdentifier = columnFilter.getColumnName();
             switch (columnFilter.getOperator()) {
