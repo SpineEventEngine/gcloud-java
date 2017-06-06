@@ -288,11 +288,12 @@ final class DsFilters {
     }
 
     /**
-     * An implementation of {@link ConjunctionProcessor} performing sequential {@link Filter}
-     * conjunction.
+     * {@inheritDoc}
+     *
+     * This implementation performs sequential {@link Filter} conjunction.
      *
      * <p>The processor polls all the {@link ColumnFilterNode} instances, transforms them into
-     * {@link Filter} instances and merges with
+     * {@link Filter} instances and merges using
      * the {@link com.google.cloud.datastore.StructuredQuery.CompositeFilter#and
      * StructuredQuery.CompositeFilter.and()} operation. The result is then collected into
      * {@code Collection} passed on the instance creation.
@@ -302,29 +303,29 @@ final class DsFilters {
     private static class ColumnFilterReducer implements ConjunctionProcessor {
 
         private final ColumnTypeAdapter columnTypeAdapter;
-        private final Collection<Filter> filters;
+        private final Collection<Filter> destination;
 
         private ColumnFilterReducer(ColumnTypeAdapter columnTypeAdapter,
-                                    Collection<Filter> filters) {
+                                    Collection<Filter> destination) {
             this.columnTypeAdapter = columnTypeAdapter;
-            this.filters = filters;
+            this.destination = destination;
         }
 
         @Override
-        public void process(Queue<ColumnFilterNode> columnFilters) {
+        public void process(Queue<ColumnFilterNode> conjunctionGroup) {
             Filter filter;
-            if (!columnFilters.isEmpty()) {
-                filter = columnFilters.poll()
-                                      .toFilter(columnTypeAdapter);
+            if (!conjunctionGroup.isEmpty()) {
+                filter = conjunctionGroup.poll()
+                                         .toFilter(columnTypeAdapter);
             } else {
                 return;
             }
-            while (!columnFilters.isEmpty()) {
-                final Filter propFilter = columnFilters.poll()
-                                                       .toFilter(columnTypeAdapter);
+            while (!conjunctionGroup.isEmpty()) {
+                final Filter propFilter = conjunctionGroup.poll()
+                                                          .toFilter(columnTypeAdapter);
                 filter = and(filter, propFilter);
             }
-            filters.add(filter);
+            destination.add(filter);
         }
     }
 
@@ -460,13 +461,24 @@ final class DsFilters {
 
     /**
      * A functional interface defining the operation of precessing a conjunction group found by
-     * the {@linkplain #fromParams parenthesis opening algorithm}.
+     * the {@linkplain #fromParams parenthesis simplifying algorithm}.
+     *
+     * <p>The function receives a {@link Queue} of {@linkplain ColumnFilterNode ColumnFilterNodes}
+     * representing a single generated conjunction group.
+     *
+     * <p>The processor may empty the received {@link Queue} by polling the elements sequentially.
      */
     private interface ConjunctionProcessor {
 
         /**
          * Processes the found conjunction.
+         *
+         * @param conjunctionGroup the path in
+         *                         the {@linkplain #buildConjunctionTree conjunction tree}
+         *                         representing a single conjunction group; the path is guaranteed
+         *                         to be descending, i.e. going from the tree top to a leaf, and
+         *                         complete, i.e. covering all the tree depth
          */
-        void process(Queue<ColumnFilterNode> conjunctiveParameter);
+        void process(Queue<ColumnFilterNode> conjunctionGroup);
     }
 }
