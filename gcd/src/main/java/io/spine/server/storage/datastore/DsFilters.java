@@ -158,7 +158,7 @@ final class DsFilters {
         final Optional<CompositeQueryParameter> mergedConjunctiveParams =
                 firstParam.transform(new ParameterReducer(conjunctionParams.skip(1)));
         final Collection<Filter> filters = newLinkedList();
-        final ConjunctionProcessor processor = new ColumnFilterReducer(columnFilterAdapter, filters);
+        final TreePathWalker processor = new ColumnFilterReducer(columnFilterAdapter, filters);
         multiply(mergedConjunctiveParams.orNull(), disjunctionParams, processor);
         return filters;
     }
@@ -172,7 +172,7 @@ final class DsFilters {
      */
     private static void multiply(@Nullable CompositeQueryParameter constant,
                                  Iterable<CompositeQueryParameter> parameters,
-                                 ConjunctionProcessor processor) {
+                                 TreePathWalker processor) {
         final ColumnFilterNode expressionTree = buildConjunctionTree(constant,
                                                                      parameters);
         expressionTree.traverse(processor);
@@ -291,15 +291,15 @@ final class DsFilters {
     /**
      * {@inheritDoc}
      *
-     * This implementation performs sequential {@link Filter} conjunction.
+     * <p>This implementation performs sequential {@link Filter} conjunction.
      *
-     * <p>The processor transforms all the {@link ColumnFilterNode} instances into {@link Filter}
-     * instances and merges then using
+     * <p>The walker transforms all the {@link ColumnFilterNode} instances into {@link Filter}
+     * instances and merges them using
      * the {@link com.google.cloud.datastore.StructuredQuery.CompositeFilter#and
      * StructuredQuery.CompositeFilter.and()} operation. The result is then collected into
      * {@code Collection} passed on the instance creation.
      */
-    private static class ColumnFilterReducer implements ConjunctionProcessor {
+    private static class ColumnFilterReducer implements TreePathWalker {
 
         private final ColumnFilterAdapter columnFilterAdapter;
         private final Collection<Filter> destination;
@@ -311,7 +311,7 @@ final class DsFilters {
         }
 
         @Override
-        public void process(Collection<ColumnFilterNode> conjunctionGroup) {
+        public void walk(Collection<ColumnFilterNode> conjunctionGroup) {
             if (conjunctionGroup.isEmpty()) {
                 return;
             }
@@ -389,7 +389,7 @@ final class DsFilters {
          */
         @SuppressWarnings("MethodWithMultipleLoops")
             // To make the traversal algorithm more obvious.
-        private void traverse(ConjunctionProcessor processor) {
+        private void traverse(TreePathWalker processor) {
             final Queue<ColumnFilterNode> nodes = new LinkedList<>();
             final Queue<Collection<ColumnFilterNode>> paths = new LinkedList<>();
             nodes.offer(this);
@@ -401,7 +401,7 @@ final class DsFilters {
                 final Collection<ColumnFilterNode> path = paths.poll();
 
                 if (node.isLeaf()) {
-                    processor.process(path);
+                    processor.walk(path);
                 } else {
                     for (ColumnFilterNode child : node.subtrees) {
                         final Collection<ColumnFilterNode> childPath = newPath(path);
@@ -484,16 +484,21 @@ final class DsFilters {
      * <p>The function receives a {@code Collection} of
      * {@linkplain ColumnFilterNode ColumnFilterNodes} representing a single generated conjunction
      * group.
+     *
+     * @see ColumnFilterReducer for the implementation
      */
-    private interface ConjunctionProcessor {
+    private interface TreePathWalker {
 
         /**
-         * Processes the found conjunction.
+         * Walks a path in {@linkplain #buildConjunctionTree the conjunction tree} and performs
+         * a specified action for each path from the tree head to a leaf.
+         *
+         * <p>The given path represents a single conjunction group.
          *
          * @param conjunctionGroup the path in
          *                         the {@linkplain #buildConjunctionTree conjunction tree}
          *                         representing a single conjunction group
          */
-        void process(Collection<ColumnFilterNode> conjunctionGroup);
+        void walk(Collection<ColumnFilterNode> conjunctionGroup);
     }
 }
