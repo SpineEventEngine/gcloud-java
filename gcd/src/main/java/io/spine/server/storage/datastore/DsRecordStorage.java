@@ -86,7 +86,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final TypeUrl typeUrl;
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
-    private final ColumnTypeAdapter columnTypeAdapter;
+    private final ColumnFilterAdapter columnFilterAdapter;
     private final Class<I> idClass;
 
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
@@ -124,7 +124,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.datastore = datastore;
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
         this.idClass = checkNotNull(idClass);
-        this.columnTypeAdapter = ColumnTypeAdapter.of(this.columnTypeRegistry);
+        this.columnFilterAdapter = ColumnFilterAdapter.of(this.columnTypeRegistry);
     }
 
     private DsRecordStorage(Builder<I> builder) {
@@ -252,7 +252,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private Collection<Filter> buildColumnFilters(
             Iterable<CompositeQueryParameter> compositeParameters) {
         final Collection<CompositeQueryParameter> params = newArrayList(compositeParameters);
-        final Collection<Filter> predicate = DsFilters.fromParams(params, columnTypeAdapter);
+        final Collection<Filter> predicate = DsFilters.fromParams(params, columnFilterAdapter);
         return predicate;
     }
 

@@ -23,7 +23,6 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import org.junit.Test;
 import io.spine.client.ColumnFilter;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
@@ -31,6 +30,7 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.test.storage.Project;
+import org.junit.Test;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -39,8 +39,6 @@ import java.util.Collections;
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.Filter;
 import static com.google.common.collect.ImmutableMultimap.of;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.ge;
 import static io.spine.client.ColumnFilters.gt;
@@ -56,6 +54,8 @@ import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactor
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * @author Dmytro Dashenkov
@@ -90,8 +90,8 @@ public class DsFiltersShould {
                 createParams(disjunctiveFilters, EITHER)
         );
 
-        final ColumnTypeAdapter columnTypeAdapter = ColumnTypeAdapter.of(defaultInstance());
-        final Collection<Filter> filters = fromParams(parameters, columnTypeAdapter);
+        final ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
+        final Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
         assertContainsAll(filters, and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
                                        PropertyFilter.eq(archived.name(), archivedValue)),
                                    and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
@@ -109,9 +109,9 @@ public class DsFiltersShould {
                 createParams(singleFilter, ALL)
         );
 
-        final ColumnTypeAdapter columnTypeAdapter = ColumnTypeAdapter.of(defaultInstance());
-        final Collection<Filter> filters = fromParams(parameters, columnTypeAdapter);
-        assertContainsAll(filters, PropertyFilter.le(ID_STRING_COLUMN_NAME, versionValue));
+        final ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
+        final Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
+        assertContainsAll(filters, and(PropertyFilter.le(ID_STRING_COLUMN_NAME, versionValue)));
     }
 
     @Test
@@ -137,8 +137,8 @@ public class DsFiltersShould {
                 createParams(versionFilters, EITHER),
                 createParams(lifecycleFilters, EITHER)
         );
-        final ColumnTypeAdapter columnTypeAdapter = ColumnTypeAdapter.of(defaultInstance());
-        final Collection<Filter> filters = fromParams(parameters, columnTypeAdapter);
+        final ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
+        final Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
         assertContainsAll(filters,
                           and(PropertyFilter.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
                               PropertyFilter.eq(archived.name(), archivedValue)),
@@ -158,7 +158,7 @@ public class DsFiltersShould {
     public void generate_filters_from_empty_params() {
         final Collection<CompositeQueryParameter> parameters = Collections.emptySet();
         final Collection<Filter> filters = fromParams(parameters,
-                                                      ColumnTypeAdapter.of(defaultInstance()));
+                                                      ColumnFilterAdapter.of(defaultInstance()));
         assertNotNull(filters);
         assertSize(0, filters);
     }

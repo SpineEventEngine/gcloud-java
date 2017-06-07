@@ -47,12 +47,13 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.gt;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.le;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 
 /**
  * A utility for working with the Datastore {@linkplain Filter filters}.
@@ -121,20 +122,20 @@ final class DsFilters {
      * is returned.
      *
      * @param parameters    the {@linkplain CompositeQueryParameter query parameters} to convert
-     * @param columnTypeAdapter an instance of {@linkplain ColumnTypeAdapter} performing the required type
+     * @param columnFilterAdapter an instance of {@linkplain ColumnFilterAdapter} performing the required type
      *                      conventions
      * @return the equivalent expression of in Datastore {@link Filter} instances
      */
     static Collection<Filter> fromParams(Collection<CompositeQueryParameter> parameters,
-                                         ColumnTypeAdapter columnTypeAdapter) {
+                                         ColumnFilterAdapter columnFilterAdapter) {
         checkNotNull(parameters);
-        checkNotNull(columnTypeAdapter);
+        checkNotNull(columnFilterAdapter);
 
         final Collection<Filter> results;
         if (parameters.isEmpty()) {
             results = emptySet();
         } else {
-            results = toFilters(parameters, columnTypeAdapter);
+            results = toFilters(parameters, columnFilterAdapter);
         }
         return results;
     }
@@ -147,7 +148,7 @@ final class DsFilters {
      * parentheses are opened and the {@linkplain #multiply logical multiplication} is performed.
      */
     private static Collection<Filter> toFilters(Collection<CompositeQueryParameter> parameters,
-                                                final ColumnTypeAdapter columnTypeAdapter) {
+                                                final ColumnFilterAdapter columnFilterAdapter) {
         final FluentIterable<CompositeQueryParameter> params = from(parameters);
         final FluentIterable<CompositeQueryParameter> conjunctionParams =
                 params.filter(isConjunctive);
@@ -157,7 +158,7 @@ final class DsFilters {
         final Optional<CompositeQueryParameter> mergedConjunctiveParams =
                 firstParam.transform(new ParameterReducer(conjunctionParams.skip(1)));
         final Collection<Filter> filters = newLinkedList();
-        final ConjunctionProcessor processor = new ColumnFilterReducer(columnTypeAdapter, filters);
+        final ConjunctionProcessor processor = new ColumnFilterReducer(columnFilterAdapter, filters);
         multiply(mergedConjunctiveParams.orNull(), disjunctionParams, processor);
         return filters;
     }
@@ -177,7 +178,7 @@ final class DsFilters {
         expressionTree.traverse(processor);
     }
 
-    private static <T> Queue<T> newPath(Collection<T> oldOne) {
+    private static <T> Collection<T> newPath(Collection<T> oldOne) {
         return new LinkedList<>(oldOne);
     }
 
@@ -302,30 +303,42 @@ final class DsFilters {
      */
     private static class ColumnFilterReducer implements ConjunctionProcessor {
 
-        private final ColumnTypeAdapter columnTypeAdapter;
+        private final ColumnFilterAdapter columnFilterAdapter;
         private final Collection<Filter> destination;
 
-        private ColumnFilterReducer(ColumnTypeAdapter columnTypeAdapter,
+        private ColumnFilterReducer(ColumnFilterAdapter columnFilterAdapter,
                                     Collection<Filter> destination) {
-            this.columnTypeAdapter = columnTypeAdapter;
+            this.columnFilterAdapter = columnFilterAdapter;
             this.destination = destination;
         }
 
         @Override
-        public void process(Queue<ColumnFilterNode> conjunctionGroup) {
-            Filter filter;
-            if (!conjunctionGroup.isEmpty()) {
-                filter = conjunctionGroup.poll()
-                                         .toFilter(columnTypeAdapter);
-            } else {
+        public void process(Collection<ColumnFilterNode> conjunctionGroup) {
+            if (conjunctionGroup.isEmpty()) {
                 return;
             }
-            while (!conjunctionGroup.isEmpty()) {
-                final Filter propFilter = conjunctionGroup.poll()
-                                                          .toFilter(columnTypeAdapter);
-                filter = and(filter, propFilter);
-            }
-            destination.add(filter);
+            final FluentIterable<Filter> filters = from(conjunctionGroup)
+                    .transform(ColumnFilterNode.toFilterFunction(columnFilterAdapter));
+            final Optional<Filter> first = filters.first();
+            checkState(first.isPresent());
+            final Filter[] other = filters.skip(1)
+                                          .toArray(Filter.class);
+            final Filter group = and(first.get(), other);
+            destination.add(group);
+//            conjunctionGroup.toArray(filters);
+//
+//            if (!conjunctionGroup.isEmpty()) {
+//                filter = conjunctionGroup.poll()
+//                                         .toFilter(columnFilterAdapter);
+//            } else {
+//                return;
+//            }
+//            while (!conjunctionGroup.isEmpty()) {
+//                final Filter propFilter = conjunctionGroup.poll()
+//                                                          .toFilter(columnFilterAdapter);
+//                filter = and(filter, propFilter);
+//            }
+//            destination.add(filter);
         }
     }
 
@@ -363,8 +376,8 @@ final class DsFilters {
 
         @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
             // Only non-faulty values are used.
-        private Filter toFilter(ColumnTypeAdapter handler) {
-            final Value<?> value = handler.toValue(column, columnFilter);
+        private Filter toFilter(ColumnFilterAdapter adapter) {
+            final Value<?> value = adapter.toValue(column, columnFilter);
             final String columnIdentifier = columnFilter.getColumnName();
             switch (columnFilter.getOperator()) {
                 case EQUAL:
@@ -394,21 +407,21 @@ final class DsFilters {
             // To make the traversal algorithm more obvious.
         private void traverse(ConjunctionProcessor processor) {
             final Queue<ColumnFilterNode> nodes = new LinkedList<>();
-            final Queue<Queue<ColumnFilterNode>> paths = new LinkedList<>();
+            final Queue<Collection<ColumnFilterNode>> paths = new LinkedList<>();
             nodes.offer(this);
             // Initial path is intentionally left empty.
             paths.offer(new LinkedList<ColumnFilterNode>());
 
             while (!nodes.isEmpty()) {
                 final ColumnFilterNode node = nodes.poll();
-                final Queue<ColumnFilterNode> path = paths.poll();
+                final Collection<ColumnFilterNode> path = paths.poll();
 
                 if (node.isLeaf()) {
                     processor.process(path);
                 } else {
                     for (ColumnFilterNode child : node.subtrees) {
-                        final Queue<ColumnFilterNode> childPath = newPath(path);
-                        childPath.offer(child);
+                        final Collection<ColumnFilterNode> childPath = newPath(path);
+                        childPath.add(child);
                         nodes.offer(child);
                         paths.offer(childPath);
                     }
@@ -436,6 +449,27 @@ final class DsFilters {
         @Override
         public int hashCode() {
             return Objects.hashCode(getColumn(), getColumnFilter());
+        }
+
+        private static Function<ColumnFilterNode, Filter> toFilterFunction(
+                ColumnFilterAdapter adapter) {
+            return new ToFilter(adapter);
+        }
+
+        private static class ToFilter implements Function<ColumnFilterNode, Filter> {
+
+            private final ColumnFilterAdapter adapter;
+
+            private ToFilter(ColumnFilterAdapter adapter) {
+                this.adapter = adapter;
+            }
+
+            @Override
+            public Filter apply(@Nullable ColumnFilterNode input) {
+                checkNotNull(input);
+                final Filter result = input.toFilter(adapter);
+                return result;
+            }
         }
     }
 
@@ -479,6 +513,6 @@ final class DsFilters {
          *                         to be descending, i.e. going from the tree top to a leaf, and
          *                         complete, i.e. covering all the tree depth
          */
-        void process(Queue<ColumnFilterNode> conjunctionGroup);
+        void process(Collection<ColumnFilterNode> conjunctionGroup);
     }
 }
