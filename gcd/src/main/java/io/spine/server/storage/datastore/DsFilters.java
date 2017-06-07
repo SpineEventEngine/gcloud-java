@@ -481,9 +481,8 @@ final class DsFilters {
      * A functional interface defining the operation of precessing a conjunction group found by
      * the {@linkplain #fromParams parenthesis simplifying algorithm}.
      *
-     * <p>The function receives a {@code Collection} of
-     * {@linkplain ColumnFilterNode ColumnFilterNodes} representing a single generated conjunction
-     * group.
+     * <p>Receives a {@code Collection} of {@linkplain ColumnFilterNode ColumnFilterNodes}
+     * representing a single generated conjunction group.
      *
      * @see ColumnFilterReducer for the implementation
      */
@@ -491,7 +490,7 @@ final class DsFilters {
 
         /**
          * Walks a path in {@linkplain #buildConjunctionTree the conjunction tree} and performs
-         * a specified action for each path from the tree head to a leaf.
+         * a specified action for the given path.
          *
          * <p>The given path represents a single conjunction group.
          *
