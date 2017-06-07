@@ -6,7 +6,51 @@
 
 Support for Spine-based Java apps running under Google App Engine.
 
-#### Testing
+### Usage
+
+This section describes the main aspects of using the library.
+
+#### Datastore indexes
+
+To work properly, datastore requires to configure the indexes. For the guide, visit [Google Cloud Platform Docs](https://cloud.google.com/datastore/docs/tools/indexconfig).
+
+##### Spine internal indexes
+
+To use `gae-java`, you should configure the Datastore indexes for the Spine internal record types. 
+Following index config may be found in `./gcd/src/test/index.yaml`:
+
+```yaml
+indexes:
+
+  # Your custom indexes if necessary.
+
+  - kind: spine.base.Event
+    ancestor: no
+    properties:
+    - name: type
+    - name: created
+```
+
+##### Custom indexes
+
+If you use the Entity Columns feature, you may want to create some custom datastore indexes.
+
+__Example:__
+Assuming you have a Projection type called `CustomerProjection`. It's state is declared in 
+the Protobuf type `my.company.Customer`. It has Entity Columns `country` and
+`companySize`. Once you try to make a query in those Columns, the Datastore will fail with 
+an internal Exception. To prevent this, you should create an index for your `CustomerProjection`:
+```yaml
+- kind: my.company.Customer
+    ancestor: no
+    properties:
+    - name: country
+    - name: companySize
+```
+
+### Testing
+
+This section describes testing the `gae-java` library itself.
 
 ##### Preconditions
 
