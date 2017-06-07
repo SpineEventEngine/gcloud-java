@@ -293,13 +293,11 @@ final class DsFilters {
      *
      * This implementation performs sequential {@link Filter} conjunction.
      *
-     * <p>The processor polls all the {@link ColumnFilterNode} instances, transforms them into
-     * {@link Filter} instances and merges using
+     * <p>The processor transforms all the {@link ColumnFilterNode} instances into {@link Filter}
+     * instances and merges then using
      * the {@link com.google.cloud.datastore.StructuredQuery.CompositeFilter#and
      * StructuredQuery.CompositeFilter.and()} operation. The result is then collected into
      * {@code Collection} passed on the instance creation.
-     *
-     * <p>The {@link Queue} passed to the function becomes empty after the processing.
      */
     private static class ColumnFilterReducer implements ConjunctionProcessor {
 
@@ -325,20 +323,6 @@ final class DsFilters {
                                           .toArray(Filter.class);
             final Filter group = and(first.get(), other);
             destination.add(group);
-//            conjunctionGroup.toArray(filters);
-//
-//            if (!conjunctionGroup.isEmpty()) {
-//                filter = conjunctionGroup.poll()
-//                                         .toFilter(columnFilterAdapter);
-//            } else {
-//                return;
-//            }
-//            while (!conjunctionGroup.isEmpty()) {
-//                final Filter propFilter = conjunctionGroup.poll()
-//                                                          .toFilter(columnFilterAdapter);
-//                filter = and(filter, propFilter);
-//            }
-//            destination.add(filter);
         }
     }
 
@@ -497,10 +481,9 @@ final class DsFilters {
      * A functional interface defining the operation of precessing a conjunction group found by
      * the {@linkplain #fromParams parenthesis simplifying algorithm}.
      *
-     * <p>The function receives a {@link Queue} of {@linkplain ColumnFilterNode ColumnFilterNodes}
-     * representing a single generated conjunction group.
-     *
-     * <p>The processor may empty the received {@link Queue} by polling the elements sequentially.
+     * <p>The function receives a {@code Collection} of
+     * {@linkplain ColumnFilterNode ColumnFilterNodes} representing a single generated conjunction
+     * group.
      */
     private interface ConjunctionProcessor {
 
@@ -509,9 +492,7 @@ final class DsFilters {
          *
          * @param conjunctionGroup the path in
          *                         the {@linkplain #buildConjunctionTree conjunction tree}
-         *                         representing a single conjunction group; the path is guaranteed
-         *                         to be descending, i.e. going from the tree top to a leaf, and
-         *                         complete, i.e. covering all the tree depth
+         *                         representing a single conjunction group
          */
         void process(Collection<ColumnFilterNode> conjunctionGroup);
     }
