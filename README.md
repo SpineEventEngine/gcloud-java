@@ -12,28 +12,20 @@ This section describes the main aspects of using the library.
 
 #### Datastore indexes
 
-To work properly, datastore requires to configure the indexes. For the guide, visit [Google Cloud Platform Docs](https://cloud.google.com/datastore/docs/tools/indexconfig).
+In order to run the application built on top of `gae-java`, Datastore instance requires some 
+preliminary configuration. In particular, the indexes for the Spine internal record types should 
+be set. 
 
-##### Spine internal indexes
+The configuration file is located at `./gcd/config/index.yaml`. 
 
-To use `gae-java`, you should configure the Datastore indexes for the Spine internal record types. 
-Following index config may be found in `./gcd/src/test/index.yaml`:
-
-```yaml
-indexes:
-
-  # Your custom indexes if necessary.
-
-  - kind: spine.base.Event
-    ancestor: no
-    properties:
-    - name: type
-    - name: created
-```
+Please see the [Google Cloud Platform documentation](https://cloud.google.com/datastore/docs/tools/indexconfig)
+ for the details.
 
 ##### Custom indexes
 
-If you use the Entity Columns feature, you may want to create some custom datastore indexes.
+It is possible to store some of the Spine `Entity` fields in separate Datastore kind fields. 
+Such an approach is useful to optimize read-side querying. In this case more Datastore indexes may
+ be created.
 
 __Example:__
 Assuming you have a Projection type called `CustomerProjection`. It's state is declared in 
