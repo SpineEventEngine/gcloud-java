@@ -6,7 +6,43 @@
 
 Support for Spine-based Java apps running under Google App Engine.
 
-#### Testing
+### Usage
+
+This section describes the main aspects of using the library.
+
+#### Datastore indexes
+
+In order to run the application built on top of `gae-java`, Datastore instance requires some 
+preliminary configuration. In particular, the indexes for the Spine internal record types should 
+be set. 
+
+The configuration file is located at `./gcd/config/index.yaml`. 
+
+Please see the [Google Cloud Platform documentation](https://cloud.google.com/datastore/docs/tools/indexconfig)
+ for the details.
+
+##### Custom indexes
+
+It is possible to store some of the Spine `Entity` fields in separate Datastore kind fields. 
+Such an approach is useful to optimize read-side querying. In this case more Datastore indexes may
+ be created.
+
+__Example:__
+Assuming you have a Projection type called `CustomerProjection`. It's state is declared in 
+the Protobuf type `my.company.Customer`. It has Entity Columns `country` and
+`companySize`. Once you try to make a query in those Columns, the Datastore will fail with 
+an internal Exception. To prevent this, you should create an index for your `CustomerProjection`:
+```yaml
+- kind: my.company.Customer
+    ancestor: no
+    properties:
+    - name: country
+    - name: companySize
+```
+
+### Testing
+
+This section describes testing the `gae-java` library itself.
 
 ##### Preconditions
 
@@ -29,4 +65,4 @@ The launched emulator will run at `localhost:8080` and will not have any persist
 To change the configuration see `./script/start-datastore.*` scripts.
 
 The datastore is cleaned up after each test.
-See test classes under `./gcd/src/test/java/...` and `org.spine3.server.storage.datastore.TestDatastoreStorageFactory#clear`.
+See test classes under `./gcd/src/test/java/...` and `io.spine.server.storage.datastore.TestDatastoreStorageFactory#clear`.
