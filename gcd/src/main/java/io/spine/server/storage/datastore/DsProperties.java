@@ -20,11 +20,20 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.DateTime;
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.StructuredQuery.OrderBy;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
+import io.spine.base.Version;
 import io.spine.server.storage.LifecycleFlagField;
 import io.spine.string.Stringifiers;
 
+import java.util.Date;
+
+import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
+import static com.google.cloud.datastore.StructuredQuery.OrderBy.desc;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.aggregate.storage.AggregateField.aggregate_id;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -38,6 +47,14 @@ import static io.spine.server.storage.LifecycleFlagField.archived;
 @SuppressWarnings("UtilityClass")
 class DsProperties {
 
+    private static final String CREATED_PROPERTY = "created";
+    private static final String VERSION_PROPERTY = "version";
+    private static final String SNAPSHOT_PROPERTY = "snapshot";
+
+    private static final OrderBy BY_CREATED_PROPERTY = desc(CREATED_PROPERTY);
+    private static final OrderBy BY_VERSION_PROPERTY = desc(VERSION_PROPERTY);
+    private static final OrderBy BY_SNAPSHOT_PROPERTY = asc(SNAPSHOT_PROPERTY);
+
     private DsProperties() {
     }
 
@@ -47,6 +64,22 @@ class DsProperties {
     static void addAggregateIdProperty(Object aggregateId, Entity.Builder entity) {
         final String propertyValue = Stringifiers.toString(aggregateId);
         entity.set(aggregate_id.toString(), propertyValue);
+    }
+
+    static void addCreatedProperty(Timestamp when, Entity.Builder entity) {
+        final long millis = Timestamps.toMillis(when);
+        final Date date = new Date(millis);
+        final DateTime dateTime = DateTime.copyFrom(date);
+        entity.set(CREATED_PROPERTY, dateTime);
+    }
+
+    static void addVersionProperty(Version version, Entity.Builder entity) {
+        final int number = version.getNumber();
+        entity.set(VERSION_PROPERTY, number);
+    }
+
+    static void markSnapshotProperty(boolean snapshot, Entity.Builder entity) {
+        entity.set(SNAPSHOT_PROPERTY, snapshot);
     }
 
     static void addArchivedProperty(Entity.Builder entity, boolean archived) {
@@ -65,6 +98,18 @@ class DsProperties {
     static boolean isDeleted(Entity entity) {
         checkNotNull(entity);
         return hasFlag(entity, LifecycleFlagField.deleted.toString());
+    }
+
+    static OrderBy byCreatedTime() {
+        return BY_CREATED_PROPERTY;
+    }
+
+    static OrderBy byVersion() {
+        return BY_VERSION_PROPERTY;
+    }
+
+    static OrderBy byRecordType() {
+        return BY_SNAPSHOT_PROPERTY;
     }
 
     private static boolean hasFlag(Entity entity, String flagName) {

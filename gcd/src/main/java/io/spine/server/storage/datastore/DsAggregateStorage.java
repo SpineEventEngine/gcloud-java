@@ -30,18 +30,18 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
+import io.spine.base.Version;
 import io.spine.server.aggregate.AggregateEventRecord;
+import io.spine.server.aggregate.AggregateEventRecord.KindCase;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.string.Stringifiers;
-import io.spine.time.Timestamps2;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,14 +50,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Collections2.transform;
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.server.aggregate.storage.AggregateField.aggregate_id;
 import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.of;
+import static io.spine.server.storage.datastore.DsProperties.addAggregateIdProperty;
 import static io.spine.server.storage.datastore.DsProperties.addArchivedProperty;
+import static io.spine.server.storage.datastore.DsProperties.addCreatedProperty;
 import static io.spine.server.storage.datastore.DsProperties.addDeletedProperty;
+import static io.spine.server.storage.datastore.DsProperties.addVersionProperty;
+import static io.spine.server.storage.datastore.DsProperties.byCreatedTime;
+import static io.spine.server.storage.datastore.DsProperties.byRecordType;
+import static io.spine.server.storage.datastore.DsProperties.byVersion;
 import static io.spine.server.storage.datastore.DsProperties.isArchived;
 import static io.spine.server.storage.datastore.DsProperties.isDeleted;
+import static io.spine.server.storage.datastore.DsProperties.markSnapshotProperty;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.server.storage.datastore.Entities.entitiesToMessages;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
@@ -134,22 +140,39 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                                                      .build());
     }
 
+    @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases.
     @Override
     protected void writeRecord(I id, AggregateEventRecord record) {
         checkNotNull(id);
 
         final String stringId = Stringifiers.toString(id);
-        String eventId = Stringifiers.toString(record.getEvent()
-                                                     .getId());
-        if (eventId.isEmpty()) {
-            // Snapshots have no Event IDs.
-            eventId = SNAPSHOT + stringId;
+        final String recordId;
+        final Version version;
+        final KindCase kind = record.getKindCase();
+        switch (kind) {
+            case EVENT:
+                recordId = Stringifiers.toString(record.getEvent().getId());
+                version = record.getEvent()
+                                .getContext()
+                                .getVersion();
+                break;
+            case SNAPSHOT:
+                recordId = SNAPSHOT + stringId;
+                version = record.getSnapshot()
+                                .getVersion();
+                break;
+            default:
+                throw new IllegalArgumentException(record.getKindCase()
+                                                         .name());
         }
-
-        final Key key = keyFor(datastore, Kind.of(stateTypeName), of(eventId));
+        final Key key = keyFor(datastore, Kind.of(stateTypeName), of(recordId));
         final Entity incompleteEntity = messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
-        DsProperties.addAggregateIdProperty(stringId, builder);
+        addAggregateIdProperty(stringId, builder);
+        addCreatedProperty(record.getTimestamp(), builder);
+
+        addVersionProperty(version, builder);
+        markSnapshotProperty(kind == KindCase.SNAPSHOT, builder);
         datastore.createOrUpdate(builder.build());
     }
 
@@ -162,6 +185,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                                                    .setKind(stateTypeName.value())
                                                    .setFilter(eq(aggregate_id.toString(),
                                                                  idString))
+                                                   .setOrderBy(byCreatedTime(),
+                                                               byVersion(),
+                                                               byRecordType())
                                                    .build();
         final List<Entity> eventEntities = datastore.read(query);
         if (eventEntities.isEmpty()) {
@@ -187,15 +213,15 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final List<AggregateEventRecord> immutableResult = entitiesToMessages(
                 filteredEntities,
                 AGGREGATE_RECORD_TYPE_URL);
-        final List<AggregateEventRecord> records = newArrayList(immutableResult);
+//        final List<AggregateEventRecord> records = newArrayList(immutableResult);
 
-        Collections.sort(records, new Comparator<AggregateEventRecord>() {
-            @Override
-            public int compare(AggregateEventRecord o1, AggregateEventRecord o2) {
-                return Timestamps2.compare(o2.getTimestamp(), o1.getTimestamp());
-            }
-        });
-        return records.iterator();
+//        Collections.sort(records, new Comparator<AggregateEventRecord>() {
+//            @Override
+//            public int compare(AggregateEventRecord o1, AggregateEventRecord o2) {
+//                return Timestamps2.compare(o2.getTimestamp(), o1.getTimestamp());
+//            }
+//        });
+        return immutableResult.iterator();
     }
 
     private Collection<Entity> getEntityStates() {
