@@ -21,19 +21,17 @@
 package io.spine.server.storage.datastore;
 
 import com.google.protobuf.Message;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.aggregate.AggregateStorageShould;
+import io.spine.test.aggregate.ProjectId;
+import io.spine.validate.ValidatingBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.aggregate.AggregateStorageShould;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.storage.Project;
-import io.spine.test.storage.ProjectValidatingBuilder;
-import io.spine.validate.ValidatingBuilder;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -94,12 +92,12 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         assertNotNull(propertyStorage);
     }
 
-    private static class TestAggregateWithIdLong
-            extends Aggregate<Long, Project, ProjectValidatingBuilder> {
-        private TestAggregateWithIdLong(Long id) {
-            super(id);
-        }
-    }
+//    private static class TestAggregateWithIdLong
+//            extends Aggregate<Long, Project, ProjectVBuilder> {
+//        private TestAggregateWithIdLong(Long id) {
+//            super(id);
+//        }
+//    }
 
     private static Logger log() {
         return LogSingleton.INSTANCE.value;

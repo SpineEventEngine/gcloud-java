@@ -30,7 +30,7 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.projection.ProjectionStorageShould;
 import io.spine.test.projection.Project;
-import io.spine.test.projection.ProjectValidatingBuilder;
+import io.spine.test.projection.ProjectVBuilder;
 import io.spine.testdata.Sample;
 
 import static org.junit.Assert.assertNotNull;
@@ -77,7 +77,7 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
 
     private static class TestProjection extends Projection<String,
                                                 Project,
-                                                ProjectValidatingBuilder> {
+                                                ProjectVBuilder> {
         private TestProjection(String id) {
             super(id);
         }
