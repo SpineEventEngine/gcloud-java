@@ -1,4 +1,7 @@
 rootProject.name = 'gae-java'
 
+include ':values'
+project(":values").projectDir = "$rootDir/values" as File
+
 include ':gcd'
 project(':gcd').projectDir = "$rootDir/gcd" as File
