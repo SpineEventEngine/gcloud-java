@@ -45,17 +45,10 @@ import static io.spine.server.storage.LifecycleFlagField.archived;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")
-class DsProperties {
-
-    private static final String CREATED_PROPERTY = "created";
-    private static final String VERSION_PROPERTY = "version";
-    private static final String SNAPSHOT_PROPERTY = "snapshot";
-
-    private static final OrderBy BY_CREATED_PROPERTY = desc(CREATED_PROPERTY);
-    private static final OrderBy BY_VERSION_PROPERTY = desc(VERSION_PROPERTY);
-    private static final OrderBy BY_SNAPSHOT_PROPERTY = asc(SNAPSHOT_PROPERTY);
+final class DsProperties {
 
     private DsProperties() {
+        // Prevent utility class instantiation.
     }
 
     /**
@@ -70,16 +63,16 @@ class DsProperties {
         final long millis = Timestamps.toMillis(when);
         final Date date = new Date(millis);
         final DateTime dateTime = DateTime.copyFrom(date);
-        entity.set(CREATED_PROPERTY, dateTime);
+        entity.set(AggregateEventRecordProperty.CREATED.name(), dateTime);
     }
 
     static void addVersionProperty(Version version, Entity.Builder entity) {
         final int number = version.getNumber();
-        entity.set(VERSION_PROPERTY, number);
+        entity.set(AggregateEventRecordProperty.VERSION.name(), number);
     }
 
     static void markSnapshotProperty(boolean snapshot, Entity.Builder entity) {
-        entity.set(SNAPSHOT_PROPERTY, snapshot);
+        entity.set(AggregateEventRecordProperty.SNAPSHOT.name(), snapshot);
     }
 
     static void addArchivedProperty(Entity.Builder entity, boolean archived) {
@@ -101,15 +94,15 @@ class DsProperties {
     }
 
     static OrderBy byCreatedTime() {
-        return BY_CREATED_PROPERTY;
+        return AggregateEventRecordOrdering.BY_CREATED_PROPERTY.ordering;
     }
 
     static OrderBy byVersion() {
-        return BY_VERSION_PROPERTY;
+        return AggregateEventRecordOrdering.BY_VERSION_PROPERTY.ordering;
     }
 
     static OrderBy byRecordType() {
-        return BY_SNAPSHOT_PROPERTY;
+        return AggregateEventRecordOrdering.BY_SNAPSHOT_PROPERTY.ordering;
     }
 
     private static boolean hasFlag(Entity entity, String flagName) {
@@ -117,5 +110,30 @@ class DsProperties {
                 entity.contains(flagName)
                         && entity.getBoolean(flagName);
         return result;
+    }
+
+    private enum AggregateEventRecordProperty {
+
+        CREATED,
+        VERSION,
+        SNAPSHOT;
+
+        @Override
+        public String toString() {
+            return name().toLowerCase();
+        }
+    }
+
+    private enum AggregateEventRecordOrdering {
+
+        BY_CREATED_PROPERTY(desc(AggregateEventRecordProperty.CREATED.toString())),
+        BY_VERSION_PROPERTY(desc(AggregateEventRecordProperty.VERSION.toString())),
+        BY_SNAPSHOT_PROPERTY(asc(AggregateEventRecordProperty.SNAPSHOT.toString()));
+
+        private final OrderBy ordering;
+
+        AggregateEventRecordOrdering(OrderBy ordering) {
+            this.ordering = ordering;
+        }
     }
 }

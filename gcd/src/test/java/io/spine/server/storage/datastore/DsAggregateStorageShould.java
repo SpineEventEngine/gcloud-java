@@ -100,6 +100,5 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(DsAggregateStorageShould.class);
-
     }
 }
