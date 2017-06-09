@@ -213,14 +213,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final List<AggregateEventRecord> immutableResult = entitiesToMessages(
                 filteredEntities,
                 AGGREGATE_RECORD_TYPE_URL);
-//        final List<AggregateEventRecord> records = newArrayList(immutableResult);
-
-//        Collections.sort(records, new Comparator<AggregateEventRecord>() {
-//            @Override
-//            public int compare(AggregateEventRecord o1, AggregateEventRecord o2) {
-//                return Timestamps2.compare(o2.getTimestamp(), o1.getTimestamp());
-//            }
-//        });
         return immutableResult.iterator();
     }
 
