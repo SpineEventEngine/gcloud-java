@@ -92,13 +92,6 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         assertNotNull(propertyStorage);
     }
 
-//    private static class TestAggregateWithIdLong
-//            extends Aggregate<Long, Project, ProjectVBuilder> {
-//        private TestAggregateWithIdLong(Long id) {
-//            super(id);
-//        }
-//    }
-
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
