@@ -10,11 +10,11 @@ indexes:
 
   # Indexes for the Aggregates
 
-  - kind: spine.test.storage.Project
+  - kind: spine.test.aggregate.Project
     properties:
-      - name: aggregate_id
-      - name: created
-        direction: desc
-      - name: version
-        direction: desc
-      - name: snapshot
+    - name: aggregate_id
+    - name: created
+      direction: desc
+    - name: version
+      direction: desc
+    - name: snapshot

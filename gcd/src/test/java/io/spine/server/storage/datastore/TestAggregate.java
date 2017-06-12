@@ -21,9 +21,9 @@
 package io.spine.server.storage.datastore;
 
 import io.spine.server.aggregate.Aggregate;
+import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.storage.Project;
-import io.spine.test.storage.ProjectVBuilder;
+import io.spine.test.aggregate.ProjectVBuilder;
 
 /**
  * @author Dmytro Dashenkov.
