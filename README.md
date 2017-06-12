@@ -18,6 +18,9 @@ be set.
 
 The configuration file is located at `./gcd/config/index.yaml`. 
 
+Please note, that it is required to add the specified in the `./gcd/config/index.yaml` indexes for
+all of your `Aggregate` types. 
+
 Please see the [Google Cloud Platform documentation](https://cloud.google.com/datastore/docs/tools/indexconfig)
  for the details.
 

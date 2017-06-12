@@ -1,6 +1,6 @@
 indexes:
 
-  # Common index for all the applications
+  # Common index for all the applications.
 
   - kind: spine.base.Event
     ancestor: no
@@ -8,7 +8,12 @@ indexes:
     - name: type
     - name: created
 
-  # Indexes for the Aggregates
+  # Indexes for the Aggregates.
+  #
+  # Each custom Aggregate type must have such indexes in order to be retrieved properly.
+  #
+  # The Datastore kind represents the Protobuf type name of the Aggregate state. Both the property
+  # names and the index directions should be kept unchanged.
 
   - kind: spine.test.aggregate.Project
     properties:
