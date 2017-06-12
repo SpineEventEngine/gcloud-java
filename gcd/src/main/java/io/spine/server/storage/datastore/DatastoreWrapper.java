@@ -43,12 +43,11 @@ import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.spine.server.storage.datastore.tenant.DsNamespaceValidator;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -59,6 +58,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Math.min;
 
@@ -200,7 +200,7 @@ public class DatastoreWrapper {
         final List<Key> keysList = newLinkedList(keys);
         final List<Entity> result;
         if (keysList.size() <= MAX_KEYS_PER_READ_REQUEST) {
-            result = Lists.newArrayList(datastore.get(keys));
+            result = newArrayList(datastore.get(keys));
         } else {
             result = readBulk(keysList);
         }
@@ -214,7 +214,8 @@ public class DatastoreWrapper {
      * {@link KeyQuery} and {@link ProjectionEntityQuery}, it is required to repeat a query with
      * the adjusted cursor position.
      *
-     * <p>Therefore, an execution of this method may in fact result in several queries to the Datastore instance.
+     * <p>Therefore, an execution of this method may in fact result in several queries to
+     * the Datastore instance.
      *
      * @param query {@link Query} to execute upon the Datastore
      * @return results fo the query packed in a {@link List}
@@ -428,7 +429,7 @@ public class DatastoreWrapper {
         for (int i = 0; i < pageCount; i++) {
             final List<Key> keysPage = keys.subList(lowerBound, higherBound);
 
-            final List<Entity> page = Lists.newArrayList(datastore.get(keysPage));
+            final List<Entity> page = newArrayList(datastore.get(keysPage));
             result.addAll(page);
 
             keysLeft -= keysPage.size();
