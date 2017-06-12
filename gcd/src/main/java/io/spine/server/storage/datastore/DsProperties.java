@@ -63,16 +63,16 @@ final class DsProperties {
         final long millis = Timestamps.toMillis(when);
         final Date date = new Date(millis);
         final DateTime dateTime = DateTime.copyFrom(date);
-        entity.set(AggregateEventRecordProperty.CREATED.name(), dateTime);
+        entity.set(AggregateEventRecordProperty.CREATED.toString(), dateTime);
     }
 
     static void addVersionProperty(Version version, Entity.Builder entity) {
         final int number = version.getNumber();
-        entity.set(AggregateEventRecordProperty.VERSION.name(), number);
+        entity.set(AggregateEventRecordProperty.VERSION.toString(), number);
     }
 
     static void markSnapshotProperty(boolean snapshot, Entity.Builder entity) {
-        entity.set(AggregateEventRecordProperty.SNAPSHOT.name(), snapshot);
+        entity.set(AggregateEventRecordProperty.SNAPSHOT.toString(), snapshot);
     }
 
     static void addArchivedProperty(Entity.Builder entity, boolean archived) {
