@@ -28,11 +28,11 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.Given;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.users.TenantId;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -43,19 +43,21 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.Collections2.transform;
+import static io.spine.server.storage.datastore.Given.TEST_PROJECT_ID;
+import static io.spine.test.Verify.assertContains;
+import static io.spine.test.Verify.assertContainsAll;
+import static io.spine.test.Verify.assertSize;
 import static java.lang.String.format;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static io.spine.server.storage.datastore.Given.TEST_PROJECT_ID;
-import static io.spine.test.Verify.assertContains;
-import static io.spine.test.Verify.assertContainsAll;
-import static io.spine.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov
@@ -176,9 +178,10 @@ public class NamespaceIndexShould {
             public void run() {
                 // Initial value check
                 final Set<TenantId> initialIdsActual = namespaceIndex.getAll(); // sync
-                assertEquals(initialIdsActual.size(), initialTenantIds.size());
-                final TenantId[] elements = new TenantId[initialTenantIds.size()];
-                initialTenantIds.toArray(elements);
+                // The keep may already be called
+                assertThat(initialIdsActual.size(), greaterThanOrEqualTo(initialTenantIds.size()));
+                @SuppressWarnings("ZeroLengthArrayAllocation")
+                final TenantId[] elements = initialTenantIds.toArray(new TenantId[0]);
                 assertContainsAll(initialIdsActual, elements);
 
                 // Add new element
