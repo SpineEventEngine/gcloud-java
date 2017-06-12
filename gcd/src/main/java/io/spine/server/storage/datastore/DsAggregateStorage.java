@@ -170,7 +170,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
         addAggregateIdProperty(stringId, builder);
         addCreatedProperty(record.getTimestamp(), builder);
-
         addVersionProperty(version, builder);
         markSnapshotProperty(kind == KindCase.SNAPSHOT, builder);
         datastore.createOrUpdate(builder.build());
