@@ -94,15 +94,15 @@ final class DsProperties {
     }
 
     static OrderBy byCreatedTime() {
-        return AggregateEventRecordOrdering.BY_CREATED_PROPERTY.ordering;
+        return AggregateEventRecordOrdering.BY_CREATED_PROPERTY.getOrdering();
     }
 
     static OrderBy byVersion() {
-        return AggregateEventRecordOrdering.BY_VERSION_PROPERTY.ordering;
+        return AggregateEventRecordOrdering.BY_VERSION_PROPERTY.getOrdering();
     }
 
     static OrderBy byRecordType() {
-        return AggregateEventRecordOrdering.BY_SNAPSHOT_PROPERTY.ordering;
+        return AggregateEventRecordOrdering.BY_SNAPSHOT_PROPERTY.getOrdering();
     }
 
     private static boolean hasFlag(Entity entity, String flagName) {
@@ -134,6 +134,10 @@ final class DsProperties {
 
         AggregateEventRecordOrdering(OrderBy ordering) {
             this.ordering = ordering;
+        }
+
+        private OrderBy getOrdering() {
+            return ordering;
         }
     }
 }
