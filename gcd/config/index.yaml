@@ -1,6 +1,20 @@
 indexes:
+
+  # Common index for all the applications
+
   - kind: spine.base.Event
     ancestor: no
     properties:
     - name: type
     - name: created
+
+  # Indexes for the Aggregates
+
+  - kind: spine.test.storage.Project
+    properties:
+      - name: aggregate_id
+      - name: created
+        direction: desc
+      - name: version
+        direction: desc
+      - name: snapshot
