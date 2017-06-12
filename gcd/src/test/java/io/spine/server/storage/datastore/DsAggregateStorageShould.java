@@ -22,9 +22,11 @@ package io.spine.server.storage.datastore;
 
 import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageShould;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.testdata.Sample;
 import io.spine.validate.ValidatingBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -90,6 +92,13 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         final DsPropertyStorage propertyStorage = storage.getPropertyStorage();
         assertNotNull(propertyStorage);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_write_invalid_record() {
+        final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        storage.writeRecord(Sample.messageOfType(ProjectId.class),
+                            AggregateEventRecord.getDefaultInstance());
     }
 
     private static Logger log() {
