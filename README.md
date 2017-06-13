@@ -16,7 +16,7 @@ In order to run the application built on top of `gae-java`, Datastore instance r
 preliminary configuration. In particular, the indexes for the Spine internal record types should 
 be set. Please notice a special index configuration for your custom `Aggregate` types.
 
-The configuration file is located at `./gcd/config/index.yaml`. 
+The configuration file is located at `./datastore/config/index.yaml`. 
 
 Please see the [Google Cloud Platform documentation](https://cloud.google.com/datastore/docs/tools/indexconfig)
 for the details.
@@ -65,4 +65,4 @@ The launched emulator will run at `localhost:8080` and will not have any persist
 To change the configuration see `./script/start-datastore.*` scripts.
 
 The datastore is cleaned up after each test.
-See test classes under `./gcd/src/test/java/...` and `io.spine.server.storage.datastore.TestDatastoreStorageFactory#clear`.
+See test classes under `./datastore/src/test/java/...` and `io.spine.server.storage.datastore.TestDatastoreStorageFactory#clear`.

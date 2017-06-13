@@ -13,7 +13,7 @@ project.ext {
 
     publishPlugin = "$rootDir/script/publish.gradle"
     credentialsPropertyFile = 'credentials.properties'
-    projectsToPublish = ['gcd']
+    projectsToPublish = ['datastore']
 }
 
 final String CREDENTIALS_LOCATION = 'credentials.properties'
