@@ -1,0 +1,19 @@
+# The GAE Datastore indexes required to run the Spine Gae-Java library tests in the test
+# remote environment.
+
+indexes:
+
+  - kind: spine.base.Event
+    ancestor: no
+    properties:
+    - name: type
+    - name: created
+
+  - kind: spine.test.aggregate.Project
+    properties:
+    - name: aggregate_id
+    - name: created
+      direction: desc
+    - name: version
+      direction: desc
+    - name: snapshot

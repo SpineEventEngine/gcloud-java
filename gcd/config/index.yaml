@@ -1,3 +1,5 @@
+# THe GAE Datastore sample indexes.
+
 indexes:
 
   # Common index for all the applications.
@@ -15,7 +17,16 @@ indexes:
   # The Datastore kind represents the Protobuf type name of the Aggregate state. Both the property
   # names and the index directions should be kept unchanged.
 
-  - kind: spine.test.aggregate.Project
+  - kind: myapp.example.MyFirstAggregate
+    properties:
+    - name: aggregate_id
+    - name: created
+      direction: desc
+    - name: version
+      direction: desc
+    - name: snapshot
+
+  - kind: myapp.example.MySecondAggregate
     properties:
     - name: aggregate_id
     - name: created
