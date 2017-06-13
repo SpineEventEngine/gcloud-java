@@ -14,15 +14,12 @@ This section describes the main aspects of using the library.
 
 In order to run the application built on top of `gae-java`, Datastore instance requires some 
 preliminary configuration. In particular, the indexes for the Spine internal record types should 
-be set. 
+be set. Please notice a special index configuration for your custom `Aggregate` types.
 
 The configuration file is located at `./gcd/config/index.yaml`. 
 
-Please note, that it is required to add the specified in the `./gcd/config/index.yaml` indexes for
-all of your `Aggregate` types. 
-
 Please see the [Google Cloud Platform documentation](https://cloud.google.com/datastore/docs/tools/indexconfig)
- for the details.
+for the details.
 
 ##### Custom indexes
 
