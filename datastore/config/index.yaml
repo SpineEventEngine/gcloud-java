@@ -1,4 +1,4 @@
-# THe GAE Datastore sample indexes.
+# The GAE Datastore sample indexes.
 
 indexes:
 
@@ -17,7 +17,9 @@ indexes:
   # The Datastore kind represents the Protobuf type name of the Aggregate state. Both the property
   # names and the index directions should be kept unchanged.
 
-  - kind: myapp.example.MyFirstAggregate
+  - kind: myapp.example.MyFirstAggregate # Replace with your Aggregate Protobuf type name.
+    # Copy as is:
+    # ------------------
     properties:
     - name: aggregate_id
     - name: created
@@ -25,8 +27,11 @@ indexes:
     - name: version
       direction: desc
     - name: snapshot
+    # ------------------
 
-  - kind: myapp.example.MySecondAggregate
+  - kind: myapp.example.MySecondAggregate # Replace with your Aggregate Protobuf type name.
+    # Copy as is:
+    # ------------------
     properties:
     - name: aggregate_id
     - name: created
@@ -34,3 +39,4 @@ indexes:
     - name: version
       direction: desc
     - name: snapshot
+    # ------------------
