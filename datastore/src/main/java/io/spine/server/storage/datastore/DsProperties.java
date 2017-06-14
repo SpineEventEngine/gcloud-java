@@ -28,6 +28,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Version;
 import io.spine.server.storage.LifecycleFlagField;
+import io.spine.server.storage.StorageField;
 import io.spine.string.Stringifiers;
 
 import java.util.Date;
@@ -63,16 +64,16 @@ final class DsProperties {
         final long millis = Timestamps.toMillis(when);
         final Date date = new Date(millis);
         final DateTime dateTime = DateTime.copyFrom(date);
-        entity.set(AggregateEventRecordProperty.CREATED.toString(), dateTime);
+        entity.set(AggregateEventRecordProperty.created.toString(), dateTime);
     }
 
     static void addVersionProperty(Version version, Entity.Builder entity) {
         final int number = version.getNumber();
-        entity.set(AggregateEventRecordProperty.VERSION.toString(), number);
+        entity.set(AggregateEventRecordProperty.version.toString(), number);
     }
 
     static void markSnapshotProperty(boolean snapshot, Entity.Builder entity) {
-        entity.set(AggregateEventRecordProperty.SNAPSHOT.toString(), snapshot);
+        entity.set(AggregateEventRecordProperty.snapshot.toString(), snapshot);
     }
 
     static void addArchivedProperty(Entity.Builder entity, boolean archived) {
@@ -94,15 +95,15 @@ final class DsProperties {
     }
 
     static OrderBy byCreatedTime() {
-        return AggregateEventRecordOrdering.BY_CREATED_PROPERTY.getOrdering();
+        return AggregateEventRecordOrdering.BY_CREATED.getOrdering();
     }
 
     static OrderBy byVersion() {
-        return AggregateEventRecordOrdering.BY_VERSION_PROPERTY.getOrdering();
+        return AggregateEventRecordOrdering.BY_VERSION.getOrdering();
     }
 
     static OrderBy byRecordType() {
-        return AggregateEventRecordOrdering.BY_SNAPSHOT_PROPERTY.getOrdering();
+        return AggregateEventRecordOrdering.BY_SNAPSHOT.getOrdering();
     }
 
     private static boolean hasFlag(Entity entity, String flagName) {
@@ -112,23 +113,30 @@ final class DsProperties {
         return result;
     }
 
-    private enum AggregateEventRecordProperty {
+    private enum AggregateEventRecordProperty implements StorageField {
 
-        CREATED,
-        VERSION,
-        SNAPSHOT;
+        /**
+         * A property storing the Event creation time.
+         */
+        created,
 
-        @Override
-        public String toString() {
-            return name().toLowerCase();
-        }
+        /**
+         * A property storing the Aggregate version.
+         */
+        version,
+
+        /**
+         * A boolean property storing {@code true} if the Record represents a Snapshot and
+         * {@code false} otherwise.
+         */
+        snapshot
     }
 
     private enum AggregateEventRecordOrdering {
 
-        BY_CREATED_PROPERTY(desc(AggregateEventRecordProperty.CREATED.toString())),
-        BY_VERSION_PROPERTY(desc(AggregateEventRecordProperty.VERSION.toString())),
-        BY_SNAPSHOT_PROPERTY(asc(AggregateEventRecordProperty.SNAPSHOT.toString()));
+        BY_CREATED(desc(AggregateEventRecordProperty.created.toString())),
+        BY_VERSION(desc(AggregateEventRecordProperty.version.toString())),
+        BY_SNAPSHOT(asc(AggregateEventRecordProperty.snapshot.toString()));
 
         private final OrderBy ordering;
 
