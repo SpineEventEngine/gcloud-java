@@ -33,8 +33,6 @@ import io.spine.string.Stringifiers;
 
 import java.util.Date;
 
-import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
-import static com.google.cloud.datastore.StructuredQuery.OrderBy.desc;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.aggregate.storage.AggregateField.aggregate_id;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -55,25 +53,25 @@ final class DsProperties {
     /**
      * Makes AggregateId property from given {@link Message} value.
      */
-    static void addAggregateIdProperty(Object aggregateId, Entity.Builder entity) {
+    static void addAggregateIdProperty(Entity.Builder entity, Object aggregateId) {
         final String propertyValue = Stringifiers.toString(aggregateId);
         entity.set(aggregate_id.toString(), propertyValue);
     }
 
-    static void addCreatedProperty(Timestamp when, Entity.Builder entity) {
+    static void addCreatedProperty(Entity.Builder entity, Timestamp when) {
         final long millis = Timestamps.toMillis(when);
         final Date date = new Date(millis);
         final DateTime dateTime = DateTime.copyFrom(date);
-        entity.set(AggregateEventRecordProperty.created.toString(), dateTime);
+        AggregateEventRecordProperty.created.setProperty(entity, dateTime);
     }
 
-    static void addVersionProperty(Version version, Entity.Builder entity) {
+    static void addVersionProperty(Entity.Builder entity, Version version) {
         final int number = version.getNumber();
-        entity.set(AggregateEventRecordProperty.version.toString(), number);
+        AggregateEventRecordProperty.version.setProperty(entity, number);
     }
 
-    static void markSnapshotProperty(boolean snapshot, Entity.Builder entity) {
-        entity.set(AggregateEventRecordProperty.snapshot.toString(), snapshot);
+    static void markAsSnapshot(Entity.Builder entity, boolean snapshot) {
+        AggregateEventRecordProperty.snapshot.setProperty(entity, snapshot);
     }
 
     static void addArchivedProperty(Entity.Builder entity, boolean archived) {
@@ -107,10 +105,17 @@ final class DsProperties {
     }
 
     private static boolean hasFlag(Entity entity, String flagName) {
-        final boolean result =
-                entity.contains(flagName)
-                        && entity.getBoolean(flagName);
+        final boolean result = entity.contains(flagName)
+                            && entity.getBoolean(flagName);
         return result;
+    }
+
+    private static OrderBy asc(StorageField property) {
+        return OrderBy.asc(property.toString());
+    }
+
+    private static OrderBy desc(StorageField property) {
+        return OrderBy.desc(property.toString());
     }
 
     private enum AggregateEventRecordProperty implements StorageField {
@@ -118,25 +123,50 @@ final class DsProperties {
         /**
          * A property storing the Event creation time.
          */
-        created,
+        created {
+            @Override
+            void setProperty(Entity.Builder builder, Object value) {
+                final DateTime dateTime = (DateTime) value;
+                builder.set(toString(), dateTime);
+            }
+        },
 
         /**
          * A property storing the Aggregate version.
          */
-        version,
+        version {
+            @Override
+            void setProperty(Entity.Builder builder, Object value) {
+                final int version = (int) value;
+                builder.set(toString(), version);
+            }
+        },
 
         /**
          * A boolean property storing {@code true} if the Record represents a Snapshot and
          * {@code false} otherwise.
          */
-        snapshot
+        snapshot {
+            @Override
+            void setProperty(Entity.Builder builder, Object value) {
+                final boolean isSnapshot = (boolean) value;
+                builder.set(toString(), isSnapshot);
+            }
+        };
+
+        abstract void setProperty(Entity.Builder builder, Object value);
+
+        @Override
+        public String toString() {
+            return super.toString().toLowerCase();
+        }
     }
 
     private enum AggregateEventRecordOrdering {
 
-        BY_CREATED(desc(AggregateEventRecordProperty.created.toString())),
-        BY_VERSION(desc(AggregateEventRecordProperty.version.toString())),
-        BY_SNAPSHOT(asc(AggregateEventRecordProperty.snapshot.toString()));
+        BY_CREATED(desc(AggregateEventRecordProperty.created)),
+        BY_VERSION(desc(AggregateEventRecordProperty.version)),
+        BY_SNAPSHOT(asc(AggregateEventRecordProperty.snapshot));
 
         private final OrderBy ordering;
 

@@ -26,17 +26,17 @@ package io.spine.server.storage.datastore;
  *
  * @author Alex Tymchenko
  */
-public class DatastoreRecordId {
+public class RecordId {
 
     // The wrapped identifier value.
     private final String value;
 
     /**
-     * Creates a new {@code DatastoreRecordId} for the given {@code value}.
+     * Creates a new {@code RecordId} for the given {@code value}.
      *
      * @param value the identity as {@code String} to wrap into an identifier
      */
-    DatastoreRecordId(String value) {
+    RecordId(String value) {
         this.value = value;
     }
 

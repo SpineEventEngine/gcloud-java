@@ -49,26 +49,26 @@ public class DsIdentifiers {
      * @param recordId  the ID of the record
      * @return the Datastore {@code Key} instance
      */
-    static Key keyFor(DatastoreWrapper datastore, Kind kind, DatastoreRecordId recordId) {
+    static Key keyFor(DatastoreWrapper datastore, Kind kind, RecordId recordId) {
         final KeyFactory keyFactory = datastore.getKeyFactory(kind);
         final Key key = keyFactory.newKey(recordId.getValue());
 
         return key;
     }
 
-    public static DatastoreRecordId of(String value) {
+    public static RecordId of(String value) {
         checkState(!value.isEmpty());
-        return new DatastoreRecordId(value);
+        return new RecordId(value);
     }
 
     /**
-     * Creates an instance of {@code DatastoreRecordId} for a
+     * Creates an instance of {@code RecordId} for a
      * given {@link io.spine.server.entity.Entity} identifier.
      *
      * @param id an identifier of an {@code Entity}
      * @return the Datastore record identifier
      */
-    public static DatastoreRecordId ofEntityId(Object id) {
+    public static RecordId ofEntityId(Object id) {
         final String idAsString = Stringifiers.toString(id);
         return of(idAsString);
     }

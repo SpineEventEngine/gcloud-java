@@ -54,7 +54,7 @@ public class DsPropertyStorage {
         this.datastore = datastore;
     }
 
-    protected <V extends Message> void write(DatastoreRecordId propertyId, V value) {
+    protected <V extends Message> void write(RecordId propertyId, V value) {
         checkNotNull(propertyId);
         checkNotNull(value);
 
@@ -67,7 +67,7 @@ public class DsPropertyStorage {
         datastore.createOrUpdate(entity);
     }
 
-    protected <V extends Message> Optional<V> read(DatastoreRecordId propertyId,
+    protected <V extends Message> Optional<V> read(RecordId propertyId,
                                                    Descriptor targetTypeDescriptor) {
         checkNotNull(propertyId);
         checkNotNull(targetTypeDescriptor);

@@ -46,7 +46,7 @@ public class DatastoreIdentifiersShould {
     @Test
     public void wrap_non_empty_String_into_record_identifier() {
         final String idAsString = newUuid();
-        final DatastoreRecordId recordId = DsIdentifiers.of(idAsString);
+        final RecordId recordId = DsIdentifiers.of(idAsString);
 
         assertNotNull(recordId);
         assertEquals(idAsString, recordId.getValue());

@@ -63,10 +63,11 @@ import static io.spine.server.storage.datastore.DsProperties.byRecordType;
 import static io.spine.server.storage.datastore.DsProperties.byVersion;
 import static io.spine.server.storage.datastore.DsProperties.isArchived;
 import static io.spine.server.storage.datastore.DsProperties.isDeleted;
-import static io.spine.server.storage.datastore.DsProperties.markSnapshotProperty;
+import static io.spine.server.storage.datastore.DsProperties.markAsSnapshot;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.server.storage.datastore.Entities.entitiesToMessages;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -89,10 +90,10 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      */
     private static final String SNAPSHOT = "SNAPSHOT";
 
-    private static final TypeName AGGREGATE_LIFECYCLE_KIND = TypeName.from(
-            LifecycleFlags.getDescriptor());
-    private static final TypeUrl AGGREGATE_RECORD_TYPE_URL = TypeUrl.from(
-            AggregateEventRecord.getDescriptor());
+    private static final TypeName AGGREGATE_LIFECYCLE_KIND =
+            TypeName.from(LifecycleFlags.getDescriptor());
+    private static final TypeUrl AGGREGATE_RECORD_TYPE_URL =
+            TypeUrl.from(AggregateEventRecord.getDescriptor());
 
     private final DatastoreWrapper datastore;
     private final DsPropertyStorage propertyStorage;
@@ -116,7 +117,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotClosed();
         checkNotNull(id);
 
-        final DatastoreRecordId datastoreId = generateDatastoreId(id);
+        final RecordId datastoreId = toRecordId(id);
         final Optional<Int32Value> count = propertyStorage.read(datastoreId,
                                                                 Int32Value.getDescriptor());
         final int countValue;
@@ -134,7 +135,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotClosed();
         checkNotNull(id);
 
-        final DatastoreRecordId datastoreId = generateDatastoreId(id);
+        final RecordId datastoreId = toRecordId(id);
         propertyStorage.write(datastoreId, Int32Value.newBuilder()
                                                      .setValue(eventCount)
                                                      .build());
@@ -162,16 +163,16 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                                 .getVersion();
                 break;
             default:
-                throw new IllegalArgumentException(record.getKindCase()
-                                                         .name());
+                throw newIllegalArgumentException("Invalid kind of AggregateEventRecord \"%s\".",
+                                                  record.getKindCase());
         }
         final Key key = keyFor(datastore, Kind.of(stateTypeName), of(recordId));
         final Entity incompleteEntity = messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
-        addAggregateIdProperty(stringId, builder);
-        addCreatedProperty(record.getTimestamp(), builder);
-        addVersionProperty(version, builder);
-        markSnapshotProperty(kind == KindCase.SNAPSHOT, builder);
+        addAggregateIdProperty(builder, stringId);
+        addCreatedProperty(builder, record.getTimestamp());
+        addVersionProperty(builder, version);
+        markAsSnapshot(builder, kind == KindCase.SNAPSHOT);
         datastore.createOrUpdate(builder.build());
     }
 
@@ -229,7 +230,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      * @param id an identifier of the {@code Aggregate}
      * @return the Datastore record ID
      */
-    protected DatastoreRecordId generateDatastoreId(I id) {
+    protected RecordId toRecordId(I id) {
         final String stringId = Stringifiers.toString(id);
         final String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
         return of(datastoreId);
@@ -306,7 +307,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     private Key toKey(I id) {
-        final DatastoreRecordId recordId = generateDatastoreId(id);
+        final RecordId recordId = toRecordId(id);
         final Key key = keyFor(datastore, Kind.of(AGGREGATE_LIFECYCLE_KIND), recordId);
         return key;
     }

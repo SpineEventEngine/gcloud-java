@@ -48,7 +48,7 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
     private final DsRecordStorage<I> recordStorage;
     private final DsPropertyStorage propertyStorage;
 
-    private final DatastoreRecordId lastTimestampId;
+    private final RecordId lastTimestampId;
 
     public DsProjectionStorage(DsRecordStorage<I> recordStorage,
                                DsPropertyStorage propertyStorage,

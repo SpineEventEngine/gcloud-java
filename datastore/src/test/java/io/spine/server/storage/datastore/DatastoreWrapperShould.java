@@ -194,7 +194,7 @@ public class DatastoreWrapperShould {
             final Map<Key, Entity> result = new HashMap<>(n);
             for (int i = 0; i < n; i++) {
                 final Any message = Any.getDefaultInstance();
-                final DatastoreRecordId recordId = new DatastoreRecordId(String.format("record-%s", i));
+                final RecordId recordId = new RecordId(String.format("record-%s", i));
                 final Key key = DsIdentifiers.keyFor(wrapper, GENERIC_ENTITY_KIND, recordId);
                 final Entity entity = Entities.messageToEntity(message, key);
                 result.put(key, entity);
