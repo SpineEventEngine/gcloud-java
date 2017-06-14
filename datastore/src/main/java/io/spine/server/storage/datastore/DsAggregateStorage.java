@@ -53,11 +53,11 @@ import static com.google.common.collect.Collections2.transform;
 import static io.spine.server.aggregate.storage.AggregateField.aggregate_id;
 import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.of;
-import static io.spine.server.storage.datastore.DsProperties.addAggregateIdProperty;
-import static io.spine.server.storage.datastore.DsProperties.addArchivedProperty;
-import static io.spine.server.storage.datastore.DsProperties.addCreatedProperty;
-import static io.spine.server.storage.datastore.DsProperties.addDeletedProperty;
-import static io.spine.server.storage.datastore.DsProperties.addVersionProperty;
+import static io.spine.server.storage.datastore.DsProperties.addAggregateId;
+import static io.spine.server.storage.datastore.DsProperties.markAsArchived;
+import static io.spine.server.storage.datastore.DsProperties.addWhenCreated;
+import static io.spine.server.storage.datastore.DsProperties.markAsDeleted;
+import static io.spine.server.storage.datastore.DsProperties.addVersion;
 import static io.spine.server.storage.datastore.DsProperties.byCreatedTime;
 import static io.spine.server.storage.datastore.DsProperties.byRecordType;
 import static io.spine.server.storage.datastore.DsProperties.byVersion;
@@ -169,9 +169,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final Key key = keyFor(datastore, Kind.of(stateTypeName), of(recordId));
         final Entity incompleteEntity = messageToEntity(record, key);
         final Entity.Builder builder = Entity.newBuilder(incompleteEntity);
-        addAggregateIdProperty(builder, stringId);
-        addCreatedProperty(builder, record.getTimestamp());
-        addVersionProperty(builder, version);
+        addAggregateId(builder, stringId);
+        addWhenCreated(builder, record.getTimestamp());
+        addVersion(builder, version);
         markAsSnapshot(builder, kind == KindCase.SNAPSHOT);
         datastore.createOrUpdate(builder.build());
     }
@@ -288,8 +288,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final Key key = toKey(id);
         final Entity.Builder entityStateRecord = Entity.newBuilder(key);
-        addArchivedProperty(entityStateRecord, flags.getArchived());
-        addDeletedProperty(entityStateRecord, flags.getDeleted());
+        markAsArchived(entityStateRecord, flags.getArchived());
+        markAsDeleted(entityStateRecord, flags.getDeleted());
         datastore.createOrUpdate(entityStateRecord.build());
     }
 

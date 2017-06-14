@@ -53,19 +53,19 @@ final class DsProperties {
     /**
      * Makes AggregateId property from given {@link Message} value.
      */
-    static void addAggregateIdProperty(Entity.Builder entity, Object aggregateId) {
+    static void addAggregateId(Entity.Builder entity, Object aggregateId) {
         final String propertyValue = Stringifiers.toString(aggregateId);
         entity.set(aggregate_id.toString(), propertyValue);
     }
 
-    static void addCreatedProperty(Entity.Builder entity, Timestamp when) {
+    static void addWhenCreated(Entity.Builder entity, Timestamp when) {
         final long millis = Timestamps.toMillis(when);
         final Date date = new Date(millis);
         final DateTime dateTime = DateTime.copyFrom(date);
         AggregateEventRecordProperty.created.setProperty(entity, dateTime);
     }
 
-    static void addVersionProperty(Entity.Builder entity, Version version) {
+    static void addVersion(Entity.Builder entity, Version version) {
         final int number = version.getNumber();
         AggregateEventRecordProperty.version.setProperty(entity, number);
     }
@@ -74,11 +74,11 @@ final class DsProperties {
         AggregateEventRecordProperty.snapshot.setProperty(entity, snapshot);
     }
 
-    static void addArchivedProperty(Entity.Builder entity, boolean archived) {
+    static void markAsArchived(Entity.Builder entity, boolean archived) {
         entity.set(LifecycleFlagField.archived.toString(), archived);
     }
 
-    static void addDeletedProperty(Entity.Builder entity, boolean deleted) {
+    static void markAsDeleted(Entity.Builder entity, boolean deleted) {
         entity.set(LifecycleFlagField.deleted.toString(), deleted);
     }
 
