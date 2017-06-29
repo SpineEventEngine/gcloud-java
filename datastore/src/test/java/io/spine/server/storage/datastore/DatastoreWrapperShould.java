@@ -31,7 +31,7 @@ import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.users.TenantId;
+import io.spine.core.TenantId;
 
 import java.util.Collection;
 import java.util.HashMap;

@@ -20,9 +20,9 @@
 
 package io.spine.server.storage.datastore.tenant;
 
+import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
-import io.spine.users.TenantId;
 
 import static io.spine.server.storage.datastore.tenant.Namespace.DOMAIN_PREFIX;
 import static io.spine.server.storage.datastore.tenant.Namespace.EMAIL_PREFIX;

@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static com.google.api.client.util.Maps.newHashMap;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Collections2.filter;
@@ -164,12 +163,12 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids) {
+    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
         return lookup(ids, recordFromEntity);
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids,
+    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids,
                                                          final FieldMask fieldMask) {
         final Function<Entity, EntityRecord> transformer = new Function<Entity, EntityRecord>() {
             @Nullable
@@ -196,22 +195,22 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords() {
+    protected Iterator<EntityRecord> readAllRecords() {
         return readAllRecords(FieldMask.getDefaultInstance());
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords(final FieldMask fieldMask) {
+    protected Iterator<EntityRecord> readAllRecords(final FieldMask fieldMask) {
         final StructuredQuery<Entity> allQuery = buildAllQuery(typeUrl);
         return queryAll(typeUrl, allQuery, fieldMask);
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
+    protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
         return queryByColumns(query, fieldMask);
     }
 
-    private Map<I, EntityRecord> queryByColumns(EntityQuery<I> entityQuery, FieldMask fieldMask) {
+    private Iterator<EntityRecord> queryByColumns(EntityQuery<I> entityQuery, FieldMask fieldMask) {
         final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                                     .setKind(getKind().getValue());
         final Iterable<CompositeQueryParameter> params = entityQuery.getParameters();
@@ -236,12 +235,12 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         );
 
         final Predicate<Entity> inMemFilter = buildMemoryPredicate(ids);
-        final Map<I, EntityRecord> result = newHashMap();
+        final Collection<EntityRecord> result = newLinkedList();
         for (StructuredQuery<Entity> query : queries) {
-            final Map<I, EntityRecord> records = queryAll(typeUrl, query, fieldMask, inMemFilter);
-            result.putAll(records);
+            final Iterator<EntityRecord> records = queryAll(typeUrl, query, fieldMask, inMemFilter);
+            result.addAll(newArrayList(records));
         }
-        return result;
+        return result.iterator();
     }
 
     private Predicate<Entity> buildMemoryPredicate(Set<I> ids) {
@@ -279,7 +278,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return typeUrl;
     }
 
-    private Map<I, EntityRecord> lookup(Collection<I> ids, FieldMask fieldMask) {
+    private Iterator<EntityRecord> lookup(Collection<I> ids, FieldMask fieldMask) {
         if (ids.isEmpty()) {
             return readAllRecords(fieldMask);
         }
@@ -289,30 +288,30 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                                          Predicates.<Entity>alwaysTrue(),
                                                          typeUrl,
                                                          fieldMask);
-        return results;
+        return results.values().iterator();
     }
 
-    private <T> Iterable<T> lookup(Iterable<I> ids,
+    private <T> Iterator<T> lookup(Iterable<I> ids,
                                    Function<Entity, T> transformer) {
         final Collection<Key> keys = toKeys(ids);
         final List<Entity> results = datastore.read(keys);
         final Collection<Entity> filteredResults = filter(results, activeEntity());
         final Collection<T> records = transform(filteredResults, transformer);
-        return unmodifiableCollection(records);
+        return unmodifiableCollection(records).iterator();
     }
 
-    private Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
+    private Iterator<EntityRecord> queryAll(TypeUrl typeUrl,
                                           StructuredQuery<Entity> query,
                                           FieldMask fieldMask) {
         return queryAll(typeUrl, query, fieldMask, activeEntity());
     }
 
-    private Map<I, EntityRecord> queryAll(TypeUrl typeUrl,
+    private Iterator<EntityRecord> queryAll(TypeUrl typeUrl,
                                           StructuredQuery<Entity> query,
                                           FieldMask fieldMask,
                                           Predicate<Entity> resultFilter) {
         final List<Entity> results = datastore.read(query);
-        return toRecordMap(results, resultFilter, typeUrl, fieldMask);
+        return toRecordMap(results, resultFilter, typeUrl, fieldMask).values().iterator();
     }
 
     private Map<I, EntityRecord> toRecordMap(Iterable<Entity> queryResults,

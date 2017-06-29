@@ -36,7 +36,7 @@ import static java.util.Collections.synchronizedMap;
  * A registry of the {@link NamespaceToTenantIdConverter}s.
  *
  * <p>The converters are mapped to the {@link ProjectId}s one-to-one, i.e. one GAE project may
- * have only one strategy of converting the {@link io.spine.users.TenantId tenant IDs}.
+ * have only one strategy of converting the {@link io.spine.core.TenantId tenant IDs}.
  *
  * @author Dmytro Dashenkov
  */
@@ -52,7 +52,7 @@ public final class TenantConverterRegistry {
 
     /**
      * Registers a {@link com.google.common.base.Converter Converter} from string datastore
-     * namespace into {@link io.spine.users.TenantId TenantId} for the given {@link ProjectId}.
+     * namespace into {@link io.spine.core.TenantId TenantId} for the given {@link ProjectId}.
      *
      * <p>After this converter has been registered, all the Datastore namespace operations will use
      * it instead of the {@linkplain Namespace default behavior}.
@@ -61,7 +61,7 @@ public final class TenantConverterRegistry {
      * All the subsequent invocations will cause {@code IllegalStateException}s.
      *
      * @param converter the converter to use for the
-     *                  namespace-to-{@link io.spine.users.TenantId TenantId} and vice versa
+     *                  namespace-to-{@link io.spine.core.TenantId TenantId} and vice versa
      *                  conversions
      * @see Namespace
      */

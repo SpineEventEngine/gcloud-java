@@ -31,7 +31,7 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.Given;
 import io.spine.server.storage.datastore.ProjectId;
-import io.spine.users.TenantId;
+import io.spine.core.TenantId;
 import org.junit.Test;
 
 import javax.annotation.Nullable;

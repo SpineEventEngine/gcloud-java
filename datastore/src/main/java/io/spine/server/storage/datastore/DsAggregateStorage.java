@@ -30,7 +30,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import io.spine.base.Version;
+import io.spine.core.Version;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateEventRecord.KindCase;
 import io.spine.server.aggregate.AggregateStorage;

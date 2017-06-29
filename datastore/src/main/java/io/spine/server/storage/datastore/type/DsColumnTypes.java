@@ -29,7 +29,7 @@ import com.google.cloud.datastore.Value;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.base.Version;
+import io.spine.core.Version;
 import io.spine.string.Stringifiers;
 
 import java.util.Date;

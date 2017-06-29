@@ -20,11 +20,10 @@
 
 package io.spine.server.storage.datastore;
 
-import org.junit.After;
-import org.junit.Test;
-import io.spine.base.Identifier;
-import io.spine.base.Version;
+import io.spine.Identifier;
+import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
@@ -32,9 +31,11 @@ import io.spine.server.projection.ProjectionStorageShould;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectVBuilder;
 import io.spine.testdata.Sample;
+import org.junit.After;
+import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Mikhail Mikhaylov
@@ -58,9 +59,14 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
         datastoreFactory.clear();
     }
 
+    @SuppressWarnings("unchecked") // Required for test purposes.
     @Override
-    protected ProjectionStorage<String> getStorage() {
-        return datastoreFactory.createProjectionStorage(TestProjection.class);
+    protected ProjectionStorage<String> getStorage(Class<? extends Entity> cls) {
+        final Class<? extends Projection<String, ?, ?>> projectionClass =
+                (Class<? extends Projection<String, ?, ?>>) cls;
+        final ProjectionStorage<String> result =
+                datastoreFactory.createProjectionStorage(projectionClass);
+        return result;
     }
 
     @Override
@@ -70,7 +76,7 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
 
     @Test
     public void provide_access_to_PropertyStorage_for_extensibility() {
-        final DsProjectionStorage<String> storage = (DsProjectionStorage<String>) getStorage();
+        final DsProjectionStorage<String> storage = (DsProjectionStorage<String>) getStorage(TestProjection.class);
         final DsPropertyStorage propertyStorage = storage.propertyStorage();
         assertNotNull(propertyStorage);
     }

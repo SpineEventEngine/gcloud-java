@@ -29,6 +29,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.RecordStorage;
@@ -151,8 +152,9 @@ public class DatastoreStorageFactory implements StorageFactory {
      * {@inheritDoc}
      */
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> aClass) {
-        final DsRecordStorage<I> recordStorage = (DsRecordStorage<I>) createRecordStorage(aClass);
+    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Projection<I, ?, ?>> aClass) {
+        final DsRecordStorage<I> recordStorage =
+                (DsRecordStorage<I>) createRecordStorage((Class<? extends Entity<I, ?>>) aClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
         final DsProjectionStorage<I> result = new DsProjectionStorage<>(recordStorage,
                                                                         propertyStorage,
@@ -290,7 +292,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         /**
          * Sets a {@link NamespaceToTenantIdConverter} for converting the Datastore namespaces and
-         * the {@link io.spine.users.TenantId Tenant IDs} back and forth.
+         * the {@link io.spine.core.TenantId Tenant IDs} back and forth.
          *
          * <p>Setting this parameter is reasonable (but not required) only if the storage is
          * multitenant. Otherwise, an exception will be thrown on {@linkplain #build() build}.

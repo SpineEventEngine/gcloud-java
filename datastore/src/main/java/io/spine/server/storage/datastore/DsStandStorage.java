@@ -21,7 +21,6 @@
 package io.spine.server.storage.datastore;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import io.spine.server.entity.EntityRecord;
@@ -52,17 +51,17 @@ public class DsStandStorage extends StandStorage {
     }
 
     @Override
-    public ImmutableCollection<EntityRecord> readAllByType(TypeUrl type) {
+    public Iterator<EntityRecord> readAllByType(TypeUrl type) {
         final Map<?, EntityRecord> records = recordStorage.readAllByType(type);
         final ImmutableList<EntityRecord> result = ImmutableList.copyOf(records.values());
-        return result;
+        return result.iterator();
     }
 
     @Override
-    public ImmutableCollection<EntityRecord> readAllByType(TypeUrl type, FieldMask fieldMask) {
+    public Iterator<EntityRecord> readAllByType(TypeUrl type, FieldMask fieldMask) {
         final Map<?, EntityRecord> records = recordStorage.readAllByType(type, fieldMask);
         final ImmutableList<EntityRecord> result = ImmutableList.copyOf(records.values());
-        return result;
+        return result.iterator();
     }
 
     @Override
@@ -82,23 +81,23 @@ public class DsStandStorage extends StandStorage {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
+    protected Iterator<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
         return recordStorage.readMultiple(ids);
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids,
+    protected Iterator<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids,
                                                          FieldMask fieldMask) {
         return recordStorage.readMultiple(ids, fieldMask);
     }
 
     @Override
-    protected Map<AggregateStateId, EntityRecord> readAllRecords() {
+    protected Iterator<EntityRecord> readAllRecords() {
         return recordStorage.readAll();
     }
 
     @Override
-    protected Map<AggregateStateId, EntityRecord> readAllRecords(FieldMask fieldMask) {
+    protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
         return recordStorage.readAll(fieldMask);
     }
 

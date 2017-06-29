@@ -22,7 +22,7 @@ package io.spine.server.storage.datastore.tenant;
 
 import com.google.common.base.Converter;
 import io.spine.annotation.SPI;
-import io.spine.users.TenantId;
+import io.spine.core.TenantId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

@@ -21,17 +21,19 @@
 package io.spine.server.storage.datastore;
 
 import com.google.common.base.Throwables;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterators.size;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -120,7 +122,7 @@ public class BigDataTester<I> {
         final long readStart = System.currentTimeMillis();
 
         // Do not test data equality here, only the sizes and time
-        final Map<I, EntityRecord> readRecords = storage.readAll();
+        final Iterator<EntityRecord> readRecords = storage.readAll();
 
         final long readEnd = System.currentTimeMillis();
         final long readTime = readEnd - readStart;
@@ -132,7 +134,7 @@ public class BigDataTester<I> {
         }
         log().debug("Reading took {} millis.", readTime);
 
-        assertEquals("Unexpected records count read.", records.size(), readRecords.size());
+        assertEquals("Unexpected records count read.", records.size(), size(readRecords));
     }
 
     /**

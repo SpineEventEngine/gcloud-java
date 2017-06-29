@@ -20,12 +20,13 @@
 
 package io.spine.server.storage.datastore;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import io.spine.server.entity.Entity;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.stand.StandStorageShould;
 import io.spine.server.storage.RecordStorage;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -49,12 +50,13 @@ public class DsStandStorageShould extends StandStorageShould {
 
     @Test
     public void contain_record_storage() {
-        final RecordStorage<?> recordStorage = ((DsStandStorage) getStorage()).getRecordStorage();
+        final RecordStorage<?> recordStorage =
+                ((DsStandStorage) getStorage(StandStorageRecord.class)).getRecordStorage();
         assertNotNull(recordStorage);
     }
 
     @Override
-    protected StandStorage getStorage() {
+    protected StandStorage getStorage(Class<? extends Entity> cls) {
         return datastoreFactory.createStandStorage();
     }
 }
