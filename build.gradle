@@ -1,16 +1,4 @@
-project.ext {
-    SPINE_VERSION = '0.9.21-SNAPSHOT'
-    GAE_JAVA_VERSION = "0.9.21-SNAPSHOT"
-    PROTOBUF_VERSION = '3.2.0'
-    SLf4J_VERSION = "1.7.21"
-    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
-    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
-    MAVEN_SNAPSHOT_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine-snapshots'
-
-    GUAVA_VERSION = "20.0"
-
-    IS_WINDOWS = org.gradle.internal.os.OperatingSystem.current().isWindows()
-
+ext {
     publishPlugin = "$rootDir/script/publish.gradle"
     credentialsPropertyFile = 'credentials.properties'
     projectsToPublish = ['datastore']
@@ -19,6 +7,12 @@ project.ext {
 final String CREDENTIALS_LOCATION = 'credentials.properties'
 
 buildscript {
+
+    // Define the versions of the library and it's dependencies.
+    // As long as `buildscript` section is always evaluated first, we need to apply
+    // `ext.gradle` explicitly here.
+    apply from: "ext.gradle"
+
     repositories {
         mavenCentral()
         mavenLocal()
@@ -44,7 +38,7 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'jacoco'
     group = 'io.spine'
-    version = project.GAE_JAVA_VERSION
+    version = project.VERSION
 
     repositories {
         mavenCentral()
@@ -73,19 +67,19 @@ subprojects {
     dependencies {
         // when Spine can be used for evaluation in real projects.
         // Spine
-        compile (group: 'io.spine', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true) {
+        compile(group: 'io.spine', name: 'spine-server-core', version: project.VERSION, changing: true) {
             exclude group: 'com.google.protobuf', module: 'protobuf-lite'
             exclude group: 'io.grpc'
         }
-        compile group: 'io.spine', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true
+        compile group: 'io.spine', name: 'spine-client-core', version: project.VERSION, changing: true
 
         // Spine for tests
-        testCompile (group: 'io.spine', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true, classifier: 'test') {
+        testCompile(group: 'io.spine', name: 'spine-server-core', version: project.VERSION, changing: true, classifier: 'test') {
             exclude group: 'com.google.protobuf', module: 'protobuf-lite'
             exclude group: 'io.grpc'
         }
-        testCompile group: 'io.spine', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
-        testCompile group: 'io.spine', name: 'spine-testutil-core', version: project.SPINE_VERSION, changing: true
+        testCompile group: 'io.spine', name: 'spine-client-core', version: project.VERSION, changing: true, classifier: 'test'
+        testCompile group: 'io.spine', name: 'spine-testutil-core', version: project.VERSION, changing: true
 
         // Guava
         compile group: 'com.google.guava', name: 'guava', version: GUAVA_VERSION
@@ -128,7 +122,7 @@ subprojects {
     }
 
     task javadocJar(type: Jar, dependsOn: 'javadoc') {
-        from ("$projectDir/build/docs/javadoc")
+        from("$projectDir/build/docs/javadoc")
         classifier "javadoc"
     }
 }
