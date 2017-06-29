@@ -82,6 +82,8 @@ subprojects {
         }
 
         testCompile group: 'io.spine', name: 'spine-testutil-base', version: project.VERSION, changing: true
+        testCompile group: 'io.spine', name: 'spine-testutil-client', version: project.VERSION, changing: true
+        testCompile group: 'io.spine', name: 'spine-testutil-server', version: project.VERSION, changing: true
 
         // Guava
         compile group: 'com.google.guava', name: 'guava', version: GUAVA_VERSION
