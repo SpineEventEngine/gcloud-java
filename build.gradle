@@ -2,6 +2,8 @@ ext {
     publishPlugin = "$rootDir/script/publish.gradle"
     credentialsPropertyFile = 'credentials.properties'
     projectsToPublish = ['datastore']
+
+    spineDependencies = ['spine-server', 'spine-client', 'spine-core', 'spine-base']
 }
 
 final String CREDENTIALS_LOCATION = 'credentials.properties'
@@ -67,19 +69,19 @@ subprojects {
     dependencies {
         // when Spine can be used for evaluation in real projects.
         // Spine
-        compile(group: 'io.spine', name: 'spine-server-core', version: project.VERSION, changing: true) {
-            exclude group: 'com.google.protobuf', module: 'protobuf-lite'
-            exclude group: 'io.grpc'
-        }
-        compile group: 'io.spine', name: 'spine-client-core', version: project.VERSION, changing: true
+        spineDependencies.forEach {
+            compile(group: 'io.spine', name: it, version: project.VERSION, changing: true) {
+                exclude group: 'com.google.protobuf', module: 'protobuf-lite'
+                exclude group: 'io.grpc'
+            }
 
-        // Spine for tests
-        testCompile(group: 'io.spine', name: 'spine-server-core', version: project.VERSION, changing: true, classifier: 'test') {
-            exclude group: 'com.google.protobuf', module: 'protobuf-lite'
-            exclude group: 'io.grpc'
+            testCompile(group: 'io.spine', name: it, version: project.VERSION, changing: true, classifier: 'test') {
+                exclude group: 'com.google.protobuf', module: 'protobuf-lite'
+                exclude group: 'io.grpc'
+            }
         }
-        testCompile group: 'io.spine', name: 'spine-client-core', version: project.VERSION, changing: true, classifier: 'test'
-        testCompile group: 'io.spine', name: 'spine-testutil-core', version: project.VERSION, changing: true
+
+        testCompile group: 'io.spine', name: 'spine-testutil-base', version: project.VERSION, changing: true
 
         // Guava
         compile group: 'com.google.guava', name: 'guava', version: GUAVA_VERSION
