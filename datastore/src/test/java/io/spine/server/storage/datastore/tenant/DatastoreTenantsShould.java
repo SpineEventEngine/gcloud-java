@@ -95,17 +95,7 @@ public class DatastoreTenantsShould {
         private final Iterator<Key> keyIterator = keys.iterator();
 
         @Override
-        public Class<?> resultClass() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public Class<?> getResultClass() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Cursor cursorAfter() {
             throw new UnsupportedOperationException();
         }
 

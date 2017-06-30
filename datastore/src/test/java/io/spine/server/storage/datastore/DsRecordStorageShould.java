@@ -25,7 +25,6 @@ import com.google.cloud.datastore.Key;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
 import io.spine.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -47,6 +46,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
+import static com.google.protobuf.util.Timestamps.toSeconds;
 import static io.spine.json.Json.toCompactJson;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Verify.assertContainsKey;
@@ -196,10 +196,10 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         assertEquals(entity.getCounterVersion()
                            .getNumber(), datastoreEntity.getLong(counterVersion));
 
-        assertEquals(Timestamps.toMicros(entity.getCreationTime()),
-                     // in Datastore max DateTime precision is 1 microsecond
-                     datastoreEntity.getDateTime(creationTime)
-                                    .getTimestampMicroseconds());
+        final com.google.cloud.Timestamp actualCreationTime =
+                datastoreEntity.getTimestamp(creationTime);
+        assertEquals(toSeconds(entity.getCreationTime()), actualCreationTime.getSeconds());
+        assertEquals(entity.getCreationTime().getNanos(), actualCreationTime.getNanos());
         assertEquals(entity.isCounterEven(), datastoreEntity.getBoolean(counterEven));
         assertEquals(toCompactJson(entity.getCounterState()),
                      datastoreEntity.getString(counterState));

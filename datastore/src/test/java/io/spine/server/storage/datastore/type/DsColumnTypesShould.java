@@ -21,32 +21,30 @@
 package io.spine.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.DateTime;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.json.Json;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
 import io.spine.time.Time;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.util.Date;
-
+import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 import static com.google.cloud.datastore.BooleanValue.of;
-import static com.google.cloud.datastore.DateTimeValue.of;
 import static com.google.cloud.datastore.LongValue.of;
 import static com.google.cloud.datastore.StringValue.of;
+import static com.google.cloud.datastore.TimestampValue.of;
+import static io.spine.server.storage.datastore.type.DsColumnTypes.timestampType;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Dmytro Dashenkov
@@ -108,15 +106,15 @@ public class DsColumnTypesShould {
 
     @Test
     public void provide_timestamp_to_date_time_type() {
-        final DatastoreColumnType<Timestamp, DateTime> type = DsColumnTypes.timestampType();
+        final DatastoreColumnType<Timestamp, com.google.cloud.Timestamp> type = timestampType();
         final Timestamp value = Time.getCurrentTime();
 
-        final Date date = new Date(Timestamps.toMillis(value));
-        final DateTime dateTime = DateTime.copyFrom(date);
+        final com.google.cloud.Timestamp timestamp = ofTimeSecondsAndNanos(value.getSeconds(),
+                                                                           value.getNanos());
 
-        setDatastoreType(type, value, dateTime);
+        setDatastoreType(type, value, timestamp);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(dateTime)));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(timestamp)));
     }
 
     @Test
