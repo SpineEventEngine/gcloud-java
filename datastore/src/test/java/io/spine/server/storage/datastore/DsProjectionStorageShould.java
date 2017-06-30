@@ -44,6 +44,11 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
     private static final TestDatastoreStorageFactory datastoreFactory =
             TestDatastoreStorageFactory.getDefaultInstance();
 
+    @Override
+    protected Class<? extends TestCounterEntity> getTestEntityClass() {
+        return TestEntity.class;
+    }
+
     @SuppressWarnings({"MagicNumber", "MethodDoesntCallSuperMethod"})
     @Override
     protected EntityRecord newStorageRecord() {
@@ -85,6 +90,13 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
                                                 Project,
                                                 ProjectVBuilder> {
         private TestProjection(String id) {
+            super(id);
+        }
+    }
+
+    public static class TestEntity extends TestCounterEntity<String> {
+
+        protected TestEntity(String id) {
             super(id);
         }
     }

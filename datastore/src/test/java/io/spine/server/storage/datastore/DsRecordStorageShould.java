@@ -64,17 +64,17 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
     private static final TestDatastoreStorageFactory datastoreFactory
             = TestDatastoreStorageFactory.getDefaultInstance();
 
-    protected DsRecordStorage<ProjectId> getStorage() {
-        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(
-                TestConstCounterEntity.class);
-    }
-
     @SuppressWarnings("unchecked") // OK for tests.
     @Override
     protected DsRecordStorage<ProjectId> getStorage(Class<? extends io.spine.server.entity.Entity> entityClass) {
         final Class<? extends io.spine.server.entity.Entity<ProjectId, ?>> cls =
                 (Class<? extends io.spine.server.entity.Entity<ProjectId, ?>>) entityClass;
         return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(cls);
+    }
+
+    @Override
+    protected Class<? extends TestCounterEntity> getTestEntityClass() {
+        return TestEntity.class;
     }
 
     @Override
@@ -313,6 +313,13 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
 
         private void injectLifecycle(LifecycleFlags flags) {
             this.lifecycleFlags = flags;
+        }
+    }
+
+    public static class TestEntity extends TestCounterEntity<String> {
+
+        protected TestEntity(String id) {
+            super(id);
         }
     }
 }

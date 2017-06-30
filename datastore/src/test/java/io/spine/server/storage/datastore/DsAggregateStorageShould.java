@@ -66,12 +66,6 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         datastoreFactory.tearDown();
     }
 
-    @SuppressWarnings("ConstantConditions")
-        // passing null because this parameter isn't used in this implementation
-    protected AggregateStorage<ProjectId> getStorage() {
-        return datastoreFactory.createAggregateStorage(TestAggregate.class);
-    }
-
     @Override
     protected AggregateStorage<ProjectId> getStorage(Class<? extends Entity> cls) {
         return getStorage();
@@ -79,11 +73,8 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
 
     @Override
     protected <I> AggregateStorage<I> getStorage(Class<? extends I> idClass,
-                                                 Class<? extends Entity> aggregateClass) {
-        @SuppressWarnings("unchecked")
-        final Class<? extends Aggregate<I, ?, ?>> cls =
-                (Class<? extends Aggregate<I, ?, ?>>) aggregateClass;
-        return datastoreFactory.createAggregateStorage(cls);
+                                                 Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
+        return datastoreFactory.createAggregateStorage(aggregateClass);
     }
 
     @Test
