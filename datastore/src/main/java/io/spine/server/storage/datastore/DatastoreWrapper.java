@@ -470,16 +470,6 @@ public class DatastoreWrapper {
         return Iterators.concat(first, second);
     }
 
-    private static Logger log() {
-        return LoggerSingleton.INSTANCE.logger;
-    }
-
-    private enum LoggerSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger logger = LoggerFactory.getLogger(DatastoreWrapper.class);
-    }
-
     /**
      * An {@code Iterator} over the {@link StructuredQuery} results.
      *
@@ -496,15 +486,15 @@ public class DatastoreWrapper {
      *
      * <p>The {@link #remove() remove()} method throws an {@link UnsupportedOperationException}.
      */
-    static final class DsQueryIterator implements Iterator<Entity> {
+    private static final class DsQueryIterator implements Iterator<Entity> {
 
         private final StructuredQuery<Entity> query;
+
         private final DatastoreReaderWriter datastore;
-
         private QueryResults<Entity> currentPage;
-        private boolean terminated;
 
-        DsQueryIterator(StructuredQuery<Entity> query, DatastoreReaderWriter datastore) {
+        private boolean terminated;
+        private DsQueryIterator(StructuredQuery<Entity> query, DatastoreReaderWriter datastore) {
             this.query = query;
             this.datastore = datastore;
             this.currentPage = datastore.run(query);
@@ -548,5 +538,16 @@ public class DatastoreWrapper {
             final QueryResults<Entity> nextPage = datastore.run(queryForMoreResults);
             return nextPage;
         }
+
+    }
+
+    private static Logger log() {
+        return LoggerSingleton.INSTANCE.logger;
+    }
+
+    private enum LoggerSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger logger = LoggerFactory.getLogger(DatastoreWrapper.class);
     }
 }
