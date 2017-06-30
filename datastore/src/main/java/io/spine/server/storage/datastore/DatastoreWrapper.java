@@ -221,6 +221,8 @@ public class DatastoreWrapper {
      * @return results fo the query packed in a {@link List}
      * @see DatastoreReader#run(Query)
      */
+    @SuppressWarnings("LoopConditionNotUpdatedInsideLoop")
+        // Implicit call to Iterator.next() in Iterators.addAll
     public List<Entity> read(StructuredQuery<Entity> query) {
         final Namespace namespace = getNamespace();
         final StructuredQuery<Entity> queryWithNamespace = query.toBuilder()
@@ -229,7 +231,7 @@ public class DatastoreWrapper {
         QueryResults<Entity> queryResults = actor.run(queryWithNamespace);
         final List<Entity> resultsAsList = newLinkedList();
 
-        while (queryResults != null && queryResults.hasNext()) {
+        while (queryResults.hasNext()) {
             Iterators.addAll(resultsAsList, queryResults);
 
             final Cursor cursorAfter = queryResults.getCursorAfter();
