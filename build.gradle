@@ -73,7 +73,7 @@ subprojects {
             dependOnSpine(dependencies, it, false)
         }
 
-        dependOnSpine dependencies,  'spine-testutil-base', true
+        dependOnSpine dependencies, 'spine-testutil-base', true
         dependOnSpine dependencies, 'spine-testutil-client', true
         dependOnSpine dependencies, 'spine-testutil-server', true
 
