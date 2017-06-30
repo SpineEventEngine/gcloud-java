@@ -316,9 +316,9 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         }
     }
 
-    public static class TestEntity extends TestCounterEntity<String> {
+    public static class TestEntity extends TestCounterEntity<ProjectId> {
 
-        protected TestEntity(String id) {
+        protected TestEntity(ProjectId id) {
             super(id);
         }
     }

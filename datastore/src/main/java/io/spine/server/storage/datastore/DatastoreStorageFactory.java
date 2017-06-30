@@ -152,13 +152,12 @@ public class DatastoreStorageFactory implements StorageFactory {
      * {@inheritDoc}
      */
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Projection<I, ?, ?>> aClass) {
-        final DsRecordStorage<I> recordStorage =
-                (DsRecordStorage<I>) createRecordStorage((Class<? extends Entity<I, ?>>) aClass);
+    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Projection<I, ?, ?>> projectionClass) {
+        final DsRecordStorage<I> recordStorage = (DsRecordStorage<I>) createRecordStorage((Class<? extends Entity<I, ?>>) projectionClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
         final DsProjectionStorage<I> result = new DsProjectionStorage<>(recordStorage,
                                                                         propertyStorage,
-                                                                        aClass,
+                                                                        projectionClass,
                                                                         multitenant);
         return result;
     }
