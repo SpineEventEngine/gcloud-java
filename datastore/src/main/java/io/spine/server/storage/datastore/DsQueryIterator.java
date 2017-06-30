@@ -56,7 +56,7 @@ class DsQueryIterator implements Iterator<Entity> {
             return true;
         }
         currentPage = computeNextPage();
-        if (currentPage.hasNext()) {
+        if (!currentPage.hasNext()) {
             terminated = true;
             return false;
         }

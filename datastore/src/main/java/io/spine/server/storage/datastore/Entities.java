@@ -117,12 +117,14 @@ class Entities {
     }
 
     // TODO:2017-06-30:dmytro.dashenkov: Add Javadoc.
-    static <M extends Message> Function<Entity, M> entityToMessage(TypeUrl type) {
+    static <M extends Message> Function<Entity, M> entityToMessage(final TypeUrl type) {
         final String typeName = type.value();
         final Function<Entity, M> transformer = new Function<Entity, M>() {
             @Override
             public M apply(@Nullable Entity entity) {
-                checkNotNull(entity);
+                if (entity == null) {
+                    return defaultMessage(type);
+                }
                 final Blob value = entity.getBlob(EntityField.bytes.toString());
                 final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
