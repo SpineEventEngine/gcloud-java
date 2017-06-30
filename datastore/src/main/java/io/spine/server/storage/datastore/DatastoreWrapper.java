@@ -40,6 +40,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterators;
 import io.spine.server.storage.datastore.tenant.DsNamespaceValidator;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
@@ -400,6 +401,8 @@ public class DatastoreWrapper {
      * single call — 1000 entities per query. To deal with this limitation we read the entities in
      * pagination fashion 1000 entity per page.
      *
+     * // TODO:2017-06-30:dmytro.dashenkov: Update Javadoc.
+     *
      * @param keys {@link Key keys} to find the entities for
      * @return ordered sequence of {@link Entity entities}
      * @see #read(Iterable)
@@ -408,23 +411,22 @@ public class DatastoreWrapper {
         final int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
         log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.",
                     pageCount);
-
-        final List<Entity> result = newLinkedList();
         int lowerBound = 0;
         int higherBound = MAX_KEYS_PER_READ_REQUEST;
         int keysLeft = keys.size();
+        Iterator<Entity> result = null;
         for (int i = 0; i < pageCount; i++) {
             final List<Key> keysPage = keys.subList(lowerBound, higherBound);
 
-            final List<Entity> page = newArrayList(datastore.get(keysPage));
-            result.addAll(page);
+            final Iterator<Entity> page = datastore.get(keysPage);
+            result = concat(result, page);
 
             keysLeft -= keysPage.size();
             lowerBound = higherBound;
             higherBound += min(keysLeft, MAX_KEYS_PER_READ_REQUEST);
         }
 
-        return result.iterator(); // TODO:2017-06-30:dmytro.dashenkov: Optimize.
+        return result;
     }
 
     private void writeBulk(Entity[] entities) {
@@ -454,6 +456,14 @@ public class DatastoreWrapper {
 
     private void writeSmallBulk(Entity[] entities) {
         actor.put(entities);
+    }
+
+    private static Iterator<Entity> concat(@Nullable Iterator<Entity> first,
+                                           Iterator<Entity> second) {
+        if (first == null) {
+            return second;
+        }
+        return Iterators.concat(first, second);
     }
 
     private static Logger log() {
