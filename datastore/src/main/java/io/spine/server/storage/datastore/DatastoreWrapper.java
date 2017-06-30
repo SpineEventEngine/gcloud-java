@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.DatastoreOptions;
@@ -34,6 +35,7 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.KeyQuery;
 import com.google.cloud.datastore.ProjectionEntityQuery;
 import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
@@ -54,9 +56,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Math.min;
@@ -79,6 +83,8 @@ public class DatastoreWrapper {
     private static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
     private static final Map<Kind, KeyFactory> keyFactories = new HashMap<>();
+
+    private static final Key[] EMPTY_KEY_ARRAY = new Key[0];
 
     private final NamespaceSupplier namespaceSupplier;
     private final Datastore datastore;
@@ -191,15 +197,15 @@ public class DatastoreWrapper {
      * Retrieves an {@link Entity} for each of the given keys.
      *
      * @param keys {@link Key Keys} to search for
-     * @return A list of found entities in the order of keys (including {@code null} values for
-     * nonexistent keys)
+     * @return an {@code Iterator} of found entities in the order of keys (including {@code null}
+     *         values for nonexistent keys)
      * @see DatastoreReader#get(Key...)
      */
     public Iterator<Entity> read(Iterable<Key> keys) {
         final List<Key> keysList = newLinkedList(keys);
         final Iterator<Entity> result;
         if (keysList.size() <= MAX_KEYS_PER_READ_REQUEST) {
-            result = datastore.get(keys); // TODO:2017-06-30:dmytro.dashenkov: Use `actor`?
+            result = actor.get(toArray(keys, Key.class));
         } else {
             result = readBulk(keysList);
         }
@@ -401,8 +407,6 @@ public class DatastoreWrapper {
      * single call — 1000 entities per query. To deal with this limitation we read the entities in
      * pagination fashion 1000 entity per page.
      *
-     * // TODO:2017-06-30:dmytro.dashenkov: Update Javadoc.
-     *
      * @param keys {@link Key keys} to find the entities for
      * @return ordered sequence of {@link Entity entities}
      * @see #read(Iterable)
@@ -418,7 +422,7 @@ public class DatastoreWrapper {
         for (int i = 0; i < pageCount; i++) {
             final List<Key> keysPage = keys.subList(lowerBound, higherBound);
 
-            final Iterator<Entity> page = datastore.get(keysPage);
+            final Iterator<Entity> page = actor.get(keysPage.toArray(EMPTY_KEY_ARRAY));
             result = concat(result, page);
 
             keysLeft -= keysPage.size();
@@ -474,5 +478,75 @@ public class DatastoreWrapper {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger logger = LoggerFactory.getLogger(DatastoreWrapper.class);
+    }
+
+    /**
+     * An {@code Iterator} over the {@link StructuredQuery} results.
+     *
+     * <p>This {@code Iterator} loads the results lazily by evaluating the {@link QueryResults} and
+     * performing cursor queries.
+     *
+     * <p>The first query to the datastore is performed on creating an instance of
+     * the {@code Iterator}.
+     *
+     * <p>A call to {@link #hasNext() hasNext()} may cause a query to the Datastore if the current
+     * {@linkplain QueryResults results page} is fully processed.
+     *
+     * <p>A call to {@link #next() next()} may not cause a Datastore query.
+     *
+     * <p>The {@link #remove() remove()} method throws an {@link UnsupportedOperationException}.
+     */
+    static final class DsQueryIterator implements Iterator<Entity> {
+
+        private final StructuredQuery<Entity> query;
+        private final DatastoreReaderWriter datastore;
+
+        private QueryResults<Entity> currentPage;
+        private boolean terminated;
+
+        DsQueryIterator(StructuredQuery<Entity> query, DatastoreReaderWriter datastore) {
+            this.query = query;
+            this.datastore = datastore;
+            this.currentPage = datastore.run(query);
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (terminated) {
+                return false;
+            }
+            if (currentPage.hasNext()) {
+                return true;
+            }
+            currentPage = computeNextPage();
+            if (!currentPage.hasNext()) {
+                terminated = true;
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public Entity next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("The query results Iterator is empty.");
+            }
+            final Entity result = currentPage.next();
+            return result;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Iterator.remove()");
+        }
+
+        private QueryResults<Entity> computeNextPage() {
+            final Cursor cursorAfter = currentPage.getCursorAfter();
+            final Query<Entity> queryForMoreResults = query.toBuilder()
+                                                           .setStartCursor(cursorAfter)
+                                                           .build();
+            final QueryResults<Entity> nextPage = datastore.run(queryForMoreResults);
+            return nextPage;
+        }
     }
 }
