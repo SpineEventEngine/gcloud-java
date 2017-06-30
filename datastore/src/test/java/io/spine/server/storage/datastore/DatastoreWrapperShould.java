@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -120,7 +121,7 @@ public class DatastoreWrapperShould {
             fail(e.getMessage());
         }
 
-        final Collection<Entity> readEntities = wrapper.read(entities.keySet());
+        final Collection<Entity> readEntities = newArrayList(wrapper.read(entities.keySet()));
         assertEquals(entities.size(), readEntities.size());
         assertTrue(expectedEntities.containsAll(readEntities));
 

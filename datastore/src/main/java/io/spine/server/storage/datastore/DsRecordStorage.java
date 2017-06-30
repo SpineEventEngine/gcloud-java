@@ -32,7 +32,6 @@ import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
@@ -53,15 +52,14 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Collections2.transform;
+import static com.google.common.collect.Iterators.filter;
+import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -70,7 +68,6 @@ import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.validate.Validate.isDefault;
-import static java.util.Collections.unmodifiableCollection;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -89,9 +86,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final Class<I> idClass;
 
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
-    private static final String ID_CONVERSION_ERROR_MESSAGE =
-            "Entity had ID of an invalid type; could not parse ID from String. " +
-            "Note: custom conversion is not supported. See io.spine.base.Identifier#idToString.";
 
     private static final Function<Entity, EntityRecord> recordFromEntity
             = new Function<Entity, EntityRecord>() {
@@ -283,60 +277,59 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return readAllRecords(fieldMask);
         }
         final Collection<Key> keys = toKeys(ids);
-        final Collection<Entity> records = datastore.read(keys);
-        final Map<I, EntityRecord> results = toRecordMap(records,
-                                                         Predicates.<Entity>alwaysTrue(),
-                                                         typeUrl,
-                                                         fieldMask);
-        return results.values().iterator();
+        final Iterator<Entity> records = datastore.read(keys);
+        final Iterator<EntityRecord> result = toRecords(records,
+                                                        Predicates.<Entity>alwaysTrue(),
+                                                        typeUrl,
+                                                        fieldMask);
+        return result;
     }
 
     private <T> Iterator<T> lookup(Iterable<I> ids,
                                    Function<Entity, T> transformer) {
         final Collection<Key> keys = toKeys(ids);
-        final List<Entity> results = datastore.read(keys);
-        final Collection<Entity> filteredResults = filter(results, activeEntity());
-        final Collection<T> records = transform(filteredResults, transformer);
-        return unmodifiableCollection(records).iterator();
+        final Iterator<Entity> results = datastore.read(keys);
+        final Iterator<Entity> filteredResults = filter(results, activeEntity());
+        final Iterator<T> records = transform(filteredResults, transformer);
+        return records;
     }
 
     private Iterator<EntityRecord> queryAll(TypeUrl typeUrl,
-                                          StructuredQuery<Entity> query,
-                                          FieldMask fieldMask) {
+                                            StructuredQuery<Entity> query,
+                                            FieldMask fieldMask) {
         return queryAll(typeUrl, query, fieldMask, activeEntity());
     }
 
     private Iterator<EntityRecord> queryAll(TypeUrl typeUrl,
-                                          StructuredQuery<Entity> query,
-                                          FieldMask fieldMask,
-                                          Predicate<Entity> resultFilter) {
-        final List<Entity> results = datastore.read(query);
-        return toRecordMap(results, resultFilter, typeUrl, fieldMask).values().iterator();
+                                            StructuredQuery<Entity> query,
+                                            FieldMask fieldMask,
+                                            Predicate<Entity> resultFilter) {
+        final Iterator<Entity> results = datastore.read(query);
+        return toRecords(results, resultFilter, typeUrl, fieldMask);
     }
 
-    private Map<I, EntityRecord> toRecordMap(Iterable<Entity> queryResults,
+    protected final Iterator<EntityRecord> toRecords(Iterator<Entity> queryResults,
                                              Predicate<Entity> filter,
-                                             TypeUrl typeUrl,
-                                             FieldMask fieldMask) {
-        final ImmutableMap.Builder<I, EntityRecord> records = new ImmutableMap.Builder<>();
-        for (Entity entity : queryResults) {
-            if (!filter.apply(entity)) {
-                continue;
+                                             final TypeUrl typeUrl,
+                                             final FieldMask fieldMask) {
+        final Iterator<Entity> filtered = filter(queryResults, filter);
+        final Function<Entity, EntityRecord> transformer = new Function<Entity, EntityRecord>() {
+            @Override
+            public EntityRecord apply(@Nullable Entity input) {
+                checkNotNull(input);
+                EntityRecord record = getRecordFromEntity(input);
+                if (!isDefault(fieldMask)) {
+                    Message state = unpack(record.getState());
+                    state = applyMask(fieldMask, state, typeUrl);
+                    record = EntityRecord.newBuilder(record)
+                                         .setState(AnyPacker.pack(state))
+                                         .build();
+                }
+                return record;
             }
-            final IdRecordPair<I> recordPair = getRecordFromEntity(entity);
-            EntityRecord record = recordPair.getRecord();
-
-            if (!isDefault(fieldMask)) {
-                Message state = unpack(record.getState());
-                state = applyMask(fieldMask, state, typeUrl);
-                record = EntityRecord.newBuilder(record)
-                                     .setState(AnyPacker.pack(state))
-                                     .build();
-            }
-            records.put(recordPair.getId(), record);
-        }
-
-        return records.build();
+        };
+        final Iterator<EntityRecord> result = transform(filtered, transformer);
+        return result;
     }
 
     protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
@@ -427,14 +420,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return id;
     }
 
-    IdRecordPair<I> getRecordFromEntity(Entity entity) {
-        // Retrieve ID
-        final I id = unpackKey(entity);
-        checkState(id != null, ID_CONVERSION_ERROR_MESSAGE);
-
-        // Retrieve record
+    EntityRecord getRecordFromEntity(Entity entity) {
         final EntityRecord record = Entities.entityToMessage(entity, RECORD_TYPE_URL);
-        return new IdRecordPair<>(id, record);
+        return record;
     }
 
     StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {

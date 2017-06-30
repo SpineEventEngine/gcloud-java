@@ -52,16 +52,14 @@ public class DsStandStorage extends StandStorage {
 
     @Override
     public Iterator<EntityRecord> readAllByType(TypeUrl type) {
-        final Map<?, EntityRecord> records = recordStorage.readAllByType(type);
-        final ImmutableList<EntityRecord> result = ImmutableList.copyOf(records.values());
-        return result.iterator();
+        final Iterator<EntityRecord> records = recordStorage.readAllByType(type);
+        return records;
     }
 
     @Override
     public Iterator<EntityRecord> readAllByType(TypeUrl type, FieldMask fieldMask) {
-        final Map<?, EntityRecord> records = recordStorage.readAllByType(type, fieldMask);
-        final ImmutableList<EntityRecord> result = ImmutableList.copyOf(records.values());
-        return result.iterator();
+        final Iterator<EntityRecord> records = recordStorage.readAllByType(type, fieldMask);
+        return records;
     }
 
     @Override

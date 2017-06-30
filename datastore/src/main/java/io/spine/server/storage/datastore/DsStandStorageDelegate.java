@@ -27,14 +27,9 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.stand.AggregateStateId;
@@ -43,13 +38,10 @@ import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
-import static io.spine.validate.Validate.isDefault;
 
 /**
  * A {@link io.spine.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage} delegates its
@@ -95,43 +87,24 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         return completeEntity;
     }
 
-    public Map<?, EntityRecord> readAllByType(final TypeUrl typeUrl, final FieldMask fieldMask) {
-        return queryAllByType(typeUrl,
-                              fieldMask);
+    public Iterator<EntityRecord> readAllByType(final TypeUrl typeUrl, final FieldMask fieldMask) {
+        return queryAllByType(typeUrl, fieldMask);
     }
 
-    public Map<?, EntityRecord> readAllByType(final TypeUrl typeUrl) {
-        return queryAllByType(typeUrl,
-                              FieldMask.getDefaultInstance());
+    public Iterator<EntityRecord> readAllByType(final TypeUrl typeUrl) {
+        return queryAllByType(typeUrl, FieldMask.getDefaultInstance());
     }
 
-    protected Map<AggregateStateId, EntityRecord> queryAllByType(TypeUrl typeUrl,
-                                                                 FieldMask fieldMask) {
+    protected Iterator<EntityRecord> queryAllByType(TypeUrl typeUrl,
+                                                    FieldMask fieldMask) {
         final StructuredQuery<Entity> query = buildByTypeQuery(typeUrl);
 
-        final List<Entity> results = getDatastore().read(query);
-
-        final Predicate<Entity> archivedAndDeletedFilter = activeEntity();
-
-        final ImmutableMap.Builder<AggregateStateId, EntityRecord> records = new ImmutableMap.Builder<>();
-        for (Entity entity : results) {
-            if (!archivedAndDeletedFilter.apply(entity)) {
-                continue;
-            }
-            final IdRecordPair<AggregateStateId> recordPair = getRecordFromEntity(entity);
-            EntityRecord record = recordPair.getRecord();
-
-            if (!isDefault(fieldMask)) {
-                Message state = AnyPacker.unpack(record.getState());
-                state = FieldMasks.applyMask(fieldMask, state, typeUrl);
-                record = EntityRecord.newBuilder(record)
-                                     .setState(AnyPacker.pack(state))
-                                     .build();
-            }
-            records.put(recordPair.getId(), record);
-        }
-
-        return records.build();
+        final Iterator<Entity> records = getDatastore().read(query);
+        final Iterator<EntityRecord> result = toRecords(records,
+                                                        activeEntity(),
+                                                        typeUrl,
+                                                        fieldMask);
+        return result;
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") // Overrides parent behavior
@@ -142,9 +115,9 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         final EntityQuery.Builder query = Query.newEntityQueryBuilder()
                                                .setKind(KIND.getValue());
 
-        final Iterable<Entity> allEntities = getDatastore().read(query.build());
+        final Iterator<Entity> allEntities = getDatastore().read(query.build());
         final Iterator<AggregateStateId> idIterator =
-                Iterators.transform(allEntities.iterator(),
+                Iterators.transform(allEntities,
                                     new Function<Entity, AggregateStateId>() {
                                         @Override
                                         public AggregateStateId apply(@Nullable Entity entity) {

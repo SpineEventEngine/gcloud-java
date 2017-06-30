@@ -38,6 +38,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 /**
  * Custom extension of the {@link DatastoreWrapper} for the integration testing.
  *
@@ -127,7 +129,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
             final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                        .setKind(table)
                                                        .build();
-            final List<Entity> entities = read(query);
+            final List<Entity> entities = newArrayList(read(query));
             remainingEntityCount = entities.size();
 
             if (remainingEntityCount > 0) {

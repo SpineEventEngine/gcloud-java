@@ -24,8 +24,9 @@ import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.BlobValue;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -35,8 +36,7 @@ import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -101,6 +101,8 @@ class Entities {
      * Retrieves a {@link List} of messages of given type, assignable from {@code Message},
      * from a collection of {@link Entity Entities}.
      *
+     * // TODO:2017-06-30:dmytro.dashenkov: Update the doc.
+     *
      * <p>If passed {@link Entity} is {@code null}, a default instance for given type is returned.
      *
      * @param entities a collection of the source {@link Entity Entities} to get message form
@@ -108,33 +110,31 @@ class Entities {
      * @param <M>      required message type
      * @return message contained in the {@link Entity}
      */
-    static <M extends Message> List<M> entitiesToMessages(Collection<Entity> entities,
-                                                          TypeUrl type) {
-        if (entities.isEmpty()) {
-            return Collections.emptyList();
-        }
+    static <M extends Message> Iterator<M> entitiesToMessages(Iterator<Entity> entities,
+                                                              TypeUrl type) {
+        final Function<Entity, M> transformer = entityToMessage(type);
+        return Iterators.transform(entities, transformer);
+    }
 
+    // TODO:2017-06-30:dmytro.dashenkov: Add Javadoc.
+    static <M extends Message> Function<Entity, M> entityToMessage(TypeUrl type) {
         final String typeName = type.value();
-        final ImmutableList.Builder<M> messages = new ImmutableList.Builder<>();
-        for (Entity entity : entities) {
-            if (entity == null) {
-                final M defaultMessage = defaultMessage(type);
-                messages.add(defaultMessage);
-                continue;
+        final Function<Entity, M> transformer = new Function<Entity, M>() {
+            @Override
+            public M apply(@Nullable Entity entity) {
+                checkNotNull(entity);
+                final Blob value = entity.getBlob(EntityField.bytes.toString());
+                final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
+
+                final Any wrapped = Any.newBuilder()
+                                       .setValue(valueBytes)
+                                       .setTypeUrl(typeName)
+                                       .build();
+                final M message = AnyPacker.unpack(wrapped);
+                return message;
             }
-
-            final Blob value = entity.getBlob(EntityField.bytes.toString());
-            final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
-
-            final Any wrapped = Any.newBuilder()
-                                   .setValue(valueBytes)
-                                   .setTypeUrl(typeName)
-                                   .build();
-            final M message = AnyPacker.unpack(wrapped);
-            messages.add(message);
-        }
-
-        return messages.build();
+        };
+        return transformer;
     }
 
     /**

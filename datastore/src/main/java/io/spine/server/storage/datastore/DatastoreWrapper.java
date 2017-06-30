@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.DatastoreOptions;
@@ -35,14 +34,12 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.KeyQuery;
 import com.google.cloud.datastore.ProjectionEntityQuery;
 import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterators;
 import io.spine.server.storage.datastore.tenant.DsNamespaceValidator;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
@@ -53,6 +50,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -196,11 +194,11 @@ public class DatastoreWrapper {
      * nonexistent keys)
      * @see DatastoreReader#get(Key...)
      */
-    public List<Entity> read(Iterable<Key> keys) {
+    public Iterator<Entity> read(Iterable<Key> keys) {
         final List<Key> keysList = newLinkedList(keys);
-        final List<Entity> result;
+        final Iterator<Entity> result;
         if (keysList.size() <= MAX_KEYS_PER_READ_REQUEST) {
-            result = newArrayList(datastore.get(keys));
+            result = datastore.get(keys); // TODO:2017-06-30:dmytro.dashenkov: Use `actor`?
         } else {
             result = readBulk(keysList);
         }
@@ -223,27 +221,13 @@ public class DatastoreWrapper {
      */
     @SuppressWarnings("LoopConditionNotUpdatedInsideLoop")
         // Implicit call to Iterator.next() in Iterators.addAll
-    public List<Entity> read(StructuredQuery<Entity> query) {
+    public Iterator<Entity> read(StructuredQuery<Entity> query) {
         final Namespace namespace = getNamespace();
         final StructuredQuery<Entity> queryWithNamespace = query.toBuilder()
                                                                 .setNamespace(namespace.getValue())
                                                                 .build();
-        QueryResults<Entity> queryResults = actor.run(queryWithNamespace);
-        final List<Entity> resultsAsList = newLinkedList();
-
-        while (queryResults.hasNext()) {
-            Iterators.addAll(resultsAsList, queryResults);
-
-            final Cursor cursorAfter = queryResults.getCursorAfter();
-            final Query<Entity> queryForMoreResults =
-                    queryWithNamespace.toBuilder()
-                                      .setStartCursor(cursorAfter)
-                                      .build();
-
-            queryResults = actor.run(queryForMoreResults);
-        }
-
-        return resultsAsList;
+        final Iterator<Entity> result = new DsQueryIterator(queryWithNamespace, actor);
+        return result;
     }
 
     /**
@@ -266,7 +250,8 @@ public class DatastoreWrapper {
                                                    .setNamespace(namespace.getValue())
                                                    .setKind(table)
                                                    .build();
-        final List<Entity> entities = read(query);
+        final Iterator<Entity> queryResult = read(query);
+        final List<Entity> entities = newArrayList(queryResult);
         final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
             @Nullable
             @Override
@@ -419,7 +404,7 @@ public class DatastoreWrapper {
      * @return ordered sequence of {@link Entity entities}
      * @see #read(Iterable)
      */
-    private List<Entity> readBulk(List<Key> keys) {
+    private Iterator<Entity> readBulk(List<Key> keys) {
         final int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
         log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.",
                     pageCount);
@@ -439,7 +424,7 @@ public class DatastoreWrapper {
             higherBound += min(keysLeft, MAX_KEYS_PER_READ_REQUEST);
         }
 
-        return result;
+        return result.iterator(); // TODO:2017-06-30:dmytro.dashenkov: Optimize.
     }
 
     private void writeBulk(Entity[] entities) {
