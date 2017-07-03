@@ -37,7 +37,6 @@ import io.spine.type.TypeUrl;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Iterator;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -68,6 +67,7 @@ class Entities {
     private static final String DEFAULT_MESSAGE_FACTORY_METHOD_NAME = "getDefaultInstance";
 
     private Entities() {
+        // Prevent utility class instantiation.
     }
 
     /**
@@ -98,12 +98,10 @@ class Entities {
     }
 
     /**
-     * Retrieves a {@link List} of messages of given type, assignable from {@code Message},
-     * from a collection of {@link Entity Entities}.
+     * Maps the elements of the given {@code Iterator} from {@linkplain Entity Entities} to enclosed
+     * {@linkplain Message Messages}.
      *
-     * // TODO:2017-06-30:dmytro.dashenkov: Update the doc.
-     *
-     * <p>If passed {@link Entity} is {@code null}, a default instance for given type is returned.
+     * <p>The runtime type of the messages is specified within the {@code type} parameter.
      *
      * @param entities a collection of the source {@link Entity Entities} to get message form
      * @param type     {@link TypeUrl} of required message
@@ -116,7 +114,15 @@ class Entities {
         return Iterators.transform(entities, transformer);
     }
 
-    // TODO:2017-06-30:dmytro.dashenkov: Add Javadoc.
+    /**
+     * Retrieves a {@link Function} transforming {@linkplain Entity Entities} into
+     * {@linkplain Message Messages} of the given type.
+     *
+     * @param type the desired type of the messages
+     * @param <M>  the compile-time type of the messages
+     * @return a {@link Function} transforming {@linkplain Entity Entities} into
+     *         {@linkplain Message Messages}
+     */
     static <M extends Message> Function<Entity, M> entityToMessage(final TypeUrl type) {
         final String typeName = type.value();
         final Function<Entity, M> transformer = new Function<Entity, M>() {
