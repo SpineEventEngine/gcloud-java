@@ -164,38 +164,3 @@ startDatastore.doLast {
 tasks["check"].dependsOn startDatastore
 
 apply from: publishPlugin
-
-/**
- * Adds a compile-time dependency on a Spine module.
- *
- * @param dependencyHandler the project dependency handler (usually {@code project.dependencies})
- * @param artifactId the ID of the Spine module artifact
- * @param version the Spine module version
- * @param testScope tag parameter: {@code true} if the dependency should be added only for the tests
- *                  (e.g. test utils modules`), {@code false} otherwise
- */
-void dependOnSpine(final dependencyHandler,
-                   final artifactId,
-                   final version,
-                   final boolean testScope) {
-
-    if (!testScope) {
-        dependencyHandler.compile(group: 'io.spine',
-                                  name: artifactId,
-                                  version: version,
-                                  changing: true,
-                                  excludes)
-        dependencyHandler.testCompile(group: 'io.spine',
-                                      name: artifactId,
-                                      version: version,
-                                      classifier: 'test',
-                                      changing: true,
-                                      excludes)
-    } else {
-        dependencyHandler.testCompile(group: 'io.spine',
-                                      name: artifactId,
-                                      version: version,
-                                      changing: true,
-                                      excludes)
-    }
-}
