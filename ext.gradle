@@ -37,6 +37,4 @@ ext {
     MAVEN_SNAPSHOT_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine-snapshots'
 
     GUAVA_VERSION = "20.0"
-
-    IS_WINDOWS = org.gradle.internal.os.OperatingSystem.current().isWindows()
 }

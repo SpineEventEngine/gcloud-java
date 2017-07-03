@@ -3,13 +3,7 @@ ext {
     credentialsPropertyFile = 'credentials.properties'
     projectsToPublish = ['datastore']
 
-    /**
-     * A map of the Spine project IDs to their versions.
-     */
-    spineDependencies = ['spine-server': VERSION,
-                         'spine-client': VERSION,
-                         'spine-core': VERSION,
-                         'spine-base': BASE_VERSION]
+    IS_WINDOWS = org.gradle.internal.os.OperatingSystem.current().isWindows()
 }
 
 final String CREDENTIALS_LOCATION = 'credentials.properties'
@@ -73,15 +67,20 @@ subprojects {
     }
 
     dependencies {
-        // when Spine can be used for evaluation in real projects.
         // Spine
-        spineDependencies.entrySet().each {
-            dependOnSpine(dependencies, it.key, it.value, false)
+        final def excludes = {
+            exclude group: 'com.google.protobuf', module: 'protobuf-lite'
+            exclude group: 'io.grpc'
         }
 
-        dependOnSpine dependencies, 'spine-testutil-base', BASE_VERSION, true
-        dependOnSpine dependencies, 'spine-testutil-client', VERSION, true
-        dependOnSpine dependencies, 'spine-testutil-server', VERSION, true
+        compile group: 'io.spine', name: "spine-client", version: VERSION, changing: true, excludes
+        compile group: 'io.spine', name: "spine-server", version: VERSION, changing: true, excludes
+
+        testCompile group: 'io.spine', name: "spine-testutil-base", version: BASE_VERSION, changing: true, excludes
+        testCompile group: 'io.spine', name: "spine-testutil-client", version: VERSION, changing: true, excludes
+        testCompile group: 'io.spine', name: "spine-testutil-server", version: VERSION, changing: true, excludes
+
+        compile group: 'io.spine', name: "spine-core", version: VERSION, changing: true, classifier: "test", excludes
 
         // Guava
         compile group: 'com.google.guava', name: 'guava', version: GUAVA_VERSION
@@ -179,10 +178,6 @@ void dependOnSpine(final dependencyHandler,
                    final artifactId,
                    final version,
                    final boolean testScope) {
-    final def excludes = {
-        exclude group: 'com.google.protobuf', module: 'protobuf-lite'
-        exclude group: 'io.grpc'
-    }
 
     if (!testScope) {
         dependencyHandler.compile(group: 'io.spine',
@@ -203,5 +198,4 @@ void dependOnSpine(final dependencyHandler,
                                       changing: true,
                                       excludes)
     }
-
 }
