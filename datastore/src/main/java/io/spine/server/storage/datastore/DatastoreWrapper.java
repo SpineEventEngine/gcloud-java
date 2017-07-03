@@ -43,6 +43,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.UnmodifiableIterator;
 import io.spine.server.storage.datastore.tenant.DsNamespaceValidator;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
@@ -61,6 +62,7 @@ import java.util.NoSuchElementException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.toArray;
+import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Math.min;
@@ -196,6 +198,9 @@ public class DatastoreWrapper {
     /**
      * Retrieves an {@link Entity} for each of the given keys.
      *
+     * <p>The resulting {@code Iterator} is evaluate lazily. A call to {@link Iterator#remove()}
+     * causes an {@link UnsupportedOperationException}.
+     *
      * @param keys {@link Key Keys} to search for
      * @return an {@code Iterator} of found entities in the order of keys (including {@code null}
      *         values for nonexistent keys)
@@ -209,7 +214,8 @@ public class DatastoreWrapper {
         } else {
             result = readBulk(keysList);
         }
-        return result;
+        final UnmodifiableIterator<Entity> unmodifiableResult = unmodifiableIterator(result);
+        return unmodifiableResult;
     }
 
     /**
@@ -222,8 +228,11 @@ public class DatastoreWrapper {
      * <p>Therefore, an execution of this method may in fact result in several queries to
      * the Datastore instance.
      *
+     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
+     *
      * @param query {@link Query} to execute upon the Datastore
-     * @return results fo the query packed in a {@link List}
+     * @return results fo the query as a lazily evaluated {@link Iterator}
      * @see DatastoreReader#run(Query)
      */
     @SuppressWarnings("LoopConditionNotUpdatedInsideLoop")
@@ -486,7 +495,7 @@ public class DatastoreWrapper {
      *
      * <p>The {@link #remove() remove()} method throws an {@link UnsupportedOperationException}.
      */
-    private static final class DsQueryIterator implements Iterator<Entity> {
+    private static final class DsQueryIterator extends UnmodifiableIterator<Entity> {
 
         private final StructuredQuery<Entity> query;
 
@@ -523,11 +532,6 @@ public class DatastoreWrapper {
             }
             final Entity result = currentPage.next();
             return result;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Iterator.remove()");
         }
 
         private QueryResults<Entity> computeNextPage() {
