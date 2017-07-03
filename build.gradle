@@ -3,6 +3,9 @@ ext {
     credentialsPropertyFile = 'credentials.properties'
     projectsToPublish = ['datastore']
 
+    /**
+     * A map of the Spine project IDs to their versions.
+     */
     spineDependencies = ['spine-server': VERSION,
                          'spine-client': VERSION,
                          'spine-core': VERSION,
@@ -163,7 +166,19 @@ tasks["check"].dependsOn startDatastore
 
 apply from: publishPlugin
 
-void dependOnSpine(def dependencyHandler, def artifactId, def version, boolean testScope) {
+/**
+ * Adds a compile-time dependency on a Spine module.
+ *
+ * @param dependencyHandler the project dependency handler (basically {@code project.dependencies})
+ * @param artifactId the ID of the Spine module artifact
+ * @param version the Spine module version
+ * @param testScope tag parameter: {@code true} if the dependency should be added only for the tests
+ *                  (e.g. test utils modules`), {@code false} otherwise
+ */
+void dependOnSpine(final dependencyHandler,
+                   final artifactId,
+                   final version,
+                   final boolean testScope) {
     final def excludes = {
         exclude group: 'com.google.protobuf', module: 'protobuf-lite'
         exclude group: 'io.grpc'
