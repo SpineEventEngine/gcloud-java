@@ -152,8 +152,11 @@ public class DatastoreStorageFactory implements StorageFactory {
      * {@inheritDoc}
      */
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Projection<I, ?, ?>> projectionClass) {
-        final DsRecordStorage<I> recordStorage = (DsRecordStorage<I>) createRecordStorage((Class<? extends Entity<I, ?>>) projectionClass);
+    public <I> ProjectionStorage<I> createProjectionStorage(
+            Class<? extends Projection<I, ?, ?>> projectionClass) {
+        final DsRecordStorage<I> recordStorage =
+                (DsRecordStorage<I>) createRecordStorage(
+                        (Class<? extends Entity<I, ?>>) projectionClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
         final DsProjectionStorage<I> result = new DsProjectionStorage<>(recordStorage,
                                                                         propertyStorage,
@@ -232,9 +235,11 @@ public class DatastoreStorageFactory implements StorageFactory {
     public static class Builder {
 
         private static final String DEFAULT_NAMESPACE_ERROR_MESSAGE =
-                "Datastore namespace should not be configured explicitly for a multitenant storage.";
+                "Datastore namespace should not be configured explicitly for a multitenant " +
+                        "storage.";
         private static final String REDUNDANT_TENANT_ID_CONVERTER_ERROR_MESSAGE =
-                "Setting a custom NamespaceToTenantIdConverter to a single-tenant storage factory is redundant.";
+                "Setting a custom NamespaceToTenantIdConverter to a single-tenant storage factory" +
+                        " is redundant.";
 
         private Datastore datastore;
         private boolean multitenant;

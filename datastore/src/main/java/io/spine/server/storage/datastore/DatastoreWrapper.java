@@ -198,12 +198,12 @@ public class DatastoreWrapper {
     /**
      * Retrieves an {@link Entity} for each of the given keys.
      *
-     * <p>The resulting {@code Iterator} is evaluate lazily. A call to {@link Iterator#remove()}
-     * causes an {@link UnsupportedOperationException}.
+     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
      * @param keys {@link Key Keys} to search for
-     * @return an {@code Iterator} of found entities in the order of keys (including {@code null}
-     *         values for nonexistent keys)
+     * @return an {@code Iterator} over the found entities in the order of keys
+     * (including {@code null} values for nonexistent keys)
      * @see DatastoreReader#get(Key...)
      */
     public Iterator<Entity> read(Iterable<Key> keys) {
