@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
@@ -30,6 +29,7 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
@@ -66,9 +66,9 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
 
     @SuppressWarnings("unchecked") // OK for tests.
     @Override
-    protected DsRecordStorage<ProjectId> getStorage(Class<? extends io.spine.server.entity.Entity> entityClass) {
-        final Class<? extends io.spine.server.entity.Entity<ProjectId, ?>> cls =
-                (Class<? extends io.spine.server.entity.Entity<ProjectId, ?>>) entityClass;
+    protected DsRecordStorage<ProjectId> getStorage(Class<? extends Entity> entityClass) {
+        final Class<? extends Entity<ProjectId, ?>> cls =
+                (Class<? extends Entity<ProjectId, ?>>) entityClass;
         return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(cls);
     }
 
@@ -183,7 +183,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         final Key key = DsIdentifiers.keyFor(datastore,
                                              Kind.of(state),
                                              DsIdentifiers.ofEntityId(id));
-        final Entity datastoreEntity = datastore.read(key);
+        final com.google.cloud.datastore.Entity datastoreEntity = datastore.read(key);
 
         // Check entity record
         final TypeUrl recordType = TypeUrl.from(EntityRecord.getDescriptor());
@@ -258,6 +258,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         // Includes Lifecycle flags comparison
         assertEquals(record, restoredRecord);
     }
+
+    // ----- Test Entity Types ------
 
     @SuppressWarnings("unused") // Reflective access
     public static class TestConstCounterEntity

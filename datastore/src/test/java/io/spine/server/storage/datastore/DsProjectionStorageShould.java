@@ -30,6 +30,7 @@ import io.spine.server.projection.ProjectionStorageShould;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
+import io.spine.test.storage.ProjectId;
 import org.junit.After;
 import org.junit.Test;
 
@@ -66,32 +67,33 @@ public class DsProjectionStorageShould extends ProjectionStorageShould {
 
     @SuppressWarnings("unchecked") // Required for test purposes.
     @Override
-    protected ProjectionStorage<io.spine.test.storage.ProjectId> getStorage(Class<? extends Entity> cls) {
-        final Class<? extends Projection<io.spine.test.storage.ProjectId, ?, ?>> projectionClass =
-                (Class<? extends Projection<io.spine.test.storage.ProjectId, ?, ?>>) cls;
-        final ProjectionStorage<io.spine.test.storage.ProjectId> result =
+    protected ProjectionStorage<ProjectId> getStorage(Class<? extends Entity> cls) {
+        final Class<? extends Projection<ProjectId, ?, ?>> projectionClass =
+                (Class<? extends Projection<ProjectId, ?, ?>>) cls;
+        final ProjectionStorage<ProjectId> result =
                 datastoreFactory.createProjectionStorage(projectionClass);
         return result;
     }
 
     @Test
     public void provide_access_to_PropertyStorage_for_extensibility() {
-        final DsProjectionStorage<io.spine.test.storage.ProjectId> storage = (DsProjectionStorage<io.spine.test.storage.ProjectId>) getStorage(TestProjection.class);
+        final DsProjectionStorage<ProjectId> storage =
+                (DsProjectionStorage<ProjectId>) getStorage(TestProjection.class);
         final DsPropertyStorage propertyStorage = storage.propertyStorage();
         assertNotNull(propertyStorage);
     }
 
-    private static class TestProjection extends Projection<io.spine.test.storage.ProjectId,
+    private static class TestProjection extends Projection<ProjectId,
                                                            Project,
                                                            ProjectVBuilder> {
-        private TestProjection(io.spine.test.storage.ProjectId id) {
+        private TestProjection(ProjectId id) {
             super(id);
         }
     }
 
-    public static class TestEntity extends TestCounterEntity<io.spine.test.storage.ProjectId> {
+    public static class TestEntity extends TestCounterEntity<ProjectId> {
 
-        protected TestEntity(io.spine.test.storage.ProjectId id) {
+        protected TestEntity(ProjectId id) {
             super(id);
         }
     }
