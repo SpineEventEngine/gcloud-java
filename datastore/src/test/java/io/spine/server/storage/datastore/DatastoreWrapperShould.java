@@ -132,7 +132,7 @@ public class DatastoreWrapperShould {
 
     @Test
     public void support_big_bulk_query_reads() throws InterruptedException {
-        final int bulkSize = 1001;
+        final int bulkSize = 2001;
 
         final TestDatastoreWrapper wrapper = wrap(Given.testDatastore(), false);
         final Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
@@ -141,7 +141,7 @@ public class DatastoreWrapperShould {
         wrapper.createOrUpdate(expectedEntities);
 
         // Wait for some time to make sure the writing is complete
-        Thread.sleep(bulkSize * 5);
+        Thread.sleep(bulkSize * 2);
 
         final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setKind(Given.GENERIC_ENTITY_KIND.getValue())
