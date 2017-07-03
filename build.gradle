@@ -40,7 +40,7 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'jacoco'
     group = 'io.spine'
-    version = project.VERSION
+    version = project.spineVersion
 
     repositories {
         mavenCentral()
@@ -58,10 +58,10 @@ subprojects {
 
     repositories {
         maven {
-            url = "$MAVEN_REPOSITORY_URL"
+            url = "$mavenRepositoryUrl"
         }
         maven {
-            url = "$MAVEN_SNAPSHOT_REPOSITORY_URL"
+            url = "$mavenSnapshotRepositoryUrl"
         }
         mavenLocal()
     }
@@ -73,28 +73,31 @@ subprojects {
             exclude group: 'io.grpc'
         }
 
-        compile group: 'io.spine', name: "spine-client", version: VERSION, changing: true, excludes
-        compile group: 'io.spine', name: "spine-server", version: VERSION, changing: true, excludes
+        compile group: 'io.spine', name: "spine-client", version: spineVersion, changing: true, excludes
+        compile group: 'io.spine', name: "spine-server", version: spineVersion, changing: true, excludes
 
-        testCompile group: 'io.spine', name: "spine-testutil-base", version: BASE_VERSION, changing: true, excludes
-        testCompile group: 'io.spine', name: "spine-testutil-client", version: VERSION, changing: true, excludes
-        testCompile group: 'io.spine', name: "spine-testutil-server", version: VERSION, changing: true, excludes
+        testCompile group: 'io.spine', name: "spine-testutil-base", version: baseVersion, changing: true, excludes
+        testCompile group: 'io.spine', name: "spine-testutil-client", version: spineVersion, changing: true, excludes
+        testCompile group: 'io.spine', name: "spine-testutil-server", version: spineVersion, changing: true, excludes
 
-        compile group: 'io.spine', name: "spine-core", version: VERSION, changing: true, classifier: "test", excludes
+        compile group: 'io.spine', name: "spine-base", version: baseVersion, changing: true, classifier: "test", excludes
+        compile group: 'io.spine', name: "spine-core", version: spineVersion, changing: true, classifier: "test", excludes
+        compile group: 'io.spine', name: "spine-client", version: spineVersion, changing: true, classifier: "test", excludes
+        compile group: 'io.spine', name: "spine-server", version: spineVersion, changing: true, classifier: "test", excludes
 
         // Guava
-        compile group: 'com.google.guava', name: 'guava', version: GUAVA_VERSION
+        compile group: 'com.google.guava', name: 'guava', version: guavaVersion
 
         // Protobuf runtime
-        compile group: 'com.google.protobuf', name: 'protobuf-java', version: PROTOBUF_VERSION
-        compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: PROTOBUF_VERSION
+        compile group: 'com.google.protobuf', name: 'protobuf-java', version: protobufVersion
+        compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: protobufVersion
 
         // Findbugs
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
 
         // SLF4J
-        compile group: 'org.slf4j', name: 'slf4j-api', version: SLf4J_VERSION
-        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: SLf4J_VERSION
+        compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: slf4jVersion
 
         // JUnit
         testCompile(group: 'junit', name: 'junit', version: '4.12') {
@@ -102,13 +105,13 @@ subprojects {
         }
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
-        testCompile group: 'com.google.guava', name: 'guava-testlib', version: GUAVA_VERSION
+        testCompile group: 'com.google.guava', name: 'guava-testlib', version: guavaVersion
     }
 
     protobuf {
         generatedFilesBaseDir = "$projectDir/generated"
         protoc {
-            artifact = project.PROTOBUF_DEPENDENCY
+            artifact = project.protobufDependency
         }
     }
 
