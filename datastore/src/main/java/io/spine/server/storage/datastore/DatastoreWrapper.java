@@ -498,12 +498,13 @@ public class DatastoreWrapper {
     private static final class DsQueryIterator extends UnmodifiableIterator<Entity> {
 
         private final StructuredQuery<Entity> query;
-
         private final DatastoreReaderWriter datastore;
         private QueryResults<Entity> currentPage;
 
         private boolean terminated;
+
         private DsQueryIterator(StructuredQuery<Entity> query, DatastoreReaderWriter datastore) {
+            super();
             this.query = query;
             this.datastore = datastore;
             this.currentPage = datastore.run(query);
