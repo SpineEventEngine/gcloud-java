@@ -3,7 +3,10 @@ ext {
     credentialsPropertyFile = 'credentials.properties'
     projectsToPublish = ['datastore']
 
-    spineDependencies = ['spine-server', 'spine-client', 'spine-core', 'spine-base']
+    spineDependencies = ['spine-server': VERSION,
+                         'spine-client': VERSION,
+                         'spine-core': VERSION,
+                         'spine-base': BASE_VERSION]
 }
 
 final String CREDENTIALS_LOCATION = 'credentials.properties'
@@ -69,13 +72,13 @@ subprojects {
     dependencies {
         // when Spine can be used for evaluation in real projects.
         // Spine
-        spineDependencies.each {
-            dependOnSpine(dependencies, it, false)
+        spineDependencies.entrySet().each {
+            dependOnSpine(dependencies, it.key, it.value, false)
         }
 
-        dependOnSpine dependencies, 'spine-testutil-base', true
-        dependOnSpine dependencies, 'spine-testutil-client', true
-        dependOnSpine dependencies, 'spine-testutil-server', true
+        dependOnSpine dependencies, 'spine-testutil-base', BASE_VERSION, true
+        dependOnSpine dependencies, 'spine-testutil-client', VERSION, true
+        dependOnSpine dependencies, 'spine-testutil-server', VERSION, true
 
         // Guava
         compile group: 'com.google.guava', name: 'guava', version: GUAVA_VERSION
@@ -160,7 +163,7 @@ tasks["check"].dependsOn startDatastore
 
 apply from: publishPlugin
 
-void dependOnSpine(def dependencyHandler, def artifactId, boolean testScope) {
+void dependOnSpine(def dependencyHandler, def artifactId, def version, boolean testScope) {
     final def excludes = {
         exclude group: 'com.google.protobuf', module: 'protobuf-lite'
         exclude group: 'io.grpc'
@@ -169,19 +172,19 @@ void dependOnSpine(def dependencyHandler, def artifactId, boolean testScope) {
     if (!testScope) {
         dependencyHandler.compile(group: 'io.spine',
                                   name: artifactId,
-                                  version: VERSION,
+                                  version: version,
                                   changing: true,
                                   excludes)
         dependencyHandler.testCompile(group: 'io.spine',
                                       name: artifactId,
-                                      version: VERSION,
+                                      version: version,
                                       classifier: 'test',
                                       changing: true,
                                       excludes)
     } else {
         dependencyHandler.testCompile(group: 'io.spine',
                                       name: artifactId,
-                                      version: VERSION,
+                                      version: version,
                                       changing: true,
                                       excludes)
     }

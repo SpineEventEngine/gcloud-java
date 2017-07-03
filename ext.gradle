@@ -25,10 +25,11 @@
  *  This file is used wherever the library versions are required.
  */
 
-final SPINE_VERSION = "0.9.35-SNAPSHOT"
+final SPINE_VERSION = "0.9.36-SNAPSHOT"
 
 ext {
     VERSION = SPINE_VERSION
+    BASE_VERSION = "0.9.35-SNAPSHOT"
     PROTOBUF_VERSION = '3.3.0'
     SLf4J_VERSION = "1.7.21"
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"

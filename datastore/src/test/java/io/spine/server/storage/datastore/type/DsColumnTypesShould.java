@@ -120,7 +120,7 @@ public class DsColumnTypesShould {
     @Test
     public void provide_version_to_int_type() {
         final DatastoreColumnType<Version, Integer> type = DsColumnTypes.versionType();
-        Version value = Versions.create();
+        Version value = Versions.zero();
         value = Versions.increment(value);
         final int number = 1;
 
