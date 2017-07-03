@@ -16,7 +16,7 @@ final String CREDENTIALS_LOCATION = 'credentials.properties'
 
 buildscript {
 
-    // Define the versions of the library and it's dependencies.
+    // Define the versions of the library and its dependencies.
     // As long as `buildscript` section is always evaluated first, we need to apply
     // `ext.gradle` explicitly here.
     apply from: "ext.gradle"
