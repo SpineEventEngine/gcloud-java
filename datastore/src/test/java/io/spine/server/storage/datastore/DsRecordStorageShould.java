@@ -259,7 +259,9 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         assertEquals(record, restoredRecord);
     }
 
-    // ----- Test Entity Types ------
+    /*
+     * Test Entity types
+     ************************/
 
     @SuppressWarnings("unused") // Reflective access
     public static class TestConstCounterEntity
