@@ -30,6 +30,7 @@ import com.google.protobuf.Any;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
+import io.spine.server.datastore.TestEnvironment;
 import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
 import io.spine.server.tenant.TenantAwareOperation;
 import org.junit.AfterClass;
@@ -242,7 +243,7 @@ public class DatastoreWrapperShould {
         private static final Kind GENERIC_ENTITY_KIND = Kind.of("my.entity");
 
         private static Datastore testDatastore() {
-            final boolean onCi = "true".equals(System.getenv("CI"));
+            final boolean onCi = TestEnvironment.runsOnCi();
             return onCi
                    ? TestDatastoreFactory.getTestRemoteDatastore()
                    : TestDatastoreFactory.getLocalDatastore();
