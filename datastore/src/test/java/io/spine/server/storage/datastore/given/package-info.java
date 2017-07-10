@@ -18,13 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore;
-
 /**
- * @author Dmytro Dashenkov
+ * Test environment classes for the {@code io.spine.server.storage.datastore} package.
  */
-public class Given {
 
-    public static final String TEST_PROJECT_ID_VALUE = "spine-dev";
-    public static final ProjectId TEST_PROJECT_ID = ProjectId.of(TEST_PROJECT_ID_VALUE);
-}
+@ParametersAreNonnullByDefault
+package io.spine.server.storage.datastore.given;
+
+import javax.annotation.ParametersAreNonnullByDefault;

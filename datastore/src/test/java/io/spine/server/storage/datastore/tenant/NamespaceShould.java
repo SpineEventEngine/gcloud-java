@@ -33,8 +33,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static io.spine.server.storage.datastore.Given.TEST_PROJECT_ID;
-import static io.spine.server.storage.datastore.Given.TEST_PROJECT_ID_VALUE;
+import static io.spine.server.storage.datastore.given.Given.TEST_PROJECT_ID;
+import static io.spine.server.storage.datastore.given.Given.TEST_PROJECT_ID_VALUE;
 
 /**
  * @author Dmytro Dashenkov

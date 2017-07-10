@@ -29,7 +29,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.testing.NullPointerTester;
 import io.spine.net.InternetDomain;
-import io.spine.server.storage.datastore.Given;
+import io.spine.server.storage.datastore.given.Given;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.core.TenantId;
 import org.junit.Test;
@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.Collections2.transform;
-import static io.spine.server.storage.datastore.Given.TEST_PROJECT_ID;
+import static io.spine.server.storage.datastore.given.Given.TEST_PROJECT_ID;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
