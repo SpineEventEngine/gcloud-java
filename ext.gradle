@@ -29,12 +29,12 @@ final SPINE_VERSION = "0.9.37-SNAPSHOT"
 
 ext {
     spineVersion = SPINE_VERSION
-    baseVersion = "0.9.35-SNAPSHOT"
-    protobufVersion = '3.3.0'
-    slf4jVersion = "1.7.21"
-    protobufDependency = "com.google.protobuf:protoc:${project.protobufVersion}"
-    mavenRepositoryUrl = 'http://maven.teamdev.com/repository/spine'
-    mavenSnapshotRepositoryUrl = 'http://maven.teamdev.com/repository/spine-snapshots'
 
-    guavaVersion = "20.0"
+    // NOTE: when updating Protobuf dependency, please check that
+    // Spine core modules have the same version as well.
+    protobufVersion = '3.3.0'
+    slf4jVersion = '1.7.21'
+    guavaVersion = '20.0'
+
+    protobufGradlePluginVerison = '0.8.1'
 }
