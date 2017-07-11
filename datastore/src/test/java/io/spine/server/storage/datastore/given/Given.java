@@ -31,10 +31,18 @@ import io.spine.server.storage.datastore.ProjectId;
 @Internal
 public final class Given {
 
-    public static final String TEST_PROJECT_ID_VALUE = "spine-dev";
-    public static final ProjectId TEST_PROJECT_ID = ProjectId.of(TEST_PROJECT_ID_VALUE);
+    private static final String TEST_PROJECT_ID_VALUE = "spine-dev";
+    private static final ProjectId TEST_PROJECT_ID = ProjectId.of(TEST_PROJECT_ID_VALUE);
 
     private Given() {
         // Prevent utility class instantiation.
+    }
+
+    public static String testProjectIdValue() {
+        return TEST_PROJECT_ID_VALUE;
+    }
+
+    public static ProjectId testProjectId() {
+        return TEST_PROJECT_ID;
     }
 }

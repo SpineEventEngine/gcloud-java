@@ -28,10 +28,10 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.testing.NullPointerTester;
-import io.spine.net.InternetDomain;
-import io.spine.server.storage.datastore.given.Given;
-import io.spine.server.storage.datastore.ProjectId;
 import io.spine.core.TenantId;
+import io.spine.net.InternetDomain;
+import io.spine.server.storage.datastore.ProjectId;
+import io.spine.server.storage.datastore.given.Given;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.Collections2.transform;
-import static io.spine.server.storage.datastore.given.Given.TEST_PROJECT_ID;
+import static io.spine.server.storage.datastore.tenant.Namespace.of;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
@@ -68,7 +68,7 @@ public class NamespaceIndexShould {
 
     @Test
     public void not_accept_nulls() {
-        final Namespace defaultNamespace = Namespace.of("some-string");
+        final Namespace defaultNamespace = of("some-string");
         final TenantId tenantId = TenantId.getDefaultInstance();
 
         new NullPointerTester()
@@ -119,7 +119,7 @@ public class NamespaceIndexShould {
         final TenantId newId = TenantId.newBuilder()
                                        .setValue(TENANT_ID_STRING)
                                        .build();
-        final Namespace newNamespace = Namespace.of(newId, Given.TEST_PROJECT_ID);
+        final Namespace newNamespace = of(newId, Given.testProjectId());
 
         namespaceIndex.keep(newId);
         assertTrue(namespaceIndex.contains(newNamespace));
@@ -136,7 +136,7 @@ public class NamespaceIndexShould {
         final TenantId fakeId = TenantId.newBuilder()
                                         .setValue(TENANT_ID_STRING)
                                         .build();
-        final Namespace fakeNamespace = Namespace.of(fakeId, ProjectId.of("fake-prj"));
+        final Namespace fakeNamespace = of(fakeId, ProjectId.of("fake-prj"));
 
         assertFalse(namespaceIndex.contains(fakeNamespace));
     }
@@ -169,7 +169,7 @@ public class NamespaceIndexShould {
         };
         // The tested object
         final NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery,
-                                                                 TEST_PROJECT_ID,
+                                                                 Given.testProjectId(),
                                                                  true);
 
         // The test flow
@@ -194,8 +194,8 @@ public class NamespaceIndexShould {
                 namespaceIndex.keep(newTenantId); // sync
 
                 // Check new value added
-                final boolean success = namespaceIndex.contains(Namespace.of(newTenantId,    // sync
-                                                                             TEST_PROJECT_ID));
+                final boolean success = namespaceIndex.contains(of(newTenantId,    // sync
+                                                                   Given.testProjectId()));
                 assertTrue(success);
 
                 // Check returned set has newly added element

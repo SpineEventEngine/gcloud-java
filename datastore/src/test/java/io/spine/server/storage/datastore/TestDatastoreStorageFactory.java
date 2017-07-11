@@ -36,7 +36,7 @@ import static io.spine.server.datastore.TestEnvironment.runsOnCi;
 @SuppressWarnings("CallToSystemGetenv")
 class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
-    public static final String DEFAULT_DATASET_NAME = Given.TEST_PROJECT_ID_VALUE;
+    public static final String DEFAULT_DATASET_NAME = Given.testProjectIdValue();
 
     /**
      * Returns a default factory instance. A {@link Datastore} is created with default {@link DatastoreOptions}:

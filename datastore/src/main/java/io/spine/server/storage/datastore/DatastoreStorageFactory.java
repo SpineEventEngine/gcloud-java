@@ -235,11 +235,11 @@ public class DatastoreStorageFactory implements StorageFactory {
     public static class Builder {
 
         private static final String DEFAULT_NAMESPACE_ERROR_MESSAGE =
-                "Datastore namespace should not be configured explicitly for a multitenant " +
-                        "storage.";
+                "Datastore namespace should not be configured explicitly" +
+                        "for a multitenant storage";
         private static final String REDUNDANT_TENANT_ID_CONVERTER_ERROR_MESSAGE =
-                "Setting a custom NamespaceToTenantIdConverter to a single-tenant storage factory" +
-                        " is redundant.";
+                "Setting a custom NamespaceToTenantIdConverter is not allowed" +
+                        " for a single-tenant storage factory.";
 
         private Datastore datastore;
         private boolean multitenant;

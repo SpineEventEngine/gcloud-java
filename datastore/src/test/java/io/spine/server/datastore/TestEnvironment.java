@@ -23,7 +23,7 @@ package io.spine.server.datastore;
 import static java.lang.System.getenv;
 
 /**
- * A utility class for investigating the test environment at runtime.
+ * A utility class for analyzing the test environment at runtime.
  *
  * @author Dmytro Dashenkov
  */
