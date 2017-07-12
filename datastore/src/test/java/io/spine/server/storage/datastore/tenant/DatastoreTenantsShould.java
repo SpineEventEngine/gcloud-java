@@ -28,7 +28,7 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import org.junit.Test;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.users.TenantId;
+import io.spine.core.TenantId;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -95,17 +95,7 @@ public class DatastoreTenantsShould {
         private final Iterator<Key> keyIterator = keys.iterator();
 
         @Override
-        public Class<?> resultClass() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public Class<?> getResultClass() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Cursor cursorAfter() {
             throw new UnsupportedOperationException();
         }
 

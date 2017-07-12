@@ -43,6 +43,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.UnmodifiableIterator;
 import io.spine.server.storage.datastore.tenant.DsNamespaceValidator;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
@@ -53,11 +54,15 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Iterables.toArray;
+import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Math.min;
@@ -80,6 +85,8 @@ public class DatastoreWrapper {
     private static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
     private static final Map<Kind, KeyFactory> keyFactories = new HashMap<>();
+
+    private static final Key[] EMPTY_KEY_ARRAY = new Key[0];
 
     private final NamespaceSupplier namespaceSupplier;
     private final Datastore datastore;
@@ -191,20 +198,24 @@ public class DatastoreWrapper {
     /**
      * Retrieves an {@link Entity} for each of the given keys.
      *
+     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
+     *
      * @param keys {@link Key Keys} to search for
-     * @return A list of found entities in the order of keys (including {@code null} values for
-     * nonexistent keys)
+     * @return an {@code Iterator} over the found entities in the order of keys
+     * (including {@code null} values for nonexistent keys)
      * @see DatastoreReader#get(Key...)
      */
-    public List<Entity> read(Iterable<Key> keys) {
+    public Iterator<Entity> read(Iterable<Key> keys) {
         final List<Key> keysList = newLinkedList(keys);
-        final List<Entity> result;
+        final Iterator<Entity> result;
         if (keysList.size() <= MAX_KEYS_PER_READ_REQUEST) {
-            result = newArrayList(datastore.get(keys));
+            result = actor.get(toArray(keys, Key.class));
         } else {
             result = readBulk(keysList);
         }
-        return result;
+        final UnmodifiableIterator<Entity> unmodifiableResult = unmodifiableIterator(result);
+        return unmodifiableResult;
     }
 
     /**
@@ -217,31 +228,22 @@ public class DatastoreWrapper {
      * <p>Therefore, an execution of this method may in fact result in several queries to
      * the Datastore instance.
      *
+     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
+     *
      * @param query {@link Query} to execute upon the Datastore
-     * @return results fo the query packed in a {@link List}
+     * @return results fo the query as a lazily evaluated {@link Iterator}
      * @see DatastoreReader#run(Query)
      */
-    public List<Entity> read(StructuredQuery<Entity> query) {
+    @SuppressWarnings("LoopConditionNotUpdatedInsideLoop")
+        // Implicit call to Iterator.next() in Iterators.addAll
+    public Iterator<Entity> read(StructuredQuery<Entity> query) {
         final Namespace namespace = getNamespace();
         final StructuredQuery<Entity> queryWithNamespace = query.toBuilder()
                                                                 .setNamespace(namespace.getValue())
                                                                 .build();
-        QueryResults<Entity> queryResults = actor.run(queryWithNamespace);
-        final List<Entity> resultsAsList = newLinkedList();
-
-        while (queryResults != null && queryResults.hasNext()) {
-            Iterators.addAll(resultsAsList, queryResults);
-
-            final Cursor cursorAfter = queryResults.getCursorAfter();
-            final Query<Entity> queryForMoreResults =
-                    queryWithNamespace.toBuilder()
-                                      .setStartCursor(cursorAfter)
-                                      .build();
-
-            queryResults = actor.run(queryForMoreResults);
-        }
-
-        return resultsAsList;
+        final Iterator<Entity> result = new DsQueryIterator(queryWithNamespace, actor);
+        return result;
     }
 
     /**
@@ -264,7 +266,8 @@ public class DatastoreWrapper {
                                                    .setNamespace(namespace.getValue())
                                                    .setKind(table)
                                                    .build();
-        final List<Entity> entities = read(query);
+        final Iterator<Entity> queryResult = read(query);
+        final List<Entity> entities = newArrayList(queryResult);
         final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
             @Nullable
             @Override
@@ -417,20 +420,19 @@ public class DatastoreWrapper {
      * @return ordered sequence of {@link Entity entities}
      * @see #read(Iterable)
      */
-    private List<Entity> readBulk(List<Key> keys) {
+    private Iterator<Entity> readBulk(List<Key> keys) {
         final int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
         log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.",
                     pageCount);
-
-        final List<Entity> result = newLinkedList();
         int lowerBound = 0;
         int higherBound = MAX_KEYS_PER_READ_REQUEST;
         int keysLeft = keys.size();
+        Iterator<Entity> result = null;
         for (int i = 0; i < pageCount; i++) {
             final List<Key> keysPage = keys.subList(lowerBound, higherBound);
 
-            final List<Entity> page = newArrayList(datastore.get(keysPage));
-            result.addAll(page);
+            final Iterator<Entity> page = actor.get(keysPage.toArray(EMPTY_KEY_ARRAY));
+            result = concat(result, page);
 
             keysLeft -= keysPage.size();
             lowerBound = higherBound;
@@ -467,6 +469,81 @@ public class DatastoreWrapper {
 
     private void writeSmallBulk(Entity[] entities) {
         actor.put(entities);
+    }
+
+    private static Iterator<Entity> concat(@Nullable Iterator<Entity> first,
+                                           Iterator<Entity> second) {
+        if (first == null) {
+            return second;
+        }
+        return Iterators.concat(first, second);
+    }
+
+    /**
+     * An {@code Iterator} over the {@link StructuredQuery} results.
+     *
+     * <p>This {@code Iterator} loads the results lazily by evaluating the {@link QueryResults} and
+     * performing cursor queries.
+     *
+     * <p>The first query to the datastore is performed on creating an instance of
+     * the {@code Iterator}.
+     *
+     * <p>A call to {@link #hasNext() hasNext()} may cause a query to the Datastore if the current
+     * {@linkplain QueryResults results page} is fully processed.
+     *
+     * <p>A call to {@link #next() next()} may not cause a Datastore query.
+     *
+     * <p>The {@link #remove() remove()} method throws an {@link UnsupportedOperationException}.
+     */
+    private static final class DsQueryIterator extends UnmodifiableIterator<Entity> {
+
+        private final StructuredQuery<Entity> query;
+        private final DatastoreReaderWriter datastore;
+        private QueryResults<Entity> currentPage;
+
+        private boolean terminated;
+
+        private DsQueryIterator(StructuredQuery<Entity> query, DatastoreReaderWriter datastore) {
+            super();
+            this.query = query;
+            this.datastore = datastore;
+            this.currentPage = datastore.run(query);
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (terminated) {
+                return false;
+            }
+            if (currentPage.hasNext()) {
+                return true;
+            }
+            currentPage = computeNextPage();
+            if (!currentPage.hasNext()) {
+                terminated = true;
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public Entity next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("The query results Iterator is empty.");
+            }
+            final Entity result = currentPage.next();
+            return result;
+        }
+
+        private QueryResults<Entity> computeNextPage() {
+            final Cursor cursorAfter = currentPage.getCursorAfter();
+            final Query<Entity> queryForMoreResults = query.toBuilder()
+                                                           .setStartCursor(cursorAfter)
+                                                           .build();
+            final QueryResults<Entity> nextPage = datastore.run(queryForMoreResults);
+            return nextPage;
+        }
+
     }
 
     private static Logger log() {

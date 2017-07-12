@@ -30,7 +30,7 @@ import com.google.common.collect.Iterators;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.users.TenantId;
+import io.spine.core.TenantId;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;

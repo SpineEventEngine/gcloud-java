@@ -22,7 +22,7 @@ package io.spine.server.storage.datastore.type;
 
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Version;
+import io.spine.core.Version;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 
 import static io.spine.server.storage.datastore.type.DsColumnTypes.booleanType;

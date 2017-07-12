@@ -21,18 +21,15 @@
 package io.spine.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BooleanValue;
-import com.google.cloud.datastore.DateTime;
-import com.google.cloud.datastore.DateTimeValue;
 import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.Value;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
-import io.spine.base.Version;
+import io.spine.core.Version;
 import io.spine.string.Stringifiers;
 
-import java.util.Date;
+import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 
 /**
  * A utility for creating the basic {@link DatastoreColumnType} implementations for
@@ -82,10 +79,10 @@ final class DsColumnTypes {
     }
 
     /**
-     * @return new instance of {@link DatastoreColumnType} storing {@link Timestamp} as the
-     * {@link DateTime}
+     * @return new instance of {@link DatastoreColumnType} storing Protobuf {@link Timestamp} as the
+     * Datastore {@link com.google.cloud.Timestamp Timestamp}
      */
-    static DatastoreColumnType<Timestamp, DateTime> timestampType() {
+    static DatastoreColumnType<Timestamp, com.google.cloud.Timestamp> timestampType() {
         return new TimestampColumnType();
     }
 
@@ -142,18 +139,16 @@ final class DsColumnTypes {
     }
 
     private static class TimestampColumnType
-            extends AbstractDatastoreColumnType<Timestamp, DateTime> {
+            extends AbstractDatastoreColumnType<Timestamp, com.google.cloud.Timestamp> {
 
         @Override
-        public DateTime convertColumnValue(Timestamp fieldValue) {
-            final long millis = Timestamps.toMillis(fieldValue);
-            final Date intermediate = new Date(millis);
-            return DateTime.copyFrom(intermediate);
+        public com.google.cloud.Timestamp convertColumnValue(Timestamp fieldValue) {
+            return ofTimeSecondsAndNanos(fieldValue.getSeconds(), fieldValue.getNanos());
         }
 
         @Override
-        public Value<?> toValue(DateTime data) {
-            return DateTimeValue.of(data);
+        public Value<?> toValue(com.google.cloud.Timestamp data) {
+            return com.google.cloud.datastore.TimestampValue.of(data);
         }
     }
 

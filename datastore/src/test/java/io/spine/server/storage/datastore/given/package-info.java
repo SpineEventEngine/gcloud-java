@@ -1,5 +1,4 @@
 /*
- *
  * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
@@ -17,38 +16,13 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
  */
-package io.spine.server.storage.datastore;
-
-import org.junit.Test;
-
-import static io.spine.Identifier.newUuid;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
- * @author Alex Tymchenko
+ * Test environment classes for the {@code io.spine.server.storage.datastore} package.
  */
-public class DatastoreIdentifiersShould {
 
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(DsIdentifiers.class);
-    }
+@ParametersAreNonnullByDefault
+package io.spine.server.storage.datastore.given;
 
-    @Test(expected = IllegalStateException.class)
-    public void not_accept_empty_String_as_identifier_source() {
-        DsIdentifiers.of("");
-    }
-
-    @Test
-    public void wrap_non_empty_String_into_record_identifier() {
-        final String idAsString = newUuid();
-        final RecordId recordId = DsIdentifiers.of(idAsString);
-
-        assertNotNull(recordId);
-        assertEquals(idAsString, recordId.getValue());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

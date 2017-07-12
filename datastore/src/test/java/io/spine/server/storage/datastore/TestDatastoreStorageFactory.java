@@ -22,10 +22,13 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.spine.server.storage.datastore.given.Given;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static io.spine.server.datastore.TestEnvironment.runsOnCi;
 
 /**
  * Creates storages based on the local Google {@link Datastore}.
@@ -33,12 +36,7 @@ import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 @SuppressWarnings("CallToSystemGetenv")
 class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
-    public static final String DEFAULT_DATASET_NAME = Given.TEST_PROJECT_ID_VALUE;
-
-    // Set in the static context upon initialization,
-    // used in class method context to avoid ambiguous calls to {@code System.getenv()}.
-    @SuppressWarnings("StaticNonFinalField")
-    private static boolean runsOnCi = false;
+    public static final String DEFAULT_DATASET_NAME = Given.testProjectIdValue();
 
     /**
      * Returns a default factory instance. A {@link Datastore} is created with default {@link DatastoreOptions}:
@@ -48,12 +46,11 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
      */
     static TestDatastoreStorageFactory getDefaultInstance() {
-        final boolean onCi = "true".equals(System.getenv("CI"));
+        final boolean onCi = runsOnCi();
         final String message = onCi
                                ? "Running on CI. Connecting to remote Google Cloud Datastore"
                                : "Running on local machine. Connecting to a local Datastore emulator";
         log().info(message);
-        runsOnCi = onCi;
         return onCi
                ? TestingInstanceSingleton.INSTANCE.value
                : LocalInstanceSingleton.INSTANCE.value;
@@ -70,7 +67,7 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         // Overrides the behavior for tests
     @Override
     protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
-        return TestDatastoreWrapper.wrap(datastore, runsOnCi);
+        return TestDatastoreWrapper.wrap(datastore, runsOnCi());
     }
 
     /**

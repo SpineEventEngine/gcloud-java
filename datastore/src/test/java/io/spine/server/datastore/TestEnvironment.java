@@ -1,5 +1,4 @@
 /*
- *
  * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
@@ -17,38 +16,37 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
  */
-package io.spine.server.storage.datastore;
 
-import org.junit.Test;
+package io.spine.server.datastore;
 
-import static io.spine.Identifier.newUuid;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static java.lang.System.getenv;
 
 /**
- * @author Alex Tymchenko
+ * A utility class for analyzing the test environment at runtime.
+ *
+ * @author Dmytro Dashenkov
  */
-public class DatastoreIdentifiersShould {
+public final class TestEnvironment {
 
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(DsIdentifiers.class);
+    private static final String TRUE = "true";
+
+    private TestEnvironment() {
+        // Prevent utility class instantiation.
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void not_accept_empty_String_as_identifier_source() {
-        DsIdentifiers.of("");
-    }
-
-    @Test
-    public void wrap_non_empty_String_into_record_identifier() {
-        final String idAsString = newUuid();
-        final RecordId recordId = DsIdentifiers.of(idAsString);
-
-        assertNotNull(recordId);
-        assertEquals(idAsString, recordId.getValue());
+    /**
+     * Shows if the current test JVM is started within a continuous integration service.
+     *
+     * <p>This method relies on the convention for the CI services to set the {@code CI}
+     * environmental variable to {@code "true"}.
+     *
+     * @return {@code true} if the tests are run on a CI service, {@code false} otherwise
+     * @see System#getenv()
+     */
+    public static boolean runsOnCi() {
+        final String ciEnvValue = getenv("CI");
+        final boolean onCi = TRUE.equalsIgnoreCase(ciEnvValue);
+        return onCi;
     }
 }

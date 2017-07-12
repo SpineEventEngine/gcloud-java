@@ -31,7 +31,6 @@ import io.spine.validate.Validate;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
-import java.util.Map;
 
 
 /**
@@ -93,22 +92,22 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids) {
+    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
         return recordStorage().readMultiple(ids);
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
+    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
         return recordStorage().readMultiple(ids, fieldMask);
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords() {
+    protected Iterator<EntityRecord> readAllRecords() {
         return recordStorage().readAll();
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
+    protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
         return recordStorage().readAll(fieldMask);
     }
 

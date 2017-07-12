@@ -63,8 +63,8 @@ public final class Indexes {
 
         final EntityQuery.Builder query = Query.newEntityQueryBuilder()
                                                .setKind(kind.getValue());
-        final Iterable<Entity> allEntities = datastore.read(query.build());
-        final Iterator<I> idIterator = Iterators.transform(allEntities.iterator(),
+        final Iterator<Entity> allEntities = datastore.read(query.build());
+        final Iterator<I> idIterator = Iterators.transform(allEntities,
                                                            idExtractor(idType));
         return idIterator;
     }

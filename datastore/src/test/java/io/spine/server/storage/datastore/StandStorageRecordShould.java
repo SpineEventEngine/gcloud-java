@@ -29,8 +29,8 @@ import io.spine.type.TypeUrl;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
+import static io.spine.Identifier.newUuid;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Identifier.newUuid;
 
 /**
  * @author Alex Tymchenko

@@ -24,7 +24,7 @@ import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.Value;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import io.spine.base.Version;
+import io.spine.core.Version;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 

@@ -25,7 +25,7 @@ import com.google.common.base.Supplier;
 import io.spine.annotation.Internal;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.ProjectId;
-import io.spine.users.TenantId;
+import io.spine.core.TenantId;
 
 import javax.annotation.Nullable;
 

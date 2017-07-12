@@ -20,28 +20,35 @@
 
 package io.spine.server.storage.datastore;
 
-import org.junit.After;
-import org.junit.Test;
-import io.spine.base.Identifier;
-import io.spine.base.Version;
+import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.projection.ProjectionStorageShould;
-import io.spine.test.projection.Project;
-import io.spine.test.projection.ProjectVBuilder;
+import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
+import io.spine.test.storage.ProjectId;
+import org.junit.After;
+import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Mikhail Mikhaylov
  */
-public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
+public class DsProjectionStorageShould extends ProjectionStorageShould {
+
     private static final TestDatastoreStorageFactory datastoreFactory =
             TestDatastoreStorageFactory.getDefaultInstance();
+
+    @Override
+    protected Class<? extends TestCounterEntity> getTestEntityClass() {
+        return TestEntity.class;
+    }
 
     @SuppressWarnings({"MagicNumber", "MethodDoesntCallSuperMethod"})
     @Override
@@ -58,27 +65,35 @@ public class DsProjectionStorageShould extends ProjectionStorageShould<String> {
         datastoreFactory.clear();
     }
 
+    @SuppressWarnings("unchecked") // Required for test purposes.
     @Override
-    protected ProjectionStorage<String> getStorage() {
-        return datastoreFactory.createProjectionStorage(TestProjection.class);
-    }
-
-    @Override
-    protected String newId() {
-        return Identifier.newUuid();
+    protected ProjectionStorage<ProjectId> getStorage(Class<? extends Entity> cls) {
+        final Class<? extends Projection<ProjectId, ?, ?>> projectionClass =
+                (Class<? extends Projection<ProjectId, ?, ?>>) cls;
+        final ProjectionStorage<ProjectId> result =
+                datastoreFactory.createProjectionStorage(projectionClass);
+        return result;
     }
 
     @Test
     public void provide_access_to_PropertyStorage_for_extensibility() {
-        final DsProjectionStorage<String> storage = (DsProjectionStorage<String>) getStorage();
+        final DsProjectionStorage<ProjectId> storage =
+                (DsProjectionStorage<ProjectId>) getStorage(TestProjection.class);
         final DsPropertyStorage propertyStorage = storage.propertyStorage();
         assertNotNull(propertyStorage);
     }
 
-    private static class TestProjection extends Projection<String,
-                                                Project,
-                                                ProjectVBuilder> {
-        private TestProjection(String id) {
+    private static class TestProjection extends Projection<ProjectId,
+                                                           Project,
+                                                           ProjectVBuilder> {
+        private TestProjection(ProjectId id) {
+            super(id);
+        }
+    }
+
+    public static class TestEntity extends TestCounterEntity<ProjectId> {
+
+        protected TestEntity(ProjectId id) {
             super(id);
         }
     }

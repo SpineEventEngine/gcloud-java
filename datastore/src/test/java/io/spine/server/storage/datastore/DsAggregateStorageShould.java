@@ -20,14 +20,13 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageShould;
+import io.spine.server.entity.Entity;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testdata.Sample;
-import io.spine.validate.ValidatingBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -67,17 +66,15 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         datastoreFactory.tearDown();
     }
 
-    @SuppressWarnings("ConstantConditions")
-        // passing null because this parameter isn't used in this implementation
     @Override
-    protected AggregateStorage<ProjectId> getStorage() {
-        return datastoreFactory.createAggregateStorage(TestAggregate.class);
+    protected AggregateStorage<ProjectId> getStorage(Class<? extends Entity> cls) {
+        return getStorage();
     }
 
     @Override
-    protected <Id> AggregateStorage<Id> getStorage(
-            Class<? extends Aggregate<Id, ? extends Message, ? extends ValidatingBuilder<?, ?>>> aClass) {
-        return datastoreFactory.createAggregateStorage(aClass);
+    protected <I> AggregateStorage<I> getStorage(Class<? extends I> idClass,
+                                                 Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
+        return datastoreFactory.createAggregateStorage(aggregateClass);
     }
 
     @Test

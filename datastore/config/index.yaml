@@ -4,7 +4,7 @@ indexes:
 
   # Common index for all the applications.
 
-  - kind: spine.base.Event
+  - kind: spine.core.Event
     ancestor: no
     properties:
     - name: type

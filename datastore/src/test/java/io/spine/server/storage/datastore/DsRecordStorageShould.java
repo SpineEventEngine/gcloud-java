@@ -20,55 +20,61 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import io.spine.base.Identifier;
-import io.spine.base.Version;
-import io.spine.base.Versions;
+import io.spine.Identifier;
+import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageShould;
-import io.spine.test.Tests;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.type.TypeUrl;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static com.google.protobuf.util.Timestamps.toSeconds;
 import static io.spine.json.Json.toCompactJson;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Verify.assertContainsKey;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
-                                                               DsRecordStorage<ProjectId>> {
+        DsRecordStorage<ProjectId>> {
 
     private static final TestDatastoreStorageFactory datastoreFactory
             = TestDatastoreStorageFactory.getDefaultInstance();
 
+    @SuppressWarnings("unchecked") // OK for tests.
     @Override
-    protected DsRecordStorage<ProjectId> getStorage() {
-        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(
-                TestConstCounterEntity.class);
+    protected DsRecordStorage<ProjectId> getStorage(Class<? extends Entity> entityClass) {
+        final Class<? extends Entity<ProjectId, ?>> cls =
+                (Class<? extends Entity<ProjectId, ?>>) entityClass;
+        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(cls);
+    }
+
+    @Override
+    protected Class<? extends TestCounterEntity> getTestEntityClass() {
+        return TestEntity.class;
     }
 
     @Override
@@ -177,7 +183,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         final Key key = DsIdentifiers.keyFor(datastore,
                                              Kind.of(state),
                                              DsIdentifiers.ofEntityId(id));
-        final Entity datastoreEntity = datastore.read(key);
+        final com.google.cloud.datastore.Entity datastoreEntity = datastore.read(key);
 
         // Check entity record
         final TypeUrl recordType = TypeUrl.from(EntityRecord.getDescriptor());
@@ -190,16 +196,17 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         assertEquals(entity.getCounterVersion()
                            .getNumber(), datastoreEntity.getLong(counterVersion));
 
-        assertEquals(Timestamps.toMicros(entity.getCreationTime()),
-                     // in Datastore max DateTime precision is 1 microsecond
-                     datastoreEntity.getDateTime(creationTime)
-                                    .getTimestampMicroseconds());
+        final com.google.cloud.Timestamp actualCreationTime =
+                datastoreEntity.getTimestamp(creationTime);
+        assertEquals(toSeconds(entity.getCreationTime()), actualCreationTime.getSeconds());
+        assertEquals(entity.getCreationTime().getNanos(), actualCreationTime.getNanos());
         assertEquals(entity.isCounterEven(), datastoreEntity.getBoolean(counterEven));
         assertEquals(toCompactJson(entity.getCounterState()),
                      datastoreEntity.getString(counterState));
 
         // Check standard Columns
-        assertEquals(entity.getVersion().getNumber(), datastoreEntity.getLong(version));
+        assertEquals(entity.getVersion()
+                           .getNumber(), datastoreEntity.getLong(version));
         assertEquals(entity.isArchived(), datastoreEntity.getBoolean(archived));
         assertEquals(entity.isDeleted(), datastoreEntity.getBoolean(deleted));
     }
@@ -232,7 +239,9 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
     @Test
     public void write_and_read_records_with_lifecycle_flags() {
         final ProjectId id = newId();
-        final LifecycleFlags lifecycle = Tests.archived();
+        final LifecycleFlags lifecycle = LifecycleFlags.newBuilder()
+                                                       .setArchived(true)
+                                                       .build();
         final EntityRecord record = EntityRecord.newBuilder()
                                                 .setState(AnyPacker.pack(newState(id)))
                                                 .setLifecycleFlags(lifecycle)
@@ -250,9 +259,13 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         assertEquals(record, restoredRecord);
     }
 
+    /*
+     * Test Entity types
+     ************************/
+
     @SuppressWarnings("unused") // Reflective access
     public static class TestConstCounterEntity
-                  extends AbstractVersionableEntity<ProjectId, Project> {
+            extends AbstractVersionableEntity<ProjectId, Project> {
 
         private static final int COUNTER = 42;
         private final Timestamp creationTime;
@@ -304,6 +317,13 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
 
         private void injectLifecycle(LifecycleFlags flags) {
             this.lifecycleFlags = flags;
+        }
+    }
+
+    public static class TestEntity extends TestCounterEntity<ProjectId> {
+
+        protected TestEntity(ProjectId id) {
+            super(id);
         }
     }
 }

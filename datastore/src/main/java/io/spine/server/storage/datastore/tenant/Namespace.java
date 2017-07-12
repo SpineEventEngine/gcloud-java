@@ -25,7 +25,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import io.spine.server.storage.datastore.ProjectId;
-import io.spine.users.TenantId;
+import io.spine.core.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.regex.Pattern;

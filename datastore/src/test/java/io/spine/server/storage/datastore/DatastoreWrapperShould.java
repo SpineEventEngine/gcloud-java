@@ -24,21 +24,31 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.protobuf.Any;
-import org.junit.AfterClass;
-import org.junit.Test;
+import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
+import io.spine.server.datastore.TestEnvironment;
 import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.users.TenantId;
+import org.junit.AfterClass;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
+import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
+import static org.hamcrest.Matchers.isIn;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -53,14 +63,14 @@ public class DatastoreWrapperShould {
     @AfterClass
     public static void tearDown() {
         final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
-                                                               TestNamespaceSuppliers.singleTenant());
+                                                               singleTenant());
         wrapper.dropTable(NAMESPACE_HOLDER_KIND);
     }
 
     @Test
     public void work_with_transactions_if_necessary() {
         final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
-                                                               TestNamespaceSuppliers.singleTenant());
+                                                               singleTenant());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
         wrapper.commitTransaction();
@@ -70,7 +80,7 @@ public class DatastoreWrapperShould {
     @Test
     public void rollback_transactions() {
         final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
-                                                               TestNamespaceSuppliers.singleTenant());
+                                                               singleTenant());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
         wrapper.rollbackTransaction();
@@ -80,7 +90,7 @@ public class DatastoreWrapperShould {
     @Test(expected = IllegalStateException.class)
     public void fail_to_start_transaction_if_one_is_active() {
         final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
-                                                               TestNamespaceSuppliers.singleTenant());
+                                                               singleTenant());
         try {
             wrapper.startTransaction();
             assertTrue(wrapper.isTransactionActive());
@@ -93,7 +103,7 @@ public class DatastoreWrapperShould {
     @Test(expected = IllegalStateException.class)
     public void fail_to_finish_not_active_transaction() {
         final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
-                                                               TestNamespaceSuppliers.singleTenant());
+                                                               singleTenant());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
         wrapper.commitTransaction();
@@ -101,26 +111,43 @@ public class DatastoreWrapperShould {
         wrapper.rollbackTransaction();
     }
 
-    // Some variables act in different cases and should have self-explanatory names
-    @SuppressWarnings("UnnecessaryLocalVariable")
     @Test
-    public void support_big_bulk_reads() throws InterruptedException {
+    public void support_big_bulk_ID_reads() throws InterruptedException {
         final int bulkSize = 1001;
 
-        final TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(Given.testDatastore(), false);
+        final TestDatastoreWrapper wrapper = wrap(Given.testDatastore(), false);
         final Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
         final Collection<Entity> expectedEntities = entities.values();
 
         wrapper.createOrUpdate(expectedEntities);
 
         // Wait for some time to make sure the writing is complete
-        try {
-            Thread.sleep(bulkSize * 5);
-        } catch (InterruptedException e) {
-            fail(e.getMessage());
-        }
+        Thread.sleep(bulkSize * 5);
 
-        final Collection<Entity> readEntities = wrapper.read(entities.keySet());
+        final Collection<Entity> readEntities = newArrayList(wrapper.read(entities.keySet()));
+        assertEquals(entities.size(), readEntities.size());
+        assertTrue(expectedEntities.containsAll(readEntities));
+
+        wrapper.dropAllTables();
+    }
+
+    @Test
+    public void support_big_bulk_query_reads() throws InterruptedException {
+        final int bulkSize = 2001;
+
+        final TestDatastoreWrapper wrapper = wrap(Given.testDatastore(), false);
+        final Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
+        final Collection<Entity> expectedEntities = entities.values();
+
+        wrapper.createOrUpdate(expectedEntities);
+
+        // Wait for some time to make sure the writing is complete
+        Thread.sleep(bulkSize * 2);
+
+        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+                                                   .setKind(Given.GENERIC_ENTITY_KIND.getValue())
+                                                   .build();
+        final Collection<Entity> readEntities = newArrayList(wrapper.read(query));
         assertEquals(entities.size(), readEntities.size());
         assertTrue(expectedEntities.containsAll(readEntities));
 
@@ -159,6 +186,38 @@ public class DatastoreWrapperShould {
         checkTenantIdInKey(tenantId3Prefixed, id3, wrapper);
     }
 
+    @Test
+    public void produce_lazy_iterator_on_query_read() {
+        final DatastoreWrapper wrapper = wrap(Given.testDatastore(), singleTenant());
+        final int count = 2;
+        final Map<?, Entity> entities = Given.nEntities(count, wrapper);
+        final Collection<Entity> expctedEntities = entities.values();
+        wrapper.createOrUpdate(expctedEntities);
+
+        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+                                                   .setKind(Given.GENERIC_ENTITY_KIND.getValue())
+                                                   .build();
+        final Iterator<Entity> result = wrapper.read(query);
+
+        assertTrue(result.hasNext());
+        final Entity first = result.next();
+        assertTrue(result.hasNext());
+        final Entity second = result.next();
+
+        assertThat(first, isIn(expctedEntities));
+        assertThat(second, isIn(expctedEntities));
+
+        assertFalse(result.hasNext());
+        assertFalse(result.hasNext());
+        assertFalse(result.hasNext());
+
+        try {
+            result.next();
+            fail();
+        } catch (NoSuchElementException ignored) {
+        }
+    }
+
     private static void checkTenantIdInKey(final String id, TenantId tenantId, final DatastoreWrapper wrapper) {
         new TenantAwareOperation(tenantId) {
             @Override
@@ -184,7 +243,7 @@ public class DatastoreWrapperShould {
         private static final Kind GENERIC_ENTITY_KIND = Kind.of("my.entity");
 
         private static Datastore testDatastore() {
-            final boolean onCi = "true".equals(System.getenv("CI"));
+            final boolean onCi = TestEnvironment.runsOnCi();
             return onCi
                    ? TestDatastoreFactory.getTestRemoteDatastore()
                    : TestDatastoreFactory.getLocalDatastore();

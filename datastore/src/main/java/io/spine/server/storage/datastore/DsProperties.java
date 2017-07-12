@@ -20,19 +20,16 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.DateTime;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.StructuredQuery.OrderBy;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
-import io.spine.base.Version;
+import io.spine.core.Version;
 import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.StorageField;
 import io.spine.string.Stringifiers;
 
-import java.util.Date;
-
+import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.aggregate.storage.AggregateField.aggregate_id;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -59,10 +56,9 @@ final class DsProperties {
     }
 
     static void addWhenCreated(Entity.Builder entity, Timestamp when) {
-        final long millis = Timestamps.toMillis(when);
-        final Date date = new Date(millis);
-        final DateTime dateTime = DateTime.copyFrom(date);
-        AggregateEventRecordProperty.created.setProperty(entity, dateTime);
+        final com.google.cloud.Timestamp value = ofTimeSecondsAndNanos(when.getSeconds(),
+                                                                       when.getNanos());
+        AggregateEventRecordProperty.created.setProperty(entity, value);
     }
 
     static void addVersion(Entity.Builder entity, Version version) {
@@ -126,7 +122,7 @@ final class DsProperties {
         created {
             @Override
             void setProperty(Entity.Builder builder, Object value) {
-                final DateTime dateTime = (DateTime) value;
+                final com.google.cloud.Timestamp dateTime = (com.google.cloud.Timestamp) value;
                 builder.set(toString(), dateTime);
             }
         },

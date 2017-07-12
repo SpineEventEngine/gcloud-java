@@ -27,10 +27,9 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterators;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import io.spine.base.Version;
+import io.spine.core.Version;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateEventRecord.KindCase;
 import io.spine.server.aggregate.AggregateStorage;
@@ -41,28 +40,27 @@ import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.not;
-import static com.google.common.collect.Collections2.filter;
-import static com.google.common.collect.Collections2.transform;
+import static com.google.common.collect.Iterators.filter;
+import static com.google.common.collect.Iterators.transform;
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.server.aggregate.storage.AggregateField.aggregate_id;
 import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.of;
 import static io.spine.server.storage.datastore.DsProperties.addAggregateId;
-import static io.spine.server.storage.datastore.DsProperties.markAsArchived;
-import static io.spine.server.storage.datastore.DsProperties.addWhenCreated;
-import static io.spine.server.storage.datastore.DsProperties.markAsDeleted;
 import static io.spine.server.storage.datastore.DsProperties.addVersion;
+import static io.spine.server.storage.datastore.DsProperties.addWhenCreated;
 import static io.spine.server.storage.datastore.DsProperties.byCreatedTime;
 import static io.spine.server.storage.datastore.DsProperties.byRecordType;
 import static io.spine.server.storage.datastore.DsProperties.byVersion;
 import static io.spine.server.storage.datastore.DsProperties.isArchived;
 import static io.spine.server.storage.datastore.DsProperties.isDeleted;
+import static io.spine.server.storage.datastore.DsProperties.markAsArchived;
+import static io.spine.server.storage.datastore.DsProperties.markAsDeleted;
 import static io.spine.server.storage.datastore.DsProperties.markAsSnapshot;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.server.storage.datastore.Entities.entitiesToMessages;
@@ -189,14 +187,11 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                                                                byVersion(),
                                                                byRecordType())
                                                    .build();
-        final List<Entity> eventEntities = datastore.read(query);
-        if (eventEntities.isEmpty()) {
-            return Collections.emptyIterator();
-        }
+        final Iterator<Entity> eventEntities = datastore.read(query);
 
-        final Collection<Entity> aggregateEntityStates = filter(getEntityStates(),
-                                                                not(activeEntity()));
-        final Collection<Key> inactiveAggregateKeys = transform(
+        final Iterator<Entity> aggregateEntityStates = filter(getEntityStates(),
+                                                              not(activeEntity()));
+        final Iterator<Key> inactiveAggregateKeys = transform(
                 aggregateEntityStates,
                 new Function<Entity, Key>() {
                     @Nullable
@@ -207,16 +202,15 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                     }
                 });
 
-        final Collection<Entity> filteredEntities = filter(
+        final Iterator<Entity> filteredEntities = filter(
                 eventEntities,
                 new IsActiveAggregateId(inactiveAggregateKeys));
-        final List<AggregateEventRecord> immutableResult = entitiesToMessages(
-                filteredEntities,
-                AGGREGATE_RECORD_TYPE_URL);
-        return immutableResult.iterator();
+        final Iterator<AggregateEventRecord> result = entitiesToMessages(filteredEntities,
+                                                                         AGGREGATE_RECORD_TYPE_URL);
+        return result;
     }
 
-    private Collection<Entity> getEntityStates() {
+    private Iterator<Entity> getEntityStates() {
         final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setKind(AGGREGATE_LIFECYCLE_KIND.value())
                                                    .build();
@@ -300,9 +294,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final StructuredQuery<Entity> allQuery = Query.newEntityQueryBuilder()
                                                       .setKind(stateTypeName.value())
                                                       .build();
-        final List<Entity> allRecords = datastore.read(allQuery);
-        final Iterator<I> index = Iterators.transform(allRecords.iterator(),
-                                                      new IndexTransformer<>(idClass));
+        final Iterator<Entity> allRecords = datastore.read(allQuery);
+        final Iterator<I> index = transform(allRecords, new IndexTransformer<>(idClass));
         return index;
     }
 
@@ -341,8 +334,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         private final Collection<Key> inActiveAggregateIds;
 
-        private IsActiveAggregateId(Collection<Key> inActiveAggregateIds) {
-            this.inActiveAggregateIds = checkNotNull(inActiveAggregateIds);
+        private IsActiveAggregateId(Iterator<Key> inActiveAggregateIds) {
+            this.inActiveAggregateIds = newArrayList(inActiveAggregateIds);
         }
 
         @Override

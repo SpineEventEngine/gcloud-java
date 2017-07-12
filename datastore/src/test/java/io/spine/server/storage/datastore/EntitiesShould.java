@@ -21,21 +21,22 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
-import org.junit.Test;
 import io.spine.test.storage.Project;
 import io.spine.type.TypeUrl;
+import org.junit.Test;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.server.storage.datastore.Entities.entitiesToMessages;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Dmytro Dashenkov
@@ -60,9 +61,10 @@ public class EntitiesShould {
     @Test
     public void retrieve_default_message_for_each_null_entity_in_collection() {
         final TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
-        final List<Entity> listOfNulls = Lists.newArrayList(null, null, null, null);
-        final Collection<Message> listOfDefaults =
-                Entities.entitiesToMessages(listOfNulls, typeUrl);
+        final List<Entity> listOfNulls = newArrayList(null, null, null, null);
+        final Iterator<Message> iterOfDefaults = entitiesToMessages(listOfNulls.iterator(),
+                                                                    typeUrl);
+        final List<Message> listOfDefaults = newArrayList(iterOfDefaults);
         assertSize(listOfNulls.size(), listOfDefaults);
         final Project expectedValue = Project.getDefaultInstance();
         for (Message message : listOfDefaults) {
@@ -72,10 +74,10 @@ public class EntitiesShould {
 
     @Test
     public void retrieve_empty_collection_on_empty_list() {
-        final List<Entity> empty = Collections.emptyList();
         final TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
-        final Collection<Message> converted = Entities.entitiesToMessages(empty, typeUrl);
+        final Iterator<Message> converted = entitiesToMessages(Collections.<Entity>emptyIterator(),
+                                                               typeUrl);
         assertNotNull(converted);
-        assertTrue(converted.isEmpty());
+        assertFalse(converted.hasNext());
     }
 }

@@ -1,41 +1,45 @@
-project.ext {
-    SPINE_VERSION = '0.9.21-SNAPSHOT'
-    GAE_JAVA_VERSION = "0.9.21-SNAPSHOT"
-    PROTOBUF_VERSION = '3.2.0'
-    SLf4J_VERSION = "1.7.21"
-    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
-    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
-    MAVEN_SNAPSHOT_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine-snapshots'
-
-    GUAVA_VERSION = "20.0"
-
-    IS_WINDOWS = org.gradle.internal.os.OperatingSystem.current().isWindows()
-
-    publishPlugin = "$rootDir/script/publish.gradle"
-    credentialsPropertyFile = 'credentials.properties'
-    projectsToPublish = ['datastore']
-}
-
-final String CREDENTIALS_LOCATION = 'credentials.properties'
-
 buildscript {
+
+    // Define the versions of the library and its dependencies.
+    // As long as `buildscript` section is always evaluated first, we need to apply
+    // `ext.gradle` explicitly here.
+    apply from: "ext.gradle"
+
+    ext {
+        googleMavenCentralMirror = 'https://maven-central.storage.googleapis.com'
+        spineRepository = 'http://maven.teamdev.com/repository/spine'
+        spineSnapshotsRepository = 'http://maven.teamdev.com/repository/spine-snapshots'
+    }
+
     repositories {
+        jcenter()
+        maven { url = googleMavenCentralMirror }
+
         mavenCentral()
         mavenLocal()
+
+        // Spine releases repository.
+        maven { url = spineRepository }
+
+        // Spine snapshots repository.
+        maven { url = spineSnapshotsRepository }
     }
+
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.0'
+        classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufGradlePluginVerison}"
     }
 }
 
-def repositoryUserName = null
-def repositoryUserPassword = null
-final Properties properties = new Properties()
-final File credentialsFile = file(CREDENTIALS_LOCATION)
-if (credentialsFile.exists()) {
-    properties.load(credentialsFile.newDataInputStream())
-    repositoryUserName = properties.getProperty("user.name")
-    repositoryUserPassword = properties.getProperty("user.password")
+apply from: 'ext.gradle'
+
+ext {
+    protobufDependency = "com.google.protobuf:protoc:${project.protobufVersion}"
+    publishPlugin = "$rootDir/script/publish.gradle"
+
+    credentialsPropertyFile = 'credentials.properties'
+    runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
+
+    projectsToPublish = ['datastore']
 }
 
 allprojects {
@@ -44,7 +48,7 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'jacoco'
     group = 'io.spine'
-    version = project.GAE_JAVA_VERSION
+    version = project.spineVersion
 
     repositories {
         mavenCentral()
@@ -61,41 +65,48 @@ subprojects {
     targetCompatibility = 1.7
 
     repositories {
-        maven {
-            url = "$MAVEN_REPOSITORY_URL"
-        }
-        maven {
-            url = "$MAVEN_SNAPSHOT_REPOSITORY_URL"
-        }
+        jcenter()
+        maven { url = googleMavenCentralMirror }
+
+        mavenCentral()
         mavenLocal()
+
+        // Spine releases repository.
+        maven { url = spineRepository }
+
+        // Spine snapshots repository.
+        maven { url = spineSnapshotsRepository }
     }
 
     dependencies {
-        // when Spine can be used for evaluation in real projects.
-        // Spine
-        compile (group: 'io.spine', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true) {
+        // Exclude the transient dependencies from Spine, that aren't needed for GAE implementation.
+        final def excludes = {
             exclude group: 'com.google.protobuf', module: 'protobuf-lite'
             exclude group: 'io.grpc'
         }
-        compile group: 'io.spine', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true
 
-        // Spine for tests
-        testCompile (group: 'io.spine', name: 'spine-server-core', version: project.SPINE_VERSION, changing: true, classifier: 'test') {
-            exclude group: 'com.google.protobuf', module: 'protobuf-lite'
-            exclude group: 'io.grpc'
-        }
-        testCompile group: 'io.spine', name: 'spine-client-core', version: project.SPINE_VERSION, changing: true, classifier: 'test'
-        testCompile group: 'io.spine', name: 'spine-testutil-core', version: project.SPINE_VERSION, changing: true
+        compile group: 'io.spine', name: "spine-server",
+                version: spineVersion, changing: true, excludes
+
 
         // Guava
-        compile group: 'com.google.guava', name: 'guava', version: GUAVA_VERSION
+        compile group: 'com.google.guava', name: 'guava', version: guavaVersion
+
+        // Protobuf runtime
+        compile group: 'com.google.protobuf', name: 'protobuf-java', version: protobufVersion
+        compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: protobufVersion
 
         // Findbugs
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
 
         // SLF4J
-        compile group: 'org.slf4j', name: 'slf4j-api', version: SLf4J_VERSION
-        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: SLf4J_VERSION
+        compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: slf4jVersion
+
+        testCompile group: 'io.spine', name: "spine-testutil-server", version: spineVersion,
+                changing: true, excludes
+        testCompile group: 'io.spine', name: "spine-server", version: spineVersion,
+                changing: true, classifier: "test", excludes
 
         // JUnit
         testCompile(group: 'junit', name: 'junit', version: '4.12') {
@@ -103,13 +114,13 @@ subprojects {
         }
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
-        testCompile group: 'com.google.guava', name: 'guava-testlib', version: GUAVA_VERSION
+        testCompile group: 'com.google.guava', name: 'guava-testlib', version: guavaVersion
     }
 
     protobuf {
         generatedFilesBaseDir = "$projectDir/generated"
         protoc {
-            artifact = project.PROTOBUF_DEPENDENCY
+            artifact = project.protobufDependency
         }
     }
 
@@ -128,7 +139,7 @@ subprojects {
     }
 
     task javadocJar(type: Jar, dependsOn: 'javadoc') {
-        from ("$projectDir/build/docs/javadoc")
+        from("$projectDir/build/docs/javadoc")
         classifier "javadoc"
     }
 }
@@ -142,7 +153,7 @@ task codeCoverageReport(type: JacocoReport) {
 
     reports {
         xml.enabled = true
-        xml.destination = "${buildDir}/reports/jacoco/report.xml"
+        xml.destination = ("${buildDir}/reports/jacoco/report.xml" as File)
         html.enabled = false
         csv.enabled = false
     }
@@ -159,7 +170,7 @@ task startDatastore {
 
 startDatastore.doLast {
     // Start Datastore emulator with the CLI command
-    ".${File.separatorChar}script${File.separatorChar}start-datastore.${IS_WINDOWS ? 'bat' : 'sh'}".execute()
+    ".${File.separatorChar}script${File.separatorChar}start-datastore.${runsOnWindows ? 'bat' : 'sh'}".execute()
 }
 
 tasks["check"].dependsOn startDatastore
