@@ -10,7 +10,10 @@ before_install:
 script:
   - ./gradlew build codeCoverageReport --debug
 
+  # The publishing script should be executed in `script` section in order to
+  # fail the Travis build if execution of this script is failed.
+  - chmod +x ./scripts/publish-artifacts.sh
+  - ./scripts/publish-artifacts.sh
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-  - chmod +x ./script/publish_artifacts.sh
-  - ./script/publish_artifacts.sh
