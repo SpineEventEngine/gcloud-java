@@ -164,13 +164,13 @@ codeCoverageReport.dependsOn {
 }
 
 task startDatastore {
-    description "Starts local in-memory datastore using scripts form ./script folder."
+    description "Starts local in-memory datastore using scripts form ./scripts folder."
     group "Build Setup"
 }
 
 startDatastore.doLast {
     // Start Datastore emulator with the CLI command
-    ".${File.separatorChar}script${File.separatorChar}start-datastore.${runsOnWindows ? 'bat' : 'sh'}".execute()
+    ".${File.separatorChar}scripts${File.separatorChar}start-datastore.${runsOnWindows ? 'bat' : 'sh'}".execute()
 }
 
 tasks["check"].dependsOn startDatastore
