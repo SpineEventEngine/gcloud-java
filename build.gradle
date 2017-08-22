@@ -34,7 +34,7 @@ apply from: 'ext.gradle'
 
 ext {
     protobufDependency = "com.google.protobuf:protoc:${project.protobufVersion}"
-    publishPlugin = "$rootDir/script/publish.gradle"
+    publishPlugin = "$rootDir/scripts/publish.gradle"
 
     credentialsPropertyFile = 'credentials.properties'
     runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
