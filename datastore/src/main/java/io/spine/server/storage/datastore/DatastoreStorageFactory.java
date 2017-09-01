@@ -47,8 +47,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static io.spine.server.entity.Entity.TypeInfo.getIdClass;
-import static io.spine.server.entity.Entity.TypeInfo.getStateClass;
+import static io.spine.server.entity.Entity.GenericParameter.ID;
+import static io.spine.server.entity.Entity.GenericParameter.STATE;
 
 /**
  * Creates storages based on GAE {@link Datastore}.
@@ -170,7 +170,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        final Class<Message> messageClass = getStateClass(entityClass);
+        final Class<? extends Message> messageClass = getStateClass(entityClass);
         final TypeUrl typeUrl = TypeUrl.of(messageClass);
         final Class<I> idClass = getIdClass(entityClass);
         final DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
@@ -357,5 +357,17 @@ public class DatastoreStorageFactory implements StorageFactory {
             checkArgument(isNullOrEmpty(namespace),
                           DEFAULT_NAMESPACE_ERROR_MESSAGE);
         }
+    }
+
+    private static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
+        @SuppressWarnings("unchecked") // Logically checked
+        final Class<I> result = (Class<I>) ID.getArgumentIn(entityClass);
+        return result;
+    }
+
+    private static <M extends Message> Class<M> getStateClass(Class<? extends Entity> entityClass) {
+        @SuppressWarnings("unchecked") // Logically checked
+        final Class<M> result = (Class<M>) STATE.getArgumentIn(entityClass);
+        return result;
     }
 }

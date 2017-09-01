@@ -31,18 +31,22 @@ import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.client.ColumnFilter;
+import io.spine.client.CompositeColumnFilter;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnRecords;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.string.Stringifiers;
@@ -54,20 +58,24 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.alwaysTrue;
 import static com.google.common.collect.Collections2.transform;
+import static com.google.common.collect.Iterators.concat;
 import static com.google.common.collect.Iterators.filter;
 import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
+import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.isDefault;
+import static java.util.Collections.emptyIterator;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -205,17 +213,22 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Iterator<EntityRecord> queryByColumns(EntityQuery<I> entityQuery, FieldMask fieldMask) {
+        final Collection<I> idFilter = entityQuery.getIds();
+        final QueryParameters params = entityQuery.getParameters();
+        if (!idFilter.isEmpty()) { // IDs query
+            final Predicate<Entity> inMemPredicate;
+            if (!params.iterator().hasNext()) { // IDs and columns query
+                inMemPredicate = buildMemoryPredicate(params);
+            } else {
+                inMemPredicate = alwaysTrue();
+            }
+            final Iterator<EntityRecord> records = lookup(idFilter, fieldMask, inMemPredicate);
+            return records;
+        }
+        // Only column query
         final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                                     .setKind(getKind().getValue());
-        final Iterable<CompositeQueryParameter> params = entityQuery.getParameters();
         final Collection<Filter> filters = buildColumnFilters(params);
-
-        if (filters.isEmpty()) {
-            return lookup(entityQuery.getIds(), fieldMask);
-        }
-
-        final Set<I> ids = entityQuery.getIds();
-
         final Collection<StructuredQuery<Entity>> queries = transform(
                 filters,
                 new Function<Filter, StructuredQuery<Entity>>() {
@@ -227,19 +240,16 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                     }
                 }
         );
-
-        final Predicate<Entity> inMemFilter = buildMemoryPredicate(ids);
-        final Collection<EntityRecord> result = newLinkedList();
+        Iterator<EntityRecord> result = emptyIterator();
         for (StructuredQuery<Entity> query : queries) {
-            final Iterator<EntityRecord> records = queryAll(typeUrl, query, fieldMask, inMemFilter);
-            result.addAll(newArrayList(records));
+            final Iterator<EntityRecord> records = queryAll(typeUrl, query, fieldMask);
+            result = concat(result, records);
         }
-        return result.iterator();
+        return result;
     }
 
-    private Predicate<Entity> buildMemoryPredicate(Set<I> ids) {
-        final Predicate<Entity> idPredicate = new IdFilter(ids);
-        return idPredicate;
+    private Predicate<Entity> buildMemoryPredicate(QueryParameters params) {
+        return new EntityColumnPredicate(params, columnFilterAdapter);
     }
 
     private Collection<Filter> buildColumnFilters(
@@ -272,14 +282,16 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return typeUrl;
     }
 
-    private Iterator<EntityRecord> lookup(Collection<I> ids, FieldMask fieldMask) {
+    private Iterator<EntityRecord> lookup(Collection<I> ids,
+                                          FieldMask fieldMask,
+                                          Predicate<Entity> predicate) {
         if (ids.isEmpty()) {
             return readAllRecords(fieldMask);
         }
         final Collection<Key> keys = toKeys(ids);
         final Iterator<Entity> records = datastore.read(keys);
         final Iterator<EntityRecord> result = toRecords(records,
-                                                        Predicates.<Entity>alwaysTrue(),
+                                                        predicate,
                                                         typeUrl,
                                                         fieldMask);
         return result;
@@ -521,48 +533,77 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
     }
 
-    /**
-     * A tuple containing generic record identifier and corresponding {@link EntityRecord}.
-     *
-     * @param <I> type of the {@link io.spine.server.entity.Entity entity} ID.
-     */
-    protected static class IdRecordPair<I> {
+    private static class EntityColumnPredicate implements Predicate<Entity> {
 
-        private final I id;
-        private final EntityRecord record;
+        private final ColumnFilterAdapter adapter;
+        private final Iterable<CompositeQueryParameter> queryParams;
 
-        protected IdRecordPair(I id, EntityRecord record) {
-            this.id = id;
-            this.record = record;
+        private EntityColumnPredicate(Iterable<CompositeQueryParameter> queryParams,
+                                      ColumnFilterAdapter adapter) {
+            this.adapter = adapter;
+            this.queryParams = queryParams;
         }
 
-        protected I getId() {
-            return id;
-        }
-
-        protected EntityRecord getRecord() {
-            return record;
-        }
-    }
-
-    private class IdFilter implements Predicate<Entity> {
-
-        private final Set<?> acceptedIds;
-
-        private IdFilter(Set<?> acceptedIds) {
-            this.acceptedIds = acceptedIds;
-        }
-
+        @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases covered
         @Override
-        public boolean apply(@Nullable Entity input) {
-            if (input == null) {
+        public boolean apply(@Nullable Entity entity) {
+            if (entity == null) {
                 return false;
             }
-            if (acceptedIds.isEmpty()) {
-                return true;
+            for (CompositeQueryParameter filter : queryParams) {
+                final boolean match;
+                final CompositeColumnFilter.CompositeOperator operator = filter.getOperator();
+                switch (operator) {
+                    case ALL:
+                        match = checkAll(filter.getFilters(), entity);
+                        break;
+                    case EITHER:
+                        match = checkEither(filter.getFilters(), entity);
+                        break;
+                    default:
+                        throw newIllegalArgumentException("Composite operator %s is invalid.",
+                                                          operator);
+                }
+                if (!match) {
+                    return false;
+                }
             }
-            final Object id = unpackKey(input);
-            final boolean result = acceptedIds.contains(id);
+            return true;
+        }
+
+        private boolean checkAll(Multimap<Column, ColumnFilter> filters, Entity entity) {
+            for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
+                final Column column = filter.getKey();
+                final boolean matches = checkSingleParam(filter.getValue(), entity, column);
+                if (!matches) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private boolean checkEither(Multimap<Column, ColumnFilter> filters, Entity entity) {
+            for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
+                final Column column = filter.getKey();
+                final boolean matches = checkSingleParam(filter.getValue(), entity, column);
+                if (matches) {
+                    return true;
+                }
+            }
+            return filters.isEmpty();
+        }
+
+        private boolean checkSingleParam(ColumnFilter filter, Entity entity, Column column) {
+            final String columnName = column.getName();
+            if (!entity.contains(columnName)) {
+                return false;
+            }
+            final Object actual = entity.getValue(columnName)
+                                        .get();
+            final Object expected = adapter.toValue(column, filter)
+                                           .get();
+
+            final boolean result = eval(actual, filter.getOperator(), expected);
             return result;
         }
     }
