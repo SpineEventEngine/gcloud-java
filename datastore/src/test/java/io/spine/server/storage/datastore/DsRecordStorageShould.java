@@ -276,32 +276,39 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
             this.creationTime = getCurrentTime();
         }
 
+        @javax.persistence.Column
         public int getCounter() {
             return COUNTER;
         }
 
+        @javax.persistence.Column
         public long getBigCounter() {
             return getCounter();
         }
 
+        @javax.persistence.Column
         public boolean isCounterEven() {
             return true;
         }
 
+        @javax.persistence.Column
         public String getCounterName() {
             return getId().toString();
         }
 
+        @javax.persistence.Column
         public Version getCounterVersion() {
             return Version.newBuilder()
                           .setNumber(COUNTER)
                           .build();
         }
 
+        @javax.persistence.Column
         public Timestamp getCreationTime() {
             return creationTime;
         }
 
+        @javax.persistence.Column
         public Project getCounterState() {
             return getState();
         }
