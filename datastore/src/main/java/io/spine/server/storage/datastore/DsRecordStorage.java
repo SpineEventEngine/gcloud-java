@@ -598,10 +598,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             if (!entity.contains(columnName)) {
                 return false;
             }
-            final Object actual = entity.getValue(columnName)
-                                        .get();
-            final Object expected = adapter.toValue(column, filter)
-                                           .get();
+            final Object actual = entity.getValue(columnName).get();
+            final Object expected = adapter.toValue(column, filter).get();
 
             final boolean result = eval(actual, filter.getOperator(), expected);
             return result;
