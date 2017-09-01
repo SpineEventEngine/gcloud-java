@@ -456,6 +456,80 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return keys;
     }
 
+
+    private static class EntityColumnPredicate implements Predicate<Entity> {
+
+        private final ColumnFilterAdapter adapter;
+        private final Iterable<CompositeQueryParameter> queryParams;
+
+        private EntityColumnPredicate(Iterable<CompositeQueryParameter> queryParams,
+                                      ColumnFilterAdapter adapter) {
+            this.adapter = adapter;
+            this.queryParams = queryParams;
+        }
+
+        @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases covered
+        @Override
+        public boolean apply(@Nullable Entity entity) {
+            if (entity == null) {
+                return false;
+            }
+            for (CompositeQueryParameter filter : queryParams) {
+                final boolean match;
+                final CompositeColumnFilter.CompositeOperator operator = filter.getOperator();
+                switch (operator) {
+                    case ALL:
+                        match = checkAll(filter.getFilters(), entity);
+                        break;
+                    case EITHER:
+                        match = checkEither(filter.getFilters(), entity);
+                        break;
+                    default:
+                        throw newIllegalArgumentException("Composite operator %s is invalid.",
+                                                          operator);
+                }
+                if (!match) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private boolean checkAll(Multimap<Column, ColumnFilter> filters, Entity entity) {
+            for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
+                final Column column = filter.getKey();
+                final boolean matches = checkSingleParam(filter.getValue(), entity, column);
+                if (!matches) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private boolean checkEither(Multimap<Column, ColumnFilter> filters, Entity entity) {
+            for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
+                final Column column = filter.getKey();
+                final boolean matches = checkSingleParam(filter.getValue(), entity, column);
+                if (matches) {
+                    return true;
+                }
+            }
+            return filters.isEmpty();
+        }
+
+        private boolean checkSingleParam(ColumnFilter filter, Entity entity, Column column) {
+            final String columnName = column.getName();
+            if (!entity.contains(columnName)) {
+                return false;
+            }
+            final Object actual = entity.getValue(columnName).get();
+            final Object expected = adapter.toValue(column, filter).get();
+
+            final boolean result = eval(actual, filter.getOperator(), expected);
+            return result;
+        }
+    }
+
     /**
      * Creates new instance of the {@link Builder}.
      *
@@ -530,79 +604,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             checkNotNull(columnTypeRegistry, "Column type registry is not set.");
             final DsRecordStorage<I> storage = new DsRecordStorage<>(this);
             return storage;
-        }
-    }
-
-    private static class EntityColumnPredicate implements Predicate<Entity> {
-
-        private final ColumnFilterAdapter adapter;
-        private final Iterable<CompositeQueryParameter> queryParams;
-
-        private EntityColumnPredicate(Iterable<CompositeQueryParameter> queryParams,
-                                      ColumnFilterAdapter adapter) {
-            this.adapter = adapter;
-            this.queryParams = queryParams;
-        }
-
-        @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases covered
-        @Override
-        public boolean apply(@Nullable Entity entity) {
-            if (entity == null) {
-                return false;
-            }
-            for (CompositeQueryParameter filter : queryParams) {
-                final boolean match;
-                final CompositeColumnFilter.CompositeOperator operator = filter.getOperator();
-                switch (operator) {
-                    case ALL:
-                        match = checkAll(filter.getFilters(), entity);
-                        break;
-                    case EITHER:
-                        match = checkEither(filter.getFilters(), entity);
-                        break;
-                    default:
-                        throw newIllegalArgumentException("Composite operator %s is invalid.",
-                                                          operator);
-                }
-                if (!match) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private boolean checkAll(Multimap<Column, ColumnFilter> filters, Entity entity) {
-            for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
-                final Column column = filter.getKey();
-                final boolean matches = checkSingleParam(filter.getValue(), entity, column);
-                if (!matches) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private boolean checkEither(Multimap<Column, ColumnFilter> filters, Entity entity) {
-            for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
-                final Column column = filter.getKey();
-                final boolean matches = checkSingleParam(filter.getValue(), entity, column);
-                if (matches) {
-                    return true;
-                }
-            }
-            return filters.isEmpty();
-        }
-
-        private boolean checkSingleParam(ColumnFilter filter, Entity entity, Column column) {
-            final String columnName = column.getName();
-            if (!entity.contains(columnName)) {
-                return false;
-            }
-            final Object actual = entity.getValue(columnName).get();
-            final Object expected = adapter.toValue(column, filter).get();
-
-            final boolean result = eval(actual, filter.getOperator(), expected);
-            return result;
         }
     }
 }
