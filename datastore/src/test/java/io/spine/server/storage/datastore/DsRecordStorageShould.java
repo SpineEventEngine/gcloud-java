@@ -354,7 +354,9 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
     public static class TestConstCounterEntity
             extends AbstractVersionableEntity<ProjectId, Project> {
 
+        private static final String CREATED_COLUMN_NAME = "creationTime";
         private static final int COUNTER = 42;
+
         private final Timestamp creationTime;
         private LifecycleFlags lifecycleFlags;
 

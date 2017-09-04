@@ -40,10 +40,10 @@ import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnRecords;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.CompositeQueryParameter;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
@@ -496,9 +496,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return true;
         }
 
-        private boolean checkAll(Multimap<Column, ColumnFilter> filters, Entity entity) {
-            for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
-                final Column column = filter.getKey();
+        private boolean checkAll(Multimap<EntityColumn, ColumnFilter> filters, Entity entity) {
+            for (Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
+                final EntityColumn column = filter.getKey();
                 final boolean matches = checkSingleParam(filter.getValue(), entity, column);
                 if (!matches) {
                     return false;
@@ -507,9 +507,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return true;
         }
 
-        private boolean checkEither(Multimap<Column, ColumnFilter> filters, Entity entity) {
-            for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
-                final Column column = filter.getKey();
+        private boolean checkEither(Multimap<EntityColumn, ColumnFilter> filters, Entity entity) {
+            for (Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
+                final EntityColumn column = filter.getKey();
                 final boolean matches = checkSingleParam(filter.getValue(), entity, column);
                 if (matches) {
                     return true;
@@ -518,7 +518,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return filters.isEmpty();
         }
 
-        private boolean checkSingleParam(ColumnFilter filter, Entity entity, Column column) {
+        private boolean checkSingleParam(ColumnFilter filter, Entity entity, EntityColumn column) {
             final String columnName = column.getName();
             if (!entity.contains(columnName)) {
                 return false;
@@ -582,8 +582,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param columnTypeRegistry the registry of the Entity
-         *                           {@link io.spine.server.entity.storage.Column Columns} types
+         * @param columnTypeRegistry the type registry of the
+         *                           {@linkplain io.spine.server.entity.storage.EntityColumn
+         *                           entity columns}
          */
         public Builder<I> setColumnTypeRegistry(
                 ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {

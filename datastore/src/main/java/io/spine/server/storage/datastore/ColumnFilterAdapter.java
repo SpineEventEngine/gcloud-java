@@ -57,7 +57,7 @@ final class ColumnFilterAdapter {
      * Extracts the filter parameter from the given {@link ColumnFilter} and converts it into
      * the Datastore {@link Value}.
      *
-     * @param column       the {@link Column} targeted by the given filter
+     * @param column       the {@link EntityColumn} targeted by the given filter
      * @param columnFilter the filter
      * @return new instance of {@link Value} representing the value of the given filter
      */
