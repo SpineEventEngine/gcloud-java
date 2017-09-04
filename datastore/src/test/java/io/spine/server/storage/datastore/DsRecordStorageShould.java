@@ -20,12 +20,19 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
+import io.spine.client.CompositeColumnFilter;
+import io.spine.client.EntityFilters;
+import io.spine.client.EntityId;
+import io.spine.client.EntityIdFilter;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.AbstractEntity;
@@ -34,6 +41,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
@@ -45,19 +53,32 @@ import io.spine.type.TypeUrl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.toSeconds;
+import static io.spine.client.ColumnFilters.all;
+import static io.spine.client.ColumnFilters.eq;
 import static io.spine.json.Json.toCompactJson;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Verify.assertContainsKey;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Dmytro Dashenkov
@@ -145,7 +166,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         final String bigCounter = "bigCounter";
         final String counterEven = "counterEven";
         final String counterVersion = "counterVersion";
-        final String creationTime = "creationTime";
+        final String creationTime = TestConstCounterEntity.CREATED_COLUMN_NAME;
         final String counterState = "counterState";
         final String version = "version";
         final String archived = "archived";
@@ -280,6 +301,51 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         assertTrue(propertiesName.contains(COLUMN_NAME_FOR_STORING));
     }
 
+    @Test
+    public void query_by_IDs_when_possible() {
+        SpyStorageFactory.injectWrapper(datastoreFactory.getDatastore());
+        final DatastoreStorageFactory storageFactory = new SpyStorageFactory();
+        final RecordStorage<ProjectId> storage =
+                storageFactory.createRecordStorage(TestConstCounterEntity.class);
+        final int recordCount = 10;
+        final int targetEntityIndex = 7;
+        final List<TestConstCounterEntity> entities = new ArrayList<>(recordCount);
+        for (int i = 0; i < recordCount; i++) {
+            final TestConstCounterEntity entity = new TestConstCounterEntity(newId());
+            entities.add(entity);
+            final EntityRecord record = EntityRecord.newBuilder()
+                                                    .setState(pack(entity.getState()))
+                                                    .build();
+            final EntityRecordWithColumns withColumns = create(record, entity);
+            storage.write(entity.getId(), withColumns);
+        }
+        final TestConstCounterEntity targetEntity = entities.get(targetEntityIndex);
+        final EntityId targetId = EntityId.newBuilder()
+                                          .setId(pack(targetEntity.getId()))
+                                          .build();
+        final Object columnTargetValue = targetEntity.getCreationTime();
+        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
+                                                      .addIds(targetId)
+                                                      .build();
+        final CompositeColumnFilter columnFilter =
+                all(eq(TestConstCounterEntity.CREATED_COLUMN_NAME, columnTargetValue));
+        final EntityFilters entityFilters = EntityFilters.newBuilder()
+                                                         .setIdFilter(idFilter)
+                                                         .addFilter(columnFilter)
+                                                         .build();
+        final EntityQuery<ProjectId> entityQuery = from(entityFilters,
+                                                        TestConstCounterEntity.class);
+        final Iterator<EntityRecord> readResult = storage.readAll(entityQuery,
+                                                                  FieldMask.getDefaultInstance());
+        final List<EntityRecord> resultList = newArrayList(readResult);
+        assertEquals(1, resultList.size());
+        assertEquals(targetEntity.getState(), unpack(resultList.get(0).getState()));
+
+        final DatastoreWrapper spy = storageFactory.getDatastore();
+        verify(spy).read(ArgumentMatchers.<Key>anyIterable());
+        verify(spy, never()).read(any(StructuredQuery.class));
+    }
+
     /*
      * Test Entity types
      ************************/
@@ -363,6 +429,27 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         @Column(name = COLUMN_NAME_FOR_STORING)
         public int getValue() {
             return 0;
+        }
+    }
+
+    /**
+     * A {@link TestDatastoreStorageFactory} which spies on its {@link DatastoreWrapper}.
+     */
+    private static class SpyStorageFactory extends TestDatastoreStorageFactory {
+
+        private static DatastoreWrapper spyWrapper = null;
+
+        private static void injectWrapper(DatastoreWrapper wrapper) {
+            spyWrapper = spy(wrapper);
+        }
+
+        private SpyStorageFactory() {
+            super(spyWrapper.getDatastore());
+        }
+
+        @Override
+        protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
+            return spyWrapper;
         }
     }
 }

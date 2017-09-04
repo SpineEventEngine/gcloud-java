@@ -62,7 +62,7 @@ To start an emulator without running tests `./gradlew startDatastore`.
 To stop the Datastore emulator, just terminate the emulator process (e.g. `kill -9 $(lsof -i:8080)` or just close the terminal window on Windows).
 
 The launched emulator will run at `localhost:8080` and will not have any persistence.
-To change the configuration see `./script/start-datastore.*` scripts.
+To change the configuration see `./scripts/start-datastore.*` scripts.
 
 The datastore is cleaned up after each test.
 See test classes under `./datastore/src/test/java/...` and `io.spine.server.storage.datastore.TestDatastoreStorageFactory#clear`.
