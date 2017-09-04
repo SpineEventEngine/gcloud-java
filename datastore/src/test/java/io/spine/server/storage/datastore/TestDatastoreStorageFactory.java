@@ -34,7 +34,7 @@ import static io.spine.server.datastore.TestEnvironment.runsOnCi;
  * Creates storages based on the local Google {@link Datastore}.
  */
 @SuppressWarnings("CallToSystemGetenv")
-class TestDatastoreStorageFactory extends DatastoreStorageFactory {
+public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     public static final String DEFAULT_DATASET_NAME = Given.testProjectIdValue();
 
@@ -56,7 +56,7 @@ class TestDatastoreStorageFactory extends DatastoreStorageFactory {
                : LocalInstanceSingleton.INSTANCE.value;
     }
 
-    private TestDatastoreStorageFactory(Datastore datastore) {
+    protected TestDatastoreStorageFactory(Datastore datastore) {
         super(datastore,
               false,
               DatastoreTypeRegistryFactory.defaultInstance(),

@@ -28,6 +28,7 @@ import io.spine.annotation.Internal;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityClass;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
@@ -47,8 +48,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static io.spine.server.entity.Entity.TypeInfo.getIdClass;
-import static io.spine.server.entity.Entity.TypeInfo.getStateClass;
 
 /**
  * Creates storages based on GAE {@link Datastore}.
@@ -168,13 +167,14 @@ public class DatastoreStorageFactory implements StorageFactory {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        final Class<Message> messageClass = getStateClass(entityClass);
-        final TypeUrl typeUrl = TypeUrl.of(messageClass);
-        final Class<I> idClass = getIdClass(entityClass);
+        final EntityClass<Entity<I, ?>> wrappedEntityClass = new EntityClass<>(entityClass);
+        final TypeUrl stateType = wrappedEntityClass.getStateType();
+        final Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
         final DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
-                                                         .setStateType(typeUrl)
+                                                         .setStateType(stateType)
                                                          .setDatastore(getDatastore())
                                                          .setMultitenant(isMultitenant())
                                                          .setColumnTypeRegistry(typeRegistry)
@@ -186,13 +186,15 @@ public class DatastoreStorageFactory implements StorageFactory {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(
             Class<? extends Aggregate<I, ?, ?>> entityClass) {
         checkNotNull(entityClass);
+        final EntityClass<Aggregate<I, ?, ?>> wrappedEntityClass = new EntityClass<>(entityClass);
         final DsPropertyStorage propertyStorage = createPropertyStorage();
-        final Class<I> idClass = getIdClass(entityClass);
-        final Class<? extends Message> stateClass = getStateClass(entityClass);
+        final Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
+        final Class<? extends Message> stateClass = wrappedEntityClass.getStateClass();
         final DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(),
                                                                       propertyStorage,
                                                                       multitenant,

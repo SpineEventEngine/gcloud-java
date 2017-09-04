@@ -23,6 +23,7 @@ package io.spine.server.storage.datastore.type;
 import com.google.cloud.datastore.BooleanValue;
 import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.TimestampValue;
 import com.google.cloud.datastore.Value;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
@@ -148,7 +149,7 @@ final class DsColumnTypes {
 
         @Override
         public Value<?> toValue(com.google.cloud.Timestamp data) {
-            return com.google.cloud.datastore.TimestampValue.of(data);
+            return TimestampValue.of(data);
         }
     }
 
