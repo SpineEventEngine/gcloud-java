@@ -468,7 +468,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             this.queryParams = queryParams;
         }
 
-        @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases covered
         @Override
         public boolean apply(@Nullable Entity entity) {
             if (entity == null) {
@@ -484,6 +483,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                     case EITHER:
                         match = checkEither(filter.getFilters(), entity);
                         break;
+                    case UNRECOGNIZED:      // Fall through to default strategy
+                    case CCF_CO_UNDEFINED:  // for the `default` and `faulty` enum values.
                     default:
                         throw newIllegalArgumentException("Composite operator %s is invalid.",
                                                           operator);
