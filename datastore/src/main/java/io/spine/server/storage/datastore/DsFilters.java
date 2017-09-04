@@ -27,10 +27,10 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableMultimap;
 import io.spine.client.ColumnFilter;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.CompositeQueryParameter;
+import io.spine.server.entity.storage.EntityColumn;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -121,9 +121,9 @@ final class DsFilters {
      * <p>If the given parameter {@code Collection} is empty, and empty {@code Collection}
      * is returned.
      *
-     * @param parameters    the {@linkplain CompositeQueryParameter query parameters} to convert
-     * @param columnFilterAdapter an instance of {@linkplain ColumnFilterAdapter} performing the required type
-     *                      conventions
+     * @param parameters          the {@linkplain CompositeQueryParameter query parameters} to convert
+     * @param columnFilterAdapter an instance of {@linkplain ColumnFilterAdapter} performing
+     *                            the required type conversions
      * @return the equivalent expression of in Datastore {@link Filter} instances
      */
     static Collection<Filter> fromParams(Collection<CompositeQueryParameter> parameters,
@@ -259,9 +259,9 @@ final class DsFilters {
      * Converts the given parameter to a {@code Collection} of {@link ColumnFilterNode}s.
      */
     private static Collection<ColumnFilterNode> toFilters(CompositeQueryParameter param) {
-        final Multimap<Column, ColumnFilter> srcFilters = param.getFilters();
+        final ImmutableMultimap<EntityColumn, ColumnFilter> srcFilters = param.getFilters();
         final Set<ColumnFilterNode> filters = new HashSet<>(srcFilters.size());
-        for (Map.Entry<Column, ColumnFilter> entry : srcFilters.entries()) {
+        for (Map.Entry<EntityColumn, ColumnFilter> entry : srcFilters.entries()) {
             filters.add(new ColumnFilterNode(entry.getKey(), entry.getValue()));
         }
         return filters;
@@ -334,12 +334,12 @@ final class DsFilters {
      */
     private static class ColumnFilterNode {
 
-        private final Column column;
+        private final EntityColumn column;
         private final ColumnFilter columnFilter;
 
         private final Collection<ColumnFilterNode> subtrees;
 
-        private ColumnFilterNode(@Nullable Column column,
+        private ColumnFilterNode(@Nullable EntityColumn column,
                                  @Nullable ColumnFilter columnFilter) {
             this.column = column;
             this.columnFilter = columnFilter;
@@ -350,7 +350,7 @@ final class DsFilters {
             this(null, null);
         }
 
-        private Column getColumn() {
+        private EntityColumn getColumn() {
             return column;
         }
 
@@ -362,7 +362,7 @@ final class DsFilters {
             // Only non-faulty values are used.
         private Filter toFilter(ColumnFilterAdapter adapter) {
             final Value<?> value = adapter.toValue(column, columnFilter);
-            final String columnIdentifier = columnFilter.getColumnName();
+            final String columnIdentifier = column.getStoredName();
             switch (columnFilter.getOperator()) {
                 case EQUAL:
                     return eq(columnIdentifier, value);

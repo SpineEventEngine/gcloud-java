@@ -21,14 +21,15 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import io.spine.client.ColumnFilter;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.TestEntityWithStringColumn;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.CompositeQueryParameter;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.test.storage.Project;
 import org.junit.Test;
 
@@ -77,11 +78,11 @@ public class DsFiltersShould {
         final String idStringValue = "42";
         final boolean archivedValue = true;
         final boolean deletedValue = true;
-        final Multimap<Column, ColumnFilter> conjunctiveFilters = of(
+        final Multimap<EntityColumn, ColumnFilter> conjunctiveFilters = of(
                 column(TestEntity.class, ID_STRING_GETTER_NAME), gt(ID_STRING_COLUMN_NAME,
                                                                            idStringValue)
         );
-        final Multimap<Column, ColumnFilter> disjunctiveFilters = of(
+        final ImmutableMultimap<EntityColumn, ColumnFilter> disjunctiveFilters = of(
                 column(TestEntity.class, DELETED_GETTER_NAME), eq(deleted.name(), deletedValue),
                 column(TestEntity.class, ARCHIVED_GETTER_NAME), eq(archived.name(), archivedValue)
         );
@@ -101,7 +102,7 @@ public class DsFiltersShould {
     @Test
     public void generate_filters_from_single_parameter() {
         final String versionValue = "314";
-        final Multimap<Column, ColumnFilter> singleFilter = of(
+        final ImmutableMultimap<EntityColumn, ColumnFilter> singleFilter = of(
                 column(TestEntity.class, ID_STRING_GETTER_NAME), le(ID_STRING_COLUMN_NAME,
                                                                     versionValue)
         );
@@ -121,13 +122,13 @@ public class DsFiltersShould {
         final String lessBoundDefiner = "42";
         final boolean archivedValue = true;
         final boolean deletedValue = true;
-        final Column idStringColumn = column(TestEntity.class, ID_STRING_GETTER_NAME);
-        final Multimap<Column, ColumnFilter> versionFilters = of(
+        final EntityColumn idStringColumn = column(TestEntity.class, ID_STRING_GETTER_NAME);
+        final ImmutableMultimap<EntityColumn, ColumnFilter> versionFilters = of(
                 idStringColumn, ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
                 idStringColumn, eq(ID_STRING_COLUMN_NAME, standaloneValue),
                 idStringColumn, lt(ID_STRING_COLUMN_NAME, lessBoundDefiner)
         );
-        final Multimap<Column, ColumnFilter> lifecycleFilters = of(
+        final ImmutableMultimap<EntityColumn, ColumnFilter> lifecycleFilters = of(
                 column(TestEntity.class, DELETED_GETTER_NAME), eq(deleted.name(),
                                                                   deletedValue),
                 column(TestEntity.class, ARCHIVED_GETTER_NAME), eq(archived.name(),
@@ -163,14 +164,14 @@ public class DsFiltersShould {
         assertSize(0, filters);
     }
 
-    private static Column column(Class<? extends Entity> cls, String methodName) {
+    private static EntityColumn column(Class<? extends Entity> cls, String methodName) {
         Method method = null;
         try {
             method = cls.getMethod(methodName);
         } catch (NoSuchMethodException e) {
             fail("Method " + methodName + " not found.");
         }
-        final Column column = Column.from(method);
+        final EntityColumn column = EntityColumn.from(method);
         return column;
     }
 

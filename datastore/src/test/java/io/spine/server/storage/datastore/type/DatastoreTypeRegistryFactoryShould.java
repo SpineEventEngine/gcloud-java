@@ -23,17 +23,17 @@ package io.spine.server.storage.datastore.type;
 import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.Value;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
 import io.spine.core.Version;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.entity.storage.EntityColumn;
+import org.junit.Test;
 
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Dmytro Dashenkov
@@ -85,8 +85,8 @@ public class DatastoreTypeRegistryFactoryShould {
         assertThat(byteColumnType, instanceOf(CustomStringType.class));
     }
 
-    private static Column mockColumn(Class type) {
-        final Column column = mock(Column.class);
+    private static EntityColumn mockColumn(Class type) {
+        final EntityColumn column = mock(EntityColumn.class);
         when(column.getType()).thenReturn(type);
         return column;
     }

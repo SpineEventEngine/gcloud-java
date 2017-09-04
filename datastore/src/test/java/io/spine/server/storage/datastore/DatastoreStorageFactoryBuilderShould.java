@@ -26,16 +26,19 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Value;
 import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.storage.datastore.type.SimpleDatastoreColumnType;
+import org.junit.Test;
 
+import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -43,8 +46,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Dmytro Dashenkov
@@ -161,8 +162,8 @@ public class DatastoreStorageFactoryBuilderShould {
         return TestDatastoreFactory.getLocalDatastore();
     }
 
-    private static <T> Column mockColumn(Class<T> type) {
-        @SuppressWarnings("unchecked") final Column mock = mock(Column.class);
+    private static <T> EntityColumn mockColumn(Class<T> type) {
+        final EntityColumn mock = mock(EntityColumn.class);
         when(mock.getType()).thenReturn(type);
         return mock;
     }
@@ -175,7 +176,7 @@ public class DatastoreStorageFactoryBuilderShould {
         @Override
         public Value<?> toValue(Byte data) {
             // NOP
-            return null;
+            return nullRef();
         }
     }
 }

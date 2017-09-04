@@ -26,6 +26,7 @@ import io.spine.client.ColumnFilter;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -60,7 +61,7 @@ final class ColumnFilterAdapter {
      * @param columnFilter the filter
      * @return new instance of {@link Value} representing the value of the given filter
      */
-    Value<?> toValue(Column column, ColumnFilter columnFilter) {
+    Value<?> toValue(EntityColumn column, ColumnFilter columnFilter) {
         checkNotNull(column);
         checkNotNull(columnFilter);
 

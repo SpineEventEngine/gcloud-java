@@ -22,17 +22,19 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Key;
 import com.google.common.base.Optional;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageShould;
@@ -45,9 +47,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.protobuf.util.Timestamps.toSeconds;
 import static io.spine.json.Json.toCompactJson;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Verify.assertContainsKey;
 import static io.spine.time.Time.getCurrentTime;
@@ -61,6 +65,7 @@ import static org.junit.Assert.assertTrue;
 public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         DsRecordStorage<ProjectId>> {
 
+    private static final String COLUMN_NAME_FOR_STORING = "columnName";
     private static final TestDatastoreStorageFactory datastoreFactory
             = TestDatastoreStorageFactory.getDefaultInstance();
 
@@ -152,12 +157,12 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         final TestConstCounterEntity entity = new TestConstCounterEntity(id);
         entity.injectState(state, versionValue);
         final EntityRecord record = EntityRecord.newBuilder()
-                                                .setState(AnyPacker.pack(state))
-                                                .setEntityId(AnyPacker.pack(id))
+                                                .setState(pack(state))
+                                                .setEntityId(pack(id))
                                                 .setVersion(versionValue)
                                                 .build();
         final EntityRecordWithColumns recordWithColumns = create(record, entity);
-        final Map<String, Column> columns = recordWithColumns.getColumns();
+        final Map<String, EntityColumn> columns = recordWithColumns.getColumns();
         assertNotNull(columns);
 
         // Custom Columns
@@ -199,7 +204,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         final com.google.cloud.Timestamp actualCreationTime =
                 datastoreEntity.getTimestamp(creationTime);
         assertEquals(toSeconds(entity.getCreationTime()), actualCreationTime.getSeconds());
-        assertEquals(entity.getCreationTime().getNanos(), actualCreationTime.getNanos());
+        assertEquals(entity.getCreationTime()
+                           .getNanos(), actualCreationTime.getNanos());
         assertEquals(entity.isCounterEven(), datastoreEntity.getBoolean(counterEven));
         assertEquals(toCompactJson(entity.getCounterState()),
                      datastoreEntity.getString(counterState));
@@ -243,9 +249,9 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
                                                        .setArchived(true)
                                                        .build();
         final EntityRecord record = EntityRecord.newBuilder()
-                                                .setState(AnyPacker.pack(newState(id)))
+                                                .setState(pack(newState(id)))
                                                 .setLifecycleFlags(lifecycle)
-                                                .setEntityId(AnyPacker.pack(id))
+                                                .setEntityId(pack(id))
                                                 .build();
         final TestConstCounterEntity entity = new TestConstCounterEntity(id);
         entity.injectLifecycle(lifecycle);
@@ -257,6 +263,21 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         final EntityRecord restoredRecord = restoredRecordOptional.get();
         // Includes Lifecycle flags comparison
         assertEquals(record, restoredRecord);
+    }
+
+    @Test
+    public void convert_entity_record_to_entity_using_column_name_for_storing() {
+        final DsRecordStorage<ProjectId> storage = getStorage(EntityWithCustomColumnName.class);
+        final ProjectId id = newId();
+        final EntityRecord record = EntityRecord.newBuilder()
+                                                .setState(pack(newState(id)))
+                                                .build();
+        final Entity entity = new EntityWithCustomColumnName(id);
+        final EntityRecordWithColumns entityRecordWithColumns = create(record, entity);
+        final com.google.cloud.datastore.Entity datastoreEntity =
+                storage.entityRecordToEntity(id, entityRecordWithColumns);
+        final Set<String> propertiesName = datastoreEntity.getNames();
+        assertTrue(propertiesName.contains(COLUMN_NAME_FOR_STORING));
     }
 
     /*
@@ -276,32 +297,39 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
             this.creationTime = getCurrentTime();
         }
 
+        @Column
         public int getCounter() {
             return COUNTER;
         }
 
+        @Column
         public long getBigCounter() {
             return getCounter();
         }
 
+        @Column
         public boolean isCounterEven() {
             return true;
         }
 
+        @Column
         public String getCounterName() {
             return getId().toString();
         }
 
+        @Column
         public Version getCounterVersion() {
             return Version.newBuilder()
                           .setNumber(COUNTER)
                           .build();
         }
 
+        @Column
         public Timestamp getCreationTime() {
             return creationTime;
         }
 
+        @Column
         public Project getCounterState() {
             return getState();
         }
@@ -324,6 +352,17 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
 
         protected TestEntity(ProjectId id) {
             super(id);
+        }
+    }
+
+    public static class EntityWithCustomColumnName extends AbstractEntity<ProjectId, Any> {
+        private EntityWithCustomColumnName(ProjectId id) {
+            super(id);
+        }
+
+        @Column(name = COLUMN_NAME_FOR_STORING)
+        public int getValue() {
+            return 0;
         }
     }
 }
