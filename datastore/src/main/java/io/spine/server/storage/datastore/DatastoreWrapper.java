@@ -44,7 +44,6 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
-import io.spine.server.storage.datastore.tenant.DsNamespaceValidator;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import org.slf4j.Logger;
@@ -92,8 +91,6 @@ public class DatastoreWrapper {
     private final Datastore datastore;
     private Transaction activeTransaction;
     private DatastoreReaderWriter actor;
-
-    private DsNamespaceValidator namespaceValidator;
 
     /**
      * Creates a new instance of {@code DatastoreWrapper}.
@@ -455,16 +452,7 @@ public class DatastoreWrapper {
 
     private Namespace getNamespace() {
         final Namespace namespace = namespaceSupplier.get();
-        namespaceValidator().validate(namespace);
         return namespace;
-    }
-
-    private DsNamespaceValidator namespaceValidator() {
-        if (namespaceValidator == null) {
-            namespaceValidator = new DsNamespaceValidator(getDatastore(),
-                                                          namespaceSupplier.isMultitenant());
-        }
-        return namespaceValidator;
     }
 
     private void writeSmallBulk(Entity[] entities) {
