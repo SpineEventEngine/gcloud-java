@@ -452,6 +452,7 @@ public class DatastoreWrapper {
 
     private Namespace getNamespace() {
         final Namespace namespace = namespaceSupplier.get();
+        log().debug("Using namespace \"{}\".", namespace.getValue());
         return namespace;
     }
 
