@@ -42,7 +42,6 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityQuery;
-import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageShould;
@@ -56,9 +55,9 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -70,7 +69,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
-import static io.spine.test.Verify.assertContainsKey;
+import static io.spine.test.Verify.assertContains;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -183,21 +182,21 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
                                                 .setVersion(versionValue)
                                                 .build();
         final EntityRecordWithColumns recordWithColumns = create(record, entity);
-        final Map<String, EntityColumn> columns = recordWithColumns.getColumns();
+        final Collection<String> columns = recordWithColumns.getColumnNames();
         assertNotNull(columns);
 
         // Custom Columns
-        assertContainsKey(counter, columns);
-        assertContainsKey(bigCounter, columns);
-        assertContainsKey(counterEven, columns);
-        assertContainsKey(counterVersion, columns);
-        assertContainsKey(creationTime, columns);
-        assertContainsKey(counterState, columns);
+        assertContains(counter, columns);
+        assertContains(bigCounter, columns);
+        assertContains(counterEven, columns);
+        assertContains(counterVersion, columns);
+        assertContains(creationTime, columns);
+        assertContains(counterState, columns);
 
         // Columns defined in superclasses
-        assertContainsKey(version, columns);
-        assertContainsKey(archived, columns);
-        assertContainsKey(deleted, columns);
+        assertContains(version, columns);
+        assertContains(archived, columns);
+        assertContains(deleted, columns);
 
         final DsRecordStorage<ProjectId> storage = getStorage();
 
