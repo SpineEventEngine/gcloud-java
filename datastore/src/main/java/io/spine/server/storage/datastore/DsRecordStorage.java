@@ -209,6 +209,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
+        if (query.getIds().isEmpty() && !query.getParameters().iterator().hasNext()) {
+            return readAll(fieldMask);
+        }
         return queryByColumns(query, fieldMask);
     }
 
