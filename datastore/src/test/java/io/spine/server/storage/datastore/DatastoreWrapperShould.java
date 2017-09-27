@@ -32,6 +32,7 @@ import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.datastore.TestEnvironment;
 import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
+import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -44,6 +45,8 @@ import java.util.NoSuchElementException;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
+import static io.spine.server.storage.datastore.given.Given.testProjectId;
+import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
 import static org.hamcrest.Matchers.isIn;
 import static org.junit.Assert.assertEquals;
@@ -218,11 +221,34 @@ public class DatastoreWrapperShould {
         }
     }
 
+    @Test
+    public void allow_new_namespaces_on_go() {
+        final DatastoreWrapper wrapper = wrap(Given.testDatastore(), multitenant(testProjectId()));
+        final TenantId tenantId = TenantId.newBuilder()
+                                          .setValue("Luke_I_am_your_tenant.")
+                                          .build();
+        final String key = "noooooo";
+        final Key entityKey = new TenantAwareFunction0<Key>(tenantId) {
+            @Override
+            public Key apply() {
+                final Key entityKey = wrapper.getKeyFactory(Kind.of(NAMESPACE_HOLDER_KIND))
+                                             .newKey(key);
+                final Entity entity = Entity.newBuilder(entityKey)
+                                            .build();
+                wrapper.create(entity);
+                return entityKey;
+            }
+        }.execute();
+
+        // Clean up the namespace.
+        wrapper.delete(entityKey);
+    }
+
     private static void checkTenantIdInKey(final String id, TenantId tenantId, final DatastoreWrapper wrapper) {
         new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
-                final Key key = wrapper.getKeyFactory(Given.GENERIC_ENTITY_KIND)
+                final Key key = wrapper.getKeyFactory(DatastoreWrapperShould.Given.GENERIC_ENTITY_KIND)
                                        .newKey(42L);
                 assertEquals(id, key.getNamespace());
             }
