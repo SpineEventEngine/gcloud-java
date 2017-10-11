@@ -20,8 +20,10 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.EntityQuery;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
+import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageShould;
 import io.spine.server.entity.Entity;
@@ -34,6 +36,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -96,6 +99,18 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         storage.writeRecord(Sample.messageOfType(ProjectId.class),
                             AggregateEventRecord.getDefaultInstance());
+    }
+
+    @Test
+    public void set_limit_for_history_backward_query() {
+        final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        final int batchSize = 10;
+        final AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(newId(),
+                                                                                   batchSize);
+        final EntityQuery historyBackwardQuery = storage.historyBackwardQuery(request);
+
+        final int queryLimit = historyBackwardQuery.getLimit();
+        assertEquals(batchSize, queryLimit);
     }
 
     private static Logger log() {

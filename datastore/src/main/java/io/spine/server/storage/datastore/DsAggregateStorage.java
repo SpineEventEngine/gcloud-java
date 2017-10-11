@@ -21,9 +21,11 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -32,6 +34,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Version;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateEventRecord.KindCase;
+import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.string.Stringifiers;
@@ -150,7 +153,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final KindCase kind = record.getKindCase();
         switch (kind) {
             case EVENT:
-                recordId = Stringifiers.toString(record.getEvent().getId());
+                recordId = Stringifiers.toString(record.getEvent()
+                                                       .getId());
                 version = record.getEvent()
                                 .getContext()
                                 .getVersion();
@@ -174,19 +178,18 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         datastore.createOrUpdate(builder.build());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The resulting iterator will fetch {@linkplain AggregateEventRecord events}
+     * by batches. Size of a batch is specified by the given {@link AggregateReadRequest}.
+     *
+     * @param request the read request
+     * @return a new iterator instance
+     */
     @Override
-    protected Iterator<AggregateEventRecord> historyBackward(I id) {
-        checkNotNull(id);
-
-        final String idString = Stringifiers.toString(id);
-        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                                   .setKind(stateTypeName.value())
-                                                   .setFilter(eq(aggregate_id.toString(),
-                                                                 idString))
-                                                   .setOrderBy(byCreatedTime(),
-                                                               byVersion(),
-                                                               byRecordType())
-                                                   .build();
+    protected Iterator<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
+        final StructuredQuery<Entity> query = historyBackwardQuery(request);
         final Iterator<Entity> eventEntities = datastore.read(query);
 
         final Iterator<Entity> aggregateEntityStates = filter(getEntityStates(),
@@ -208,6 +211,22 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         final Iterator<AggregateEventRecord> result = entitiesToMessages(filteredEntities,
                                                                          AGGREGATE_RECORD_TYPE_URL);
         return result;
+    }
+
+    @VisibleForTesting
+    EntityQuery historyBackwardQuery(AggregateReadRequest<I> request) {
+        checkNotNull(request);
+        final String idString = Stringifiers.toString(request.getRecordId());
+        final int limit = request.getBatchSize();
+        return Query.newEntityQueryBuilder()
+                    .setKind(stateTypeName.value())
+                    .setFilter(eq(aggregate_id.toString(),
+                                  idString))
+                    .setOrderBy(byCreatedTime(),
+                                byVersion(),
+                                byRecordType())
+                    .setLimit(limit)
+                    .build();
     }
 
     private Iterator<Entity> getEntityStates() {
