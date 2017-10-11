@@ -223,8 +223,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                     .setKind(stateTypeName.value())
                     .setFilter(eq(aggregate_id.toString(),
                                   idString))
-                    .setOrderBy(byCreatedTime(),
-                                byVersion(),
+                    .setOrderBy(byVersion(),
+                                byCreatedTime(),
                                 byRecordType())
                     .setLimit(limit)
                     .build();
