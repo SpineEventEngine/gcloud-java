@@ -181,8 +181,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     /**
      * {@inheritDoc}
      *
-     * <p>The resulting iterator will fetch {@linkplain AggregateEventRecord events}
-     * by batches. Size of a batch is specified by the given {@link AggregateReadRequest}.
+     * <p>The resulting iterator will fetch {@linkplain AggregateEventRecord events} batch by batch.
+     *
+     * <p>Size of the batch is specified by the given {@link AggregateReadRequest}.
      *
      * @param request the read request
      * @return a new iterator instance
