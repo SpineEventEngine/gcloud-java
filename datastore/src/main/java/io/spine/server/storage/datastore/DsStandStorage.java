@@ -72,7 +72,6 @@ public class DsStandStorage extends StandStorage {
         return recordStorage.delete(id);
     }
 
-    @Nullable
     @Override
     protected Optional<EntityRecord> readRecord(AggregateStateId id) {
         final RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(id);
