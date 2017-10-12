@@ -21,12 +21,21 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.EntityQuery;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+import com.google.protobuf.Message;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.core.CommandEnvelope;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateReadRequest;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageShould;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
 import io.spine.server.entity.Entity;
+import io.spine.server.storage.StorageFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testdata.Sample;
 import org.junit.After;
@@ -36,6 +45,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.spine.client.TestActorRequestFactory.newInstance;
+import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -111,6 +122,55 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
 
         final int queryLimit = historyBackwardQuery.getLimit();
         assertEquals(batchSize, queryLimit);
+    }
+
+    @Test
+    public void allow_aggregate_loading_if_snapshot_trigger_was_decreased_in_AggregateRepository() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        register(repository);
+
+        final ProjectId id = newId();
+        final int initialSnapshotTrigger = 10;
+
+        // To restore an aggregate using a snapshot and events.
+        final int tasksCount = initialSnapshotTrigger * 2 - 1;
+
+        repository.setSnapshotTrigger(initialSnapshotTrigger);
+        for (int i = 0; i < tasksCount; i++) {
+            repository.dispatch(env(addTask(id)));
+        }
+
+        final int minimalSnapshotTrigger = 1;
+        repository.setSnapshotTrigger(minimalSnapshotTrigger);
+        final ProjectAggregate aggregate = repository.find(id)
+                                                     .get();
+        assertEquals(initialSnapshotTrigger, aggregate.getState()
+                                                      .getTaskCount());
+    }
+
+    private static void register(AggregateRepository repository) {
+        final Supplier<StorageFactory> factory =
+                Suppliers.ofInstance((StorageFactory) datastoreFactory);
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setStorageFactorySupplier(factory)
+                                                            .build();
+        boundedContext.register(repository);
+    }
+
+    private static CommandEnvelope env(Message commandMessage) {
+        final TestActorRequestFactory factory = newInstance(DsAggregateStorageShould.class);
+        return CommandEnvelope.of(factory.command()
+                                         .create(commandMessage));
+    }
+
+    private static class ProjectAggregateRepository
+            extends AggregateRepository<ProjectId, ProjectAggregate> {
+
+        @SuppressWarnings("RedundantMethodOverride") // To expose the method for testing.
+        @Override
+        protected void setSnapshotTrigger(int snapshotTrigger) {
+            super.setSnapshotTrigger(snapshotTrigger);
+        }
     }
 
     private static Logger log() {
