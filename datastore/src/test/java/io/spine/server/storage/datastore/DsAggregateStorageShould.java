@@ -144,8 +144,8 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         repository.setSnapshotTrigger(minimalSnapshotTrigger);
         final ProjectAggregate aggregate = repository.find(id)
                                                      .get();
-        assertEquals(initialSnapshotTrigger, aggregate.getState()
-                                                      .getTaskCount());
+        assertEquals(tasksCount, aggregate.getState()
+                                          .getTaskCount());
     }
 
     private static void register(AggregateRepository repository) {
