@@ -43,6 +43,7 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.storage.Project;
@@ -278,7 +279,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         final EntityRecordWithColumns recordWithColumns = create(record, entity);
         final RecordStorage<ProjectId> storage = getStorage();
         storage.write(id, recordWithColumns);
-        final Optional<EntityRecord> restoredRecordOptional = storage.read(id);
+        final RecordReadRequest<ProjectId> request = new RecordReadRequest<>(id);
+        final Optional<EntityRecord> restoredRecordOptional = storage.read(request);
         assertTrue(restoredRecordOptional.isPresent());
         final EntityRecord restoredRecord = restoredRecordOptional.get();
         // Includes Lifecycle flags comparison

@@ -18,23 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.storage.datastore.given;
+
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
+import io.spine.test.aggregate.ProjectId;
 
 /**
- *  The versions of the libraries used.
- *
- *  This file is used wherever the library versions are required.
+ * @author Dmytro Grankin
  */
+public class DsAggregateStorageTestEnv {
 
-final SPINE_VERSION = "0.9.76-SNAPSHOT"
+    private DsAggregateStorageTestEnv() {
+        // Prevent instantiation of this class.
+    }
 
-ext {
-    spineVersion = SPINE_VERSION
+    /**
+     * A repository to check loading of an aggregates by the storage for different snapshot triggers.
+     */
+    public static class ProjectAggregateRepository
+            extends AggregateRepository<ProjectId, ProjectAggregate> {
 
-    // NOTE: when updating Protobuf dependency, please check that
-    // Spine core modules have the same version as well.
-    protobufVersion = '3.3.0'
-    slf4jVersion = '1.7.21'
-    guavaVersion = '20.0'
-
-    protobufGradlePluginVerison = '0.8.1'
+        @SuppressWarnings("RedundantMethodOverride") // To expose the method for testing.
+        @Override
+        public void setSnapshotTrigger(int snapshotTrigger) {
+            super.setSnapshotTrigger(snapshotTrigger);
+        }
+    }
 }

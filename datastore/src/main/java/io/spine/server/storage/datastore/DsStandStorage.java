@@ -21,12 +21,12 @@
 package io.spine.server.storage.datastore;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.server.stand.StandStorage;
+import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 
@@ -72,10 +72,10 @@ public class DsStandStorage extends StandStorage {
         return recordStorage.delete(id);
     }
 
-    @Nullable
     @Override
     protected Optional<EntityRecord> readRecord(AggregateStateId id) {
-        return recordStorage.read(id);
+        final RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(id);
+        return recordStorage.read(request);
     }
 
     @Override
