@@ -27,11 +27,11 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateReadRequest;
-import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageShould;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
 import io.spine.server.entity.Entity;
+import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.ProjectAggregateRepository;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.testdata.Sample;
@@ -147,16 +147,6 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
                                                      .get();
         assertEquals(tasksCount, aggregate.getState()
                                           .getTaskCount());
-    }
-
-    private static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> {
-
-        @SuppressWarnings("RedundantMethodOverride") // To expose the method for testing.
-        @Override
-        protected void setSnapshotTrigger(int snapshotTrigger) {
-            super.setSnapshotTrigger(snapshotTrigger);
-        }
     }
 
     private static Logger log() {
