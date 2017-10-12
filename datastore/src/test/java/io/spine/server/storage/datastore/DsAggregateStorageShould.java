@@ -124,6 +124,7 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     @Test
     public void still_load_aggregates_properly_after_snapshot_trigger_decrease_at_runtime() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        repository.initStorage(datastoreFactory);
         repository.setBoundedContext(BoundedContext.newBuilder()
                                                    .build());
         final ProjectId id = newId();
