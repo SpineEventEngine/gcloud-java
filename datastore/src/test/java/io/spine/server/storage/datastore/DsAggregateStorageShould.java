@@ -21,9 +21,6 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.EntityQuery;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
@@ -35,8 +32,8 @@ import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageShould;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
 import io.spine.server.entity.Entity;
-import io.spine.server.storage.StorageFactory;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.testdata.Sample;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -125,10 +122,10 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     }
 
     @Test
-    public void allow_aggregate_loading_if_snapshot_trigger_was_decreased_in_AggregateRepository() {
+    public void still_load_aggregates_properly_after_snapshot_trigger_decrease_at_runtime() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        register(repository);
-
+        repository.setBoundedContext(BoundedContext.newBuilder()
+                                                   .build());
         final ProjectId id = newId();
         final int initialSnapshotTrigger = 10;
 
@@ -136,8 +133,11 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
         final int tasksCount = initialSnapshotTrigger * 2 - 1;
 
         repository.setSnapshotTrigger(initialSnapshotTrigger);
+        final TestActorRequestFactory factory = newInstance(DsAggregateStorageShould.class);
         for (int i = 0; i < tasksCount; i++) {
-            repository.dispatch(env(addTask(id)));
+            final AggAddTask command = addTask(id);
+            final CommandEnvelope envelope = CommandEnvelope.of(factory.createCommand(command));
+            repository.dispatch(envelope);
         }
 
         final int minimalSnapshotTrigger = 1;
@@ -146,21 +146,6 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
                                                      .get();
         assertEquals(tasksCount, aggregate.getState()
                                           .getTaskCount());
-    }
-
-    private static void register(AggregateRepository repository) {
-        final Supplier<StorageFactory> factory =
-                Suppliers.ofInstance((StorageFactory) datastoreFactory);
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setStorageFactorySupplier(factory)
-                                                            .build();
-        boundedContext.register(repository);
-    }
-
-    private static CommandEnvelope env(Message commandMessage) {
-        final TestActorRequestFactory factory = newInstance(DsAggregateStorageShould.class);
-        return CommandEnvelope.of(factory.command()
-                                         .create(commandMessage));
     }
 
     private static class ProjectAggregateRepository
