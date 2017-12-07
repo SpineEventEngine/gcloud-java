@@ -221,7 +221,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final QueryParameters params = entityQuery.getParameters();
         if (!idFilter.isEmpty()) { // IDs query
             final Predicate<Entity> inMemPredicate;
-            if (!params.iterator().hasNext()) { // IDs and columns query
+            if (params.iterator().hasNext()) { // IDs and columns query
                 inMemPredicate = buildMemoryPredicate(params);
             } else {
                 inMemPredicate = alwaysTrue();
