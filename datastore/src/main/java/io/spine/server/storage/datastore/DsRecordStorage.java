@@ -31,6 +31,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -245,7 +246,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         );
         Iterator<EntityRecord> result = emptyIterator();
         for (StructuredQuery<Entity> query : queries) {
-            final Iterator<EntityRecord> records = queryAll(typeUrl, query, fieldMask);
+            final Iterator<EntityRecord> records = queryAll(typeUrl,
+                                                            query,
+                                                            fieldMask,
+                                                            Predicates.<Entity>alwaysTrue());
             result = concat(result, records);
         }
         return result;
