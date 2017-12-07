@@ -587,6 +587,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
     }
 
+    /**
+     * A function transforming the input {@link Filter} into a {@link StructuredQuery} with
+     * the given builder.
+     */
     private static class FilterToQuery implements Function<Filter, StructuredQuery<Entity>> {
 
         private final StructuredQuery.Builder<Entity> builder;
