@@ -18,10 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ *  The versions of the libraries used.
+ *
+ *  This file is used wherever the library versions are required.
+ */
+
 ext {
     spineGaeVersion = '0.9.77-SNAPSHOT'
     spineVersion = '0.10.11-SNAPSHOT'
-
 
     // NOTE: when updating Protobuf dependency, please check that
     // Spine core modules have the same version as well.
