@@ -56,7 +56,7 @@ public class DsStandStorageShould extends StandStorageShould {
     }
 
     @Override
-    protected StandStorage newStorage(Class<? extends Entity> aClass) {
+    protected StandStorage newStorage(Class<? extends Entity> cls) {
         return datastoreFactory.createStandStorage();
     }
 }
