@@ -35,4 +35,6 @@ ext {
     guavaVersion = '20.0'
 
     protobufGradlePluginVerison = '0.8.3'
+
+    datastoreVersion = '1.12.0'
 }
