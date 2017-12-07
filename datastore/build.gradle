@@ -1,5 +1,6 @@
 ext {
     artifactId = 'gae-java'
+    datastoreVersion = '1.12.0'
 }
 
 buildscript {
@@ -14,7 +15,7 @@ configurations.all {
 
 dependencies {
     // Google Cloud Datastore
-    compile(group: 'com.google.cloud', name: 'google-cloud-datastore', version: '1.2.1') {
+    compile(group: 'com.google.cloud', name: 'google-cloud-datastore', version: datastoreVersion) {
         exclude group: 'com.google.protobuf'
     }
 }

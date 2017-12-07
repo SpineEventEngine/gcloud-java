@@ -25,7 +25,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import io.spine.string.Stringifiers;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Utilities for working with GAE Datastore record identifiers and keys.
@@ -57,7 +57,7 @@ public class DsIdentifiers {
     }
 
     public static RecordId of(String value) {
-        checkState(!value.isEmpty());
+        checkArgument(!value.isEmpty());
         return new RecordId(value);
     }
 

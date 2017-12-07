@@ -38,7 +38,7 @@ public class DatastoreIdentifiersShould {
         assertHasPrivateParameterlessCtor(DsIdentifiers.class);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void not_accept_empty_String_as_identifier_source() {
         DsIdentifiers.of("");
     }
