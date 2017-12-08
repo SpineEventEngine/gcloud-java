@@ -78,12 +78,15 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
     }
 
     @Override
-    protected AggregateStorage<ProjectId> getStorage(Class<? extends Entity> cls) {
-        return getStorage();
+    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
+        @SuppressWarnings("unchecked") // Logically checked; OK for test purposes.
+        final Class<? extends Aggregate<ProjectId, ?, ?>> aggCls =
+                (Class<? extends Aggregate<ProjectId, ?, ?>>) cls;
+        return datastoreFactory.createAggregateStorage(aggCls);
     }
 
     @Override
-    protected <I> AggregateStorage<I> getStorage(Class<? extends I> idClass,
+    protected <I> AggregateStorage<I> newStorage(Class<? extends I> idClass,
                                                  Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
         return datastoreFactory.createAggregateStorage(aggregateClass);
     }

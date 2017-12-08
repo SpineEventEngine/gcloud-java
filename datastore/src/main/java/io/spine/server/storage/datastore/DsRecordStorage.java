@@ -31,6 +31,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -212,40 +213,98 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         if (query.getIds().isEmpty() && !query.getParameters().iterator().hasNext()) {
             return readAll(fieldMask);
         }
-        return queryByColumns(query, fieldMask);
+        return queryBy(query, fieldMask);
     }
 
-    private Iterator<EntityRecord> queryByColumns(EntityQuery<I> entityQuery, FieldMask fieldMask) {
+    /**
+     * Performs Datastore query by the given {@link EntityQuery}.
+     *
+     * <p>This method assumes that there are either IDs of query parameters or both in the given
+     * {@code EntityQuery} (i.e. the query is not empty).
+     *
+     * @param entityQuery the {@link EntityQuery} to query the Datastore by
+     * @param fieldMask   the {@code FieldMask} to apply to all the retrieved entity states
+     * @return an iterator over the resulting entity records
+     */
+    private Iterator<EntityRecord> queryBy(EntityQuery<I> entityQuery, FieldMask fieldMask) {
         final Collection<I> idFilter = entityQuery.getIds();
         final QueryParameters params = entityQuery.getParameters();
-        if (!idFilter.isEmpty()) { // IDs query
-            final Predicate<Entity> inMemPredicate;
-            if (!params.iterator().hasNext()) { // IDs and columns query
-                inMemPredicate = buildMemoryPredicate(params);
-            } else {
-                inMemPredicate = alwaysTrue();
-            }
-            final Iterator<EntityRecord> records = lookup(idFilter, fieldMask, inMemPredicate);
-            return records;
+        final Iterator<EntityRecord> result;
+        if (!idFilter.isEmpty()) {
+            result = queryByIdsAndColumns(idFilter, params, fieldMask);
+        } else {
+            result = queryByColumnsOnly(params, fieldMask);
         }
-        // Only column query
+        return result;
+    }
+
+    /**
+     * Performs a query by IDs and entity columns.
+     *
+     * <p>The by-IDs query is performed on Datastore, and the by-columns filtering is done in
+     * memory.
+     *
+     * @param acceptableIds the IDs to search by
+     * @param params        the additional query parameters
+     * @param fieldMask     the {@code FieldMask} to apply to all the retrieved entity states
+     * @return an iterator over the resulting entity records
+     */
+    private Iterator<EntityRecord> queryByIdsAndColumns(Collection<I> acceptableIds,
+                                                        QueryParameters params,
+                                                        FieldMask fieldMask) {
+        final Predicate<Entity> inMemPredicate;
+        if (params.iterator().hasNext()) { // IDs and columns query
+            inMemPredicate = buildMemoryPredicate(params);
+        } else { // Only IDs query
+            inMemPredicate = alwaysTrue();
+        }
+        final Iterator<EntityRecord> records = lookup(acceptableIds, fieldMask, inMemPredicate);
+        return records;
+    }
+
+    /**
+     * Performs a query by entity columns.
+     *
+     * <p>The query is performed on Datastore. A single call to this method may turn into several
+     * API calls. See {@link DsFilters} for details.
+     *
+     * @param params    the by-column query parameters
+     * @param fieldMask the {@code FieldMask} to apply to all the retrieved entity states
+     * @return an iterator over the resulting entity records
+     */
+    private Iterator<EntityRecord> queryByColumnsOnly(QueryParameters params,
+                                                      FieldMask fieldMask) {
         final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                                     .setKind(getKind().getValue());
         final Collection<Filter> filters = buildColumnFilters(params);
-        final Collection<StructuredQuery<Entity>> queries = transform(
-                filters,
-                new Function<Filter, StructuredQuery<Entity>>() {
-                    @Override
-                    public StructuredQuery<Entity> apply(@Nullable Filter input) {
-                        checkNotNull(input);
-                        return datastoreQuery.setFilter(input)
-                                             .build();
-                    }
-                }
-        );
+        final FilterToQuery function = new FilterToQuery(datastoreQuery);
+        final Collection<StructuredQuery<Entity>> queries = transform(filters, function);
+        final Iterator<EntityRecord> result = queryAndMerge(queries, fieldMask);
+        return result;
+    }
+
+    /**
+     * Performs the given Datastore {@linkplain StructuredQuery queries} and combines results into
+     * a single lazy iterator.
+     *
+     * <p>The resulting iterator is constructed of
+     * {@linkplain DatastoreWrapper#read(StructuredQuery) Datastore query response iterators}
+     * concatenated together one by one. Each of them is evaluated only after the previous one runs
+     * out of records (i.e. {@code hasNext()} method returns {@code false}). The order of
+     * the iterators corresponds to the order of the {@code queries}.
+     *
+     * @param queries   the queries to perform
+     * @param fieldMask the {@code FieldMask} to apply to all the retrieved entity states
+     * @return an iterator over the resulting entity records
+     */
+    private Iterator<EntityRecord> queryAndMerge(Iterable<StructuredQuery<Entity>> queries,
+                                                 FieldMask fieldMask) {
         Iterator<EntityRecord> result = emptyIterator();
         for (StructuredQuery<Entity> query : queries) {
-            final Iterator<EntityRecord> records = queryAll(typeUrl, query, fieldMask);
+            final Iterator<EntityRecord> records = queryAll(typeUrl,
+                                                            query,
+                                                            fieldMask,
+                                                            Predicates.<Entity>alwaysTrue());
             result = concat(result, records);
         }
         return result;
@@ -531,6 +590,27 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
             final boolean result = eval(actual, filter.getOperator(), expected);
             return result;
+        }
+    }
+
+    /**
+     * A function transforming the input {@link Filter} into a {@link StructuredQuery} with
+     * the given builder.
+     */
+    private static class FilterToQuery implements Function<Filter, StructuredQuery<Entity>> {
+
+        private final StructuredQuery.Builder<Entity> builder;
+
+        private FilterToQuery(StructuredQuery.Builder<Entity> builder) {
+            this.builder = builder;
+        }
+
+        @Override
+        public StructuredQuery<Entity> apply(@Nullable Filter filter) {
+            checkNotNull(filter);
+            final StructuredQuery<Entity> query = builder.setFilter(filter)
+                                                         .build();
+            return query;
         }
     }
 

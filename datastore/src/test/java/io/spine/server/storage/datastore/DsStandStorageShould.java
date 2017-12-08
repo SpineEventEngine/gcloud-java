@@ -39,24 +39,24 @@ public class DsStandStorageShould extends StandStorageShould {
             = TestDatastoreStorageFactory.getDefaultInstance();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         datastoreFactory.setUp();
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         datastoreFactory.tearDown();
     }
 
     @Test
     public void contain_record_storage() {
         final RecordStorage<?> recordStorage =
-                ((DsStandStorage) getStorage(StandStorageRecord.class)).getRecordStorage();
+                ((DsStandStorage) newStorage(StandStorageRecord.class)).getRecordStorage();
         assertNotNull(recordStorage);
     }
 
     @Override
-    protected StandStorage getStorage(Class<? extends Entity> cls) {
+    protected StandStorage newStorage(Class<? extends Entity> cls) {
         return datastoreFactory.createStandStorage();
     }
 }

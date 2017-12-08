@@ -92,7 +92,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
 
     @SuppressWarnings("unchecked") // OK for tests.
     @Override
-    protected DsRecordStorage<ProjectId> getStorage(Class<? extends Entity> entityClass) {
+    protected DsRecordStorage<ProjectId> newStorage(Class<? extends Entity> entityClass) {
         final Class<? extends Entity<ProjectId, ?>> cls =
                 (Class<? extends Entity<ProjectId, ?>>) entityClass;
         return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(cls);
@@ -289,7 +289,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
 
     @Test
     public void convert_entity_record_to_entity_using_column_name_for_storing() {
-        final DsRecordStorage<ProjectId> storage = getStorage(EntityWithCustomColumnName.class);
+        final DsRecordStorage<ProjectId> storage = newStorage(EntityWithCustomColumnName.class);
         final ProjectId id = newId();
         final EntityRecord record = EntityRecord.newBuilder()
                                                 .setState(pack(newState(id)))
