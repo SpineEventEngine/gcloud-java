@@ -288,10 +288,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * a single lazy iterator.
      *
      * <p>The resulting iterator is constructed of
-     * {@linkplain DatastoreWrapper#read(StructuredQuery) Datastore query iterators} concatenated
-     * together one by one. The Each of them is evaluated only after the previous one runs out of
-     * records (i.e. {@code hasNext()} method returns {@code false}). The order of the iterators
-     * corresponds to the order of the {@code queries}.
+     * {@linkplain DatastoreWrapper#read(StructuredQuery) Datastore query response iterators}
+     * concatenated together one by one. Each of them is evaluated only after the previous one runs
+     * out of records (i.e. {@code hasNext()} method returns {@code false}). The order of
+     * the iterators corresponds to the order of the {@code queries}.
      *
      * @param queries   the queries to perform
      * @param fieldMask the {@code FieldMask} to apply to all the retrieved entity states
