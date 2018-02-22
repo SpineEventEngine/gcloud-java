@@ -303,8 +303,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         for (StructuredQuery<Entity> query : queries) {
             final Iterator<EntityRecord> records = queryAll(typeUrl,
                                                             query,
-                                                            fieldMask,
-                                                            Predicates.<Entity>alwaysTrue());
+                                                            fieldMask);
             result = concat(result, records);
         }
         return result;
@@ -371,15 +370,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private Iterator<EntityRecord> queryAll(TypeUrl typeUrl,
                                             StructuredQuery<Entity> query,
                                             FieldMask fieldMask) {
-        return queryAll(typeUrl, query, fieldMask, activeEntity());
-    }
-
-    private Iterator<EntityRecord> queryAll(TypeUrl typeUrl,
-                                            StructuredQuery<Entity> query,
-                                            FieldMask fieldMask,
-                                            Predicate<Entity> resultFilter) {
         final Iterator<Entity> results = datastore.read(query);
-        return toRecords(results, resultFilter, typeUrl, fieldMask);
+        return toRecords(results, Predicates.<Entity>alwaysTrue(), typeUrl, fieldMask);
     }
 
     protected final Iterator<EntityRecord> toRecords(Iterator<Entity> queryResults,
@@ -475,7 +467,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return kind;
     }
 
-    private Kind kindFrom(TypeUrl typeUrl) {
+    final Kind kindFrom(TypeUrl typeUrl) {
         final Kind defaultKind = getDefaultKind();
         if (defaultKind != null) {
             return defaultKind;
@@ -499,10 +491,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return record;
     }
 
-    StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
+    private StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
         final String entityKind = kindFrom(typeUrl).getValue();
         final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setKind(entityKind)
+                                                   .setFilter(DsFilters.activeEntity())
                                                    .build();
         return query;
     }

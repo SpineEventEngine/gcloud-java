@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.Value;
 import com.google.common.base.Function;
@@ -52,6 +53,8 @@ import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
@@ -61,6 +64,11 @@ import static java.util.Collections.singleton;
  * @author Dmytro Dashenkov
  */
 final class DsFilters {
+
+    private static final Filter ACTIVE_ENTITY_FILTER = and(
+            eq(archived.name(), false),
+            eq(deleted.name(), false)
+    );
 
     /**
      * Matches the {@link CompositeQueryParameter} instances joined by
@@ -85,6 +93,10 @@ final class DsFilters {
 
     private DsFilters() {
         // Prevent utility class fromm being initialized.
+    }
+
+    static Filter activeEntity() {
+        return ACTIVE_ENTITY_FILTER;
     }
 
     /**
@@ -295,7 +307,7 @@ final class DsFilters {
      *
      * <p>The walker transforms all the {@link ColumnFilterNode} instances into {@link Filter}
      * instances and merges them using
-     * the {@link com.google.cloud.datastore.StructuredQuery.CompositeFilter#and
+     * the {@link CompositeFilter#and
      * StructuredQuery.CompositeFilter.and()} operation. The result is then collected into
      * {@code Collection} passed on the instance creation.
      */

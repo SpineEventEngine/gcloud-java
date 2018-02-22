@@ -145,4 +145,12 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
                                                  .build();
         return query;
     }
+
+    private StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
+        final String entityKind = kindFrom(typeUrl).getValue();
+        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+                                                   .setKind(entityKind)
+                                                   .build();
+        return query;
+    }
 }
