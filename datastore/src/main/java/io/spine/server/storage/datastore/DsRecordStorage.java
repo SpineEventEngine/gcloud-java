@@ -116,11 +116,12 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param descriptor the descriptor of the type of messages to save to the storage
      * @param datastore  the Datastore implementation to use
      */
-    protected DsRecordStorage(Descriptor descriptor,
-                              DatastoreWrapper datastore,
-                              boolean multitenant,
-                              ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
-                              Class<I> idClass) {
+    protected DsRecordStorage(
+            Descriptor descriptor,
+            DatastoreWrapper datastore,
+            boolean multitenant,
+            ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
+            Class<I> idClass) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
@@ -495,7 +496,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         final String entityKind = kindFrom(typeUrl).getValue();
         final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setKind(entityKind)
-                                                   .setFilter(DsFilters.activeEntity())
                                                    .build();
         return query;
     }

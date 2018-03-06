@@ -44,8 +44,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
 
 /**
- * A {@link io.spine.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage} delegates its
- * operations.
+ * A {@link io.spine.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage}
+ * delegates its operations.
  *
  * @author Dmytro Dashenkov
  */
@@ -143,15 +143,6 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         final StructuredQuery<Entity> query = incompleteQuery.toBuilder()
                                                  .setFilter(filter)
                                                  .build();
-        return query;
-    }
-
-    @Override
-    protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
-        final String entityKind = kindFrom(typeUrl).getValue();
-        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                                   .setKind(entityKind)
-                                                   .build();
         return query;
     }
 }
