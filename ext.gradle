@@ -25,16 +25,12 @@
  */
 
 ext {
-    spineGaeVersion = '0.10.0'
-    spineVersion = '0.10.11-SNAPSHOT'
+    spineGaeVersion = '0.10.26-SNAPSHOT'
+    spineVersion = '0.10.26-SNAPSHOT'
 
-    // NOTE: when updating Protobuf dependency, please check that
-    // Spine core modules have the same version as well.
-    protobufVersion = '3.5.0'
     slf4jVersion = '1.7.21'
+    jUnitVersion = '4.12'
+    hamcrestVersion = '1.3'
     guavaVersion = '20.0'
-
-    protobufGradlePluginVerison = '0.8.3'
-
     datastoreVersion = '1.12.0'
 }
