@@ -182,7 +182,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 if (input == null) {
                     return null;
                 }
-
                 final EntityRecord readRecord = Entities.entityToMessage(input, RECORD_TYPE_URL);
                 final Message state = unpack(readRecord.getState());
                 final TypeUrl typeUrl = TypeUrl.from(state.getDescriptorForType());
@@ -201,13 +200,18 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords() {
-        return readAllRecords(FieldMask.getDefaultInstance());
+        final Iterator<EntityRecord> result = readAllRecords(FieldMask.getDefaultInstance());
+        return result;
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(final FieldMask fieldMask) {
         final StructuredQuery<Entity> allQuery = buildAllQuery(typeUrl);
-        return queryAll(typeUrl, allQuery, fieldMask, activeEntity());
+        final Iterator<EntityRecord> result = queryAll(typeUrl,
+                                                       allQuery,
+                                                       fieldMask,
+                                                       activeEntity());
+        return result;
     }
 
     @Override
