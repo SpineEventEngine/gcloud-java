@@ -62,6 +62,7 @@ import java.util.Map.Entry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.alwaysTrue;
+import static com.google.common.base.Predicates.in;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Iterators.concat;
 import static com.google.common.collect.Iterators.filter;
@@ -206,7 +207,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Iterator<EntityRecord> readAllRecords(final FieldMask fieldMask) {
         final StructuredQuery<Entity> allQuery = buildAllQuery(typeUrl);
-        return queryAll(typeUrl, allQuery, fieldMask);
+        return queryAll(typeUrl, allQuery, fieldMask, activeEntity());
     }
 
     @Override
@@ -304,7 +305,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         for (StructuredQuery<Entity> query : queries) {
             final Iterator<EntityRecord> records = queryAll(typeUrl,
                                                             query,
-                                                            fieldMask);
+                                                            fieldMask,
+                                                            Predicates.<Entity>alwaysTrue());
             result = concat(result, records);
         }
         return result;
@@ -370,9 +372,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private Iterator<EntityRecord> queryAll(TypeUrl typeUrl,
                                             StructuredQuery<Entity> query,
-                                            FieldMask fieldMask) {
+                                            FieldMask fieldMask,
+                                            Predicate<Entity> inMemFilter) {
         final Iterator<Entity> results = datastore.read(query);
-        return toRecords(results, Predicates.<Entity>alwaysTrue(), typeUrl, fieldMask);
+        return toRecords(results, inMemFilter, typeUrl, fieldMask);
     }
 
     protected final Iterator<EntityRecord> toRecords(Iterator<Entity> queryResults,
