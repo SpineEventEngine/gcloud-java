@@ -491,7 +491,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return record;
     }
 
-    private StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
+    protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
         final String entityKind = kindFrom(typeUrl).getValue();
         final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setKind(entityKind)
