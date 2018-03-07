@@ -26,7 +26,7 @@
 
 ext {
     spineGaeVersion = '0.10.26-SNAPSHOT'
-    spineVersion = '0.10.26-SNAPSHOT'
+    spineVersion = '0.10.29-SNAPSHOT'
 
     // NOTE: when updating Protobuf dependency, please check that
     // Spine core modules have the same version as well.
