@@ -34,7 +34,7 @@ import io.spine.test.storage.ProjectId;
 import org.junit.After;
 import org.junit.Test;
 
-import static io.spine.time.Time.getCurrentTime;
+import static io.spine.base.Time.getCurrentTime;
 import static org.junit.Assert.assertNotNull;
 
 /**

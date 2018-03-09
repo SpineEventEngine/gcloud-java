@@ -25,12 +25,12 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.json.Json;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
-import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
 
