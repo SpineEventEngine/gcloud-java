@@ -62,7 +62,6 @@ import java.util.Map.Entry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.alwaysTrue;
-import static com.google.common.base.Predicates.in;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Iterators.concat;
 import static com.google.common.collect.Iterators.filter;
@@ -117,12 +116,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param descriptor the descriptor of the type of messages to save to the storage
      * @param datastore  the Datastore implementation to use
      */
-    protected DsRecordStorage(
-            Descriptor descriptor,
-            DatastoreWrapper datastore,
-            boolean multitenant,
-            ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
-            Class<I> idClass) {
+    protected DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore,
+                              boolean multitenant,
+                              ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
+                              Class<I> idClass) {
         super(multitenant);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
@@ -132,11 +129,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private DsRecordStorage(Builder<I> builder) {
-        this(builder.descriptor,
-             builder.datastore,
-             builder.multitenant,
-             builder.columnTypeRegistry,
-             builder.idClass);
+        this(builder.getDescriptor(),
+             builder.getDatastore(),
+             builder.isMultitenant(),
+             builder.getColumnTypeRegistry(),
+             builder.getIdClass());
     }
 
     @Override
@@ -499,6 +496,12 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return record;
     }
 
+    /**
+     * Constructs a Datastore {@link Query}, which fetches all the records of the given type.
+     *
+     * @param typeUrl the type of the records to fetch
+     * @return new {@link StructuredQuery}
+     */
     protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
         final String entityKind = kindFrom(typeUrl).getValue();
         final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
@@ -595,7 +598,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     /**
      * A function transforming the input {@link Filter} into a {@link StructuredQuery} with
-     * the given builder.
+     * the given newBuilder.
      */
     private static class FilterToQuery implements Function<Filter, StructuredQuery<Entity>> {
 
@@ -620,14 +623,44 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param <I> the ID type of the instances built by the created {@link Builder}
      * @return new instance of the {@link Builder}
      */
-    public static <I> Builder<I> newBuilder() {
+    public static <I> AbstractBuilder<I, Builder<I>> newBuilder() {
         return new Builder<>();
     }
 
     /**
-     * A builder for the {@code DsRecordStorage}.
+     * A newBuilder for the {@code DsRecordStorage}.
      */
-    public static class Builder<I> {
+    public static final class Builder<I>
+            extends AbstractBuilder<I, Builder<I>> {
+
+        /**
+         * Prevents direct instantiation.
+         */
+        private Builder() {
+        }
+
+        /**
+         * Creates new instance of the {@code DsRecordStorage}.
+         */
+        public DsRecordStorage<I> build() {
+            checkRequiredFields();
+            final DsRecordStorage<I> storage = new DsRecordStorage<>(this);
+            return storage;
+        }
+
+        @Override
+        Builder<I> self() {
+            return this;
+        }
+    }
+
+    /**
+     * An implementation base for {@code DsRecordStorage} builders.
+     *
+     * @param <I> the ID type of the stored entities
+     * @param <B> the builder own type
+     */
+    protected abstract static class AbstractBuilder<I, B extends AbstractBuilder<I, B>> {
 
         private Descriptor descriptor;
         private DatastoreWrapper datastore;
@@ -635,23 +668,29 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
         private Class<I> idClass;
 
-        private Builder() {
-            // Prevent direct initialization.
+        /**
+         * Prevents direct instantiation.
+         */
+        AbstractBuilder() {
         }
 
-        public Builder<I> setStateType(TypeUrl stateTypeUrl) {
+        /**
+         * @param stateTypeUrl the type URL of the entity state, which is stored in the resulting
+         *                     storage
+         */
+        public B setStateType(TypeUrl stateTypeUrl) {
             checkNotNull(stateTypeUrl);
             final Descriptor descriptor = (Descriptor) stateTypeUrl.getDescriptor();
             this.descriptor = checkNotNull(descriptor);
-            return this;
+            return self();
         }
 
         /**
          * @param datastore the {@link DatastoreWrapper} to use in this storage
          */
-        public Builder<I> setDatastore(DatastoreWrapper datastore) {
+        public B setDatastore(DatastoreWrapper datastore) {
             this.datastore = checkNotNull(datastore);
-            return this;
+            return self();
         }
 
         /**
@@ -659,9 +698,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
          *                    {@link io.spine.server.storage.Storage#isMultitenant multitenant}
          *                    or not
          */
-        public Builder<I> setMultitenant(boolean multitenant) {
+        public B setMultitenant(boolean multitenant) {
             this.multitenant = multitenant;
-            return this;
+            return self();
         }
 
         /**
@@ -669,26 +708,63 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
          *                           {@linkplain io.spine.server.entity.storage.EntityColumn
          *                           entity columns}
          */
-        public Builder<I> setColumnTypeRegistry(
+        public B setColumnTypeRegistry(
                 ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
             this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
-            return this;
-        }
-
-        public Builder<I> setIdClass(Class<I> idClass) {
-            this.idClass = checkNotNull(idClass);
-            return this;
+            return self();
         }
 
         /**
-         * Creates new instance of the {@code DsRecordStorage}.
+         * @param idClass the ID class of the stored entity
          */
-        public DsRecordStorage<I> build() {
+        public B setIdClass(Class<I> idClass) {
+            this.idClass = checkNotNull(idClass);
+            return self();
+        }
+
+        /**
+         * @return the {@link Descriptor} of the stored entity state type
+         */
+        public Descriptor getDescriptor() {
+            return descriptor;
+        }
+
+        /**
+         * @return the {@link DatastoreWrapper} used in this storage
+         */
+        public DatastoreWrapper getDatastore() {
+            return datastore;
+        }
+
+        /**
+         * @return {@code true} if the storage should be
+         * {@link io.spine.server.storage.Storage#isMultitenant multitenant} or not
+         */
+        public boolean isMultitenant() {
+            return multitenant;
+        }
+
+        /**
+         * @return the type registry of the {@linkplain io.spine.server.entity.storage.EntityColumn
+         * entity columns}
+         */
+        public ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> getColumnTypeRegistry() {
+            return columnTypeRegistry;
+        }
+
+        /**
+         * @return the ID class of the stored entity
+         */
+        public Class<I> getIdClass() {
+            return idClass;
+        }
+
+        final void checkRequiredFields() {
             checkNotNull(descriptor, "State descriptor is not set.");
             checkNotNull(datastore, "Datastore is not set.");
             checkNotNull(columnTypeRegistry, "Column type registry is not set.");
-            final DsRecordStorage<I> storage = new DsRecordStorage<>(this);
-            return storage;
         }
+
+        abstract B self();
     }
 }

@@ -158,7 +158,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         final TypeUrl stateType = entityClass.getStateType();
         final Class<I> idClass = (Class<I>) entityClass.getIdClass();
         final DsProjectionStorageDelegate<I> recordStorage =
-                DsProjectionStorageDelegate.<I>builder()
+                DsProjectionStorageDelegate.<I>newDelegateBuilder()
                                            .setDatastore(getDatastore())
                                            .setMultitenant(isMultitenant())
                                            .setIdClass(idClass)
