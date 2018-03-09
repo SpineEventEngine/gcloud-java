@@ -91,10 +91,18 @@ final class DsFilters {
      */
     private static final Predicate<CompositeQueryParameter> isDisjunctive = not(isConjunctive);
 
+    /**
+     * Prevents the utility class instantiation.
+     */
     private DsFilters() {
-        // Prevent utility class fromm being initialized.
     }
 
+    /**
+     * Retrieves a {@linkplain Filter Datastore entity filter}, which filters out all records marked
+     * as {@code archived} or {@code deleted}.
+     *
+     * @return active entity Datastore filter
+     */
     static Filter activeEntity() {
         return ACTIVE_ENTITY_FILTER;
     }
