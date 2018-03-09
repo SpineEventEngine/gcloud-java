@@ -24,16 +24,11 @@ buildscript {
         // Spine snapshots repository.
         maven { url = spineSnapshotsRepository }
     }
-
-    dependencies {
-        classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufGradlePluginVerison}"
-    }
 }
 
 apply from: 'ext.gradle'
 
 ext {
-    protobufDependency = "com.google.protobuf:protoc:${project.protobufVersion}"
     publishPlugin = "$rootDir/scripts/publish.gradle"
 
     credentialsPropertyFile = 'credentials.properties'
@@ -58,7 +53,6 @@ allprojects {
 subprojects {
 
     apply plugin: 'java'
-    apply plugin: 'com.google.protobuf'
     apply plugin: 'maven-publish'
 
     sourceCompatibility = 1.7
@@ -79,49 +73,19 @@ subprojects {
     }
 
     dependencies {
-        // Exclude the transient dependencies from Spine, that aren't needed for GAE implementation.
-        final def excludes = {
-            exclude group: 'com.google.protobuf', module: 'protobuf-lite'
-            exclude group: 'io.grpc'
-        }
-
         compile group: 'io.spine', name: "spine-server",
-                version: spineVersion, changing: true, excludes
-
-
-        // Guava
-        compile group: 'com.google.guava', name: 'guava', version: guavaVersion
-
-        // Protobuf runtime
-        compile group: 'com.google.protobuf', name: 'protobuf-java', version: protobufVersion
-        compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: protobufVersion
-
-        // Findbugs
-        compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
-
-        // SLF4J
-        compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: slf4jVersion
+                version: spineVersion, changing: true
 
         testCompile group: 'io.spine', name: "spine-testutil-server", version: spineVersion,
-                changing: true, excludes
+                changing: true
         testCompile group: 'io.spine', name: "spine-server", version: spineVersion,
-                changing: true, classifier: "test", excludes
-
-        // JUnit
-        testCompile(group: 'junit', name: 'junit', version: '4.12') {
-            exclude(module: 'hamcrest-core')
-        }
-        testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+                changing: true, classifier: "test"
+        testCompile group: 'junit', name: 'junit', version: jUnitVersion
+        testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
         testCompile group: 'com.google.guava', name: 'guava-testlib', version: guavaVersion
-    }
 
-    protobuf {
-        generatedFilesBaseDir = "$projectDir/generated"
-        protoc {
-            artifact = project.protobufDependency
-        }
+        testRuntime group: 'org.slf4j', name: 'slf4j-jdk14', version: slf4jVersion
     }
 
     javadoc {

@@ -150,12 +150,21 @@ public class DatastoreStorageFactory implements StorageFactory {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
-        final DsRecordStorage<I> recordStorage =
-                (DsRecordStorage<I>) createRecordStorage(
-                        (Class<? extends Entity<I, ?>>) projectionClass);
+        final EntityClass<Projection<I, ?, ?>> entityClass = new EntityClass<>(projectionClass);
+        final TypeUrl stateType = entityClass.getStateType();
+        final Class<I> idClass = (Class<I>) entityClass.getIdClass();
+        final DsProjectionStorageDelegate<I> recordStorage =
+                DsProjectionStorageDelegate.<I>newDelegateBuilder()
+                                           .setDatastore(getDatastore())
+                                           .setMultitenant(isMultitenant())
+                                           .setIdClass(idClass)
+                                           .setStateType(stateType)
+                                           .setColumnTypeRegistry(typeRegistry)
+                                           .build();
         final DsPropertyStorage propertyStorage = createPropertyStorage();
         final DsProjectionStorage<I> result = new DsProjectionStorage<>(recordStorage,
                                                                         propertyStorage,

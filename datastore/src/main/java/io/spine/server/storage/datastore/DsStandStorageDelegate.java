@@ -44,8 +44,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
 
 /**
- * A {@link io.spine.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage} delegates its
- * operations.
+ * A {@link io.spine.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage}
+ * delegates its operations.
  *
  * @author Dmytro Dashenkov
  */
