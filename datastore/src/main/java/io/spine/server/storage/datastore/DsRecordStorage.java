@@ -637,6 +637,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
          * Prevents direct instantiation.
          */
         private Builder() {
+            super();
         }
 
         /**
