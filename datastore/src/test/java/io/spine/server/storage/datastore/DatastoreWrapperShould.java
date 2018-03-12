@@ -145,7 +145,7 @@ public class DatastoreWrapperShould {
         wrapper.createOrUpdate(expectedEntities);
 
         // Wait for some time to make sure the writing is complete
-        Thread.sleep(bulkSize * 2);
+        Thread.sleep(bulkSize * 3);
 
         final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setKind(Given.GENERIC_ENTITY_KIND.getValue())
