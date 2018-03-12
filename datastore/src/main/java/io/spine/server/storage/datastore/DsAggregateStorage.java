@@ -192,24 +192,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected Iterator<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         final StructuredQuery<Entity> query = historyBackwardQuery(request);
         final Iterator<Entity> eventEntities = datastore.read(query);
-
-        final Iterator<Entity> aggregateEntityStates = filter(getEntityStates(),
-                                                              not(activeEntity()));
-        final Iterator<Key> inactiveAggregateKeys = transform(
-                aggregateEntityStates,
-                new Function<Entity, Key>() {
-                    @Nullable
-                    @Override
-                    public Key apply(@Nullable Entity input) {
-                        checkNotNull(input);
-                        return input.getKey();
-                    }
-                });
-
-        final Iterator<Entity> filteredEntities = filter(
-                eventEntities,
-                new IsActiveAggregateId(inactiveAggregateKeys));
-        final Iterator<AggregateEventRecord> result = entitiesToMessages(filteredEntities,
+        final Iterator<AggregateEventRecord> result = entitiesToMessages(eventEntities,
                                                                          AGGREGATE_RECORD_TYPE_URL);
         return result;
     }
@@ -343,25 +326,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             checkNotNull(entity);
             final String stringId = entity.getString(aggregate_id.toString());
             return Stringifiers.fromString(stringId, idClass);
-        }
-    }
-
-    /**
-     * A {@linkplain Predicate} type filtering the input {@linkplain Entity entities} by presence
-     * of their {@linkplain Key keys} in the given {@link Collection} of keys.
-     */
-    private static class IsActiveAggregateId implements Predicate<Entity> {
-
-        private final Collection<Key> inActiveAggregateIds;
-
-        private IsActiveAggregateId(Iterator<Key> inActiveAggregateIds) {
-            this.inActiveAggregateIds = newArrayList(inActiveAggregateIds);
-        }
-
-        @Override
-        public boolean apply(@Nullable Entity input) {
-            checkNotNull(input);
-            return !inActiveAggregateIds.contains(input.getKey());
         }
     }
 }
