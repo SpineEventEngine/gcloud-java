@@ -213,13 +213,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                     .build();
     }
 
-    private Iterator<Entity> getEntityStates() {
-        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                                   .setKind(AGGREGATE_LIFECYCLE_KIND.value())
-                                                   .build();
-        return datastore.read(query);
-    }
-
     /**
      * Generates an identifier of the Datastore record basing on the given {@code Aggregate}
      * identifier.
