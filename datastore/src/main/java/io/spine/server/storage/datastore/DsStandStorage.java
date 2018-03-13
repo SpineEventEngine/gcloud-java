@@ -52,61 +52,66 @@ public class DsStandStorage extends StandStorage {
 
     @Override
     public Iterator<EntityRecord> readAllByType(TypeUrl type) {
-        final Iterator<EntityRecord> records = recordStorage.readAllByType(type);
+        final Iterator<EntityRecord> records = recordStorage().readAllByType(type);
         return records;
     }
 
     @Override
     public Iterator<EntityRecord> readAllByType(TypeUrl type, FieldMask fieldMask) {
-        final Iterator<EntityRecord> records = recordStorage.readAllByType(type, fieldMask);
+        final Iterator<EntityRecord> records = recordStorage().readAllByType(type, fieldMask);
         return records;
     }
 
     @Override
     public Iterator<AggregateStateId> index() {
-        return recordStorage.index();
+        return recordStorage().index();
     }
 
     @Override
     public boolean delete(AggregateStateId id) {
-        return recordStorage.delete(id);
+        return recordStorage().delete(id);
     }
 
     @Override
     protected Optional<EntityRecord> readRecord(AggregateStateId id) {
         final RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(id);
-        return recordStorage.read(request);
+        return recordStorage().read(request);
     }
 
     @Override
     protected Iterator<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
-        return recordStorage.readMultiple(ids);
+        return recordStorage().readMultiple(ids);
     }
 
     @Override
     protected Iterator<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids,
                                                          FieldMask fieldMask) {
-        return recordStorage.readMultiple(ids, fieldMask);
+        return recordStorage().readMultiple(ids, fieldMask);
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords() {
-        return recordStorage.readAll();
+        return recordStorage().readAll();
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        return recordStorage.readAll(fieldMask);
+        return recordStorage().readAll(fieldMask);
     }
 
     @Override
     protected void writeRecord(AggregateStateId id, EntityRecordWithColumns record) {
-        recordStorage.write(id, record);
+        recordStorage().write(id, record);
     }
 
     @Override
     protected void writeRecords(Map<AggregateStateId, EntityRecordWithColumns> records) {
-        recordStorage.writeRecords(records);
+        recordStorage().writeRecords(records);
+    }
+
+    @Override
+    protected DsStandStorageDelegate recordStorage() {
+        return recordStorage;
     }
 
     @SuppressWarnings("unused") // Part of API

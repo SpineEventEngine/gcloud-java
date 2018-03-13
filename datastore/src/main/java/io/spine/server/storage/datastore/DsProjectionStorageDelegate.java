@@ -45,8 +45,9 @@ public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
                                           DatastoreWrapper datastore,
                                           boolean multitenant,
                                           ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
-                                          Class<I> idClass) {
-        super(descriptor, datastore, multitenant, columnTypeRegistry, idClass);
+                                          Class<I> idClass,
+                                          Class<? extends io.spine.server.entity.Entity> entityClass) {
+        super(descriptor, datastore, multitenant, columnTypeRegistry, idClass, entityClass);
     }
 
     private DsProjectionStorageDelegate(Builder<I> builder) {
@@ -54,7 +55,8 @@ public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
              builder.getDatastore(),
              builder.isMultitenant(),
              builder.getColumnTypeRegistry(),
-             builder.getIdClass());
+             builder.getIdClass(),
+             builder.getEntityClass());
     }
 
     /**
