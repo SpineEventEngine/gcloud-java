@@ -343,8 +343,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
                                                          .setIdFilter(idFilter)
                                                          .addFilter(columnFilter)
                                                          .build();
-        final EntityQuery<ProjectId> entityQuery =
-                from(entityFilters, storage.getEntityColumnCache());
+        final EntityQuery<ProjectId> entityQuery = from(entityFilters, storage.getEntityColumnCache());
         final Iterator<EntityRecord> readResult = storage.readAll(entityQuery,
                                                                   FieldMask.getDefaultInstance());
         final List<EntityRecord> resultList = newArrayList(readResult);
