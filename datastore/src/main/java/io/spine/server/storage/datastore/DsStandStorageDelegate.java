@@ -29,6 +29,7 @@ import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.FieldMask;
+import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -66,7 +67,8 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
               multitenant,
               ColumnTypeRegistry.<DatastoreColumnType<?, ?>>newBuilder()
                                 .build(),
-              AggregateStateId.class);
+              AggregateStateId.class,
+              AbstractVersionableEntity.class);
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") // Overrides a pure method behavior

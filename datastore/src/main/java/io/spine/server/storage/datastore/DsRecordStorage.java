@@ -119,8 +119,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     protected DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore,
                               boolean multitenant,
                               ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
-                              Class<I> idClass) {
-        super(multitenant);
+                              Class<I> idClass,
+                              Class<? extends io.spine.server.entity.Entity> entityClass) {
+        super(multitenant, entityClass);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
@@ -133,7 +134,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
              builder.getDatastore(),
              builder.isMultitenant(),
              builder.getColumnTypeRegistry(),
-             builder.getIdClass());
+             builder.getIdClass(),
+             builder.getEntityClass());
     }
 
     @Override
@@ -668,6 +670,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         private boolean multitenant;
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
         private Class<I> idClass;
+        private Class<? extends io.spine.server.entity.Entity> entityClass;
 
         /**
          * Prevents direct instantiation.
@@ -724,6 +727,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
+         * @param entityClass the class of the stored entity
+         */
+        public B setEntityClass(Class<? extends io.spine.server.entity.Entity> entityClass) {
+            this.entityClass = checkNotNull(entityClass);
+            return self();
+        }
+
+        /**
          * @return the {@link Descriptor} of the stored entity state type
          */
         public Descriptor getDescriptor() {
@@ -758,6 +769,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
          */
         public Class<I> getIdClass() {
             return idClass;
+        }
+
+        /**
+         * @return the class of the stored entity
+         */
+        public Class<? extends io.spine.server.entity.Entity> getEntityClass() {
+            return entityClass;
         }
 
         final void checkRequiredFields() {

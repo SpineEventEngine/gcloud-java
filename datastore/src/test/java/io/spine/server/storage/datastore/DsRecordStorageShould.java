@@ -122,10 +122,10 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         return project;
     }
 
-    private EntityRecordWithColumns newRecordWithColumns() {
+    private EntityRecordWithColumns newRecordWithColumns(RecordStorage<ProjectId> storage) {
         final EntityRecord record = newStorageRecord();
         final TestConstCounterEntity entity = new TestConstCounterEntity(newId());
-        final EntityRecordWithColumns recordWithColumns = create(record, entity);
+        final EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
         return recordWithColumns;
     }
 
@@ -182,7 +182,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
                                                 .setEntityId(pack(id))
                                                 .setVersion(versionValue)
                                                 .build();
-        final EntityRecordWithColumns recordWithColumns = create(record, entity);
+        final DsRecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
+        final EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
         final Collection<String> columns = recordWithColumns.getColumnNames();
         assertNotNull(columns);
 
@@ -198,8 +199,6 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         assertContains(version, columns);
         assertContains(archived, columns);
         assertContains(deleted, columns);
-
-        final DsRecordStorage<ProjectId> storage = getStorage();
 
         // High level write operation
         storage.write(id, recordWithColumns);
@@ -245,6 +244,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         final long maxReadTime = 1000;
         final long maxWriteTime = 9500;
 
+        final DsRecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
+
         BigDataTester.<ProjectId>newBuilder()
                 .setEntryFactory(new BigDataTester.EntryFactory<ProjectId>() {
                     @Override
@@ -254,13 +255,13 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
 
                     @Override
                     public EntityRecordWithColumns newRecord() {
-                        return DsRecordStorageShould.this.newRecordWithColumns();
+                        return DsRecordStorageShould.this.newRecordWithColumns(storage);
                     }
                 })
                 .setReadLimit(maxReadTime)
                 .setWriteLimit(maxWriteTime)
                 .build()
-                .testBigDataOperations(getStorage());
+                .testBigDataOperations(storage);
     }
 
     @Test
@@ -276,8 +277,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
                                                 .build();
         final TestConstCounterEntity entity = new TestConstCounterEntity(id);
         entity.injectLifecycle(lifecycle);
-        final EntityRecordWithColumns recordWithColumns = create(record, entity);
-        final RecordStorage<ProjectId> storage = getStorage();
+        final RecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
+        final EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
         storage.write(id, recordWithColumns);
         final RecordReadRequest<ProjectId> request = new RecordReadRequest<>(id);
         final Optional<EntityRecord> restoredRecordOptional = storage.read(request);
@@ -295,7 +296,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
                                                 .setState(pack(newState(id)))
                                                 .build();
         final Entity entity = new EntityWithCustomColumnName(id);
-        final EntityRecordWithColumns entityRecordWithColumns = create(record, entity);
+        final EntityRecordWithColumns entityRecordWithColumns = create(record, entity, storage);
         final com.google.cloud.datastore.Entity datastoreEntity =
                 storage.entityRecordToEntity(id, entityRecordWithColumns);
         final Set<String> propertiesName = datastoreEntity.getNames();
@@ -317,7 +318,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
             final EntityRecord record = EntityRecord.newBuilder()
                                                     .setState(pack(entity.getState()))
                                                     .build();
-            final EntityRecordWithColumns withColumns = create(record, entity);
+            final EntityRecordWithColumns withColumns = create(record, entity, storage);
             storage.write(entity.getId(), withColumns);
         }
         final TestConstCounterEntity targetEntity = entities.get(targetEntityIndex);
@@ -334,8 +335,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
                                                          .setIdFilter(idFilter)
                                                          .addFilter(columnFilter)
                                                          .build();
-        final EntityQuery<ProjectId> entityQuery = from(entityFilters,
-                                                        TestConstCounterEntity.class);
+        final EntityQuery<ProjectId> entityQuery = from(entityFilters, storage);
         final Iterator<EntityRecord> readResult = storage.readAll(entityQuery,
                                                                   FieldMask.getDefaultInstance());
         final List<EntityRecord> resultList = newArrayList(readResult);

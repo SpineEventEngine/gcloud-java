@@ -162,6 +162,7 @@ public class DatastoreStorageFactory implements StorageFactory {
                                            .setDatastore(getDatastore())
                                            .setMultitenant(isMultitenant())
                                            .setIdClass(idClass)
+                                           .setEntityClass(projectionClass)
                                            .setStateType(stateType)
                                            .setColumnTypeRegistry(typeRegistry)
                                            .build();
@@ -188,6 +189,7 @@ public class DatastoreStorageFactory implements StorageFactory {
                                                          .setMultitenant(isMultitenant())
                                                          .setColumnTypeRegistry(typeRegistry)
                                                          .setIdClass(idClass)
+                                                         .setEntityClass(entityClass)
                                                          .build();
         return result;
     }
