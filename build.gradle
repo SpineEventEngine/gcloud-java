@@ -127,7 +127,7 @@ subprojects {
 
         selectors {
             directory "${sourcesRootDir}/test/java"
-            packages 'com.teamdev', 'io.spine.server.storage.datastore', 'io.spine.server.datastore'
+            packages 'io.spine.server.storage.datastore', 'io.spine.server.datastore', 'io.spine.web'
         }
 
         filters {
