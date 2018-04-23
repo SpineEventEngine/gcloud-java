@@ -172,5 +172,5 @@ task startDatastore {
 
 tasks["check"].dependsOn startDatastore
 
-apply from: publishPlugin
 apply from: jacocoPlugin
+apply from: publishPlugin
