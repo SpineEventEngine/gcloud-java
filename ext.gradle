@@ -25,8 +25,8 @@
  */
 
 ext {
-    spineGaeVersion = '0.10.33-SNAPSHOT'
-    spineVersion = '0.10.33-SNAPSHOT'
+    spineGaeVersion = '0.10.35-SNAPSHOT'
+    spineVersion = '0.10.35-SNAPSHOT'
 
     slf4jVersion = '1.7.21'
     guavaVersion = '20.0'
