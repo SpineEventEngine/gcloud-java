@@ -54,6 +54,7 @@ apply from: 'ext.gradle'
 
 ext {
     publishPlugin = "$rootDir/scripts/publish.gradle"
+    jacocoPlugin = "$rootDir/scripts/code-coverage.gradle"
 
     credentialsPropertyFile = 'credentials.properties'
     runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
@@ -103,8 +104,7 @@ subprojects {
     }
 
     dependencies {
-        compile group: 'io.spine', name: "spine-server",
-                version: spineVersion, changing: true
+        compile group: 'io.spine', name: "spine-server", version: spineVersion, changing: true
 
         testCompile group: 'io.spine', name: "spine-testutil-server", version: spineVersion, changing: true
         testCompile group: 'io.spine', name: "spine-server", version: spineVersion, changing: true, classifier: "test"
@@ -146,23 +146,23 @@ subprojects {
 
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
-        classifier "sources"
+        classifier = "sources"
     }
 
     task testOutputJar(type: Jar) {
         from sourceSets.test.output
-        classifier "test"
+        classifier = "test"
     }
 
     task javadocJar(type: Jar, dependsOn: 'javadoc') {
         from("$projectDir/build/docs/javadoc")
-        classifier "javadoc"
+        classifier = "javadoc"
     }
 }
 
 task startDatastore {
-    description "Starts local in-memory datastore using scripts form ./scripts folder."
-    group "Build Setup"
+    description = "Starts local in-memory datastore using scripts form ./scripts folder."
+    group = "Build Setup"
 
     doLast {
         // Start Datastore emulator with the CLI command
@@ -173,4 +173,4 @@ task startDatastore {
 tasks["check"].dependsOn startDatastore
 
 apply from: publishPlugin
-apply from: "$rootDir/scripts/code-coverage.gradle"
+apply from: jacocoPlugin
