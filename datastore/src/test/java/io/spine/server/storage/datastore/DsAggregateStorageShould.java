@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.EntityQuery;
+import com.google.common.base.Suppliers;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
@@ -32,6 +33,7 @@ import io.spine.server.aggregate.AggregateStorageShould;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
 import io.spine.server.entity.Entity;
 import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.ProjectAggregateRepository;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.testdata.Sample;
@@ -126,10 +128,14 @@ public class DsAggregateStorageShould extends AggregateStorageShould {
 
     @Test
     public void still_load_aggregates_properly_after_snapshot_trigger_decrease_at_runtime() {
+        final BoundedContext boundedContext =
+                BoundedContext.newBuilder()
+                              .setName(DsAggregateStorageShould.class.getName())
+                              .setStorageFactorySupplier(Suppliers.ofInstance(datastoreFactory))
+                              .build();
         final ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        repository.initStorage(datastoreFactory);
-        repository.setBoundedContext(BoundedContext.newBuilder()
-                                                   .build());
+        boundedContext.register(repository);
+
         final ProjectId id = newId();
         final int initialSnapshotTrigger = 10;
 
