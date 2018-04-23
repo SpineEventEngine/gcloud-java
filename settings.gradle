@@ -22,3 +22,5 @@ rootProject.name = 'gae-java'
 
 include ':datastore'
 include 'web'
+include 'firebase-web'
+

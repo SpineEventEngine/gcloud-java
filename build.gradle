@@ -44,6 +44,10 @@ buildscript {
         // Spine snapshots repository.
         maven { url = spineSnapshotsRepository }
     }
+
+    dependencies {
+        classpath "org.junit.platform:junit-platform-gradle-plugin:$jUnitPlatformVersion"
+    }
 }
 
 apply from: 'ext.gradle'
@@ -58,12 +62,12 @@ ext {
 }
 
 allprojects {
-
     apply plugin: 'java'
     apply plugin: 'maven'
-    apply plugin: 'jacoco'
     group = 'io.spine'
     version = project.spineGaeVersion
+
+    apply from: "$rootDir/ext.gradle"
 
     repositories {
         mavenCentral()
@@ -71,12 +75,18 @@ allprojects {
 }
 
 subprojects {
+    project.ext {
+        sourcesRootDir = "${projectDir}/src"
 
-    apply plugin: 'java'
+        generateDescriptorSetPlugin = "${rootDir}/scripts/generate-descriptor-set.gradle"
+        protobufImportPlugin = "$rootDir/scripts/protobuf.gradle"
+    }
+
     apply plugin: 'maven-publish'
+    apply plugin: 'org.junit.platform.gradle.plugin'
 
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
     repositories {
         jcenter()
@@ -96,16 +106,38 @@ subprojects {
         compile group: 'io.spine', name: "spine-server",
                 version: spineVersion, changing: true
 
-        testCompile group: 'io.spine', name: "spine-testutil-server", version: spineVersion,
-                changing: true
-        testCompile group: 'io.spine', name: "spine-server", version: spineVersion,
-                changing: true, classifier: "test"
-        testCompile group: 'junit', name: 'junit', version: jUnitVersion
+        testCompile group: 'io.spine', name: "spine-testutil-server", version: spineVersion, changing: true
+        testCompile group: 'io.spine', name: "spine-server", version: spineVersion, changing: true, classifier: "test"
+
+        testCompile "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
+        testRuntime "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
+        testRuntime "org.junit.vintage:junit-vintage-engine:${jUnitVersion}"
+
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
         testCompile group: 'com.google.guava', name: 'guava-testlib', version: guavaVersion
 
         testRuntime group: 'org.slf4j', name: 'slf4j-jdk14', version: slf4jVersion
+    }
+
+    junitPlatform {
+        platformVersion jUnitPlatformVersion
+
+        logManager 'java.util.logging.LogManager'
+
+        selectors {
+            directory "${sourcesRootDir}/test/java"
+            packages 'com.teamdev', 'io.spine.server.storage.datastore', 'io.spine.server.datastore'
+        }
+
+        filters {
+            engines {
+                include 'junit-jupiter'
+                include 'junit-vintage'
+            }
+
+            includeClassNamePatterns '.*Test', '.*Should'
+        }
     }
 
     javadoc {
@@ -128,35 +160,17 @@ subprojects {
     }
 }
 
-task codeCoverageReport(type: JacocoReport) {
-    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
-
-    subprojects.each {
-        sourceSets it.sourceSets.main
-    }
-
-    reports {
-        xml.enabled = true
-        xml.destination = ("${buildDir}/reports/jacoco/report.xml" as File)
-        html.enabled = false
-        csv.enabled = false
-    }
-}
-
-codeCoverageReport.dependsOn {
-    subprojects*.test
-}
-
 task startDatastore {
     description "Starts local in-memory datastore using scripts form ./scripts folder."
     group "Build Setup"
-}
 
-startDatastore.doLast {
-    // Start Datastore emulator with the CLI command
-    ".${File.separatorChar}scripts${File.separatorChar}start-datastore.${runsOnWindows ? 'bat' : 'sh'}".execute()
+    doLast {
+        // Start Datastore emulator with the CLI command
+        ".${File.separatorChar}scripts${File.separatorChar}start-datastore.${runsOnWindows ? 'bat' : 'sh'}".execute()
+    }
 }
 
 tasks["check"].dependsOn startDatastore
 
 apply from: publishPlugin
+apply from: "$rootDir/scripts/code-coverage.gradle"
