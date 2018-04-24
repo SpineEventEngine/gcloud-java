@@ -46,7 +46,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("serial") // Java serialization is not supported.
-public abstract class QueryServlet extends HttpServlet {
+public abstract class QueryServlet extends NonSerializableServlet {
 
     private final QueryMediator mediator;
 
@@ -77,30 +77,5 @@ public abstract class QueryServlet extends HttpServlet {
             final QueryResult result = mediator.mediate(queryParser);
             result.writeTo(resp);
         }
-    }
-
-    // Disables serialization.
-    // ----------------------
-
-    /**
-     * Blocks the Java serialization mechanism.
-     *
-     * <p>It is a common case for a {@code QueryServlet} not to be able to serialize its fields.
-     * Thus, any {@code QueryServlet} refuses the serialization bequest.
-     *
-     * @throws UnsupportedOperationException always
-     */
-    private void writeObject(ObjectOutputStream ignored) throws UnsupportedOperationException {
-        throw unsupported("QueryServlet serialization is not supported.");
-    }
-
-    /**
-     * Blocks the Java serialization mechanism.
-     *
-     * @throws UnsupportedOperationException always
-     * @see #writeObject(ObjectOutputStream)
-     */
-    private void readObject(ObjectInputStream ignored) throws UnsupportedOperationException {
-        throw unsupported("QueryServlet deserialization is not supported.");
     }
 }
