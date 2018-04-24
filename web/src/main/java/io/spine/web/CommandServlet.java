@@ -10,18 +10,16 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.json.Json;
 import io.spine.server.CommandService;
+import io.spine.web.parser.HttpMessages;
 
-import javax.servlet.annotation.WebServlet;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.unsupported;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
 /**
@@ -44,14 +42,15 @@ public abstract class CommandServlet extends NonSerializableServlet {
         this.commandService = checkNotNull(commandService);
     }
 
+    @OverridingMethodsMustInvokeSuper
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        final Optional<CommandParser> parsed = CommandParser.from(req);
+        final Optional<Command> parsed = HttpMessages.parse(req, Command.class);
         if (!parsed.isPresent()) {
             resp.sendError(SC_BAD_REQUEST);
         } else {
-            final Command command = parsed.get().command();
+            final Command command = parsed.get();
             final FutureObserver<Ack> ack = FutureObserver.withDefault(Ack.getDefaultInstance());
             commandService.post(command, ack);
             final Ack result = ack.toFuture().join();

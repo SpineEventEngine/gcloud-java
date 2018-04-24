@@ -8,7 +8,6 @@ package io.spine.web.firebase;
 
 import com.google.firebase.database.FirebaseDatabase;
 import io.spine.web.QueryMediator;
-import io.spine.web.QueryParser;
 import io.spine.web.QueryResult;
 import io.spine.web.queryservice.AsyncQueryService;
 import io.spine.client.Query;
@@ -36,7 +35,7 @@ import static com.google.common.base.Preconditions.checkState;
  * the data from the database.
  *
  * <p>Note that the database writes are non-blocking. This means that when
- * the {@link #mediate(QueryParser)} method exits, the records may or may not be in
+ * the {@link #mediate(Query)} method exits, the records may or may not be in
  * the database yet.
  *
  * @author Dmytro Dashenkov
@@ -54,12 +53,9 @@ public final class FirebaseQueryMediator implements QueryMediator {
     }
 
     @Override
-    public QueryResult mediate(QueryParser query) {
-        final Query entityQuery = query.query();
-        final CompletableFuture<QueryResponse> queryResponse = queryService.execute(entityQuery);
-        final FirebaseRecord record = new FirebaseRecord(entityQuery,
-                                                         queryResponse,
-                                                         writeAwaitSeconds);
+    public QueryResult mediate(Query query) {
+        final CompletableFuture<QueryResponse> queryResponse = queryService.execute(query);
+        final FirebaseRecord record = new FirebaseRecord(query, queryResponse, writeAwaitSeconds);
         record.storeTo(database);
         final QueryResult result = new FirebaseQueryResult(record.path());
         return result;

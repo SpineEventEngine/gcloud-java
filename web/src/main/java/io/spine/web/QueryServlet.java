@@ -6,19 +6,18 @@
 
 package io.spine.web;
 
+import io.spine.client.Query;
+import io.spine.web.parser.HttpMessages;
+
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Optional;
 
-import static io.spine.util.Exceptions.unsupported;
-
 /**
- * An {@link HttpServlet} which receives {@linkplain QueryParser query requests}, dispatches them
+ * An {@link HttpServlet} which receives {@linkplain Query query requests}, dispatches them
  * into a {@link QueryMediator} and writes the {@linkplain QueryResult mediation result} into
  * the response.
  *
@@ -69,11 +68,11 @@ public abstract class QueryServlet extends NonSerializableServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        final Optional<QueryParser> query = QueryParser.from(req);
+        final Optional<Query> query = HttpMessages.parse(req, Query.class);
         if (!query.isPresent()) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         } else {
-            final QueryParser queryParser = query.get();
+            final Query queryParser = query.get();
             final QueryResult result = mediator.mediate(queryParser);
             result.writeTo(resp);
         }

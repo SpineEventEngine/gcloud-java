@@ -6,10 +6,12 @@
 
 package io.spine.web;
 
+import io.spine.client.Query;
+
 /**
  * An {@linkplain io.spine.client.Query entity query} mediator.
  *
- * <p>Translates the given {@link QueryParser} into a {@link QueryResult}.
+ * <p>Translates the given {@link Query} into a {@link QueryResult}.
  *
  * <p>No constrains are applied to the contents of the query. Neither any guaranties are made for
  * the query result. Investigate the concrete implementation to find out the details of their
@@ -20,10 +22,10 @@ package io.spine.web;
 public interface QueryMediator {
 
     /**
-     * Processes the given {@link QueryParser} and returns a {@link QueryResult}.
+     * Processes the given {@link Query} and returns a {@link QueryResult}.
      *
      * @param query the query to mediate
      * @return the query result
      */
-    QueryResult mediate(QueryParser query);
+    QueryResult mediate(Query query);
 }
