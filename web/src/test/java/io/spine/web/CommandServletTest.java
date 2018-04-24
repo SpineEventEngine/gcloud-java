@@ -49,7 +49,7 @@ class CommandServletTest {
     }
 
     @Test
-    @DisplayName("handle `/command` POST requests")
+    @DisplayName("handle command POST requests")
     void testHandle() throws IOException {
         final CommandServlet servlet = new TestCommandServlet();
         final StringWriter response = new StringWriter();
