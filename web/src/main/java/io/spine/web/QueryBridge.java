@@ -9,7 +9,7 @@ package io.spine.web;
 import io.spine.client.Query;
 
 /**
- * An {@linkplain io.spine.client.Query entity query} mediator.
+ * An {@linkplain io.spine.client.Query entity query} bridge.
  *
  * <p>Translates the given {@link Query} into a {@link QueryResult}.
  *
@@ -19,13 +19,13 @@ import io.spine.client.Query;
  *
  * @author Dmytro Dashenkov
  */
-public interface QueryMediator {
+public interface QueryBridge {
 
     /**
      * Processes the given {@link Query} and returns a {@link QueryResult}.
      *
-     * @param query the query to mediate
+     * @param query the query to send
      * @return the query result
      */
-    QueryResult mediate(Query query);
+    QueryResult send(Query query);
 }

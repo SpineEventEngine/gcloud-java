@@ -24,7 +24,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.client.Query;
 import io.spine.json.Json;
-import io.spine.web.QueryMediator;
+import io.spine.web.QueryBridge;
 import io.spine.web.QueryResult;
 import io.spine.web.QueryServlet;
 
@@ -44,20 +44,20 @@ public final class QueryServletTestEnv {
         }
 
         public TestQueryServlet(Message expectedMessage) {
-            super(new TestQueryMediator(expectedMessage));
+            super(new TestQueryBridge(expectedMessage));
         }
     }
 
-    private static final class TestQueryMediator implements QueryMediator {
+    private static final class TestQueryBridge implements QueryBridge {
 
         private final Message response;
 
-        private TestQueryMediator(Message response) {
+        private TestQueryBridge(Message response) {
             this.response = response;
         }
 
         @Override
-        public QueryResult mediate(Query query) {
+        public QueryResult send(Query query) {
             return new TestQueryResult(response);
         }
     }

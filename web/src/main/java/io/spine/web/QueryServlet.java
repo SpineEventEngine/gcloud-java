@@ -17,8 +17,8 @@ import java.io.IOException;
 import java.util.Optional;
 
 /**
- * An {@link HttpServlet} which receives {@linkplain Query query requests}, dispatches them
- * into a {@link QueryMediator} and writes the {@linkplain QueryResult mediation result} into
+ * An {@link HttpServlet} which receives {@linkplain Query query requests}, passes them
+ * into a {@link QueryBridge} and writes the {@linkplain QueryResult sending result} into
  * the response.
  *
  * <p>The servlet supports only {@code POST} requests. {@code GET}, {@code HEAD}, {@code PUT},
@@ -31,10 +31,10 @@ import java.util.Optional;
  *
  * <p>If the request is valid (i.e. the request body contains a valid
  * {@link io.spine.client.Query Query}), the response will contain the {@linkplain QueryResult
- * query mediation result}. Otherwise, the response will be empty with the response code
+ * query sending result}. Otherwise, the response will be empty with the response code
  * {@link HttpServletResponse#SC_BAD_REQUEST 400}.
  *
- * <p>A typical implementation would extend this class and provide a {@link QueryMediator} in
+ * <p>A typical implementation would extend this class and provide a {@link QueryBridge} in
  * the constructor. No additional config is required in order for this servlet to handle
  * the {@linkplain io.spine.client.Query entity queries}.
  *
@@ -47,22 +47,22 @@ import java.util.Optional;
 @SuppressWarnings("serial") // Java serialization is not supported.
 public abstract class QueryServlet extends NonSerializableServlet {
 
-    private final QueryMediator mediator;
+    private final QueryBridge bridge;
 
     /**
-     * Creates a new instance of {@link QueryServlet} with the given {@link QueryMediator}.
+     * Creates a new instance of {@link QueryServlet} with the given {@link QueryBridge}.
      *
-     * @param mediator the query mediator to be used in this query servlet
+     * @param bridge the query bridge to be used in this query servlet
      */
-    protected QueryServlet(QueryMediator mediator) {
+    protected QueryServlet(QueryBridge bridge) {
         super();
-        this.mediator = mediator;
+        this.bridge = bridge;
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p>Handles the {@code POST} request through the {@link QueryMediator}.
+     * <p>Handles the {@code POST} request through the {@link QueryBridge}.
      */
     @OverridingMethodsMustInvokeSuper
     @Override
@@ -73,7 +73,7 @@ public abstract class QueryServlet extends NonSerializableServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         } else {
             final Query queryParser = query.get();
-            final QueryResult result = mediator.mediate(queryParser);
+            final QueryResult result = bridge.send(queryParser);
             result.writeTo(resp);
         }
     }

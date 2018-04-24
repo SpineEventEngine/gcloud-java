@@ -54,7 +54,7 @@ final class FirebaseRecord {
     /**
      * Writes this record to the given {@link FirebaseDatabase}.
      *
-     * @see FirebaseQueryMediator FirebaseQueryMediator for the detailed storage protocol
+     * @see FirebaseQueryBridge FirebaseQueryBridge for the detailed storage protocol
      */
     void storeTo(FirebaseDatabase database) {
         final DatabaseReference reference = path().reference(database);

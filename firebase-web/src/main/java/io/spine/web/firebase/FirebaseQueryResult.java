@@ -12,10 +12,10 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 
 /**
- * A result of a query processed by a {@link FirebaseQueryMediator}.
+ * A result of a query processed by a {@link FirebaseQueryBridge}.
  *
  * <p>This result represents a database path to the requested data.
- * See {@link FirebaseQueryMediator} for more details.
+ * See {@link FirebaseQueryBridge} for more details.
  *
  * @author Dmytro Dashenkov
  */

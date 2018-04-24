@@ -7,7 +7,7 @@
 package io.spine.web.firebase;
 
 import com.google.firebase.database.FirebaseDatabase;
-import io.spine.web.QueryMediator;
+import io.spine.web.QueryBridge;
 import io.spine.web.QueryResult;
 import io.spine.web.queryservice.AsyncQueryService;
 import io.spine.client.Query;
@@ -21,39 +21,39 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * A Firebase Realtime Database based implementation of {@link QueryMediator}.
+ * A Firebase Realtime Database based implementation of {@link QueryBridge}.
  *
- * <p>This mediator stores the {@link QueryResponse} data to a location in a given
+ * <p>This bridge stores the {@link QueryResponse} data to a location in a given
  * {@link FirebaseDatabase} and retrieves the database path to that response as the result.
  *
- * <p>More formally, for each encountered {@link Query}, the mediator performs a call to
+ * <p>More formally, for each encountered {@link Query}, the bridge performs a call to
  * the {@code QueryService} and stores the resulting entity states into the given database. The data
  * is stored as a list of strings. Each entry is
  * a {@linkplain io.spine.json.Json JSON representation} of an entity state. The path returned by
- * the mediator as a result is the path to the database node containing all those records.
+ * the bridge as a result is the path to the database node containing all those records.
  * The absolute position of such node is not specified, thus the result path is the only way to read
  * the data from the database.
  *
  * <p>Note that the database writes are non-blocking. This means that when
- * the {@link #mediate(Query)} method exits, the records may or may not be in
+ * the {@link #send(Query)} method exits, the records may or may not be in
  * the database yet.
  *
  * @author Dmytro Dashenkov
  */
-public final class FirebaseQueryMediator implements QueryMediator {
+public final class FirebaseQueryBridge implements QueryBridge {
 
     private final AsyncQueryService queryService;
     private final FirebaseDatabase database;
     private final long writeAwaitSeconds;
 
-    private FirebaseQueryMediator(Builder builder) {
+    private FirebaseQueryBridge(Builder builder) {
         this.queryService = builder.queryService;
         this.database = builder.database;
         this.writeAwaitSeconds = builder.writeAwaitSeconds;
     }
 
     @Override
-    public QueryResult mediate(Query query) {
+    public QueryResult send(Query query) {
         final CompletableFuture<QueryResponse> queryResponse = queryService.execute(query);
         final FirebaseRecord record = new FirebaseRecord(query, queryResponse, writeAwaitSeconds);
         record.storeTo(database);
@@ -62,7 +62,7 @@ public final class FirebaseQueryMediator implements QueryMediator {
     }
 
     /**
-     * Creates a new instance of {@code Builder} for {@code FirebaseQueryMediator} instances.
+     * Creates a new instance of {@code Builder} for {@code FirebaseQueryBridge} instances.
      *
      * @return new instance of {@code Builder}
      */
@@ -71,7 +71,7 @@ public final class FirebaseQueryMediator implements QueryMediator {
     }
 
     /**
-     * A builder for the {@code FirebaseQueryMediator} instances.
+     * A builder for the {@code FirebaseQueryBridge} instances.
      */
     public static final class Builder {
 
@@ -120,14 +120,14 @@ public final class FirebaseQueryMediator implements QueryMediator {
         }
 
         /**
-         * Creates a new instance of {@code FirebaseQueryMediator}.
+         * Creates a new instance of {@code FirebaseQueryBridge}.
          *
-         * @return new instance of {@code FirebaseQueryMediator}
+         * @return new instance of {@code FirebaseQueryBridge}
          */
-        public FirebaseQueryMediator build() {
+        public FirebaseQueryBridge build() {
             checkState(queryService != null, "Query Service is not set.");
             checkState(database != null, "FirebaseDatabase is not set.");
-            return new FirebaseQueryMediator(this);
+            return new FirebaseQueryBridge(this);
         }
     }
 

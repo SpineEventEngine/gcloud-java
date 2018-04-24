@@ -9,7 +9,7 @@ package io.spine.web.firebase;
 import io.spine.web.QueryServlet;
 
 /**
- * A {@link QueryServlet} which uses the {@link FirebaseQueryMediator}.
+ * A {@link QueryServlet} which uses the {@link FirebaseQueryBridge}.
  *
  * @author Dmytro Dashenkov
  * @see QueryServlet
@@ -20,7 +20,7 @@ public abstract class FirebaseQueryServlet extends QueryServlet {
     /**
      * @see QueryServlet#QueryServlet
      */
-    protected FirebaseQueryServlet(FirebaseQueryMediator mediator) {
-        super(mediator);
+    protected FirebaseQueryServlet(FirebaseQueryBridge bridge) {
+        super(bridge);
     }
 }
