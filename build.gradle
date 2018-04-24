@@ -59,7 +59,7 @@ ext {
     credentialsPropertyFile = 'credentials.properties'
     runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
 
-    projectsToPublish = ['datastore']
+    projectsToPublish = ['datastore', 'web', 'firebase-web']
 }
 
 allprojects {

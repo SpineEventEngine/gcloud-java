@@ -23,4 +23,3 @@ rootProject.name = 'gcloud-java'
 include 'datastore'
 include 'web'
 include 'firebase-web'
-

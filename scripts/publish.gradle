@@ -51,6 +51,15 @@ void dependPublish(final Project project) {
     publish.dependsOn project.getTasksByName("publish", false)
 }
 
+/**
+ * Retrieves the ID of the artifact to publish for the given project.
+ *
+ * @return value of {@code artifactId} property if defined, {@code project.name} otherwise
+ */
+static def artifactId(final Project project) {
+    return project.hasProperty("artifactId") ? project.artifactId : project.name
+}
+
 projectsToPublish.each {
     project(":$it") { final currentProject ->
         apply plugin: 'maven-publish'
@@ -58,9 +67,9 @@ projectsToPublish.each {
         publishing {
             publications {
                 mavenJava(MavenPublication) {
-                    groupId = "${group}"
-                    artifactId = "${currentProject.artifactId}"
-                    version = "${currentProject.version}"
+                    groupId = group
+                    artifactId = artifactId(currentProject)
+                    version = currentProject.version
 
                     from components.java
 
