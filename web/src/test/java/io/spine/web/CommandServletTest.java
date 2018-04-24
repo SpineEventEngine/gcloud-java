@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Dmytro Dashenkov
  */
-@DisplayName("LicensingCommandServlet should")
-class LicensingCommandServletTest {
+@DisplayName("CommandServlet should")
+class CommandServletTest {
 
     private CommandService commandService;
 
