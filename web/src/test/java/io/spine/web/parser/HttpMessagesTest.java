@@ -9,6 +9,9 @@ package io.spine.web.parser;
 import com.google.protobuf.Empty;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.UnknownFieldSet;
+import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Responses;
 import org.junit.jupiter.api.DisplayName;
@@ -101,6 +104,33 @@ class HttpMessagesTest {
         final Optional<?> parsed = HttpMessages.parse(requestInFormat(content, PROTOBUF_TYPE),
                                                       Empty.class);
         assertFalse(parsed.isPresent());
+    }
+
+    @Test
+    @DisplayName("fail to parse wrong type of message from JSON")
+    void testJsonWrongType() throws IOException {
+        final String content = "{ \"foo\": \"bar\" }";
+        final Optional<?> parsed = HttpMessages.parse(requestWithJson(content), Empty.class);
+        assertFalse(parsed.isPresent());
+    }
+
+    @Test
+    @DisplayName("parse to parse wrong type of message from bytes into unknown fields")
+    void testBase64WrongType() throws IOException {
+        final Timestamp message = Time.getCurrentTime();
+        final String content = base64(message);
+        final Optional<Empty> parsed = HttpMessages.parse(requestInFormat(content, PROTOBUF_TYPE),
+                                                          Empty.class);
+        assertTrue(parsed.isPresent());
+        final Empty parsingResult = parsed.get();
+        final UnknownFieldSet unknownFields = parsingResult.getUnknownFields();
+        assertEquals(message.getSeconds(),
+                     (long) unknownFields.getField(1)
+                                         .getVarintList()
+                                         .get(0));
+        assertEquals(message.getNanos(), (long) unknownFields.getField(2)
+                                                             .getVarintList()
+                                                             .get(0));
     }
 
     private static String base64(Message message) {
