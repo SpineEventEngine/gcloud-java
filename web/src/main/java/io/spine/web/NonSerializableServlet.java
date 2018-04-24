@@ -41,6 +41,10 @@ abstract class NonSerializableServlet extends HttpServlet {
     /**
      * Blocks the Java serialization mechanism.
      *
+     * <p>It is a common case for a servlet not to be able to serialize its fields.
+     * Thus, any servlet class derived from {@code NonSerializableServlet} refuses
+     * the serialization bequest.
+     *
      * @throws UnsupportedOperationException always
      */
     private void writeObject(ObjectOutputStream ignored) throws UnsupportedOperationException {
@@ -51,6 +55,7 @@ abstract class NonSerializableServlet extends HttpServlet {
      * Blocks the Java serialization mechanism.
      *
      * @throws UnsupportedOperationException always
+     * @see #writeObject(ObjectOutputStream)
      */
     private void readObject(ObjectInputStream ignored) throws UnsupportedOperationException {
         throw unsupported("%s deserialization is not supported.", getClass().getSimpleName());
