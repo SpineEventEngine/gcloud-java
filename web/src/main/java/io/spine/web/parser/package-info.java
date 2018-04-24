@@ -5,7 +5,7 @@
  */
 
 /**
- * This package contains components responsible for parsing messages sent over the Web protocols.
+ * This package contains components responsible for parsing messages sent over HTTP.
  */
 @ParametersAreNonnullByDefault
 package io.spine.web.parser;
