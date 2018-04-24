@@ -31,6 +31,12 @@ import static java.util.stream.Collectors.joining;
  * is absent, the JSON format is expected. If the header value is not recognized, the parsing is
  * failed.
  *
+ * <p>There is a difference in behavior when parsing one or the other format.
+ * When parsing a JSON-encoded message, if an unknown field is found, the parsing is considered
+ * failed. In contrary, an unknown field in a Base64-encoded message does not fail parsing;
+ * the field can be found in the {@linkplain Message#getUnknownFields() unknown fields set} of
+ * the parsed message.
+ *
  * @see MessageFormat
  * @author Dmytro Dashenkov
  */
