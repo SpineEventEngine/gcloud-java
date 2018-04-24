@@ -5,7 +5,7 @@
  */
 
 /**
- * This package contains the basic client transport API.
+ * This package contains the Spine web API.
  */
 
 @ParametersAreNonnullByDefault
