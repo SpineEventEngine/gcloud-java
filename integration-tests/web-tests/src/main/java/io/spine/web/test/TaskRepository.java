@@ -18,13 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'gcloud-java'
+package io.spine.web.test;
 
-include 'datastore'
-include 'web'
-include 'firebase-web'
-include 'client-js'
-include 'web-tests'
+import io.spine.server.aggregate.AggregateRepository;
 
-project(':web-tests').projectDir = "integration-tests/web-tests" as File
-
+/**
+ * @author Dmytro Dashenkov
+ */
+public class TaskRepository extends AggregateRepository<TaskId, TaskAggregate> {
+}

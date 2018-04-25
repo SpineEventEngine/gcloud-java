@@ -19,9 +19,7 @@
  */
 
 buildscript {
-    ext {
-        protobufGradlePluginVersion = '0.8.3'
-    }
+    apply from: "$rootDir/ext.gradle"
     repositories {
         mavenCentral()
         mavenLocal()
@@ -39,10 +37,10 @@ buildscript {
 
 ext {
     compiledPath = "$projectDir/build/js-client.js"
-    protobufVersion = '3.5.0'
 }
 
 apply plugin: 'com.google.protobuf'
+apply from: "$rootDir/ext.gradle"
 apply plugin: 'idea'
 apply from: "$rootDir/scripts/js-cli.gradle"
 

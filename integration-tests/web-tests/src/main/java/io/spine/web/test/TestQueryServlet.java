@@ -18,13 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'gcloud-java'
+package io.spine.web.test;
 
-include 'datastore'
-include 'web'
-include 'firebase-web'
-include 'client-js'
-include 'web-tests'
+import io.spine.web.firebase.FirebaseQueryBridge;
+import io.spine.web.firebase.FirebaseQueryServlet;
 
-project(':web-tests').projectDir = "integration-tests/web-tests" as File
+/**
+ * @author Dmytro Dashenkov
+ */
+@SuppressWarnings("serial")
+public class TestQueryServlet extends FirebaseQueryServlet {
 
+    public TestQueryServlet() {
+        super(FirebaseQueryBridge.newBuilder()
+                                 .serQueryService(Server.application().getQueryService())
+                                 .setDatabase(FirebaseClient.database())
+                                 .build());
+    }
+}
