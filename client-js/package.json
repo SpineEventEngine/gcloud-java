@@ -8,7 +8,7 @@
   },
   "scripts": {
     "compile": "webpack --config webpack.config.js --mode=production",
-    "test": "nyc --reporter=text-lcov mocha --require babel-polyfill --require babel-register --recursive $NODE_DEBUG_OPTION --exit --full-trace ./test > coverage.lcov && codecov"
+    "test": "nyc --reporter=text-lcov mocha --require babel-polyfill --require babel-register --recursive $NODE_DEBUG_OPTION --exit --full-trace ./test > build/coverage.lcov"
   },
   "dependencies": {
     "base64-js": "^1.3.0",
