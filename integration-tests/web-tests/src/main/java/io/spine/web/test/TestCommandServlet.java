@@ -22,9 +22,12 @@ package io.spine.web.test;
 
 import io.spine.web.CommandServlet;
 
+import javax.servlet.annotation.WebServlet;
+
 /**
  * @author Dmytro Dashenkov
  */
+@WebServlet("/command")
 @SuppressWarnings("serial")
 public class TestCommandServlet extends CommandServlet {
 

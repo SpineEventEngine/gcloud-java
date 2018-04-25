@@ -21,6 +21,8 @@
 package io.spine.web.test;
 
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
 
 /**
  * @author Dmytro Dashenkov
@@ -29,5 +31,21 @@ public class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
 
     public TaskAggregate(TaskId id) {
         super(id);
+    }
+
+    @Assign
+    TaskCreated handle(CreateTask command) {
+        return TaskCreated.newBuilder()
+                          .setId(command.getId())
+                          .setName(command.getName())
+                          .setDescription(command.getDescription())
+                          .build();
+    }
+
+    @Apply
+    private void on(TaskCreated event) {
+        getBuilder().setId(event.getId())
+                    .setName(event.getName())
+                    .setDescription(event.getDescription());
     }
 }

@@ -38,14 +38,13 @@ public final class FirebaseClient {
     static {
         try {
             final InputStream in = FirebaseClient.class.getClassLoader()
-                                                       .getResourceAsStream("serviceAccount.json");
+                                                       .getResourceAsStream("spine-dev.json");
             final GoogleCredentials credentials;
 
             credentials = GoogleCredentials.fromStream(in);
-            final String databaseUrl = ""; // TODO:2018-04-25:dmytro.dashenkov: add creds.
             final FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(credentials)
-                    .setDatabaseUrl(databaseUrl)
+                    .setDatabaseUrl("https://spine-dev.firebaseio.com/")
                     .build();
             FirebaseApp.initializeApp(options);
         } catch (IOException e) {

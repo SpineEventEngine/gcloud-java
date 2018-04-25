@@ -51,6 +51,7 @@ final class Server {
                               .setName(name)
                               .setStorageFactorySupplier(() -> storageFactory)
                               .build();
+        boundedContext.register(new TaskRepository());
         final Application app = Application.create(boundedContext);
         return app;
     }

@@ -23,9 +23,12 @@ package io.spine.web.test;
 import io.spine.web.firebase.FirebaseQueryBridge;
 import io.spine.web.firebase.FirebaseQueryServlet;
 
+import javax.servlet.annotation.WebServlet;
+
 /**
  * @author Dmytro Dashenkov
  */
+@WebServlet("/query")
 @SuppressWarnings("serial")
 public class TestQueryServlet extends FirebaseQueryServlet {
 
