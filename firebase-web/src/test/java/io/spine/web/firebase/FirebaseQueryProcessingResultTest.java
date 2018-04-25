@@ -41,11 +41,11 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-@DisplayName("FirebaseQueryResult should")
-class FirebaseQueryResultTest {
+@DisplayName("FirebaseQueryProcessingResult should")
+class FirebaseQueryProcessingResultTest {
 
     private static final QueryFactory queryFactory =
-            TestActorRequestFactory.newInstance(FirebaseQueryResultTest.class).query();
+            TestActorRequestFactory.newInstance(FirebaseQueryProcessingResultTest.class).query();
 
     private FirebaseDatabasePath databasePath;
 
@@ -63,7 +63,7 @@ class FirebaseQueryResultTest {
         final PrintWriter writer = new PrintWriter(stringWriter);
         when(response.getWriter()).thenReturn(writer);
 
-        final FirebaseQueryResult queryResult = new FirebaseQueryResult(databasePath);
+        final FirebaseQueryProcessingResult queryResult = new FirebaseQueryProcessingResult(databasePath);
         queryResult.writeTo(response);
         verify(response).getWriter();
 
@@ -73,7 +73,7 @@ class FirebaseQueryResultTest {
     @Test
     @DisplayName("provide a comprehensible string representation")
     void test_toString() {
-        final FirebaseQueryResult queryResult = new FirebaseQueryResult(databasePath);
+        final FirebaseQueryProcessingResult queryResult = new FirebaseQueryProcessingResult(databasePath);
         assertEquals(databasePath.toString(), queryResult.toString());
     }
 }

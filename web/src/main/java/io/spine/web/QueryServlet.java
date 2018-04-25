@@ -18,7 +18,7 @@ import java.util.Optional;
 
 /**
  * An {@link HttpServlet} which receives {@linkplain Query query requests}, passes them
- * into a {@link QueryBridge} and writes the {@linkplain QueryResult sending result} into
+ * into a {@link QueryBridge} and writes the {@linkplain QueryProcessingResult sending result} into
  * the response.
  *
  * <p>The servlet supports only {@code POST} requests. {@code GET}, {@code HEAD}, {@code PUT},
@@ -30,7 +30,7 @@ import java.util.Optional;
  * {@link io.spine.client.Query io.spine.client.Query}.
  *
  * <p>If the request is valid (i.e. the request body contains a valid
- * {@link io.spine.client.Query Query}), the response will contain the {@linkplain QueryResult
+ * {@link io.spine.client.Query Query}), the response will contain the {@linkplain QueryProcessingResult
  * query sending result}. Otherwise, the response will be empty with the response code
  * {@link HttpServletResponse#SC_BAD_REQUEST 400}.
  *
@@ -73,7 +73,7 @@ public abstract class QueryServlet extends NonSerializableServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         } else {
             final Query queryParser = query.get();
-            final QueryResult result = bridge.send(queryParser);
+            final QueryProcessingResult result = bridge.send(queryParser);
             result.writeTo(resp);
         }
     }

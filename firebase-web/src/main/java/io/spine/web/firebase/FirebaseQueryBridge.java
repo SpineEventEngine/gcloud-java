@@ -8,7 +8,7 @@ package io.spine.web.firebase;
 
 import com.google.firebase.database.FirebaseDatabase;
 import io.spine.web.QueryBridge;
-import io.spine.web.QueryResult;
+import io.spine.web.QueryProcessingResult;
 import io.spine.web.queryservice.AsyncQueryService;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
  * <p>More formally, for each encountered {@link Query}, the bridge performs a call to
  * the {@code QueryService} and stores the resulting entity states into the given database. The data
  * is stored as a list of strings. Each entry is
- * a {@linkplain io.spine.json.Json JSON representation} of an entity state. The path returned by
+ * a {@linkplain io.spine.json.Json JSON representation} of an entity state. The path produced by
  * the bridge as a result is the path to the database node containing all those records.
  * The absolute position of such node is not specified, thus the result path is the only way to read
  * the data from the database.
@@ -53,11 +53,11 @@ public final class FirebaseQueryBridge implements QueryBridge {
     }
 
     @Override
-    public QueryResult send(Query query) {
+    public QueryProcessingResult send(Query query) {
         final CompletableFuture<QueryResponse> queryResponse = queryService.execute(query);
         final FirebaseRecord record = new FirebaseRecord(query, queryResponse, writeAwaitSeconds);
         record.storeTo(database);
-        final QueryResult result = new FirebaseQueryResult(record.path());
+        final QueryProcessingResult result = new FirebaseQueryProcessingResult(record.path());
         return result;
     }
 

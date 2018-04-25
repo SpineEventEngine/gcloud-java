@@ -25,9 +25,10 @@ import com.google.protobuf.Message;
 import io.spine.client.Query;
 import io.spine.json.Json;
 import io.spine.web.QueryBridge;
-import io.spine.web.QueryResult;
+import io.spine.web.QueryProcessingResult;
 import io.spine.web.QueryServlet;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 
@@ -57,21 +58,21 @@ public final class QueryServletTestEnv {
         }
 
         @Override
-        public QueryResult send(Query query) {
-            return new TestQueryResult(response);
+        public QueryProcessingResult send(@Nonnull Query query) {
+            return new TestQueryProcessingResult(response);
         }
     }
 
-    private static final class TestQueryResult implements QueryResult {
+    private static final class TestQueryProcessingResult implements QueryProcessingResult {
 
         private final Message message;
 
-        private TestQueryResult(Message message) {
+        private TestQueryProcessingResult(Message message) {
             this.message = message;
         }
 
         @Override
-        public void writeTo(ServletResponse response) throws IOException {
+        public void writeTo(@Nonnull ServletResponse response) throws IOException {
             response.getWriter().append(Json.toJson(message));
         }
     }

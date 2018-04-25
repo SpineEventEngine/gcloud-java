@@ -6,7 +6,7 @@
 
 package io.spine.web.firebase;
 
-import io.spine.web.QueryResult;
+import io.spine.web.QueryProcessingResult;
 
 import javax.servlet.ServletResponse;
 import java.io.IOException;
@@ -19,13 +19,13 @@ import java.io.IOException;
  *
  * @author Dmytro Dashenkov
  */
-final class FirebaseQueryResult implements QueryResult {
+final class FirebaseQueryProcessingResult implements QueryProcessingResult {
 
     private static final String MIME_TYPE = "text/plain";
 
     private final FirebaseDatabasePath path;
 
-    FirebaseQueryResult(FirebaseDatabasePath path) {
+    FirebaseQueryProcessingResult(FirebaseDatabasePath path) {
         this.path = path;
     }
 
