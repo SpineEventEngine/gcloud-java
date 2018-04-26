@@ -7,7 +7,7 @@
 "use strict";
 
 /**
- * The client of the License Server backend.
+ * The client of the application backend.
  *
  * Orchestrates the work of the HTTP and Firebase clients and
  * the {@link ActorRequestFactory}.
