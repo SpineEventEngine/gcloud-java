@@ -16,7 +16,7 @@ let commands = require("../../proto/test/js/spine/web/test/commands_pb");
 let task = require("../../proto/test/js/spine/web/test/task_pb");
 
 let { TypeUrl, TypedMessage} = require("../../src/client/typed-message");
-let httpClient = new HttpClient("https://license-server-dev-a9044.appspot.com");
+let httpClient = new HttpClient("https://spine-dev.appspot.com");
 let requestFactory = new ActorRequestFactory("web-test-actor");
 let backendClient = new BackendClient(httpClient,
                                       new FirebaseClient(firebase),
