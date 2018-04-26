@@ -1,0 +1,41 @@
+/*
+ * Copyright (c) 2000-2018 TeamDev Ltd. All rights reserved.
+ * TeamDev PROPRIETARY and CONFIDENTIAL.
+ * Use is subject to license terms.
+ */
+
+allprojects {
+    apply plugin: 'jacoco'
+}
+
+subprojects {
+    project.afterEvaluate {
+        def junitPlatformTestTask = project.tasks.getByName('junitPlatformTest')
+
+        // configure jacoco to analyze the junitPlatformTest task
+        jacoco {
+            // this tool version is known to be compatible with JUnit 5.
+            toolVersion = "0.7.6.201602180812"
+            applyTo junitPlatformTestTask
+        }
+
+        codeCoverageReport.dependsOn {
+            subprojects*.test
+        }
+    }
+}
+
+task codeCoverageReport(type: JacocoReport) {
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+    subprojects.each {
+        sourceSets it.sourceSets.main
+    }
+
+    reports {
+        xml.enabled = true
+        xml.destination = "${buildDir}/reports/jacoco/report.xml"
+        html.enabled = false
+        csv.enabled = false
+    }
+}

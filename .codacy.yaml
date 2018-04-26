@@ -1,0 +1,5 @@
+---
+exclude_paths:
+- "datastore/src/test/**/*.*"
+- "web/src/test/**/*.*"
+- "firebase-web/src/test/**/*.*"
