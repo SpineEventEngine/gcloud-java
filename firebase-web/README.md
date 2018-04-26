@@ -78,7 +78,7 @@ Alternatively, the `Query` may be represented as a Base64-encoded byte string.
 See [`HttpMessages`](../client-transport/src/main/java/com/teamdev/licensing/web/parser/HttpMessages.java)
 for more info. 
 
-The response path is generated based on the `Query`. Assume that the path is `foo/bar`. 
+The response path is generated basing on the `Query`. Assume that the path is `foo/bar`. 
 Then the servlet response contains the literal string `foo/bar` without any additional info.
 
 When the client receives the response, it should subscribe to the child events of `foo/bar`. Each

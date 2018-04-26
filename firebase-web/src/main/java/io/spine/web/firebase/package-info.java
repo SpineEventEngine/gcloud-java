@@ -5,7 +5,8 @@
  */
 
 /**
- * This package contains the Firebase client transport.
+ * This package contains the implementation of the Spine web API based on the Firebase Realtime
+ * Database.
  */
 
 @ParametersAreNonnullByDefault

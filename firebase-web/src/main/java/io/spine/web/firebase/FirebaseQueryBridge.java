@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * A Firebase Realtime Database based implementation of {@link QueryBridge}.
+ * An implementation of {@link QueryBridge} based on the Firebase Realtime Database.
  *
  * <p>This bridge stores the {@link QueryResponse} data to a location in a given
  * {@link FirebaseDatabase} and retrieves the database path to that response as the result.
@@ -31,8 +31,8 @@ import static com.google.common.base.Preconditions.checkState;
  * is stored as a list of strings. Each entry is
  * a {@linkplain io.spine.json.Json JSON representation} of an entity state. The path produced by
  * the bridge as a result is the path to the database node containing all those records.
- * The absolute position of such node is not specified, thus the result path is the only way to read
- * the data from the database.
+ * The absolute position of such a node is not specified, thus the result path is the only way
+ * to read the data from the database.
  *
  * <p>Note that the database writes are non-blocking. This means that when
  * the {@link #send(Query)} method exits, the records may or may not be in
@@ -52,6 +52,15 @@ public final class FirebaseQueryBridge implements QueryBridge {
         this.writeAwaitSeconds = builder.writeAwaitSeconds;
     }
 
+    /**
+     * Sends the given {@link Query} to the {@link io.spine.server.QueryService QueryService} and
+     * stores the query response into the database.
+     *
+     * <p>Returns the path in the database, under which the query response is stored.
+     *
+     * @param query the query to send
+     * @return a path in the database
+     */
     @Override
     public QueryProcessingResult send(Query query) {
         final CompletableFuture<QueryResponse> queryResponse = queryService.execute(query);
@@ -130,5 +139,4 @@ public final class FirebaseQueryBridge implements QueryBridge {
             return new FirebaseQueryBridge(this);
         }
     }
-
 }

@@ -161,11 +161,11 @@ subprojects {
 }
 
 task startDatastore {
-    description = "Starts local in-memory datastore using scripts form ./scripts folder."
+    description = "Starts local in-memory datastore using scripts from ./scripts folder."
     group = "Build Setup"
 
     doLast {
-        // Start Datastore emulator with the CLI command
+        // Start Datastore emulator with the CLI command.
         ".${File.separatorChar}scripts${File.separatorChar}start-datastore.${runsOnWindows ? 'bat' : 'sh'}".execute()
     }
 }
