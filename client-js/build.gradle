@@ -85,6 +85,8 @@ task integrationTest {
     dependsOn compileJs
 }
 
+rootProject.codeCoverageReport.dependsOn integrationTest
+
 protobuf {
     generatedFilesBaseDir = "$projectDir/proto"
     protoc {
