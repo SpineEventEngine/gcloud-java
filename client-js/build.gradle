@@ -46,6 +46,7 @@ apply from: "$rootDir/scripts/js-cli.gradle"
 
 dependencies {
     protobuf group: 'io.spine', name: 'spine-client', version: spineVersion, classifier: 'proto'
+    testProtobuf project(":web-tests")
 }
 
 /**
@@ -136,3 +137,4 @@ clean {
 
 // Suppress building the JS project as a Java module.
 project.compileJava.enabled = false
+project.compileTestJava.enabled = false
