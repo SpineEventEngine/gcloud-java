@@ -15,8 +15,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A {@linkplain StreamObserver stream observer} which can provide
- * a {@link CompletableFuture} view on the stream.
+ * A {@linkplain StreamObserver stream observer} which can provide a {@link CompletableFuture}
+ * view on the stream.
  *
  * <p>This implementation works only with the unary gRPC calls, i.e. {@link #onNext(Object)} cannot
  * be called more then once.
