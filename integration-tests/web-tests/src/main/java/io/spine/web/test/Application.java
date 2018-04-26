@@ -27,9 +27,11 @@ import io.spine.server.QueryService;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A test Spine application.
+ *
  * @author Dmytro Dashenkov
  */
-public final class Application {
+final class Application {
 
     private final CommandService commandService;
     private final QueryService queryService;
@@ -39,7 +41,7 @@ public final class Application {
         this.queryService = queryService;
     }
 
-    public static Application create(BoundedContext boundedContext) {
+    static Application create(BoundedContext boundedContext) {
         checkNotNull(boundedContext);
         final CommandService commandService = CommandService.newBuilder()
                                                             .add(boundedContext)
@@ -50,11 +52,11 @@ public final class Application {
         return new Application(commandService, queryService);
     }
 
-    public CommandService getCommandService() {
+    CommandService getCommandService() {
         return commandService;
     }
 
-    public QueryService getQueryService() {
+    QueryService getQueryService() {
         return queryService;
     }
 }

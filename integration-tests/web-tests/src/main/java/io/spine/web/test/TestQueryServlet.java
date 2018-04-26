@@ -26,6 +26,8 @@ import io.spine.web.firebase.FirebaseQueryServlet;
 import javax.servlet.annotation.WebServlet;
 
 /**
+ * The query side endpoint of the application.
+ *
  * @author Dmytro Dashenkov
  */
 @WebServlet("/query")

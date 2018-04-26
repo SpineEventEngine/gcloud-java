@@ -31,9 +31,11 @@ import java.io.InputStream;
 import static io.spine.util.Exceptions.illegalArgumentWithCauseOf;
 
 /**
+ * A Firebase client of the application.
+ *
  * @author Dmytro Dashenkov
  */
-public final class FirebaseClient {
+final class FirebaseClient {
 
     static {
         try {
@@ -58,7 +60,10 @@ public final class FirebaseClient {
     private FirebaseClient() {
     }
 
-    public static FirebaseDatabase database() {
+    /**
+     * Retrieves the application Firebase Realtime Database instance.
+     */
+    static FirebaseDatabase database() {
         return FirebaseDatabase.getInstance();
     }
 }

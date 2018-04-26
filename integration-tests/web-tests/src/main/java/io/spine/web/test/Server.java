@@ -27,6 +27,8 @@ import static io.spine.server.BoundedContext.newName;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 
 /**
+ * The test application server.
+ *
  * @author Dmytro Dashenkov
  */
 final class Server {
@@ -39,6 +41,9 @@ final class Server {
     private Server() {
     }
 
+    /**
+     * Retrieves the {@link Application} instance.
+     */
     static Application application() {
         return app;
     }

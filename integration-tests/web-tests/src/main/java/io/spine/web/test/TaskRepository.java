@@ -23,7 +23,9 @@ package io.spine.web.test;
 import io.spine.server.aggregate.AggregateRepository;
 
 /**
+ * A repository for the task aggregates.
+ *
  * @author Dmytro Dashenkov
  */
-public class TaskRepository extends AggregateRepository<TaskId, TaskAggregate> {
+class TaskRepository extends AggregateRepository<TaskId, TaskAggregate> {
 }

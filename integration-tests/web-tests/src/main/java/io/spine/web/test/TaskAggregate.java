@@ -25,6 +25,8 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 
 /**
+ * An aggregate with the state of type {@code spine.web.test.Task}.
+ *
  * @author Dmytro Dashenkov
  */
 public class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {

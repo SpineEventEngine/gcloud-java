@@ -25,13 +25,15 @@ import io.spine.web.CommandServlet;
 import javax.servlet.annotation.WebServlet;
 
 /**
+ * The command side endpoint of the application.
+ *
  * @author Dmytro Dashenkov
  */
 @WebServlet("/command")
 @SuppressWarnings("serial")
-public class TestCommandServlet extends CommandServlet {
+class TestCommandServlet extends CommandServlet {
 
-    public TestCommandServlet() {
+    TestCommandServlet() {
         super(Server.application().getCommandService());
     }
 }
