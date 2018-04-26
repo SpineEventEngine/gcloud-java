@@ -1,6 +1,6 @@
 # Integration tests
 
-This directory contains integration tests which belong to multiple modules of `gcloud-java`.
+This directory contains integration test environment used by multiple modules of `gcloud-java`.
 
 ## `web-tests`
 
