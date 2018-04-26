@@ -1,0 +1,27 @@
+/*
+ * Copyright (c) 2000-2018 TeamDev Ltd. All rights reserved.
+ * TeamDev PROPRIETARY and CONFIDENTIAL.
+ * Use is subject to license terms.
+ */
+
+import org.apache.tools.ant.taskdefs.condition.Os
+
+def execMultiplatform(final File workingDirArg,
+                      final String windowsCommand,
+                      final String unixCommand,
+                      final String[] params) {
+    exec {
+        final String command = Os.isFamily(Os.FAMILY_WINDOWS) ? windowsCommand : unixCommand
+        final List resultingParams = [command] + Arrays.asList(params)
+        workingDir = workingDirArg
+        commandLine = resultingParams
+    }
+}
+
+def runNpm(final String[] params) {
+    execMultiplatform project.projectDir, 'npm.cmd', 'npm', params
+}
+
+ext {
+    npm = { final String... params -> runNpm(params) }
+}

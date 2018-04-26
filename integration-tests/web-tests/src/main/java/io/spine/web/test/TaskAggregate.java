@@ -18,26 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.web.test;
+
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
+
 /**
- *  The versions of the libraries used.
+ * An aggregate with the state of type {@code spine.web.test.Task}.
  *
- *  This file is used wherever the library versions are required.
+ * @author Dmytro Dashenkov
  */
+public class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
 
-ext {
-    spineGaeVersion = '0.10.35-SNAPSHOT'
-    spineVersion = '0.10.35-SNAPSHOT'
-    spineBaseVersion = '0.10.32-SNAPSHOT'
+    public TaskAggregate(TaskId id) {
+        super(id);
+    }
 
-    slf4jVersion = '1.7.21'
-    guavaVersion = '20.0'
-    datastoreVersion = '1.12.0'
-    firebaseVersion = '5.9.0'
+    @Assign
+    TaskCreated handle(CreateTask command) {
+        return TaskCreated.newBuilder()
+                          .setId(command.getId())
+                          .setName(command.getName())
+                          .setDescription(command.getDescription())
+                          .build();
+    }
 
-    protobufVersion = '3.5.0'
-    protobufGradlePluginVersion = '0.8.3'
-
-    jUnitPlatformVersion = '1.1.1'
-    jUnitVersion = '5.1.1'
-    hamcrestVersion = '1.3'
+    @Apply
+    private void on(TaskCreated event) {
+        getBuilder().setId(event.getId())
+                    .setName(event.getName())
+                    .setDescription(event.getDescription());
+    }
 }

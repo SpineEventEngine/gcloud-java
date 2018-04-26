@@ -1,0 +1,141 @@
+/*
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+buildscript {
+    apply from: "$rootDir/ext.gradle"
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath("com.google.protobuf:protobuf-gradle-plugin:$protobufGradlePluginVersion") {
+            // exclude an old Guava version
+            exclude group: 'com.google.guava'
+        }
+        classpath "com.google.guava:guava:$guavaVersion"
+    }
+}
+
+ext {
+    compiledPath = "$projectDir/build/js-client.js"
+}
+
+apply plugin: 'com.google.protobuf'
+apply from: "$rootDir/ext.gradle"
+apply plugin: 'idea'
+apply from: "$rootDir/scripts/js-cli.gradle"
+
+dependencies {
+    protobuf group: 'io.spine', name: 'spine-client', version: spineVersion, classifier: 'proto'
+    testProtobuf project(":web-tests")
+}
+
+/**
+ * Installs the module dependencies using the `npm install` command.
+ */
+task installDependencies {
+    description = "Installs the JavaScript dependencies."
+    inputs.files "$projectDir/package.json"
+    outputs.files "$projectDir/node_modules"
+    doLast {
+        npm 'install'
+    }
+}
+
+/**
+ * Compiles the JS into the `client-all.js` artifact.
+ *
+ * <p>This task executes the NPM `compile` script, which uses Webpack to assemble the artifact.
+ *
+ * <p>This task is a part of a standard Gradle build for the `:js-client` project.
+ */
+task compileJs {
+    description = "Compiles the JavaScript sources into a single .js file."
+    inputs.files "$projectDir/webpack.config.js"
+    outputs.files compiledPath
+    doLast {
+        npm 'run', 'compile'
+    }
+    dependsOn installDependencies
+}
+
+task integrationTest {
+    doLast {
+        npm 'run', 'test'
+    }
+    dependsOn compileJs
+}
+
+protobuf {
+    generatedFilesBaseDir = "$projectDir/proto"
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    generateProtoTasks {
+        all().each { final task ->
+            task.plugins {
+                task.generateDescriptorSet = true
+                task.descriptorSetOptions.path = "${projectDir}/build/descriptors/${task.sourceSet.name}.desc"
+                task.descriptorSetOptions.includeImports = true
+                task.descriptorSetOptions.includeSourceInfo = true
+            }
+            task.builtins {
+                // Do not use java builtin output in this project.
+                remove java
+
+                // For information on JavaScript code generation please see
+                // https://github.com/google/protobuf/blob/master/js/README.md
+                js {
+                    option "import_style=commonjs"
+                }
+            }
+            compileJs.dependsOn task
+        }
+    }
+}
+
+build.dependsOn compileJs
+
+idea.module {
+    sourceDirs += file("${projectDir}/proto")
+    sourceDirs += file("$projectDir/src")
+    testSourceDirs += file("$projectDir/test")
+    excludeDirs += file("$projectDir/node_modules")
+    excludeDirs += file("$projectDir/.nyc_output")
+
+    iml {
+        beforeMerged { module ->
+            module.dependencies.clear()
+        }
+        whenMerged { module ->
+            module.dependencies*.exported = true
+        }
+    }
+}
+
+clean {
+    delete "$projectDir/proto/main"
+}
+
+// Suppress building the JS project as a Java module.
+project.compileJava.enabled = false
+project.compileTestJava.enabled = false

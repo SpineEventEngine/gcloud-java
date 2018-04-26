@@ -18,26 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.web.test;
+
+import io.spine.web.firebase.FirebaseQueryBridge;
+import io.spine.web.firebase.FirebaseQueryServlet;
+
+import javax.servlet.annotation.WebServlet;
+
 /**
- *  The versions of the libraries used.
+ * The query side endpoint of the application.
  *
- *  This file is used wherever the library versions are required.
+ * @author Dmytro Dashenkov
  */
+@WebServlet("/query")
+@SuppressWarnings("serial")
+public class TestQueryServlet extends FirebaseQueryServlet {
 
-ext {
-    spineGaeVersion = '0.10.35-SNAPSHOT'
-    spineVersion = '0.10.35-SNAPSHOT'
-    spineBaseVersion = '0.10.32-SNAPSHOT'
-
-    slf4jVersion = '1.7.21'
-    guavaVersion = '20.0'
-    datastoreVersion = '1.12.0'
-    firebaseVersion = '5.9.0'
-
-    protobufVersion = '3.5.0'
-    protobufGradlePluginVersion = '0.8.3'
-
-    jUnitPlatformVersion = '1.1.1'
-    jUnitVersion = '5.1.1'
-    hamcrestVersion = '1.3'
+    public TestQueryServlet() {
+        super(FirebaseQueryBridge.newBuilder()
+                                 .serQueryService(Server.application().getQueryService())
+                                 .setDatabase(FirebaseClient.database())
+                                 .build());
+    }
 }

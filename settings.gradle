@@ -23,3 +23,8 @@ rootProject.name = 'gcloud-java'
 include 'datastore'
 include 'web'
 include 'firebase-web'
+include 'client-js'
+include 'web-tests'
+
+project(':web-tests').projectDir = "integration-tests/web-tests" as File
+

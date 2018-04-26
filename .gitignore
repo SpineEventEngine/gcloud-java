@@ -23,3 +23,5 @@ credentials.properties
 # Credentials to the test Datastore environment.
 # They are stored in the encrypted file and are decrypted on the CI server only.
 /datastore/src/test/resources/spine-dev-62685282c0b9.json
+
+package-lock.json
