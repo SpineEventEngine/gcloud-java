@@ -29,6 +29,9 @@ final class FirebaseQueryProcessingResult implements QueryProcessingResult {
         this.path = path;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void writeTo(ServletResponse response) throws IOException {
         final String databaseUrl = path.toString();
