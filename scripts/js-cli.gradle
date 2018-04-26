@@ -6,6 +6,14 @@
 
 import org.apache.tools.ant.taskdefs.condition.Os
 
+/**
+ * Executes the given command depending on the current OS.
+ *
+ * @param workingDirArg  the directory to execute the command in
+ * @param windowsCommand the command to execute is the OS is Windows
+ * @param unixCommand    the command to execute is the OS is Unix-like
+ * @param params         the command params, platform-independent
+ */
 def execMultiplatform(final File workingDirArg,
                       final String windowsCommand,
                       final String unixCommand,
@@ -23,5 +31,14 @@ def runNpm(final String[] params) {
 }
 
 ext {
+
+    /**
+     * Executes an {@code npm} CLI command.
+     *
+     * For example, to execute command {@code npm run compile}, invoke this function as follows:
+     * {@code npm 'run', 'compile'}
+     *
+     * @param params the command parameters
+     */
     npm = { final String... params -> runNpm(params) }
 }
