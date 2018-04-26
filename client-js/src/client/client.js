@@ -5,9 +5,9 @@
  */
 
 /**
- * The object which represents the public API of the js-client module.
+ * The object which represents the public API of the `client-js` module.
  *
- * This object is exported from the artifact build by webpack.
+ * This object is exported from the artifact built by webpack.
  *
  * @type {{BackendClient: BackendClient, HttpClient: HttpClient, FirebaseClient: FirebaseClient, ActorRequestFactory: ActorRequestFactory}}
  */
