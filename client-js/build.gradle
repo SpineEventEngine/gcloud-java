@@ -120,6 +120,7 @@ idea.module {
     sourceDirs += file("$projectDir/src")
     testSourceDirs += file("$projectDir/test")
     excludeDirs += file("$projectDir/node_modules")
+    excludeDirs += file("$projectDir/.nyc_output")
 
     iml {
         beforeMerged { module ->
