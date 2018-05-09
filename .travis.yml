@@ -6,7 +6,9 @@ jdk:
 before_install:
   - chmod +x gradlew
   - chmod +x ./scripts/start-datastore.sh
-  - openssl aes-256-cbc -K $encrypted_af189f5020cd_key -iv $encrypted_af189f5020cd_iv -in spine-dev-62685282c0b9.json.enc -out ./datastore/src/test/resources/spine-dev-62685282c0b9.json -d
+  # Decrypt the Google Cloud credentials file and copy it over to the destination.
+  - openssl aes-256-cbc -K $encrypted_af189f5020cd_key -iv $encrypted_af189f5020cd_iv -in spine-dev-62685282c0b9.json.enc -out spine-dev-62685282c0b9.json -d
+  - cp spine-dev-62685282c0b9.json ./datastore/src/test/resources/spine-dev-62685282c0b9.json
 
 script:
   - ./gradlew build integrationTest codeCoverageReport --stacktrace
