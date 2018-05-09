@@ -26,8 +26,8 @@ def execMultiplatform(final File workingDirArg,
     }
 }
 
-def runNpm(final String[] params) {
-    execMultiplatform project.projectDir, 'npm.cmd', 'npm', params
+def runNpm(final File launchDir, final String[] params) {
+    execMultiplatform launchDir, 'npm.cmd', 'npm', params
 }
 
 ext {
@@ -40,5 +40,7 @@ ext {
      *
      * @param params the command parameters
      */
-    npm = { final String... params -> runNpm(params) }
+    npm = { final File from = projectDir, final String... params ->
+        runNpm(from, params)
+    }
 }
