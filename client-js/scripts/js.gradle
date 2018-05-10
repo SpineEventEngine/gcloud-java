@@ -21,6 +21,7 @@
 apply from: "$projectDir/scripts/js-cli.gradle"
 
 final def TASK_GROUP = 'JavaScript'
+ext.npmPublicationRoot = "$buildDir/npm-publication/"
 
 /**
  * Installs the module dependencies using the `npm install` command.
@@ -58,8 +59,6 @@ task compileJs {
     dependsOn installDependencies
 }
 
-build.dependsOn compileJs
-
 task integrationTest {
     group = TASK_GROUP
     description = ''
@@ -71,12 +70,11 @@ task integrationTest {
     dependsOn compileJs
 }
 
-rootProject.codeCoverageReport.dependsOn integrationTest
-
-ext {
-    npmPublicationRoot = "$buildDir/npm-publication/"
-}
-
+/**
+ * Copies the library artifact built by `compileJs` into the NPM publication directory.
+ *
+ * The artifact is renamed to `index.js` in the new directory.
+ */
 task copyArtifact(type: Copy) {
     group = TASK_GROUP
 
@@ -88,13 +86,30 @@ task copyArtifact(type: Copy) {
     dependsOn compileJs
 }
 
+/**
+ * Copies the `package.json` file into the NPM publication directory.
+ *
+ * The original file declares a `private` (non-publishable) package. The resulting file declares
+ * a publishable package.
+ */
 task copyPackageDescriptor(type: Copy) {
     group = TASK_GROUP
 
     from "$projectDir/package.json"
     into npmPublicationRoot
+
+    filter { final line ->
+        if (line.matches('.*private.*')) {
+            return null
+        } else {
+            return line
+        }
+    }
 }
 
+/**
+ * Copies the NPM publication files into a temporary directory which they are published from.
+ */
 task prepareJsPublication {
     group = TASK_GROUP
     description = 'Prepares the NPM package for publish.'
@@ -102,13 +117,19 @@ task prepareJsPublication {
     dependsOn copyArtifact, copyPackageDescriptor
 }
 
+/**
+ * Publishes the NPM package with `npm publish`.
+ */
 task publishJs {
     group = TASK_GROUP
     description = 'Publishes the NPM package.'
 
     doLast {
-        npm from: npmPublicationRoot, 'publish'
+        project.ext.npm npmPublicationRoot as File, 'publish'
     }
 
     dependsOn prepareJsPublication
 }
+
+build.dependsOn compileJs
+rootProject.codeCoverageReport.dependsOn integrationTest
