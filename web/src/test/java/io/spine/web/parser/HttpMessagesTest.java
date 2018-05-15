@@ -25,6 +25,8 @@ import java.util.Base64;
 import java.util.Optional;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.web.parser.HttpMessages.parse;
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -44,6 +46,12 @@ class HttpMessagesTest {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String PROTOBUF_TYPE = "application/x-protobuf";
 
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    private static final String JSON_FORMAT = "json";
+
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    private static final String BYTES_FORMAT = "bytes";
+
     @Test
     @DisplayName("have private utility ctor")
     void testUtilCtor() {
@@ -57,7 +65,7 @@ class HttpMessagesTest {
         final Ack expected = Ack.newBuilder()
                                 .setStatus(Responses.statusOk())
                                 .build();
-        final Optional<Ack> actual = HttpMessages.parse(requestWithJson(content), Ack.class);
+        final Optional<Ack> actual = parse(requestWithFormat(content, JSON_FORMAT), Ack.class);
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
     }
@@ -69,9 +77,8 @@ class HttpMessagesTest {
                                                  .addPaths("Dummy.field")
                                                  .build();
         final String content = base64(expectedMessage);
-        final Optional<FieldMask> actual =
-                HttpMessages.parse(requestInFormat(content, PROTOBUF_TYPE),
-                                   FieldMask.class);
+        final Optional<FieldMask> actual = parse(requestWithFormat(content, BYTES_FORMAT),
+                                                 FieldMask.class);
         assertTrue(actual.isPresent());
         assertEquals(expectedMessage, actual.get());
     }
@@ -80,17 +87,28 @@ class HttpMessagesTest {
     @DisplayName("not parse message of an unknown format")
     void testNotSupportUnknownFormat() throws IOException {
         final String content = "whatever";
-        final Optional<?> result = HttpMessages.parse(requestInFormat(content, "invalid-format"),
-                                                      Message.class);
+        final Optional<?> result = parse(
+                requestWithContentType(content, "invalid-format"),
+                Message.class);
         assertFalse(result.isPresent());
     }
 
     @Test
-    @DisplayName("parse message of JSON format specified explicitly")
-    void testParseExplicitJson() throws IOException {
+    @DisplayName("parse message of JSON format specified in Content-Type")
+    void testParseJsonFromHeader() throws IOException {
         final String content = "{}";
-        final Optional<Empty> parsed = HttpMessages.parse(requestInFormat(content, JSON_TYPE),
-                                                          Empty.class);
+        final Optional<Empty> parsed = parse(requestWithContentType(content, JSON_TYPE),
+                                             Empty.class);
+        assertTrue(parsed.isPresent());
+        assertEquals(Empty.getDefaultInstance(), parsed.get());
+    }
+
+    @Test
+    @DisplayName("parse message of Base64 format specified in Content-Type")
+    void testParseBytesFromHeader() throws IOException {
+        final String content = base64(Empty.getDefaultInstance());
+        final Optional<Empty> parsed = parse(requestWithContentType(content, PROTOBUF_TYPE),
+                                             Empty.class);
         assertTrue(parsed.isPresent());
         assertEquals(Empty.getDefaultInstance(), parsed.get());
     }
@@ -101,8 +119,8 @@ class HttpMessagesTest {
         final String content = Base64.getEncoder().encodeToString(
                 new byte[] {(byte) 1, (byte) 42, (byte) 127}
         );
-        final Optional<?> parsed = HttpMessages.parse(requestInFormat(content, PROTOBUF_TYPE),
-                                                      Empty.class);
+        final Optional<?> parsed = parse(requestWithContentType(content, PROTOBUF_TYPE),
+                                         Empty.class);
         assertFalse(parsed.isPresent());
     }
 
@@ -110,17 +128,18 @@ class HttpMessagesTest {
     @DisplayName("fail to parse wrong type of message from JSON")
     void testJsonWrongType() throws IOException {
         final String content = "{ \"foo\": \"bar\" }";
-        final Optional<?> parsed = HttpMessages.parse(requestWithJson(content), Empty.class);
+        final Optional<?> parsed = parse(requestWithFormat(content, JSON_FORMAT), Empty.class);
         assertFalse(parsed.isPresent());
     }
 
     @Test
-    @DisplayName("parse to parse wrong type of message from bytes into unknown fields")
+    @DisplayName("parse wrong type of message from bytes into unknown fields")
     void testBase64WrongType() throws IOException {
         final Timestamp message = Time.getCurrentTime();
         final String content = base64(message);
-        final Optional<Empty> parsed = HttpMessages.parse(requestInFormat(content, PROTOBUF_TYPE),
-                                                          Empty.class);
+        final Optional<Empty> parsed = parse(
+                requestWithFormat(content, BYTES_FORMAT),
+                Empty.class);
         assertTrue(parsed.isPresent());
         final Empty parsingResult = parsed.get();
         final UnknownFieldSet unknownFields = parsingResult.getUnknownFields();
@@ -140,17 +159,25 @@ class HttpMessagesTest {
         return result;
     }
 
-    private static HttpServletRequest requestWithJson(String content) throws IOException {
-        final HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(content)));
+    private static HttpServletRequest requestWithContentType(String content, String contentType)
+            throws IOException {
+        final HttpServletRequest request = requestWithBody(content);
+        when(request.getHeader(eq(MessageFormat.CONTENT_TYPE))).thenReturn(contentType);
+        when(request.getQueryString()).thenReturn("");
         return request;
     }
 
-    private static HttpServletRequest requestInFormat(String content, String format)
+    private static HttpServletRequest requestWithFormat(String content, String format)
             throws IOException {
+        final HttpServletRequest request = requestWithBody(content);
+        when(request.getQueryString()).thenReturn(format("format=%s", format));
+        return request;
+    }
+
+    private static HttpServletRequest requestWithBody(String content) throws IOException {
         final HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(content)));
-        when(request.getHeader(eq(MessageFormat.CONTENT_TYPE))).thenReturn(format);
+        when(request.getRequestURL()).thenReturn(new StringBuffer("http://test.request/"));
         return request;
     }
 }

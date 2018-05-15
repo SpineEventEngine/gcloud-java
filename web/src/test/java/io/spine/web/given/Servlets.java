@@ -36,6 +36,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
+ * The factory of mock servlet API objects, such as requests and responses.
+ *
  * @author Dmytro Dashenkov
  */
 public final class Servlets {
@@ -50,6 +52,7 @@ public final class Servlets {
         final HttpServletRequest request = mock(HttpServletRequest.class);
         final String content = Json.toJson(contents);
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(content)));
+        when(request.getQueryString()).thenReturn("format=json");
         return request;
     }
 

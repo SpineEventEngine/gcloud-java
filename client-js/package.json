@@ -1,6 +1,6 @@
 {
   "name": "spine-js-client",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "private": true,
   "license": "Apache-2.0",
   "description": "JS implementation of the Spine client.",

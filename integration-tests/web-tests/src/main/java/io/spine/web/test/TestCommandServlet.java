@@ -31,9 +31,9 @@ import javax.servlet.annotation.WebServlet;
  */
 @WebServlet("/command")
 @SuppressWarnings("serial")
-class TestCommandServlet extends CommandServlet {
+public final class TestCommandServlet extends CommandServlet {
 
-    TestCommandServlet() {
+    public TestCommandServlet() {
         super(Server.application().getCommandService());
     }
 }

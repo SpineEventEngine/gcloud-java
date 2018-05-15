@@ -23,8 +23,7 @@
 /**
  * The cross-platform HTTP fetch function.
  *
- * This way of performing HTTP requests works both in the browser JavaScript
- * and in the Node.js.
+ * This way of performing HTTP requests works both in the browser JavaScript and in the Node.js.
  */
 let fetch = require("isomorphic-fetch");
 
@@ -33,15 +32,15 @@ let fetch = require("isomorphic-fetch");
  */
 export class HttpClient {
 
-  /**
-   * Creates a new instance of HttpClient.
-   *
-   * @param appBaseUrl the application base URL (the protocol and
-   *                   the domain name) represented as a string
-   */
-  constructor(appBaseUrl) {
-    this._appBaseUrl = appBaseUrl;
-  }
+    /**
+     * Creates a new instance of HttpClient.
+     *
+     * @param appBaseUrl the application base URL (the protocol and the domain name) represented as
+     *                   a string
+     */
+    constructor(appBaseUrl) {
+        this._appBaseUrl = appBaseUrl;
+    }
 
   /**
    * Sends the given message to the given endpoint.
@@ -54,14 +53,14 @@ export class HttpClient {
   postMessage(endpoint, message) {
     let messageString = message.toBase64();
     let path = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
-    let url = this._appBaseUrl + path;
-    let result = fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-protobuf"
-      },
-      body: messageString
-    });
+    let query = "?format=bytes";
+    let url = this._appBaseUrl + path + query;
+    let request = {
+        method: "POST",
+        body: messageString,
+        mode: "no-cors"
+    };
+    let result = fetch(url, request);
     return result;
   }
 }
