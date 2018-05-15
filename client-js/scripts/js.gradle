@@ -33,6 +33,8 @@ task installDependencies {
     inputs.files "$projectDir/package.json"
     outputs.files "$projectDir/node_modules"
 
+    mustRunAfter ':client-js-proto:publish'
+
     doLast {
         npm 'install'
     }
@@ -120,3 +122,4 @@ task publishJs {
 
 build.dependsOn installDependencies
 rootProject.codeCoverageReport.dependsOn integrationTest
+publish.dependsOn publishJs

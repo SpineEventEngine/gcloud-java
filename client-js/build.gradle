@@ -41,7 +41,6 @@ apply plugin: 'idea'
 apply from: "$projectDir/scripts/js.gradle"
 
 dependencies {
-    protobuf group: 'io.spine', name: 'spine-client', version: spineVersion, classifier: 'proto'
     testProtobuf project(":web-tests")
 }
 
@@ -68,12 +67,12 @@ protobuf {
                     option "import_style=commonjs"
                 }
             }
-            compileJs.dependsOn task
+            integrationTest.dependsOn task
         }
     }
 }
 
-build.dependsOn compileJs
+build.dependsOn installDependencies
 
 idea.module {
     sourceDirs += file("${projectDir}/proto")
@@ -93,7 +92,7 @@ idea.module {
 }
 
 clean {
-    delete "$projectDir/proto/main"
+    delete "$projectDir/proto"
 }
 
 // Suppress building the JS project as a Java module.

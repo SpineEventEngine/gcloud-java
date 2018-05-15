@@ -98,3 +98,4 @@ task publishJs {
 }
 
 build.dependsOn installDependencies
+publish.dependsOn publishJs

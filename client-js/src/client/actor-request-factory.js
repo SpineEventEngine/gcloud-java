@@ -1,21 +1,35 @@
 /*
- * Copyright (c) 2000-2018 TeamDev Ltd. All rights reserved.
- * TeamDev PROPRIETARY and CONFIDENTIAL.
- * Use is subject to license terms.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 "use strict";
 
 let uuid = require("uuid");
 
-let timestamp = require("../../proto/main/js/google/protobuf/timestamp_pb.js");
+let timestamp = require("spine-js-client-proto/google/protobuf/timestamp_pb.js");
 
-let query = require("../../proto/main/js/spine/client/query_pb.js");
-let entities = require("../../proto/main/js/spine/client/entities_pb.js");
-let actorContext = require("../../proto/main/js/spine/core/actor_context_pb");
-let command = require("../../proto/main/js/spine/core/command_pb.js");
-let userId = require("../../proto/main/js/spine/core/user_id_pb");
-let timeZone = require("../../proto/main/js/spine/time/zone_pb");
+let query = require("spine-js-client-proto/spine/client/query_pb.js");
+let entities = require("spine-js-client-proto/spine/client/entities_pb.js");
+let actorContext = require("spine-js-client-proto/spine/core/actor_context_pb");
+let command = require("spine-js-client-proto/spine/core/command_pb.js");
+let userId = require("spine-js-client-proto/spine/core/user_id_pb");
+let timeZone = require("spine-js-client-proto/spine/time/zone_pb");
 
 let {TypeUrl, TypedMessage} = require("./typed-message");
 

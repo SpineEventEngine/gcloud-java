@@ -18,37 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-"use strict";
-
 /**
- * The client of a Firebase Realtime database.
+ * The object which represents the public API of the `client-js` module.
+ *
+ * This object is exported from the artifact built by webpack.
+ *
+ * @type {{BackendClient: BackendClient, HttpClient: HttpClient, FirebaseClient: FirebaseClient, ActorRequestFactory: ActorRequestFactory}}
  */
-export class FirebaseClient {
-
-  /**
-   * Creates a new FirebaseClient.
-   *
-   * @param firebaseApp an initialized Firebase app
-   */
-  constructor(firebaseApp) {
-    this._firebaseApp = firebaseApp;
-  }
-
-  /**
-   * Subscribes to the child_added events of of the node under the given path.
-   *
-   * Each child's value is parsed as a JSON and dispatched to the given callback
-   *
-   * @param path         the path to the watched node
-   * @param dataCallback the child value callback
-   */
-  subscribeTo(path, dataCallback) {
-    console.log("Subscribe to " + path);
-    let dbRef = this._firebaseApp.database().ref(path);
-    dbRef.on("child_added", data => {
-      let msgJson = data.val();
-      let message = JSON.parse(msgJson);
-      dataCallback(message);
-    });
-  }
-}
+export const client = {
+    BackendClient: require("./backend-client").BackendClient,
+    HttpClient: require("./http-client").HttpClient,
+    FirebaseClient: require("./firebase-client").FirebaseClient,
+    ActorRequestFactory: require("./actor-request-factory").ActorRequestFactory,
+    TypeUrl: require("./typed-message").TypeUrl,
+    TypedMessage: require("./typed-message").TypedMessage
+};
