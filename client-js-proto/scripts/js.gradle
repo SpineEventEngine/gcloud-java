@@ -38,27 +38,6 @@ task installDependencies {
     }
 }
 
-task integrationTest {
-    group = TASK_GROUP
-    description = ''
-
-    doLast {
-        npm 'run', 'test'
-    }
-
-    dependsOn installDependencies
-}
-
-/**
- * Copies the library sources into the NPM publication directory.
- */
-task copySources(type: Copy) {
-    group = TASK_GROUP
-
-    from fileTree("$projectDir/src")
-    into npmPublicationRoot
-}
-
 /**
  * Copies the library protobuf dependencies into the NPM publication directory.
  */
@@ -67,7 +46,7 @@ task copyProtobuf(type: Copy) {
 
     exclude "test"
 
-    from fileTree("$projectDir/proto")
+    from fileTree("$projectDir/proto/main/js")
     into npmPublicationRoot
 }
 
@@ -101,7 +80,7 @@ task prepareJsPublication {
     group = TASK_GROUP
     description = 'Prepares the NPM package for publish.'
 
-    dependsOn copySources, copyProtobuf, copyPackageDescriptor
+    dependsOn copyProtobuf, copyPackageDescriptor
 }
 
 /**
@@ -119,4 +98,3 @@ task publishJs {
 }
 
 build.dependsOn installDependencies
-rootProject.codeCoverageReport.dependsOn integrationTest
