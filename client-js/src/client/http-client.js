@@ -53,12 +53,14 @@ export class HttpClient {
   postMessage(endpoint, message) {
     let messageString = message.toBase64();
     let path = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
-    let query = "?format=bytes";
-    let url = this._appBaseUrl + path + query;
+    let url = this._appBaseUrl + path;
     let request = {
         method: "POST",
         body: messageString,
-        mode: "no-cors"
+        headers: {
+            'Content-Type': 'application/x-protobuf'
+        },
+        mode: 'cors'
     };
     let result = fetch(url, request);
     return result;
