@@ -52,7 +52,6 @@ public final class Servlets {
         final HttpServletRequest request = mock(HttpServletRequest.class);
         final String content = Json.toJson(contents);
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(content)));
-        when(request.getQueryString()).thenReturn("format=json");
         return request;
     }
 
