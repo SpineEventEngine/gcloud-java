@@ -20,57 +20,22 @@
 
 apply from: "$rootDir/scripts/js-cli.gradle"
 
-final def TASK_GROUP = 'JavaScript'
+ext.JAVA_SCRIPT_TASK_GROUP = 'JavaScript'
 ext.npmPublicationRoot = "$buildDir/npm-publication/"
 
 /**
  * Installs the module dependencies using the `npm install` command.
  */
 task installDependencies {
-    group = TASK_GROUP
+    group = JAVA_SCRIPT_TASK_GROUP
     description = 'Installs the JavaScript dependencies.'
 
     inputs.files "$projectDir/package.json"
     outputs.files "$projectDir/node_modules"
 
-    mustRunAfter ':client-js-proto:publish'
-
     doLast {
         npm 'install'
     }
-}
-
-task integrationTest {
-    group = TASK_GROUP
-    description = ''
-
-    doLast {
-        npm 'run', 'test'
-    }
-
-    dependsOn installDependencies
-}
-
-/**
- * Copies the library sources into the NPM publication directory.
- */
-task copySources(type: Copy) {
-    group = TASK_GROUP
-
-    from fileTree("$projectDir/src")
-    into npmPublicationRoot
-}
-
-/**
- * Copies the library protobuf dependencies into the NPM publication directory.
- */
-task copyProtobuf(type: Copy) {
-    group = TASK_GROUP
-
-    exclude "test"
-
-    from fileTree("$projectDir/proto")
-    into npmPublicationRoot
 }
 
 /**
@@ -80,7 +45,7 @@ task copyProtobuf(type: Copy) {
  * a publishable package.
  */
 task copyPackageDescriptor(type: Copy) {
-    group = TASK_GROUP
+    group = JAVA_SCRIPT_TASK_GROUP
 
     from "$projectDir/package.json"
     into npmPublicationRoot
@@ -88,29 +53,29 @@ task copyPackageDescriptor(type: Copy) {
     filter { final line ->
         if (line.matches('.*private.*')) {
             return null
+        } else if (line.contains('$VERSION')) {
+            return line.replaceAll('\\$VERSION', spineVersion)
         } else {
             return line
         }
     }
-
-    dependsOn installDependencies
 }
 
 /**
  * Copies the NPM publication files into a temporary directory which they are published from.
  */
 task prepareJsPublication {
-    group = TASK_GROUP
+    group = JAVA_SCRIPT_TASK_GROUP
     description = 'Prepares the NPM package for publish.'
 
-    dependsOn copySources, copyProtobuf, copyPackageDescriptor
+    dependsOn copyPackageDescriptor
 }
 
 /**
  * Publishes the NPM package with `npm publish`.
  */
 task publishJs {
-    group = TASK_GROUP
+    group = JAVA_SCRIPT_TASK_GROUP
     description = 'Publishes the NPM package.'
 
     doLast {
@@ -121,5 +86,4 @@ task publishJs {
 }
 
 build.dependsOn installDependencies
-rootProject.codeCoverageReport.dependsOn integrationTest
 publish.dependsOn publishJs

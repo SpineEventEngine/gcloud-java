@@ -1,6 +1,6 @@
 {
   "name": "spine-js-client-proto",
-  "version": "0.0.1",
+  "version": "$VERSION",
   "private": true,
   "license": "Apache-2.0",
   "description": "Protobuf types defined and used by the Spine client library.",

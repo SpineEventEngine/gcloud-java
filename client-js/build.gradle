@@ -38,7 +38,7 @@ buildscript {
 apply plugin: 'com.google.protobuf'
 apply from: "$rootDir/ext.gradle"
 apply plugin: 'idea'
-apply from: "$projectDir/scripts/js.gradle"
+apply from: "$projectDir/scripts/tasks.gradle"
 
 dependencies {
     testProtobuf project(":web-tests")

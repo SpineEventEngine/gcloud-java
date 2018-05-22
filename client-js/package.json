@@ -1,6 +1,6 @@
 {
   "name": "spine-js-client",
-  "version": "0.0.12",
+  "version": "$VERSION",
   "private": true,
   "license": "Apache-2.0",
   "description": "JS implementation of the Spine client.",
@@ -14,7 +14,7 @@
     "base64-js": "^1.3.0",
     "firebase": "^4.12.1",
     "isomorphic-fetch": "^2.2.1",
-    "spine-js-client-proto": "0.0.1",
+    "spine-js-client-proto": "$VERSION",
     "uuid": "^3.2.1"
   },
   "devDependencies": {
