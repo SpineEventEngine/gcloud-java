@@ -28,31 +28,9 @@ task integrationTest {
         npm 'run', 'test'
     }
 
-    dependsOn installDependencies
+    dependsOn buildJs
 }
-
-/**
- * Copies the library sources into the NPM publication directory.
- */
-task copySources(type: Copy) {
-    group = JAVA_SCRIPT_TASK_GROUP
-
-    from fileTree("$projectDir/src")
-    into npmPublicationRoot
-}
-
-/**
- * Copies the library protobuf dependencies into the NPM publication directory.
- */
-task copyProtobuf(type: Copy) {
-    group = JAVA_SCRIPT_TASK_GROUP
-
-    exclude "test"
-
-    from fileTree("$projectDir/proto")
-    into npmPublicationRoot
-}
-
-prepareJsPublication.dependsOn copySources, copyProtobuf, copyPackageDescriptor
 
 rootProject.codeCoverageReport.dependsOn integrationTest
+
+installDependencies.dependsOn ':client-js-proto:link'

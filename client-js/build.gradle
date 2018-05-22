@@ -44,36 +44,6 @@ dependencies {
     testProtobuf project(":web-tests")
 }
 
-protobuf {
-    generatedFilesBaseDir = "$projectDir/proto"
-    protoc {
-        artifact = "com.google.protobuf:protoc:${protobufVersion}"
-    }
-    generateProtoTasks {
-        all().each { final task ->
-            task.plugins {
-                task.generateDescriptorSet = true
-                task.descriptorSetOptions.path = "${projectDir}/build/descriptors/${task.sourceSet.name}.desc"
-                task.descriptorSetOptions.includeImports = true
-                task.descriptorSetOptions.includeSourceInfo = true
-            }
-            task.builtins {
-                // Do not use java builtin output in this project.
-                remove java
-
-                // For information on JavaScript code generation please see
-                // https://github.com/google/protobuf/blob/master/js/README.md
-                js {
-                    option "import_style=commonjs"
-                }
-            }
-            integrationTest.dependsOn task
-        }
-    }
-}
-
-build.dependsOn installDependencies
-
 idea.module {
     sourceDirs += file("${projectDir}/proto")
     sourceDirs += file("$projectDir/src")

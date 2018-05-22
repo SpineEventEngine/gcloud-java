@@ -38,36 +38,11 @@ buildscript {
 apply plugin: 'com.google.protobuf'
 apply from: "$rootDir/ext.gradle"
 apply plugin: 'idea'
-apply from: "$projectDir/scripts/tasks.gradle"
+apply from: "$rootDir/scripts/js.gradle"
 
 dependencies {
     protobuf group: 'io.spine', name: 'spine-client', version: spineVersion, classifier: 'proto'
     testProtobuf project(':web-tests')
-}
-
-protobuf {
-    generatedFilesBaseDir = "$projectDir/proto"
-    protoc {
-        artifact = "com.google.protobuf:protoc:${protobufVersion}"
-    }
-    generateProtoTasks {
-        all().each { final task ->
-            task.plugins {
-                task.generateDescriptorSet = false
-            }
-            task.builtins {
-                // Do not use java builtin output in this project.
-                remove java
-
-                // For information on JavaScript code generation please see
-                // https://github.com/google/protobuf/blob/master/js/README.md
-                js {
-                    option "import_style=commonjs"
-                }
-            }
-            copyProtobuf.dependsOn task
-        }
-    }
 }
 
 idea.module {
