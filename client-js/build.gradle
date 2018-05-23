@@ -38,11 +38,21 @@ buildscript {
 apply plugin: 'com.google.protobuf'
 apply from: "$rootDir/ext.gradle"
 apply plugin: 'idea'
-apply from: "$projectDir/scripts/tasks.gradle"
+apply from: "$rootDir/scripts/js.gradle"
 
 dependencies {
     testProtobuf project(":web-tests")
 }
+
+task linkProto {
+    doLast {
+        npm 'link', 'spine-js-client-proto'
+    }
+
+    dependsOn ':client-js-proto:link'
+}
+
+installDependencies.dependsOn linkProto
 
 idea.module {
     sourceDirs += file("${projectDir}/proto")

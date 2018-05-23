@@ -20,125 +20,19 @@
 
 apply from: "$rootDir/scripts/js-cli.gradle"
 
-ext.JAVA_SCRIPT_TASK_GROUP = 'JavaScript'
-ext.npmPublicationRoot = "$buildDir/npm-publication/"
+ext {
+    JAVA_SCRIPT_TASK_GROUP = 'JavaScript'
 
-/**
- * Installs the module dependencies using the `npm install` command.
- */
-task installDependencies {
-    group = JAVA_SCRIPT_TASK_GROUP
-    description = 'Installs the JavaScript dependencies.'
+    workDirectory = "$buildDir/node-module/"
 
-    inputs.files "$projectDir/package.json"
-    outputs.files "$projectDir/node_modules"
+    assemblyComponents = ['package.json', 'proto', 'src', 'test', '.babelrc']
 
-    doLast {
-        npm 'install'
+    npm = { final String... command ->
+        ext.executeNpm(workDirectory as File, command)
     }
 }
 
-/**
- * Assembles the JS sources.
- *
- * This task is an analog of `build` for JS.
- *
- * To include a task into the JS build, depend `buildJs` onto that task.
- */
-task buildJs {
-    group = JAVA_SCRIPT_TASK_GROUP
-    description = "Assembles the JavaScript source files."
-
-    dependsOn installDependencies
-}
-
-/**
- * Copies the `package.json` file into the NPM publication directory.
- *
- * The original file declares a `private` (non-publishable) package. The resulting file declares
- * a publishable package.
- */
-task copyPackageDescriptor(type: Copy) {
-    group = JAVA_SCRIPT_TASK_GROUP
-
-    from "$projectDir/package.json"
-    into npmPublicationRoot
-
-    filter { final line ->
-        if (line.matches('.*private.*')) {
-            return null
-        } else if (line.contains('$VERSION')) {
-            return line.replaceAll('\\$VERSION', spineVersion)
-        } else {
-            return line
-        }
-    }
-}
-
-/**
- * Copies the library protobuf dependencies into the NPM publication directory.
- */
-task copyProtobuf(type: Copy) {
-    group = JAVA_SCRIPT_TASK_GROUP
-
-    exclude "test"
-
-    from fileTree("$projectDir/proto")
-    into npmPublicationRoot
-
-    dependsOn buildJs
-}
-
-/**
- * Copies the library sources into the NPM publication directory.
- */
-task copySources(type: Copy) {
-    group = JAVA_SCRIPT_TASK_GROUP
-
-    from fileTree("$projectDir/src")
-    into npmPublicationRoot
-}
-
-/**
- * Copies the NPM publication files into a temporary directory which they are published from.
- */
-task prepareJsPublication {
-    group = JAVA_SCRIPT_TASK_GROUP
-    description = 'Prepares the NPM package for publish.'
-
-    dependsOn copyPackageDescriptor, copyProtobuf, copySources
-}
-
-/**
- * Publishes the NPM package locally with `npm link`.
- */
-task link {
-    group = JAVA_SCRIPT_TASK_GROUP
-    description = "Publishes the NPM packge locally."
-
-    dependsOn prepareJsPublication
-
-    doLast {
-        project.ext.npm npmPublicationRoot as File, 'link'
-    }
-}
-
-/**
- * Publishes the NPM package with `npm publish`.
- */
-task publishJs {
-    group = JAVA_SCRIPT_TASK_GROUP
-    description = 'Publishes the NPM package.'
-
-    doLast {
-        project.ext.npm npmPublicationRoot as File, 'publish'
-    }
-
-    dependsOn prepareJsPublication
-}
-
-build.dependsOn buildJs
-publish.dependsOn publishJs
+task compileProtoToJs {}
 
 protobuf {
     generatedFilesBaseDir = "$projectDir/proto"
@@ -157,7 +51,131 @@ protobuf {
                     option "import_style=commonjs"
                 }
             }
-            buildJs.dependsOn task
+            compileProtoToJs.dependsOn task
         }
     }
 }
+
+task copyModuleSources(type: Copy) {
+    from assemblyComponents.findResults {
+        final def file = "$projectDir/$it" as File
+        if (!file.exists()) {
+            return null
+        } else if (file.isDirectory()) {
+            return fileTree(file)
+        } else {
+            return file
+        }
+    }
+    into workDirectory
+
+    filter { final line ->
+        if (line.matches('.*private.*')) {
+            return null
+        } else if (line.contains('$PACKAGE_VERSION')) {
+            return line.replaceAll('\\$PACKAGE_VERSION', spineVersion)
+        } else if (line.contains('$PACKAGE_TEST')) {
+            return line.replaceAll('\\$PACKAGE_TEST', 'mocha --require babel-polyfill --require babel-register --recursive \\$NODE_DEBUG_OPTION --exit --full-trace ./test')
+        } else {
+            return line
+        }
+    }
+
+    dependsOn compileProtoToJs
+}
+
+/**
+ * Installs the module dependencies using the `npm install` command.
+ */
+task installDependencies {
+    group = JAVA_SCRIPT_TASK_GROUP
+    description = 'Installs the JavaScript dependencies.'
+
+    inputs.files "$projectDir/package.json"
+    outputs.files "$projectDir/node_modules"
+
+    dependsOn copyModuleSources
+
+    doLast {
+        npm 'install'
+    }
+}
+
+/**
+ * Assembles the JS sources.
+ *
+ * This task is an analog of `build` for JS.
+ *
+ * To include a task into the JS build, depend `buildJs` onto that task.
+ */
+task buildJs {
+    group = JAVA_SCRIPT_TASK_GROUP
+    description = "Assembles the JavaScript source files."
+
+    dependsOn installDependencies, compileProtoToJs
+}
+
+/**
+ * Copies the NPM publication files into a temporary directory which they are published from.
+ */
+task prepareJsPublication {
+    group = JAVA_SCRIPT_TASK_GROUP
+    description = 'Prepares the NPM package for publish.'
+
+    dependsOn installDependencies
+}
+
+/**
+ * Publishes the NPM package locally with `npm link`.
+ */
+task link {
+    group = JAVA_SCRIPT_TASK_GROUP
+    description = "Publishes the NPM packge locally."
+
+    dependsOn buildJs
+
+    doLast {
+        npm 'link'
+    }
+}
+
+/**
+ * Publishes the NPM package with `npm publish`.
+ */
+task publishJs {
+    group = JAVA_SCRIPT_TASK_GROUP
+    description = 'Publishes the NPM package.'
+
+    doLast {
+        npm 'publish'
+    }
+
+    dependsOn prepareJsPublication
+}
+
+task testJs {
+    group = JAVA_SCRIPT_TASK_GROUP
+    description = 'Runs the JS tests.'
+
+    doLast {
+        npm 'run', 'test'
+    }
+
+    dependsOn buildJs
+}
+
+task coverageJs {
+    group = JAVA_SCRIPT_TASK_GROUP
+    description = 'Runs the JS test and collects the code coverage info.'
+
+    doLast {
+        npm 'run', 'test'
+    }
+
+    dependsOn buildJs
+}
+
+rootProject.codeCoverageReport.dependsOn coverageJs
+
+build.dependsOn buildJs
+publish.dependsOn publishJs

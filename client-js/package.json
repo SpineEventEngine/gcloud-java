@@ -1,6 +1,6 @@
 {
   "name": "spine-js-client",
-  "version": "$VERSION",
+  "version": "$PACKAGE_VERSION",
   "private": true,
   "license": "Apache-2.0",
   "description": "JS implementation of the Spine client.",
@@ -8,13 +8,14 @@
     "test": "test"
   },
   "scripts": {
-    "test": "nyc --reporter=text-lcov mocha --require babel-polyfill --require babel-register --recursive $NODE_DEBUG_OPTION --exit --full-trace ./test > build/coverage.lcov"
+    "coverage": "nyc --reporter=text-lcov $PACKAGE_TEST > build/coverage.lcov",
+    "test": "$PACKAGE_TEST"
   },
   "dependencies": {
     "base64-js": "^1.3.0",
     "firebase": "^4.12.1",
     "isomorphic-fetch": "^2.2.1",
-    "spine-js-client-proto": "$VERSION",
+    "spine-js-client-proto": "$PACKAGE_VERSION",
     "uuid": "^3.2.1"
   },
   "devDependencies": {

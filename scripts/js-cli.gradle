@@ -40,7 +40,7 @@ ext {
      *
      * @param params the command parameters
      */
-    npm = { final File from = projectDir, final String... params ->
+    executeNpm = { final File from = projectDir, final String... params ->
         runNpm(from, params)
     }
 }
