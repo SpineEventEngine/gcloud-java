@@ -27,7 +27,7 @@ ext {
     publicationDirectory = "$buildDir/npm-publication/"
 
     assemblyComponents = ['package.json', 'proto', 'src', 'test', '.babelrc']
-    publicationComponents = ['package.json', 'proto', 'src']
+    publicationComponents = ['package.json', 'proto/main/js', 'src']
 
     npm = { final String... command ->
         ext.executeNpm(workDirectory as File, command)
@@ -148,13 +148,13 @@ task prepareJsPublication(type: Copy) {
  */
 task link {
     group = JAVA_SCRIPT_TASK_GROUP
-    description = "Publishes the NPM packge locally."
-
-    dependsOn buildJs
+    description = "Publishes the NPM package locally."
 
     doLast {
-        npm 'link'
+        executeNpm(publicationDirectory as File, 'link')
     }
+
+    dependsOn prepareJsPublication
 }
 
 /**
