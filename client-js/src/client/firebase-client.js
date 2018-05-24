@@ -43,7 +43,6 @@ export class FirebaseClient {
    * @param dataCallback the child value callback
    */
   subscribeTo(path, dataCallback) {
-    console.log("Subscribe to " + path);
     let dbRef = this._firebaseApp.database().ref(path);
     dbRef.on("child_added", data => {
       let msgJson = data.val();
