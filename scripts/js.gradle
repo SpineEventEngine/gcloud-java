@@ -24,8 +24,10 @@ ext {
     JAVA_SCRIPT_TASK_GROUP = 'JavaScript'
 
     workDirectory = "$buildDir/node-module/"
+    publicationDirectory = "$buildDir/npm-publication/"
 
     assemblyComponents = ['package.json', 'proto', 'src', 'test', '.babelrc']
+    publicationComponents = ['package.json', 'proto', 'src']
 
     npm = { final String... command ->
         ext.executeNpm(workDirectory as File, command)
@@ -56,30 +58,31 @@ protobuf {
     }
 }
 
+String filterPackageDescriptor(final String line) {
+    if (line.matches('.*private.*')) {
+        return null
+    } else if (line.contains('$PACKAGE_VERSION')) {
+        return line.replaceAll('\\$PACKAGE_VERSION', spineVersion)
+    } else if (line.contains('$PACKAGE_TEST')) {
+        return line.replaceAll('\\$PACKAGE_TEST', 'mocha --require babel-polyfill --require babel-register --recursive \\$NODE_DEBUG_OPTION --exit --full-trace ./test')
+    } else {
+        return line
+    }
+}
+
 task copyModuleSources(type: Copy) {
-    from assemblyComponents.findResults {
-        final def file = "$projectDir/$it" as File
-        if (!file.exists()) {
-            return null
-        } else if (file.isDirectory()) {
-            return fileTree(file)
-        } else {
-            return file
+    from fileTree(projectDir).include {
+        final def path = it.path
+        for (final def branch in assemblyComponents) {
+            if (path.startsWith(branch)) {
+                return true
+            }
         }
+        return false
     }
     into workDirectory
 
-    filter { final line ->
-        if (line.matches('.*private.*')) {
-            return null
-        } else if (line.contains('$PACKAGE_VERSION')) {
-            return line.replaceAll('\\$PACKAGE_VERSION', spineVersion)
-        } else if (line.contains('$PACKAGE_TEST')) {
-            return line.replaceAll('\\$PACKAGE_TEST', 'mocha --require babel-polyfill --require babel-register --recursive \\$NODE_DEBUG_OPTION --exit --full-trace ./test')
-        } else {
-            return line
-        }
-    }
+    filter { filterPackageDescriptor(it) }
 
     dependsOn compileProtoToJs
 }
@@ -118,11 +121,24 @@ task buildJs {
 /**
  * Copies the NPM publication files into a temporary directory which they are published from.
  */
-task prepareJsPublication {
+task prepareJsPublication(type: Copy) {
     group = JAVA_SCRIPT_TASK_GROUP
     description = 'Prepares the NPM package for publish.'
 
-    dependsOn installDependencies
+    from publicationComponents.collect {
+        final def file = "$projectDir/$it" as File
+        if (!file.exists()) {
+            return null
+        } else {
+            return file
+        }
+    }.findAll { it != null }
+    into publicationDirectory
+    exclude "test"
+
+    filter { filterPackageDescriptor(it) }
+
+    dependsOn buildJs
 }
 
 /**
@@ -147,7 +163,7 @@ task publishJs {
     description = 'Publishes the NPM package.'
 
     doLast {
-        npm 'publish'
+        executeNpm(publicationDirectory as File, 'publish')
     }
 
     dependsOn prepareJsPublication
