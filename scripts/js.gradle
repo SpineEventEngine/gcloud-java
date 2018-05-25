@@ -27,7 +27,7 @@ ext {
     publicationDirectory = "$buildDir/npm-publication/"
 
     assemblyComponents = ['package.json', 'proto', 'src', 'test', '.babelrc']
-    publicationComponents = ['package.json', 'proto/main/js', 'src']
+    publicationComponents = ['package.json', 'proto/main/js', 'src', '.npmrc']
 
     npm = { final String... command ->
         ext.executeNpm(workDirectory as File, command)
