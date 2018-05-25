@@ -34,6 +34,12 @@ ext {
     }
 }
 
+/**
+ * Compiles Protobuf sources into JavaScript.
+ *
+ * <p>This is a lifecycle task. It performs no action but triggers all the tasks which perform
+ * the compilation.
+ */
 task compileProtoToJs {}
 
 protobuf {
@@ -58,6 +64,14 @@ protobuf {
     }
 }
 
+/**
+ * Processes a `package.json` file line.
+ *
+ * <p>Replaces the templates used in the package descriptor with the actual values.
+ *
+ * @param line the line to process
+ * @return the processed line
+ */
 String filterPackageDescriptor(final String line) {
     final Map<String, String> replacements = [
             '\\$PACKAGE_VERSION'         : ext.spineVersion,
@@ -72,6 +86,10 @@ String filterPackageDescriptor(final String line) {
     return result
 }
 
+/**
+ * Copies the module sources from the project directory to an isolated working directory, where
+ * the module is built and tested.
+ */
 task copyModuleSources(type: Copy) {
     from fileTree(projectDir).include {
         final def path = it.path
@@ -173,6 +191,12 @@ task publishJs {
     dependsOn prepareJsPublication
 }
 
+/**
+ * Runs the JavaScript tests.
+ *
+ * <p>The tests connect to the `spine-dev` GAE application and perform networking. Avoid running
+ * the JS tests when not necessary.
+ */
 task testJs {
     group = JAVA_SCRIPT_TASK_GROUP
     description = 'Runs the JS tests.'
@@ -184,9 +208,15 @@ task testJs {
     dependsOn buildJs
 }
 
+/**
+ * Runs the JavaScript tests and collects the code coverage.
+ *
+ * <p>The tests connect to the `spine-dev` GAE application and perform networking. Avoid running
+ * the JS tests when not necessary.
+ */
 task coverageJs {
     group = JAVA_SCRIPT_TASK_GROUP
-    description = 'Runs the JS test and collects the code coverage info.'
+    description = 'Runs the JS tests and collects the code coverage info.'
 
     doLast {
         npm 'run', 'test'
