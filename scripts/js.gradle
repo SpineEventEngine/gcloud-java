@@ -59,15 +59,17 @@ protobuf {
 }
 
 String filterPackageDescriptor(final String line) {
-    if (line.matches('.*private.*')) {
-        return null
-    } else if (line.contains('$PACKAGE_VERSION')) {
-        return line.replaceAll('\\$PACKAGE_VERSION', spineVersion)
-    } else if (line.contains('$PACKAGE_TEST')) {
-        return line.replaceAll('\\$PACKAGE_TEST', 'mocha --require babel-polyfill --require babel-register --recursive \\$NODE_DEBUG_OPTION --exit --full-trace ./test')
-    } else {
-        return line
+    final Map<String, String> replacements = [
+            '\\$PACKAGE_VERSION'         : ext.spineVersion,
+            '\\$PACKAGE_PROTOBUF_VERSION': '^3.5.0',
+            '\\$PACKAGE_TEST'            : 'mocha --require babel-polyfill --require babel-register --recursive \\$NODE_DEBUG_OPTION --exit --full-trace ./test'
+    ]
+
+    def result  = line
+    replacements.each {
+        result = result.replaceAll(it.key, it.value)
     }
+    return result
 }
 
 task copyModuleSources(type: Copy) {
