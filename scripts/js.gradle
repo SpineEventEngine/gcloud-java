@@ -219,7 +219,7 @@ task coverageJs {
     description = 'Runs the JS tests and collects the code coverage info.'
 
     doLast {
-        npm 'run', 'test'
+        npm 'run', 'coverage'
     }
 
     dependsOn buildJs
