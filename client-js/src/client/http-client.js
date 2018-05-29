@@ -42,27 +42,27 @@ export class HttpClient {
         this._appBaseUrl = appBaseUrl;
     }
 
-  /**
-   * Sends the given message to the given endpoint.
-   *
-   * The message is sent as in form of a Base64-encoded byte string.
-   *
-   * @param endpoint the endpoint to send the message to
-   * @param message  the message to send, as a {@link TypedMessage}
-   */
-  postMessage(endpoint, message) {
-    let messageString = message.toBase64();
-    let path = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
-    let url = this._appBaseUrl + path;
-    let request = {
-        method: "POST",
-        body: messageString,
-        headers: {
-            'Content-Type': 'application/x-protobuf'
-        },
-        mode: 'cors'
-    };
-    let result = fetch(url, request);
-    return result;
-  }
+    /**
+     * Sends the given message to the given endpoint.
+     *
+     * The message is sent as in form of a Base64-encoded byte string.
+     *
+     * @param endpoint the endpoint to send the message to
+     * @param message  the message to send, as a {@link TypedMessage}
+     */
+    postMessage(endpoint, message) {
+        let messageString = message.toBase64();
+        let path = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
+        let url = this._appBaseUrl + path;
+        let request = {
+            method: "POST",
+            body: messageString,
+            headers: {
+                'Content-Type': 'application/x-protobuf'
+            },
+            mode: 'cors'
+        };
+        let result = fetch(url, request);
+        return result;
+    }
 }
