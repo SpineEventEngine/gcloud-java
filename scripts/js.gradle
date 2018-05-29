@@ -18,6 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * This build script contains a Gradle plugin for JavaScript modules.
+ *
+ * <p>The plugin configures NPM tools execution and connects the JS assembly and test routines
+ * with the Gradle execution process.
+ *
+ * <p>The plugin defines a number of tasks, which launch NPM scripts, compile Protobuf into
+ * JavaScript sources, publish artifacts into NPM registry, etc.
+ */
+
 apply from: "$rootDir/scripts/js-cli.gradle"
 
 ext {
