@@ -26,6 +26,9 @@
  *
  * <p>The plugin defines a number of tasks, which launch NPM scripts, compile Protobuf into
  * JavaScript sources, publish artifacts into NPM registry, etc.
+ *
+ * <p>To see the tasks, available with this plugin, run `gradle tasks` and see
+ * the "JavaScript" group.
  */
 
 apply from: "$rootDir/scripts/js-cli.gradle"
