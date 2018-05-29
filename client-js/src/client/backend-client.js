@@ -29,7 +29,7 @@
 export class BackendClient {
 
     /**
-     * Creates a new BackendClient.
+     * Creates a new `BackendClient`.
      *
      * @param httpClient          the {@link HttpClient} to connect to
      *                            the backend with
