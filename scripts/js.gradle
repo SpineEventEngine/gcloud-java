@@ -24,11 +24,21 @@
  * <p>The plugin configures NPM tools execution and connects the JS assembly and test routines
  * with the Gradle execution process.
  *
- * <p>The plugin defines a number of tasks, which launch NPM scripts, compile Protobuf into
- * JavaScript sources, publish artifacts into NPM registry, etc.
+ * <p>The plugin defines tasks for:
+ * <ul>
+ *     <li>downloading NPM dependencies -                   {@code installDependencies};
+ *     <li>compile Protobuf into JavaScript -               {@code compileProtoToJs};
+ *     <li>running tests NPM dependencies -                 {@code testJs} and {@code coverageJs};
+ *     <li>publishing NPM artifacts into the NPM registry - {@code publishJs};
+ *     <li>linking the module to the local NPM registry -   {@code link}
+ * </ul>
  *
- * <p>To see the tasks, available with this plugin, run `gradle tasks` and see
- * the "JavaScript" group.
+ * <p>Most of the tasks launch a separate process which runs an NPM CLI command, so it's necessary
+ * that the NPM command line tool is installed.
+ *
+ * <p>In order to publish the NPM module, it is required that the {@code NPM_TOKEN} environment
+ * variable is set to a valid NPM auth token. If the token is not set, a dummy value is added to
+ * the NPM execution process, which is sufficient for the local development.
  */
 
 apply from: "$rootDir/scripts/js-cli.gradle"
@@ -53,7 +63,9 @@ ext {
  * <p>This is a lifecycle task. It performs no action but triggers all the tasks which perform
  * the compilation.
  */
-task compileProtoToJs {}
+task compileProtoToJs {
+    description = "Compiles Protobuf sources into JavaScript."
+}
 
 protobuf {
     generatedFilesBaseDir = "$projectDir/proto"
