@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -40,26 +40,19 @@ apply from: "$rootDir/ext.gradle"
 apply plugin: 'idea'
 apply from: "$rootDir/scripts/js.gradle"
 
+testJs.enabled = false
+coverageJs.enabled = false
+
 dependencies {
-    testProtobuf project(":web-tests")
+    protobuf group: 'io.spine', name: 'spine-client', version: spineVersion, classifier: 'proto'
+    testProtobuf project(':web-tests')
 }
-
-task linkProto {
-    doLast {
-        npm 'link', 'spine-js-client-proto'
-    }
-
-    dependsOn ':client-js-proto:link'
-}
-
-installDependencies.dependsOn linkProto
 
 idea.module {
     sourceDirs += file("${projectDir}/proto")
     sourceDirs += file("$projectDir/src")
     testSourceDirs += file("$projectDir/test")
     excludeDirs += file("$projectDir/node_modules")
-    excludeDirs += file("$projectDir/.nyc_output")
 
     iml {
         beforeMerged { module ->

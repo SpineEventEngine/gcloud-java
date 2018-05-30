@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2018, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,8 +26,10 @@
  * @type {{BackendClient: BackendClient, HttpClient: HttpClient, FirebaseClient: FirebaseClient, ActorRequestFactory: ActorRequestFactory}}
  */
 export const client = {
-  BackendClient: require("./backend-client").BackendClient,
-  HttpClient: require("./http-client").HttpClient,
-  FirebaseClient: require("./firebase-client").FirebaseClient,
-  ActorRequestFactory: require("./actor-request-factory").ActorRequestFactory
+    BackendClient: require("./backend-client").BackendClient,
+    HttpClient: require("./http-client").HttpClient,
+    FirebaseClient: require("./firebase-client").FirebaseClient,
+    ActorRequestFactory: require("./actor-request-factory").ActorRequestFactory,
+    TypeUrl: require("./typed-message").TypeUrl,
+    TypedMessage: require("./typed-message").TypedMessage
 };

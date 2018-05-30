@@ -21,6 +21,24 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 
 /**
+ * The name of an environmental variable which contains the NPM auth token.
+ *
+ * <p>The token is used for publishing only.
+ *
+ * <p>It is required to set this variable before invoking NPM commands.
+ */
+ext.NPM_TOKEN_VARIABLE = "NPM_TOKEN"
+
+/**
+ * @return the value of `NPM_TOKEN` environmental variable or a stub value, if the token is not set
+ */
+String npmToken() {
+    final def tokenVarValue = System.getenv(NPM_TOKEN_VARIABLE)
+    final def token = tokenVarValue?.isEmpty() ? "PUBLISHING_FORBIDDEN" : tokenVarValue
+    return token
+}
+
+/**
  * Executes the given command depending on the current OS.
  *
  * @param workingDirArg  the directory to execute the command in
@@ -37,11 +55,12 @@ def execMultiplatform(final File workingDirArg,
         final List resultingParams = [command] + Arrays.asList(params)
         workingDir = workingDirArg
         commandLine = resultingParams
+        environment NPM_TOKEN_VARIABLE, npmToken()
     }
 }
 
-def runNpm(final String[] params) {
-    execMultiplatform project.projectDir, 'npm.cmd', 'npm', params
+def runNpm(final File launchDir, final String[] params) {
+    execMultiplatform launchDir, 'npm.cmd', 'npm', params
 }
 
 ext {
@@ -54,5 +73,7 @@ ext {
      *
      * @param params the command parameters
      */
-    npm = { final String... params -> runNpm(params) }
+    executeNpm = { final File from = projectDir, final String... params ->
+        runNpm(from, params)
+    }
 }

@@ -20,7 +20,7 @@
 
 "use strict";
 
-let Any = require("../../proto/main/js/google/protobuf/any_pb").Any;
+let Any = require("spine-js-client-proto/google/protobuf/any_pb").Any;
 let base64 = require("base64-js");
 
 /**
@@ -32,20 +32,20 @@ let base64 = require("base64-js");
  */
 export class TypeUrl {
 
-  /**
-   * Creates a new instance of TypeUrl from the given string value.
-   *
-   * The value should be a valid type URL of format:
-   * (typeUrlPrefix)/(typeName)
-   *
-   * @param value the type URL value
-   */
-  constructor(value) {
-    let urlParts = value.split("/");
-    this.typeUrlPrefix = urlParts[0];
-    this.typeName = urlParts[1];
-    this.value = value;
-  }
+    /**
+     * Creates a new instance of TypeUrl from the given string value.
+     *
+     * The value should be a valid type URL of format:
+     * (typeUrlPrefix)/(typeName)
+     *
+     * @param value the type URL value
+     */
+    constructor(value) {
+        let urlParts = value.split("/");
+        this.typeUrlPrefix = urlParts[0];
+        this.typeName = urlParts[1];
+        this.value = value;
+    }
 }
 
 /**
@@ -55,48 +55,48 @@ export class TypeUrl {
  */
 export class TypedMessage {
 
-  /**
-   * Creates a new instance of TypedMessage from the given Protobuf message and
-   * type URL.
-   *
-   * @param message the Protobuf message
-   * @param typeUrl the {@link TypeUrl} representing the type of the message
-   */
-  constructor(message, typeUrl) {
-    this.message = message;
-    this.type = typeUrl;
-  }
+    /**
+     * Creates a new instance of TypedMessage from the given Protobuf message and
+     * type URL.
+     *
+     * @param message the Protobuf message
+     * @param typeUrl the {@link TypeUrl} representing the type of the message
+     */
+    constructor(message, typeUrl) {
+        this.message = message;
+        this.type = typeUrl;
+    }
 
-  /**
-   * Converts this message into a byte array.
-   *
-   * @returns an array of bytes representing the message
-   */
-  toBytes() {
-    let result = this.message.serializeBinary();
-    return result;
-  }
+    /**
+     * Converts this message into a byte array.
+     *
+     * @returns an array of bytes representing the message
+     */
+    toBytes() {
+        let result = this.message.serializeBinary();
+        return result;
+    }
 
-  /**
-   * Converts this message into an {@link Any}.
-   *
-   * @returns this message packed into an instance of Any
-   */
-  toAny() {
-    let result = new Any();
-    let bytes = this.toBytes();
-    result.pack(bytes, this.type.typeName, this.type.typeUrlPrefix);
-    return result;
-  }
+    /**
+     * Converts this message into an {@link Any}.
+     *
+     * @returns this message packed into an instance of Any
+     */
+    toAny() {
+        let result = new Any();
+        let bytes = this.toBytes();
+        result.pack(bytes, this.type.typeName, this.type.typeUrlPrefix);
+        return result;
+    }
 
-  /**
-   * Converts this message into a Base64-encoded byte string.
-   *
-   * @returns the string representing this message
-   */
-  toBase64() {
-    let bytes = this.toBytes();
-    let result = base64.fromByteArray(bytes);
-    return result;
-  }
+    /**
+     * Converts this message into a Base64-encoded byte string.
+     *
+     * @returns the string representing this message
+     */
+    toBase64() {
+        let bytes = this.toBytes();
+        let result = base64.fromByteArray(bytes);
+        return result;
+    }
 }

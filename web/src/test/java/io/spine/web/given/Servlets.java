@@ -36,6 +36,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
+ * The factory of mock servlet API objects, such as requests and responses.
+ *
  * @author Dmytro Dashenkov
  */
 public final class Servlets {
