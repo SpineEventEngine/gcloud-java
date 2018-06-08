@@ -168,7 +168,7 @@ public class DsFiltersShould {
         assertSize(0, filters);
     }
 
-    //TODO:2018-06-08:dmytro.kuzmin: re-write without mocks when null filters will be available.
+    //TODO:2018-06-08:dmytro.kuzmin: re-write without mocks when null column filters are available.
     @Test
     public void generate_filters_for_null_column_value() {
         final EntityColumn column = mock(EntityColumn.class);
