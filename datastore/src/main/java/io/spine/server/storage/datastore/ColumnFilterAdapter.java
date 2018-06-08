@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.NullValue;
 import com.google.cloud.datastore.Value;
 import com.google.protobuf.Any;
 import io.spine.client.ColumnFilter;
@@ -70,6 +71,10 @@ final class ColumnFilterAdapter {
         final Any filterValue = columnFilter.getValue();
         final Object filterValueUnpacked = TypeConverter.toObject(filterValue, column.getType());
         final Object columnValue = column.toPersistedValue(filterValueUnpacked);
+
+        if (columnValue == null) {
+            return NullValue.of();
+        }
 
         @SuppressWarnings("unchecked") // Concrete type is unknown on compile time.
         final Value<?> result = type.toValue(type.convertColumnValue(columnValue));
