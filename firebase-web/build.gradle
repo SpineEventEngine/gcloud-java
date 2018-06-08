@@ -20,5 +20,7 @@
 
 dependencies {
     compile project(':web')
-    compile "com.google.firebase:firebase-admin:$firebaseVersion"
+    compile ("com.google.firebase:firebase-admin:$firebaseVersion") {
+        exclude group: 'com.google.guava', module: 'guava'
+    }
 }

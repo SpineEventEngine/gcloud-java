@@ -25,12 +25,12 @@
  */
 
 ext {
-    spineGaeVersion = '0.10.36-SNAPSHOT'
-    spineVersion = '0.10.36-SNAPSHOT'
-    spineBaseVersion = '0.10.32-SNAPSHOT'
+    spineGaeVersion = '0.10.41-SNAPSHOT'
+    spineVersion = '0.10.41-SNAPSHOT'
+    spineBaseVersion = '0.10.40-SNAPSHOT'
 
     slf4jVersion = '1.7.21'
-    guavaVersion = '20.0'
+    guavaVersion = '25.1-jre'
     datastoreVersion = '1.12.0'
     firebaseVersion = '5.9.0'
 
