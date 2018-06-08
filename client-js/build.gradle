@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -35,87 +35,24 @@ buildscript {
     }
 }
 
-ext {
-    compiledPath = "$projectDir/build/js-client.js"
-}
-
 apply plugin: 'com.google.protobuf'
 apply from: "$rootDir/ext.gradle"
 apply plugin: 'idea'
-apply from: "$rootDir/scripts/js-cli.gradle"
+apply from: "$rootDir/scripts/js.gradle"
 
 dependencies {
-    protobuf group: 'io.spine', name: 'spine-client', version: spineVersion, classifier: 'proto'
     testProtobuf project(":web-tests")
 }
 
-/**
- * Installs the module dependencies using the `npm install` command.
- */
-task installDependencies {
-    description = "Installs the JavaScript dependencies."
-    inputs.files "$projectDir/package.json"
-    outputs.files "$projectDir/node_modules"
+task linkProto {
     doLast {
-        npm 'install'
+        npm 'link', 'spine-js-client-proto'
     }
+
+    dependsOn ':client-js-proto:link'
 }
 
-/**
- * Compiles the JS into the `client-all.js` artifact.
- *
- * <p>This task executes the NPM `compile` script, which uses Webpack to assemble the artifact.
- *
- * <p>This task is a part of a standard Gradle build for the `:js-client` project.
- */
-task compileJs {
-    description = "Compiles the JavaScript sources into a single .js file."
-    inputs.files "$projectDir/webpack.config.js"
-    outputs.files compiledPath
-    doLast {
-        npm 'run', 'compile'
-    }
-    dependsOn installDependencies
-}
-
-task integrationTest {
-    doLast {
-        npm 'run', 'test'
-    }
-    dependsOn compileJs
-}
-
-rootProject.codeCoverageReport.dependsOn integrationTest
-
-protobuf {
-    generatedFilesBaseDir = "$projectDir/proto"
-    protoc {
-        artifact = "com.google.protobuf:protoc:${protobufVersion}"
-    }
-    generateProtoTasks {
-        all().each { final task ->
-            task.plugins {
-                task.generateDescriptorSet = true
-                task.descriptorSetOptions.path = "${projectDir}/build/descriptors/${task.sourceSet.name}.desc"
-                task.descriptorSetOptions.includeImports = true
-                task.descriptorSetOptions.includeSourceInfo = true
-            }
-            task.builtins {
-                // Do not use java builtin output in this project.
-                remove java
-
-                // For information on JavaScript code generation please see
-                // https://github.com/google/protobuf/blob/master/js/README.md
-                js {
-                    option "import_style=commonjs"
-                }
-            }
-            compileJs.dependsOn task
-        }
-    }
-}
-
-build.dependsOn compileJs
+installDependencies.dependsOn linkProto
 
 idea.module {
     sourceDirs += file("${projectDir}/proto")
@@ -135,7 +72,7 @@ idea.module {
 }
 
 clean {
-    delete "$projectDir/proto/main"
+    delete "$projectDir/proto"
 }
 
 // Suppress building the JS project as a Java module.

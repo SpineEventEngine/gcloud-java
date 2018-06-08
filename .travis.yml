@@ -3,13 +3,22 @@ language: java
 jdk:
   - oraclejdk8
 
+env:
+  global:
+    - secure: "N30+tQHzr7i05iIbVf6YAk7i3ykPjZLxEZur3cZWh5vwD4TmQI9FDZ5vVJo3HWulb8tCV5jFM0RXwo2nswhq2G8WGJY6DkjICF1/U3FPax2VdgDEMScfULvRbt5f6NugHo5sbUuVPukVKv4+7LBdOuBOFXQ92OfEm9HQVO6PSzg5jgHeSJSEmh1cW+Zn6fSRVBP7+1A1HO/i0zdccA4noxx+pbhWp28GM7z2jnQ5x21Up9Zs4HA599r3pTYQuguzeaUzJh9GXMRh6xio1FgDfQ2wJe/0cTR+ZXcZNefX9LKo+eKNeez3ylgxkq48THtIfko5I7DBnm8omGbMSgoX1HF8CVgBD8igHUjN7nk+xbIR6aJLGaoZfdwxb/th2jayoj6JNp2v21KbmoTWlmUnOx5tFXAJIf1Y8+tl6PEfPmlz+LCXug6xhLTg67yD4Ee2EjMje9AUsbOjc033PMgszMPajjN5+m497ys7d7v+qU/6WeXh4OKGg04jkFw0hAghYd/+0twe9iUgPaFTm+pfmOKkOQjj9g8mhwwqQ57OdPzqDBl7EWNjHQtMgF0whWfitWzYUaqHUdRke4M74G9Albr8iK3IUXGBf/UKj8xWYF92J6TdgkNuMT1CR4XaYdYqyu4B6fjvCHXfaukt8G00y4cnY7OPTd4JEdwwTPSBvHQ="
+
 before_install:
   - chmod +x gradlew
   - chmod +x ./scripts/start-datastore.sh
-  - openssl aes-256-cbc -K $encrypted_16408b1fb58f_key -iv $encrypted_16408b1fb58f_iv -in ./datastore/src/test/resources/spine-dev-62685282c0b9.json.enc -out ./datastore/src/test/resources/spine-dev-62685282c0b9.json -d
+  # Decrypt the Google Cloud credentials file and copy it over to the destination.
+  - openssl aes-256-cbc -K $encrypted_e506c3a92d8d_key -iv $encrypted_e506c3a92d8d_iv -in credentials.tar.enc -out credentials.tar -d
+  - tar xvf credentials.tar
+  # Create a target folder for the credentials file.
+  - mkdir -p ./datastore/src/test/resources/
+  - cp spine-dev.json ./datastore/src/test/resources/spine-dev-62685282c0b9.json
 
 script:
-  - ./gradlew build integrationTest codeCoverageReport --stacktrace
+  - ./gradlew build codeCoverageReport --stacktrace
 
   # The publishing script should be executed in `script` section in order to
   # fail the Travis build if execution of this script is failed.
