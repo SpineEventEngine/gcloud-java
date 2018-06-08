@@ -165,6 +165,7 @@ public class DatastoreStorageFactoryBuilderShould {
     private static <T> EntityColumn mockColumn(Class<T> type) {
         final EntityColumn mock = mock(EntityColumn.class);
         when(mock.getType()).thenReturn(type);
+        when(mock.getPersistedType()).thenReturn(type);
         return mock;
     }
 

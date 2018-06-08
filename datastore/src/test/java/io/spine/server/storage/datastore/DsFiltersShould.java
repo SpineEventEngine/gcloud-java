@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.NullValue;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -57,6 +58,9 @@ import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Dmytro Dashenkov
@@ -162,6 +166,29 @@ public class DsFiltersShould {
                                                       ColumnFilterAdapter.of(defaultInstance()));
         assertNotNull(filters);
         assertSize(0, filters);
+    }
+
+    //TODO:2018-06-08:dmytro.kuzmin: re-write without mocks when null column filters are available.
+    // See https://github.com/SpineEventEngine/core-java/issues/720.
+    @Test
+    public void generate_filters_for_null_column_value() {
+        final EntityColumn column = mock(EntityColumn.class);
+        when(column.getStoredName()).thenReturn(ID_STRING_COLUMN_NAME);
+        when(column.getType()).thenReturn(String.class);
+        when(column.getPersistedType()).thenReturn(String.class);
+        when(column.toPersistedValue(any())).thenReturn(null);
+
+        final ColumnFilter filterWithStubValue = eq(ID_STRING_COLUMN_NAME, "");
+        final ImmutableMultimap<EntityColumn, ColumnFilter> filter = of(
+                column, filterWithStubValue
+        );
+        final Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
+                createParams(filter, ALL)
+        );
+
+        final ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
+        final Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
+        assertContainsAll(filters, and(PropertyFilter.eq(ID_STRING_COLUMN_NAME, NullValue.of())));
     }
 
     private static EntityColumn column(Class<? extends Entity> cls, String methodName) {
