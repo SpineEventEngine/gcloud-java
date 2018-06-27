@@ -20,21 +20,21 @@
 
 package io.spine.server.storage.datastore;
 
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.aggregate.AggregateStorageVisibilityHandlingTest;
+import io.spine.test.aggregate.ProjectId;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.aggregate.AggregateStorageVisibilityHandlingShould;
-import io.spine.test.aggregate.ProjectId;
 
 /**
  * @author Dmytro Dashenkov.
  */
 public class DsAggregateStorageStatusHandlingShould
-       extends AggregateStorageVisibilityHandlingShould {
+        extends AggregateStorageVisibilityHandlingTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory;
 
