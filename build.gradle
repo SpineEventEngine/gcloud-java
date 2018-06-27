@@ -59,7 +59,7 @@ ext {
     credentialsPropertyFile = 'credentials.properties'
     runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
 
-    projectsToPublish = ['datastore', 'web', 'firebase-web']
+    projectsToPublish = ['datastore']
 }
 
 allprojects {
@@ -127,7 +127,7 @@ subprojects {
 
         selectors {
             directory "${sourcesRootDir}/test/java"
-            packages 'io.spine.server.storage.datastore', 'io.spine.server.datastore', 'io.spine.web'
+            packages 'io.spine.server.storage.datastore', 'io.spine.server.datastore'
         }
 
         filters {
