@@ -35,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
@@ -56,7 +57,8 @@ public class NamespaceShould {
     @Test
     public void not_accept_empty_TenantIds() {
         TenantId emptyId = TenantId.getDefaultInstance();
-        of(emptyId, ProjectId.of("no-matter-what"));
+        assertThrows(IllegalArgumentException.class,
+                     () -> of(emptyId, ProjectId.of("no-matter-what")));
     }
 
     @SuppressWarnings("LocalVariableNamingConvention")
