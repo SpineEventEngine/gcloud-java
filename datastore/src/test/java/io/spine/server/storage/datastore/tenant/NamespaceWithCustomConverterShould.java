@@ -67,7 +67,7 @@ public class NamespaceWithCustomConverterShould {
     public void construct_from_Key() {
         String ns = "my.test.namespace.from.key";
         Key key = Key.newBuilder(PROJECT_ID.getValue(), "some.kind", ns)
-                           .build();
+                     .build();
         Namespace namespace = Namespace.fromNameOf(key, true);
         assertNotNull(namespace);
         assertEquals(ns, namespace.getValue());

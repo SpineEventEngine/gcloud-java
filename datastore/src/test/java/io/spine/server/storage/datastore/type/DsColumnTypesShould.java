@@ -31,7 +31,7 @@ import io.spine.core.Versions;
 import io.spine.json.Json;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
@@ -54,7 +54,7 @@ public class DsColumnTypesShould {
     private static final String RANDOM_COLUMN_LABEL = "some-column";
     private BaseEntity.Builder<Key, Entity.Builder> entity;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         entity = mockEntity();
     }
