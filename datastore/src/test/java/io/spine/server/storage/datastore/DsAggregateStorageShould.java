@@ -39,7 +39,7 @@ import io.spine.testdata.Sample;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +47,7 @@ import static io.spine.client.TestActorRequestFactory.newInstance;
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DsAggregateStorageShould extends AggregateStorageTest {
@@ -106,11 +107,12 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
         assertNotNull(propertyStorage);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fail_to_write_invalid_record() {
         final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
-        storage.writeRecord(Sample.messageOfType(ProjectId.class),
-                            AggregateEventRecord.getDefaultInstance());
+        assertThrows(IllegalArgumentException.class,
+                     () -> storage.writeRecord(Sample.messageOfType(ProjectId.class),
+                                               AggregateEventRecord.getDefaultInstance()));
     }
 
     @Test

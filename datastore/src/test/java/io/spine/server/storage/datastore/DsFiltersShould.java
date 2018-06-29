@@ -32,7 +32,7 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.test.storage.Project;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.Collection;

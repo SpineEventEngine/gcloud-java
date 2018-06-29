@@ -23,21 +23,20 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
-import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
-import io.spine.test.aggregate.ProjectId;
 import io.spine.test.storage.Project;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreStorageFactoryShould {
@@ -55,7 +54,7 @@ public class DatastoreStorageFactoryShould {
                                    .build();
 
     @Test
-    public void create_multitenant_storages() throws Exception {
+    public void create_multitenant_storages() {
         final StorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                               .setDatastore(datastore)
                                                               .setMultitenant(true)
@@ -105,11 +104,10 @@ public class DatastoreStorageFactoryShould {
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
+    @Test
     public void fail_to_create_aggregate_storage_not_using_class_parameter() {
-        final AggregateStorage<ProjectId> storage =
-                datastoreFactory.createAggregateStorage(null);
-        assertNotNull(storage);
+        assertThrows(NullPointerException.class,
+                     () -> datastoreFactory.createAggregateStorage(null));
     }
 
     @Test
@@ -122,10 +120,9 @@ public class DatastoreStorageFactoryShould {
         assertSame(DatastoreTypeRegistryFactory.defaultInstance(), defaultRegistry);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void fail_to_construct_without_datastore() {
-        DatastoreStorageFactory.newBuilder()
-                               .build();
+        assertThrows(NullPointerException.class, DatastoreStorageFactory.newBuilder()::build);
     }
 
     @Test

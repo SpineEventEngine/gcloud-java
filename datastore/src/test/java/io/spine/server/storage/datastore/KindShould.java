@@ -26,11 +26,12 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.junit.Test;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
@@ -63,10 +64,10 @@ public class KindShould {
                 .testEquals();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void not_accept_forbidden_prefix() {
         final String invalidKind = "__my.invalid.type";
-        Kind.of(invalidKind);
+        assertThrows(IllegalArgumentException.class, () -> Kind.of(invalidKind));
     }
 
     @Test

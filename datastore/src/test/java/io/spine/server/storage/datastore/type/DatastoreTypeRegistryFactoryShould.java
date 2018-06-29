@@ -26,7 +26,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityColumn;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.hamcrest.Matchers.instanceOf;

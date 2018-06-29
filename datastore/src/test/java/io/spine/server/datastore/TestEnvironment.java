@@ -31,8 +31,10 @@ public final class TestEnvironment {
 
     private static final String TRUE = "true";
 
+    /**
+     * Prevents the utility class instantiation.
+     */
     private TestEnvironment() {
-        // Prevent utility class instantiation.
     }
 
     /**

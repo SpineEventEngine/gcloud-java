@@ -24,21 +24,21 @@ import com.google.cloud.datastore.Datastore;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
 import io.spine.server.BoundedContext;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.TestDatastoreFactory;
 import io.spine.server.storage.datastore.tenant.TestNamespaceIndex;
 import io.spine.server.tenant.TenantIndex;
+import org.junit.jupiter.api.Test;
 
+import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Dmytro Dashenkov

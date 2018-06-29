@@ -20,7 +20,7 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 

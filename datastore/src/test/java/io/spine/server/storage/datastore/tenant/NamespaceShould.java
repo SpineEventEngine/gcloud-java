@@ -28,7 +28,7 @@ import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.storage.datastore.given.Given;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.storage.datastore.tenant.Namespace.of;
 import static org.junit.Assert.assertEquals;
@@ -53,7 +53,7 @@ public class NamespaceShould {
                 .testStaticMethods(Namespace.class, NullPointerTester.Visibility.PACKAGE);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void not_accept_empty_TenantIds() {
         final TenantId emptyId = TenantId.getDefaultInstance();
         of(emptyId, ProjectId.of("no-matter-what"));

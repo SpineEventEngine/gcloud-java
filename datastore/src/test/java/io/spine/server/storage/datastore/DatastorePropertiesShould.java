@@ -19,7 +19,7 @@
  */
 package io.spine.server.storage.datastore;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import io.spine.test.Tests;
 
 /**

@@ -32,7 +32,7 @@ import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
 import io.spine.test.storage.ProjectId;
 import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Time.getCurrentTime;
 import static org.junit.Assert.assertNotNull;

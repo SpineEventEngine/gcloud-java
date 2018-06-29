@@ -21,7 +21,7 @@
 package io.spine.server.storage.datastore;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.mock;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;

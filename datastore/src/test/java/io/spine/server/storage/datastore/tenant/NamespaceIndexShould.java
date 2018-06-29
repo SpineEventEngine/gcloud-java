@@ -25,36 +25,34 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
-import com.google.common.base.Function;
-import com.google.common.base.Throwables;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.storage.datastore.given.Given;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nullable;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.collect.Collections2.transform;
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.spine.server.storage.datastore.tenant.Namespace.of;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -141,68 +139,60 @@ public class NamespaceIndexShould {
         assertFalse(namespaceIndex.contains(fakeNamespace));
     }
 
-    @Test(timeout = 5000L) // 5 second execution indicates a possible dead lock
-    public void synchronize_access_methods() throws InterruptedException {
+    @Test
+    public void synchronize_access_methods() {
+        assertTimeout(Duration.ofSeconds(5L),
+                      NamespaceIndexShould::testSynchronizeAccessMethods);
+    }
+
+    @SuppressWarnings("OverlyLongMethod")
+    private static void testSynchronizeAccessMethods() throws InterruptedException {
         // Initial data
         final Collection<Key> keys = new LinkedList<>();
         keys.add(mockKey("Vtenant1"));
         keys.add(mockKey("Vtenant2"));
         keys.add(mockKey("Vtenant3"));
-        final Function<Key, TenantId> keyTenantIdTransformer =
-                new Function<Key, TenantId>() {
-                    @Override
-                    public TenantId apply(@Nullable Key input) {
-                        assertNotNull(input);
-                        return TenantId.newBuilder()
-                                       .setValue(input.getName()
-                                                      .substring(1))
-                                       .build();
-                    }
-                };
-        final Collection<TenantId> initialTenantIds = transform(keys, keyTenantIdTransformer);
+        final Collection<TenantId> initialTenantIds =
+                keys.stream()
+                    .map(key -> TenantId.newBuilder()
+                                        .setValue(key.getName().substring(1))
+                                        .build())
+                    .collect(toList());
 
-        final NamespaceIndex.NamespaceQuery namespaceQuery = new NamespaceIndex.NamespaceQuery() {
-            @Override
-            public Iterator<Key> run() {
-                return keys.iterator();
-            }
-        };
+        final NamespaceIndex.NamespaceQuery namespaceQuery = keys::iterator;
         // The tested object
         final NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery,
                                                                  Given.testProjectId(),
                                                                  true);
 
         // The test flow
-        final Runnable flow = new Runnable() {
-            @Override
-            public void run() {
-                // Initial value check
-                final Set<TenantId> initialIdsActual = namespaceIndex.getAll(); // sync
-                // The keep may already be called
-                assertThat(initialIdsActual.size(), greaterThanOrEqualTo(initialTenantIds.size()));
-                @SuppressWarnings("ZeroLengthArrayAllocation")
-                final TenantId[] elements = initialTenantIds.toArray(new TenantId[0]);
-                assertContainsAll(initialIdsActual, elements);
+        final Runnable flow = () -> {
+            // Initial value check
+            final Set<TenantId> initialIdsActual = namespaceIndex.getAll(); // sync
+            // The keep may already be called
+            assertThat(initialIdsActual.size(), greaterThanOrEqualTo(initialTenantIds.size()));
+            @SuppressWarnings("ZeroLengthArrayAllocation")
+            final TenantId[] elements = initialTenantIds.toArray(new TenantId[0]);
+            assertContainsAll(initialIdsActual, elements);
 
-                // Add new element
-                final InternetDomain domain = InternetDomain.newBuilder()
-                                                            .setValue("my.tenant.com")
-                                                            .build();
-                final TenantId newTenantId = TenantId.newBuilder()
-                                                     .setDomain(domain)
-                                                     .build();
-                namespaceIndex.keep(newTenantId); // sync
+            // Add new element
+            final InternetDomain domain = InternetDomain.newBuilder()
+                                                        .setValue("my.tenant.com")
+                                                        .build();
+            final TenantId newTenantId = TenantId.newBuilder()
+                                                 .setDomain(domain)
+                                                 .build();
+            namespaceIndex.keep(newTenantId); // sync
 
-                // Check new value added
-                final boolean success = namespaceIndex.contains(of(newTenantId,    // sync
-                                                                   Given.testProjectId()));
-                assertTrue(success);
+            // Check new value added
+            final boolean success = namespaceIndex.contains(of(newTenantId,    // sync
+                                                               Given.testProjectId()));
+            assertTrue(success);
 
-                // Check returned set has newly added element
-                final Set<TenantId> updatedIds = namespaceIndex.getAll(); // sync
-                assertEquals(updatedIds.size(), initialTenantIds.size() + 1);
-                assertContains(newTenantId, updatedIds);
-            }
+            // Check returned set has newly added element
+            final Set<TenantId> updatedIds = namespaceIndex.getAll(); // sync
+            assertEquals(updatedIds.size(), initialTenantIds.size() + 1);
+            assertContains(newTenantId, updatedIds);
         };
 
         // Test execution threads
@@ -211,13 +201,7 @@ public class NamespaceIndexShould {
 
         // Collect thread failures
         final Map<Thread, Throwable> threadFailures = new HashMap<>(2);
-        final Thread.UncaughtExceptionHandler throwableCollector =
-                new Thread.UncaughtExceptionHandler() {
-                    @Override
-                    public void uncaughtException(Thread t, Throwable e) {
-                        threadFailures.put(t, e);
-                    }
-                };
+        final Thread.UncaughtExceptionHandler throwableCollector = threadFailures::put;
 
         firstThread.setUncaughtExceptionHandler(throwableCollector);
         secondThread.setUncaughtExceptionHandler(throwableCollector);
@@ -234,7 +218,7 @@ public class NamespaceIndexShould {
         // Throw if any, failing the test
         for (Throwable failure : threadFailures.values()) {
             fail(format("Test thread has thrown a Throwable. %s",
-                        Throwables.getStackTraceAsString(failure)));
+                        getStackTraceAsString(failure)));
         }
     }
 

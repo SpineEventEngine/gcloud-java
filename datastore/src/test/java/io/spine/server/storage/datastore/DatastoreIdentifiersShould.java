@@ -19,12 +19,13 @@
  */
 package io.spine.server.storage.datastore;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alex Tymchenko
@@ -36,9 +37,9 @@ public class DatastoreIdentifiersShould {
         assertHasPrivateParameterlessCtor(DsIdentifiers.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void not_accept_empty_String_as_identifier_source() {
-        DsIdentifiers.of("");
+        assertThrows(IllegalAccessException.class, () -> DsIdentifiers.of(""));
     }
 
     @Test

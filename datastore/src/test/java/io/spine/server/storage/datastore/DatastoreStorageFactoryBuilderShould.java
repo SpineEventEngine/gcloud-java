@@ -34,7 +34,8 @@ import io.spine.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.storage.datastore.type.SimpleDatastoreColumnType;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -97,17 +98,18 @@ public class DatastoreStorageFactoryBuilderShould {
         assertNotNull(type);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void ensure_datastore_has_no_namespace_if_multitenant() {
         final DatastoreOptions options =
                 DatastoreOptions.newBuilder()
                                 .setNamespace("non-null-or-empty-namespace")
                                 .setProjectId(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME)
                                 .build();
-        DatastoreStorageFactory.newBuilder()
-                               .setMultitenant(true)
-                               .setDatastore(options.getService())
-                               .build();
+        DatastoreStorageFactory.Builder builder = DatastoreStorageFactory
+                .newBuilder()
+                .setMultitenant(true)
+                .setDatastore(options.getService());
+        Assertions.assertThrows(IllegalAccessException.class, builder::build);
     }
 
     @Test

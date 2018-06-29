@@ -24,7 +24,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.protobuf.Message;
 import io.spine.test.storage.Project;
 import io.spine.type.TypeUrl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.Iterator;

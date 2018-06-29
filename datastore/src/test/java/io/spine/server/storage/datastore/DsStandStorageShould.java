@@ -26,7 +26,7 @@ import io.spine.server.stand.StandStorageShould;
 import io.spine.server.storage.RecordStorage;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertNotNull;
 

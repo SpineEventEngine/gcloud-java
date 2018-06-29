@@ -32,7 +32,7 @@ import io.spine.json.Json;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 import static com.google.cloud.datastore.BooleanValue.of;

@@ -20,7 +20,7 @@
 package io.spine.server.storage.datastore;
 
 import com.google.protobuf.Any;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.type.TypeUrl;
 

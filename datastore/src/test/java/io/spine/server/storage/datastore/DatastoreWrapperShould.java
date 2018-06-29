@@ -36,7 +36,7 @@ import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import org.junit.AfterClass;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -55,6 +55,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
@@ -91,20 +92,20 @@ public class DatastoreWrapperShould {
         assertFalse(wrapper.isTransactionActive());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void fail_to_start_transaction_if_one_is_active() {
         final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
                                                                singleTenant());
         try {
             wrapper.startTransaction();
             assertTrue(wrapper.isTransactionActive());
-            wrapper.startTransaction();
+            assertThrows(IllegalStateException.class, wrapper::startTransaction);
         } finally {
             wrapper.rollbackTransaction();
         }
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void fail_to_finish_not_active_transaction() {
         final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
                                                                singleTenant());
@@ -112,7 +113,7 @@ public class DatastoreWrapperShould {
         assertTrue(wrapper.isTransactionActive());
         wrapper.commitTransaction();
         assertFalse(wrapper.isTransactionActive());
-        wrapper.rollbackTransaction();
+        assertThrows(IllegalStateException.class, wrapper::rollbackTransaction);
     }
 
     @Test

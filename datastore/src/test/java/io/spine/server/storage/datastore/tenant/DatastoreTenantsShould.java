@@ -26,7 +26,7 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.core.TenantId;
 

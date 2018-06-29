@@ -24,7 +24,7 @@ import com.google.cloud.datastore.Key;
 import com.google.common.base.Converter;
 import com.google.common.base.Optional;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import io.spine.string.Stringifiers;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.core.TenantId;
