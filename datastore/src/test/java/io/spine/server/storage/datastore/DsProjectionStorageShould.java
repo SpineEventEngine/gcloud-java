@@ -26,7 +26,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.projection.ProjectionStorageShould;
+import io.spine.server.projection.ProjectionStorageTest;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
@@ -40,7 +40,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Mikhail Mikhaylov
  */
-public class DsProjectionStorageShould extends ProjectionStorageShould {
+public class DsProjectionStorageShould extends ProjectionStorageTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory =
             TestDatastoreStorageFactory.getDefaultInstance();
