@@ -162,7 +162,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
     @SuppressWarnings("BusyWait")   // allow Datastore to become consistent before reading.
     private void waitForConsistency() {
         if (!waitForConsistency) {
-            log().info("Wait for consistency is not required.");
+            log().debug("Wait for consistency is not required.");
             return;
         }
         log().info("Waiting for data consistency to establish.");
