@@ -51,18 +51,18 @@ final class DsProperties {
      * Makes AggregateId property from given {@link Message} value.
      */
     static void addAggregateId(Entity.Builder entity, Object aggregateId) {
-        final String propertyValue = Stringifiers.toString(aggregateId);
+        String propertyValue = Stringifiers.toString(aggregateId);
         entity.set(aggregate_id.toString(), propertyValue);
     }
 
     static void addWhenCreated(Entity.Builder entity, Timestamp when) {
-        final com.google.cloud.Timestamp value = ofTimeSecondsAndNanos(when.getSeconds(),
+        com.google.cloud.Timestamp value = ofTimeSecondsAndNanos(when.getSeconds(),
                                                                        when.getNanos());
         AggregateEventRecordProperty.created.setProperty(entity, value);
     }
 
     static void addVersion(Entity.Builder entity, Version version) {
-        final int number = version.getNumber();
+        int number = version.getNumber();
         AggregateEventRecordProperty.version.setProperty(entity, number);
     }
 
@@ -101,7 +101,7 @@ final class DsProperties {
     }
 
     private static boolean hasFlag(Entity entity, String flagName) {
-        final boolean result = entity.contains(flagName)
+        boolean result = entity.contains(flagName)
                             && entity.getBoolean(flagName);
         return result;
     }
@@ -122,7 +122,7 @@ final class DsProperties {
         created {
             @Override
             void setProperty(Entity.Builder builder, Object value) {
-                final com.google.cloud.Timestamp dateTime = (com.google.cloud.Timestamp) value;
+                com.google.cloud.Timestamp dateTime = (com.google.cloud.Timestamp) value;
                 builder.set(toString(), dateTime);
             }
         },
@@ -133,7 +133,7 @@ final class DsProperties {
         version {
             @Override
             void setProperty(Entity.Builder builder, Object value) {
-                final int version = (int) value;
+                int version = (int) value;
                 builder.set(toString(), version);
             }
         },
@@ -145,7 +145,7 @@ final class DsProperties {
         snapshot {
             @Override
             void setProperty(Entity.Builder builder, Object value) {
-                final boolean isSnapshot = (boolean) value;
+                boolean isSnapshot = (boolean) value;
                 builder.set(toString(), isSnapshot);
             }
         };

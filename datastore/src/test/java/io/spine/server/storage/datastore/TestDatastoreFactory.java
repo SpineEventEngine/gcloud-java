@@ -51,17 +51,17 @@ public class TestDatastoreFactory {
 
     private static DatastoreOptions generateTestOptions() {
         try {
-            final InputStream is = TestDatastoreFactory.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-            final BufferedInputStream bufferedStream = new BufferedInputStream(is);
+            InputStream is = TestDatastoreFactory.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+            BufferedInputStream bufferedStream = new BufferedInputStream(is);
 
-            final ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(bufferedStream);
+            ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(bufferedStream);
             return DatastoreOptions.newBuilder()
                                    .setProjectId(DEFAULT_DATASET_NAME)
                                    .setCredentials(credentials)
                                    .build();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
             log().warn("Cannot find the configuration file {}", CREDENTIALS_FILE_PATH);
-            final DatastoreOptions defaultOptions = DatastoreOptions.newBuilder()
+            DatastoreOptions defaultOptions = DatastoreOptions.newBuilder()
                                                                     .setProjectId(DEFAULT_DATASET_NAME)
                                                                     .build();
             return defaultOptions;

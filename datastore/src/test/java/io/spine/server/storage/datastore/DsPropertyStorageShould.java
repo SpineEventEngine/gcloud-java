@@ -32,8 +32,8 @@ public class DsPropertyStorageShould {
 
     @Test
     public void provide_access_to_DatastoreWrapper_for_extensibility() {
-        final DsPropertyStorage storage = getStorage();
-        final DatastoreWrapper datastore = storage.getDatastore();
+        DsPropertyStorage storage = getStorage();
+        DatastoreWrapper datastore = storage.getDatastore();
         assertNotNull(datastore);
     }
 

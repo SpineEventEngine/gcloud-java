@@ -126,14 +126,14 @@ class TestDatastoreWrapper extends DatastoreWrapper {
                 }
             }
 
-            final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+            StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                        .setKind(table)
                                                        .build();
-            final List<Entity> entities = newArrayList(read(query));
+            List<Entity> entities = newArrayList(read(query));
             remainingEntityCount = entities.size();
 
             if (remainingEntityCount > 0) {
-                final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
+                Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
                     @Nullable
                     @Override
                     public Key apply(@Nullable Entity input) {
@@ -145,7 +145,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
                     }
                 });
 
-                final Key[] keysArray = new Key[keys.size()];
+                Key[] keysArray = new Key[keys.size()];
                 keys.toArray(keysArray);
                 dropTableInternal(keysArray);
 

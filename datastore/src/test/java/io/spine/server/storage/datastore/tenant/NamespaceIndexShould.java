@@ -66,8 +66,8 @@ public class NamespaceIndexShould {
 
     @Test
     public void not_accept_nulls() {
-        final Namespace defaultNamespace = of("some-string");
-        final TenantId tenantId = TenantId.getDefaultInstance();
+        Namespace defaultNamespace = of("some-string");
+        TenantId tenantId = TenantId.getDefaultInstance();
 
         new NullPointerTester()
                 .setDefault(Namespace.class, defaultNamespace)
@@ -78,28 +78,28 @@ public class NamespaceIndexShould {
 
     @Test
     public void store_tenant_ids() {
-        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
+        NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
-        final Set<TenantId> initialEmptySet = namespaceIndex.getAll();
+        Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
-        final TenantId newId = TenantId.newBuilder()
+        TenantId newId = TenantId.newBuilder()
                                        .setValue(TENANT_ID_STRING)
                                        .build();
         namespaceIndex.keep(newId);
 
-        final Set<TenantId> ids = namespaceIndex.getAll();
+        Set<TenantId> ids = namespaceIndex.getAll();
         assertFalse(ids.isEmpty());
         assertSize(1, ids);
 
-        final TenantId actual = ids.iterator()
+        TenantId actual = ids.iterator()
                                    .next();
         assertEquals(newId, actual);
     }
 
     @Test
     public void do_nothing_on_close() {
-        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), false);
+        NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), false);
 
         namespaceIndex.close();
         namespaceIndex.close();
@@ -108,16 +108,16 @@ public class NamespaceIndexShould {
 
     @Test
     public void find_existing_namespaces() {
-        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
+        NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
         // Ensure no namespace has been kept
-        final Set<TenantId> initialEmptySet = namespaceIndex.getAll();
+        Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
-        final TenantId newId = TenantId.newBuilder()
+        TenantId newId = TenantId.newBuilder()
                                        .setValue(TENANT_ID_STRING)
                                        .build();
-        final Namespace newNamespace = of(newId, Given.testProjectId());
+        Namespace newNamespace = of(newId, Given.testProjectId());
 
         namespaceIndex.keep(newId);
         assertTrue(namespaceIndex.contains(newNamespace));
@@ -125,16 +125,16 @@ public class NamespaceIndexShould {
 
     @Test
     public void not_find_non_existing_namespaces() {
-        final NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
+        NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
         // Ensure no namespace has been kept
-        final Set<TenantId> initialEmptySet = namespaceIndex.getAll();
+        Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
-        final TenantId fakeId = TenantId.newBuilder()
+        TenantId fakeId = TenantId.newBuilder()
                                         .setValue(TENANT_ID_STRING)
                                         .build();
-        final Namespace fakeNamespace = of(fakeId, ProjectId.of("fake-prj"));
+        Namespace fakeNamespace = of(fakeId, ProjectId.of("fake-prj"));
 
         assertFalse(namespaceIndex.contains(fakeNamespace));
     }
@@ -148,60 +148,59 @@ public class NamespaceIndexShould {
     @SuppressWarnings("OverlyLongMethod")
     private static void testSynchronizeAccessMethods() throws InterruptedException {
         // Initial data
-        final Collection<Key> keys = new LinkedList<>();
+        Collection<Key> keys = new LinkedList<>();
         keys.add(mockKey("Vtenant1"));
         keys.add(mockKey("Vtenant2"));
         keys.add(mockKey("Vtenant3"));
-        final Collection<TenantId> initialTenantIds =
+        Collection<TenantId> initialTenantIds =
                 keys.stream()
                     .map(key -> TenantId.newBuilder()
                                         .setValue(key.getName().substring(1))
                                         .build())
                     .collect(toList());
 
-        final NamespaceIndex.NamespaceQuery namespaceQuery = keys::iterator;
+        NamespaceIndex.NamespaceQuery namespaceQuery = keys::iterator;
         // The tested object
-        final NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery,
+        NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery,
                                                                  Given.testProjectId(),
                                                                  true);
 
         // The test flow
-        final Runnable flow = () -> {
+        Runnable flow = () -> {
             // Initial value check
-            final Set<TenantId> initialIdsActual = namespaceIndex.getAll(); // sync
+            Set<TenantId> initialIdsActual = namespaceIndex.getAll(); // sync
             // The keep may already be called
             assertThat(initialIdsActual.size(), greaterThanOrEqualTo(initialTenantIds.size()));
-            @SuppressWarnings("ZeroLengthArrayAllocation")
-            final TenantId[] elements = initialTenantIds.toArray(new TenantId[0]);
+            @SuppressWarnings("ZeroLengthArrayAllocation") TenantId[] elements = initialTenantIds.toArray(new TenantId[0]);
             assertContainsAll(initialIdsActual, elements);
 
             // Add new element
-            final InternetDomain domain = InternetDomain.newBuilder()
+            InternetDomain domain = InternetDomain.newBuilder()
                                                         .setValue("my.tenant.com")
                                                         .build();
-            final TenantId newTenantId = TenantId.newBuilder()
+            TenantId newTenantId = TenantId.newBuilder()
                                                  .setDomain(domain)
                                                  .build();
             namespaceIndex.keep(newTenantId); // sync
 
             // Check new value added
-            final boolean success = namespaceIndex.contains(of(newTenantId,    // sync
+            boolean success = namespaceIndex.contains(of(newTenantId,    // sync
                                                                Given.testProjectId()));
             assertTrue(success);
 
             // Check returned set has newly added element
-            final Set<TenantId> updatedIds = namespaceIndex.getAll(); // sync
+            Set<TenantId> updatedIds = namespaceIndex.getAll(); // sync
             assertEquals(updatedIds.size(), initialTenantIds.size() + 1);
             assertContains(newTenantId, updatedIds);
         };
 
         // Test execution threads
-        final Thread firstThread = new Thread(flow);
-        final Thread secondThread = new Thread(flow);
+        Thread firstThread = new Thread(flow);
+        Thread secondThread = new Thread(flow);
 
         // Collect thread failures
-        final Map<Thread, Throwable> threadFailures = new HashMap<>(2);
-        final Thread.UncaughtExceptionHandler throwableCollector = threadFailures::put;
+        Map<Thread, Throwable> threadFailures = new HashMap<>(2);
+        Thread.UncaughtExceptionHandler throwableCollector = threadFailures::put;
 
         firstThread.setUncaughtExceptionHandler(throwableCollector);
         secondThread.setUncaughtExceptionHandler(throwableCollector);
@@ -223,17 +222,17 @@ public class NamespaceIndexShould {
     }
 
     private static Key mockKey(String name) {
-        final Key key = Key.newBuilder("some-proj", "some-kind", name)
+        Key key = Key.newBuilder("some-proj", "some-kind", name)
                            .build();
         return key;
     }
 
     private static Datastore mockDatastore() {
-        final Datastore datastore = mock(Datastore.class);
-        final DatastoreOptions options = mock(DatastoreOptions.class);
+        Datastore datastore = mock(Datastore.class);
+        DatastoreOptions options = mock(DatastoreOptions.class);
         when(datastore.getOptions()).thenReturn(options);
         when(options.getProjectId()).thenReturn("some-project-id-NamespaceIndexShould");
-        final QueryResults results = mock(QueryResults.class);
+        QueryResults results = mock(QueryResults.class);
         when(datastore.run(any(Query.class))).thenReturn(results);
         return datastore;
     }

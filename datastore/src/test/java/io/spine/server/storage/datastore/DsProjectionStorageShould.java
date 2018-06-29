@@ -68,18 +68,18 @@ public class DsProjectionStorageShould extends ProjectionStorageTest {
     @SuppressWarnings("unchecked") // Required for test purposes.
     @Override
     protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
-        final Class<? extends Projection<ProjectId, ?, ?>> projectionClass =
+        Class<? extends Projection<ProjectId, ?, ?>> projectionClass =
                 (Class<? extends Projection<ProjectId, ?, ?>>) cls;
-        final ProjectionStorage<ProjectId> result =
+        ProjectionStorage<ProjectId> result =
                 datastoreFactory.createProjectionStorage(projectionClass);
         return result;
     }
 
     @Test
     public void provide_access_to_PropertyStorage_for_extensibility() {
-        final DsProjectionStorage<ProjectId> storage =
+        DsProjectionStorage<ProjectId> storage =
                 (DsProjectionStorage<ProjectId>) newStorage(TestProjection.class);
-        final DsPropertyStorage propertyStorage = storage.propertyStorage();
+        DsPropertyStorage propertyStorage = storage.propertyStorage();
         assertNotNull(propertyStorage);
     }
 

@@ -22,19 +22,19 @@ package io.spine.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Key;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import io.spine.server.storage.datastore.ProjectId;
 import io.spine.core.TenantId;
+import io.spine.server.storage.datastore.ProjectId;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.regex.Matcher.quoteReplacement;
 import static io.spine.server.storage.datastore.tenant.TenantConverterRegistry.getNamespaceConverter;
+import static java.util.regex.Matcher.quoteReplacement;
 
 /**
  * A value object representing the Datastore
@@ -125,16 +125,16 @@ public final class Namespace {
         checkNotNull(id);
         checkNotNull(projectId);
 
-        final Optional<NamespaceToTenantIdConverter> customConverter =
+        Optional<NamespaceToTenantIdConverter> customConverter =
                 getNamespaceConverter(projectId);
 
-        final TenantIdConverterType tenantIdConverterType =
-                TenantIdConverterType.forTenantId(id, customConverter.orNull());
-        final NamespaceToTenantIdConverter converter = customConverter
-                .or(tenantIdConverterType.namespaceConverter);
-        final String ns = converter.toString(id);
+        TenantIdConverterType tenantIdConverterType =
+                TenantIdConverterType.forTenantId(id, customConverter.orElse(null));
+        NamespaceToTenantIdConverter converter = customConverter.orElse(
+                tenantIdConverterType.namespaceConverter);
+        String ns = converter.toString(id);
         return new Namespace(ns,
-                             customConverter.or(tenantIdConverterType.namespaceConverter));
+                             customConverter.orElse(tenantIdConverterType.namespaceConverter));
     }
 
     /**
@@ -144,40 +144,39 @@ public final class Namespace {
      * @return a {@code Namespace} of the given Key name or {@code null} if the name is
      * {@code null} or empty
      */
-    @Nullable
-    static Namespace fromNameOf(Key key, boolean multitenant) {
+    static @Nullable Namespace fromNameOf(Key key, boolean multitenant) {
         checkNotNull(key);
 
-        final String projectIdString = key.getProjectId();
-        final ProjectId projectId = ProjectId.of(projectIdString);
-        final Optional<NamespaceToTenantIdConverter> customConverter =
+        String projectIdString = key.getProjectId();
+        ProjectId projectId = ProjectId.of(projectIdString);
+        Optional<NamespaceToTenantIdConverter> customConverter =
                 getNamespaceConverter(projectId);
-        final String namespace = key.getName();
+        String namespace = key.getName();
         if (isNullOrEmpty(namespace)) {
             return null;
         }
 
-        final TenantIdConverterType tenantIdConverterType;
+        TenantIdConverterType tenantIdConverterType;
         if (!multitenant) {
             tenantIdConverterType = TenantIdConverterType.SINGLE_CUSTOM;
         } else if (customConverter.isPresent()) {
             tenantIdConverterType = TenantIdConverterType.PREDEFINED_VALUE;
         } else {
-            final String typePrefix = String.valueOf(namespace.charAt(0));
+            String typePrefix = String.valueOf(namespace.charAt(0));
             tenantIdConverterType = TYPE_PREFIX_TO_CONVERTER.get(typePrefix);
             checkState(tenantIdConverterType != null,
                        "Could not determine a TenantId converter for namespace %s.",
                        namespace);
         }
 
-        final NamespaceToTenantIdConverter defaultConverter = tenantIdConverterType.namespaceConverter;
-        final Namespace result = new Namespace(namespace,
-                                               customConverter.or(defaultConverter));
+        NamespaceToTenantIdConverter defaultConverter = tenantIdConverterType.namespaceConverter;
+        Namespace result = new Namespace(namespace,
+                                               customConverter.orElse(defaultConverter));
         return result;
     }
 
     private static String escapeIllegalCharacters(String candidateNamespace) {
-        final String result = AT_SYMBOL_PATTERN.matcher(candidateNamespace)
+        String result = AT_SYMBOL_PATTERN.matcher(candidateNamespace)
                                                .replaceAll(quoteReplacement(AT_SYMBOL_REPLACEMENT));
         return result;
     }
@@ -209,7 +208,7 @@ public final class Namespace {
      * @return a {@link TenantId} represented by this {@code Namespace}
      */
     TenantId toTenantId() {
-        final TenantId tenantId = converter.convert(getValue());
+        TenantId tenantId = converter.convert(getValue());
         return tenantId;
     }
 
@@ -284,9 +283,9 @@ public final class Namespace {
             if (customConverter != null) {
                 return PREDEFINED_VALUE;
             }
-            final TenantId.KindCase kindCase = tenantId.getKindCase();
-            final String kindCaseName = kindCase.name();
-            final TenantIdConverterType converter = valueOf(kindCaseName);
+            TenantId.KindCase kindCase = tenantId.getKindCase();
+            String kindCaseName = kindCase.name();
+            TenantIdConverterType converter = valueOf(kindCaseName);
             return converter;
         }
 

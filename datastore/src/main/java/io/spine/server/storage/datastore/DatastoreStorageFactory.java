@@ -41,8 +41,7 @@ import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.type.TypeUrl;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -102,7 +101,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
         checkState(this.getDatastore() == null, "Datastore is already initialized");
-        final DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore, namespaceSupplier);
+        DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore, namespaceSupplier);
         return wrapped;
     }
 
@@ -141,9 +140,9 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public StandStorage createStandStorage() {
-        final DsStandStorageDelegate recordStorage =
+        DsStandStorageDelegate recordStorage =
                 new DsStandStorageDelegate(datastore, multitenant);
-        final DsStandStorage result = new DsStandStorage(recordStorage, multitenant);
+        DsStandStorage result = new DsStandStorage(recordStorage, multitenant);
         return result;
     }
 
@@ -154,10 +153,10 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
-        final EntityClass<Projection<I, ?, ?>> entityClass = new EntityClass<>(projectionClass);
-        final TypeUrl stateType = entityClass.getStateType();
-        final Class<I> idClass = (Class<I>) entityClass.getIdClass();
-        final DsProjectionStorageDelegate<I> recordStorage =
+        EntityClass<Projection<I, ?, ?>> entityClass = new EntityClass<>(projectionClass);
+        TypeUrl stateType = entityClass.getStateType();
+        Class<I> idClass = (Class<I>) entityClass.getIdClass();
+        DsProjectionStorageDelegate<I> recordStorage =
                 DsProjectionStorageDelegate.<I>newDelegateBuilder()
                                            .setDatastore(getDatastore())
                                            .setMultitenant(isMultitenant())
@@ -166,8 +165,8 @@ public class DatastoreStorageFactory implements StorageFactory {
                                            .setStateType(stateType)
                                            .setColumnTypeRegistry(typeRegistry)
                                            .build();
-        final DsPropertyStorage propertyStorage = createPropertyStorage();
-        final DsProjectionStorage<I> result = new DsProjectionStorage<>(recordStorage,
+        DsPropertyStorage propertyStorage = createPropertyStorage();
+        DsProjectionStorage<I> result = new DsProjectionStorage<>(recordStorage,
                                                                         propertyStorage,
                                                                         projectionClass,
                                                                         multitenant);
@@ -180,10 +179,10 @@ public class DatastoreStorageFactory implements StorageFactory {
     @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        final EntityClass<Entity<I, ?>> wrappedEntityClass = new EntityClass<>(entityClass);
-        final TypeUrl stateType = wrappedEntityClass.getStateType();
-        final Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
-        final DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
+        EntityClass<Entity<I, ?>> wrappedEntityClass = new EntityClass<>(entityClass);
+        TypeUrl stateType = wrappedEntityClass.getStateType();
+        Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
+        DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
                                                          .setStateType(stateType)
                                                          .setDatastore(getDatastore())
                                                          .setMultitenant(isMultitenant())
@@ -202,11 +201,11 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I> AggregateStorage<I> createAggregateStorage(
             Class<? extends Aggregate<I, ?, ?>> entityClass) {
         checkNotNull(entityClass);
-        final EntityClass<Aggregate<I, ?, ?>> wrappedEntityClass = new EntityClass<>(entityClass);
-        final DsPropertyStorage propertyStorage = createPropertyStorage();
-        final Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
-        final Class<? extends Message> stateClass = wrappedEntityClass.getStateClass();
-        final DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(),
+        EntityClass<Aggregate<I, ?, ?>> wrappedEntityClass = new EntityClass<>(entityClass);
+        DsPropertyStorage propertyStorage = createPropertyStorage();
+        Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
+        Class<? extends Message> stateClass = wrappedEntityClass.getStateClass();
+        DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(),
                                                                       propertyStorage,
                                                                       multitenant,
                                                                       idClass,
@@ -215,7 +214,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     protected DsPropertyStorage createPropertyStorage() {
-        final DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(getDatastore());
+        DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(getDatastore());
         return propertyStorage;
     }
 
@@ -340,7 +339,7 @@ public class DatastoreStorageFactory implements StorageFactory {
                               REDUNDANT_TENANT_ID_CONVERTER_ERROR_MESSAGE);
             }
             if (namespaceToTenantIdConverter != null) {
-                final ProjectId projectId = ProjectId.of(datastore);
+                ProjectId projectId = ProjectId.of(datastore);
                 TenantConverterRegistry.registerNamespaceConverter(projectId,
                                                                    namespaceToTenantIdConverter);
             }
@@ -349,7 +348,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
 
         private NamespaceSupplier createNamespaceSupplier() {
-            final String defaultNamespace;
+            String defaultNamespace;
             if (multitenant) {
                 checkHasNoNamespace(datastore);
                 defaultNamespace = null;
@@ -357,7 +356,7 @@ public class DatastoreStorageFactory implements StorageFactory {
                 defaultNamespace = datastore.getOptions()
                                             .getNamespace();
             }
-            final NamespaceSupplier result = NamespaceSupplier.instance(multitenant,
+            NamespaceSupplier result = NamespaceSupplier.instance(multitenant,
                                                                         defaultNamespace,
                                                                         ProjectId.of(datastore));
             return result;
@@ -365,8 +364,8 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         private static void checkHasNoNamespace(Datastore datastore) {
             checkNotNull(datastore);
-            final DatastoreOptions options = datastore.getOptions();
-            final String namespace = options.getNamespace();
+            DatastoreOptions options = datastore.getOptions();
+            String namespace = options.getNamespace();
             checkArgument(isNullOrEmpty(namespace),
                           DEFAULT_NAMESPACE_ERROR_MESSAGE);
         }

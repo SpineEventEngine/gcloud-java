@@ -43,29 +43,29 @@ public class SingleTenantNamespaceSuppierShould {
 
     @Test
     public void produce_empty_namespace() {
-        final NamespaceSupplier supplier = NamespaceSupplier.instance(false,
+        NamespaceSupplier supplier = NamespaceSupplier.instance(false,
                                                                       null,
                                                                       ProjectId.of("any"));
-        final Namespace namespace = supplier.get();
+        Namespace namespace = supplier.get();
         assertNotNull(namespace);
         assertThat(namespace.getValue(), isEmptyString());
-        final TenantId tenantId = namespace.toTenantId();
+        TenantId tenantId = namespace.toTenantId();
         assertThat(tenantId, isEffectivelyDefault());
     }
 
     @Test
     public void produce_custom_namespace() {
-        final String namespaceValue = "my-custom-namespace";
-        final NamespaceSupplier supplier = NamespaceSupplier.instance(false,
+        String namespaceValue = "my-custom-namespace";
+        NamespaceSupplier supplier = NamespaceSupplier.instance(false,
                                                                       namespaceValue,
                                                                       ProjectId.of("some"));
-        final Namespace namespace = supplier.get();
+        Namespace namespace = supplier.get();
         assertNotNull(namespace);
         assertEquals(namespaceValue, namespace.getValue());
 
-        final TenantId tenantId = namespace.toTenantId();
+        TenantId tenantId = namespace.toTenantId();
         assertThat(tenantId, not(isEffectivelyDefault()));
-        final String actualNamespaceValue = tenantId.getValue();
+        String actualNamespaceValue = tenantId.getValue();
         assertEquals(namespaceValue, actualNamespaceValue);
     }
 
@@ -77,16 +77,16 @@ public class SingleTenantNamespaceSuppierShould {
                 if (!(item instanceof TenantId)) {
                     return false;
                 }
-                final TenantId tenantId = (TenantId) item;
-                final InternetDomain domain = tenantId.getDomain();
+                TenantId tenantId = (TenantId) item;
+                InternetDomain domain = tenantId.getDomain();
                 if (!isDefault(domain)) {
                     return false;
                 }
-                final EmailAddress email = tenantId.getEmail();
+                EmailAddress email = tenantId.getEmail();
                 if (!isDefault(email)) {
                     return false;
                 }
-                final String value = tenantId.getValue();
+                String value = tenantId.getValue();
                 return value.isEmpty();
             }
 

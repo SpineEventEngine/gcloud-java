@@ -22,12 +22,13 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.storage.datastore.Entities.entityToMessage;
@@ -58,12 +59,12 @@ public class DsPropertyStorage {
         checkNotNull(propertyId);
         checkNotNull(value);
 
-        final Descriptor typeDescriptor = value.getDescriptorForType();
-        final Kind kind = Kind.of(typeDescriptor);
+        Descriptor typeDescriptor = value.getDescriptorForType();
+        Kind kind = Kind.of(typeDescriptor);
 
-        final Key key = DsIdentifiers.keyFor(datastore, kind, propertyId);
+        Key key = DsIdentifiers.keyFor(datastore, kind, propertyId);
 
-        final Entity entity = messageToEntity(AnyPacker.pack(value), key);
+        Entity entity = messageToEntity(AnyPacker.pack(value), key);
         datastore.createOrUpdate(entity);
     }
 
@@ -72,18 +73,18 @@ public class DsPropertyStorage {
         checkNotNull(propertyId);
         checkNotNull(targetTypeDescriptor);
 
-        final Kind kind = Kind.of(targetTypeDescriptor);
+        Kind kind = Kind.of(targetTypeDescriptor);
 
-        final Key key = DsIdentifiers.keyFor(datastore, kind, propertyId);
-        final Entity response = datastore.read(key);
+        Key key = DsIdentifiers.keyFor(datastore, kind, propertyId);
+        Entity response = datastore.read(key);
 
         if (response == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
-        final Any anyResult = entityToMessage(response, ANY_TYPE_URL);
-        final V result = AnyPacker.unpack(anyResult);
-        return Optional.fromNullable(result);
+        Any anyResult = entityToMessage(response, ANY_TYPE_URL);
+        V result = AnyPacker.unpack(anyResult);
+        return Optional.ofNullable(result);
     }
 
     /**

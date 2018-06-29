@@ -55,50 +55,50 @@ public class DatastoreStorageFactoryShould {
 
     @Test
     public void create_multitenant_storages() {
-        final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+        StorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                               .setDatastore(datastore)
                                                               .setMultitenant(true)
                                                               .build();
         assertTrue(factory.isMultitenant());
-        final RecordStorage storage = factory.createStandStorage();
+        RecordStorage storage = factory.createStandStorage();
         assertTrue(storage.isMultitenant());
         storage.close();
     }
 
     @Test
     public void create_entity_storage_using_class_parameter() {
-        final RecordStorage<String> storage = datastoreFactory.createRecordStorage(TestEntity.class);
+        RecordStorage<String> storage = datastoreFactory.createRecordStorage(TestEntity.class);
         assertNotNull(storage);
     }
 
     @Test
     public void create_separate_record_storage_per_state_type() {
-        final DsRecordStorage<?> storage =
+        DsRecordStorage<?> storage =
                 (DsRecordStorage<?>) datastoreFactory.createRecordStorage(TestEntity.class);
-        final DsRecordStorage<?> differentStorage =
+        DsRecordStorage<?> differentStorage =
                 (DsRecordStorage<?>) datastoreFactory.createRecordStorage(DifferentTestEntity.class);
         assertNotEquals(storage.getKind(), differentStorage.getKind());
     }
 
     @Test
     public void convert_itself_to_single_tenant() {
-        final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+        StorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                               .setDatastore(datastore)
                                                               .setMultitenant(true)
                                                               .build();
         assertTrue(factory.isMultitenant());
-        final StorageFactory singleTenantFactory = factory.toSingleTenant();
+        StorageFactory singleTenantFactory = factory.toSingleTenant();
         assertFalse(singleTenantFactory.isMultitenant());
     }
 
     @Test
     public void return_self_if_single_tenant() {
-        final StorageFactory factory = DatastoreStorageFactory.newBuilder()
+        StorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                               .setDatastore(datastore)
                                                               .setMultitenant(false)
                                                               .build();
         assertFalse(factory.isMultitenant());
-        final StorageFactory singleTenantFactory = factory.toSingleTenant();
+        StorageFactory singleTenantFactory = factory.toSingleTenant();
         assertFalse(singleTenantFactory.isMultitenant());
         assertSame(factory, singleTenantFactory);
     }
@@ -112,10 +112,10 @@ public class DatastoreStorageFactoryShould {
 
     @Test
     public void have_default_column_type_registry() {
-        final DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
+        DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                                        .setDatastore(datastore)
                                                                        .build();
-        final ColumnTypeRegistry defaultRegistry = factory.getTypeRegistry();
+        ColumnTypeRegistry defaultRegistry = factory.getTypeRegistry();
         assertNotNull(defaultRegistry);
         assertSame(DatastoreTypeRegistryFactory.defaultInstance(), defaultRegistry);
     }
@@ -127,7 +127,7 @@ public class DatastoreStorageFactoryShould {
 
     @Test
     public void do_nothing_on_close() throws Exception {
-        final DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
+        DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                                        .setDatastore(datastore)
                                                                        .build();
         factory.close();

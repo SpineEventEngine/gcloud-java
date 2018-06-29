@@ -50,13 +50,13 @@ public class KindShould {
 
     @Test
     public void support_equality() {
-        final Kind anyFromDesc = Kind.of(Any.getDescriptor());
-        final Kind anyFromTypeUrl = Kind.of(TypeUrl.of(Any.class));
-        final Kind anyFromString = Kind.of("google.protobuf.Any");
+        Kind anyFromDesc = Kind.of(Any.getDescriptor());
+        Kind anyFromTypeUrl = Kind.of(TypeUrl.of(Any.class));
+        Kind anyFromString = Kind.of("google.protobuf.Any");
 
-        final Kind fieldMaskFromInstance = Kind.of(FieldMask.getDefaultInstance());
-        final Kind fieldMaskFromTypeName = Kind.of(TypeName.of(FieldMask.class));
-        final Kind fieldMaskFromDesc = Kind.of(FieldMask.getDescriptor());
+        Kind fieldMaskFromInstance = Kind.of(FieldMask.getDefaultInstance());
+        Kind fieldMaskFromTypeName = Kind.of(TypeName.of(FieldMask.class));
+        Kind fieldMaskFromDesc = Kind.of(FieldMask.getDescriptor());
 
         new EqualsTester()
                 .addEqualityGroup(anyFromDesc, anyFromString, anyFromTypeUrl)
@@ -66,45 +66,45 @@ public class KindShould {
 
     @Test
     public void not_accept_forbidden_prefix() {
-        final String invalidKind = "__my.invalid.type";
+        String invalidKind = "__my.invalid.type";
         assertThrows(IllegalArgumentException.class, () -> Kind.of(invalidKind));
     }
 
     @Test
     public void construct_from_string() {
-        final String type = "my.custom.type";
-        final Kind kind = Kind.of(type);
+        String type = "my.custom.type";
+        Kind kind = Kind.of(type);
         assertEquals(type, kind.getValue());
     }
 
     @Test
     public void construct_from_TypeUrl() {
-        final Descriptors.Descriptor descriptor = Any.getDescriptor();
-        final TypeUrl type = TypeUrl.from(descriptor);
-        final Kind kind = Kind.of(type);
+        Descriptors.Descriptor descriptor = Any.getDescriptor();
+        TypeUrl type = TypeUrl.from(descriptor);
+        Kind kind = Kind.of(type);
         assertEquals(descriptor.getFullName(), kind.getValue());
         assertEquals(type.getTypeName(), kind.getValue());
     }
 
     @Test
     public void construct_from_descriptor() {
-        final Descriptors.Descriptor descriptor = Any.getDescriptor();
-        final Kind kind = Kind.of(descriptor);
+        Descriptors.Descriptor descriptor = Any.getDescriptor();
+        Kind kind = Kind.of(descriptor);
         assertEquals(descriptor.getFullName(), kind.getValue());
     }
 
     @Test
     public void construct_from_Message() {
-        final Message message = Any.getDefaultInstance();
-        final Kind kind = Kind.of(message);
+        Message message = Any.getDefaultInstance();
+        Kind kind = Kind.of(message);
         assertEquals(message.getDescriptorForType().getFullName(), kind.getValue());
     }
 
     @Test
     public void construct_from_TypeName() {
-        final Descriptors.Descriptor descriptor = Any.getDescriptor();
-        final TypeName type = TypeName.from(descriptor);
-        final Kind kind = Kind.of(type);
+        Descriptors.Descriptor descriptor = Any.getDescriptor();
+        TypeName type = TypeName.from(descriptor);
+        Kind kind = Kind.of(type);
         assertEquals(descriptor.getFullName(), kind.getValue());
         assertEquals(type.value(), kind.getValue());
     }

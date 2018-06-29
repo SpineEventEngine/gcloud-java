@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.Entity;
@@ -28,10 +27,10 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.validate.Validate;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
-
+import java.util.Optional;
 
 /**
  * GAE Datastore implementation of the {@link ProjectionStorage}.
@@ -65,16 +64,14 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
         propertyStorage.write(lastTimestampId, timestamp);
     }
 
-    @Nullable
     @Override
-    public Timestamp readLastHandledEventTime() {
-        final Optional<Timestamp> readTimestamp = propertyStorage.read(lastTimestampId,
+    public @Nullable Timestamp readLastHandledEventTime() {
+        Optional<Timestamp> readTimestamp = propertyStorage.read(lastTimestampId,
                                                                        Timestamp.getDescriptor());
-
         if ((!readTimestamp.isPresent()) || Validate.isDefault(readTimestamp.get())) {
             return null;
         }
-        final Timestamp result = readTimestamp.get();
+        Timestamp result = readTimestamp.get();
         return result;
     }
 

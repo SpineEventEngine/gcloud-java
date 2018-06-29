@@ -37,8 +37,8 @@ public class StandStorageRecordShould {
 
     @Test
     public void have_protected_constructor_for_extension() {
-        final AggregateStateId someId = AggregateStateId.of(newUuid(), TypeUrl.from(Any.getDescriptor()));
-        final boolean matches = hasProtectedConstructorWithSingleParam(
+        AggregateStateId someId = AggregateStateId.of(newUuid(), TypeUrl.from(Any.getDescriptor()));
+        boolean matches = hasProtectedConstructorWithSingleParam(
                 StandStorageRecord.class, someId);
         assertTrue(matches);
     }
@@ -57,7 +57,7 @@ public class StandStorageRecordShould {
      */
     public static <I> boolean hasProtectedConstructorWithSingleParam(
             Class<?> clazz, I constructorArg) {
-        final Constructor constructor;
+        Constructor constructor;
         try {
             constructor = clazz.getDeclaredConstructor(constructorArg.getClass());
         } catch (NoSuchMethodException ignored) {
@@ -68,7 +68,7 @@ public class StandStorageRecordShould {
             return false;
         }
 
-        final Class[] parameterTypes = constructor.getParameterTypes();
+        Class[] parameterTypes = constructor.getParameterTypes();
         if (parameterTypes.length != 1) {
             return false;
         }

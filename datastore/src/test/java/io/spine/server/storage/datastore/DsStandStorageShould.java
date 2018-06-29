@@ -50,7 +50,7 @@ public class DsStandStorageShould extends StandStorageShould {
 
     @Test
     public void contain_record_storage() {
-        final RecordStorage<?> recordStorage =
+        RecordStorage<?> recordStorage =
                 ((DsStandStorage) newStorage(StandStorageRecord.class)).getRecordStorage();
         assertNotNull(recordStorage);
     }

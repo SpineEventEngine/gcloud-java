@@ -48,8 +48,8 @@ public class DsIdentifiers {
      * @return the Datastore {@code Key} instance
      */
     static Key keyFor(DatastoreWrapper datastore, Kind kind, RecordId recordId) {
-        final KeyFactory keyFactory = datastore.getKeyFactory(kind);
-        final Key key = keyFactory.newKey(recordId.getValue());
+        KeyFactory keyFactory = datastore.getKeyFactory(kind);
+        Key key = keyFactory.newKey(recordId.getValue());
 
         return key;
     }
@@ -67,7 +67,7 @@ public class DsIdentifiers {
      * @return the Datastore record identifier
      */
     public static RecordId ofEntityId(Object id) {
-        final String idAsString = Stringifiers.toString(id);
+        String idAsString = Stringifiers.toString(id);
         return of(idAsString);
     }
 }

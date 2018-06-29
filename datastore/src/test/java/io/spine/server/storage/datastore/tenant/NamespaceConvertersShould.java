@@ -39,7 +39,7 @@ public class NamespaceConvertersShould {
 
     @Test
     public void create_stub_faulty_converter() {
-        final NamespaceToTenantIdConverter converter = NamespaceConverters.stub();
+        NamespaceToTenantIdConverter converter = NamespaceConverters.stub();
         try {
             converter.convert("");
             fail();
@@ -56,14 +56,14 @@ public class NamespaceConvertersShould {
 
     @Test
     public void create_custom_namespace_converter() {
-        final NamespaceToTenantIdConverter converter = NamespaceConverters.forCustomNamespace();
-        final Namespace namespace = Namespace.of("namespace");
-        final TenantId fromInternalConverter = namespace.toTenantId();
-        final TenantId fromExternalConverter = converter.convert(namespace.getValue());
+        NamespaceToTenantIdConverter converter = NamespaceConverters.forCustomNamespace();
+        Namespace namespace = Namespace.of("namespace");
+        TenantId fromInternalConverter = namespace.toTenantId();
+        TenantId fromExternalConverter = converter.convert(namespace.getValue());
 
         assertEquals(fromInternalConverter, fromExternalConverter);
 
-        final String restored = converter.reverse().convert(fromExternalConverter);
+        String restored = converter.reverse().convert(fromExternalConverter);
         assertEquals(namespace.getValue(), restored);
     }
 }

@@ -56,22 +56,22 @@ public class DatastoreTenantsShould {
 
     @Test
     public void create_tenant_index() {
-        final TenantIndex index = DatastoreTenants.index(mockDatastore());
+        TenantIndex index = DatastoreTenants.index(mockDatastore());
         assertNotNull(index);
         assertThat(index, instanceOf(NamespaceIndex.class));
 
-        final String customNamespace = "my-namespace";
-        final TenantId customId = TenantId.newBuilder()
+        String customNamespace = "my-namespace";
+        TenantId customId = TenantId.newBuilder()
                                           .setValue(customNamespace)
                                           .build();
         index.keep(customId);
-        final Set<TenantId> ids = index.getAll();
+        Set<TenantId> ids = index.getAll();
         assertContains(customId, ids);
     }
 
     private static Datastore mockDatastore() {
-        final Datastore datastore = mock(Datastore.class);
-        final DatastoreOptions options = mock(DatastoreOptions.class);
+        Datastore datastore = mock(Datastore.class);
+        DatastoreOptions options = mock(DatastoreOptions.class);
         when(datastore.getOptions()).thenReturn(options);
         when(options.getProjectId()).thenReturn("some-project-id-DatastoreTenantsShould");
         when(datastore.run(any(Query.class))).thenReturn(new MockKeyQueryResults());
@@ -79,7 +79,7 @@ public class DatastoreTenantsShould {
     }
 
     private static Key mockKey(String name) {
-        final Key key = Key.newBuilder("my-proj", "my-kind", name)
+        Key key = Key.newBuilder("my-proj", "my-kind", name)
                            .build();
         return key;
     }

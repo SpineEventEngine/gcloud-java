@@ -79,24 +79,24 @@ public class DsFiltersShould {
 
     @Test
     public void generate_filters_from_composite_query_params() {
-        final String idStringValue = "42";
-        final boolean archivedValue = true;
-        final boolean deletedValue = true;
-        final Multimap<EntityColumn, ColumnFilter> conjunctiveFilters = of(
+        String idStringValue = "42";
+        boolean archivedValue = true;
+        boolean deletedValue = true;
+        Multimap<EntityColumn, ColumnFilter> conjunctiveFilters = of(
                 column(TestEntity.class, ID_STRING_GETTER_NAME), gt(ID_STRING_COLUMN_NAME,
                                                                            idStringValue)
         );
-        final ImmutableMultimap<EntityColumn, ColumnFilter> disjunctiveFilters = of(
+        ImmutableMultimap<EntityColumn, ColumnFilter> disjunctiveFilters = of(
                 column(TestEntity.class, DELETED_GETTER_NAME), eq(deleted.name(), deletedValue),
                 column(TestEntity.class, ARCHIVED_GETTER_NAME), eq(archived.name(), archivedValue)
         );
-        final Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
+        Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(conjunctiveFilters, ALL),
                 createParams(disjunctiveFilters, EITHER)
         );
 
-        final ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
-        final Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
+        ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
+        Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
         assertContainsAll(filters, and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
                                        PropertyFilter.eq(archived.name(), archivedValue)),
                                    and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
@@ -105,45 +105,45 @@ public class DsFiltersShould {
 
     @Test
     public void generate_filters_from_single_parameter() {
-        final String versionValue = "314";
-        final ImmutableMultimap<EntityColumn, ColumnFilter> singleFilter = of(
+        String versionValue = "314";
+        ImmutableMultimap<EntityColumn, ColumnFilter> singleFilter = of(
                 column(TestEntity.class, ID_STRING_GETTER_NAME), le(ID_STRING_COLUMN_NAME,
                                                                     versionValue)
         );
-        final Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
+        Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(singleFilter, ALL)
         );
 
-        final ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
-        final Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
+        ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
+        Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
         assertContainsAll(filters, and(PropertyFilter.le(ID_STRING_COLUMN_NAME, versionValue)));
     }
 
     @Test
     public void generate_filters_for_multiple_disjunctive_groups() {
-        final String greaterBoundDefiner = "271";
-        final String standaloneValue = "100";
-        final String lessBoundDefiner = "42";
-        final boolean archivedValue = true;
-        final boolean deletedValue = true;
-        final EntityColumn idStringColumn = column(TestEntity.class, ID_STRING_GETTER_NAME);
-        final ImmutableMultimap<EntityColumn, ColumnFilter> versionFilters = of(
+        String greaterBoundDefiner = "271";
+        String standaloneValue = "100";
+        String lessBoundDefiner = "42";
+        boolean archivedValue = true;
+        boolean deletedValue = true;
+        EntityColumn idStringColumn = column(TestEntity.class, ID_STRING_GETTER_NAME);
+        ImmutableMultimap<EntityColumn, ColumnFilter> versionFilters = of(
                 idStringColumn, ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
                 idStringColumn, eq(ID_STRING_COLUMN_NAME, standaloneValue),
                 idStringColumn, lt(ID_STRING_COLUMN_NAME, lessBoundDefiner)
         );
-        final ImmutableMultimap<EntityColumn, ColumnFilter> lifecycleFilters = of(
+        ImmutableMultimap<EntityColumn, ColumnFilter> lifecycleFilters = of(
                 column(TestEntity.class, DELETED_GETTER_NAME), eq(deleted.name(),
                                                                   deletedValue),
                 column(TestEntity.class, ARCHIVED_GETTER_NAME), eq(archived.name(),
                                                                    archivedValue)
         );
-        final Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
+        Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(versionFilters, EITHER),
                 createParams(lifecycleFilters, EITHER)
         );
-        final ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
-        final Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
+        ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
+        Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
         assertContainsAll(filters,
                           and(PropertyFilter.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
                               PropertyFilter.eq(archived.name(), archivedValue)),
@@ -161,8 +161,8 @@ public class DsFiltersShould {
 
     @Test
     public void generate_filters_from_empty_params() {
-        final Collection<CompositeQueryParameter> parameters = Collections.emptySet();
-        final Collection<Filter> filters = fromParams(parameters,
+        Collection<CompositeQueryParameter> parameters = Collections.emptySet();
+        Collection<Filter> filters = fromParams(parameters,
                                                       ColumnFilterAdapter.of(defaultInstance()));
         assertNotNull(filters);
         assertSize(0, filters);
@@ -172,22 +172,22 @@ public class DsFiltersShould {
     // See https://github.com/SpineEventEngine/core-java/issues/720.
     @Test
     public void generate_filters_for_null_column_value() {
-        final EntityColumn column = mock(EntityColumn.class);
+        EntityColumn column = mock(EntityColumn.class);
         when(column.getStoredName()).thenReturn(ID_STRING_COLUMN_NAME);
         when(column.getType()).thenReturn(String.class);
         when(column.getPersistedType()).thenReturn(String.class);
         when(column.toPersistedValue(any())).thenReturn(null);
 
-        final ColumnFilter filterWithStubValue = eq(ID_STRING_COLUMN_NAME, "");
-        final ImmutableMultimap<EntityColumn, ColumnFilter> filter = of(
+        ColumnFilter filterWithStubValue = eq(ID_STRING_COLUMN_NAME, "");
+        ImmutableMultimap<EntityColumn, ColumnFilter> filter = of(
                 column, filterWithStubValue
         );
-        final Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
+        Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(filter, ALL)
         );
 
-        final ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
-        final Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
+        ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
+        Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
         assertContainsAll(filters, and(PropertyFilter.eq(ID_STRING_COLUMN_NAME, NullValue.of())));
     }
 
@@ -198,7 +198,7 @@ public class DsFiltersShould {
         } catch (NoSuchMethodException e) {
             fail("Method " + methodName + " not found.");
         }
-        final EntityColumn column = EntityColumn.from(method);
+        EntityColumn column = EntityColumn.from(method);
         return column;
     }
 

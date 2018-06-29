@@ -95,16 +95,16 @@ public class BigDataTester<I> {
      */
     public void testBigDataOperations(RecordStorage<I> storage) {
         checkNotNull(storage);
-        final Map<I, EntityRecordWithColumns> records = new HashMap<>(bulkSize);
+        Map<I, EntityRecordWithColumns> records = new HashMap<>(bulkSize);
         for (int i = 0; i < bulkSize; i++) {
             records.put(entryFactory.newId(), entryFactory.newRecord());
         }
 
-        final long writeStart = System.currentTimeMillis();
+        long writeStart = System.currentTimeMillis();
         storage.write(records);
-        final long writeEnd = System.currentTimeMillis();
+        long writeEnd = System.currentTimeMillis();
 
-        final long writeTime = writeEnd - writeStart;
+        long writeTime = writeEnd - writeStart;
         if (writeTime > writeMillisLimit) {
             fail(format("Writing took too long. Expected %d millis but was %d millis.",
                         writeMillisLimit,
@@ -119,13 +119,13 @@ public class BigDataTester<I> {
             fail(Throwables.getStackTraceAsString(e));
         }
 
-        final long readStart = System.currentTimeMillis();
+        long readStart = System.currentTimeMillis();
 
         // Do not test data equality here, only the sizes and time
-        final Iterator<EntityRecord> readRecords = storage.readAll();
+        Iterator<EntityRecord> readRecords = storage.readAll();
 
-        final long readEnd = System.currentTimeMillis();
-        final long readTime = readEnd - readStart;
+        long readEnd = System.currentTimeMillis();
+        long readTime = readEnd - readStart;
 
         if (readTime > readMillisLimit) {
             fail(format("Reading took too long. Expected %d millis but was %d millis.",
@@ -228,7 +228,7 @@ public class BigDataTester<I> {
             }
             checkArgument(writeMillisLimit != 0, "Write time limit should be set.");
             checkArgument(readMillisLimit != 0, "Read time limit should be set.");
-            final BigDataTester<I> tester = new BigDataTester<>(this);
+            BigDataTester<I> tester = new BigDataTester<>(this);
             return tester;
         }
     }

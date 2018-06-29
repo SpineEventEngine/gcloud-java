@@ -82,7 +82,7 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
     @Override
     protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
         @SuppressWarnings("unchecked") // Logically checked; OK for test purposes.
-        final Class<? extends Aggregate<ProjectId, ?, ?>> aggCls =
+        Class<? extends Aggregate<ProjectId, ?, ?>> aggCls =
                 (Class<? extends Aggregate<ProjectId, ?, ?>>) cls;
         return datastoreFactory.createAggregateStorage(aggCls);
     }
@@ -95,21 +95,21 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
 
     @Test
     public void provide_access_to_DatastoreWrapper_for_extensibility() {
-        final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
-        final DatastoreWrapper datastore = storage.getDatastore();
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DatastoreWrapper datastore = storage.getDatastore();
         assertNotNull(datastore);
     }
 
     @Test
     public void provide_access_to_PropertyStorage_for_extensibility() {
-        final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
-        final DsPropertyStorage propertyStorage = storage.getPropertyStorage();
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DsPropertyStorage propertyStorage = storage.getPropertyStorage();
         assertNotNull(propertyStorage);
     }
 
     @Test
     public void fail_to_write_invalid_record() {
-        final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         assertThrows(IllegalArgumentException.class,
                      () -> storage.writeRecord(Sample.messageOfType(ProjectId.class),
                                                AggregateEventRecord.getDefaultInstance()));
@@ -117,43 +117,43 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
 
     @Test
     public void set_limit_for_history_backward_query() {
-        final DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
-        final int batchSize = 10;
-        final AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(newId(),
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        int batchSize = 10;
+        AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(newId(),
                                                                                    batchSize);
-        final EntityQuery historyBackwardQuery = storage.historyBackwardQuery(request);
+        EntityQuery historyBackwardQuery = storage.historyBackwardQuery(request);
 
-        final int queryLimit = historyBackwardQuery.getLimit();
+        int queryLimit = historyBackwardQuery.getLimit();
         assertEquals(batchSize, queryLimit);
     }
 
     @Test
     public void still_load_aggregates_properly_after_snapshot_trigger_decrease_at_runtime() {
-        final BoundedContext boundedContext =
+        BoundedContext boundedContext =
                 BoundedContext.newBuilder()
                               .setName(DsAggregateStorageShould.class.getName())
                               .setStorageFactorySupplier(Suppliers.ofInstance(datastoreFactory))
                               .build();
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
 
-        final ProjectId id = newId();
-        final int initialSnapshotTrigger = 10;
+        ProjectId id = newId();
+        int initialSnapshotTrigger = 10;
 
         // To restore an aggregate using a snapshot and events.
-        final int tasksCount = initialSnapshotTrigger * 2 - 1;
+        int tasksCount = initialSnapshotTrigger * 2 - 1;
 
         repository.setSnapshotTrigger(initialSnapshotTrigger);
-        final TestActorRequestFactory factory = newInstance(DsAggregateStorageShould.class);
+        TestActorRequestFactory factory = newInstance(DsAggregateStorageShould.class);
         for (int i = 0; i < tasksCount; i++) {
-            final AggAddTask command = addTask(id);
-            final CommandEnvelope envelope = CommandEnvelope.of(factory.createCommand(command));
+            AggAddTask command = addTask(id);
+            CommandEnvelope envelope = CommandEnvelope.of(factory.createCommand(command));
             repository.dispatch(envelope);
         }
 
-        final int minimalSnapshotTrigger = 1;
+        int minimalSnapshotTrigger = 1;
         repository.setSnapshotTrigger(minimalSnapshotTrigger);
-        final ProjectAggregate aggregate = repository.find(id)
+        ProjectAggregate aggregate = repository.find(id)
                                                      .get();
         assertEquals(tasksCount, aggregate.getState()
                                           .getTaskCount());

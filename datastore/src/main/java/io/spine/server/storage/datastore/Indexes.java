@@ -24,26 +24,30 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
-import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Streams;
+import io.spine.server.storage.Storage;
 import io.spine.string.Stringifiers;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A utility for generating the
- * {@linkplain io.spine.server.storage.Storage#index() storage ID indexes}.
+ * {@linkplain Storage#index() storage ID indexes}.
  *
  * @author Dmytro Dashenkov.
- * @see io.spine.server.storage.Storage#index()
+ * @see Storage#index()
  */
 public final class Indexes {
 
+    /**
+     * Prevents the utility class instantiation.
+     */
     private Indexes() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -61,24 +65,22 @@ public final class Indexes {
         checkNotNull(kind);
         checkNotNull(idType);
 
-        final EntityQuery.Builder query = Query.newEntityQueryBuilder()
+        EntityQuery.Builder query = Query.newEntityQueryBuilder()
                                                .setKind(kind.getValue());
-        final Iterator<Entity> allEntities = datastore.read(query.build());
-        final Iterator<I> idIterator = Iterators.transform(allEntities,
-                                                           idExtractor(idType));
+        Iterator<Entity> allEntities = datastore.read(query.build());
+        Iterator<I> idIterator = Streams.stream(allEntities)
+                                        .map(idExtractor(idType))
+                                        .iterator();
         return idIterator;
     }
 
-    private static <I> Function<Entity, I> idExtractor(final Class<I> idType) {
-        return new Function<Entity, I>() {
-            @Override
-            public I apply(@Nullable Entity input) {
-                checkNotNull(input);
-                final Key key = input.getKey();
-                final String stringId = key.getName();
-                final I id = Stringifiers.fromString(stringId, idType);
-                return id;
-            }
+    private static <I> Function<Entity, @Nullable I> idExtractor(Class<I> idType) {
+        return input -> {
+            checkNotNull(input);
+            Key key = input.getKey();
+            String stringId = key.getName();
+            I id = Stringifiers.fromString(stringId, idType);
+            return id;
         };
     }
 }

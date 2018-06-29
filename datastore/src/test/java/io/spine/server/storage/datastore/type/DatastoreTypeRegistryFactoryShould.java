@@ -47,46 +47,46 @@ public class DatastoreTypeRegistryFactoryShould {
 
     @Test
     public void have_default_column_types() {
-        final ColumnTypeRegistry<? extends DatastoreColumnType> registry =
+        ColumnTypeRegistry<? extends DatastoreColumnType> registry =
                 DatastoreTypeRegistryFactory.defaultInstance();
-        final DatastoreColumnType<?, ?> stringType = registry.get(mockColumn(String.class));
+        DatastoreColumnType<?, ?> stringType = registry.get(mockColumn(String.class));
         assertNotNull(stringType);
-        final DatastoreColumnType<?, ?> intType = registry.get(mockColumn(int.class));
+        DatastoreColumnType<?, ?> intType = registry.get(mockColumn(int.class));
         assertNotNull(intType);
-        final DatastoreColumnType<?, ?> booleanType = registry.get(mockColumn(boolean.class));
+        DatastoreColumnType<?, ?> booleanType = registry.get(mockColumn(boolean.class));
         assertNotNull(booleanType);
-        final DatastoreColumnType<?, ?> messageType = registry.get(mockColumn(String.class));
+        DatastoreColumnType<?, ?> messageType = registry.get(mockColumn(String.class));
         assertNotNull(messageType);
-        final DatastoreColumnType<?, ?> timestampType = registry.get(mockColumn(Timestamp.class));
+        DatastoreColumnType<?, ?> timestampType = registry.get(mockColumn(Timestamp.class));
         assertNotNull(timestampType);
-        final DatastoreColumnType<?, ?> versionType = registry.get(mockColumn(Version.class));
+        DatastoreColumnType<?, ?> versionType = registry.get(mockColumn(Version.class));
         assertNotNull(versionType);
     }
 
     @Test
     public void allow_to_customize_types() {
-        final ColumnTypeRegistry<? extends DatastoreColumnType> registry =
+        ColumnTypeRegistry<? extends DatastoreColumnType> registry =
                 DatastoreTypeRegistryFactory.predefinedValuesAnd()
                                             .put(byte.class, new ByteColumnType())
                                             .build();
-        final DatastoreColumnType byteColumnType = registry.get(mockColumn(Byte.class));
+        DatastoreColumnType byteColumnType = registry.get(mockColumn(Byte.class));
         assertNotNull(byteColumnType);
         assertThat(byteColumnType, instanceOf(ByteColumnType.class));
     }
 
     @Test
     public void allow_to_override_types() {
-        final ColumnTypeRegistry<? extends DatastoreColumnType> registry =
+        ColumnTypeRegistry<? extends DatastoreColumnType> registry =
                 DatastoreTypeRegistryFactory.predefinedValuesAnd()
                                             .put(String.class, new CustomStringType())
                                             .build();
-        final DatastoreColumnType byteColumnType = registry.get(mockColumn(String.class));
+        DatastoreColumnType byteColumnType = registry.get(mockColumn(String.class));
         assertNotNull(byteColumnType);
         assertThat(byteColumnType, instanceOf(CustomStringType.class));
     }
 
     private static EntityColumn mockColumn(Class type) {
-        final EntityColumn column = mock(EntityColumn.class);
+        EntityColumn column = mock(EntityColumn.class);
         when(column.getType()).thenReturn(type);
         when(column.getPersistedType()).thenReturn(type);
         return column;

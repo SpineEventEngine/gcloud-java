@@ -94,7 +94,7 @@ class NamespaceIndex implements TenantIndex {
         synchronized (lock) {
             fetchNamespaces();
 
-            final Set<TenantId> result = new HashSet<>(cache.size());
+            Set<TenantId> result = new HashSet<>(cache.size());
             for (Namespace namespace : cache) {
                 if (namespace != null) {
                     result.add(namespace.toTenantId());
@@ -131,13 +131,13 @@ class NamespaceIndex implements TenantIndex {
         }
 
         synchronized (lock) {
-            final boolean cachedNamespace = cache.contains(namespace);
+            boolean cachedNamespace = cache.contains(namespace);
             if (cachedNamespace) {
                 return true;
             }
 
             fetchNamespaces();
-            final boolean result = cache.contains(namespace);
+            boolean result = cache.contains(namespace);
             return result;
         }
     }
@@ -146,9 +146,9 @@ class NamespaceIndex implements TenantIndex {
      * Fetches the namespaces from the Datastore into the in-mem cache.
      */
     private void fetchNamespaces() {
-        final Iterator<Key> existingNamespaces = namespaceQuery.run();
-        final Set<Namespace> newNamespaces = new HashSet<>();
-        final Iterator<Namespace> extractedNamespaces =
+        Iterator<Key> existingNamespaces = namespaceQuery.run();
+        Set<Namespace> newNamespaces = new HashSet<>();
+        Iterator<Namespace> extractedNamespaces =
                 Iterators.transform(existingNamespaces, new NamespaceUnpacker(multitenant));
         Iterators.addAll(newNamespaces, extractedNamespaces);
 
@@ -188,10 +188,10 @@ class NamespaceIndex implements TenantIndex {
 
         @Override
         public Iterator<Key> run() {
-            final Query<Key> query = Query.newKeyQueryBuilder()
+            Query<Key> query = Query.newKeyQueryBuilder()
                                           .setKind(NAMESPACE_KIND.getValue())
                                           .build();
-            final Iterator<Key> result = datastore.run(query);
+            Iterator<Key> result = datastore.run(query);
             return result;
         }
     }

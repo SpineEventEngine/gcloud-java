@@ -58,20 +58,20 @@ public class ContextsShould {
 
     @Test
     public void produce_BoundedContext_Builder_for_given_storage_factory() {
-        final DatastoreStorageFactory factory = givenFactory();
-        final BoundedContext.Builder builder = Contexts.onTopOf(factory);
-        final Optional<Supplier<StorageFactory>> supplierOptional =
+        DatastoreStorageFactory factory = givenFactory();
+        BoundedContext.Builder builder = Contexts.onTopOf(factory);
+        Optional<Supplier<StorageFactory>> supplierOptional =
                 builder.getStorageFactorySupplier();
         assertTrue(supplierOptional.isPresent());
         assertSame(factory, supplierOptional.get().get());
         assertEquals(builder.isMultitenant(), factory.isMultitenant());
-        final Optional<? extends TenantIndex> tenantIndexOptional = builder.getTenantIndex();
+        Optional<? extends TenantIndex> tenantIndexOptional = builder.getTenantIndex();
         assertTrue(tenantIndexOptional.isPresent());
         assertThat(tenantIndexOptional.get(), instanceOf(TestNamespaceIndex.getType()));
     }
 
     private static DatastoreStorageFactory givenFactory() {
-        final DatastoreStorageFactory result =
+        DatastoreStorageFactory result =
                 DatastoreStorageFactory.newBuilder()
                                        .setDatastore(givenDatastore())
                                        .setMultitenant(true)

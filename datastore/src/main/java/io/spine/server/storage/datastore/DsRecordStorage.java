@@ -27,11 +27,8 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -49,20 +46,22 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.Storage;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.alwaysTrue;
-import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Iterators.concat;
 import static com.google.common.collect.Iterators.filter;
 import static com.google.common.collect.Iterators.transform;
@@ -77,6 +76,7 @@ import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.isDefault;
 import static java.util.Collections.emptyIterator;
+import static java.util.stream.Collectors.toList;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -96,19 +96,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
 
-    private static final Function<Entity, EntityRecord> recordFromEntity
-            = new Function<Entity, EntityRecord>() {
-        @Nullable
-        @Override
-        public EntityRecord apply(@Nullable Entity input) {
-            if (input == null) {
-                return null;
-            }
-
-            final EntityRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
-            return record;
-        }
-    };
+    private static final Function<@Nullable Entity, @Nullable EntityRecord> recordFromEntity
+            = input -> {
+                if (input == null) {
+                    return null;
+                }
+                EntityRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
+                return record;
+            };
 
     /**
      * Creates a new storage instance.
@@ -140,29 +135,28 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public boolean delete(I id) {
-        final Key key = keyFor(datastore,
+        Key key = keyFor(datastore,
                                getKind(),
                                ofEntityId(id));
         datastore.delete(key);
 
         // Check presence
-        final Entity record = datastore.read(key);
+        Entity record = datastore.read(key);
         return record == null;
     }
 
-    @Nullable
     @Override
-    protected Optional<EntityRecord> readRecord(I id) {
-        final Key key = keyFor(datastore,
+    protected @Nullable Optional<EntityRecord> readRecord(I id) {
+        Key key = keyFor(datastore,
                                getKind(),
                                ofEntityId(id));
-        final Entity response = datastore.read(key);
+        Entity response = datastore.read(key);
 
         if (response == null) {
             return Optional.absent();
         }
 
-        final EntityRecord result = Entities.entityToMessage(response, RECORD_TYPE_URL);
+        EntityRecord result = Entities.entityToMessage(response, RECORD_TYPE_URL);
         return Optional.of(result);
     }
 
@@ -173,25 +167,21 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids,
-                                                         final FieldMask fieldMask) {
-        final Function<Entity, EntityRecord> transformer = new Function<Entity, EntityRecord>() {
-            @Nullable
-            @Override
-            public EntityRecord apply(@Nullable Entity input) {
-                if (input == null) {
-                    return null;
-                }
-                final EntityRecord readRecord = Entities.entityToMessage(input, RECORD_TYPE_URL);
-                final Message state = unpack(readRecord.getState());
-                final TypeUrl typeUrl = TypeUrl.from(state.getDescriptorForType());
-                final Message maskedState = applyMask(fieldMask, state, typeUrl);
-                final Any wrappedState = AnyPacker.pack(maskedState);
-
-                final EntityRecord record = EntityRecord.newBuilder(readRecord)
-                                                        .setState(wrappedState)
-                                                        .build();
-                return record;
+                                                         FieldMask fieldMask) {
+        Function<Entity, @Nullable EntityRecord> transformer = input -> {
+            if (input == null) {
+                return null;
             }
+            EntityRecord readRecord = Entities.entityToMessage(input, RECORD_TYPE_URL);
+            Message state = unpack(readRecord.getState());
+            TypeUrl typeUrl = TypeUrl.from(state.getDescriptorForType());
+            Message maskedState = applyMask(fieldMask, state, typeUrl);
+            Any wrappedState = AnyPacker.pack(maskedState);
+
+            EntityRecord record = EntityRecord.newBuilder(readRecord)
+                                                    .setState(wrappedState)
+                                                    .build();
+            return record;
         };
 
         return lookup(ids, transformer);
@@ -199,17 +189,17 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords() {
-        final Iterator<EntityRecord> result = readAllRecords(FieldMask.getDefaultInstance());
+        Iterator<EntityRecord> result = readAllRecords(FieldMask.getDefaultInstance());
         return result;
     }
 
     @Override
-    protected Iterator<EntityRecord> readAllRecords(final FieldMask fieldMask) {
-        final StructuredQuery<Entity> allQuery = buildAllQuery(typeUrl);
-        final Iterator<EntityRecord> result = queryAll(typeUrl,
+    protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
+        StructuredQuery<Entity> allQuery = buildAllQuery(typeUrl);
+        Iterator<EntityRecord> result = queryAll(typeUrl,
                                                        allQuery,
                                                        fieldMask,
-                                                       activeEntity());
+                                                       activeEntity()::apply);
         return result;
     }
 
@@ -232,9 +222,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @return an iterator over the resulting entity records
      */
     private Iterator<EntityRecord> queryBy(EntityQuery<I> entityQuery, FieldMask fieldMask) {
-        final Collection<I> idFilter = entityQuery.getIds();
-        final QueryParameters params = entityQuery.getParameters();
-        final Iterator<EntityRecord> result;
+        Collection<I> idFilter = entityQuery.getIds();
+        QueryParameters params = entityQuery.getParameters();
+        Iterator<EntityRecord> result;
         if (!idFilter.isEmpty()) {
             result = queryByIdsAndColumns(idFilter, params, fieldMask);
         } else {
@@ -257,13 +247,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private Iterator<EntityRecord> queryByIdsAndColumns(Collection<I> acceptableIds,
                                                         QueryParameters params,
                                                         FieldMask fieldMask) {
-        final Predicate<Entity> inMemPredicate;
+        Predicate<Entity> inMemPredicate;
         if (params.iterator().hasNext()) { // IDs and columns query
             inMemPredicate = buildMemoryPredicate(params);
         } else { // Only IDs query
-            inMemPredicate = alwaysTrue();
+            inMemPredicate = entity -> true;
         }
-        final Iterator<EntityRecord> records = lookup(acceptableIds, fieldMask, inMemPredicate);
+        Iterator<EntityRecord> records = lookup(acceptableIds, fieldMask,
+                                                      inMemPredicate);
         return records;
     }
 
@@ -279,12 +270,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      */
     private Iterator<EntityRecord> queryByColumnsOnly(QueryParameters params,
                                                       FieldMask fieldMask) {
-        final StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
-                                                                    .setKind(getKind().getValue());
-        final Collection<Filter> filters = buildColumnFilters(params);
-        final FilterToQuery function = new FilterToQuery(datastoreQuery);
-        final Collection<StructuredQuery<Entity>> queries = transform(filters, function);
-        final Iterator<EntityRecord> result = queryAndMerge(queries, fieldMask);
+        StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
+                                                              .setKind(getKind().getValue());
+        Collection<Filter> filters = buildColumnFilters(params);
+        Collection<StructuredQuery<Entity>> queries = filters.stream()
+                                                             .map(new FilterToQuery(datastoreQuery))
+                                                             .collect(toList());
+        Iterator<EntityRecord> result = queryAndMerge(queries, fieldMask);
         return result;
     }
 
@@ -306,10 +298,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                                  FieldMask fieldMask) {
         Iterator<EntityRecord> result = emptyIterator();
         for (StructuredQuery<Entity> query : queries) {
-            final Iterator<EntityRecord> records = queryAll(typeUrl,
+            Iterator<EntityRecord> records = queryAll(typeUrl,
                                                             query,
                                                             fieldMask,
-                                                            Predicates.<Entity>alwaysTrue());
+                                                            entity -> true);
             result = concat(result, records);
         }
         return result;
@@ -321,8 +313,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private Collection<Filter> buildColumnFilters(
             Iterable<CompositeQueryParameter> compositeParameters) {
-        final Collection<CompositeQueryParameter> params = newArrayList(compositeParameters);
-        final Collection<Filter> predicate = DsFilters.fromParams(params, columnFilterAdapter);
+        Collection<CompositeQueryParameter> params = newArrayList(compositeParameters);
+        Collection<Filter> predicate = DsFilters.fromParams(params, columnFilterAdapter);
         return predicate;
     }
 
@@ -355,9 +347,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         if (ids.isEmpty()) {
             return readAllRecords(fieldMask);
         }
-        final Collection<Key> keys = toKeys(ids);
-        final Iterator<Entity> records = datastore.read(keys);
-        final Iterator<EntityRecord> result = toRecords(records,
+        Collection<Key> keys = toKeys(ids);
+        Iterator<Entity> records = datastore.read(keys);
+        Iterator<EntityRecord> result = toRecords(records,
                                                         predicate,
                                                         typeUrl,
                                                         fieldMask);
@@ -365,11 +357,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private <T> Iterator<T> lookup(Iterable<I> ids,
-                                   Function<Entity, T> transformer) {
-        final Collection<Key> keys = toKeys(ids);
-        final Iterator<Entity> results = datastore.read(keys);
-        final Iterator<Entity> filteredResults = filter(results, activeEntity());
-        final Iterator<T> records = transform(filteredResults, transformer);
+                                   Function<Entity, @Nullable T> transformer) {
+        Collection<Key> keys = toKeys(ids);
+        Iterator<Entity> results = datastore.read(keys);
+        Iterator<Entity> filteredResults = filter(results, activeEntity());
+        Iterator<T> records = transform(filteredResults, transformer::apply);
         return records;
     }
 
@@ -377,45 +369,42 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                             StructuredQuery<Entity> query,
                                             FieldMask fieldMask,
                                             Predicate<Entity> inMemFilter) {
-        final Iterator<Entity> results = datastore.read(query);
+        Iterator<Entity> results = datastore.read(query);
         return toRecords(results, inMemFilter, typeUrl, fieldMask);
     }
 
     protected final Iterator<EntityRecord> toRecords(Iterator<Entity> queryResults,
-                                             Predicate<Entity> filter,
-                                             final TypeUrl typeUrl,
-                                             final FieldMask fieldMask) {
-        final Iterator<Entity> filtered = filter(queryResults, filter);
-        final Function<Entity, EntityRecord> transformer = new Function<Entity, EntityRecord>() {
-            @Override
-            public EntityRecord apply(@Nullable Entity input) {
-                checkNotNull(input);
-                EntityRecord record = getRecordFromEntity(input);
-                if (!isDefault(fieldMask)) {
-                    Message state = unpack(record.getState());
-                    state = applyMask(fieldMask, state, typeUrl);
-                    record = EntityRecord.newBuilder(record)
-                                         .setState(AnyPacker.pack(state))
-                                         .build();
-                }
-                return record;
+                                                     Predicate<Entity> filter,
+                                                     TypeUrl typeUrl,
+                                                     FieldMask fieldMask) {
+        Iterator<Entity> filtered = filter(queryResults, filter::test);
+        Function<Entity, EntityRecord> transformer = input -> {
+            checkNotNull(input);
+            EntityRecord record = getRecordFromEntity(input);
+            if (!isDefault(fieldMask)) {
+                Message state = unpack(record.getState());
+                state = applyMask(fieldMask, state, typeUrl);
+                record = EntityRecord.newBuilder(record)
+                                     .setState(AnyPacker.pack(state))
+                                     .build();
             }
+            return record;
         };
-        final Iterator<EntityRecord> result = transform(filtered, transformer);
+        Iterator<EntityRecord> result = transform(filtered, transformer::apply);
         return result;
     }
 
     protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
-        final EntityRecord entityRecord = record.getRecord();
-        final Key key = keyFor(datastore,
+        EntityRecord entityRecord = record.getRecord();
+        Key key = keyFor(datastore,
                                kindFrom(entityRecord),
                                ofEntityId(id));
-        final Entity incompleteEntity = Entities.messageToEntity(entityRecord, key);
-        final Entity.Builder entity = Entity.newBuilder(incompleteEntity);
+        Entity incompleteEntity = Entities.messageToEntity(entityRecord, key);
+        Entity.Builder entity = Entity.newBuilder(incompleteEntity);
 
         populateFromStorageFields(entity, record);
 
-        final Entity completeEntity = entity.build();
+        Entity completeEntity = entity.build();
         return completeEntity;
     }
 
@@ -425,7 +414,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             ColumnRecords.feedColumnsTo(entity,
                                         record,
                                         columnTypeRegistry,
-                                        Functions.<String>identity());
+                                        Functions.identity());
         }
     }
 
@@ -434,7 +423,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         checkNotNull(id, "ID is null.");
         checkNotNull(entityStorageRecord, "Message is null.");
 
-        final Entity entity = entityRecordToEntity(id, entityStorageRecord);
+        Entity entity = entityRecordToEntity(id, entityStorageRecord);
         datastore.createOrUpdate(entity);
     }
 
@@ -442,9 +431,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
         checkNotNull(records);
 
-        final Collection<Entity> entitiesToWrite = new ArrayList<>(records.size());
+        Collection<Entity> entitiesToWrite = new ArrayList<>(records.size());
         for (Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
-            final Entity entity = entityRecordToEntity(record.getKey(), record.getValue());
+            Entity entity = entityRecordToEntity(record.getKey(), record.getValue());
             entitiesToWrite.add(entity);
         }
         datastore.createOrUpdate(entitiesToWrite);
@@ -458,24 +447,23 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                      idClass);
     }
 
-    @Nullable
-    protected Kind getDefaultKind() {
+    protected @Nullable Kind getDefaultKind() {
         return null;
     }
 
     private Kind kindFrom(EntityRecord record) {
-        final Kind defaultKind = getDefaultKind();
+        Kind defaultKind = getDefaultKind();
         if (defaultKind != null) {
             return defaultKind;
         }
-        final Any packedState = record.getState();
-        final Message state = unpack(packedState);
-        final Kind kind = Kind.of(state);
+        Any packedState = record.getState();
+        Message state = unpack(packedState);
+        Kind kind = Kind.of(state);
         return kind;
     }
 
     final Kind kindFrom(TypeUrl typeUrl) {
-        final Kind defaultKind = getDefaultKind();
+        Kind defaultKind = getDefaultKind();
         if (defaultKind != null) {
             return defaultKind;
         }
@@ -487,14 +475,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     I unpackKey(Entity entity) {
-        final String stringId = entity.getKey()
+        String stringId = entity.getKey()
                                       .getName();
-        final I id = Stringifiers.fromString(stringId, idClass);
+        I id = Stringifiers.fromString(stringId, idClass);
         return id;
     }
 
     EntityRecord getRecordFromEntity(Entity entity) {
-        final EntityRecord record = Entities.entityToMessage(entity, RECORD_TYPE_URL);
+        EntityRecord record = Entities.entityToMessage(entity, RECORD_TYPE_URL);
         return record;
     }
 
@@ -505,17 +493,17 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @return new {@link StructuredQuery}
      */
     protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
-        final String entityKind = kindFrom(typeUrl).getValue();
-        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+        String entityKind = kindFrom(typeUrl).getValue();
+        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setKind(entityKind)
                                                    .build();
         return query;
     }
 
     private Collection<Key> toKeys(Iterable<I> ids) {
-        final Collection<Key> keys = newLinkedList();
+        Collection<Key> keys = newLinkedList();
         for (I id : ids) {
-            final Key key = keyFor(datastore,
+            Key key = keyFor(datastore,
                                    kindFrom(typeUrl),
                                    ofEntityId(id));
             keys.add(key);
@@ -536,13 +524,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         @Override
-        public boolean apply(@Nullable Entity entity) {
+        public boolean test(@Nullable Entity entity) {
             if (entity == null) {
                 return false;
             }
             for (CompositeQueryParameter filter : queryParams) {
-                final boolean match;
-                final CompositeColumnFilter.CompositeOperator operator = filter.getOperator();
+                boolean match;
+                CompositeColumnFilter.CompositeOperator operator = filter.getOperator();
                 switch (operator) {
                     case ALL:
                         match = checkAll(filter.getFilters(), entity);
@@ -565,8 +553,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         private boolean checkAll(Multimap<EntityColumn, ColumnFilter> filters, Entity entity) {
             for (Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
-                final EntityColumn column = filter.getKey();
-                final boolean matches = checkSingleParam(filter.getValue(), entity, column);
+                EntityColumn column = filter.getKey();
+                boolean matches = checkSingleParam(filter.getValue(), entity, column);
                 if (!matches) {
                     return false;
                 }
@@ -576,8 +564,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         private boolean checkEither(Multimap<EntityColumn, ColumnFilter> filters, Entity entity) {
             for (Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
-                final EntityColumn column = filter.getKey();
-                final boolean matches = checkSingleParam(filter.getValue(), entity, column);
+                EntityColumn column = filter.getKey();
+                boolean matches = checkSingleParam(filter.getValue(), entity, column);
                 if (matches) {
                     return true;
                 }
@@ -586,14 +574,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         private boolean checkSingleParam(ColumnFilter filter, Entity entity, EntityColumn column) {
-            final String columnName = column.getName();
+            String columnName = column.getName();
             if (!entity.contains(columnName)) {
                 return false;
             }
-            final Object actual = entity.getValue(columnName).get();
-            final Object expected = adapter.toValue(column, filter).get();
+            Object actual = entity.getValue(columnName).get();
+            Object expected = adapter.toValue(column, filter).get();
 
-            final boolean result = eval(actual, filter.getOperator(), expected);
+            boolean result = eval(actual, filter.getOperator(), expected);
             return result;
         }
     }
@@ -613,7 +601,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         @Override
         public StructuredQuery<Entity> apply(@Nullable Filter filter) {
             checkNotNull(filter);
-            final StructuredQuery<Entity> query = builder.setFilter(filter)
+            StructuredQuery<Entity> query = builder.setFilter(filter)
                                                          .build();
             return query;
         }
@@ -647,7 +635,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
          */
         public DsRecordStorage<I> build() {
             checkRequiredFields();
-            final DsRecordStorage<I> storage = new DsRecordStorage<>(this);
+            DsRecordStorage<I> storage = new DsRecordStorage<>(this);
             return storage;
         }
 
@@ -684,7 +672,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
          */
         public B setStateType(TypeUrl stateTypeUrl) {
             checkNotNull(stateTypeUrl);
-            final Descriptor descriptor = (Descriptor) stateTypeUrl.getDescriptor();
+            Descriptor descriptor = (Descriptor) stateTypeUrl.getDescriptor();
             this.descriptor = checkNotNull(descriptor);
             return self();
         }
@@ -699,7 +687,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         /**
          * @param multitenant {@code true} if the storage should be
-         *                    {@link io.spine.server.storage.Storage#isMultitenant multitenant}
+         *                    {@link Storage#isMultitenant multitenant}
          *                    or not
          */
         public B setMultitenant(boolean multitenant) {
@@ -709,7 +697,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         /**
          * @param columnTypeRegistry the type registry of the
-         *                           {@linkplain io.spine.server.entity.storage.EntityColumn
+         *                           {@linkplain EntityColumn
          *                           entity columns}
          */
         public B setColumnTypeRegistry(
@@ -750,14 +738,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         /**
          * @return {@code true} if the storage should be
-         * {@link io.spine.server.storage.Storage#isMultitenant multitenant} or not
+         * {@link Storage#isMultitenant multitenant} or not
          */
         public boolean isMultitenant() {
             return multitenant;
         }
 
         /**
-         * @return the type registry of the {@linkplain io.spine.server.entity.storage.EntityColumn
+         * @return the type registry of the {@linkplain EntityColumn
          * entity columns}
          */
         public ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> getColumnTypeRegistry() {

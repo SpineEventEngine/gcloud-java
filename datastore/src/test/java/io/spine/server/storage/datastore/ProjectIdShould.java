@@ -45,11 +45,11 @@ public class ProjectIdShould {
 
     @Test
     public void support_equality() {
-        final ProjectId a1 = ProjectId.of("a");
-        final ProjectId a2 = ProjectId.of(mockDatastore("a"));
+        ProjectId a1 = ProjectId.of("a");
+        ProjectId a2 = ProjectId.of(mockDatastore("a"));
 
-        final ProjectId b1 = ProjectId.of("b");
-        final ProjectId b2 = ProjectId.of(mockDatastore("b"));
+        ProjectId b1 = ProjectId.of("b");
+        ProjectId b2 = ProjectId.of(mockDatastore("b"));
 
         new EqualsTester()
                 .addEqualityGroup(a1, a2)
@@ -59,9 +59,9 @@ public class ProjectIdShould {
 
     @Test
     public void support_toString() {
-        final String value = "my-fancy-project-id";
-        final ProjectId projectId = ProjectId.of(value);
-        final String stringRepr = projectId.toString();
+        String value = "my-fancy-project-id";
+        ProjectId projectId = ProjectId.of(value);
+        String stringRepr = projectId.toString();
         assertThat(stringRepr, containsString(value));
     }
 
@@ -70,8 +70,8 @@ public class ProjectIdShould {
     }
 
     private static Datastore mockDatastore(String value) {
-        final Datastore datastore = mock(Datastore.class);
-        final DatastoreOptions options = mock(DatastoreOptions.class);
+        Datastore datastore = mock(Datastore.class);
+        DatastoreOptions options = mock(DatastoreOptions.class);
         when(datastore.getOptions()).thenReturn(options);
         when(options.getProjectId()).thenReturn(value);
         return datastore;

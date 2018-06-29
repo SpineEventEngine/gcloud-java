@@ -52,13 +52,13 @@ public class DsStandStorage extends StandStorage {
 
     @Override
     public Iterator<EntityRecord> readAllByType(TypeUrl type) {
-        final Iterator<EntityRecord> records = recordStorage().readAllByType(type);
+        Iterator<EntityRecord> records = recordStorage().readAllByType(type);
         return records;
     }
 
     @Override
     public Iterator<EntityRecord> readAllByType(TypeUrl type, FieldMask fieldMask) {
-        final Iterator<EntityRecord> records = recordStorage().readAllByType(type, fieldMask);
+        Iterator<EntityRecord> records = recordStorage().readAllByType(type, fieldMask);
         return records;
     }
 
@@ -74,7 +74,7 @@ public class DsStandStorage extends StandStorage {
 
     @Override
     protected Optional<EntityRecord> readRecord(AggregateStateId id) {
-        final RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(id);
+        RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(id);
         return recordStorage().read(request);
     }
 

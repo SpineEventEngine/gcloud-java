@@ -66,8 +66,8 @@ public class DsColumnTypesShould {
 
     @Test
     public void provide_simple_string_type() {
-        final SimpleDatastoreColumnType<String> type = DsColumnTypes.stringType();
-        final String value = "some string";
+        SimpleDatastoreColumnType<String> type = DsColumnTypes.stringType();
+        String value = "some string";
 
         setSimpleType(type, value);
 
@@ -76,8 +76,8 @@ public class DsColumnTypesShould {
 
     @Test
     public void provide_simple_int_type() {
-        final SimpleDatastoreColumnType<Integer> type = DsColumnTypes.integerType();
-        final int value = 42;
+        SimpleDatastoreColumnType<Integer> type = DsColumnTypes.integerType();
+        int value = 42;
 
         setSimpleType(type, value);
 
@@ -86,8 +86,8 @@ public class DsColumnTypesShould {
 
     @Test
     public void provide_simple_long_type() {
-        final SimpleDatastoreColumnType<Long> type = DsColumnTypes.longType();
-        final long value = 42L;
+        SimpleDatastoreColumnType<Long> type = DsColumnTypes.longType();
+        long value = 42L;
 
         setSimpleType(type, value);
 
@@ -96,8 +96,8 @@ public class DsColumnTypesShould {
 
     @Test
     public void provide_simple_bool_type() {
-        final SimpleDatastoreColumnType<Boolean> type = DsColumnTypes.booleanType();
-        final boolean value = true;
+        SimpleDatastoreColumnType<Boolean> type = DsColumnTypes.booleanType();
+        boolean value = true;
 
         setSimpleType(type, value);
 
@@ -106,10 +106,10 @@ public class DsColumnTypesShould {
 
     @Test
     public void provide_timestamp_to_date_time_type() {
-        final DatastoreColumnType<Timestamp, com.google.cloud.Timestamp> type = timestampType();
-        final Timestamp value = Time.getCurrentTime();
+        DatastoreColumnType<Timestamp, com.google.cloud.Timestamp> type = timestampType();
+        Timestamp value = Time.getCurrentTime();
 
-        final com.google.cloud.Timestamp timestamp = ofTimeSecondsAndNanos(value.getSeconds(),
+        com.google.cloud.Timestamp timestamp = ofTimeSecondsAndNanos(value.getSeconds(),
                                                                            value.getNanos());
 
         setDatastoreType(type, value, timestamp);
@@ -119,10 +119,10 @@ public class DsColumnTypesShould {
 
     @Test
     public void provide_version_to_int_type() {
-        final DatastoreColumnType<Version, Integer> type = DsColumnTypes.versionType();
+        DatastoreColumnType<Version, Integer> type = DsColumnTypes.versionType();
         Version value = Versions.zero();
         value = Versions.increment(value);
-        final int number = 1;
+        int number = 1;
 
 
         setDatastoreType(type, value, number);
@@ -132,10 +132,10 @@ public class DsColumnTypesShould {
 
     @Test
     public void provide_message_to_string_type() {
-        final DatastoreColumnType<AbstractMessage, String> type = DsColumnTypes.messageType();
+        DatastoreColumnType<AbstractMessage, String> type = DsColumnTypes.messageType();
 
-        final AbstractMessage value = Sample.messageOfType(Project.class);
-        final String stringMessage = Json.toCompactJson(value); // default Stringifier behavior
+        AbstractMessage value = Sample.messageOfType(Project.class);
+        String stringMessage = Json.toCompactJson(value); // default Stringifier behavior
 
         setDatastoreType(type, value, stringMessage);
 
@@ -144,13 +144,13 @@ public class DsColumnTypesShould {
 
     @Test
     public void set_null_value() {
-        final SimpleDatastoreColumnType<Boolean> type = DsColumnTypes.booleanType();
+        SimpleDatastoreColumnType<Boolean> type = DsColumnTypes.booleanType();
         type.setNull(entity, RANDOM_COLUMN_LABEL);
         verify(entity).setNull(eq(RANDOM_COLUMN_LABEL));
     }
 
     private <T> void setSimpleType(SimpleDatastoreColumnType<T> type, T value) {
-        final T storedValue = type.convertColumnValue(value);
+        T storedValue = type.convertColumnValue(value);
         assertEquals(value, storedValue);
 
         type.setColumnValue(entity, storedValue, RANDOM_COLUMN_LABEL);
@@ -159,7 +159,7 @@ public class DsColumnTypesShould {
     private <J, S> void setDatastoreType(DatastoreColumnType<J, S> type,
                                          J value,
                                          S expectedStoredValue) {
-        final S storedValue = type.convertColumnValue(value);
+        S storedValue = type.convertColumnValue(value);
         assertEquals(expectedStoredValue, storedValue);
 
         type.setColumnValue(entity, storedValue, RANDOM_COLUMN_LABEL);

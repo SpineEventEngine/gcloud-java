@@ -21,19 +21,20 @@
 package io.spine.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Key;
-import com.google.common.base.Converter;
-import com.google.common.base.Optional;
+import io.spine.core.TenantId;
+import io.spine.server.storage.datastore.ProjectId;
+import io.spine.string.Stringifier;
+import io.spine.string.Stringifiers;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
-import io.spine.string.Stringifiers;
-import io.spine.server.storage.datastore.ProjectId;
-import io.spine.core.TenantId;
 
+import java.util.Optional;
+
+import static io.spine.server.storage.datastore.tenant.TenantConverterRegistry.getNamespaceConverter;
+import static io.spine.server.storage.datastore.tenant.TenantConverterRegistry.registerNamespaceConverter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static io.spine.server.storage.datastore.tenant.TenantConverterRegistry.getNamespaceConverter;
-import static io.spine.server.storage.datastore.tenant.TenantConverterRegistry.registerNamespaceConverter;
 
 /**
  * @author Dmytro Dashenkov
@@ -49,12 +50,12 @@ public class NamespaceWithCustomConverterShould {
 
     @Test
     public void construct_from_TenantId() {
-        final String ns = "my.test.namespace.from.tenant.id";
-        final TenantId tenantId = TenantId.newBuilder()
+        String ns = "my.test.namespace.from.tenant.id";
+        TenantId tenantId = TenantId.newBuilder()
                                           .setValue(ns)
                                           .build();
-        final Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
-        final Optional<? extends Converter<String, TenantId>> converter =
+        Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
+        Optional<NamespaceToTenantIdConverter> converter =
                 getNamespaceConverter(PROJECT_ID);
         assertTrue(converter.isPresent());
         assertEquals(converter.get()
@@ -64,21 +65,21 @@ public class NamespaceWithCustomConverterShould {
 
     @Test
     public void construct_from_Key() {
-        final String ns = "my.test.namespace.from.key";
-        final Key key = Key.newBuilder(PROJECT_ID.getValue(), "some.kind", ns)
+        String ns = "my.test.namespace.from.key";
+        Key key = Key.newBuilder(PROJECT_ID.getValue(), "some.kind", ns)
                            .build();
-        final Namespace namespace = Namespace.fromNameOf(key, true);
+        Namespace namespace = Namespace.fromNameOf(key, true);
         assertNotNull(namespace);
         assertEquals(ns, namespace.getValue());
     }
 
     @Test
     public void restore_to_TenantId() {
-        final String ns = "my.test.namespace.to.tenant.id";
-        final TenantId tenantId = TenantId.newBuilder()
+        String ns = "my.test.namespace.to.tenant.id";
+        TenantId tenantId = TenantId.newBuilder()
                                           .setValue(ns)
                                           .build();
-        final Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
+        Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
         assertEquals(tenantId, namespace.toTenantId());
     }
 
@@ -86,7 +87,7 @@ public class NamespaceWithCustomConverterShould {
      * An example of custom {@link NamespaceToTenantIdConverter}.
      *
      * <p>Note that this implementation uses the default
-     * {@link io.spine.string.Stringifier Stringifier} for the conversion, which is not acceptable
+     * {@link Stringifier Stringifier} for the conversion, which is not acceptable
      * to use in production code, but good enough for these tests.
      */
     private static class CustomNamespaceConverter extends NamespaceToTenantIdConverter {

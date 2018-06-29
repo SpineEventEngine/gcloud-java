@@ -55,7 +55,7 @@ public class NamespaceShould {
 
     @Test
     public void not_accept_empty_TenantIds() {
-        final TenantId emptyId = TenantId.getDefaultInstance();
+        TenantId emptyId = TenantId.getDefaultInstance();
         of(emptyId, ProjectId.of("no-matter-what"));
     }
 
@@ -63,22 +63,22 @@ public class NamespaceShould {
         // Required comprehensive naming
     @Test
     public void support_equality() {
-        final String aGroupValue = "namespace1";
-        final TenantId aGroupTenantId = TenantId.newBuilder()
+        String aGroupValue = "namespace1";
+        TenantId aGroupTenantId = TenantId.newBuilder()
                                                 .setValue(aGroupValue)
                                                 .build();
-        final Namespace aGroupNamespaceFromTenantId = of(aGroupTenantId, Given.testProjectId());
-        final Namespace aGroupNamespaceFromString = of(aGroupValue);
-        final Namespace duplicateAGroupNamespaceFromString = of(aGroupValue);
+        Namespace aGroupNamespaceFromTenantId = of(aGroupTenantId, Given.testProjectId());
+        Namespace aGroupNamespaceFromString = of(aGroupValue);
+        Namespace duplicateAGroupNamespaceFromString = of(aGroupValue);
 
-        final String bGroupValue = "namespace2";
-        final TenantId bGroupTenantId = TenantId.newBuilder()
+        String bGroupValue = "namespace2";
+        TenantId bGroupTenantId = TenantId.newBuilder()
                                                 .setEmail(EmailAddress.newBuilder()
                                                                       .setValue(bGroupValue))
                                                 .build();
-        final Namespace bGroupNamespaceFromTenantId = of(bGroupTenantId, Given.testProjectId());
+        Namespace bGroupNamespaceFromTenantId = of(bGroupTenantId, Given.testProjectId());
         // Same string but other type
-        final Namespace cGroupNamespaceFromString = of(bGroupValue);
+        Namespace cGroupNamespaceFromString = of(bGroupValue);
 
         new EqualsTester()
                 .addEqualityGroup(aGroupNamespaceFromTenantId)
@@ -91,33 +91,33 @@ public class NamespaceShould {
 
     @Test
     public void restore_self_to_tenant_id() {
-        final String randomTenantIdString = "arbitrary-tenant-id";
-        final TenantId domainId = TenantId.newBuilder()
+        String randomTenantIdString = "arbitrary-tenant-id";
+        TenantId domainId = TenantId.newBuilder()
                                           .setDomain(InternetDomain.newBuilder()
                                                                    .setValue(randomTenantIdString))
                                           .build();
-        final TenantId emailId = TenantId.newBuilder()
+        TenantId emailId = TenantId.newBuilder()
                                          .setEmail(EmailAddress.newBuilder()
                                                                .setValue(randomTenantIdString))
                                          .build();
-        final TenantId stringId = TenantId.newBuilder()
+        TenantId stringId = TenantId.newBuilder()
                                           .setValue(randomTenantIdString)
                                           .build();
         assertNotEquals(domainId, emailId);
         assertNotEquals(domainId, stringId);
         assertNotEquals(emailId, stringId);
 
-        final Namespace fromDomainId = of(domainId, Given.testProjectId());
-        final Namespace fromEmailId = of(emailId, Given.testProjectId());
-        final Namespace fromStringId = of(stringId, Given.testProjectId());
+        Namespace fromDomainId = of(domainId, Given.testProjectId());
+        Namespace fromEmailId = of(emailId, Given.testProjectId());
+        Namespace fromStringId = of(stringId, Given.testProjectId());
 
         assertNotEquals(fromDomainId, fromEmailId);
         assertNotEquals(fromDomainId, fromStringId);
         assertNotEquals(fromEmailId, fromStringId);
 
-        final TenantId domainIdRestored = fromDomainId.toTenantId();
-        final TenantId emailIdRestored = fromEmailId.toTenantId();
-        final TenantId stringIdRestored = fromStringId.toTenantId();
+        TenantId domainIdRestored = fromDomainId.toTenantId();
+        TenantId emailIdRestored = fromEmailId.toTenantId();
+        TenantId stringIdRestored = fromStringId.toTenantId();
 
         assertEquals(domainId, domainIdRestored);
         assertEquals(emailId, emailIdRestored);
@@ -126,10 +126,10 @@ public class NamespaceShould {
 
     @Test
     public void return_null_if_key_is_empty() {
-        final ProjectId projectId = ProjectId.of("project");
-        final Key emptyKey = Key.newBuilder(projectId.getValue(), "my.type", 42)
+        ProjectId projectId = ProjectId.of("project");
+        Key emptyKey = Key.newBuilder(projectId.getValue(), "my.type", 42)
                                 .build();
-        final Namespace namespace = Namespace.fromNameOf(emptyKey, false);
+        Namespace namespace = Namespace.fromNameOf(emptyKey, false);
         assertNull(namespace);
     }
 
@@ -144,22 +144,22 @@ public class NamespaceShould {
     }
 
     private static void checkConstructFromKey(String ns, boolean multitenant) {
-        final Key key = Key.newBuilder("my-simple-project", "any.kind", ns)
+        Key key = Key.newBuilder("my-simple-project", "any.kind", ns)
                            .build();
-        final Namespace namespace = Namespace.fromNameOf(key, multitenant);
+        Namespace namespace = Namespace.fromNameOf(key, multitenant);
         assertNotNull(namespace);
         assertEquals(ns, namespace.getValue());
     }
 
     @Test
     public void convert_self_to_string_based_tenant_if_created_from_string() {
-        final String namespaceString = "my.namespace";
+        String namespaceString = "my.namespace";
 
-        final TenantId expectedId = TenantId.newBuilder()
+        TenantId expectedId = TenantId.newBuilder()
                                             .setValue(namespaceString)
                                             .build();
-        final Namespace namespace = of(namespaceString);
-        final TenantId actualId = namespace.toTenantId();
+        Namespace namespace = of(namespaceString);
+        TenantId actualId = namespace.toTenantId();
         assertEquals(expectedId, actualId);
     }
 }

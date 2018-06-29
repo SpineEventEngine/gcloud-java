@@ -67,14 +67,14 @@ public class DatastoreWrapperShould {
 
     @AfterAll
     public static void tearDown() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
+        DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
                                                                singleTenant());
         wrapper.dropTable(NAMESPACE_HOLDER_KIND);
     }
 
     @Test
     public void work_with_transactions_if_necessary() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
+        DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
                                                                singleTenant());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
@@ -84,7 +84,7 @@ public class DatastoreWrapperShould {
 
     @Test
     public void rollback_transactions() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
+        DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
                                                                singleTenant());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
@@ -94,7 +94,7 @@ public class DatastoreWrapperShould {
 
     @Test
     public void fail_to_start_transaction_if_one_is_active() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
+        DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
                                                                singleTenant());
         try {
             wrapper.startTransaction();
@@ -107,7 +107,7 @@ public class DatastoreWrapperShould {
 
     @Test
     public void fail_to_finish_not_active_transaction() {
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
+        DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
                                                                singleTenant());
         wrapper.startTransaction();
         assertTrue(wrapper.isTransactionActive());
@@ -118,18 +118,18 @@ public class DatastoreWrapperShould {
 
     @Test
     public void support_big_bulk_ID_reads() throws InterruptedException {
-        final int bulkSize = 1001;
+        int bulkSize = 1001;
 
-        final TestDatastoreWrapper wrapper = wrap(Given.testDatastore(), false);
-        final Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
-        final Collection<Entity> expectedEntities = entities.values();
+        TestDatastoreWrapper wrapper = wrap(Given.testDatastore(), false);
+        Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
+        Collection<Entity> expectedEntities = entities.values();
 
         wrapper.createOrUpdate(expectedEntities);
 
         // Wait for some time to make sure the writing is complete
         Thread.sleep(bulkSize * 5);
 
-        final Collection<Entity> readEntities = newArrayList(wrapper.read(entities.keySet()));
+        Collection<Entity> readEntities = newArrayList(wrapper.read(entities.keySet()));
         assertEquals(entities.size(), readEntities.size());
         assertTrue(expectedEntities.containsAll(readEntities));
 
@@ -139,21 +139,21 @@ public class DatastoreWrapperShould {
     @Ignore // This test rarely passes on Travis CI due to eventual consistency.
     @Test
     public void support_big_bulk_query_reads() throws InterruptedException {
-        final int bulkSize = 2001;
+        int bulkSize = 2001;
 
-        final TestDatastoreWrapper wrapper = wrap(Given.testDatastore(), false);
-        final Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
-        final Collection<Entity> expectedEntities = entities.values();
+        TestDatastoreWrapper wrapper = wrap(Given.testDatastore(), false);
+        Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
+        Collection<Entity> expectedEntities = entities.values();
 
         wrapper.createOrUpdate(expectedEntities);
 
         // Wait for some time to make sure the writing is complete
         Thread.sleep(bulkSize * 3);
 
-        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setKind(Given.GENERIC_ENTITY_KIND.getValue())
                                                    .build();
-        final Collection<Entity> readEntities = newArrayList(wrapper.read(query));
+        Collection<Entity> readEntities = newArrayList(wrapper.read(query));
         assertEquals(entities.size(), readEntities.size());
         assertTrue(expectedEntities.containsAll(readEntities));
 
@@ -162,27 +162,27 @@ public class DatastoreWrapperShould {
 
     @Test
     public void generate_key_factories_aware_of_tenancy() {
-        final ProjectId projectId = ProjectId.of(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME);
-        final DatastoreWrapper wrapper = DatastoreWrapper.wrap(
+        ProjectId projectId = ProjectId.of(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME);
+        DatastoreWrapper wrapper = DatastoreWrapper.wrap(
                 Given.testDatastore(),
                 TestNamespaceSuppliers.multitenant(projectId));
-        final String tenantId1 = "first-tenant-ID";
-        final String tenantId1Prefixed = "Vfirst-tenant-ID";
-        final String tenantId2 = "second@tenant.id";
-        final String tenantId2Prefixed = "Esecond-at-tenant.id";
-        final String tenantId3 = "third.id";
-        final String tenantId3Prefixed = "Dthird.id";
+        String tenantId1 = "first-tenant-ID";
+        String tenantId1Prefixed = "Vfirst-tenant-ID";
+        String tenantId2 = "second@tenant.id";
+        String tenantId2Prefixed = "Esecond-at-tenant.id";
+        String tenantId3 = "third.id";
+        String tenantId3Prefixed = "Dthird.id";
         ensureNamespace(tenantId1Prefixed, wrapper.getDatastore());
         ensureNamespace(tenantId2Prefixed, wrapper.getDatastore());
         ensureNamespace(tenantId3Prefixed, wrapper.getDatastore());
-        final TenantId id1 = TenantId.newBuilder()
+        TenantId id1 = TenantId.newBuilder()
                                      .setValue(tenantId1)
                                      .build();
-        final TenantId id2 = TenantId.newBuilder()
+        TenantId id2 = TenantId.newBuilder()
                                      .setEmail(EmailAddress.newBuilder()
                                                            .setValue(tenantId2))
                                      .build();
-        final TenantId id3 = TenantId.newBuilder()
+        TenantId id3 = TenantId.newBuilder()
                                      .setDomain(InternetDomain.newBuilder()
                                                               .setValue(tenantId3))
                                      .build();
@@ -194,21 +194,21 @@ public class DatastoreWrapperShould {
 
     @Test
     public void produce_lazy_iterator_on_query_read() {
-        final DatastoreWrapper wrapper = wrap(Given.testDatastore(), singleTenant());
-        final int count = 2;
-        final Map<?, Entity> entities = Given.nEntities(count, wrapper);
-        final Collection<Entity> expctedEntities = entities.values();
+        DatastoreWrapper wrapper = wrap(Given.testDatastore(), singleTenant());
+        int count = 2;
+        Map<?, Entity> entities = Given.nEntities(count, wrapper);
+        Collection<Entity> expctedEntities = entities.values();
         wrapper.createOrUpdate(expctedEntities);
 
-        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setKind(Given.GENERIC_ENTITY_KIND.getValue())
                                                    .build();
-        final Iterator<Entity> result = wrapper.read(query);
+        Iterator<Entity> result = wrapper.read(query);
 
         assertTrue(result.hasNext());
-        final Entity first = result.next();
+        Entity first = result.next();
         assertTrue(result.hasNext());
-        final Entity second = result.next();
+        Entity second = result.next();
 
         assertThat(first, isIn(expctedEntities));
         assertThat(second, isIn(expctedEntities));
@@ -226,17 +226,17 @@ public class DatastoreWrapperShould {
 
     @Test
     public void allow_new_namespaces_on_go() {
-        final DatastoreWrapper wrapper = wrap(Given.testDatastore(), multitenant(testProjectId()));
-        final TenantId tenantId = TenantId.newBuilder()
+        DatastoreWrapper wrapper = wrap(Given.testDatastore(), multitenant(testProjectId()));
+        TenantId tenantId = TenantId.newBuilder()
                                           .setValue("Luke_I_am_your_tenant.")
                                           .build();
-        final String key = "noooooo";
-        final Key entityKey = new TenantAwareFunction0<Key>(tenantId) {
+        String key = "noooooo";
+        Key entityKey = new TenantAwareFunction0<Key>(tenantId) {
             @Override
             public Key apply() {
-                final Key entityKey = wrapper.getKeyFactory(Kind.of(NAMESPACE_HOLDER_KIND))
+                Key entityKey = wrapper.getKeyFactory(Kind.of(NAMESPACE_HOLDER_KIND))
                                              .newKey(key);
-                final Entity entity = Entity.newBuilder(entityKey)
+                Entity entity = Entity.newBuilder(entityKey)
                                             .build();
                 wrapper.create(entity);
                 return entityKey;
@@ -247,11 +247,11 @@ public class DatastoreWrapperShould {
         wrapper.delete(entityKey);
     }
 
-    private static void checkTenantIdInKey(final String id, TenantId tenantId, final DatastoreWrapper wrapper) {
+    private static void checkTenantIdInKey(String id, TenantId tenantId, DatastoreWrapper wrapper) {
         new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
-                final Key key = wrapper.getKeyFactory(DatastoreWrapperShould.Given.GENERIC_ENTITY_KIND)
+                Key key = wrapper.getKeyFactory(DatastoreWrapperShould.Given.GENERIC_ENTITY_KIND)
                                        .newKey(42L);
                 assertEquals(id, key.getNamespace());
             }
@@ -259,10 +259,10 @@ public class DatastoreWrapperShould {
     }
 
     private static void ensureNamespace(String namespaceValue, Datastore datastore) {
-        final KeyFactory keyFactory = datastore.newKeyFactory()
+        KeyFactory keyFactory = datastore.newKeyFactory()
                                                .setNamespace(namespaceValue)
                                                .setKind(NAMESPACE_HOLDER_KIND);
-        final Entity entity = Entity.newBuilder(keyFactory.newKey(42L))
+        Entity entity = Entity.newBuilder(keyFactory.newKey(42L))
                                     .build();
         datastore.put(entity);
     }
@@ -272,19 +272,19 @@ public class DatastoreWrapperShould {
         private static final Kind GENERIC_ENTITY_KIND = Kind.of("my.entity");
 
         private static Datastore testDatastore() {
-            final boolean onCi = TestEnvironment.runsOnCi();
+            boolean onCi = TestEnvironment.runsOnCi();
             return onCi
                    ? TestDatastoreFactory.getTestRemoteDatastore()
                    : TestDatastoreFactory.getLocalDatastore();
         }
 
         private static Map<Key, Entity> nEntities(int n, DatastoreWrapper wrapper) {
-            final Map<Key, Entity> result = new HashMap<>(n);
+            Map<Key, Entity> result = new HashMap<>(n);
             for (int i = 0; i < n; i++) {
-                final Any message = Any.getDefaultInstance();
-                final RecordId recordId = new RecordId(String.format("record-%s", i));
-                final Key key = DsIdentifiers.keyFor(wrapper, GENERIC_ENTITY_KIND, recordId);
-                final Entity entity = Entities.messageToEntity(message, key);
+                Any message = Any.getDefaultInstance();
+                RecordId recordId = new RecordId(String.format("record-%s", i));
+                Key key = DsIdentifiers.keyFor(wrapper, GENERIC_ENTITY_KIND, recordId);
+                Entity entity = Entities.messageToEntity(message, key);
                 result.put(key, entity);
             }
             return result;

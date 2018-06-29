@@ -51,22 +51,22 @@ public class EntitiesShould {
 
     @Test
     public void retrieve_default_message_instance_for_null_entity() {
-        final TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
-        final Project expected = Project.getDefaultInstance();
-        final Project actual = Entities.entityToMessage(null, typeUrl);
+        TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
+        Project expected = Project.getDefaultInstance();
+        Project actual = Entities.entityToMessage(null, typeUrl);
 
         assertEquals(expected, actual);
     }
 
     @Test
     public void retrieve_default_message_for_each_null_entity_in_collection() {
-        final TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
-        final List<Entity> listOfNulls = newArrayList(null, null, null, null);
-        final Iterator<Message> iterOfDefaults = entitiesToMessages(listOfNulls.iterator(),
+        TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
+        List<Entity> listOfNulls = newArrayList(null, null, null, null);
+        Iterator<Message> iterOfDefaults = entitiesToMessages(listOfNulls.iterator(),
                                                                     typeUrl);
-        final List<Message> listOfDefaults = newArrayList(iterOfDefaults);
+        List<Message> listOfDefaults = newArrayList(iterOfDefaults);
         assertSize(listOfNulls.size(), listOfDefaults);
-        final Project expectedValue = Project.getDefaultInstance();
+        Project expectedValue = Project.getDefaultInstance();
         for (Message message : listOfDefaults) {
             assertEquals(expectedValue, message);
         }
@@ -74,8 +74,8 @@ public class EntitiesShould {
 
     @Test
     public void retrieve_empty_collection_on_empty_list() {
-        final TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
-        final Iterator<Message> converted = entitiesToMessages(Collections.<Entity>emptyIterator(),
+        TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
+        Iterator<Message> converted = entitiesToMessages(Collections.<Entity>emptyIterator(),
                                                                typeUrl);
         assertNotNull(converted);
         assertFalse(converted.hasNext());

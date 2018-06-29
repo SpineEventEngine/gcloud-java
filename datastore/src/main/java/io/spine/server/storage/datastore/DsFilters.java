@@ -151,7 +151,7 @@ final class DsFilters {
         checkNotNull(parameters);
         checkNotNull(columnFilterAdapter);
 
-        final Collection<Filter> results;
+        Collection<Filter> results;
         if (parameters.isEmpty()) {
             results = emptySet();
         } else {
@@ -168,17 +168,17 @@ final class DsFilters {
      * parentheses are opened and the {@linkplain #multiply logical multiplication} is performed.
      */
     private static Collection<Filter> toFilters(Collection<CompositeQueryParameter> parameters,
-                                                final ColumnFilterAdapter columnFilterAdapter) {
-        final FluentIterable<CompositeQueryParameter> params = from(parameters);
-        final FluentIterable<CompositeQueryParameter> conjunctionParams =
+                                                ColumnFilterAdapter columnFilterAdapter) {
+        FluentIterable<CompositeQueryParameter> params = from(parameters);
+        FluentIterable<CompositeQueryParameter> conjunctionParams =
                 params.filter(isConjunctive);
-        final FluentIterable<CompositeQueryParameter> disjunctionParams =
+        FluentIterable<CompositeQueryParameter> disjunctionParams =
                 params.filter(isDisjunctive);
-        final Optional<CompositeQueryParameter> firstParam = conjunctionParams.first();
-        final Optional<CompositeQueryParameter> mergedConjunctiveParams =
+        Optional<CompositeQueryParameter> firstParam = conjunctionParams.first();
+        Optional<CompositeQueryParameter> mergedConjunctiveParams =
                 firstParam.transform(new ParameterReducer(conjunctionParams.skip(1)));
-        final Collection<Filter> filters = newLinkedList();
-        final TreePathWalker processor = new ColumnFilterReducer(columnFilterAdapter, filters);
+        Collection<Filter> filters = newLinkedList();
+        TreePathWalker processor = new ColumnFilterReducer(columnFilterAdapter, filters);
         multiply(mergedConjunctiveParams.orNull(), disjunctionParams, processor);
         return filters;
     }
@@ -193,7 +193,7 @@ final class DsFilters {
     private static void multiply(@Nullable CompositeQueryParameter constant,
                                  Iterable<CompositeQueryParameter> parameters,
                                  TreePathWalker processor) {
-        final ColumnFilterNode expressionTree = buildConjunctionTree(constant,
+        ColumnFilterNode expressionTree = buildConjunctionTree(constant,
                                                                      parameters);
         expressionTree.traverse(processor);
     }
@@ -241,10 +241,10 @@ final class DsFilters {
             @Nullable CompositeQueryParameter constant,
             Iterable<CompositeQueryParameter> parameters) {
 
-        final ColumnFilterNode lastSequentialNode;
-        final ColumnFilterNode head;
+        ColumnFilterNode lastSequentialNode;
+        ColumnFilterNode head;
         if (constant != null) {
-            final Collection<ColumnFilterNode> filters = toFilters(constant);
+            Collection<ColumnFilterNode> filters = toFilters(constant);
             if (!filters.isEmpty()) {
                 ColumnFilterNode prev = ColumnFilterTreeHead.instance();
                 head = prev;
@@ -264,7 +264,7 @@ final class DsFilters {
 
         Collection<ColumnFilterNode> lastLayer = singleton(lastSequentialNode);
         for (CompositeQueryParameter parameter : parameters) {
-            final Collection<ColumnFilterNode> currentLayer = toFilters(parameter);
+            Collection<ColumnFilterNode> currentLayer = toFilters(parameter);
             for (ColumnFilterNode thisLayerItem : currentLayer) {
                 for (ColumnFilterNode prevLayerItem : lastLayer) {
                     prevLayerItem.subtrees.add(thisLayerItem);
@@ -279,8 +279,8 @@ final class DsFilters {
      * Converts the given parameter to a {@code Collection} of {@link ColumnFilterNode}s.
      */
     private static Collection<ColumnFilterNode> toFilters(CompositeQueryParameter param) {
-        final ImmutableMultimap<EntityColumn, ColumnFilter> srcFilters = param.getFilters();
-        final Set<ColumnFilterNode> filters = new HashSet<>(srcFilters.size());
+        ImmutableMultimap<EntityColumn, ColumnFilter> srcFilters = param.getFilters();
+        Set<ColumnFilterNode> filters = new HashSet<>(srcFilters.size());
         for (Map.Entry<EntityColumn, ColumnFilter> entry : srcFilters.entries()) {
             filters.add(new ColumnFilterNode(entry.getKey(), entry.getValue()));
         }
@@ -303,7 +303,7 @@ final class DsFilters {
         @Override
         public CompositeQueryParameter apply(@Nullable CompositeQueryParameter input) {
             checkNotNull(input);
-            final CompositeQueryParameter merged = input.conjunct(otherParams);
+            CompositeQueryParameter merged = input.conjunct(otherParams);
             return merged;
         }
     }
@@ -335,13 +335,13 @@ final class DsFilters {
             if (conjunctionGroup.isEmpty()) {
                 return;
             }
-            final FluentIterable<Filter> filters = from(conjunctionGroup)
+            FluentIterable<Filter> filters = from(conjunctionGroup)
                     .transform(ColumnFilterNode.toFilterFunction(columnFilterAdapter));
-            final Optional<Filter> first = filters.first();
+            Optional<Filter> first = filters.first();
             checkState(first.isPresent());
-            final Filter[] other = filters.skip(1)
+            Filter[] other = filters.skip(1)
                                           .toArray(Filter.class);
-            final Filter group = and(first.get(), other);
+            Filter group = and(first.get(), other);
             destination.add(group);
         }
     }
@@ -381,8 +381,8 @@ final class DsFilters {
         @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
             // Only non-faulty values are used.
         private Filter toFilter(ColumnFilterAdapter adapter) {
-            final Value<?> value = adapter.toValue(column, columnFilter);
-            final String columnIdentifier = column.getStoredName();
+            Value<?> value = adapter.toValue(column, columnFilter);
+            String columnIdentifier = column.getStoredName();
             switch (columnFilter.getOperator()) {
                 case EQUAL:
                     return eq(columnIdentifier, value);
@@ -410,21 +410,21 @@ final class DsFilters {
         @SuppressWarnings("MethodWithMultipleLoops")
             // To make the traversal algorithm more obvious.
         private void traverse(TreePathWalker processor) {
-            final Queue<ColumnFilterNode> nodes = new LinkedList<>();
-            final Queue<Collection<ColumnFilterNode>> paths = new LinkedList<>();
+            Queue<ColumnFilterNode> nodes = new LinkedList<>();
+            Queue<Collection<ColumnFilterNode>> paths = new LinkedList<>();
             nodes.offer(this);
             // Initial path is intentionally left empty.
             paths.offer(new LinkedList<ColumnFilterNode>());
 
             while (!nodes.isEmpty()) {
-                final ColumnFilterNode node = nodes.poll();
-                final Collection<ColumnFilterNode> path = paths.poll();
+                ColumnFilterNode node = nodes.poll();
+                Collection<ColumnFilterNode> path = paths.poll();
 
                 if (node.isLeaf()) {
                     processor.walk(path);
                 } else {
                     for (ColumnFilterNode child : node.subtrees) {
-                        final Collection<ColumnFilterNode> childPath = newPath(path);
+                        Collection<ColumnFilterNode> childPath = newPath(path);
                         childPath.add(child);
                         nodes.offer(child);
                         paths.offer(childPath);
@@ -471,7 +471,7 @@ final class DsFilters {
             @Override
             public Filter apply(@Nullable ColumnFilterNode input) {
                 checkNotNull(input);
-                final Filter result = input.toFilter(adapter);
+                Filter result = input.toFilter(adapter);
                 return result;
             }
         }

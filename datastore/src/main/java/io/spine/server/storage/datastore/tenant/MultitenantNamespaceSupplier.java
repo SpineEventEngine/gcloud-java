@@ -53,10 +53,10 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
      */
     @Override
     public Namespace get() {
-        final TenantIdRetriever retriever = new TenantIdRetriever();
-        final TenantId tenantId = retriever.execute();
+        TenantIdRetriever retriever = new TenantIdRetriever();
+        TenantId tenantId = retriever.execute();
         checkNotNull(tenantId);
-        final Namespace result = Namespace.of(tenantId, projectId);
+        Namespace result = Namespace.of(tenantId, projectId);
         return result;
     }
 
