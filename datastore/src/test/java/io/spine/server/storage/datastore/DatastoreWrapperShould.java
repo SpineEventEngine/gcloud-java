@@ -34,8 +34,8 @@ import io.spine.server.datastore.TestEnvironment;
 import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
-import org.junit.AfterClass;
 import org.junit.Ignore;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -65,7 +65,7 @@ public class DatastoreWrapperShould {
 
     private static final String NAMESPACE_HOLDER_KIND = "spine.test.NAMESPACE_HOLDER_KIND";
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         final DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
                                                                singleTenant());

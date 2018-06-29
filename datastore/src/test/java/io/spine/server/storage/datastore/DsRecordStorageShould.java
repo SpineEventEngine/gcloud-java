@@ -50,9 +50,9 @@ import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.type.TypeUrl;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
@@ -64,6 +64,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.toSeconds;
+import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.json.Json.toCompactJson;
@@ -72,7 +73,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Verify.assertContains;
-import static io.spine.base.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -135,7 +135,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         datastoreFactory.setUp();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         datastoreFactory.tearDown();
     }

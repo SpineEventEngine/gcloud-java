@@ -36,9 +36,9 @@ import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.Project
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.testdata.Sample;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,17 +64,17 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
         }
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         datastoreFactory.setUp();
     }
 
-    @After
+    @AfterEach
     public void tearDownTest() {
         datastoreFactory.clear();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass() {
         datastoreFactory.tearDown();
     }

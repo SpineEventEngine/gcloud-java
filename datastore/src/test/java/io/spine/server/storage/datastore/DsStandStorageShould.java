@@ -24,8 +24,8 @@ import io.spine.server.entity.Entity;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.stand.StandStorageShould;
 import io.spine.server.storage.RecordStorage;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertNotNull;
@@ -43,7 +43,7 @@ public class DsStandStorageShould extends StandStorageShould {
         datastoreFactory.setUp();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         datastoreFactory.tearDown();
     }

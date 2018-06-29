@@ -39,7 +39,7 @@ public class DatastoreIdentifiersShould {
 
     @Test
     public void not_accept_empty_String_as_identifier_source() {
-        assertThrows(IllegalAccessException.class, () -> DsIdentifiers.of(""));
+        assertThrows(IllegalArgumentException.class, () -> DsIdentifiers.of(""));
     }
 
     @Test

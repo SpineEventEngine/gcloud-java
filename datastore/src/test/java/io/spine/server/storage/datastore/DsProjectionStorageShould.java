@@ -28,10 +28,10 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.projection.ProjectionStorageTest;
 import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
-import io.spine.test.storage.ProjectId;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Time.getCurrentTime;
@@ -60,7 +60,7 @@ public class DsProjectionStorageShould extends ProjectionStorageTest {
                 .build();
     }
 
-    @After
+    @AfterEach
     public void tearDownTest() {
         datastoreFactory.clear();
     }

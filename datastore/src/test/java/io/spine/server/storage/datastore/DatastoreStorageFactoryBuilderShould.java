@@ -34,7 +34,6 @@ import io.spine.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.storage.datastore.type.SimpleDatastoreColumnType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
@@ -45,6 +44,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -109,7 +109,7 @@ public class DatastoreStorageFactoryBuilderShould {
                 .newBuilder()
                 .setMultitenant(true)
                 .setDatastore(options.getService());
-        Assertions.assertThrows(IllegalAccessException.class, builder::build);
+        assertThrows(IllegalArgumentException.class, builder::build);
     }
 
     @Test

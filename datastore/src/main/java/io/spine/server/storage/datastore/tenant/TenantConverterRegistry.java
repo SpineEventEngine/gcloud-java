@@ -30,6 +30,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.synchronizedMap;
 
 /**
@@ -44,10 +45,12 @@ import static java.util.Collections.synchronizedMap;
 public final class TenantConverterRegistry {
 
     private static final Map<ProjectId, NamespaceToTenantIdConverter> tenantIdConverters =
-            synchronizedMap(Maps.<ProjectId, NamespaceToTenantIdConverter>newHashMap());
+            synchronizedMap(newHashMap());
 
+    /**
+     * Prevents the utility class instantiation.
+     */
     private TenantConverterRegistry() {
-        // Prevent initialization of this utility class
     }
 
     /**
