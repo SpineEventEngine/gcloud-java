@@ -22,19 +22,9 @@ ext {
     artifactId = 'gae-java'
 }
 
-buildscript {
-    configurations.all {
-        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-    }
-}
-
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
 dependencies {
     // Google Cloud Datastore
-    compile(group: 'com.google.cloud', name: 'google-cloud-datastore', version: datastoreVersion) {
+    implementation(group: 'com.google.cloud', name: 'google-cloud-datastore', version: datastoreVersion) {
         exclude group: 'com.google.protobuf'
         exclude group: 'com.google.guava'
     }
