@@ -24,9 +24,9 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageVisibilityHandlingTest;
 import io.spine.test.aggregate.ProjectId;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class DsAggregateStorageStatusHandlingShould
         }
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         datastoreFactory.setUp();
     }

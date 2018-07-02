@@ -20,15 +20,15 @@
 package io.spine.server.storage.datastore;
 
 import com.google.protobuf.Any;
-import org.junit.jupiter.api.Test;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
 import static io.spine.base.Identifier.newUuid;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alex Tymchenko

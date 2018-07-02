@@ -32,8 +32,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class DatastoreTenants {
 
+    /**
+     * Prevents the utility class instantiation.
+     */
     private DatastoreTenants() {
-        // Prevent the utility class initialization
     }
 
     /**

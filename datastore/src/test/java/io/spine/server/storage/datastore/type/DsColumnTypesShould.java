@@ -41,7 +41,7 @@ import static com.google.cloud.datastore.StringValue.of;
 import static com.google.cloud.datastore.TimestampValue.of;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.timestampType;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

@@ -24,11 +24,11 @@ import io.spine.server.entity.Entity;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.stand.StandStorageShould;
 import io.spine.server.storage.RecordStorage;
-import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Dmytro Dashenkov
@@ -38,7 +38,7 @@ public class DsStandStorageShould extends StandStorageShould {
     private static final TestDatastoreStorageFactory datastoreFactory
             = TestDatastoreStorageFactory.getDefaultInstance();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         datastoreFactory.setUp();
     }

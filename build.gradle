@@ -77,9 +77,7 @@ subprojects {
         compile group: 'io.spine', name: "spine-server", version: spineVersion
 
         testCompile group: 'io.spine', name: "spine-testutil-server", version: spineVersion
-        testCompile(group: 'io.spine', name: "spine-server", version: spineVersion, classifier: "test") {
-            exclude group: 'org.junit'
-        }
+        testCompile group: 'io.spine', name: "spine-server", version: spineVersion, classifier: "test"
 
         testImplementation deps.test.junit5Api
         testImplementation deps.test.junit5Runner

@@ -34,8 +34,8 @@ import io.spine.server.datastore.TestEnvironment;
 import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -49,13 +49,13 @@ import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.given.Given.testProjectId;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.isIn;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Dmytro Dashenkov
@@ -136,7 +136,7 @@ public class DatastoreWrapperShould {
         wrapper.dropAllTables();
     }
 
-    @Ignore // This test rarely passes on Travis CI due to eventual consistency.
+    @Disabled("This test rarely passes on Travis CI due to eventual consistency.")
     @Test
     public void support_big_bulk_query_reads() throws InterruptedException {
         int bulkSize = 2001;
@@ -148,7 +148,7 @@ public class DatastoreWrapperShould {
         wrapper.createOrUpdate(expectedEntities);
 
         // Wait for some time to make sure the writing is complete
-        Thread.sleep(bulkSize * 3);
+        Thread.sleep(bulkSize * 3L);
 
         StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setKind(Given.GENERIC_ENTITY_KIND.getValue())

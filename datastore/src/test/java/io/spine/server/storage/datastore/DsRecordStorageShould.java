@@ -50,9 +50,9 @@ import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.type.TypeUrl;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
@@ -73,9 +73,9 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Verify.assertContains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -238,7 +238,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         assertEquals(entity.isDeleted(), datastoreEntity.getBoolean(deleted));
     }
 
-    @Ignore // This test rarely passes on Travis CI due to eventual consistency.
+    @Disabled("This test rarely passes on Travis CI due to eventual consistency.")
     @Test
     public void pass_big_data_speed_test() {
         // Default bulk size is 500 records - the maximum records that could be written within

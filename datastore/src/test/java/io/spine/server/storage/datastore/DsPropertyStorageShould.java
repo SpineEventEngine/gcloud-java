@@ -21,7 +21,7 @@ package io.spine.server.storage.datastore;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Alex Tymchenko

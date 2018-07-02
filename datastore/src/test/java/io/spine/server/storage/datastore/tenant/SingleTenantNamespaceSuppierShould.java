@@ -20,21 +20,21 @@
 
 package io.spine.server.storage.datastore.tenant;
 
+import io.spine.core.TenantId;
+import io.spine.net.EmailAddress;
+import io.spine.net.InternetDomain;
+import io.spine.server.storage.datastore.ProjectId;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
-import io.spine.net.EmailAddress;
-import io.spine.net.InternetDomain;
-import io.spine.server.storage.datastore.ProjectId;
-import io.spine.core.TenantId;
 
+import static io.spine.validate.Validate.isDefault;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static io.spine.validate.Validate.isDefault;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Dmytro Dashenkov

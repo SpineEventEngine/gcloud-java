@@ -149,8 +149,7 @@ public final class Namespace {
 
         String projectIdString = key.getProjectId();
         ProjectId projectId = ProjectId.of(projectIdString);
-        Optional<NamespaceToTenantIdConverter> customConverter =
-                getNamespaceConverter(projectId);
+        Optional<NamespaceToTenantIdConverter> customConverter = getNamespaceConverter(projectId);
         String namespace = key.getName();
         if (isNullOrEmpty(namespace)) {
             return null;

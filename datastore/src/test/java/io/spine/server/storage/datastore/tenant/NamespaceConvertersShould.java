@@ -20,12 +20,12 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import org.junit.jupiter.api.Test;
 import io.spine.core.TenantId;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Dmytro Dashenkov

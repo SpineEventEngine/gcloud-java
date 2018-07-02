@@ -35,8 +35,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.size;
 import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * A test utility that checks that the data read/write operations perform well (i.e. execute within
@@ -134,7 +134,7 @@ public class BigDataTester<I> {
         }
         log().debug("Reading took {} millis.", readTime);
 
-        assertEquals("Unexpected records count read.", records.size(), size(readRecords));
+        assertEquals(records.size(), size(readRecords), "Unexpected records count read.");
     }
 
     /**
@@ -172,8 +172,10 @@ public class BigDataTester<I> {
         private long writeMillisLimit;
         private long readMillisLimit;
 
+        /**
+         * Prevents direct instantiation.
+         */
         private Builder() {
-            // Prevent direct initialization
         }
 
         /**

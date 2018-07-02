@@ -45,8 +45,8 @@ import org.slf4j.LoggerFactory;
 
 import static io.spine.client.TestActorRequestFactory.newInstance;
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("InstanceMethodNamingConvention")

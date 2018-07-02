@@ -25,16 +25,16 @@ import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.string.Stringifier;
 import io.spine.string.Stringifiers;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
 import static io.spine.server.storage.datastore.tenant.TenantConverterRegistry.getNamespaceConverter;
 import static io.spine.server.storage.datastore.tenant.TenantConverterRegistry.registerNamespaceConverter;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
@@ -43,7 +43,7 @@ public class NamespaceWithCustomConverterShould {
 
     private static final ProjectId PROJECT_ID = ProjectId.of("arbitraryproject");
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
         registerNamespaceConverter(PROJECT_ID, new CustomNamespaceConverter());
     }
@@ -52,8 +52,8 @@ public class NamespaceWithCustomConverterShould {
     public void construct_from_TenantId() {
         String ns = "my.test.namespace.from.tenant.id";
         TenantId tenantId = TenantId.newBuilder()
-                                          .setValue(ns)
-                                          .build();
+                                    .setValue(ns)
+                                    .build();
         Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
         Optional<NamespaceToTenantIdConverter> converter =
                 getNamespaceConverter(PROJECT_ID);
@@ -77,8 +77,8 @@ public class NamespaceWithCustomConverterShould {
     public void restore_to_TenantId() {
         String ns = "my.test.namespace.to.tenant.id";
         TenantId tenantId = TenantId.newBuilder()
-                                          .setValue(ns)
-                                          .build();
+                                    .setValue(ns)
+                                    .build();
         Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
         assertEquals(tenantId, namespace.toTenantId());
     }
