@@ -17,30 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package io.spine.server.storage.datastore;
 
-import com.google.common.testing.NullPointerTester;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.mock;
+import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * @author Dmytro Dashenkov
+ * @author Alex Tymchenko
  */
-public class IndexesShould {
+class DatastorePropertiesTest {
 
     @Test
-    public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(Indexes.class);
-    }
-
-    @Test
-    public void not_accept_nulls() {
-        new NullPointerTester()
-                .setDefault(Kind.class, Kind.of("arbitrary-kind"))
-                .setDefault(DatastoreWrapper.class, mock(DatastoreWrapper.class))
-                .testStaticMethods(Indexes.class, NullPointerTester.Visibility.PACKAGE);
+    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    void testPrivateCtor() {
+        assertHasPrivateParameterlessCtor(DsProperties.class);
     }
 }

@@ -26,8 +26,10 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityColumn;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -38,15 +40,18 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class DatastoreTypeRegistryFactoryShould {
+@DisplayName("DatastoreTypeRegistryFactory should")
+class DatastoreTypeRegistryFactoryTest {
 
     @Test
-    public void have_private_ctor() {
+    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    void testPrivateCtor() {
         assertHasPrivateParameterlessCtor(DatastoreTypeRegistryFactory.class);
     }
 
     @Test
-    public void have_default_column_types() {
+    @DisplayName("have default column types")
+    void testDefaults() {
         ColumnTypeRegistry<? extends DatastoreColumnType> registry =
                 DatastoreTypeRegistryFactory.defaultInstance();
         DatastoreColumnType<?, ?> stringType = registry.get(mockColumn(String.class));
@@ -64,7 +69,8 @@ public class DatastoreTypeRegistryFactoryShould {
     }
 
     @Test
-    public void allow_to_customize_types() {
+    @DisplayName("allow to customize types")
+    void testCustomize() {
         ColumnTypeRegistry<? extends DatastoreColumnType> registry =
                 DatastoreTypeRegistryFactory.predefinedValuesAnd()
                                             .put(byte.class, new ByteColumnType())
@@ -75,7 +81,8 @@ public class DatastoreTypeRegistryFactoryShould {
     }
 
     @Test
-    public void allow_to_override_types() {
+    @DisplayName("allow to override types")
+    void testOverride() {
         ColumnTypeRegistry<? extends DatastoreColumnType> registry =
                 DatastoreTypeRegistryFactory.predefinedValuesAnd()
                                             .put(String.class, new CustomStringType())

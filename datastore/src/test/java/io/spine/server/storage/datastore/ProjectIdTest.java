@@ -24,8 +24,11 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
+import static io.spine.server.storage.datastore.given.TestCases.SUPPORT_EQUALITY;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.mock;
@@ -34,17 +37,19 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class ProjectIdShould {
+class ProjectIdTest {
 
     @Test
-    public void not_accept_nulls() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void testNulls() {
         new NullPointerTester()
                 .setDefault(Datastore.class, mockDatastore())
                 .testStaticMethods(ProjectId.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName(SUPPORT_EQUALITY)
+    void testEquals() {
         ProjectId a1 = ProjectId.of("a");
         ProjectId a2 = ProjectId.of(mockDatastore("a"));
 
@@ -58,7 +63,8 @@ public class ProjectIdShould {
     }
 
     @Test
-    public void support_toString() {
+    @DisplayName("support toString()")
+    void testToString() {
         String value = "my-fancy-project-id";
         ProjectId projectId = ProjectId.of(value);
         String stringRepr = projectId.toString();
@@ -66,7 +72,7 @@ public class ProjectIdShould {
     }
 
     private static Datastore mockDatastore() {
-        return mockDatastore("some-project-id-ProjectIdShould");
+        return mockDatastore("some-project-id-ProjectIdTest");
     }
 
     private static Datastore mockDatastore(String value) {

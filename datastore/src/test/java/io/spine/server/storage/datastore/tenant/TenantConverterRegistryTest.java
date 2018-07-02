@@ -17,37 +17,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.storage.datastore;
 
+package io.spine.server.storage.datastore.tenant;
+
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-public class DatastoreIdentifiersShould {
+@DisplayName("TenantConverterRegistry should")
+class TenantConverterRegistryTest {
 
     @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(DsIdentifiers.class);
-    }
-
-    @Test
-    public void not_accept_empty_String_as_identifier_source() {
-        assertThrows(IllegalArgumentException.class, () -> DsIdentifiers.of(""));
-    }
-
-    @Test
-    public void wrap_non_empty_String_into_record_identifier() {
-        String idAsString = newUuid();
-        RecordId recordId = DsIdentifiers.of(idAsString);
-
-        assertNotNull(recordId);
-        assertEquals(idAsString, recordId.getValue());
+    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    void have_private_ctor() {
+        assertHasPrivateParameterlessCtor(TenantConverterRegistry.class);
     }
 }

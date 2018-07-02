@@ -17,28 +17,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.storage.datastore;
 
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+package io.spine.server.storage.datastore.given;
 
 /**
- * @author Alex Tymchenko
+ * Common names of test cases.
+ *
+ * <p>This is a temporary constant-holder class. Remove after the values are migrated to a test
+ * library.
+ *
+ * @author Dmytro Dashenkov
  */
-public class DsPropertyStorageShould {
-    private static final TestDatastoreStorageFactory datastoreFactory =
-            TestDatastoreStorageFactory.getDefaultInstance();
+public final class TestCases {
 
-    @Test
-    public void provide_access_to_DatastoreWrapper_for_extensibility() {
-        DsPropertyStorage storage = getStorage();
-        DatastoreWrapper datastore = storage.getDatastore();
-        assertNotNull(datastore);
+    public static final String HAVE_PRIVATE_UTILITY_CTOR = "have private utility constructor";
+    public static final String NOT_ACCEPT_NULLS = "not accept nulls";
+    public static final String SUPPORT_EQUALITY = "support equality";
+    public static final String DO_NOTHING_ON_CLOSE = "do nothing on close";
+
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private TestCases() {
     }
-
-    private static DsPropertyStorage getStorage() {
-        return datastoreFactory.createPropertyStorage();
-    }
-
 }

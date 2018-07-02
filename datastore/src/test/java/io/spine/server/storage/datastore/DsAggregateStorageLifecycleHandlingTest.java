@@ -27,14 +27,15 @@ import io.spine.test.aggregate.ProjectId;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author Dmytro Dashenkov.
  */
-public class DsAggregateStorageStatusHandlingShould
-        extends AggregateStorageVisibilityHandlingTest {
+@DisplayName("DsAggregateStorage lifecycle handling should")
+class DsAggregateStorageLifecycleHandlingTest extends AggregateStorageVisibilityHandlingTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory;
 
@@ -49,17 +50,17 @@ public class DsAggregateStorageStatusHandlingShould
     }
 
     @BeforeAll
-    public static void setUpClass() {
+    static void setUpClass() {
         datastoreFactory.setUp();
     }
 
     @AfterEach
-    public void tearDownTest() {
+    void tearDownTest() {
         datastoreFactory.clear();
     }
 
     @AfterAll
-    public static void tearDownClass() {
+    static void tearDownClass() {
         datastoreFactory.tearDown();
     }
 
@@ -77,7 +78,7 @@ public class DsAggregateStorageStatusHandlingShould
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(
-                DsAggregateStorageStatusHandlingShould.class);
+                DsAggregateStorageLifecycleHandlingTest.class);
     }
 
 }

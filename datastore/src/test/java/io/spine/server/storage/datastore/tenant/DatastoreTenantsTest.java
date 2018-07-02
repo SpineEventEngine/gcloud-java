@@ -28,6 +28,7 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantIndex;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
@@ -35,6 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContains;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,15 +49,18 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class DatastoreTenantsShould {
+@DisplayName("DatastoreTenants should")
+class DatastoreTenantsTest {
 
     @Test
-    public void have_private_utility_ctor() {
+    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    void have_private_utility_ctor() {
         assertHasPrivateParameterlessCtor(DatastoreTenants.class);
     }
 
     @Test
-    public void create_tenant_index() {
+    @DisplayName("create tenant index")
+    void testCreateIndex() {
         TenantIndex index = DatastoreTenants.index(mockDatastore());
         assertNotNull(index);
         assertThat(index, instanceOf(NamespaceIndex.class));
@@ -73,7 +78,7 @@ public class DatastoreTenantsShould {
         Datastore datastore = mock(Datastore.class);
         DatastoreOptions options = mock(DatastoreOptions.class);
         when(datastore.getOptions()).thenReturn(options);
-        when(options.getProjectId()).thenReturn("some-project-id-DatastoreTenantsShould");
+        when(options.getProjectId()).thenReturn("some-project-id-DatastoreTenantsTest");
         when(datastore.run(any(Query.class))).thenReturn(new MockKeyQueryResults());
         return datastore;
     }

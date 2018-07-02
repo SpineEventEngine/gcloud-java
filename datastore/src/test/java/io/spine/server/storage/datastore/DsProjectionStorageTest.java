@@ -32,6 +32,7 @@ import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Time.getCurrentTime;
@@ -40,7 +41,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /**
  * @author Mikhail Mikhaylov
  */
-public class DsProjectionStorageShould extends ProjectionStorageTest {
+@DisplayName("DsProjectionStorage should")
+class DsProjectionStorageTest extends ProjectionStorageTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory =
             TestDatastoreStorageFactory.getDefaultInstance();
@@ -61,7 +63,7 @@ public class DsProjectionStorageShould extends ProjectionStorageTest {
     }
 
     @AfterEach
-    public void tearDownTest() {
+    void tearDownTest() {
         datastoreFactory.clear();
     }
 
@@ -75,8 +77,10 @@ public class DsProjectionStorageShould extends ProjectionStorageTest {
         return result;
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
     @Test
-    public void provide_access_to_PropertyStorage_for_extensibility() {
+    @DisplayName("provide access to PropertyStorage for extensibility")
+    void testAccessPropertyStorage() {
         DsProjectionStorage<ProjectId> storage =
                 (DsProjectionStorage<ProjectId>) newStorage(TestProjection.class);
         DsPropertyStorage propertyStorage = storage.propertyStorage();

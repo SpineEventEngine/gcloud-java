@@ -30,8 +30,11 @@ import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.TestDatastoreFactory;
 import io.spine.server.storage.datastore.tenant.TestNamespaceIndex;
 import io.spine.server.tenant.TenantIndex;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
+import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -43,21 +46,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Dmytro Dashenkov
  */
-public class ContextsShould {
+@DisplayName("Contexts should")
+class ContextsTest {
 
     @Test
-    public void have_private_util_ctor() {
+    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    void testPrivateCtor() {
         assertHasPrivateParameterlessCtor(Contexts.class);
     }
 
     @Test
-    public void not_accept_nulls() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void testNulls() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(Contexts.class);
     }
 
     @Test
-    public void produce_BoundedContext_Builder_for_given_storage_factory() {
+    @DisplayName("produce BoundedContext Builder for given storage factory")
+    void testProduceBCBuilder() {
         DatastoreStorageFactory factory = givenFactory();
         BoundedContext.Builder builder = Contexts.onTopOf(factory);
         Optional<Supplier<StorageFactory>> supplierOptional =

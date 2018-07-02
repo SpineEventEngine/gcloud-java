@@ -22,6 +22,7 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
@@ -29,17 +30,19 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.test.storage.Project;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.storage.datastore.given.TestCases.DO_NOTHING_ON_CLOSE;
+import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class DatastoreStorageFactoryShould {
+@DisplayName("DatastoreStorageFactory should")
+class DatastoreStorageFactoryTest {
 
     private static final DatastoreOptions DUMMY_OPTIONS =
             DatastoreOptions.newBuilder()
@@ -54,11 +57,18 @@ public class DatastoreStorageFactoryShould {
                                    .build();
 
     @Test
-    public void create_multitenant_storages() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void testNulls() {
+        new NullPointerTester().testAllPublicInstanceMethods(datastoreFactory);
+    }
+
+    @Test
+    @DisplayName("create multitenant storages")
+    void testCreateMultitenant() {
         StorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                              .setDatastore(datastore)
-                                                              .setMultitenant(true)
-                                                              .build();
+                                                        .setDatastore(datastore)
+                                                        .setMultitenant(true)
+                                                        .build();
         assertTrue(factory.isMultitenant());
         RecordStorage storage = factory.createStandStorage();
         assertTrue(storage.isMultitenant());
@@ -66,70 +76,60 @@ public class DatastoreStorageFactoryShould {
     }
 
     @Test
-    public void create_entity_storage_using_class_parameter() {
-        RecordStorage<String> storage = datastoreFactory.createRecordStorage(TestEntity.class);
-        assertNotNull(storage);
-    }
-
-    @Test
-    public void create_separate_record_storage_per_state_type() {
+    @DisplayName("create separate record storage per state type")
+    void testDependsOnStateType() {
         DsRecordStorage<?> storage =
                 (DsRecordStorage<?>) datastoreFactory.createRecordStorage(TestEntity.class);
+        assertNotNull(storage);
         DsRecordStorage<?> differentStorage =
-                (DsRecordStorage<?>) datastoreFactory.createRecordStorage(DifferentTestEntity.class);
+                (DsRecordStorage<?>) datastoreFactory.createRecordStorage(
+                        DifferentTestEntity.class);
+        assertNotNull(differentStorage);
         assertNotEquals(storage.getKind(), differentStorage.getKind());
     }
 
     @Test
-    public void convert_itself_to_single_tenant() {
+    @DisplayName("convert itself to single tenant")
+    void testToSingleTenant() {
         StorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                              .setDatastore(datastore)
-                                                              .setMultitenant(true)
-                                                              .build();
+                                                        .setDatastore(datastore)
+                                                        .setMultitenant(true)
+                                                        .build();
         assertTrue(factory.isMultitenant());
         StorageFactory singleTenantFactory = factory.toSingleTenant();
         assertFalse(singleTenantFactory.isMultitenant());
     }
 
     @Test
-    public void return_self_if_single_tenant() {
+    @DisplayName("return itself if single tenant")
+    void testSingleTenantToSingleTenant() {
         StorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                              .setDatastore(datastore)
-                                                              .setMultitenant(false)
-                                                              .build();
+                                                        .setDatastore(datastore)
+                                                        .setMultitenant(false)
+                                                        .build();
         assertFalse(factory.isMultitenant());
         StorageFactory singleTenantFactory = factory.toSingleTenant();
         assertFalse(singleTenantFactory.isMultitenant());
         assertSame(factory, singleTenantFactory);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
-    public void fail_to_create_aggregate_storage_not_using_class_parameter() {
-        assertThrows(NullPointerException.class,
-                     () -> datastoreFactory.createAggregateStorage(null));
-    }
-
-    @Test
-    public void have_default_column_type_registry() {
+    @DisplayName("have default column type registry")
+    void testDefaultColumnTypeRegistry() {
         DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                                       .setDatastore(datastore)
-                                                                       .build();
+                                                                 .setDatastore(datastore)
+                                                                 .build();
         ColumnTypeRegistry defaultRegistry = factory.getTypeRegistry();
         assertNotNull(defaultRegistry);
         assertSame(DatastoreTypeRegistryFactory.defaultInstance(), defaultRegistry);
     }
 
     @Test
-    public void fail_to_construct_without_datastore() {
-        assertThrows(NullPointerException.class, DatastoreStorageFactory.newBuilder()::build);
-    }
-
-    @Test
-    public void do_nothing_on_close() throws Exception {
+    @DisplayName(DO_NOTHING_ON_CLOSE)
+    void testClose() throws Exception {
         DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                                       .setDatastore(datastore)
-                                                                       .build();
+                                                                 .setDatastore(datastore)
+                                                                 .build();
         factory.close();
         // Multiple calls are allowed as no action is performed
         factory.close();
@@ -143,6 +143,7 @@ public class DatastoreStorageFactoryShould {
     }
 
     private static class DifferentTestEntity extends AbstractEntity<String, Project> {
+
         protected DifferentTestEntity(String id) {
             super(id);
         }

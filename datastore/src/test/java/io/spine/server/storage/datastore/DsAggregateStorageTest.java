@@ -39,6 +39,7 @@ import io.spine.testdata.Sample;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +50,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class DsAggregateStorageShould extends AggregateStorageTest {
+@DisplayName("DsAggregateStorage should")
+class DsAggregateStorageTest extends AggregateStorageTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory;
 
@@ -65,17 +66,17 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
     }
 
     @BeforeAll
-    public static void setUpClass() {
+    static void setUpClass() {
         datastoreFactory.setUp();
     }
 
     @AfterEach
-    public void tearDownTest() {
+    void tearDownTest() {
         datastoreFactory.clear();
     }
 
     @AfterAll
-    public static void tearDownClass() {
+    static void tearDownClass() {
         datastoreFactory.tearDown();
     }
 
@@ -93,22 +94,27 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
         return datastoreFactory.createAggregateStorage(aggregateClass);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
     @Test
-    public void provide_access_to_DatastoreWrapper_for_extensibility() {
+    @DisplayName("provide access to DatastoreWrapper for extensibility")
+    void testAccessDatastoreWrapper() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         DatastoreWrapper datastore = storage.getDatastore();
         assertNotNull(datastore);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
     @Test
-    public void provide_access_to_PropertyStorage_for_extensibility() {
+    @DisplayName("provide access to PropertyStorage for extensibility")
+    void testAccessPropertyStorage() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         DsPropertyStorage propertyStorage = storage.getPropertyStorage();
         assertNotNull(propertyStorage);
     }
 
     @Test
-    public void fail_to_write_invalid_record() {
+    @DisplayName("fail to write invalid record")
+    void testFailOnInvalidRecord() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         assertThrows(IllegalArgumentException.class,
                      () -> storage.writeRecord(Sample.messageOfType(ProjectId.class),
@@ -116,11 +122,12 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
     }
 
     @Test
-    public void set_limit_for_history_backward_query() {
+    @DisplayName("set limit for history backward query")
+    void testHistoryQueryLimit() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         int batchSize = 10;
         AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(newId(),
-                                                                                   batchSize);
+                                                                             batchSize);
         EntityQuery historyBackwardQuery = storage.historyBackwardQuery(request);
 
         int queryLimit = historyBackwardQuery.getLimit();
@@ -128,10 +135,11 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
     }
 
     @Test
-    public void still_load_aggregates_properly_after_snapshot_trigger_decrease_at_runtime() {
+    @DisplayName("still load aggregates properly after snapshot trigger decrease at runtime")
+    void testLoadHistoryAfterSnapshotTriggerChange() {
         BoundedContext boundedContext =
                 BoundedContext.newBuilder()
-                              .setName(DsAggregateStorageShould.class.getName())
+                              .setName(DsAggregateStorageTest.class.getName())
                               .setStorageFactorySupplier(Suppliers.ofInstance(datastoreFactory))
                               .build();
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
@@ -144,7 +152,7 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
         int tasksCount = initialSnapshotTrigger * 2 - 1;
 
         repository.setSnapshotTrigger(initialSnapshotTrigger);
-        TestActorRequestFactory factory = newInstance(DsAggregateStorageShould.class);
+        TestActorRequestFactory factory = newInstance(DsAggregateStorageTest.class);
         for (int i = 0; i < tasksCount; i++) {
             AggAddTask command = addTask(id);
             CommandEnvelope envelope = CommandEnvelope.of(factory.createCommand(command));
@@ -153,8 +161,7 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
 
         int minimalSnapshotTrigger = 1;
         repository.setSnapshotTrigger(minimalSnapshotTrigger);
-        ProjectAggregate aggregate = repository.find(id)
-                                                     .get();
+        ProjectAggregate aggregate = repository.find(id).get();
         assertEquals(tasksCount, aggregate.getState()
                                           .getTaskCount());
     }
@@ -166,6 +173,6 @@ public class DsAggregateStorageShould extends AggregateStorageTest {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(DsAggregateStorageShould.class);
+        private final Logger value = LoggerFactory.getLogger(DsAggregateStorageTest.class);
     }
 }

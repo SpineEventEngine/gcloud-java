@@ -27,6 +27,7 @@ import io.spine.server.storage.datastore.ProjectId;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.validate.Validate.isDefault;
@@ -39,13 +40,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /**
  * @author Dmytro Dashenkov
  */
-public class SingleTenantNamespaceSuppierShould {
+@DisplayName("SingleTenantNamespaceSupplier should")
+class SingleTenantNamespaceSupplierTest {
 
     @Test
-    public void produce_empty_namespace() {
+    @DisplayName("produce empty namespace")
+    void testProduceEmpty() {
         NamespaceSupplier supplier = NamespaceSupplier.instance(false,
-                                                                      null,
-                                                                      ProjectId.of("any"));
+                                                                null,
+                                                                ProjectId.of("any"));
         Namespace namespace = supplier.get();
         assertNotNull(namespace);
         assertThat(namespace.getValue(), isEmptyString());
@@ -54,11 +57,12 @@ public class SingleTenantNamespaceSuppierShould {
     }
 
     @Test
-    public void produce_custom_namespace() {
+    @DisplayName("produce custom namespace")
+    void testProduceCustom() {
         String namespaceValue = "my-custom-namespace";
         NamespaceSupplier supplier = NamespaceSupplier.instance(false,
-                                                                      namespaceValue,
-                                                                      ProjectId.of("some"));
+                                                                namespaceValue,
+                                                                ProjectId.of("some"));
         Namespace namespace = supplier.get();
         assertNotNull(namespace);
         assertEquals(namespaceValue, namespace.getValue());

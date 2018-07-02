@@ -22,6 +22,7 @@ package io.spine.server.storage.datastore;
 import com.google.protobuf.Any;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
@@ -33,10 +34,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Alex Tymchenko
  */
-public class StandStorageRecordShould {
+@DisplayName("StandStorageRecord should")
+class StandStorageRecordTest {
 
     @Test
-    public void have_protected_constructor_for_extension() {
+    @DisplayName("have protected constructor for extension")
+    void testCtor() {
         AggregateStateId someId = AggregateStateId.of(newUuid(), TypeUrl.from(Any.getDescriptor()));
         boolean matches = hasProtectedConstructorWithSingleParam(
                 StandStorageRecord.class, someId);
@@ -55,7 +58,7 @@ public class StandStorageRecordShould {
      * @param <I>            the expected type of the constructor argument
      * @return {@code true} if the protected constructor is present, {@code false} otherwise
      */
-    public static <I> boolean hasProtectedConstructorWithSingleParam(
+    private static <I> boolean hasProtectedConstructorWithSingleParam(
             Class<?> clazz, I constructorArg) {
         Constructor constructor;
         try {

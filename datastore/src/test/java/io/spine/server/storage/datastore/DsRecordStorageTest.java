@@ -53,8 +53,8 @@ import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,6 +77,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -84,12 +85,13 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Dmytro Dashenkov
  */
-public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
-        DsRecordStorage<ProjectId>> {
+@DisplayName("DsRecordStorage should")
+public class DsRecordStorageTest
+        extends RecordStorageShould<ProjectId, DsRecordStorage<ProjectId>> {
 
     private static final String COLUMN_NAME_FOR_STORING = "columnName";
-    private static final TestDatastoreStorageFactory datastoreFactory
-            = TestDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory datastoreFactory =
+            TestDatastoreStorageFactory.getDefaultInstance();
 
     @SuppressWarnings("unchecked") // OK for tests.
     @Override
@@ -107,19 +109,19 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
     @Override
     protected ProjectId newId() {
         ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(Identifier.newUuid())
-                                             .build();
+                                       .setId(Identifier.newUuid())
+                                       .build();
         return projectId;
     }
 
     @Override
     protected Message newState(ProjectId projectId) {
         Project project = Project.newBuilder()
-                                       .setId(projectId)
-                                       .setName("Some test name")
-                                       .addTask(Task.getDefaultInstance())
-                                       .setStatus(Project.Status.CREATED)
-                                       .build();
+                                 .setId(projectId)
+                                 .setName("Some test name")
+                                 .addTask(Task.getDefaultInstance())
+                                 .setStatus(Project.Status.CREATED)
+                                 .build();
         return project;
     }
 
@@ -131,24 +133,27 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         datastoreFactory.setUp();
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         datastoreFactory.tearDown();
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
     @Test
-    public void provide_access_to_DatastoreWrapper_for_extensibility() {
+    @DisplayName("provide access to DatastoreWrapper for extensibility")
+    void testAccessDatastoreWrapper() {
         DsRecordStorage<ProjectId> storage = getStorage();
         DatastoreWrapper datastore = storage.getDatastore();
         assertNotNull(datastore);
     }
 
     @Test
-    public void provide_access_to_TypeUrl_for_extensibility() {
+    @DisplayName("provide access to TypeUrl for extensibility")
+    void testAccessTypeUrl() {
         DsRecordStorage<ProjectId> storage = getStorage();
         TypeUrl typeUrl = storage.getTypeUrl();
         assertNotNull(typeUrl);
@@ -159,10 +164,11 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
 
     @SuppressWarnings("OverlyLongMethod")
     // A complicated test case verifying right Datastore behavior on
-    // a low level of DatastoreWrapper and Datastore Entity/
+    // a low level of DatastoreWrapper and Datastore Entity.
     // Additionally checks the standard predefined Datastore Column Types
     @Test
-    public void persist_entity_Columns_beside_its_record() {
+    @DisplayName("persist entity columns beside the corresponding record")
+    void testPersistColumns() {
         String counter = "counter";
         String bigCounter = "bigCounter";
         String counterEven = "counterEven";
@@ -179,10 +185,10 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         TestConstCounterEntity entity = new TestConstCounterEntity(id);
         entity.injectState(state, versionValue);
         EntityRecord record = EntityRecord.newBuilder()
-                                                .setState(pack(state))
-                                                .setEntityId(pack(id))
-                                                .setVersion(versionValue)
-                                                .build();
+                                          .setState(pack(state))
+                                          .setEntityId(pack(id))
+                                          .setVersion(versionValue)
+                                          .build();
         DsRecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
         Collection<String> columns = recordWithColumns.getColumnNames();
@@ -207,8 +213,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         // Read Datastore Entity
         DatastoreWrapper datastore = storage.getDatastore();
         Key key = DsIdentifiers.keyFor(datastore,
-                                             Kind.of(state),
-                                             DsIdentifiers.ofEntityId(id));
+                                       Kind.of(state),
+                                       DsIdentifiers.ofEntityId(id));
         com.google.cloud.datastore.Entity datastoreEntity = datastore.read(key);
 
         // Check entity record
@@ -240,7 +246,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
 
     @Disabled("This test rarely passes on Travis CI due to eventual consistency.")
     @Test
-    public void pass_big_data_speed_test() {
+    @DisplayName("pass big data speed test")
+    void testBigData() {
         // Default bulk size is 500 records - the maximum records that could be written within
         // one write operation
         long maxReadTime = 1000;
@@ -252,12 +259,12 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
                 .setEntryFactory(new BigDataTester.EntryFactory<ProjectId>() {
                     @Override
                     public ProjectId newId() {
-                        return DsRecordStorageShould.this.newId();
+                        return DsRecordStorageTest.this.newId();
                     }
 
                     @Override
                     public EntityRecordWithColumns newRecord() {
-                        return DsRecordStorageShould.this.newRecordWithColumns(storage);
+                        return DsRecordStorageTest.this.newRecordWithColumns(storage);
                     }
                 })
                 .setReadLimit(maxReadTime)
@@ -267,16 +274,17 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
     }
 
     @Test
-    public void write_and_read_records_with_lifecycle_flags() {
+    @DisplayName("write and read records with lifecycle flags")
+    void testLifecycleFlags() {
         ProjectId id = newId();
         LifecycleFlags lifecycle = LifecycleFlags.newBuilder()
-                                                       .setArchived(true)
-                                                       .build();
+                                                 .setArchived(true)
+                                                 .build();
         EntityRecord record = EntityRecord.newBuilder()
-                                                .setState(pack(newState(id)))
-                                                .setLifecycleFlags(lifecycle)
-                                                .setEntityId(pack(id))
-                                                .build();
+                                          .setState(pack(newState(id)))
+                                          .setLifecycleFlags(lifecycle)
+                                          .setEntityId(pack(id))
+                                          .build();
         TestConstCounterEntity entity = new TestConstCounterEntity(id);
         entity.injectLifecycle(lifecycle);
         RecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
@@ -291,12 +299,13 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
     }
 
     @Test
-    public void convert_entity_record_to_entity_using_column_name_for_storing() {
+    @DisplayName("convert entity record to entity using column name for storing")
+    void testUseColumnStoreName() {
         DsRecordStorage<ProjectId> storage = newStorage(EntityWithCustomColumnName.class);
         ProjectId id = newId();
         EntityRecord record = EntityRecord.newBuilder()
-                                                .setState(pack(newState(id)))
-                                                .build();
+                                          .setState(pack(newState(id)))
+                                          .build();
         Entity entity = new EntityWithCustomColumnName(id);
         EntityRecordWithColumns entityRecordWithColumns = create(record, entity, storage);
         com.google.cloud.datastore.Entity datastoreEntity =
@@ -306,7 +315,8 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
     }
 
     @Test
-    public void query_by_IDs_when_possible() {
+    @DisplayName("query by IDs when possible")
+    void testQueryByIDs() {
         SpyStorageFactory.injectWrapper(datastoreFactory.getDatastore());
         DatastoreStorageFactory storageFactory = new SpyStorageFactory();
         RecordStorage<ProjectId> storage =
@@ -318,34 +328,34 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
             TestConstCounterEntity entity = new TestConstCounterEntity(newId());
             entities.add(entity);
             EntityRecord record = EntityRecord.newBuilder()
-                                                    .setState(pack(entity.getState()))
-                                                    .build();
+                                              .setState(pack(entity.getState()))
+                                              .build();
             EntityRecordWithColumns withColumns = create(record, entity, storage);
             storage.write(entity.getId(), withColumns);
         }
         TestConstCounterEntity targetEntity = entities.get(targetEntityIndex);
         EntityId targetId = EntityId.newBuilder()
-                                          .setId(pack(targetEntity.getId()))
-                                          .build();
+                                    .setId(pack(targetEntity.getId()))
+                                    .build();
         Object columnTargetValue = targetEntity.getCreationTime();
         EntityIdFilter idFilter = EntityIdFilter.newBuilder()
-                                                      .addIds(targetId)
-                                                      .build();
+                                                .addIds(targetId)
+                                                .build();
         CompositeColumnFilter columnFilter =
                 all(eq(TestConstCounterEntity.CREATED_COLUMN_NAME, columnTargetValue));
         EntityFilters entityFilters = EntityFilters.newBuilder()
-                                                         .setIdFilter(idFilter)
-                                                         .addFilter(columnFilter)
-                                                         .build();
+                                                   .setIdFilter(idFilter)
+                                                   .addFilter(columnFilter)
+                                                   .build();
         EntityQuery<ProjectId> entityQuery = from(entityFilters, storage);
         Iterator<EntityRecord> readResult = storage.readAll(entityQuery,
-                                                                  FieldMask.getDefaultInstance());
+                                                            FieldMask.getDefaultInstance());
         List<EntityRecord> resultList = newArrayList(readResult);
         assertEquals(1, resultList.size());
         assertEquals(targetEntity.getState(), unpack(resultList.get(0).getState()));
 
         DatastoreWrapper spy = storageFactory.getDatastore();
-        verify(spy).read(ArgumentMatchers.<Key>anyIterable());
+        verify(spy).read(anyIterable());
         verify(spy, never()).read(any(StructuredQuery.class));
     }
 
@@ -363,7 +373,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
         private final Timestamp creationTime;
         private LifecycleFlags lifecycleFlags;
 
-        protected TestConstCounterEntity(ProjectId id) {
+        private TestConstCounterEntity(ProjectId id) {
             super(id);
             this.creationTime = getCurrentTime();
         }
@@ -427,6 +437,7 @@ public class DsRecordStorageShould extends RecordStorageShould<ProjectId,
     }
 
     public static class EntityWithCustomColumnName extends AbstractEntity<ProjectId, Any> {
+
         private EntityWithCustomColumnName(ProjectId id) {
             super(id);
         }

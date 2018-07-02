@@ -18,19 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.tenant;
+package io.spine.server.storage.datastore;
 
+import com.google.common.testing.NullPointerTester;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
+import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class TenantConverterRegistryShould {
+@DisplayName("Indexes should")
+class IndexesTest {
 
     @Test
-    public void have_private_ctor() {
-        assertHasPrivateParameterlessCtor(TenantConverterRegistry.class);
+    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    void testPrivateCtor() {
+        assertHasPrivateParameterlessCtor(Indexes.class);
+    }
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void testNulls() {
+        new NullPointerTester()
+                .setDefault(Kind.class, Kind.of("arbitrary-kind"))
+                .setDefault(DatastoreWrapper.class, mock(DatastoreWrapper.class))
+                .testStaticMethods(Indexes.class, NullPointerTester.Visibility.PACKAGE);
     }
 }

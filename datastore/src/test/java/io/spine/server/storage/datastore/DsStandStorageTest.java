@@ -26,6 +26,7 @@ import io.spine.server.stand.StandStorageShould;
 import io.spine.server.storage.RecordStorage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -33,23 +34,25 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /**
  * @author Dmytro Dashenkov
  */
-public class DsStandStorageShould extends StandStorageShould {
+@DisplayName("DsStandStorage should")
+class DsStandStorageTest extends StandStorageShould {
 
-    private static final TestDatastoreStorageFactory datastoreFactory
-            = TestDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory datastoreFactory =
+            TestDatastoreStorageFactory.getDefaultInstance();
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         datastoreFactory.setUp();
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         datastoreFactory.tearDown();
     }
 
     @Test
-    public void contain_record_storage() {
+    @DisplayName("have RecordStorage instance")
+    void testRecordStorage() {
         RecordStorage<?> recordStorage =
                 ((DsStandStorage) newStorage(StandStorageRecord.class)).getRecordStorage();
         assertNotNull(recordStorage);

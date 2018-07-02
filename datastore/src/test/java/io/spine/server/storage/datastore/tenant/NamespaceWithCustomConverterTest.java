@@ -26,6 +26,7 @@ import io.spine.server.storage.datastore.ProjectId;
 import io.spine.string.Stringifier;
 import io.spine.string.Stringifiers;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -39,17 +40,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Dmytro Dashenkov
  */
-public class NamespaceWithCustomConverterShould {
+@DisplayName("Namespace with custom converter should")
+class NamespaceWithCustomConverterTest {
 
     private static final ProjectId PROJECT_ID = ProjectId.of("arbitraryproject");
 
     @BeforeAll
-    public static void setUp() {
+    static void setUp() {
         registerNamespaceConverter(PROJECT_ID, new CustomNamespaceConverter());
     }
 
     @Test
-    public void construct_from_TenantId() {
+    @DisplayName("construct from TenantId")
+    void testFromTenantId() {
         String ns = "my.test.namespace.from.tenant.id";
         TenantId tenantId = TenantId.newBuilder()
                                     .setValue(ns)
@@ -64,7 +67,8 @@ public class NamespaceWithCustomConverterShould {
     }
 
     @Test
-    public void construct_from_Key() {
+    @DisplayName("construct from Key")
+    void testFromKey() {
         String ns = "my.test.namespace.from.key";
         Key key = Key.newBuilder(PROJECT_ID.getValue(), "some.kind", ns)
                      .build();
@@ -74,7 +78,8 @@ public class NamespaceWithCustomConverterShould {
     }
 
     @Test
-    public void restore_to_TenantId() {
+    @DisplayName("restore to TenantId")
+    void testToTenantId() {
         String ns = "my.test.namespace.to.tenant.id";
         TenantId tenantId = TenantId.newBuilder()
                                     .setValue(ns)

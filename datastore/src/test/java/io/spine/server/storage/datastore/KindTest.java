@@ -28,18 +28,23 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
+import static io.spine.server.storage.datastore.given.TestCases.SUPPORT_EQUALITY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class KindShould {
+@DisplayName("Kind should")
+class KindTest {
 
     @Test
-    public void be_null_safe() {
+    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    void testNulls() {
         new NullPointerTester()
                 .setDefault(TypeUrl.class, TypeUrl.from(Any.getDescriptor()))
                 .setDefault(Descriptors.Descriptor.class, Any.getDescriptor())
@@ -49,7 +54,8 @@ public class KindShould {
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName(SUPPORT_EQUALITY)
+    void testEquals() {
         Kind anyFromDesc = Kind.of(Any.getDescriptor());
         Kind anyFromTypeUrl = Kind.of(TypeUrl.of(Any.class));
         Kind anyFromString = Kind.of("google.protobuf.Any");
@@ -65,20 +71,23 @@ public class KindShould {
     }
 
     @Test
-    public void not_accept_forbidden_prefix() {
+    @DisplayName("not accept forbidden prefix")
+    void testCheckValidity() {
         String invalidKind = "__my.invalid.type";
         assertThrows(IllegalArgumentException.class, () -> Kind.of(invalidKind));
     }
 
     @Test
-    public void construct_from_string() {
+    @DisplayName("construct from string")
+    void testFromString() {
         String type = "my.custom.type";
         Kind kind = Kind.of(type);
         assertEquals(type, kind.getValue());
     }
 
     @Test
-    public void construct_from_TypeUrl() {
+    @DisplayName("construct from TypeUrl")
+    void testFromTypeUrl() {
         Descriptors.Descriptor descriptor = Any.getDescriptor();
         TypeUrl type = TypeUrl.from(descriptor);
         Kind kind = Kind.of(type);
@@ -87,21 +96,24 @@ public class KindShould {
     }
 
     @Test
-    public void construct_from_descriptor() {
+    @DisplayName("construct from Descriptor")
+    void testFromDescriptor() {
         Descriptors.Descriptor descriptor = Any.getDescriptor();
         Kind kind = Kind.of(descriptor);
         assertEquals(descriptor.getFullName(), kind.getValue());
     }
 
     @Test
-    public void construct_from_Message() {
+    @DisplayName("construct from Message")
+    void testFromMessage() {
         Message message = Any.getDefaultInstance();
         Kind kind = Kind.of(message);
         assertEquals(message.getDescriptorForType().getFullName(), kind.getValue());
     }
 
     @Test
-    public void construct_from_TypeName() {
+    @DisplayName("construct from TypeName")
+    void testFromTypeName() {
         Descriptors.Descriptor descriptor = Any.getDescriptor();
         TypeName type = TypeName.from(descriptor);
         Kind kind = Kind.of(type);

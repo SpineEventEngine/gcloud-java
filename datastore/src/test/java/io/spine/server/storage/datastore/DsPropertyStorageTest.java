@@ -19,15 +19,30 @@
  */
 package io.spine.server.storage.datastore;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import io.spine.test.Tests;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Alex Tymchenko
  */
-public class DatastorePropertiesShould {
+@DisplayName("DsPropertyStorage should")
+class DsPropertyStorageTest {
+    private static final TestDatastoreStorageFactory datastoreFactory =
+            TestDatastoreStorageFactory.getDefaultInstance();
+
+    @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
     @Test
-    public void have_private_constructor() {
-        Tests.assertHasPrivateParameterlessCtor(DsProperties.class);
+    @DisplayName("provide access to DatastoreWrapper for extensibility")
+    void testAccessDatastoreWrapper() {
+        DsPropertyStorage storage = getStorage();
+        DatastoreWrapper datastore = storage.getDatastore();
+        assertNotNull(datastore);
     }
+
+    private static DsPropertyStorage getStorage() {
+        return datastoreFactory.createPropertyStorage();
+    }
+
 }

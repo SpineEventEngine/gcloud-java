@@ -21,8 +21,10 @@
 package io.spine.server.storage.datastore.tenant;
 
 import io.spine.core.TenantId;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -30,15 +32,18 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * @author Dmytro Dashenkov
  */
-public class NamespaceConvertersShould {
+@DisplayName("NamespaceConverters should")
+class NamespaceConvertersTest {
 
     @Test
-    public void have_private_utility_ctor() {
+    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    void have_private_utility_ctor() {
         assertHasPrivateParameterlessCtor(NamespaceConverters.class);
     }
 
     @Test
-    public void create_stub_faulty_converter() {
+    @DisplayName("create stub faulty converter")
+    void testFaulty() {
         NamespaceToTenantIdConverter converter = NamespaceConverters.stub();
         try {
             converter.convert("");
@@ -55,7 +60,8 @@ public class NamespaceConvertersShould {
     }
 
     @Test
-    public void create_custom_namespace_converter() {
+    @DisplayName("create custom namespace converter")
+    void testCustomConverter() {
         NamespaceToTenantIdConverter converter = NamespaceConverters.forCustomNamespace();
         Namespace namespace = Namespace.of("namespace");
         TenantId fromInternalConverter = namespace.toTenantId();

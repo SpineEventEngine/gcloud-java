@@ -32,6 +32,7 @@ import io.spine.json.Json;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
@@ -39,6 +40,7 @@ import static com.google.cloud.datastore.BooleanValue.of;
 import static com.google.cloud.datastore.LongValue.of;
 import static com.google.cloud.datastore.StringValue.of;
 import static com.google.cloud.datastore.TimestampValue.of;
+import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.timestampType;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,23 +51,26 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Dmytro Dashenkov
  */
-public class DsColumnTypesShould {
+@DisplayName("DsColumnTypes should")
+class DsColumnTypesTest {
 
     private static final String RANDOM_COLUMN_LABEL = "some-column";
     private BaseEntity.Builder<Key, Entity.Builder> entity;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         entity = mockEntity();
     }
 
     @Test
-    public void have_private_utility_ctor() {
+    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    void testPrivateCtor() {
         assertHasPrivateParameterlessCtor(DsColumnTypes.class);
     }
 
     @Test
-    public void provide_simple_string_type() {
+    @DisplayName("provide simple string type")
+    void testString() {
         SimpleDatastoreColumnType<String> type = DsColumnTypes.stringType();
         String value = "some string";
 
@@ -75,7 +80,8 @@ public class DsColumnTypesShould {
     }
 
     @Test
-    public void provide_simple_int_type() {
+    @DisplayName("provide simple int type")
+    void testInt() {
         SimpleDatastoreColumnType<Integer> type = DsColumnTypes.integerType();
         int value = 42;
 
@@ -85,7 +91,8 @@ public class DsColumnTypesShould {
     }
 
     @Test
-    public void provide_simple_long_type() {
+    @DisplayName("provide simple long type")
+    void testLong() {
         SimpleDatastoreColumnType<Long> type = DsColumnTypes.longType();
         long value = 42L;
 
@@ -95,7 +102,8 @@ public class DsColumnTypesShould {
     }
 
     @Test
-    public void provide_simple_bool_type() {
+    @DisplayName("provide simple boolean type")
+    void testBoolean() {
         SimpleDatastoreColumnType<Boolean> type = DsColumnTypes.booleanType();
         boolean value = true;
 
@@ -105,12 +113,13 @@ public class DsColumnTypesShould {
     }
 
     @Test
-    public void provide_timestamp_to_date_time_type() {
+    @DisplayName("provide Timestamp as DateTime type")
+    void testTimestampToDateTime() {
         DatastoreColumnType<Timestamp, com.google.cloud.Timestamp> type = timestampType();
         Timestamp value = Time.getCurrentTime();
 
         com.google.cloud.Timestamp timestamp = ofTimeSecondsAndNanos(value.getSeconds(),
-                                                                           value.getNanos());
+                                                                     value.getNanos());
 
         setDatastoreType(type, value, timestamp);
 
@@ -118,12 +127,12 @@ public class DsColumnTypesShould {
     }
 
     @Test
-    public void provide_version_to_int_type() {
+    @DisplayName("provide Version as int type")
+    void testVersionToInt() {
         DatastoreColumnType<Version, Integer> type = DsColumnTypes.versionType();
         Version value = Versions.zero();
         value = Versions.increment(value);
         int number = 1;
-
 
         setDatastoreType(type, value, number);
 
@@ -131,7 +140,8 @@ public class DsColumnTypesShould {
     }
 
     @Test
-    public void provide_message_to_string_type() {
+    @DisplayName("provide Message as String type")
+    void testMessageToString() {
         DatastoreColumnType<AbstractMessage, String> type = DsColumnTypes.messageType();
 
         AbstractMessage value = Sample.messageOfType(Project.class);
@@ -143,7 +153,8 @@ public class DsColumnTypesShould {
     }
 
     @Test
-    public void set_null_value() {
+    @DisplayName("sut null value")
+    void testNull() {
         SimpleDatastoreColumnType<Boolean> type = DsColumnTypes.booleanType();
         type.setNull(entity, RANDOM_COLUMN_LABEL);
         verify(entity).setNull(eq(RANDOM_COLUMN_LABEL));

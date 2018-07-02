@@ -32,6 +32,7 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.test.storage.Project;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -52,6 +53,7 @@ import static io.spine.server.entity.storage.TestCompositeQueryParameterFactory.
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.server.storage.datastore.DsFilters.fromParams;
+import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;
@@ -65,7 +67,8 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class DsFiltersShould {
+@DisplayName("DsFilters should")
+class DsFiltersTest {
 
     private static final String ID_STRING_GETTER_NAME = "getIdString";
     private static final String ID_STRING_COLUMN_NAME = "idString";
@@ -73,18 +76,20 @@ public class DsFiltersShould {
     private static final String ARCHIVED_GETTER_NAME = "isArchived";
 
     @Test
-    public void have_private_util_ctor() {
+    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    void testPrivateCtor() {
         assertHasPrivateParameterlessCtor(DsFilters.class);
     }
 
     @Test
-    public void generate_filters_from_composite_query_params() {
+    @DisplayName("generate filters from composite query params")
+    void testCompositeParams() {
         String idStringValue = "42";
         boolean archivedValue = true;
         boolean deletedValue = true;
         Multimap<EntityColumn, ColumnFilter> conjunctiveFilters = of(
-                column(TestEntity.class, ID_STRING_GETTER_NAME), gt(ID_STRING_COLUMN_NAME,
-                                                                           idStringValue)
+                column(TestEntity.class, ID_STRING_GETTER_NAME),
+                gt(ID_STRING_COLUMN_NAME, idStringValue)
         );
         ImmutableMultimap<EntityColumn, ColumnFilter> disjunctiveFilters = of(
                 column(TestEntity.class, DELETED_GETTER_NAME), eq(deleted.name(), deletedValue),
@@ -97,14 +102,16 @@ public class DsFiltersShould {
 
         ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
         Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
-        assertContainsAll(filters, and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
-                                       PropertyFilter.eq(archived.name(), archivedValue)),
-                                   and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
-                                       PropertyFilter.eq(deleted.name(), deletedValue)));
+        assertContainsAll(filters,
+                          and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
+                              PropertyFilter.eq(archived.name(), archivedValue)),
+                          and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
+                              PropertyFilter.eq(deleted.name(), deletedValue)));
     }
 
     @Test
-    public void generate_filters_from_single_parameter() {
+    @DisplayName("generate filters from single parameter")
+    void testSingleParameter() {
         String versionValue = "314";
         ImmutableMultimap<EntityColumn, ColumnFilter> singleFilter = of(
                 column(TestEntity.class, ID_STRING_GETTER_NAME), le(ID_STRING_COLUMN_NAME,
@@ -120,7 +127,8 @@ public class DsFiltersShould {
     }
 
     @Test
-    public void generate_filters_for_multiple_disjunctive_groups() {
+    @DisplayName("generate filters for multiple disjunctive groups")
+    void testMultipleDisjunctiveGroups() {
         String greaterBoundDefiner = "271";
         String standaloneValue = "100";
         String lessBoundDefiner = "42";
@@ -160,10 +168,11 @@ public class DsFiltersShould {
     }
 
     @Test
-    public void generate_filters_from_empty_params() {
+    @DisplayName("generate filters from empty params")
+    void testEmptyParameters() {
         Collection<CompositeQueryParameter> parameters = Collections.emptySet();
         Collection<Filter> filters = fromParams(parameters,
-                                                      ColumnFilterAdapter.of(defaultInstance()));
+                                                ColumnFilterAdapter.of(defaultInstance()));
         assertNotNull(filters);
         assertSize(0, filters);
     }
@@ -171,7 +180,8 @@ public class DsFiltersShould {
     //TODO:2018-06-08:dmytro.kuzmin: re-write without mocks when null column filters are available.
     // See https://github.com/SpineEventEngine/core-java/issues/720.
     @Test
-    public void generate_filters_for_null_column_value() {
+    @DisplayName("generate filters for null column value")
+    void testNullFilters() {
         EntityColumn column = mock(EntityColumn.class);
         when(column.getStoredName()).thenReturn(ID_STRING_COLUMN_NAME);
         when(column.getType()).thenReturn(String.class);

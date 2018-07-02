@@ -33,10 +33,13 @@ import io.spine.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.storage.datastore.type.SimpleDatastoreColumnType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
+import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.nullRef;
@@ -52,45 +55,55 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class DatastoreStorageFactoryBuilderShould {
+@DisplayName("DatastoreStorageFactory.Builder should")
+class DatastoreStorageFactoryBuilderTest {
 
     @Test
-    public void have_private_ctor() {
+    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    void testPrivateCtor() {
         assertHasPrivateParameterlessCtor(DatastoreStorageFactory.Builder.class);
     }
 
     @Test
-    public void not_accept_nulls() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void testNulls() {
         new NullPointerTester()
-                .setDefault(Datastore.class, mockDatastore())
-                .setDefault(ColumnTypeRegistry.class, DatastoreTypeRegistryFactory.defaultInstance())
-                .testInstanceMethods(DatastoreStorageFactory.newBuilder(), NullPointerTester.Visibility.PACKAGE);
+                .setDefault(Datastore.class,
+                            mockDatastore())
+                .setDefault(ColumnTypeRegistry.class,
+                            DatastoreTypeRegistryFactory.defaultInstance())
+                .testInstanceMethods(DatastoreStorageFactory.newBuilder(),
+                                     NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
-    public void construct_factories_with_default_type_registry() {
+    @DisplayName("construct factories with default type registry")
+    void testDefaultTypeRegistry() {
         StorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                              .setDatastore(mockDatastore())
-                                                              .build();
+                                                        .setDatastore(mockDatastore())
+                                                        .build();
         ColumnTypeRegistry registry = factory.getTypeRegistry();
         assertNotNull(registry);
     }
 
     @Test
-    public void construct_single_tenant_factories_by_default() {
+    @DisplayName("construct single tenant factories by default")
+    void testDefaultTenancy() {
         StorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                              .setDatastore(mockDatastore())
-                                                              .build();
+                                                        .setDatastore(mockDatastore())
+                                                        .build();
         assertFalse(factory.isMultitenant());
     }
 
     @Test
-    public void construct_factories_with_extended_type_registry() {
+    @DisplayName("construct factories with extended type registry")
+    void testExtendedTypeRegistry() {
         StorageFactory factory =
                 DatastoreStorageFactory.newBuilder()
                                        .setDatastore(mockDatastore())
                                        .setTypeRegistry(predefinedValuesAnd()
-                                                                .put(Byte.class, new MockByteColumnType())
+                                                                .put(Byte.class,
+                                                                     new MockByteColumnType())
                                                                 .build())
                                        .build();
         ColumnTypeRegistry<?> registry = factory.getTypeRegistry();
@@ -100,7 +113,8 @@ public class DatastoreStorageFactoryBuilderShould {
     }
 
     @Test
-    public void ensure_datastore_has_no_namespace_if_multitenant() {
+    @DisplayName("ensure datastore has no namespace if multitenant")
+    void testDatastoreNamespaceInOptions() {
         DatastoreOptions options =
                 DatastoreOptions.newBuilder()
                                 .setNamespace("non-null-or-empty-namespace")
@@ -114,7 +128,8 @@ public class DatastoreStorageFactoryBuilderShould {
     }
 
     @Test
-    public void allow_custom_namespace_for_single_tenant_instances() {
+    @DisplayName("allow custom namespace for single tenant instances")
+    void testCustomNamespace() {
         String namespace = "my.custom.namespace";
         DatastoreOptions options =
                 DatastoreOptions.newBuilder()
@@ -128,13 +143,14 @@ public class DatastoreStorageFactoryBuilderShould {
                                        .build();
         assertNotNull(factory);
         String actualNamespace = factory.getDatastore()
-                                              .getDatastoreOptions()
-                                              .getNamespace();
+                                        .getDatastoreOptions()
+                                        .getNamespace();
         assertEquals(namespace, actualNamespace);
     }
 
     @Test
-    public void register_custom_tenant_id_converter_upon_build() {
+    @DisplayName("register custom TenantId converter upon build")
+    void testCustomTenantId() {
         ProjectId withCustomConverter = ProjectId.of("customized");
         ProjectId withDefaultConverter = ProjectId.of("defaulted");
 
@@ -161,6 +177,12 @@ public class DatastoreStorageFactoryBuilderShould {
         assertFalse(absentConverter.isPresent());
     }
 
+    @Test
+    @DisplayName("fail to construct without datastore")
+    void testRequireDatastore() {
+        assertThrows(NullPointerException.class, DatastoreStorageFactory.newBuilder()::build);
+    }
+
     private static Datastore mockDatastore() {
         return TestDatastoreFactory.getLocalDatastore();
     }
@@ -173,10 +195,13 @@ public class DatastoreStorageFactoryBuilderShould {
     }
 
     private static class MockByteColumnType extends SimpleDatastoreColumnType<Byte> {
+
         @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, Byte value, String columnIdentifier) {
+        public void setColumnValue(BaseEntity.Builder storageRecord, Byte value,
+                                   String columnIdentifier) {
             // NOP
         }
+
         @Override
         public Value<?> toValue(Byte data) {
             // NOP
