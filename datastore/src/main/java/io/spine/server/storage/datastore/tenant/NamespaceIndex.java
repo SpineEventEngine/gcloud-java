@@ -27,10 +27,10 @@ import com.google.cloud.datastore.KeyQuery;
 import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
+import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.core.TenantId;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * A DAO for the Datastore {@link Namespace Namespaces}.
@@ -147,7 +148,7 @@ class NamespaceIndex implements TenantIndex {
      */
     private void fetchNamespaces() {
         Iterator<Key> existingNamespaces = namespaceQuery.run();
-        Set<Namespace> newNamespaces = new HashSet<>();
+        Set<Namespace> newNamespaces = newHashSet();
         Iterator<Namespace> extractedNamespaces =
                 Iterators.transform(existingNamespaces, new NamespaceUnpacker(multitenant));
         Iterators.addAll(newNamespaces, extractedNamespaces);

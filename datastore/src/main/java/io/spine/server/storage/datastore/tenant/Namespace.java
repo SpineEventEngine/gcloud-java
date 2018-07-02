@@ -130,11 +130,10 @@ public final class Namespace {
 
         TenantIdConverterType tenantIdConverterType =
                 TenantIdConverterType.forTenantId(id, customConverter.orElse(null));
-        NamespaceToTenantIdConverter converter = customConverter.orElse(
-                tenantIdConverterType.namespaceConverter);
+        NamespaceToTenantIdConverter converter =
+                customConverter.orElse(tenantIdConverterType.namespaceConverter);
         String ns = converter.toString(id);
-        return new Namespace(ns,
-                             customConverter.orElse(tenantIdConverterType.namespaceConverter));
+        return new Namespace(ns, converter);
     }
 
     /**
@@ -170,13 +169,13 @@ public final class Namespace {
 
         NamespaceToTenantIdConverter defaultConverter = tenantIdConverterType.namespaceConverter;
         Namespace result = new Namespace(namespace,
-                                               customConverter.orElse(defaultConverter));
+                                         customConverter.orElse(defaultConverter));
         return result;
     }
 
     private static String escapeIllegalCharacters(String candidateNamespace) {
         String result = AT_SYMBOL_PATTERN.matcher(candidateNamespace)
-                                               .replaceAll(quoteReplacement(AT_SYMBOL_REPLACEMENT));
+                                         .replaceAll(quoteReplacement(AT_SYMBOL_REPLACEMENT));
         return result;
     }
 
