@@ -45,7 +45,8 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.RecordStorageShould;
+import io.spine.server.storage.RecordStorageTest;
+import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
@@ -87,7 +88,7 @@ import static org.mockito.Mockito.verify;
  */
 @DisplayName("DsRecordStorage should")
 public class DsRecordStorageTest
-        extends RecordStorageShould<ProjectId, DsRecordStorage<ProjectId>> {
+        extends RecordStorageTest<ProjectId, DsRecordStorage<ProjectId>> {
 
     private static final String COLUMN_NAME_FOR_STORING = "columnName";
     private static final TestDatastoreStorageFactory datastoreFactory =

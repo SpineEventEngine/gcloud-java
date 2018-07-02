@@ -22,7 +22,7 @@ package io.spine.server.storage.datastore;
 
 import io.spine.server.entity.Entity;
 import io.spine.server.stand.StandStorage;
-import io.spine.server.stand.StandStorageShould;
+import io.spine.server.stand.StandStorageTest;
 import io.spine.server.storage.RecordStorage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @author Dmytro Dashenkov
  */
 @DisplayName("DsStandStorage should")
-class DsStandStorageTest extends StandStorageShould {
+class DsStandStorageTest extends StandStorageTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory =
             TestDatastoreStorageFactory.getDefaultInstance();
