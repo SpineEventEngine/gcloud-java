@@ -176,7 +176,7 @@ public class DatastoreWrapper {
      * @see DatastoreWrapper#createOrUpdate(Entity)
      */
     public void createOrUpdate(Collection<Entity> entities) {
-        final Entity[] array = new Entity[entities.size()];
+        Entity[] array = new Entity[entities.size()];
         entities.toArray(array);
         createOrUpdate(array);
     }
@@ -204,14 +204,14 @@ public class DatastoreWrapper {
      * @see DatastoreReader#get(Key...)
      */
     public Iterator<Entity> read(Iterable<Key> keys) {
-        final List<Key> keysList = newLinkedList(keys);
-        final Iterator<Entity> result;
+        List<Key> keysList = newLinkedList(keys);
+        Iterator<Entity> result;
         if (keysList.size() <= MAX_KEYS_PER_READ_REQUEST) {
             result = actor.get(toArray(keys, Key.class));
         } else {
             result = readBulk(keysList);
         }
-        final UnmodifiableIterator<Entity> unmodifiableResult = unmodifiableIterator(result);
+        UnmodifiableIterator<Entity> unmodifiableResult = unmodifiableIterator(result);
         return unmodifiableResult;
     }
 
@@ -235,11 +235,11 @@ public class DatastoreWrapper {
     @SuppressWarnings("LoopConditionNotUpdatedInsideLoop")
         // Implicit call to Iterator.next() in Iterators.addAll
     public Iterator<Entity> read(StructuredQuery<Entity> query) {
-        final Namespace namespace = getNamespace();
-        final StructuredQuery<Entity> queryWithNamespace = query.toBuilder()
+        Namespace namespace = getNamespace();
+        StructuredQuery<Entity> queryWithNamespace = query.toBuilder()
                                                                 .setNamespace(namespace.getValue())
                                                                 .build();
-        final Iterator<Entity> result = new DsQueryIterator(queryWithNamespace, actor);
+        Iterator<Entity> result = new DsQueryIterator(queryWithNamespace, actor);
         return result;
     }
 
@@ -258,14 +258,14 @@ public class DatastoreWrapper {
      * @param table kind (a.k.a. type, table, etc.) of the records to delete
      */
     void dropTable(String table) {
-        final Namespace namespace = getNamespace();
-        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+        Namespace namespace = getNamespace();
+        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setNamespace(namespace.getValue())
                                                    .setKind(table)
                                                    .build();
-        final Iterator<Entity> queryResult = read(query);
-        final List<Entity> entities = newArrayList(queryResult);
-        final Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
+        Iterator<Entity> queryResult = read(query);
+        List<Entity> entities = newArrayList(queryResult);
+        Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
             @Nullable
             @Override
             public Key apply(@Nullable Entity input) {
@@ -277,7 +277,7 @@ public class DatastoreWrapper {
             }
         });
 
-        final Key[] keysArray = new Key[keys.size()];
+        Key[] keysArray = new Key[keys.size()];
         keys.toArray(keysArray);
         dropTableInternal(keysArray);
     }
@@ -287,11 +287,11 @@ public class DatastoreWrapper {
             int start = 0;
             int end = MAX_ENTITIES_PER_WRITE_REQUEST;
             while (true) {
-                final int length = end - start;
+                int length = end - start;
                 if (length <= 0) {
                     return;
                 }
-                final Key[] keysSubarray = new Key[length];
+                Key[] keysSubarray = new Key[length];
                 System.arraycopy(keysArray, start, keysSubarray, 0, keysSubarray.length);
                 delete(keysSubarray);
 
@@ -381,14 +381,14 @@ public class DatastoreWrapper {
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
         }
-        final Namespace namespace = getNamespace();
+        Namespace namespace = getNamespace();
         keyFactory.setNamespace(namespace.getValue());
 
         return keyFactory;
     }
 
     public DatastoreOptions getDatastoreOptions() {
-        final DatastoreOptions options = datastore.getOptions()
+        DatastoreOptions options = datastore.getOptions()
                                                   .toBuilder()
                                                   .build();
         return options;
@@ -400,7 +400,7 @@ public class DatastoreWrapper {
     }
 
     private KeyFactory initKeyFactory(Kind kind) {
-        final KeyFactory keyFactory = datastore.newKeyFactory()
+        KeyFactory keyFactory = datastore.newKeyFactory()
                                                .setKind(kind.getValue());
         keyFactories.put(kind, keyFactory);
         return keyFactory;
@@ -418,7 +418,7 @@ public class DatastoreWrapper {
      * @see #read(Iterable)
      */
     private Iterator<Entity> readBulk(List<Key> keys) {
-        final int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
+        int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
         log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.",
                     pageCount);
         int lowerBound = 0;
@@ -426,9 +426,9 @@ public class DatastoreWrapper {
         int keysLeft = keys.size();
         Iterator<Entity> result = null;
         for (int i = 0; i < pageCount; i++) {
-            final List<Key> keysPage = keys.subList(lowerBound, higherBound);
+            List<Key> keysPage = keys.subList(lowerBound, higherBound);
 
-            final Iterator<Entity> page = actor.get(keysPage.toArray(EMPTY_KEY_ARRAY));
+            Iterator<Entity> page = actor.get(keysPage.toArray(EMPTY_KEY_ARRAY));
             result = concat(result, page);
 
             keysLeft -= keysPage.size();
@@ -440,18 +440,18 @@ public class DatastoreWrapper {
     }
 
     private void writeBulk(Entity[] entities) {
-        final int partsCount = entities.length / MAX_ENTITIES_PER_WRITE_REQUEST + 1;
+        int partsCount = entities.length / MAX_ENTITIES_PER_WRITE_REQUEST + 1;
         for (int i = 0; i < partsCount; i++) {
-            final int partHead = i * MAX_ENTITIES_PER_WRITE_REQUEST;
-            final int partTail = min(partHead + MAX_ENTITIES_PER_WRITE_REQUEST, entities.length);
+            int partHead = i * MAX_ENTITIES_PER_WRITE_REQUEST;
+            int partTail = min(partHead + MAX_ENTITIES_PER_WRITE_REQUEST, entities.length);
 
-            final Entity[] part = Arrays.copyOfRange(entities, partHead, partTail);
+            Entity[] part = Arrays.copyOfRange(entities, partHead, partTail);
             writeSmallBulk(part);
         }
     }
 
     private Namespace getNamespace() {
-        final Namespace namespace = namespaceSupplier.get();
+        Namespace namespace = namespaceSupplier.get();
         log().debug("Using namespace \"{}\".", namespace.getValue());
         return namespace;
     }
@@ -520,16 +520,16 @@ public class DatastoreWrapper {
             if (!hasNext()) {
                 throw new NoSuchElementException("The query results Iterator is empty.");
             }
-            final Entity result = currentPage.next();
+            Entity result = currentPage.next();
             return result;
         }
 
         private QueryResults<Entity> computeNextPage() {
-            final Cursor cursorAfter = currentPage.getCursorAfter();
-            final Query<Entity> queryForMoreResults = query.toBuilder()
+            Cursor cursorAfter = currentPage.getCursorAfter();
+            Query<Entity> queryForMoreResults = query.toBuilder()
                                                            .setStartCursor(cursorAfter)
                                                            .build();
-            final QueryResults<Entity> nextPage = datastore.run(queryForMoreResults);
+            QueryResults<Entity> nextPage = datastore.run(queryForMoreResults);
             return nextPage;
         }
 

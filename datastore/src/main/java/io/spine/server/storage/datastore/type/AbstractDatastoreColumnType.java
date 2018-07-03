@@ -53,7 +53,7 @@ public abstract class AbstractDatastoreColumnType<J, C> implements DatastoreColu
     public void setColumnValue(BaseEntity.Builder<Key, Entity.Builder> storageRecord,
                                C value,
                                String columnIdentifier) {
-        final Value<?> dsValue = toValue(value);
+        Value<?> dsValue = toValue(value);
         storageRecord.set(columnIdentifier, dsValue);
     }
 }

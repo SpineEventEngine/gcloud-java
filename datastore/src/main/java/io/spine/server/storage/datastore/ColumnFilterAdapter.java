@@ -65,19 +65,19 @@ final class ColumnFilterAdapter {
         checkNotNull(column);
         checkNotNull(columnFilter);
 
-        final DatastoreColumnType type = registry.get(column);
+        DatastoreColumnType type = registry.get(column);
         checkArgument(type != null, "Column of unknown type: %s.", column);
 
-        final Any filterValue = columnFilter.getValue();
-        final Object filterValueUnpacked = TypeConverter.toObject(filterValue, column.getType());
-        final Object columnValue = column.toPersistedValue(filterValueUnpacked);
+        Any filterValue = columnFilter.getValue();
+        Object filterValueUnpacked = TypeConverter.toObject(filterValue, column.getType());
+        Object columnValue = column.toPersistedValue(filterValueUnpacked);
 
         if (columnValue == null) {
             return NullValue.of();
         }
 
         @SuppressWarnings("unchecked") // Concrete type is unknown on compile time.
-        final Value<?> result = type.toValue(type.convertColumnValue(columnValue));
+        Value<?> result = type.toValue(type.convertColumnValue(columnValue));
         return result;
     }
 }

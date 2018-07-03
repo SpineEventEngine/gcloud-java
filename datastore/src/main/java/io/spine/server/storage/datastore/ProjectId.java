@@ -47,7 +47,7 @@ public final class ProjectId {
      * @return new instance of {@code ProjectId}
      */
     public static ProjectId of(String projectId) {
-        final ProjectId result = new ProjectId(checkNotNull(projectId));
+        ProjectId result = new ProjectId(checkNotNull(projectId));
         return result;
     }
 
@@ -60,8 +60,8 @@ public final class ProjectId {
      */
     public static ProjectId of(Datastore datastore) {
         checkNotNull(datastore);
-        final DatastoreOptions options = datastore.getOptions();
-        final String value = options.getProjectId();
+        DatastoreOptions options = datastore.getOptions();
+        String value = options.getProjectId();
         return of(value);
     }
 

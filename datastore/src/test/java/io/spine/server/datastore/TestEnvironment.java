@@ -31,8 +31,10 @@ public final class TestEnvironment {
 
     private static final String TRUE = "true";
 
+    /**
+     * Prevents the utility class instantiation.
+     */
     private TestEnvironment() {
-        // Prevent utility class instantiation.
     }
 
     /**
@@ -45,8 +47,8 @@ public final class TestEnvironment {
      * @see System#getenv()
      */
     public static boolean runsOnCi() {
-        final String ciEnvValue = getenv("CI");
-        final boolean onCi = TRUE.equalsIgnoreCase(ciEnvValue);
+        String ciEnvValue = getenv("CI");
+        boolean onCi = TRUE.equalsIgnoreCase(ciEnvValue);
         return onCi;
     }
 }

@@ -24,119 +24,76 @@ buildscript {
     // As long as `buildscript` section is always evaluated first, we need to apply
     // `ext.gradle` explicitly here.
     apply from: "ext.gradle"
-
-    ext {
-        googleMavenCentralMirror = 'https://maven-central.storage.googleapis.com'
-        spineRepository = 'http://maven.teamdev.com/repository/spine'
-        spineSnapshotsRepository = 'http://maven.teamdev.com/repository/spine-snapshots'
-    }
+    apply from: "$rootDir/config/gradle/dependencies.gradle"
 
     repositories {
         jcenter()
-        maven { url = googleMavenCentralMirror }
-
+        google()
         mavenCentral()
         mavenLocal()
-
-        // Spine releases repository.
-        maven { url = spineRepository }
-
-        // Spine snapshots repository.
-        maven { url = spineSnapshotsRepository }
-    }
-
-    dependencies {
-        classpath "org.junit.platform:junit-platform-gradle-plugin:$jUnitPlatformVersion"
+        maven { url = repos.spine }
+        maven { url = repos.spineSnapshots }
     }
 }
 
 apply from: 'ext.gradle'
 
 ext {
-    publishPlugin = "$rootDir/scripts/publish.gradle"
-    jacocoPlugin = "$rootDir/scripts/code-coverage.gradle"
-
     credentialsPropertyFile = 'credentials.properties'
     runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
 
-    projectsToPublish = ['datastore', 'web', 'firebase-web']
+    projectsToPublish = ['datastore']
 }
 
 allprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
+    apply plugin: 'jacoco'
+
     group = 'io.spine'
     version = project.spineGaeVersion
-
-    apply from: "$rootDir/ext.gradle"
-
-    repositories {
-        mavenCentral()
-    }
 }
 
 subprojects {
     project.ext {
         sourcesRootDir = "${projectDir}/src"
-
-        generateDescriptorSetPlugin = "${rootDir}/scripts/generate-descriptor-set.gradle"
-        protobufImportPlugin = "$rootDir/scripts/protobuf.gradle"
     }
 
     apply plugin: 'maven-publish'
-    apply plugin: 'org.junit.platform.gradle.plugin'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
     repositories {
         jcenter()
-        maven { url = googleMavenCentralMirror }
-
+        google()
         mavenCentral()
         mavenLocal()
-
-        // Spine releases repository.
-        maven { url = spineRepository }
-
-        // Spine snapshots repository.
-        maven { url = spineSnapshotsRepository }
+        maven { url = repos.spine }
+        maven { url = repos.spineSnapshots }
     }
 
     dependencies {
-        compile group: 'io.spine', name: "spine-server", version: spineVersion, changing: true
+        implementation group: 'io.spine', name: "spine-server", version: spineVersion
 
-        testCompile group: 'io.spine', name: "spine-testutil-server", version: spineVersion, changing: true
-        testCompile group: 'io.spine', name: "spine-server", version: spineVersion, changing: true, classifier: "test"
+        testImplementation group: 'io.spine', name: "spine-testutil-server", version: spineVersion
+        testImplementation group: 'io.spine', name: "spine-server", version: spineVersion, classifier: "test"
 
-        testCompile "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
-        testRuntime "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
-        testRuntime "org.junit.vintage:junit-vintage-engine:${jUnitVersion}"
+        testImplementation deps.test.junit5Api
+        testImplementation deps.test.junit5Runner
 
-        testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
-        testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
-        testCompile group: 'com.google.guava', name: 'guava-testlib', version: guavaVersion
+        testImplementation deps.test.hamcrest
+        testImplementation deps.test.mockito
+        testImplementation deps.test.guavaTestlib
 
-        testRuntime group: 'org.slf4j', name: 'slf4j-jdk14', version: slf4jVersion
+        testRuntime deps.test.slf4j
     }
 
-    junitPlatform {
-        platformVersion jUnitPlatformVersion
+    apply from: "$rootDir/config/gradle/test-output.gradle"
 
-        logManager 'java.util.logging.LogManager'
-
-        selectors {
-            directory "${sourcesRootDir}/test/java"
-            packages 'io.spine.server.storage.datastore', 'io.spine.server.datastore', 'io.spine.web'
-        }
-
-        filters {
-            engines {
-                include 'junit-jupiter'
-                include 'junit-vintage'
-            }
-
-            includeClassNamePatterns '.*Test', '.*Should'
+    test {
+        useJUnitPlatform {
+            includeEngines 'junit-jupiter'
         }
     }
 
@@ -172,5 +129,5 @@ task startDatastore {
 
 tasks["check"].dependsOn startDatastore
 
-apply from: jacocoPlugin
-apply from: publishPlugin
+apply from: "$rootDir/config/gradle/jacoco.gradle"
+apply from: "$rootDir/config/gradle/publish.gradle"

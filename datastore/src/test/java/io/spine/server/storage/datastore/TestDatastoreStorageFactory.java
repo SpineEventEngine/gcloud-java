@@ -46,8 +46,8 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
      */
     static TestDatastoreStorageFactory getDefaultInstance() {
-        final boolean onCi = runsOnCi();
-        final String message = onCi
+        boolean onCi = runsOnCi();
+        String message = onCi
                                ? "Running on CI. Connecting to remote Google Cloud Datastore"
                                : "Running on local machine. Connecting to a local Datastore emulator";
         log().info(message);

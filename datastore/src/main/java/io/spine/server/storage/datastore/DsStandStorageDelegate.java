@@ -34,6 +34,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.stand.AggregateStateId;
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.type.TypeUrl;
 
@@ -45,7 +46,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
 
 /**
- * A {@link io.spine.server.storage.RecordStorage RecordStorage} to which {@link DsStandStorage}
+ * A {@link RecordStorage RecordStorage} to which {@link DsStandStorage}
  * delegates its operations.
  *
  * @author Dmytro Dashenkov
@@ -79,31 +80,31 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
     @Override
     protected Entity entityRecordToEntity(AggregateStateId id, EntityRecordWithColumns record) {
-        final Entity incompleteEntity = super.entityRecordToEntity(id, record);
-        final String typeUrl = record.getRecord()
+        Entity incompleteEntity = super.entityRecordToEntity(id, record);
+        String typeUrl = record.getRecord()
                                      .getState()
                                      .getTypeUrl();
-        final Entity.Builder builder = Entity.newBuilder(incompleteEntity)
+        Entity.Builder builder = Entity.newBuilder(incompleteEntity)
                                              .set(TYPE_URL_KEY, typeUrl);
-        final Entity completeEntity = builder.build();
+        Entity completeEntity = builder.build();
         return completeEntity;
     }
 
-    public Iterator<EntityRecord> readAllByType(final TypeUrl typeUrl, final FieldMask fieldMask) {
+    public Iterator<EntityRecord> readAllByType(TypeUrl typeUrl, FieldMask fieldMask) {
         return queryAllByType(typeUrl, fieldMask);
     }
 
-    public Iterator<EntityRecord> readAllByType(final TypeUrl typeUrl) {
+    public Iterator<EntityRecord> readAllByType(TypeUrl typeUrl) {
         return queryAllByType(typeUrl, FieldMask.getDefaultInstance());
     }
 
     protected Iterator<EntityRecord> queryAllByType(TypeUrl typeUrl,
                                                     FieldMask fieldMask) {
-        final StructuredQuery<Entity> query = buildByTypeQuery(typeUrl);
+        StructuredQuery<Entity> query = buildByTypeQuery(typeUrl);
 
-        final Iterator<Entity> records = getDatastore().read(query);
-        final Iterator<EntityRecord> result = toRecords(records,
-                                                        activeEntity(),
+        Iterator<Entity> records = getDatastore().read(query);
+        Iterator<EntityRecord> result = toRecords(records,
+                                                        activeEntity()::apply,
                                                         typeUrl,
                                                         fieldMask);
         return result;
@@ -114,17 +115,17 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     public Iterator<AggregateStateId> index() {
         checkNotClosed();
 
-        final EntityQuery.Builder query = Query.newEntityQueryBuilder()
+        EntityQuery.Builder query = Query.newEntityQueryBuilder()
                                                .setKind(KIND.getValue());
 
-        final Iterator<Entity> allEntities = getDatastore().read(query.build());
-        final Iterator<AggregateStateId> idIterator =
+        Iterator<Entity> allEntities = getDatastore().read(query.build());
+        Iterator<AggregateStateId> idIterator =
                 Iterators.transform(allEntities,
                                     new Function<Entity, AggregateStateId>() {
                                         @Override
                                         public AggregateStateId apply(@Nullable Entity entity) {
                                             checkNotNull(entity);
-                                            final AggregateStateId result = unpackKey(entity);
+                                            AggregateStateId result = unpackKey(entity);
                                             return result;
                                         }
                                     });
@@ -140,9 +141,9 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     }
 
     private StructuredQuery<Entity> buildByTypeQuery(TypeUrl typeUrl) {
-        final StructuredQuery<Entity> incompleteQuery = buildAllQuery(typeUrl);
-        final Filter filter = eq(TYPE_URL_KEY, typeUrl.value());
-        final StructuredQuery<Entity> query = incompleteQuery.toBuilder()
+        StructuredQuery<Entity> incompleteQuery = buildAllQuery(typeUrl);
+        Filter filter = eq(TYPE_URL_KEY, typeUrl.value());
+        StructuredQuery<Entity> query = incompleteQuery.toBuilder()
                                                  .setFilter(filter)
                                                  .build();
         return query;

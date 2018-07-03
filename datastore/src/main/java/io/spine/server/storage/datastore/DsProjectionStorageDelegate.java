@@ -71,8 +71,8 @@ public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
      */
     @Override
     protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
-        final String entityKind = kindFrom(typeUrl).getValue();
-        final StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+        String entityKind = kindFrom(typeUrl).getValue();
+        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
                                                    .setKind(entityKind)
                                                    .setFilter(activeEntity())
                                                    .build();
@@ -110,7 +110,7 @@ public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
          */
         public DsProjectionStorageDelegate<I> build() {
             checkRequiredFields();
-            final DsProjectionStorageDelegate<I> storage =
+            DsProjectionStorageDelegate<I> storage =
                     new DsProjectionStorageDelegate<>(this);
             return storage;
         }

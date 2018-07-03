@@ -32,8 +32,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class DatastoreTenants {
 
+    /**
+     * Prevents the utility class instantiation.
+     */
     private DatastoreTenants() {
-        // Prevent the utility class initialization
     }
 
     /**
@@ -84,7 +86,7 @@ public final class DatastoreTenants {
     public static TenantIndex index(Datastore datastore) {
         checkNotNull(datastore);
         // We assume we are in a single-tenant execution environment
-        final TenantIndex index = new NamespaceIndex(datastore, true);
+        TenantIndex index = new NamespaceIndex(datastore, true);
         return index;
     }
 }

@@ -58,8 +58,8 @@ class Entities {
             if (input == null) {
                 return false;
             }
-            final boolean isNotArchived = !isArchived(input);
-            final boolean isNotDeleted = !isDeleted(input);
+            boolean isNotArchived = !isArchived(input);
+            boolean isNotDeleted = !isDeleted(input);
             return isNotArchived && isNotDeleted;
         }
     };
@@ -86,14 +86,14 @@ class Entities {
             return defaultMessage(type);
         }
 
-        final Blob value = entity.getBlob(EntityField.bytes.toString());
-        final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
+        Blob value = entity.getBlob(EntityField.bytes.toString());
+        ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
-        final Any wrapped = Any.newBuilder()
+        Any wrapped = Any.newBuilder()
                                .setValue(valueBytes)
                                .setTypeUrl(type.value())
                                .build();
-        final M result = AnyPacker.unpack(wrapped);
+        M result = AnyPacker.unpack(wrapped);
         return result;
     }
 
@@ -110,7 +110,7 @@ class Entities {
      */
     static <M extends Message> Iterator<M> entitiesToMessages(Iterator<Entity> entities,
                                                               TypeUrl type) {
-        final Function<Entity, M> transformer = entityToMessage(type);
+        Function<Entity, M> transformer = entityToMessage(type);
         return Iterators.transform(entities, transformer);
     }
 
@@ -123,22 +123,22 @@ class Entities {
      * @return a {@link Function} transforming {@linkplain Entity Entities} into
      *         {@linkplain Message Messages}
      */
-    static <M extends Message> Function<Entity, M> entityToMessage(final TypeUrl type) {
-        final String typeName = type.value();
-        final Function<Entity, M> transformer = new Function<Entity, M>() {
+    static <M extends Message> Function<Entity, M> entityToMessage(TypeUrl type) {
+        String typeName = type.value();
+        Function<Entity, M> transformer = new Function<Entity, M>() {
             @Override
             public M apply(@Nullable Entity entity) {
                 if (entity == null) {
                     return defaultMessage(type);
                 }
-                final Blob value = entity.getBlob(EntityField.bytes.toString());
-                final ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
+                Blob value = entity.getBlob(EntityField.bytes.toString());
+                ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
 
-                final Any wrapped = Any.newBuilder()
+                Any wrapped = Any.newBuilder()
                                        .setValue(valueBytes)
                                        .setTypeUrl(typeName)
                                        .build();
-                final M message = AnyPacker.unpack(wrapped);
+                M message = AnyPacker.unpack(wrapped);
                 return message;
             }
         };
@@ -156,12 +156,12 @@ class Entities {
         checkNotNull(message);
         checkNotNull(key);
 
-        final byte[] messageBytes = message.toByteArray();
-        final Blob valueBlob = Blob.copyFrom(messageBytes);
-        final BlobValue blobValue = BlobValue.newBuilder(valueBlob)
+        byte[] messageBytes = message.toByteArray();
+        Blob valueBlob = Blob.copyFrom(messageBytes);
+        BlobValue blobValue = BlobValue.newBuilder(valueBlob)
                                              .setExcludeFromIndexes(true)
                                              .build();
-        final Entity entity = Entity.newBuilder(key)
+        Entity entity = Entity.newBuilder(key)
                                     .set(EntityField.bytes.toString(), blobValue)
                                     .build();
         return entity;
@@ -173,13 +173,13 @@ class Entities {
 
     @SuppressWarnings("unchecked")
     static <M extends Message> M defaultMessage(TypeUrl type) {
-        final Class<M> messageClass = type.getJavaClass();
+        Class<M> messageClass = type.getJavaClass();
         checkState(messageClass != null, String.format(
                 "Not found class for type url \"%s\". Try to rebuild the project",
                 type.getTypeName()));
-        final M message;
+        M message;
         try {
-            final Method factoryMethod =
+            Method factoryMethod =
                     messageClass.getDeclaredMethod(DEFAULT_MESSAGE_FACTORY_METHOD_NAME);
             message = (M) factoryMethod.invoke(null);
             return message;

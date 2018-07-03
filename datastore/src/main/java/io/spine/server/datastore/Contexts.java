@@ -62,14 +62,14 @@ public final class Contexts {
      */
     public static BoundedContext.Builder onTopOf(DatastoreStorageFactory storageFactory) {
         checkNotNull(storageFactory);
-        final Datastore datastore = storageFactory.getDatastore()
+        Datastore datastore = storageFactory.getDatastore()
                                                   .getDatastoreOptions()
                                                   .getService();
-        final TenantIndex tenantIndex = DatastoreTenants.index(datastore);
-        final Supplier<StorageFactory> storageFactorySupplier =
+        TenantIndex tenantIndex = DatastoreTenants.index(datastore);
+        Supplier<StorageFactory> storageFactorySupplier =
                 Suppliers.<StorageFactory>ofInstance(storageFactory);
 
-        final BoundedContext.Builder resultBuilder =
+        BoundedContext.Builder resultBuilder =
                 BoundedContext.newBuilder()
                               .setMultitenant(storageFactory.isMultitenant())
                               .setStorageFactorySupplier(storageFactorySupplier)

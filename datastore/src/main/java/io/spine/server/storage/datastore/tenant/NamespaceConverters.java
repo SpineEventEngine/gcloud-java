@@ -125,7 +125,7 @@ final class NamespaceConverters {
 
         @Override
         protected final TenantId toTenantId(String namespace) {
-            final String significantNamespacePart =
+            String significantNamespacePart =
                     namespace.substring(SIGNIFICANT_PART_START_INDEX);
             return significantStringToTenantId(significantNamespacePart);
         }
@@ -144,19 +144,19 @@ final class NamespaceConverters {
 
         @Override
         protected String toSignificantString(TenantId tenantId) {
-            final String value = tenantId.getDomain()
-                                         .getValue();
+            String value = tenantId.getDomain()
+                                   .getValue();
             return value;
         }
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            final InternetDomain domain = InternetDomain.newBuilder()
-                                                        .setValue(namespace)
-                                                        .build();
-            final TenantId tenantId = TenantId.newBuilder()
-                                              .setDomain(domain)
-                                              .build();
+            InternetDomain domain = InternetDomain.newBuilder()
+                                                  .setValue(namespace)
+                                                  .build();
+            TenantId tenantId = TenantId.newBuilder()
+                                        .setDomain(domain)
+                                        .build();
             return tenantId;
         }
     }
@@ -170,19 +170,19 @@ final class NamespaceConverters {
 
         @Override
         protected String toSignificantString(TenantId tenantId) {
-            final String value = tenantId.getEmail()
-                                         .getValue();
+            String value = tenantId.getEmail()
+                                   .getValue();
             return value;
         }
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            final EmailAddress email = EmailAddress.newBuilder()
-                                                   .setValue(namespace)
-                                                   .build();
-            final TenantId tenantId = TenantId.newBuilder()
-                                              .setEmail(email)
-                                              .build();
+            EmailAddress email = EmailAddress.newBuilder()
+                                             .setValue(namespace)
+                                             .build();
+            TenantId tenantId = TenantId.newBuilder()
+                                        .setEmail(email)
+                                        .build();
             return tenantId;
         }
     }
@@ -196,20 +196,21 @@ final class NamespaceConverters {
 
         @Override
         protected String toSignificantString(TenantId tenantId) {
-            final String value = tenantId.getValue();
+            String value = tenantId.getValue();
             return value;
         }
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            final TenantId tenantId = TenantId.newBuilder()
-                                              .setValue(namespace)
-                                              .build();
+            TenantId tenantId = TenantId.newBuilder()
+                                        .setValue(namespace)
+                                        .build();
             return tenantId;
         }
     }
 
     private static class StubNamespaceToTenantIdConverter extends NamespaceToTenantIdConverter {
+
         @Override
         protected String toString(TenantId tenantId) {
             throw stubUsage();
@@ -229,15 +230,15 @@ final class NamespaceConverters {
 
         @Override
         protected String toString(TenantId tenantId) {
-            final String ns = tenantId.getValue();
+            String ns = tenantId.getValue();
             return ns;
         }
 
         @Override
         protected TenantId toTenantId(String namespace) {
-            final TenantId tenantId = TenantId.newBuilder()
-                                              .setValue(namespace)
-                                              .build();
+            TenantId tenantId = TenantId.newBuilder()
+                                        .setValue(namespace)
+                                        .build();
             return tenantId;
         }
     }

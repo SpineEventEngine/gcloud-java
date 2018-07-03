@@ -21,22 +21,25 @@
 package io.spine.server.storage.datastore.tenant;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
+import com.google.common.base.Converter;
 import io.spine.annotation.Internal;
+import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.ProjectId;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.synchronizedMap;
+import static java.util.Optional.ofNullable;
 
 /**
  * A registry of the {@link NamespaceToTenantIdConverter}s.
  *
  * <p>The converters are mapped to the {@link ProjectId}s one-to-one, i.e. one GAE project may
- * have only one strategy of converting the {@link io.spine.core.TenantId tenant IDs}.
+ * have only one strategy of converting the {@link TenantId tenant IDs}.
  *
  * @author Dmytro Dashenkov
  */
@@ -44,15 +47,17 @@ import static java.util.Collections.synchronizedMap;
 public final class TenantConverterRegistry {
 
     private static final Map<ProjectId, NamespaceToTenantIdConverter> tenantIdConverters =
-            synchronizedMap(Maps.<ProjectId, NamespaceToTenantIdConverter>newHashMap());
+            synchronizedMap(newHashMap());
 
+    /**
+     * Prevents the utility class instantiation.
+     */
     private TenantConverterRegistry() {
-        // Prevent initialization of this utility class
     }
 
     /**
-     * Registers a {@link com.google.common.base.Converter Converter} from string datastore
-     * namespace into {@link io.spine.core.TenantId TenantId} for the given {@link ProjectId}.
+     * Registers a {@link Converter Converter} from string datastore
+     * namespace into {@link TenantId TenantId} for the given {@link ProjectId}.
      *
      * <p>After this converter has been registered, all the Datastore namespace operations will use
      * it instead of the {@linkplain Namespace default behavior}.
@@ -61,7 +66,7 @@ public final class TenantConverterRegistry {
      * All the subsequent invocations will cause {@code IllegalStateException}s.
      *
      * @param converter the converter to use for the
-     *                  namespace-to-{@link io.spine.core.TenantId TenantId} and vice versa
+     *                  namespace-to-{@link TenantId TenantId} and vice versa
      *                  conversions
      * @see Namespace
      */
@@ -70,7 +75,7 @@ public final class TenantConverterRegistry {
                                                   NamespaceToTenantIdConverter converter) {
         checkNotNull(projectId);
         checkNotNull(converter);
-        final NamespaceToTenantIdConverter pastConverter = tenantIdConverters.put(projectId,
+        NamespaceToTenantIdConverter pastConverter = tenantIdConverters.put(projectId,
                                                                                   converter);
         checkState(pastConverter == null,
                    "A namespace converter has already been registered.");
@@ -81,12 +86,12 @@ public final class TenantConverterRegistry {
      *
      * @return the {@linkplain #registerNamespaceConverter registered}
      * {@link NamespaceToTenantIdConverter} wrapped into {@link Optional} or
-     * {@link Optional#absent() Optional.absent()} if the converter has never been registered
+     * {@link Optional#empty() Optional.empty()} if the converter has never been registered
      */
     @VisibleForTesting
     public static Optional<NamespaceToTenantIdConverter> getNamespaceConverter(ProjectId projectId) {
         checkNotNull(projectId);
-        final NamespaceToTenantIdConverter converter = tenantIdConverters.get(projectId);
-        return Optional.fromNullable(converter);
+        NamespaceToTenantIdConverter converter = tenantIdConverters.get(projectId);
+        return ofNullable(converter);
     }
 }
