@@ -24,9 +24,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Streams;
-import io.spine.server.storage.Storage;
 import io.spine.string.Stringifiers;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -37,12 +35,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A utility for generating the
- * {@linkplain Storage#index() storage ID indexes}.
+ * {@linkplain io.spine.server.storage.Storage#index() storage ID indexes}.
  *
  * @author Dmytro Dashenkov.
- * @see Storage#index()
+ * @see io.spine.server.storage.Storage#index()
  */
-public final class Indexes {
+final class Indexes {
 
     /**
      * Prevents the utility class instantiation.
@@ -58,15 +56,13 @@ public final class Indexes {
      * @param <I>       type of the IDs to retrieve
      * @return an {@link Iterator} of the IDs matching given record kind
      */
-    public static <I> Iterator<I> indexIterator(DatastoreWrapper datastore,
-                                                Kind kind,
-                                                Class<I> idType) {
+    static <I> Iterator<I> indexIterator(DatastoreWrapper datastore, Kind kind, Class<I> idType) {
         checkNotNull(datastore);
         checkNotNull(kind);
         checkNotNull(idType);
 
         EntityQuery.Builder query = Query.newEntityQueryBuilder()
-                                               .setKind(kind.getValue());
+                                         .setKind(kind.getValue());
         Iterator<Entity> allEntities = datastore.read(query.build());
         Iterator<I> idIterator = Streams.stream(allEntities)
                                         .map(idExtractor(idType))
