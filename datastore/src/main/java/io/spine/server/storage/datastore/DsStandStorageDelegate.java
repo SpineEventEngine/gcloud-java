@@ -104,7 +104,7 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
 
         Iterator<Entity> records = getDatastore().read(query);
         Iterator<EntityRecord> result = toRecords(records,
-                                                        activeEntity()::apply,
+                                                        activeEntity(),
                                                         typeUrl,
                                                         fieldMask);
         return result;
