@@ -23,12 +23,10 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StructuredQuery;
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
@@ -61,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -73,7 +72,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
-import static io.spine.test.Verify.assertContains;
+import static io.spine.testing.Verify.assertContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -88,7 +87,7 @@ import static org.mockito.Mockito.verify;
  */
 @DisplayName("DsRecordStorage should")
 public class DsRecordStorageTest
-        extends RecordStorageTest<ProjectId, DsRecordStorage<ProjectId>> {
+        extends RecordStorageTest<DsRecordStorage<ProjectId>> {
 
     private static final String COLUMN_NAME_FOR_STORING = "columnName";
     private static final TestDatastoreStorageFactory datastoreFactory =
@@ -105,14 +104,6 @@ public class DsRecordStorageTest
     @Override
     protected Class<? extends TestCounterEntity> getTestEntityClass() {
         return TestEntity.class;
-    }
-
-    @Override
-    protected ProjectId newId() {
-        ProjectId projectId = ProjectId.newBuilder()
-                                       .setId(Identifier.newUuid())
-                                       .build();
-        return projectId;
     }
 
     @Override
@@ -430,7 +421,7 @@ public class DsRecordStorageTest
         }
     }
 
-    public static class TestEntity extends TestCounterEntity<ProjectId> {
+    public static class TestEntity extends TestCounterEntity {
 
         protected TestEntity(ProjectId id) {
             super(id);
