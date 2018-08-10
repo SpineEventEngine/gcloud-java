@@ -28,7 +28,6 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Functions;
-import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -57,15 +56,16 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.concat;
-import static com.google.common.collect.Iterators.filter;
-import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Streams.stream;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.storage.OperatorEvaluator.eval;
@@ -152,7 +152,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         Entity response = datastore.read(key);
 
         if (response == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         EntityRecord result = Entities.entityToMessage(response, RECORD_TYPE_URL);
@@ -198,7 +198,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         Iterator<EntityRecord> result = queryAll(typeUrl,
                                                  allQuery,
                                                  fieldMask,
-                                                 activeEntity()::apply);
+                                                 activeEntity());
         return result;
     }
 
@@ -359,9 +359,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                    Function<Entity, @Nullable T> transformer) {
         Collection<Key> keys = toKeys(ids);
         Iterator<Entity> results = datastore.read(keys);
-        Iterator<Entity> filteredResults = filter(results, activeEntity());
-        Iterator<T> records = transform(filteredResults, transformer::apply);
-        return records;
+        return stream(results).filter(activeEntity())
+                              .map(transformer)
+                              .iterator();
     }
 
     private Iterator<EntityRecord> queryAll(TypeUrl typeUrl,
@@ -376,7 +376,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                                      Predicate<Entity> filter,
                                                      TypeUrl typeUrl,
                                                      FieldMask fieldMask) {
-        Iterator<Entity> filtered = filter(queryResults, filter::test);
+        Stream<Entity> filtered = stream(queryResults).filter(filter);
         Function<Entity, EntityRecord> transformer = input -> {
             checkNotNull(input);
             EntityRecord record = getRecordFromEntity(input);
@@ -389,7 +389,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             }
             return record;
         };
-        Iterator<EntityRecord> result = transform(filtered, transformer::apply);
+        Iterator<EntityRecord> result = filtered.map(transformer)
+                                                .iterator();
         return result;
     }
 
