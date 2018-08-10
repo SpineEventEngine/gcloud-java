@@ -28,7 +28,7 @@ import io.spine.annotation.Internal;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
@@ -47,6 +47,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
 
 /**
  * Creates storages based on GAE {@link Datastore}.
@@ -153,7 +154,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
-        EntityClass<Projection<I, ?, ?>> entityClass = new EntityClass<>(projectionClass);
+        EntityClass<? extends Projection<I, ?, ?>> entityClass = asEntityClass(projectionClass);
         TypeUrl stateType = entityClass.getStateType();
         Class<I> idClass = (Class<I>) entityClass.getIdClass();
         DsProjectionStorageDelegate<I> recordStorage =
@@ -179,7 +180,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        EntityClass<Entity<I, ?>> wrappedEntityClass = new EntityClass<>(entityClass);
+        EntityClass<? extends Entity<I, ?>> wrappedEntityClass = asEntityClass(entityClass);
         TypeUrl stateType = wrappedEntityClass.getStateType();
         Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
         DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
@@ -201,7 +202,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I> AggregateStorage<I> createAggregateStorage(
             Class<? extends Aggregate<I, ?, ?>> entityClass) {
         checkNotNull(entityClass);
-        EntityClass<Aggregate<I, ?, ?>> wrappedEntityClass = new EntityClass<>(entityClass);
+        EntityClass<? extends Aggregate<I, ?, ?>> wrappedEntityClass = asEntityClass(entityClass);
         DsPropertyStorage propertyStorage = createPropertyStorage();
         Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
         Class<? extends Message> stateClass = wrappedEntityClass.getStateClass();
