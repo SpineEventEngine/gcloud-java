@@ -10,6 +10,24 @@ indexes:
     - name: type
     - name: created
 
+  - kind: spine.system.server.EntityHistory
+    properties:
+    - name: aggregate_id
+    - name: version
+      direction: desc
+    - name: created
+      direction: desc
+    - name: snapshot
+
+  - kind: spine.system.server.CommandLifecycle
+    properties:
+    - name: aggregate_id
+    - name: version
+      direction: desc
+    - name: created
+      direction: desc
+    - name: snapshot
+
   # Indexes for the Aggregates.
   #
   # Each custom Aggregate type must have such indexes in order to be retrieved properly.
