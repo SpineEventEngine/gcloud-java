@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -55,6 +56,8 @@ import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -166,19 +169,39 @@ final class DsFilters {
      */
     private static Collection<Filter> toFilters(Collection<CompositeQueryParameter> parameters,
                                                 ColumnFilterAdapter columnFilterAdapter) {
-        Stream<CompositeQueryParameter> conjunctionParams = parameters.stream()
-                                                                      .filter(isConjunctive);
+        List<CompositeQueryParameter> conjunctionParams = parameters.stream()
+                                                                    .filter(isConjunctive)
+                                                                    .collect(toList());
         Stream<CompositeQueryParameter> disjunctionParams = parameters.stream()
                                                                       .filter(isDisjunctive);
-        Optional<CompositeQueryParameter> firstParam = conjunctionParams.findFirst();
         Optional<CompositeQueryParameter> mergedConjunctiveParams =
-                firstParam.map(new ParameterReducer(conjunctionParams.skip(1)
-                                                                     .collect(toList())));
+                mergeConjunctiveParameters(conjunctionParams);
+
         Collection<Filter> filters = newLinkedList();
         TreePathWalker processor = new ColumnFilterReducer(columnFilterAdapter, filters);
         multiply(mergedConjunctiveParams.orElse(null), disjunctionParams.collect(toList()),
                  processor);
         return filters;
+    }
+
+    /**
+     * Merges conjunctive parameters into a single {@link Filter}.
+     *
+     * @param conjunctiveParams list of parameters
+     * @return resulting filter or {@code Optional.empty()} if there are not params
+     */
+    private static Optional<CompositeQueryParameter> mergeConjunctiveParameters(
+            List<CompositeQueryParameter> conjunctiveParams) {
+        if (!conjunctiveParams.isEmpty()) {
+            CompositeQueryParameter firstParam = conjunctiveParams.get(0);
+            List<CompositeQueryParameter> tailParams =
+                    conjunctiveParams.subList(1, conjunctiveParams.size());
+            CompositeQueryParameter mergedConjunctiveParams =
+                    new ParameterReducer(tailParams).apply(firstParam);
+            return of(mergedConjunctiveParams);
+        } else {
+            return empty();
+        }
     }
 
     /**
@@ -334,13 +357,13 @@ final class DsFilters {
             }
             Function<ColumnFilterNode, Filter> mapper =
                     ColumnFilterNode.toFilterFunction(columnFilterAdapter);
-            Stream<Filter> filters = conjunctionGroup.stream()
-                                                     .map(mapper);
-            Optional<Filter> first = filters.findFirst();
-            checkState(first.isPresent());
-            Filter[] other = (Filter[]) filters.skip(1)
-                                               .toArray();
-            Filter group = and(first.get(), other);
+            List<Filter> filters = conjunctionGroup.stream()
+                                                   .map(mapper)
+                                                   .collect(toList());
+            checkState(!filters.isEmpty());
+            Filter first = filters.get(0);
+            Filter[] other = filters.subList(1, filters.size()).toArray(new Filter[0]);
+            Filter group = and(first, other);
             destination.add(group);
         }
     }
