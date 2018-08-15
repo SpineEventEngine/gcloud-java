@@ -75,6 +75,8 @@ import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.isDefault;
 import static java.util.Collections.emptyIterator;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -152,11 +154,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         Entity response = datastore.read(key);
 
         if (response == null) {
-            return Optional.empty();
+            return empty();
         }
 
         EntityRecord result = Entities.entityToMessage(response, RECORD_TYPE_URL);
-        return Optional.of(result);
+        return of(result);
     }
 
     @Override

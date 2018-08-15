@@ -188,7 +188,8 @@ final class DsFilters {
      * Merges conjunctive parameters into a single {@link Filter}.
      *
      * @param conjunctiveParams list of parameters
-     * @return resulting filter or {@code Optional.empty()} if there are not params
+     * @return resulting filter or {@code Optional.empty()} if there {@code conjunctiveParams} is
+     * empty
      */
     private static Optional<CompositeQueryParameter> mergeConjunctiveParameters(
             List<CompositeQueryParameter> conjunctiveParams) {
@@ -362,7 +363,8 @@ final class DsFilters {
                                                    .collect(toList());
             checkState(!filters.isEmpty());
             Filter first = filters.get(0);
-            Filter[] other = filters.subList(1, filters.size()).toArray(new Filter[0]);
+            Filter[] other = filters.subList(1, filters.size())
+                                    .toArray(new Filter[0]);
             Filter group = and(first, other);
             destination.add(group);
         }

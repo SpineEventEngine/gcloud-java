@@ -256,9 +256,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             return empty();
         }
         LifecycleFlags flags = LifecycleFlags.newBuilder()
-                                                   .setArchived(archived)
-                                                   .setDeleted(deleted)
-                                                   .build();
+                                             .setArchived(archived)
+                                             .setDeleted(deleted)
+                                             .build();
         return of(flags);
     }
 
