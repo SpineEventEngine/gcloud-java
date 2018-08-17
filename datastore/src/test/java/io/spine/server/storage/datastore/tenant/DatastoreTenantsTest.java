@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Verify.assertContains;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.Verify.assertContains;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

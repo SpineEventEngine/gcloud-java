@@ -22,7 +22,7 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.EntityQuery;
 import com.google.common.base.Suppliers;
-import io.spine.client.TestActorRequestFactory;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
@@ -44,7 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.spine.client.TestActorRequestFactory.newInstance;
+import static io.spine.testing.client.TestActorRequestFactory.newInstance;
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

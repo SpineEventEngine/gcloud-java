@@ -23,11 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.Value;
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import io.spine.client.ColumnFilter;
 import io.spine.server.entity.storage.CompositeQueryParameter;
@@ -37,9 +33,14 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
@@ -49,14 +50,15 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.le;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Predicates.not;
-import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A utility for working with the Datastore {@linkplain Filter filters}.
@@ -76,12 +78,9 @@ final class DsFilters {
      * operator.
      */
     private static final Predicate<CompositeQueryParameter> isConjunctive =
-            new Predicate<CompositeQueryParameter>() {
-                @Override
-                public boolean apply(@Nullable CompositeQueryParameter input) {
-                    checkNotNull(input);
-                    return input.getOperator() == ALL;
-                }
+            input -> {
+                checkNotNull(input);
+                return input.getOperator() == ALL;
             };
 
     /**
@@ -89,7 +88,8 @@ final class DsFilters {
      * the {@linkplain io.spine.client.CompositeColumnFilter.CompositeOperator#EITHER disjunctive}
      * operator.
      */
-    private static final Predicate<CompositeQueryParameter> isDisjunctive = not(isConjunctive);
+    private static final Predicate<CompositeQueryParameter> isDisjunctive =
+            input -> !isConjunctive.test(input);
 
     /**
      * Prevents the utility class instantiation.
@@ -169,18 +169,39 @@ final class DsFilters {
      */
     private static Collection<Filter> toFilters(Collection<CompositeQueryParameter> parameters,
                                                 ColumnFilterAdapter columnFilterAdapter) {
-        FluentIterable<CompositeQueryParameter> params = from(parameters);
-        FluentIterable<CompositeQueryParameter> conjunctionParams =
-                params.filter(isConjunctive);
-        FluentIterable<CompositeQueryParameter> disjunctionParams =
-                params.filter(isDisjunctive);
-        Optional<CompositeQueryParameter> firstParam = conjunctionParams.first();
+        Stream<CompositeQueryParameter> parameterStream = parameters.stream();
+        List<CompositeQueryParameter> conjunctionParams = parameterStream.filter(isConjunctive)
+                                                                         .collect(toList());
+        List<CompositeQueryParameter> disjunctionParams = parameterStream.filter(isDisjunctive)
+                                                                         .collect(toList());
         Optional<CompositeQueryParameter> mergedConjunctiveParams =
-                firstParam.transform(new ParameterReducer(conjunctionParams.skip(1)));
+                mergeConjunctiveParameters(conjunctionParams);
+
         Collection<Filter> filters = newLinkedList();
         TreePathWalker processor = new ColumnFilterReducer(columnFilterAdapter, filters);
-        multiply(mergedConjunctiveParams.orNull(), disjunctionParams, processor);
+        multiply(mergedConjunctiveParams.orElse(null), disjunctionParams, processor);
         return filters;
+    }
+
+    /**
+     * Merges conjunctive parameters into a single {@link Filter}.
+     *
+     * @param conjunctiveParams list of parameters
+     * @return resulting filter or {@code Optional.empty()} if there {@code conjunctiveParams} is
+     * empty
+     */
+    private static Optional<CompositeQueryParameter> mergeConjunctiveParameters(
+            List<CompositeQueryParameter> conjunctiveParams) {
+        if (!conjunctiveParams.isEmpty()) {
+            CompositeQueryParameter firstParam = conjunctiveParams.get(0);
+            List<CompositeQueryParameter> tailParams =
+                    conjunctiveParams.subList(1, conjunctiveParams.size());
+            CompositeQueryParameter mergedConjunctiveParams =
+                    new ParameterReducer(tailParams).apply(firstParam);
+            return of(mergedConjunctiveParams);
+        } else {
+            return empty();
+        }
     }
 
     /**
@@ -193,8 +214,7 @@ final class DsFilters {
     private static void multiply(@Nullable CompositeQueryParameter constant,
                                  Iterable<CompositeQueryParameter> parameters,
                                  TreePathWalker processor) {
-        ColumnFilterNode expressionTree = buildConjunctionTree(constant,
-                                                                     parameters);
+        ColumnFilterNode expressionTree = buildConjunctionTree(constant, parameters);
         expressionTree.traverse(processor);
     }
 
@@ -330,18 +350,23 @@ final class DsFilters {
             this.destination = destination;
         }
 
+        @SuppressWarnings("ZeroLengthArrayAllocation")
+            // It is used to create a typed array from the collection.
         @Override
         public void walk(Collection<ColumnFilterNode> conjunctionGroup) {
             if (conjunctionGroup.isEmpty()) {
                 return;
             }
-            FluentIterable<Filter> filters = from(conjunctionGroup)
-                    .transform(ColumnFilterNode.toFilterFunction(columnFilterAdapter));
-            Optional<Filter> first = filters.first();
-            checkState(first.isPresent());
-            Filter[] other = filters.skip(1)
-                                          .toArray(Filter.class);
-            Filter group = and(first.get(), other);
+            Function<ColumnFilterNode, Filter> mapper =
+                    ColumnFilterNode.toFilterFunction(columnFilterAdapter);
+            List<Filter> filters = conjunctionGroup.stream()
+                                                   .map(mapper)
+                                                   .collect(toList());
+            checkState(!filters.isEmpty());
+            Filter first = filters.get(0);
+            Filter[] other = filters.subList(1, filters.size())
+                                    .toArray(new Filter[0]);
+            Filter group = and(first, other);
             destination.add(group);
         }
     }

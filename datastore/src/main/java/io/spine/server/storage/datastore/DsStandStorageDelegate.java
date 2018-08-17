@@ -82,10 +82,10 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
     protected Entity entityRecordToEntity(AggregateStateId id, EntityRecordWithColumns record) {
         Entity incompleteEntity = super.entityRecordToEntity(id, record);
         String typeUrl = record.getRecord()
-                                     .getState()
-                                     .getTypeUrl();
+                               .getState()
+                               .getTypeUrl();
         Entity.Builder builder = Entity.newBuilder(incompleteEntity)
-                                             .set(TYPE_URL_KEY, typeUrl);
+                                       .set(TYPE_URL_KEY, typeUrl);
         Entity completeEntity = builder.build();
         return completeEntity;
     }
@@ -98,15 +98,11 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         return queryAllByType(typeUrl, FieldMask.getDefaultInstance());
     }
 
-    protected Iterator<EntityRecord> queryAllByType(TypeUrl typeUrl,
-                                                    FieldMask fieldMask) {
+    protected Iterator<EntityRecord> queryAllByType(TypeUrl typeUrl, FieldMask fieldMask) {
         StructuredQuery<Entity> query = buildByTypeQuery(typeUrl);
 
         Iterator<Entity> records = getDatastore().read(query);
-        Iterator<EntityRecord> result = toRecords(records,
-                                                        activeEntity()::apply,
-                                                        typeUrl,
-                                                        fieldMask);
+        Iterator<EntityRecord> result = toRecords(records, activeEntity(), typeUrl, fieldMask);
         return result;
     }
 
@@ -144,8 +140,8 @@ class DsStandStorageDelegate extends DsRecordStorage<AggregateStateId> {
         StructuredQuery<Entity> incompleteQuery = buildAllQuery(typeUrl);
         Filter filter = eq(TYPE_URL_KEY, typeUrl.value());
         StructuredQuery<Entity> query = incompleteQuery.toBuilder()
-                                                 .setFilter(filter)
-                                                 .build();
+                                                       .setFilter(filter)
+                                                       .build();
         return query;
     }
 }

@@ -21,10 +21,8 @@
 package io.spine.server.datastore;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.common.base.Optional;
-import com.google.common.base.Supplier;
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.TestDatastoreFactory;
@@ -33,10 +31,13 @@ import io.spine.server.tenant.TenantIndex;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.function.Supplier;
+
 import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,7 +67,7 @@ class ContextsTest {
     @DisplayName("produce BoundedContext Builder for given storage factory")
     void testProduceBCBuilder() {
         DatastoreStorageFactory factory = givenFactory();
-        BoundedContext.Builder builder = Contexts.onTopOf(factory);
+        BoundedContextBuilder builder = Contexts.onTopOf(factory);
         Optional<Supplier<StorageFactory>> supplierOptional =
                 builder.getStorageFactorySupplier();
         assertTrue(supplierOptional.isPresent());

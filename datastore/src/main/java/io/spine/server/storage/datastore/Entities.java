@@ -24,9 +24,6 @@ import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.BlobValue;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterators;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -37,9 +34,12 @@ import io.spine.type.TypeUrl;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Iterator;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Streams.stream;
 import static io.spine.server.storage.datastore.DsProperties.isArchived;
 import static io.spine.server.storage.datastore.DsProperties.isDeleted;
 
@@ -52,16 +52,13 @@ import static io.spine.server.storage.datastore.DsProperties.isDeleted;
 @SuppressWarnings("UtilityClass")
 class Entities {
 
-    private static final Predicate<Entity> NOT_ARCHIVED_OR_DELETED = new Predicate<Entity>() {
-        @Override
-        public boolean apply(@Nullable Entity input) {
-            if (input == null) {
-                return false;
-            }
-            boolean isNotArchived = !isArchived(input);
-            boolean isNotDeleted = !isDeleted(input);
-            return isNotArchived && isNotDeleted;
+    private static final Predicate<Entity> NOT_ARCHIVED_OR_DELETED = input -> {
+        if (input == null) {
+            return false;
         }
+        boolean isNotArchived = !isArchived(input);
+        boolean isNotDeleted = !isDeleted(input);
+        return isNotArchived && isNotDeleted;
     };
 
     private static final String DEFAULT_MESSAGE_FACTORY_METHOD_NAME = "getDefaultInstance";
@@ -111,7 +108,8 @@ class Entities {
     static <M extends Message> Iterator<M> entitiesToMessages(Iterator<Entity> entities,
                                                               TypeUrl type) {
         Function<Entity, M> transformer = entityToMessage(type);
-        return Iterators.transform(entities, transformer);
+        return stream(entities).map(transformer)
+                               .iterator();
     }
 
     /**
@@ -173,7 +171,7 @@ class Entities {
 
     @SuppressWarnings("unchecked")
     static <M extends Message> M defaultMessage(TypeUrl type) {
-        Class<M> messageClass = type.getJavaClass();
+        Class<?> messageClass = type.getJavaClass();
         checkState(messageClass != null, String.format(
                 "Not found class for type url \"%s\". Try to rebuild the project",
                 type.getTypeName()));

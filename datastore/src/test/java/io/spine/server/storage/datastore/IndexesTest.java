@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.mockito.Mockito.mock;
 
 /**

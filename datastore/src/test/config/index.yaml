@@ -17,3 +17,21 @@ indexes:
     - name: version
       direction: desc
     - name: snapshot
+
+  - kind: spine.system.server.EntityHistory
+    properties:
+    - name: aggregate_id
+    - name: version
+      direction: desc
+    - name: created
+      direction: desc
+    - name: snapshot
+
+  - kind: spine.system.server.CommandLifecycle
+    properties:
+    - name: aggregate_id
+    - name: version
+      direction: desc
+    - name: created
+      direction: desc
+    - name: snapshot

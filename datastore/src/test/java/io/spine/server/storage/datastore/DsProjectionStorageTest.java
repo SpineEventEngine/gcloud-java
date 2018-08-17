@@ -96,7 +96,7 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
         }
     }
 
-    public static class TestEntity extends TestCounterEntity<ProjectId> {
+    public static class TestEntity extends TestCounterEntity {
 
         protected TestEntity(ProjectId id) {
             super(id);

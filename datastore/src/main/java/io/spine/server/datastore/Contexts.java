@@ -21,13 +21,14 @@
 package io.spine.server.datastore;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.tenant.DatastoreTenants;
 import io.spine.server.tenant.TenantIndex;
+
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -43,33 +44,32 @@ public final class Contexts {
     }
 
     /**
-     * Creates new instance of the {@link BoundedContext.Builder} based on the passed
+     * Creates new instance of the {@link BoundedContextBuilder} based on the passed
      * {@link DatastoreStorageFactory}.
      *
      * <p>The returned instance has the following attributes pre-configured:
      * <ul>
-     *     <li>{@link BoundedContext.Builder#setStorageFactorySupplier(Supplier) StorageFactory};
-     *     <li>{@link BoundedContext.Builder#setTenantIndex(TenantIndex) TenantIndex};
-     *     <li>{@linkplain BoundedContext.Builder#setMultitenant(boolean) multitenancy}.
+     *     <li>{@link BoundedContextBuilder#setStorageFactorySupplier(java.util.function.Supplier)}
+     *     StorageFactory};
+     *     <li>{@link BoundedContextBuilder#setTenantIndex(TenantIndex) TenantIndex};
+     *     <li>{@linkplain BoundedContextBuilder#setMultitenant(boolean) multitenancy}.
      * </ul>
      *
      * <p>In a majority of use cases the configuration of the produced
-     * {@link BoundedContext.Builder builder} is enough for operation. However, it is still possible
+     * {@link BoundedContextBuilder builder} is enough for operation. However, it is still possible
      * to use the returned instance for further customization.
      *
      * @param storageFactory the {@link StorageFactory} to use in the result {@link BoundedContext}
-     * @return new instance of {@link BoundedContext.Builder} with the specified parameters
+     * @return new instance of {@link BoundedContextBuilder} with the specified parameters
      */
-    public static BoundedContext.Builder onTopOf(DatastoreStorageFactory storageFactory) {
+    public static BoundedContextBuilder onTopOf(DatastoreStorageFactory storageFactory) {
         checkNotNull(storageFactory);
         Datastore datastore = storageFactory.getDatastore()
                                                   .getDatastoreOptions()
                                                   .getService();
         TenantIndex tenantIndex = DatastoreTenants.index(datastore);
-        Supplier<StorageFactory> storageFactorySupplier =
-                Suppliers.<StorageFactory>ofInstance(storageFactory);
-
-        BoundedContext.Builder resultBuilder =
+        Supplier<StorageFactory> storageFactorySupplier = () -> storageFactory;
+        BoundedContextBuilder resultBuilder =
                 BoundedContext.newBuilder()
                               .setMultitenant(storageFactory.isMultitenant())
                               .setStorageFactorySupplier(storageFactorySupplier)
