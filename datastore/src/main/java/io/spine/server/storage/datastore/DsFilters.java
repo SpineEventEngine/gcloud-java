@@ -40,7 +40,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
@@ -172,15 +171,15 @@ final class DsFilters {
         List<CompositeQueryParameter> conjunctionParams = parameters.stream()
                                                                     .filter(isConjunctive)
                                                                     .collect(toList());
-        Stream<CompositeQueryParameter> disjunctionParams = parameters.stream()
-                                                                      .filter(isDisjunctive);
+        List<CompositeQueryParameter> disjunctionParams = parameters.stream()
+                                                                    .filter(isDisjunctive)
+                                                                    .collect(toList());
         Optional<CompositeQueryParameter> mergedConjunctiveParams =
                 mergeConjunctiveParameters(conjunctionParams);
 
         Collection<Filter> filters = newLinkedList();
         TreePathWalker processor = new ColumnFilterReducer(columnFilterAdapter, filters);
-        multiply(mergedConjunctiveParams.orElse(null), disjunctionParams.collect(toList()),
-                 processor);
+        multiply(mergedConjunctiveParams.orElse(null), disjunctionParams, processor);
         return filters;
     }
 
@@ -351,6 +350,8 @@ final class DsFilters {
             this.destination = destination;
         }
 
+        @SuppressWarnings("ZeroLengthArrayAllocation")
+            // It is used to create a typed array from the collection.
         @Override
         public void walk(Collection<ColumnFilterNode> conjunctionGroup) {
             if (conjunctionGroup.isEmpty()) {
