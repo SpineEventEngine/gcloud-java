@@ -48,7 +48,7 @@ public final class DatastoreTenants {
      *
      * <p>In a multitenant application it's necessary to pass an instance of
      * the {@link TenantIndex} to a
-     * {@link io.spine.server.BoundedContext.Builder BoundedContext.Builder}
+     * {@link io.spine.server.BoundedContextBuilder BoundedContextBuilder}
      * when creating an instance of {@link io.spine.server.BoundedContext BoundedContext}.
      *
      * <p>An example of creating a multitenant
