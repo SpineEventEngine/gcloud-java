@@ -40,7 +40,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
@@ -169,11 +168,12 @@ final class DsFilters {
      */
     private static Collection<Filter> toFilters(Collection<CompositeQueryParameter> parameters,
                                                 ColumnFilterAdapter columnFilterAdapter) {
-        Stream<CompositeQueryParameter> parameterStream = parameters.stream();
-        List<CompositeQueryParameter> conjunctionParams = parameterStream.filter(isConjunctive)
-                                                                         .collect(toList());
-        List<CompositeQueryParameter> disjunctionParams = parameterStream.filter(isDisjunctive)
-                                                                         .collect(toList());
+        List<CompositeQueryParameter> conjunctionParams = parameters.stream()
+                                                                    .filter(isConjunctive)
+                                                                    .collect(toList());
+        List<CompositeQueryParameter> disjunctionParams = parameters.stream()
+                                                                    .filter(isDisjunctive)
+                                                                    .collect(toList());
         Optional<CompositeQueryParameter> mergedConjunctiveParams =
                 mergeConjunctiveParameters(conjunctionParams);
 
