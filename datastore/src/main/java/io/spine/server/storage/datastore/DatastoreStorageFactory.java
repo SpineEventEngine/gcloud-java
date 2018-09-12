@@ -32,7 +32,6 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
@@ -134,17 +133,6 @@ public class DatastoreStorageFactory implements StorageFactory {
                                              NamespaceSupplier.singleTenant(),
                                              namespaceToTenantIdConverter)
                : this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StandStorage createStandStorage() {
-        DsStandStorageDelegate recordStorage =
-                new DsStandStorageDelegate(datastore, multitenant);
-        DsStandStorage result = new DsStandStorage(recordStorage, multitenant);
-        return result;
     }
 
     /**

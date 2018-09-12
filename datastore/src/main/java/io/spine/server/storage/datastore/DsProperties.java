@@ -31,7 +31,7 @@ import io.spine.string.Stringifiers;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.aggregate.storage.AggregateField.aggregate_id;
+import static io.spine.server.aggregate.AggregateField.aggregate_id;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 
 /**

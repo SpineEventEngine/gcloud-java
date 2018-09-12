@@ -47,7 +47,6 @@ import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
-import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -442,38 +441,19 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return Indexes.indexIterator(datastore, getKind(), idClass);
     }
 
-    protected @Nullable Kind getDefaultKind() {
-        return null;
-    }
-
-    private Kind kindFrom(EntityRecord record) {
-        Kind defaultKind = getDefaultKind();
-        if (defaultKind != null) {
-            return defaultKind;
-        }
+    private static Kind kindFrom(EntityRecord record) {
         Any packedState = record.getState();
         Message state = unpack(packedState);
         Kind kind = Kind.of(state);
         return kind;
     }
 
-    final Kind kindFrom(TypeUrl typeUrl) {
-        Kind defaultKind = getDefaultKind();
-        if (defaultKind != null) {
-            return defaultKind;
-        }
+    static Kind kindFrom(TypeUrl typeUrl) {
         return Kind.of(typeUrl);
     }
 
     protected Kind getKind() {
         return kindFrom(typeUrl);
-    }
-
-    I unpackKey(Entity entity) {
-        String stringId = entity.getKey()
-                                .getName();
-        I id = Stringifiers.fromString(stringId, idClass);
-        return id;
     }
 
     EntityRecord getRecordFromEntity(Entity entity) {
