@@ -46,7 +46,7 @@ import java.util.Optional;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.transform;
-import static io.spine.server.aggregate.storage.AggregateField.aggregate_id;
+import static io.spine.server.aggregate.AggregateField.aggregate_id;
 import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.of;
 import static io.spine.server.storage.datastore.DsProperties.addAggregateId;
