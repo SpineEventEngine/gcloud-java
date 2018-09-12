@@ -70,7 +70,7 @@ class DatastoreStorageFactoryTest {
                                                         .setMultitenant(true)
                                                         .build();
         assertTrue(factory.isMultitenant());
-        RecordStorage storage = factory.createStandStorage();
+        RecordStorage storage = factory.createRecordStorage(TestEntity.class);
         assertTrue(storage.isMultitenant());
         storage.close();
     }
