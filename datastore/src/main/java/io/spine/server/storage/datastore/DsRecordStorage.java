@@ -207,14 +207,35 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        if (query.getIds()
-                 .isEmpty()
-        && !query.getParameters()
-                 .iterator()
-                 .hasNext()) {
+        if (isQueryForAll(query)) {
             return readAll(fieldMask);
         }
         return queryBy(query, fieldMask);
+    }
+
+    private boolean isQueryForAll(EntityQuery<I> query) {
+        if (!query.getIds()
+                  .isEmpty()) {
+            return false;
+        }
+
+        if (query.getParameters()
+                 .iterator()
+                 .hasNext()) {
+            return false;
+        }
+
+        if (query.getParameters()
+                 .limited()) {
+            return false;
+        }
+
+        if (query.getParameters()
+                 .ordered()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
