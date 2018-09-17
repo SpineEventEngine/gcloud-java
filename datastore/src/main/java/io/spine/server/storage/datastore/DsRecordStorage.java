@@ -108,8 +108,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * Creates a new storage instance.
      *
-     * @param descriptor the descriptor of the type of messages to save to the storage
-     * @param datastore  the Datastore implementation to use
+     * @param descriptor
+     *         the descriptor of the type of messages to save to the storage
+     * @param datastore
+     *         the Datastore implementation to use
      */
     protected DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore,
                               boolean multitenant,
@@ -221,8 +223,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * <p>This method assumes that there are either IDs of query parameters or both in the given
      * {@code EntityQuery} (i.e. the query is not empty).
      *
-     * @param entityQuery the {@link EntityQuery} to query the Datastore by
-     * @param fieldMask   the {@code FieldMask} to apply to all the retrieved entity states
+     * @param entityQuery
+     *         the {@link EntityQuery} to query the Datastore by
+     * @param fieldMask
+     *         the {@code FieldMask} to apply to all the retrieved entity states
      * @return an iterator over the resulting entity records
      */
     private Iterator<EntityRecord> queryBy(EntityQuery<I> entityQuery, FieldMask fieldMask) {
@@ -243,16 +247,20 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * <p>The by-IDs query is performed on Datastore, and the by-columns filtering is done in
      * memory.
      *
-     * @param acceptableIds the IDs to search by
-     * @param params        the additional query parameters
-     * @param fieldMask     the {@code FieldMask} to apply to all the retrieved entity states
+     * @param acceptableIds
+     *         the IDs to search by
+     * @param params
+     *         the additional query parameters
+     * @param fieldMask
+     *         the {@code FieldMask} to apply to all the retrieved entity states
      * @return an iterator over the resulting entity records
      */
     private Iterator<EntityRecord> queryByIdsAndColumns(Collection<I> acceptableIds,
                                                         QueryParameters params,
                                                         FieldMask fieldMask) {
         Predicate<Entity> inMemPredicate;
-        if (params.iterator().hasNext()) { // IDs and columns query
+        if (params.iterator()
+                  .hasNext()) { // IDs and columns query
             inMemPredicate = buildMemoryPredicate(params);
         } else { // Only IDs query
             inMemPredicate = entity -> true;
@@ -267,8 +275,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * <p>The query is performed on Datastore. A single call to this method may turn into several
      * API calls. See {@link DsFilters} for details.
      *
-     * @param params    the by-column query parameters
-     * @param fieldMask the {@code FieldMask} to apply to all the retrieved entity states
+     * @param params
+     *         the by-column query parameters
+     * @param fieldMask
+     *         the {@code FieldMask} to apply to all the retrieved entity states
      * @return an iterator over the resulting entity records
      */
     private Iterator<EntityRecord> queryByColumnsOnly(QueryParameters params,
@@ -293,8 +303,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * out of records (i.e. {@code hasNext()} method returns {@code false}). The order of
      * the iterators corresponds to the order of the {@code queries}.
      *
-     * @param queries   the queries to perform
-     * @param fieldMask the {@code FieldMask} to apply to all the retrieved entity states
+     * @param queries
+     *         the queries to perform
+     * @param fieldMask
+     *         the {@code FieldMask} to apply to all the retrieved entity states
      * @return an iterator over the resulting entity records
      */
     private Iterator<EntityRecord> queryAndMerge(Iterable<StructuredQuery<Entity>> queries,
@@ -339,7 +351,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      *
      * @return the {@link TypeUrl} of the stored messages
      */
-    @VisibleForTesting // Otherwise this getter is not used
+    @VisibleForTesting
+    // Otherwise this getter is not used
     TypeUrl getTypeUrl() {
         return typeUrl;
     }
@@ -464,7 +477,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * Constructs a Datastore {@link Query}, which fetches all the records of the given type.
      *
-     * @param typeUrl the type of the records to fetch
+     * @param typeUrl
+     *         the type of the records to fetch
      * @return new {@link StructuredQuery}
      */
     protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
@@ -584,7 +598,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * Creates new instance of the {@link Builder}.
      *
-     * @param <I> the ID type of the instances built by the created {@link Builder}
+     * @param <I>
+     *         the ID type of the instances built by the created {@link Builder}
      * @return new instance of the {@link Builder}
      */
     public static <I> AbstractBuilder<I, Builder<I>> newBuilder() {
@@ -622,8 +637,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * An implementation base for {@code DsRecordStorage} builders.
      *
-     * @param <I> the ID type of the stored entities
-     * @param <B> the builder own type
+     * @param <I>
+     *         the ID type of the stored entities
+     * @param <B>
+     *         the builder own type
      */
     protected abstract static class AbstractBuilder<I, B extends AbstractBuilder<I, B>> {
 
@@ -641,8 +658,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param stateTypeUrl the type URL of the entity state, which is stored in the resulting
-         *                     storage
+         * @param stateTypeUrl
+         *         the type URL of the entity state, which is stored in the resulting
+         *         storage
          */
         public B setStateType(TypeUrl stateTypeUrl) {
             checkNotNull(stateTypeUrl);
@@ -652,7 +670,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param datastore the {@link DatastoreWrapper} to use in this storage
+         * @param datastore
+         *         the {@link DatastoreWrapper} to use in this storage
          */
         public B setDatastore(DatastoreWrapper datastore) {
             this.datastore = checkNotNull(datastore);
@@ -660,9 +679,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param multitenant {@code true} if the storage should be
-         *                    {@link Storage#isMultitenant multitenant}
-         *                    or not
+         * @param multitenant
+         *         {@code true} if the storage should be
+         *         {@link Storage#isMultitenant multitenant}
+         *         or not
          */
         public B setMultitenant(boolean multitenant) {
             this.multitenant = multitenant;
@@ -670,9 +690,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param columnTypeRegistry the type registry of the
-         *                           {@linkplain EntityColumn
-         *                           entity columns}
+         * @param columnTypeRegistry
+         *         the type registry of the
+         *         {@linkplain EntityColumn
+         *         entity columns}
          */
         public B setColumnTypeRegistry(
                 ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
@@ -681,7 +702,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param idClass the ID class of the stored entity
+         * @param idClass
+         *         the ID class of the stored entity
          */
         public B setIdClass(Class<I> idClass) {
             this.idClass = checkNotNull(idClass);
@@ -689,7 +711,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param entityClass the class of the stored entity
+         * @param entityClass
+         *         the class of the stored entity
          */
         public B setEntityClass(Class<? extends io.spine.server.entity.Entity> entityClass) {
             this.entityClass = checkNotNull(entityClass);
@@ -712,7 +735,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         /**
          * @return {@code true} if the storage should be
-         * {@link Storage#isMultitenant multitenant} or not
+         *         {@link Storage#isMultitenant multitenant} or not
          */
         public boolean isMultitenant() {
             return multitenant;
@@ -720,7 +743,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
         /**
          * @return the type registry of the {@linkplain EntityColumn
-         * entity columns}
+         *         entity columns}
          */
         public ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> getColumnTypeRegistry() {
             return columnTypeRegistry;
