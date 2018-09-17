@@ -25,9 +25,9 @@
  */
 
 ext {
-    spineGaeVersion = '0.10.88-SNAPSHOT'
-    spineVersion = '0.10.88-SNAPSHOT'
-    spineBaseVersion = '0.10.69-SNAPSHOT'
+    spineGaeVersion = '0.10.89-SNAPSHOT'
+    spineVersion = '0.10.89-SNAPSHOT'
+    spineBaseVersion = '0.10.70-SNAPSHOT'
 
     datastoreVersion = '1.35.0'
 }

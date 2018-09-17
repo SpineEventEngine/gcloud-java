@@ -31,6 +31,8 @@ import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
+import io.spine.client.OrderBy;
+import io.spine.client.Pagination;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.AbstractEntity;
@@ -339,7 +341,8 @@ public class DsRecordStorageTest
                                                    .setIdFilter(idFilter)
                                                    .addFilter(columnFilter)
                                                    .build();
-        EntityQuery<ProjectId> entityQuery = from(entityFilters, storage);
+        EntityQuery<ProjectId> entityQuery = from(entityFilters, OrderBy.getDefaultInstance(),
+                                                  Pagination.getDefaultInstance(), storage);
         Iterator<EntityRecord> readResult = storage.readAll(entityQuery,
                                                             FieldMask.getDefaultInstance());
         List<EntityRecord> resultList = newArrayList(readResult);
