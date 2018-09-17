@@ -99,6 +99,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private static final Function<@Nullable Entity, @Nullable EntityRecord> recordFromEntity =
             input -> {
                 if (input == null) {
+                    //noinspection ReturnOfNull returning null on null input.
                     return null;
                 }
                 EntityRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
@@ -172,6 +173,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                                          FieldMask fieldMask) {
         Function<Entity, @Nullable EntityRecord> transformer = input -> {
             if (input == null) {
+                //noinspection ReturnOfNull returning null on null input.
                 return null;
             }
             EntityRecord readRecord = Entities.entityToMessage(input, RECORD_TYPE_URL);
