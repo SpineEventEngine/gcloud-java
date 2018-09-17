@@ -1,8 +1,8 @@
 # gcloud-java
 
-[![codecov](https://codecov.io/gh/SpineEventEngine/gae-java/branch/master/graph/badge.svg)](https://codecov.io/gh/SpineEventEngine/gae-java)
-[![Build Status](https://travis-ci.org/SpineEventEngine/gae-java.svg?branch=master)](https://travis-ci.org/SpineEventEngine/gae-java)
-[![codacy](https://api.codacy.com/project/badge/Grade/fe24ec78520943afa038336d45db4513)](https://www.codacy.com/app/SpineEventEngine/gae-java?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SpineEventEngine/gae-java&amp;utm_campaign=Badge_Grade)
+[![codecov](https://codecov.io/gh/SpineEventEngine/gcloud-java/branch/master/graph/badge.svg)](https://codecov.io/gh/SpineEventEngine/gcloud-java)
+[![Build Status](https://travis-ci.org/SpineEventEngine/gcloud-java.svg?branch=master)](https://travis-ci.org/SpineEventEngine/gcloud-java)
+[![codacy](https://api.codacy.com/project/badge/Grade/fe24ec78520943afa038336d45db4513)](https://www.codacy.com/app/SpineEventEngine/gcloud-java?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SpineEventEngine/gcloud-java&amp;utm_campaign=Badge_Grade)
 
 Support for Spine-based Java apps running under Google App Engine.
 
@@ -12,7 +12,7 @@ This section describes the main aspects of using the library.
 
 #### Datastore indexes
 
-In order to run the application built on top of `gae-java`, Datastore instance requires some 
+In order to run the application built on top of `gcloud-java`, Datastore instance requires some 
 preliminary configuration. In particular, the indexes for the Spine internal record types should 
 be set. Please notice a special index configuration for your custom `Aggregate` types.
 
@@ -42,7 +42,7 @@ an internal Exception. To prevent this, you should create an index for your `Cus
 
 ### Testing
 
-This section describes testing the `gae-java` library itself.
+This section describes testing the `gcloud-java` library itself.
 
 ##### Preconditions
 

@@ -1,4 +1,4 @@
-# The GAE Datastore indexes required to run the Spine Gae-Java library tests in the test
+# The GAE Datastore indexes required to run the Spine gcloud-java library tests in the test
 # remote environment.
 
 indexes:
