@@ -35,7 +35,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.ColumnRecords;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
@@ -58,21 +57,20 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
+import static com.google.cloud.datastore.Query.newEntityQueryBuilder;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.concat;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
+import static io.spine.server.storage.datastore.Entities.entityToMessage;
+import static io.spine.server.storage.datastore.DsQueryHelper.maskRecord;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static io.spine.validate.Validate.isDefault;
 import static java.util.Collections.emptyIterator;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -90,21 +88,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
 
+    private final DsIdLookup<I> idLookup;
+
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
     private final ColumnFilterAdapter columnFilterAdapter;
     private final Class<I> idClass;
 
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
-
-    private static final Function<@Nullable Entity, @Nullable EntityRecord> recordFromEntity =
-            input -> {
-                if (input == null) {
-                    //noinspection ReturnOfNull returning null on null input.
-                    return null;
-                }
-                EntityRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
-                return record;
-            };
 
     /**
      * Creates a new storage instance.
@@ -125,6 +115,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
         this.idClass = checkNotNull(idClass);
         this.columnFilterAdapter = ColumnFilterAdapter.of(this.columnTypeRegistry);
+        this.idLookup = new DsIdLookup<I>(this.datastore, this.typeUrl);
     }
 
     private DsRecordStorage(Builder<I> builder) {
@@ -150,45 +141,26 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected @Nullable Optional<EntityRecord> readRecord(I id) {
-        Key key = keyFor(datastore,
-                         getKind(),
-                         ofEntityId(id));
+        Key key = keyFor(datastore, getKind(), ofEntityId(id));
         Entity response = datastore.read(key);
 
         if (response == null) {
             return empty();
         }
 
-        EntityRecord result = Entities.entityToMessage(response, RECORD_TYPE_URL);
+        EntityRecord result = entityToMessage(response, RECORD_TYPE_URL);
         return of(result);
     }
 
     @Override
     protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        return lookup(ids, recordFromEntity);
+        return idLookup.execute(ids);
     }
 
     @Override
     protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids,
                                                          FieldMask fieldMask) {
-        Function<Entity, @Nullable EntityRecord> transformer = input -> {
-            if (input == null) {
-                //noinspection ReturnOfNull returning null on null input.
-                return null;
-            }
-            EntityRecord readRecord = Entities.entityToMessage(input, RECORD_TYPE_URL);
-            Message state = unpack(readRecord.getState());
-            TypeUrl typeUrl = TypeUrl.from(state.getDescriptorForType());
-            Message maskedState = applyMask(fieldMask, state, typeUrl);
-            Any wrappedState = AnyPacker.pack(maskedState);
-
-            EntityRecord record = EntityRecord.newBuilder(readRecord)
-                                              .setState(wrappedState)
-                                              .build();
-            return record;
-        };
-
-        return lookup(ids, transformer);
+        return idLookup.execute(ids, fieldMask);
     }
 
     @Override
@@ -215,25 +187,22 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return queryBy(query, fieldMask);
     }
 
-    private boolean isQueryForAll(EntityQuery<I> query) {
+    private static <I> boolean isQueryForAll(EntityQuery<I> query) {
         if (!query.getIds()
                   .isEmpty()) {
             return false;
         }
 
-        if (query.getParameters()
-                 .iterator()
-                 .hasNext()) {
+        QueryParameters params = query.getParameters();
+        if (notEmpty(params)) {
             return false;
         }
 
-        if (query.getParameters()
-                 .limited()) {
+        if (params.ordered()) {
             return false;
         }
 
-        if (query.getParameters()
-                 .ordered()) {
+        if (params.limited()) {
             return false;
         }
 
@@ -281,15 +250,21 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private Iterator<EntityRecord> queryByIdsAndColumns(Collection<I> acceptableIds,
                                                         QueryParameters params,
                                                         FieldMask fieldMask) {
-        Predicate<Entity> inMemPredicate;
-        if (params.iterator()
-                  .hasNext()) { // IDs and columns query
-            inMemPredicate = buildMemoryPredicate(params);
-        } else { // Only IDs query
-            inMemPredicate = entity -> true;
+        Predicate<Entity> inMemPredicate = notEmpty(params) ? buildMemoryPredicate(params)
+                                                            : (entity -> true);
+        if (params.ordered()) {
+            if (params.limited()) {
+                return idLookup.execute(acceptableIds, fieldMask, inMemPredicate,
+                                        params.orderBy(), params.limit());
+            }
+            return idLookup.execute(acceptableIds, fieldMask, inMemPredicate, params.orderBy());
         }
-        Iterator<EntityRecord> records = lookup(acceptableIds, fieldMask, inMemPredicate);
-        return records;
+        return idLookup.execute(acceptableIds, fieldMask, inMemPredicate);
+    }
+
+    private static boolean notEmpty(QueryParameters params) {
+        return params.iterator()
+                     .hasNext();
     }
 
     /**
@@ -306,8 +281,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      */
     private Iterator<EntityRecord> queryByColumnsOnly(QueryParameters params,
                                                       FieldMask fieldMask) {
-        StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
-                                                              .setKind(getKind().getValue());
+        StructuredQuery.Builder<Entity> datastoreQuery =
+                newEntityQueryBuilder().setKind(getKind().getValue());
         Collection<Filter> filters = buildColumnFilters(params);
         Collection<StructuredQuery<Entity>> queries = filters.stream()
                                                              .map(new FilterToQuery(datastoreQuery))
@@ -380,55 +355,16 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return typeUrl;
     }
 
-    private Iterator<EntityRecord> lookup(Collection<I> ids,
-                                          FieldMask fieldMask,
-                                          Predicate<Entity> predicate) {
-        if (ids.isEmpty()) {
-            return readAllRecords(fieldMask);
-        }
-        Collection<Key> keys = toKeys(ids);
-        Iterator<Entity> records = datastore.read(keys);
-        Iterator<EntityRecord> result = toRecords(records, predicate, typeUrl, fieldMask);
-        return result;
-    }
-
-    private <T> Iterator<T> lookup(Iterable<I> ids,
-                                   Function<Entity, @Nullable T> transformer) {
-        Collection<Key> keys = toKeys(ids);
-        Iterator<Entity> results = datastore.read(keys);
-        return stream(results).filter(activeEntity())
-                              .map(transformer)
-                              .iterator();
-    }
-
     private Iterator<EntityRecord> queryAll(TypeUrl typeUrl,
                                             StructuredQuery<Entity> query,
                                             FieldMask fieldMask,
                                             Predicate<Entity> inMemFilter) {
         Iterator<Entity> results = datastore.read(query);
-        return toRecords(results, inMemFilter, typeUrl, fieldMask);
-    }
-
-    protected final Iterator<EntityRecord> toRecords(Iterator<Entity> queryResults,
-                                                     Predicate<Entity> filter,
-                                                     TypeUrl typeUrl,
-                                                     FieldMask fieldMask) {
-        Stream<Entity> filtered = stream(queryResults).filter(filter);
-        Function<Entity, EntityRecord> transformer = input -> {
-            checkNotNull(input);
-            EntityRecord record = getRecordFromEntity(input);
-            if (!isDefault(fieldMask)) {
-                Message state = unpack(record.getState());
-                state = applyMask(fieldMask, state, typeUrl);
-                record = EntityRecord.newBuilder(record)
-                                     .setState(AnyPacker.pack(state))
-                                     .build();
-            }
-            return record;
-        };
-        Iterator<EntityRecord> result = filtered.map(transformer)
-                                                .iterator();
-        return result;
+        return stream(results)
+                .filter(inMemFilter)
+                .map(DsQueryHelper::toRecord)
+                .map(maskRecord(typeUrl, fieldMask))
+                .iterator();
     }
 
     protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
@@ -492,11 +428,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return kindFrom(typeUrl);
     }
 
-    EntityRecord getRecordFromEntity(Entity entity) {
-        EntityRecord record = Entities.entityToMessage(entity, RECORD_TYPE_URL);
-        return record;
-    }
-
     /**
      * Constructs a Datastore {@link Query}, which fetches all the records of the given type.
      *
@@ -506,19 +437,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      */
     protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
         String entityKind = kindFrom(typeUrl).getValue();
-        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                             .setKind(entityKind)
-                                             .build();
+        StructuredQuery<Entity> query = newEntityQueryBuilder().setKind(entityKind)
+                                                               .build();
         return query;
-    }
-
-    private Collection<Key> toKeys(Iterable<I> ids) {
-        Collection<Key> keys = newLinkedList();
-        for (I id : ids) {
-            Key key = keyFor(datastore, kindFrom(typeUrl), ofEntityId(id));
-            keys.add(key);
-        }
-        return keys;
     }
 
     private static class EntityColumnPredicate implements Predicate<Entity> {
