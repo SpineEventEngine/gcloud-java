@@ -44,6 +44,8 @@ import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.server.storage.given.RecordStorageTestEnv;
+import io.spine.test.datastore.College;
+import io.spine.test.datastore.CollegeId;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectIdVBuilder;
@@ -275,6 +277,60 @@ public class DsRecordStorageTestEnv {
         }
 
         public void injectState(Project state, Version version) {
+            updateState(state);
+        }
+
+        public void injectLifecycle(LifecycleFlags flags) {
+            this.lifecycleFlags = flags;
+        }
+    }
+
+    @SuppressWarnings("unused") // Reflective access
+    public static class CollegeEntity
+            extends AbstractVersionableEntity<CollegeId, College> {
+
+        private LifecycleFlags lifecycleFlags;
+
+        public CollegeEntity(CollegeId id) {
+            super(id);
+        }
+
+        @Column
+        public String getName() {
+            return getState().getName();
+        }
+
+        @Column
+        public int getStudentCount() {
+            return getState().getStudentCount();
+        }
+
+        @Column
+        public Timestamp getAdmissionDeadline() {
+            return getState().getAdmissionDeadline();
+        }
+
+        @Column
+        public Double getPassingGrade() {
+            return getState().getPassingGrade();
+        }
+
+        @Column
+        public boolean isPrivate() {
+            return getState().getPrivate();
+        }
+
+        @Column
+        public List<String> getSubjects() {
+            return getState().getSubjectsList();
+        }
+
+        @Override
+        public LifecycleFlags getLifecycleFlags() {
+            return lifecycleFlags == null ? super.getLifecycleFlags() : lifecycleFlags;
+        }
+
+        public void injectState(College state, Version version) {
             updateState(state);
         }
 
