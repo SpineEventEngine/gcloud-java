@@ -58,6 +58,8 @@ class DatastoreTypeRegistryFactoryTest {
         assertNotNull(stringType);
         DatastoreColumnType<?, ?> intType = registry.get(mockColumn(int.class));
         assertNotNull(intType);
+        DatastoreColumnType<?, ?> longType = registry.get(mockColumn(long.class));
+        assertNotNull(longType);
         DatastoreColumnType<?, ?> booleanType = registry.get(mockColumn(boolean.class));
         assertNotNull(booleanType);
         DatastoreColumnType<?, ?> messageType = registry.get(mockColumn(String.class));
