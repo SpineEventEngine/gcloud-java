@@ -29,11 +29,25 @@ buildscript {
     repositories {
         jcenter()
         google()
+        maven { url = repos.gradlePlugins }
         mavenCentral()
         mavenLocal()
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
     }
+
+    dependencies {
+        classpath deps.build.guava
+        classpath deps.build.gradlePlugins.errorProne
+        classpath deps.build.gradlePlugins.protobuf
+        classpath "io.spine.tools:spine-model-compiler:$spineBaseVersion"
+    }
+
+    configurations.all({
+        resolutionStrategy {
+            force deps.build.guava
+        }
+    })
 }
 
 apply from: 'ext.gradle'
@@ -41,6 +55,7 @@ apply from: 'ext.gradle'
 ext {
     credentialsPropertyFile = 'credentials.properties'
     runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
+    spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
 
     projectsToPublish = ['datastore']
 }
@@ -55,8 +70,36 @@ allprojects {
 }
 
 subprojects {
+
+    configurations {
+        // Avoid collisions of Java classes defined both in `protobuf-lite` and `protobuf-java`
+        runtime.exclude group: "com.google.protobuf", module: "protobuf-lite"
+        testRuntime.exclude group: "com.google.protobuf", module: "protobuf-lite"
+
+        all {
+            resolutionStrategy {
+                force deps.build.guava
+                force deps.test.guavaTestlib
+            }
+        }
+    }
+    
     project.ext {
-        sourcesRootDir = "${projectDir}/src"
+        sourcesRootDir = "$projectDir/src"
+        generatedRootDir = "$projectDir/generated"
+
+        generatedJavaDir = "$generatedRootDir/main/java"
+        generatedTestJavaDir = "$generatedRootDir/test/java"
+
+        generatedGrpcDir = "$generatedRootDir/main/grpc"
+        generatedTestGrpcDir = "$generatedRootDir/test/grpc"
+
+        generatedSpineDir = "$generatedRootDir/main/spine"
+        generatedTestSpineDir = "$generatedRootDir/test/spine"
+
+        testArtifactsScript = "${rootDir}/scripts/test-artifacts.gradle"
+        filterInternalJavadocsScript = "${rootDir}/config/gradle/filter-internal-javadoc.gradle"
+        updateDocsPlugin = "$rootDir/scripts/update-gh-pages.gradle"
     }
 
     apply plugin: 'maven-publish'
@@ -90,6 +133,22 @@ subprojects {
     }
 
     apply from: "$rootDir/config/gradle/test-output.gradle"
+    apply plugin: 'com.google.protobuf'
+    apply plugin: spineProtobufPluginId
+
+
+    sourceSets {
+        main {
+            proto.srcDirs "$sourcesRootDir/main/proto"
+            java.srcDirs generatedJavaDir, "$sourcesRootDir/main/java", generatedSpineDir
+            resources.srcDirs "$generatedRootDir/main/resources"
+        }
+        test {
+            proto.srcDirs "$sourcesRootDir/test/proto"
+            java.srcDirs generatedTestJavaDir, "$sourcesRootDir/test/java", generatedTestSpineDir
+            resources.srcDirs "$generatedRootDir/test/resources"
+        }
+    }
 
     test {
         useJUnitPlatform {
