@@ -22,16 +22,21 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Value;
+import com.google.cloud.datastore.ValueType;
 import com.google.protobuf.FieldMask;
 import io.spine.client.OrderBy;
 import io.spine.server.entity.EntityRecord;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -40,8 +45,9 @@ import static com.google.common.collect.Streams.stream;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
-import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.server.storage.datastore.DsQueryHelper.maskRecord;
+import static io.spine.server.storage.datastore.Entities.activeEntity;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotDefault;
 
 /**
@@ -204,8 +210,15 @@ final class DsIdLookup<I> {
                 return +1;
             }
 
-            Comparable aValue = a.getValue(column);
-            Comparable bValue = b.getValue(column);
+            Comparable aValue = ComparableValueExtractor.comparable(a.getValue(column));
+            Comparable bValue = ComparableValueExtractor.comparable(b.getValue(column));
+
+            if (aValue == null) {
+                return -1;
+            }
+            if (bValue == null) {
+                return +1;
+            }
 
             //noinspection unchecked entity values are required to be comparable by Spine
             return aValue.compareTo(bValue);
@@ -216,6 +229,123 @@ final class DsIdLookup<I> {
             checkNotDefault(orderBy);
             Comparator<Entity> comparator = new RecordComparator(orderBy.getColumn());
             return orderBy.getDirection() == ASCENDING ? comparator : comparator.reversed();
+        }
+    }
+
+    /**
+     * An extractor of comparable values from Datastore {@link Value Value}.
+     *
+     * <p>Only {@link ValueType#NULL NULL}, {@link ValueType#STRING STRING},
+     * {@link ValueType#KEY KEY}, {@link ValueType#LONG LONG}, {@link ValueType#DOUBLE DOUBLE},
+     * {@link ValueType#BOOLEAN BOOLEAN}, and {@link ValueType#TIMESTAMP TIMESTAMP} column types
+     * support comparison, thus ordering.
+     *
+     * <p>The {@link ValueType#ENTITY ENTITY}, {@link ValueType#LIST LIST},
+     * {@link ValueType#RAW_VALUE RAW_VALUE}, and {@link ValueType#LAT_LNG LAT_LNG}
+     * types are not supported.
+     */
+    private enum ComparableValueExtractor {
+        NULL(ValueType.NULL) {
+            @Override
+            @Nullable Comparable extract(Value<?> value) {
+                return null;
+            }
+        },
+        STRING(ValueType.STRING) {
+            @Override
+            Comparable extract(Value<?> value) {
+                return (Comparable) value.get();
+            }
+        },
+        ENTITY(ValueType.ENTITY) {
+            @Override
+            @Nullable Comparable extract(Value<?> value) {
+                throw newIllegalStateException("Entity columns do not support comparison.");
+            }
+        },
+        LIST(ValueType.LIST) {
+            @Override
+            @Nullable Comparable extract(Value<?> value) {
+                throw newIllegalStateException("List columns do not support comparison.");
+            }
+        },
+        KEY(ValueType.KEY) {
+            @Override
+            @Nullable Comparable extract(Value<?> value) {
+                Key key = (Key) value.get();
+                if (key.hasName()) {
+                    return key.getName();
+                }
+                if (key.hasId()) {
+                    return key.getId();
+                }
+                return key.toUrlSafe();
+            }
+        },
+        LONG(ValueType.LONG) {
+            @Override
+            @Nullable Comparable extract(Value<?> value) {
+                return (Long) value.get();
+            }
+        },
+        DOUBLE(ValueType.DOUBLE) {
+            @Override
+            @Nullable Comparable extract(Value<?> value) {
+                return (Double) value.get();
+            }
+        },
+        BOOLEAN(ValueType.BOOLEAN) {
+            @Override
+            @Nullable Comparable extract(Value<?> value) {
+                return (Boolean) value.get();
+            }
+        },
+        TIMESTAMP(ValueType.TIMESTAMP) {
+            @Override
+            @Nullable Comparable extract(Value<?> value) {
+                return (Comparable) value.get();
+            }
+        },
+        RAW_VALUE(ValueType.RAW_VALUE) {
+            @Override
+            @Nullable Comparable extract(Value<?> value) {
+                throw newIllegalStateException("RAW_VALUE columns do not support comparison.");
+            }
+        },
+        LAT_LNG(ValueType.LAT_LNG) {
+            @Override
+            @Nullable Comparable extract(Value<?> value) {
+                throw newIllegalStateException("LAT_LNG columns do not support comparison.");
+            }
+        };
+
+        private final ValueType valueType;
+
+        ComparableValueExtractor(ValueType type) {
+            this.valueType = type;
+        }
+
+        abstract @Nullable Comparable extract(Value<?> value);
+
+        private boolean matches(ValueType type) {
+            return type == valueType;
+        }
+
+        static @Nullable Comparable comparable(Value<?> value) {
+            ValueType type = value.getType();
+            ComparableValueExtractor extractor = pickForType(type);
+            return extractor.extract(value);
+        }
+
+        private static ComparableValueExtractor pickForType(ValueType type) {
+            return Arrays.stream(values())
+                         .filter(extractType -> extractType.matches(type))
+                         .findFirst()
+                         .orElseThrow(unrecognizedType(type));
+        }
+
+        private static Supplier<IllegalStateException> unrecognizedType(ValueType type) {
+            return () -> newIllegalStateException("Unrecognized Datastore type %s.", type);
         }
     }
 }
