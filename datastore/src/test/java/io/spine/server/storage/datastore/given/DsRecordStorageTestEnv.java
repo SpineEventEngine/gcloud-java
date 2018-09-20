@@ -28,9 +28,12 @@ import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
+import io.spine.client.EntityIdFilterVBuilder;
 import io.spine.client.OrderBy;
+import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
 import io.spine.core.Version;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityRecord;
@@ -43,9 +46,15 @@ import io.spine.server.storage.given.RecordStorageTestEnv;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 
+import java.util.List;
+
+import static com.google.common.collect.Lists.asList;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A test environment for {@link io.spine.server.storage.datastore.DsRecordStorageTest}
@@ -78,6 +87,12 @@ public class DsRecordStorageTestEnv {
         return FieldMask.getDefaultInstance();
     }
 
+    public static EntityFilters newEntityFilters(EntityIdFilter idFilter) {
+        return EntityFilters.newBuilder()
+                            .setIdFilter(idFilter)
+                            .build();
+    }
+
     public static EntityFilters newEntityFilters(EntityIdFilter idFilter,
                                                  CompositeColumnFilter columnFilter) {
         return EntityFilters.newBuilder()
@@ -86,10 +101,14 @@ public class DsRecordStorageTestEnv {
                             .build();
     }
 
-    public static EntityIdFilter newIdFilter(EntityId targetId) {
-        return EntityIdFilter.newBuilder()
-                             .addIds(targetId)
-                             .build();
+    public static EntityIdFilter newIdFilter(EntityId firstId, EntityId... otherIds) {
+        return newIdFilter(asList(firstId, otherIds));
+    }
+
+    public static EntityIdFilter newIdFilter(List<EntityId> targetIds) {
+        return EntityIdFilterVBuilder.newBuilder()
+                                     .addAllIds(targetIds)
+                                     .build();
     }
 
     public static EntityId newEntityId(TestConstCounterEntity targetEntity) {
@@ -98,17 +117,48 @@ public class DsRecordStorageTestEnv {
                        .build();
     }
 
+    public static List<EntityId> newEntityIds(List<TestConstCounterEntity> targetEntities) {
+        return targetEntities.stream()
+                             .map(entity -> EntityId.newBuilder()
+                                                    .setId(pack(entity.getId()))
+                                                    .build())
+                             .collect(toList());
+    }
+
     public static void storeEntity(RecordStorage<ProjectId> storage,
                                    TestConstCounterEntity entity) {
-        EntityRecord record = newEntityRecord(entity.getState());
+        EntityRecord record = newEntityRecord(entity.getId(), entity.getState());
         EntityRecordWithColumns withColumns = create(record, entity, storage);
         storage.write(entity.getId(), withColumns);
     }
 
-    public static EntityRecord newEntityRecord(Message state) {
+    public static EntityRecord newEntityRecord(Message id, Message state) {
         return EntityRecord.newBuilder()
+                           .setEntityId(pack(id))
                            .setState(pack(state))
                            .build();
+    }
+
+    public static OrderBy ascendingBy(String column) {
+        return OrderByVBuilder.newBuilder()
+                              .setColumn(column)
+                              .setDirection(ASCENDING)
+                              .build();
+    }
+
+    public static List<ProjectId> recordIds(List<EntityRecord> resultList) {
+        return resultList.stream()
+                         .map(EntityRecord::getEntityId)
+                         .map(AnyPacker::unpack)
+                         .map(id -> (ProjectId) id)
+                         .collect(toList());
+    }
+
+    public static List<ProjectId> idsSortedByName(List<TestConstCounterEntity> entities) {
+        return entities.stream()
+                       .sorted(comparing(TestConstCounterEntity::getCounterName))
+                       .map(AbstractEntity::getId)
+                       .collect(toList());
     }
 
     /*
@@ -138,7 +188,8 @@ public class DsRecordStorageTestEnv {
     public static class TestConstCounterEntity
             extends AbstractVersionableEntity<ProjectId, Project> {
 
-        public static final String CREATED_COLUMN_NAME = "creationTime";
+        public static final String CREATED_COLUMN = "creationTime";
+        public static final String COUNTER_ID_COLUMN = "counterName";
         private static final int COUNTER = 42;
 
         private final Timestamp creationTime;
