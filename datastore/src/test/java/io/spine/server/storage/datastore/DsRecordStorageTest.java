@@ -54,7 +54,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -84,9 +83,8 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.new
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityRecord;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newIdFilter;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.storeEntity;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.pagination;
 import static io.spine.testing.Verify.assertContains;
-import static java.util.Comparator.comparing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -329,7 +327,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         // Create 10 entities and pick one for tests.
         int recordCount = 10;
         int targetEntityIndex = 7;
-        List<TestConstCounterEntity> entities = createAndStoreEntities(storage, recordCount);
+        List<TestConstCounterEntity> entities = DsRecordStorageTestEnv.createAndStoreEntities(storage, recordCount);
         TestConstCounterEntity targetEntity = entities.get(targetEntityIndex);
 
         // Create ID filter.
@@ -366,7 +364,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     }
 
     @Test
-    @DisplayName("query by IDs when possible")
+    @DisplayName("query by IDs in specified order")
     void testQueryByIDsWithOrder() {
         // Initialize test storage.
         SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
@@ -376,7 +374,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         // Create 10 entities and pick one for tests.
         int recordCount = 10;
-        List<TestConstCounterEntity> entities = createAndStoreEntities(storage, recordCount);
+        List<TestConstCounterEntity> entities = DsRecordStorageTestEnv.createAndStoreEntities(storage, recordCount);
 
         // Create ID filter.
         List<EntityId> targetIds = newEntityIds(entities);
@@ -408,20 +406,51 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         verify(spy, never()).read(any(StructuredQuery.class));
     }
 
-    private List<TestConstCounterEntity> createAndStoreEntities(RecordStorage<ProjectId> storage,
-                                                                int recordCount) {
-        List<TestConstCounterEntity> entities = new ArrayList<>(recordCount);
-        for (int i = 0; i < recordCount; i++) {
-            TestConstCounterEntity entity = createAndStoreEntity(storage);
-            entities.add(entity);
-        }
-        return entities;
-    }
+    @Test
+    @DisplayName("query by IDs a specified number of entities")
+    void testQueryByIDsWithLimit() {
+        // Initialize test storage.
+        SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
+        DatastoreStorageFactory storageFactory = new SpyStorageFactory();
+        RecordStorage<ProjectId> storage =
+                storageFactory.createRecordStorage(TestConstCounterEntity.class);
 
-    private TestConstCounterEntity createAndStoreEntity(RecordStorage<ProjectId> storage) {
-        TestConstCounterEntity entity = new TestConstCounterEntity(newId());
-        storeEntity(storage, entity);
-        return entity;
+        // Create 10 entities and pick one for tests.
+        int recordCount = 10;
+        int expectedRecordCount = 4;
+        List<TestConstCounterEntity> entities = DsRecordStorageTestEnv.createAndStoreEntities(storage, recordCount);
+
+        // Create ID filter.
+        List<EntityId> targetIds = newEntityIds(entities);
+        EntityIdFilter idFilter = newIdFilter(targetIds);
+
+        // Compose Query filters.
+        EntityFilters entityFilters = newEntityFilters(idFilter);
+
+        // Compose Query.
+        EntityQuery<ProjectId> entityQuery = from(entityFilters,
+                                                  ascendingBy(COUNTER_ID_COLUMN),
+                                                  pagination(expectedRecordCount),
+                                                  storage);
+
+        // Execute Query.
+        Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
+
+        // Check the query results.
+        List<EntityRecord> resultList = newArrayList(readResult);
+        assertEquals(expectedRecordCount, resultList.size());
+
+        // Check the entities were ordered.
+        List<ProjectId> expectedResults = DsRecordStorageTestEnv.idsSortedByName(entities)
+                                                                .subList(0, expectedRecordCount);
+        List<ProjectId> actualResults = DsRecordStorageTestEnv.recordIds(resultList);
+        assertEquals(expectedResults, actualResults);
+
+        // Check Datastore reads are performed by keys but not using a structured query.
+        DatastoreWrapper spy = storageFactory.getDatastore();
+        verify(spy).read(anyIterable());
+        //noinspection unchecked OK for a generic class assignment in tests.
+        verify(spy, never()).read(any(StructuredQuery.class));
     }
 
     /*

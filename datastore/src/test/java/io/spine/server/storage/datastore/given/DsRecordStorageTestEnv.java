@@ -32,6 +32,7 @@ import io.spine.client.EntityIdFilterVBuilder;
 import io.spine.client.OrderBy;
 import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
+import io.spine.client.PaginationVBuilder;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
@@ -45,10 +46,13 @@ import io.spine.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.server.storage.given.RecordStorageTestEnv;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
+import io.spine.test.storage.ProjectIdVBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.collect.Lists.asList;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -159,6 +163,34 @@ public class DsRecordStorageTestEnv {
                        .sorted(comparing(TestConstCounterEntity::getCounterName))
                        .map(AbstractEntity::getId)
                        .collect(toList());
+    }
+
+    public static Pagination pagination(int pageSize) {
+        return PaginationVBuilder.newBuilder()
+                                 .setPageSize(pageSize)
+                                 .build();
+    }
+
+    public static List<TestConstCounterEntity>
+    createAndStoreEntities(RecordStorage<ProjectId> storage, int recordCount) {
+        List<TestConstCounterEntity> entities = new ArrayList<>(recordCount);
+        for (int i = 0; i < recordCount; i++) {
+            TestConstCounterEntity entity = createAndStoreEntity(storage);
+            entities.add(entity);
+        }
+        return entities;
+    }
+
+    private static TestConstCounterEntity createAndStoreEntity(RecordStorage<ProjectId> storage) {
+        TestConstCounterEntity entity = new TestConstCounterEntity(newId());
+        storeEntity(storage, entity);
+        return entity;
+    }
+
+    private static ProjectId newId() {
+        return ProjectIdVBuilder.newBuilder()
+                                .setId(newUuid())
+                                .build();
     }
 
     /*
