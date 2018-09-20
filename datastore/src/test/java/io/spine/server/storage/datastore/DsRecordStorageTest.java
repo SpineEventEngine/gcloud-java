@@ -23,29 +23,25 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StructuredQuery;
-import com.google.protobuf.Any;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageTest;
+import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.EntityWithCustomColumnName;
+import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestConstCounterEntity;
+import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestEntity;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
@@ -74,6 +70,17 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.COLUMN_NAME_FOR_STORING;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestConstCounterEntity.CREATED_COLUMN_NAME;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyFieldMask;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyOrderBy;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyPagination;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityFilters;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityId;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityRecord;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newIdFilter;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.storeEntity;
 import static io.spine.testing.Verify.assertContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -85,15 +92,14 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 /**
+ * Tests for {@link DsRecordStorage}.
+ *
  * @author Dmytro Dashenkov
  */
 @DisplayName("DsRecordStorage should")
-public class DsRecordStorageTest
-        extends RecordStorageTest<DsRecordStorage<ProjectId>> {
+class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> {
 
-    private static final String COLUMN_NAME_FOR_STORING = "columnName";
-    private static final TestDatastoreStorageFactory datastoreFactory =
-            TestDatastoreStorageFactory.getDefaultInstance();
+    private final TestDatastoreStorageFactory datastoreFactory = datastoreFactory();
 
     @SuppressWarnings("unchecked") // OK for tests.
     @Override
@@ -121,7 +127,7 @@ public class DsRecordStorageTest
 
     private EntityRecordWithColumns newRecordWithColumns(RecordStorage<ProjectId> storage) {
         EntityRecord record = newStorageRecord();
-        TestConstCounterEntity entity = new TestConstCounterEntity(newId());
+        Entity<ProjectId, Project> entity = new TestConstCounterEntity(newId());
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
         return recordWithColumns;
     }
@@ -167,7 +173,7 @@ public class DsRecordStorageTest
         String bigCounter = "bigCounter";
         String counterEven = "counterEven";
         String counterVersion = "counterVersion";
-        String creationTime = TestConstCounterEntity.CREATED_COLUMN_NAME;
+        String creationTime = CREATED_COLUMN_NAME;
         String counterState = "counterState";
         String version = "version";
         String archived = "archived";
@@ -297,9 +303,7 @@ public class DsRecordStorageTest
     void testUseColumnStoreName() {
         DsRecordStorage<ProjectId> storage = newStorage(EntityWithCustomColumnName.class);
         ProjectId id = newId();
-        EntityRecord record = EntityRecord.newBuilder()
-                                          .setState(pack(newState(id)))
-                                          .build();
+        EntityRecord record = newEntityRecord(newState(id));
         Entity entity = new EntityWithCustomColumnName(id);
         EntityRecordWithColumns entityRecordWithColumns = create(record, entity, storage);
         com.google.cloud.datastore.Entity datastoreEntity =
@@ -311,140 +315,77 @@ public class DsRecordStorageTest
     @Test
     @DisplayName("query by IDs when possible")
     void testQueryByIDs() {
-        SpyStorageFactory.injectWrapper(datastoreFactory.getDatastore());
+        // Initialize test storage.
+        SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
         DatastoreStorageFactory storageFactory = new SpyStorageFactory();
         RecordStorage<ProjectId> storage =
                 storageFactory.createRecordStorage(TestConstCounterEntity.class);
+
+        // Create 10 entities and pick one for tests.
         int recordCount = 10;
         int targetEntityIndex = 7;
-        List<TestConstCounterEntity> entities = new ArrayList<>(recordCount);
-        for (int i = 0; i < recordCount; i++) {
-            TestConstCounterEntity entity = new TestConstCounterEntity(newId());
-            entities.add(entity);
-            EntityRecord record = EntityRecord.newBuilder()
-                                              .setState(pack(entity.getState()))
-                                              .build();
-            EntityRecordWithColumns withColumns = create(record, entity, storage);
-            storage.write(entity.getId(), withColumns);
-        }
+        List<TestConstCounterEntity> entities = createAndStoreEntities(storage, recordCount);
         TestConstCounterEntity targetEntity = entities.get(targetEntityIndex);
-        EntityId targetId = EntityId.newBuilder()
-                                    .setId(pack(targetEntity.getId()))
-                                    .build();
-        Object columnTargetValue = targetEntity.getCreationTime();
-        EntityIdFilter idFilter = EntityIdFilter.newBuilder()
-                                                .addIds(targetId)
-                                                .build();
-        CompositeColumnFilter columnFilter =
-                all(eq(TestConstCounterEntity.CREATED_COLUMN_NAME, columnTargetValue));
-        EntityFilters entityFilters = EntityFilters.newBuilder()
-                                                   .setIdFilter(idFilter)
-                                                   .addFilter(columnFilter)
-                                                   .build();
-        EntityQuery<ProjectId> entityQuery = from(entityFilters, OrderBy.getDefaultInstance(),
-                                                  Pagination.getDefaultInstance(), storage);
-        Iterator<EntityRecord> readResult = storage.readAll(entityQuery,
-                                                            FieldMask.getDefaultInstance());
+
+        // Create ID filter.
+        EntityId targetId = newEntityId(targetEntity);
+        EntityIdFilter idFilter = newIdFilter(targetId);
+
+        // Create column filter.
+        Timestamp targetColumnValue = targetEntity.getCreationTime();
+        CompositeColumnFilter columnFilter = all(eq(CREATED_COLUMN_NAME, targetColumnValue));
+
+        // Compose Query filters.
+        EntityFilters entityFilters = newEntityFilters(idFilter, columnFilter);
+
+        // Compose Query.
+        EntityQuery<ProjectId> entityQuery =
+                from(entityFilters, emptyOrderBy(), emptyPagination(), storage);
+
+        // Execute Query.
+        Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
+
+        // Check the query results.
         List<EntityRecord> resultList = newArrayList(readResult);
         assertEquals(1, resultList.size());
-        assertEquals(targetEntity.getState(), unpack(resultList.get(0).getState()));
 
+        // Check the record state.
+        EntityRecord record = resultList.get(0);
+        assertEquals(targetEntity.getState(), unpack(record.getState()));
+
+        // Check Datastore reads are performed by keys but not using a structured query.
         DatastoreWrapper spy = storageFactory.getDatastore();
         verify(spy).read(anyIterable());
+        //noinspection unchecked OK for a generic class assignment in tests.
         verify(spy, never()).read(any(StructuredQuery.class));
+    }
+
+    private List<TestConstCounterEntity> createAndStoreEntities(RecordStorage<ProjectId> storage,
+                                                                int recordCount) {
+        List<TestConstCounterEntity> entities = new ArrayList<>(recordCount);
+        for (int i = 0; i < recordCount; i++) {
+            TestConstCounterEntity entity = createAndStoreEntity(storage);
+            entities.add(entity);
+        }
+        return entities;
+    }
+
+    private TestConstCounterEntity createAndStoreEntity(RecordStorage<ProjectId> storage) {
+        TestConstCounterEntity entity = new TestConstCounterEntity(newId());
+        storeEntity(storage, entity);
+        return entity;
     }
 
     /*
      * Test Entity types
      ************************/
 
-    @SuppressWarnings("unused") // Reflective access
-    public static class TestConstCounterEntity
-            extends AbstractVersionableEntity<ProjectId, Project> {
-
-        private static final String CREATED_COLUMN_NAME = "creationTime";
-        private static final int COUNTER = 42;
-
-        private final Timestamp creationTime;
-        private LifecycleFlags lifecycleFlags;
-
-        private TestConstCounterEntity(ProjectId id) {
-            super(id);
-            this.creationTime = getCurrentTime();
-        }
-
-        @Column
-        public int getCounter() {
-            return COUNTER;
-        }
-
-        @Column
-        public long getBigCounter() {
-            return getCounter();
-        }
-
-        @Column
-        public boolean isCounterEven() {
-            return true;
-        }
-
-        @Column
-        public String getCounterName() {
-            return getId().toString();
-        }
-
-        @Column
-        public Version getCounterVersion() {
-            return Version.newBuilder()
-                          .setNumber(COUNTER)
-                          .build();
-        }
-
-        @Column
-        public Timestamp getCreationTime() {
-            return creationTime;
-        }
-
-        @Column
-        public Project getCounterState() {
-            return getState();
-        }
-
-        @Override
-        public LifecycleFlags getLifecycleFlags() {
-            return lifecycleFlags == null ? super.getLifecycleFlags() : lifecycleFlags;
-        }
-
-        private void injectState(Project state, Version version) {
-            updateState(state);
-        }
-
-        private void injectLifecycle(LifecycleFlags flags) {
-            this.lifecycleFlags = flags;
-        }
-    }
-
-    public static class TestEntity extends TestCounterEntity {
-
-        protected TestEntity(ProjectId id) {
-            super(id);
-        }
-    }
-
-    public static class EntityWithCustomColumnName extends AbstractEntity<ProjectId, Any> {
-
-        private EntityWithCustomColumnName(ProjectId id) {
-            super(id);
-        }
-
-        @Column(name = COLUMN_NAME_FOR_STORING)
-        public int getValue() {
-            return 0;
-        }
-    }
-
     /**
      * A {@link TestDatastoreStorageFactory} which spies on its {@link DatastoreWrapper}.
+     *
+     * This class is not moved to the
+     * {@linkplain io.spine.server.storage.datastore.given.DsRecordStorageTestEnv test environment}
+     * because it uses package-private method of {@link DatastoreWrapper}.
      */
     private static class SpyStorageFactory extends TestDatastoreStorageFactory {
 
