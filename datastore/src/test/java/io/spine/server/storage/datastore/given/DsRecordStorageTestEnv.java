@@ -390,17 +390,8 @@ public class DsRecordStorageTestEnv {
             return creationTime;
         }
 
-        @Override
-        public LifecycleFlags getLifecycleFlags() {
-            return lifecycleFlags == null ? super.getLifecycleFlags() : lifecycleFlags;
-        }
-
-        public void injectState(College state) {
+        private void injectState(College state) {
             updateState(state);
-        }
-
-        public void injectLifecycle(LifecycleFlags flags) {
-            this.lifecycleFlags = flags;
         }
     }
 }
