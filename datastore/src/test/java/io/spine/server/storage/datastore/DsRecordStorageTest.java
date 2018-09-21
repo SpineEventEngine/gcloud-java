@@ -72,8 +72,8 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.COLUMN_NAME_FOR_STORING;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.COLLEGE_CREATED_COLUMN;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.COLLEGE_NAME_COLUMN;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.Columns.CREATED;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.Columns.NAME;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestConstCounterEntity.CREATED_COLUMN;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.UNORDERED_COLLEGE_NAMES;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ascendingBy;
@@ -341,7 +341,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         // Create column filter.
         Timestamp targetColumnValue = targetEntity.getCreationTime();
-        CompositeColumnFilter columnFilter = all(eq(COLLEGE_CREATED_COLUMN, targetColumnValue));
+        CompositeColumnFilter columnFilter = all(eq(CREATED.columnName(), targetColumnValue));
 
         // Compose Query filters.
         EntityFilters entityFilters = newEntityFilters(idFilter, columnFilter);
@@ -389,7 +389,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         // Compose Query.
         EntityQuery<CollegeId> entityQuery = from(entityFilters,
-                                                  ascendingBy(COLLEGE_NAME_COLUMN),
+                                                  ascendingBy(NAME.columnName()),
                                                   emptyPagination(),
                                                   storage);
 
@@ -433,7 +433,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         // Compose Query.
         EntityQuery<CollegeId> entityQuery = from(entityFilters,
-                                                  ascendingBy(COLLEGE_NAME_COLUMN),
+                                                  ascendingBy(NAME.columnName()),
                                                   pagination(expectedRecordCount),
                                                   storage);
 

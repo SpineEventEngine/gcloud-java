@@ -349,8 +349,24 @@ public class DsRecordStorageTestEnv {
     public static class CollegeEntity
             extends AbstractVersionableEntity<CollegeId, College> {
 
-        public static final String COLLEGE_CREATED_COLUMN = "creationTime";
-        public static final String COLLEGE_NAME_COLUMN = "name";
+        public enum Columns {
+            CREATED("creationTime"),
+            NAME("name"),
+            STUDENT_COUNT("studentCount"),
+            PASSING_GRADE("passingGrade"),
+            ADMISSION_DEADLINE("admissionDeadline"),
+            STATE_SPONSORED("stateSponsored");
+
+            private final String name;
+
+            Columns(String name) {
+                this.name = name;
+            }
+
+            public String columnName() {
+                return name;
+            }
+        }
 
         private LifecycleFlags lifecycleFlags;
         private final Timestamp creationTime;
