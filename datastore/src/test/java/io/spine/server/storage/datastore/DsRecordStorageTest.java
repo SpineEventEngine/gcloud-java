@@ -44,7 +44,6 @@ import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.EntityWith
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestConstCounterEntity;
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestEntity;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
-import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
@@ -84,12 +83,14 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.Col
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestConstCounterEntity.CREATED_COLUMN;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.UNORDERED_COLLEGE_NAMES;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ascendingBy;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.assertSortedBooleans;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.createAndStoreEntities;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.descendingBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyFieldMask;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyOrderBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyPagination;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.getStateSponsoredValues;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityFilters;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityId;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityIds;
@@ -478,17 +479,8 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         assertEquals(recordCount, resultList.size());
 
         // Check the entities were ordered.
-        List<CollegeId> expectedResults = sortedIds(entities, CollegeEntity::getStateSponsored);
-        int boolSwitches = 0;
-        boolean lastBool = false;
-        for (EntityRecord record : resultList) {
-            College college = unpack(record.getState());
-            if (lastBool != college.getStateSponsored()) {
-                boolSwitches++;
-            }
-            lastBool = college.getStateSponsored();
-        }
-        assertEquals(1, boolSwitches);
+        List<Boolean> actualResults = getStateSponsoredValues(resultList);
+        assertSortedBooleans(actualResults);
 
         // Check Datastore reads are performed by keys but not using a structured query.
         DatastoreWrapper spy = storageFactory.getDatastore();

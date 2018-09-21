@@ -68,10 +68,12 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static java.lang.Math.abs;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * A test environment for {@link io.spine.server.storage.datastore.DsRecordStorageTest}
@@ -265,6 +267,26 @@ public class DsRecordStorageTestEnv {
         return CollegeIdVBuilder.newBuilder()
                                 .setValue(newUuid())
                                 .build();
+    }
+
+    public static void assertSortedBooleans(List<Boolean> values) {
+        int boolSwitches = 0;
+        boolean lastBool = false;
+        for (boolean value : values) {
+            if (lastBool != value) {
+                boolSwitches++;
+            }
+            lastBool = value;
+        }
+        assertEquals(1, boolSwitches);
+    }
+
+    public static List<Boolean> getStateSponsoredValues(List<EntityRecord> resultList) {
+        return resultList.stream()
+                         .map(EntityRecord::getState)
+                         .map(state -> (College) unpack(state))
+                         .map(College::getStateSponsored)
+                         .collect(toList());
     }
 
     /*
