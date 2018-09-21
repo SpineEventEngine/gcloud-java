@@ -378,7 +378,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     }
 
     @Test
-    @DisplayName("query by IDs in specified order by string field")
+    @DisplayName("query by IDs in descending sort order")
     void testQueryByIDsWithDescendingOrder() {
         // Initialize test storage.
         SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
