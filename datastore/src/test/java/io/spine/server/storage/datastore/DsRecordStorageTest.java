@@ -74,8 +74,8 @@ import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.COLUMN_NAME_FOR_STORING;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.COLLEGE_CREATED_COLUMN;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.COLLEGE_NAME_COLUMN;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestConstCounterEntity.COUNTER_ID_COLUMN;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestConstCounterEntity.CREATED_COLUMN;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.UNORDERED_COLLEGE_NAMES;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ascendingBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.createAndStoreEntities;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
@@ -369,7 +369,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     }
 
     @Test
-    @DisplayName("query by IDs in specified order")
+    @DisplayName("query by IDs in specified order by string field")
     void testQueryByIDsWithOrder() {
         // Initialize test storage.
         SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
@@ -377,8 +377,8 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         RecordStorage<CollegeId> storage = storageFactory.createRecordStorage(CollegeEntity.class);
 
         // Create 10 entities and pick one for tests.
-        int recordCount = 10;
-        List<CollegeEntity> entities = createAndStoreEntities(storage, recordCount);
+        int recordCount = UNORDERED_COLLEGE_NAMES.size();
+        List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
 
         // Create ID filter.
         List<EntityId> targetIds = newEntityIds(entities);
@@ -388,9 +388,9 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         EntityFilters entityFilters = newEntityFilters(idFilter);
 
         // Compose Query.
-        EntityQuery<CollegeId> entityQuery = from(entityFilters, 
-                                                  ascendingBy(COLLEGE_NAME_COLUMN), 
-                                                  emptyPagination(), 
+        EntityQuery<CollegeId> entityQuery = from(entityFilters,
+                                                  ascendingBy(COLLEGE_NAME_COLUMN),
+                                                  emptyPagination(),
                                                   storage);
 
         // Execute Query.
@@ -421,9 +421,8 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         RecordStorage<CollegeId> storage = storageFactory.createRecordStorage(CollegeEntity.class);
 
         // Create 10 entities and pick one for tests.
-        int recordCount = 10;
         int expectedRecordCount = 4;
-        List<CollegeEntity> entities = createAndStoreEntities(storage, recordCount);
+        List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
 
         // Create ID filter.
         List<EntityId> targetIds = newEntityIds(entities);

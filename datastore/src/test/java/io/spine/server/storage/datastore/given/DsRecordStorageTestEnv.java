@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore.given;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -51,6 +52,7 @@ import io.spine.test.datastore.CollegeVBuilder;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.validate.TimestampVBuilder;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,6 +60,7 @@ import java.util.List;
 import java.util.Random;
 
 import static com.google.common.collect.Lists.asList;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.TIMESTAMP_SECONDS_MAX;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
@@ -76,6 +79,10 @@ import static java.util.stream.Collectors.toList;
 public class DsRecordStorageTestEnv {
 
     public static final String COLUMN_NAME_FOR_STORING = "columnName";
+    public static final ImmutableList<String> UNORDERED_COLLEGE_NAMES = ImmutableList.of(
+            "Ivy University", "Doonesbury", "Winston University", "Springfield A&M",
+            "Greendale Community College", "Monsters University"
+    );
     private static final Random RANDOM = new Random();
 
     /**
@@ -189,6 +196,13 @@ public class DsRecordStorageTestEnv {
         return entities;
     }
 
+    public static List<CollegeEntity>
+    createAndStoreEntities(RecordStorage<CollegeId> storage, List<@Nullable String> names) {
+        return names.stream()
+                    .map(name -> createAndStoreEntity(storage, name))
+                    .collect(toList());
+    }
+
     private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage) {
         CollegeId id = newId();
         CollegeEntity entity = new CollegeEntity(id);
@@ -197,15 +211,28 @@ public class DsRecordStorageTestEnv {
         return entity;
     }
 
-    private static College newCollege(CollegeId id) {
+    private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage,
+                                                      String name) {
+        CollegeId id = newId();
+        CollegeEntity entity = new CollegeEntity(id);
+        entity.injectState(newCollege(id, name));
+        storeEntity(storage, entity);
+        return entity;
+    }
+
+    private static College newCollege(CollegeId id, String name) {
         return CollegeVBuilder.newBuilder()
                               .setId(id)
-                              .setName(id.getValue())
+                              .setName(name)
                               .setAdmissionDeadline(randomTimestamp())
                               .setPassingGrade(randomPassingGrade())
                               .setStudentCount(randomStudentCount())
                               .setStateSponsored(RANDOM.nextBoolean())
                               .build();
+    }
+
+    private static College newCollege(CollegeId id) {
+        return newCollege(id, id.getValue());
     }
 
     private static int randomStudentCount() {
