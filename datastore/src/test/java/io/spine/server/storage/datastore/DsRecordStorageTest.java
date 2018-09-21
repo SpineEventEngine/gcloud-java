@@ -62,6 +62,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.reverse;
 import static com.google.protobuf.util.Timestamps.toSeconds;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.ColumnFilters.all;
@@ -72,17 +73,21 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.COLUMN_NAME_FOR_STORING;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.Columns.ADMISSION_DEADLINE;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.Columns.CREATED;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.Columns.NAME;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.Columns.PASSING_GRADE;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.Columns.STATE_SPONSORED;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.Columns.STUDENT_COUNT;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestConstCounterEntity.CREATED_COLUMN;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.UNORDERED_COLLEGE_NAMES;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ascendingBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.createAndStoreEntities;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.descendingBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyFieldMask;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyOrderBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyPagination;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.idsSortedByName;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityFilters;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityId;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityIds;
@@ -90,6 +95,7 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.new
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newIdFilter;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.pagination;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.recordIds;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedIds;
 import static io.spine.testing.Verify.assertContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -370,7 +376,51 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
     @Test
     @DisplayName("query by IDs in specified order by string field")
-    void testQueryByIDsWithOrder() {
+    void testQueryByIDsWithDescendingOrder() {
+        // Initialize test storage.
+        SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
+        DatastoreStorageFactory storageFactory = new SpyStorageFactory();
+        RecordStorage<CollegeId> storage = storageFactory.createRecordStorage(CollegeEntity.class);
+
+        // Create 10 entities and pick one for tests.
+        int recordCount = UNORDERED_COLLEGE_NAMES.size();
+        List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
+
+        // Create ID filter.
+        List<EntityId> targetIds = newEntityIds(entities);
+        EntityIdFilter idFilter = newIdFilter(targetIds);
+
+        // Compose Query filters.
+        EntityFilters entityFilters = newEntityFilters(idFilter);
+
+        // Compose Query.
+        EntityQuery<CollegeId> entityQuery = from(entityFilters,
+                                                  descendingBy(NAME.columnName()),
+                                                  emptyPagination(),
+                                                  storage);
+
+        // Execute Query.
+        Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
+
+        // Check the query results.
+        List<EntityRecord> resultList = newArrayList(readResult);
+        assertEquals(recordCount, resultList.size());
+
+        // Check the entities were ordered.
+        List<CollegeId> expectedResults = reverse(sortedIds(entities, CollegeEntity::getName));
+        List<CollegeId> actualResults = recordIds(resultList);
+        assertEquals(expectedResults, actualResults);
+
+        // Check Datastore reads are performed by keys but not using a structured query.
+        DatastoreWrapper spy = storageFactory.getDatastore();
+        verify(spy).read(anyIterable());
+        //noinspection unchecked OK for a generic class assignment in tests.
+        verify(spy, never()).read(any(StructuredQuery.class));
+    }
+
+    @Test
+    @DisplayName("query by IDs in specified order by string field")
+    void testQueryByIDsWithOrderByString() {
         // Initialize test storage.
         SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
         DatastoreStorageFactory storageFactory = new SpyStorageFactory();
@@ -401,7 +451,185 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         assertEquals(recordCount, resultList.size());
 
         // Check the entities were ordered.
-        List<CollegeId> expectedResults = idsSortedByName(entities);
+        List<CollegeId> expectedResults = sortedIds(entities, CollegeEntity::getName);
+        List<CollegeId> actualResults = recordIds(resultList);
+        assertEquals(expectedResults, actualResults);
+
+        // Check Datastore reads are performed by keys but not using a structured query.
+        DatastoreWrapper spy = storageFactory.getDatastore();
+        verify(spy).read(anyIterable());
+        //noinspection unchecked OK for a generic class assignment in tests.
+        verify(spy, never()).read(any(StructuredQuery.class));
+    }
+
+    @Test
+    @DisplayName("query by IDs in specified order by double field")
+    void testQueryByIDsWithOrderByDouble() {
+        // Initialize test storage.
+        SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
+        DatastoreStorageFactory storageFactory = new SpyStorageFactory();
+        RecordStorage<CollegeId> storage = storageFactory.createRecordStorage(CollegeEntity.class);
+
+        // Create 10 entities and pick one for tests.
+        int recordCount = 20;
+        List<CollegeEntity> entities = createAndStoreEntities(storage, recordCount);
+
+        // Create ID filter.
+        List<EntityId> targetIds = newEntityIds(entities);
+        EntityIdFilter idFilter = newIdFilter(targetIds);
+
+        // Compose Query filters.
+        EntityFilters entityFilters = newEntityFilters(idFilter);
+
+        // Compose Query.
+        EntityQuery<CollegeId> entityQuery = from(entityFilters,
+                                                  ascendingBy(PASSING_GRADE.columnName()),
+                                                  emptyPagination(),
+                                                  storage);
+
+        // Execute Query.
+        Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
+
+        // Check the query results.
+        List<EntityRecord> resultList = newArrayList(readResult);
+        assertEquals(recordCount, resultList.size());
+
+        // Check the entities were ordered.
+        List<CollegeId> expectedResults = sortedIds(entities, CollegeEntity::getPassingGrade);
+        List<CollegeId> actualResults = recordIds(resultList);
+        assertEquals(expectedResults, actualResults);
+
+        // Check Datastore reads are performed by keys but not using a structured query.
+        DatastoreWrapper spy = storageFactory.getDatastore();
+        verify(spy).read(anyIterable());
+        //noinspection unchecked OK for a generic class assignment in tests.
+        verify(spy, never()).read(any(StructuredQuery.class));
+    }
+
+    @Test
+    @DisplayName("query by IDs in specified order by timestamp field")
+    void testQueryByIDsWithOrderByTimestamp() {
+        // Initialize test storage.
+        SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
+        DatastoreStorageFactory storageFactory = new SpyStorageFactory();
+        RecordStorage<CollegeId> storage = storageFactory.createRecordStorage(CollegeEntity.class);
+
+        // Create 10 entities and pick one for tests.
+        int recordCount = 20;
+        List<CollegeEntity> entities = createAndStoreEntities(storage, recordCount);
+
+        // Create ID filter.
+        List<EntityId> targetIds = newEntityIds(entities);
+        EntityIdFilter idFilter = newIdFilter(targetIds);
+
+        // Compose Query filters.
+        EntityFilters entityFilters = newEntityFilters(idFilter);
+
+        // Compose Query.
+        EntityQuery<CollegeId> entityQuery = from(entityFilters,
+                                                  ascendingBy(ADMISSION_DEADLINE.columnName()),
+                                                  emptyPagination(),
+                                                  storage);
+
+        // Execute Query.
+        Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
+
+        // Check the query results.
+        List<EntityRecord> resultList = newArrayList(readResult);
+        assertEquals(recordCount, resultList.size());
+
+        // Check the entities were ordered.
+        List<CollegeId> expectedResults = sortedIds(entities,
+                                                    entity -> entity.getAdmissionDeadline()
+                                                                    .getSeconds());
+        List<CollegeId> actualResults = recordIds(resultList);
+        assertEquals(expectedResults, actualResults);
+
+        // Check Datastore reads are performed by keys but not using a structured query.
+        DatastoreWrapper spy = storageFactory.getDatastore();
+        verify(spy).read(anyIterable());
+        //noinspection unchecked OK for a generic class assignment in tests.
+        verify(spy, never()).read(any(StructuredQuery.class));
+    }
+
+    @Test
+    @DisplayName("query by IDs in specified order by integer")
+    void testQueryByIDsWithOrderByInt() {
+        // Initialize test storage.
+        SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
+        DatastoreStorageFactory storageFactory = new SpyStorageFactory();
+        RecordStorage<CollegeId> storage = storageFactory.createRecordStorage(CollegeEntity.class);
+
+        // Create 10 entities and pick one for tests.
+        int recordCount = 20;
+        List<CollegeEntity> entities = createAndStoreEntities(storage, recordCount);
+
+        // Create ID filter.
+        List<EntityId> targetIds = newEntityIds(entities);
+        EntityIdFilter idFilter = newIdFilter(targetIds);
+
+        // Compose Query filters.
+        EntityFilters entityFilters = newEntityFilters(idFilter);
+
+        // Compose Query.
+        EntityQuery<CollegeId> entityQuery = from(entityFilters,
+                                                  ascendingBy(STUDENT_COUNT.columnName()),
+                                                  emptyPagination(),
+                                                  storage);
+
+        // Execute Query.
+        Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
+
+        // Check the query results.
+        List<EntityRecord> resultList = newArrayList(readResult);
+        assertEquals(recordCount, resultList.size());
+
+        // Check the entities were ordered.
+        List<CollegeId> expectedResults = sortedIds(entities, CollegeEntity::getStudentCount);
+        List<CollegeId> actualResults = recordIds(resultList);
+        assertEquals(expectedResults, actualResults);
+
+        // Check Datastore reads are performed by keys but not using a structured query.
+        DatastoreWrapper spy = storageFactory.getDatastore();
+        verify(spy).read(anyIterable());
+        //noinspection unchecked OK for a generic class assignment in tests.
+        verify(spy, never()).read(any(StructuredQuery.class));
+    }
+
+    @Test
+    @DisplayName("query by IDs in specified order by boolean")
+    void testQueryByIDsWithOrderByBoolean() {
+        // Initialize test storage.
+        SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
+        DatastoreStorageFactory storageFactory = new SpyStorageFactory();
+        RecordStorage<CollegeId> storage = storageFactory.createRecordStorage(CollegeEntity.class);
+
+        // Create 10 entities and pick one for tests.
+        int recordCount = 20;
+        List<CollegeEntity> entities = createAndStoreEntities(storage, recordCount);
+
+        // Create ID filter.
+        List<EntityId> targetIds = newEntityIds(entities);
+        EntityIdFilter idFilter = newIdFilter(targetIds);
+
+        // Compose Query filters.
+        EntityFilters entityFilters = newEntityFilters(idFilter);
+
+        // Compose Query.
+        EntityQuery<CollegeId> entityQuery = from(entityFilters,
+                                                  ascendingBy(STATE_SPONSORED.columnName()),
+                                                  emptyPagination(),
+                                                  storage);
+
+        // Execute Query.
+        Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
+
+        // Check the query results.
+        List<EntityRecord> resultList = newArrayList(readResult);
+        assertEquals(recordCount, resultList.size());
+
+        // Check the entities were ordered.
+        List<CollegeId> expectedResults = sortedIds(entities, CollegeEntity::isStateSponsored);
         List<CollegeId> actualResults = recordIds(resultList);
         assertEquals(expectedResults, actualResults);
 
@@ -445,7 +673,8 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         assertEquals(expectedRecordCount, resultList.size());
 
         // Check the entities were ordered.
-        List<CollegeId> expectedResults = idsSortedByName(entities).subList(0, expectedRecordCount);
+        List<CollegeId> sortedIds = sortedIds(entities, CollegeEntity::getName);
+        List<CollegeId> expectedResults = sortedIds.subList(0, expectedRecordCount);
         List<CollegeId> actualResults = recordIds(resultList);
         assertEquals(expectedResults, actualResults);
 

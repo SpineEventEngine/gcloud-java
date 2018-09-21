@@ -57,13 +57,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 
 import static com.google.common.collect.Lists.asList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
+import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static java.lang.Math.abs;
@@ -159,9 +162,17 @@ public class DsRecordStorageTestEnv {
     }
 
     public static OrderBy ascendingBy(String column) {
+        return orderBy(column, ASCENDING);
+    }
+
+    public static OrderBy descendingBy(String column) {
+        return orderBy(column, DESCENDING);
+    }
+
+    private static OrderBy orderBy(String column, OrderBy.Direction descending) {
         return OrderByVBuilder.newBuilder()
                               .setColumn(column)
-                              .setDirection(ASCENDING)
+                              .setDirection(descending)
                               .build();
     }
 
@@ -173,9 +184,10 @@ public class DsRecordStorageTestEnv {
                          .collect(toList());
     }
 
-    public static List<CollegeId> idsSortedByName(List<CollegeEntity> entities) {
+    public static <T extends Comparable<T>> List<CollegeId>
+    sortedIds(List<CollegeEntity> entities, Function<CollegeEntity, T> property) {
         return entities.stream()
-                       .sorted(comparing(CollegeEntity::getName))
+                       .sorted(comparing(property))
                        .map(AbstractEntity::getId)
                        .collect(toList());
     }

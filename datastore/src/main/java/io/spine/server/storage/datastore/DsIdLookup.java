@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Value;
@@ -303,7 +304,7 @@ final class DsIdLookup<I> {
         TIMESTAMP(ValueType.TIMESTAMP) {
             @Override
             @Nullable Comparable extract(Value<?> value) {
-                return (Comparable) value.get();
+                return (Timestamp) value.get();
             }
         },
         RAW_VALUE(ValueType.RAW_VALUE) {
