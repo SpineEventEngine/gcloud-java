@@ -54,14 +54,13 @@ import io.spine.test.storage.ProjectId;
 import io.spine.validate.TimestampVBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
 import static com.google.common.collect.Lists.asList;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.util.TimeUtil.TIMESTAMP_SECONDS_MAX;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
@@ -83,7 +82,8 @@ public class DsRecordStorageTestEnv {
             "Ivy University", "Doonesbury", "Winston University", "Springfield A&M",
             "Greendale Community College", "Monsters University"
     );
-    private static final Random RANDOM = new Random();
+    private static final Random RANDOM = new SecureRandom();
+    private static final long MAX_TIMESTAMP_SECONDS = 250000000000L;
 
     /**
      * Prevents instantiation of this test environment.
@@ -245,7 +245,7 @@ public class DsRecordStorageTestEnv {
 
     private static Timestamp randomTimestamp() {
         return TimestampVBuilder.newBuilder()
-                                .setSeconds(abs(RANDOM.nextLong()) % TIMESTAMP_SECONDS_MAX)
+                                .setSeconds(abs(RANDOM.nextLong()) % MAX_TIMESTAMP_SECONDS)
                                 .build();
     }
 
@@ -375,11 +375,10 @@ public class DsRecordStorageTestEnv {
             return getState().getAdmissionDeadline();
         }
 
-//        TODO:2018-09-21:mdrachuk: support double values by DatastoreTypeRegistryFactory
-//        @Column
-//        public double getPassingGrade() {
-//            return getState().getPassingGrade();
-//        }
+        @Column
+        public double getPassingGrade() {
+            return getState().getPassingGrade();
+        }
 
         @Column
         public boolean isStateSponsored() {
