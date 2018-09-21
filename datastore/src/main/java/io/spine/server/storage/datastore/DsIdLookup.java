@@ -241,13 +241,13 @@ final class DsIdLookup<I> {
      * An extractor of comparable values from Datastore {@link Value Value}.
      *
      * <p>Only {@link ValueType#NULL NULL}, {@link ValueType#STRING STRING},
-     * {@link ValueType#KEY KEY}, {@link ValueType#LONG LONG}, {@link ValueType#DOUBLE DOUBLE},
+     * {@link ValueType#LONG LONG}, {@link ValueType#DOUBLE DOUBLE},
      * {@link ValueType#BOOLEAN BOOLEAN}, and {@link ValueType#TIMESTAMP TIMESTAMP} column types
      * support comparison, thus ordering.
      *
      * <p>The {@link ValueType#ENTITY ENTITY}, {@link ValueType#LIST LIST},
-     * {@link ValueType#RAW_VALUE RAW_VALUE}, and {@link ValueType#LAT_LNG LAT_LNG}
-     * types are not supported.
+     * {@link ValueType#RAW_VALUE RAW_VALUE}, {@link ValueType#LAT_LNG LAT_LNG},
+     * and {@link ValueType#KEY KEY} types are not supported.
      */
     private enum ComparableValueExtractor {
         NULL(ValueType.NULL) {
@@ -260,31 +260,6 @@ final class DsIdLookup<I> {
             @Override
             Comparable extract(Value<?> value) {
                 return (Comparable) value.get();
-            }
-        },
-        ENTITY(ValueType.ENTITY) {
-            @Override
-            @Nullable Comparable extract(Value<?> value) {
-                throw newIllegalStateException("Entity columns do not support comparison.");
-            }
-        },
-        LIST(ValueType.LIST) {
-            @Override
-            @Nullable Comparable extract(Value<?> value) {
-                throw newIllegalStateException("List columns do not support comparison.");
-            }
-        },
-        KEY(ValueType.KEY) {
-            @Override
-            @Nullable Comparable extract(Value<?> value) {
-                Key key = (Key) value.get();
-                if (key.hasName()) {
-                    return key.getName();
-                }
-                if (key.hasId()) {
-                    return key.getId();
-                }
-                return key.toUrlSafe();
             }
         },
         LONG(ValueType.LONG) {
@@ -309,18 +284,6 @@ final class DsIdLookup<I> {
             @Override
             @Nullable Comparable extract(Value<?> value) {
                 return (Timestamp) value.get();
-            }
-        },
-        RAW_VALUE(ValueType.RAW_VALUE) {
-            @Override
-            @Nullable Comparable extract(Value<?> value) {
-                throw newIllegalStateException("RAW_VALUE columns do not support comparison.");
-            }
-        },
-        LAT_LNG(ValueType.LAT_LNG) {
-            @Override
-            @Nullable Comparable extract(Value<?> value) {
-                throw newIllegalStateException("LAT_LNG columns do not support comparison.");
             }
         };
 
