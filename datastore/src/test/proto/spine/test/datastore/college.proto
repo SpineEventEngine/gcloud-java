@@ -25,27 +25,28 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.test.datastore";
+option java_outer_classname = "TestDatastoreEntityProto";
 option java_multiple_files = true;
 
 import "google/protobuf/timestamp.proto";
 
 message CollegeId {
-    string value = 1;
+    string value = 1 [(required) = true];
 }
 
 message College {
 
-    CollegeId id = 1;
+    CollegeId id = 1 [(required) = true];
 
-    string name = 2;
+    string name = 2 [(required) = true];
 
     int32 student_count = 3;
 
-    google.protobuf.Timestamp admission_deadline = 4;
+    google.protobuf.Timestamp admission_deadline = 4 [(required) = true];
 
-    double passing_grade = 5;
+    double passing_grade = 5 [(required) = true];
 
-    bool private = 6;
+    bool stateSponsored = 6;
 
     repeated string subjects = 7;
 }

@@ -46,19 +46,25 @@ import io.spine.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.server.storage.given.RecordStorageTestEnv;
 import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
+import io.spine.test.datastore.CollegeIdVBuilder;
+import io.spine.test.datastore.CollegeVBuilder;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.ProjectIdVBuilder;
+import io.spine.validate.TimestampVBuilder;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import static com.google.common.collect.Lists.asList;
+import static com.google.protobuf.util.TimeUtil.TIMESTAMP_SECONDS_MAX;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
+import static java.lang.Math.abs;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
@@ -70,6 +76,7 @@ import static java.util.stream.Collectors.toList;
 public class DsRecordStorageTestEnv {
 
     public static final String COLUMN_NAME_FOR_STORING = "columnName";
+    private static final Random RANDOM = new Random();
 
     /**
      * Prevents instantiation of this test environment.
@@ -117,22 +124,21 @@ public class DsRecordStorageTestEnv {
                                      .build();
     }
 
-    public static EntityId newEntityId(TestConstCounterEntity targetEntity) {
+    public static EntityId
+    newEntityId(AbstractEntity<? extends Message, ? extends Message> targetEntity) {
         return EntityId.newBuilder()
                        .setId(pack(targetEntity.getId()))
                        .build();
     }
 
-    public static List<EntityId> newEntityIds(List<TestConstCounterEntity> targetEntities) {
+    public static List<EntityId>
+    newEntityIds(Collection<CollegeEntity> targetEntities) {
         return targetEntities.stream()
-                             .map(entity -> EntityId.newBuilder()
-                                                    .setId(pack(entity.getId()))
-                                                    .build())
+                             .map(DsRecordStorageTestEnv::newEntityId)
                              .collect(toList());
     }
 
-    public static void storeEntity(RecordStorage<ProjectId> storage,
-                                   TestConstCounterEntity entity) {
+    public static void storeEntity(RecordStorage<CollegeId> storage, CollegeEntity entity) {
         EntityRecord record = newEntityRecord(entity.getId(), entity.getState());
         EntityRecordWithColumns withColumns = create(record, entity, storage);
         storage.write(entity.getId(), withColumns);
@@ -152,17 +158,17 @@ public class DsRecordStorageTestEnv {
                               .build();
     }
 
-    public static List<ProjectId> recordIds(List<EntityRecord> resultList) {
+    public static List<CollegeId> recordIds(List<EntityRecord> resultList) {
         return resultList.stream()
                          .map(EntityRecord::getEntityId)
                          .map(AnyPacker::unpack)
-                         .map(id -> (ProjectId) id)
+                         .map(id -> (CollegeId) id)
                          .collect(toList());
     }
 
-    public static List<ProjectId> idsSortedByName(List<TestConstCounterEntity> entities) {
+    public static List<CollegeId> idsSortedByName(List<CollegeEntity> entities) {
         return entities.stream()
-                       .sorted(comparing(TestConstCounterEntity::getCounterName))
+                       .sorted(comparing(CollegeEntity::getName))
                        .map(AbstractEntity::getId)
                        .collect(toList());
     }
@@ -173,25 +179,52 @@ public class DsRecordStorageTestEnv {
                                  .build();
     }
 
-    public static List<TestConstCounterEntity>
-    createAndStoreEntities(RecordStorage<ProjectId> storage, int recordCount) {
-        List<TestConstCounterEntity> entities = new ArrayList<>(recordCount);
+    public static List<CollegeEntity>
+    createAndStoreEntities(RecordStorage<CollegeId> storage, int recordCount) {
+        List<CollegeEntity> entities = new ArrayList<>(recordCount);
         for (int i = 0; i < recordCount; i++) {
-            TestConstCounterEntity entity = createAndStoreEntity(storage);
+            CollegeEntity entity = createAndStoreEntity(storage);
             entities.add(entity);
         }
         return entities;
     }
 
-    private static TestConstCounterEntity createAndStoreEntity(RecordStorage<ProjectId> storage) {
-        TestConstCounterEntity entity = new TestConstCounterEntity(newId());
+    private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage) {
+        CollegeId id = newId();
+        CollegeEntity entity = new CollegeEntity(id);
+        entity.injectState(newCollege(id));
         storeEntity(storage, entity);
         return entity;
     }
 
-    private static ProjectId newId() {
-        return ProjectIdVBuilder.newBuilder()
-                                .setId(newUuid())
+    private static College newCollege(CollegeId id) {
+        return CollegeVBuilder.newBuilder()
+                              .setId(id)
+                              .setName(id.getValue())
+                              .setAdmissionDeadline(randomTimestamp())
+                              .setPassingGrade(randomPassingGrade())
+                              .setStudentCount(randomStudentCount())
+                              .setStateSponsored(RANDOM.nextBoolean())
+                              .build();
+    }
+
+    private static int randomStudentCount() {
+        return RANDOM.nextInt(1000);
+    }
+
+    private static double randomPassingGrade() {
+        return RANDOM.nextDouble() * 9 + 1;
+    }
+
+    private static Timestamp randomTimestamp() {
+        return TimestampVBuilder.newBuilder()
+                                .setSeconds(abs(RANDOM.nextLong()) % TIMESTAMP_SECONDS_MAX)
+                                .build();
+    }
+
+    private static CollegeId newId() {
+        return CollegeIdVBuilder.newBuilder()
+                                .setValue(newUuid())
                                 .build();
     }
 
@@ -289,10 +322,15 @@ public class DsRecordStorageTestEnv {
     public static class CollegeEntity
             extends AbstractVersionableEntity<CollegeId, College> {
 
+        public static final String COLLEGE_CREATED_COLUMN = "creationTime";
+        public static final String COLLEGE_NAME_COLUMN = "name";
+
         private LifecycleFlags lifecycleFlags;
+        private final Timestamp creationTime;
 
         public CollegeEntity(CollegeId id) {
             super(id);
+            this.creationTime = getCurrentTime();
         }
 
         @Column
@@ -310,19 +348,20 @@ public class DsRecordStorageTestEnv {
             return getState().getAdmissionDeadline();
         }
 
+//        TODO:2018-09-21:mdrachuk: support double values by DatastoreTypeRegistryFactory
+//        @Column
+//        public double getPassingGrade() {
+//            return getState().getPassingGrade();
+//        }
+
         @Column
-        public Double getPassingGrade() {
-            return getState().getPassingGrade();
+        public boolean isStateSponsored() {
+            return getState().getStateSponsored();
         }
 
         @Column
-        public boolean isPrivate() {
-            return getState().getPrivate();
-        }
-
-        @Column
-        public List<String> getSubjects() {
-            return getState().getSubjectsList();
+        public Timestamp getCreationTime() {
+            return creationTime;
         }
 
         @Override
@@ -330,7 +369,7 @@ public class DsRecordStorageTestEnv {
             return lifecycleFlags == null ? super.getLifecycleFlags() : lifecycleFlags;
         }
 
-        public void injectState(College state, Version version) {
+        public void injectState(College state) {
             updateState(state);
         }
 
