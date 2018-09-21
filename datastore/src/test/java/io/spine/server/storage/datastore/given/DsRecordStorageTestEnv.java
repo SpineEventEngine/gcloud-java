@@ -409,7 +409,7 @@ public class DsRecordStorageTestEnv {
         }
 
         @Column
-        public Boolean isStateSponsored() {
+        public Boolean getStateSponsored() {
             return getState().getStateSponsored();
         }
 

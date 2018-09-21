@@ -44,6 +44,7 @@ import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.EntityWith
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestConstCounterEntity;
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestEntity;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
+import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
@@ -477,9 +478,17 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         assertEquals(recordCount, resultList.size());
 
         // Check the entities were ordered.
-        List<CollegeId> expectedResults = sortedIds(entities, CollegeEntity::isStateSponsored);
-        List<CollegeId> actualResults = recordIds(resultList);
-        assertEquals(expectedResults, actualResults);
+        List<CollegeId> expectedResults = sortedIds(entities, CollegeEntity::getStateSponsored);
+        int boolSwitches = 0;
+        boolean lastBool = false;
+        for (EntityRecord record : resultList) {
+            College college = unpack(record.getState());
+            if (lastBool != college.getStateSponsored()) {
+                boolSwitches++;
+            }
+            lastBool = college.getStateSponsored();
+        }
+        assertEquals(1, boolSwitches);
 
         // Check Datastore reads are performed by keys but not using a structured query.
         DatastoreWrapper spy = storageFactory.getDatastore();

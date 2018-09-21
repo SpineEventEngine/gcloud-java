@@ -205,10 +205,10 @@ final class DsIdLookup<I> {
         @Override
         public int compare(Entity a, Entity b) {
             if (!a.contains(column)) {
-                return -1;
+                throw noColumnInEntity(a);
             }
             if (!b.contains(column)) {
-                return +1;
+                throw noColumnInEntity(b);
             }
 
             Comparable aValue = ComparableValueExtractor.comparable(a.getValue(column));
@@ -223,6 +223,10 @@ final class DsIdLookup<I> {
 
             //noinspection unchecked entity values are required to be comparable by Spine
             return aValue.compareTo(bValue);
+        }
+
+        private IllegalStateException noColumnInEntity(Entity b) {
+            return newIllegalStateException("Entity %s does not contain column %s", b, column);
         }
 
         private static Comparator<Entity> implementing(OrderBy orderBy) {
