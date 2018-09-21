@@ -404,12 +404,12 @@ public class DsRecordStorageTestEnv {
         }
 
         @Column
-        public double getPassingGrade() {
+        public Double getPassingGrade() {
             return getState().getPassingGrade();
         }
 
         @Column
-        public boolean isStateSponsored() {
+        public Boolean isStateSponsored() {
             return getState().getStateSponsored();
         }
 
