@@ -42,7 +42,7 @@ an internal Exception. To prevent this, you should create an index for your `Cus
 
 ### Testing
 
-This section describes testing the `gae-java` library itself.
+This section describes testing the `gcloud-java` library itself.
 
 ##### Preconditions
 
