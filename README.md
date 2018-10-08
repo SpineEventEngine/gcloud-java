@@ -6,9 +6,7 @@
 
 Support for Spine-based Java apps running under Google App Engine.
 
-### Usage
-
-This section describes the main aspects of using the library.
+### Configuring Datastore
 
 #### Datastore indexes
 
