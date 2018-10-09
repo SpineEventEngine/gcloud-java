@@ -47,7 +47,6 @@ ext {
 }
 
 allprojects {
-    apply plugin: 'java'
     apply plugin: 'maven'
     apply plugin: 'jacoco'
 
@@ -56,15 +55,18 @@ allprojects {
 }
 
 subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+
     project.ext {
         sourcesRootDir = "${projectDir}/src"
     }
 
-    apply plugin: 'maven-publish'
-
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    
     repositories {
         google()
         maven { url = repos.gradlePlugins }
