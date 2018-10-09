@@ -21,6 +21,8 @@
 package io.spine.server.storage.datastore;
 
 import com.google.protobuf.Descriptors;
+import io.spine.server.entity.Entity;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.type.TypeUrl;
@@ -59,6 +61,41 @@ abstract class AbstractBuilder<I, B extends AbstractBuilder<I, B>> {
     }
 
     /**
+     * Assignts the ID class of the stored entities.
+     */
+    public B setIdClass(Class<I> idClass) {
+        this.idClass = checkNotNull(idClass);
+        return self();
+    }
+
+    /**
+     * Assigns the class of the stored entity.
+     */
+    public B setEntityClass(Class<? extends io.spine.server.entity.Entity> entityClass) {
+        this.entityClass = checkNotNull(entityClass);
+        return self();
+    }
+
+    /**
+     * Assigns the model class to the builder.
+     *
+     * <p>This call is equivalent of setting {@linkplain #setStateType(io.spine.type.TypeUrl)
+     * state type}, {@linkplain #setIdClass(Class) ID class}, and
+     * {@linkplain #setEntityClass(Class) entity class} separately.
+     */
+    @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
+    public B setModelClass(EntityClass<? extends Entity<I, ?>> modelClass) {
+        TypeUrl stateType = modelClass.getStateType();
+        Class<I> idClass = (Class<I>) modelClass.getIdClass();
+
+        setStateType(stateType);
+        setIdClass(idClass);
+        setEntityClass(modelClass.value());
+
+        return self();
+    }
+
+    /**
      * Sets the {@link io.spine.server.storage.datastore.DatastoreWrapper} to use in this storage.
      */
     public B setDatastore(DatastoreWrapper datastore) {
@@ -85,22 +122,6 @@ abstract class AbstractBuilder<I, B extends AbstractBuilder<I, B>> {
     public B setColumnTypeRegistry(
             ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
-        return self();
-    }
-
-    /**
-     * Assignts the ID class of the stored entities.
-     */
-    public B setIdClass(Class<I> idClass) {
-        this.idClass = checkNotNull(idClass);
-        return self();
-    }
-
-    /**
-     * Assigns the class of the stored entity.
-     */
-    public B setEntityClass(Class<? extends io.spine.server.entity.Entity> entityClass) {
-        this.entityClass = checkNotNull(entityClass);
         return self();
     }
 

@@ -163,7 +163,7 @@ class DatastoreStorageFactoryBuilderTest {
                 DatastoreStorageFactory.newBuilder()
                                        .setMultitenant(true)
                                        .setDatastore(options.getService())
-                                       .setNamespaceToTenantIdConverter(converter)
+                                       .setNamespaceConverter(converter)
                                        .build();
         assertNotNull(factory);
 

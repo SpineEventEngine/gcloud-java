@@ -23,8 +23,8 @@ package io.spine.server.storage.datastore;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -46,9 +46,9 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     private final RecordId lastTimestampId;
 
-    protected DsProjectionStorage(DsRecordStorage<I> recordStorage,
+    protected DsProjectionStorage(Class<? extends Projection<I, ?, ?>> projectionClass,
+                                  DsRecordStorage<I> recordStorage,
                                   DsPropertyStorage propertyStorage,
-                                  Class<? extends Entity<I, ?>> projectionClass,
                                   boolean multitenant) {
         super(multitenant);
         this.recordStorage = recordStorage;

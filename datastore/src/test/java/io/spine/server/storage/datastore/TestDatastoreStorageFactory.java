@@ -63,7 +63,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
                       .setMultitenant(false)
                       .setTypeRegistry(DatastoreTypeRegistryFactory.defaultInstance())
                       .setNamespaceSupplier(NamespaceSupplier.singleTenant())
-                      .setNamespaceToTenantIdConverter(null)
+                      .setNamespaceConverter(null)
         );
     }
 
