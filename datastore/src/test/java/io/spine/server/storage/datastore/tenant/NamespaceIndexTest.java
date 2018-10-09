@@ -31,6 +31,7 @@ import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.storage.datastore.given.Given;
+import io.spine.testing.TestValues;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -60,7 +61,11 @@ import static org.mockito.Mockito.when;
 @DisplayName("NamespaceIndex should")
 class NamespaceIndexTest {
 
-    private static final String TENANT_ID_STRING = "some-tenant";
+    private static TenantId newTenantId() {
+        return TenantId.newBuilder()
+                       .setValue(TestValues.randomString())
+                       .build();
+    }
 
     @Test
     @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
@@ -83,9 +88,7 @@ class NamespaceIndexTest {
         Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
-        TenantId newId = TenantId.newBuilder()
-                                 .setValue(TENANT_ID_STRING)
-                                 .build();
+        TenantId newId = newTenantId();
         namespaceIndex.keep(newId);
 
         Set<TenantId> ids = namespaceIndex.getAll();
@@ -117,9 +120,7 @@ class NamespaceIndexTest {
         Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
-        TenantId newId = TenantId.newBuilder()
-                                 .setValue(TENANT_ID_STRING)
-                                 .build();
+        TenantId newId = newTenantId();
         Namespace newNamespace = of(newId, Given.testProjectId());
 
         namespaceIndex.keep(newId);
@@ -135,9 +136,7 @@ class NamespaceIndexTest {
         Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
-        TenantId fakeId = TenantId.newBuilder()
-                                  .setValue(TENANT_ID_STRING)
-                                  .build();
+        TenantId fakeId = newTenantId();
         Namespace fakeNamespace = of(fakeId, ProjectId.of("fake-prj"));
 
         assertFalse(namespaceIndex.contains(fakeNamespace));
@@ -233,13 +232,13 @@ class NamespaceIndexTest {
         return key;
     }
 
+    @SuppressWarnings("unchecked") // OK for mocking in this method.
     private static Datastore mockDatastore() {
         Datastore datastore = mock(Datastore.class);
         DatastoreOptions options = mock(DatastoreOptions.class);
         when(datastore.getOptions()).thenReturn(options);
         when(options.getProjectId()).thenReturn("some-project-id-NamespaceIndexTest");
         QueryResults results = mock(QueryResults.class);
-        //noinspection unchecked
         when(datastore.run(any(Query.class))).thenReturn(results);
         return datastore;
     }
