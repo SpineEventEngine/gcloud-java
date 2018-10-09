@@ -78,10 +78,10 @@ subprojects {
     }
 
     dependencies {
-        implementation group: 'io.spine', name: "spine-server", version: spineVersion
+        implementation group: 'io.spine', name: "spine-server", version: spineCoreVersion
 
-        testImplementation group: 'io.spine', name: "spine-testutil-server", version: spineVersion
-        testImplementation group: 'io.spine', name: "spine-server", version: spineVersion, classifier: "test"
+        testImplementation group: 'io.spine', name: "spine-testutil-server", version: spineCoreVersion
+        testImplementation group: 'io.spine', name: "spine-server", version: spineCoreVersion, classifier: "test"
 
         testImplementation deps.test.junit5Api
         testImplementation deps.test.junit5Runner
