@@ -22,7 +22,6 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.server.aggregate.Aggregate;
@@ -53,35 +52,20 @@ import static io.spine.server.entity.model.EntityClass.asEntityClass;
  *
  * @see io.spine.server.datastore.Contexts#onTopOf for the recommended usage description
  */
-@SuppressWarnings("WeakerAccess") // Part of API
 public class DatastoreStorageFactory implements StorageFactory {
 
     private final DatastoreWrapper datastore;
     private final boolean multitenant;
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
     private final NamespaceSupplier namespaceSupplier;
-    private final NamespaceToTenantIdConverter namespaceToTenantIdConverter;
+    private final NamespaceToTenantIdConverter namespaceConverter;
 
-    private DatastoreStorageFactory(Builder builder) {
-        this(builder.datastore,
-             builder.multitenant,
-             builder.typeRegistry,
-             builder.namespaceSupplier,
-             builder.namespaceToTenantIdConverter);
-    }
-
-    @VisibleForTesting
-    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
-    protected DatastoreStorageFactory(Datastore datastore,
-                                      boolean multitenant,
-                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
-                                      NamespaceSupplier namespaceSupplier,
-                                      @Nullable NamespaceToTenantIdConverter namespaceConverter) {
-        this.multitenant = multitenant;
-        this.typeRegistry = typeRegistry;
-        this.namespaceSupplier = namespaceSupplier;
-        this.datastore = createDatastoreWrapper(datastore);
-        this.namespaceToTenantIdConverter = namespaceConverter;
+    DatastoreStorageFactory(Builder builder) {
+        this.datastore = createDatastoreWrapper(builder.datastore);
+        this.multitenant = builder.multitenant;
+        this.typeRegistry = builder.typeRegistry;
+        this.namespaceSupplier = builder.namespaceSupplier;
+        this.namespaceConverter = builder.namespaceToTenantIdConverter;
     }
 
     protected DatastoreStorageFactory(DatastoreWrapper datastore,
@@ -93,7 +77,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         this.multitenant = multitenant;
         this.typeRegistry = typeRegistry;
         this.namespaceSupplier = namespaceSupplier;
-        this.namespaceToTenantIdConverter = namespaceConverter;
+        this.namespaceConverter = namespaceConverter;
     }
 
     protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
@@ -119,7 +103,7 @@ public class DatastoreStorageFactory implements StorageFactory {
                                              false,
                                              typeRegistry,
                                              NamespaceSupplier.singleTenant(),
-                                             namespaceToTenantIdConverter)
+                                             namespaceConverter)
                : this;
     }
 
@@ -273,6 +257,14 @@ public class DatastoreStorageFactory implements StorageFactory {
         public Builder setTypeRegistry(
                 ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
             this.typeRegistry = checkNotNull(typeRegistry);
+            return this;
+        }
+
+        /**
+         * Sets the namespace supplier.
+         */
+        public Builder setNamespaceSupplier(NamespaceSupplier namespaceSupplier) {
+            this.namespaceSupplier = namespaceSupplier;
             return this;
         }
 
