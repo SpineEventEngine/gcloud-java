@@ -35,8 +35,11 @@ import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -46,6 +49,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
 import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.given.Given.testProjectId;
@@ -59,9 +63,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("DatastoreWrapper should")
 class DatastoreWrapperTest {
 
@@ -69,112 +70,119 @@ class DatastoreWrapperTest {
 
     @AfterAll
     static void tearDown() {
-        DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
-                                                         singleTenant());
+        DatastoreWrapper wrapper = wrap(Given.testDatastore(), singleTenant());
         wrapper.dropTable(NAMESPACE_HOLDER_KIND);
     }
 
-    @Test
-    @DisplayName("work with transactions if necessary")
-    void testExecuteTransactions() {
-        DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
-                                                         singleTenant());
-        wrapper.startTransaction();
-        assertTrue(wrapper.isTransactionActive());
-        wrapper.commitTransaction();
-        assertFalse(wrapper.isTransactionActive());
-    }
+    @Nested
+    class SingleTenant {
 
-    @Test
-    @DisplayName("rollback transactions")
-    void testRollback() {
-        DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
-                                                         singleTenant());
-        wrapper.startTransaction();
-        assertTrue(wrapper.isTransactionActive());
-        wrapper.rollbackTransaction();
-        assertFalse(wrapper.isTransactionActive());
-    }
+        private DatastoreWrapper wrapper;
 
-    @Test
-    @DisplayName("fail to start transaction if one is active")
-    void testFailToRestartTransactions() {
-        DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
-                                                         singleTenant());
-        try {
+        @BeforeEach
+        void setUp() {
+            wrapper = wrap(Given.testDatastore(), singleTenant());
             wrapper.startTransaction();
+        }
+
+        @Test
+        @DisplayName("work with transactions if necessary")
+        void testExecuteTransactions() {
             assertTrue(wrapper.isTransactionActive());
-            assertThrows(IllegalStateException.class, wrapper::startTransaction);
-        } finally {
+            wrapper.commitTransaction();
+            assertFalse(wrapper.isTransactionActive());
+        }
+
+        @Test
+        @DisplayName("rollback transactions")
+        void testRollback() {
+            assertTrue(wrapper.isTransactionActive());
             wrapper.rollbackTransaction();
+            assertFalse(wrapper.isTransactionActive());
+        }
+
+        @Test
+        @DisplayName("fail to start transaction if one is active")
+        void testFailToRestartTransactions() {
+            try {
+                assertTrue(wrapper.isTransactionActive());
+                assertThrows(IllegalStateException.class, wrapper::startTransaction);
+            } finally {
+                wrapper.rollbackTransaction();
+            }
+        }
+
+        @Test
+        @DisplayName("fail to finish non active transaction")
+        void testFailToFinishNonActiveTransaction() {
+            assertTrue(wrapper.isTransactionActive());
+            wrapper.commitTransaction();
+            assertFalse(wrapper.isTransactionActive());
+            assertThrows(IllegalStateException.class, wrapper::rollbackTransaction);
         }
     }
 
-    @Test
-    @DisplayName("fail to finish non active transaction")
-    void testFailToFinishNonActiveTransaction() {
-        DatastoreWrapper wrapper = DatastoreWrapper.wrap(Given.testDatastore(),
-                                                         singleTenant());
-        wrapper.startTransaction();
-        assertTrue(wrapper.isTransactionActive());
-        wrapper.commitTransaction();
-        assertFalse(wrapper.isTransactionActive());
-        assertThrows(IllegalStateException.class, wrapper::rollbackTransaction);
-    }
+    @Nested
+    class NotWaiting {
 
-    @Test
-    @DisplayName("support bulk reads")
-    void testBulkRead() throws InterruptedException {
-        int bulkSize = 1001;
+        private TestDatastoreWrapper wrapper;
 
-        TestDatastoreWrapper wrapper = wrap(Given.testDatastore(), false);
-        Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
-        Collection<Entity> expectedEntities = entities.values();
+        @BeforeEach
+        void setUp() {
+            wrapper = wrap(Given.testDatastore(), false);
+        }
 
-        wrapper.createOrUpdate(expectedEntities);
+        @AfterEach
+        void tearDown() {
+            wrapper.dropAllTables();
+        }
 
-        // Wait for some time to make sure the writing is complete
-        Thread.sleep(bulkSize * 5L);
+        @Test
+        @DisplayName("support bulk reads")
+        void testBulkRead() throws InterruptedException {
+            int bulkSize = 1001;
 
-        Collection<Entity> readEntities = newArrayList(wrapper.read(entities.keySet()));
-        assertEquals(entities.size(), readEntities.size());
-        assertTrue(expectedEntities.containsAll(readEntities));
+            Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
+            Collection<Entity> expectedEntities = entities.values();
 
-        wrapper.dropAllTables();
-    }
+            wrapper.createOrUpdate(expectedEntities);
 
-    @Disabled("This test rarely passes on Travis CI due to eventual consistency.")
-    @Test
-    @DisplayName("support big bulk reads")
-    void testBigBulkRead() throws InterruptedException {
-        int bulkSize = 2001;
+            // Wait for some time to make sure the writing is complete
+            Thread.sleep(bulkSize * 5L);
 
-        TestDatastoreWrapper wrapper = wrap(Given.testDatastore(), false);
-        Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
-        Collection<Entity> expectedEntities = entities.values();
+            Collection<Entity> readEntities = newArrayList(wrapper.read(entities.keySet()));
+            assertEquals(entities.size(), readEntities.size());
+            assertTrue(expectedEntities.containsAll(readEntities));
+        }
 
-        wrapper.createOrUpdate(expectedEntities);
+        @Disabled("This test rarely passes on Travis CI due to eventual consistency.")
+        @Test
+        @DisplayName("support big bulk reads")
+        void testBigBulkRead() throws InterruptedException {
+            int bulkSize = 2001;
 
-        // Wait for some time to make sure the writing is complete
-        Thread.sleep(bulkSize * 3L);
+            Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
+            Collection<Entity> expectedEntities = entities.values();
 
-        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                             .setKind(Given.GENERIC_ENTITY_KIND.getValue())
-                                             .build();
-        Collection<Entity> readEntities = newArrayList(wrapper.read(query));
-        assertEquals(entities.size(), readEntities.size());
-        assertTrue(expectedEntities.containsAll(readEntities));
+            wrapper.createOrUpdate(expectedEntities);
 
-        wrapper.dropAllTables();
+            // Wait for some time to make sure the writing is complete
+            Thread.sleep(bulkSize * 3L);
+
+            StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+                                                 .setKind(Given.GENERIC_ENTITY_KIND.getValue())
+                                                 .build();
+            Collection<Entity> readEntities = newArrayList(wrapper.read(query));
+            assertEquals(entities.size(), readEntities.size());
+            assertTrue(expectedEntities.containsAll(readEntities));
+        }
     }
 
     @Test
     @DisplayName("generate key factories aware of tenancy")
     void testGenerateKeyFactory() {
         ProjectId projectId = ProjectId.of(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME);
-        DatastoreWrapper wrapper = DatastoreWrapper.wrap(
-                Given.testDatastore(),
-                TestNamespaceSuppliers.multitenant(projectId));
+        DatastoreWrapper wrapper = wrap(Given.testDatastore(), multitenant(projectId));
         String tenantId1 = "first-tenant-ID";
         String tenantId1Prefixed = "Vfirst-tenant-ID";
         String tenantId2 = "second@tenant.id";
