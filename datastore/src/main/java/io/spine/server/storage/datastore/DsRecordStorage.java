@@ -37,12 +37,10 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.ColumnRecords;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.CompositeQueryParameter;
-import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.Storage;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -524,7 +522,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param <I> the ID type of the instances built by the created {@link Builder}
      * @return new instance of the {@link Builder}
      */
-    public static <I> AbstractBuilder<I, Builder<I>> newBuilder() {
+    public static <I> Builder<I> newBuilder() {
         return new Builder<>();
     }
 
@@ -555,130 +553,4 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
     }
 
-    /**
-     * An implementation base for {@code DsRecordStorage} builders.
-     *
-     * @param <I> the ID type of the stored entities
-     * @param <B> the builder own type
-     */
-    protected abstract static class AbstractBuilder<I, B extends AbstractBuilder<I, B>> {
-
-        private Descriptor descriptor;
-        private DatastoreWrapper datastore;
-        private boolean multitenant;
-        private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
-        private Class<I> idClass;
-        private Class<? extends io.spine.server.entity.Entity> entityClass;
-
-        /**
-         * Prevents direct instantiation.
-         */
-        AbstractBuilder() {
-        }
-
-        /**
-         * Sets the type URL of the entity state, which is stored in the resulting storage.
-         */
-        public B setStateType(TypeUrl stateTypeUrl) {
-            checkNotNull(stateTypeUrl);
-            Descriptor descriptor = (Descriptor) stateTypeUrl.getDescriptor();
-            this.descriptor = checkNotNull(descriptor);
-            return self();
-        }
-
-        /**
-         * Sets the {@link DatastoreWrapper} to use in this storage.
-         */
-        public B setDatastore(DatastoreWrapper datastore) {
-            this.datastore = checkNotNull(datastore);
-            return self();
-        }
-
-        /**
-         * Configures multitenancy mode for the storage.
-         *
-         * @param multitenant {@code true} if the storage should be
-         *                    {@link Storage#isMultitenant multitenant}
-         *                    or not
-         */
-        public B setMultitenant(boolean multitenant) {
-            this.multitenant = multitenant;
-            return self();
-        }
-
-        /**
-         * Assigns the type registry of the {@linkplain EntityColumn entity columns}.
-         */
-        public B setColumnTypeRegistry(
-                ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
-            this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
-            return self();
-        }
-
-        /**
-         * Assignts the ID class of the stored entities.
-         */
-        public B setIdClass(Class<I> idClass) {
-            this.idClass = checkNotNull(idClass);
-            return self();
-        }
-
-        /**
-         * Assigns the class of the stored entity.
-         */
-        public B setEntityClass(Class<? extends io.spine.server.entity.Entity> entityClass) {
-            this.entityClass = checkNotNull(entityClass);
-            return self();
-        }
-
-        /**
-         * Obtains the {@link Descriptor} of the stored entity state type.
-         */
-        public Descriptor getDescriptor() {
-            return descriptor;
-        }
-
-        /**
-         * Obtains the {@link DatastoreWrapper} used in this storage.
-         */
-        public DatastoreWrapper getDatastore() {
-            return datastore;
-        }
-
-        /**
-         * Verifies if the storage is multitenant.
-         */
-        public boolean isMultitenant() {
-            return multitenant;
-        }
-
-        /**
-         * Obtains the type registry of the {@linkplain EntityColumn entity columns}.
-         */
-        public ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> getColumnTypeRegistry() {
-            return columnTypeRegistry;
-        }
-
-        /**
-         * Obtains the ID class of the stored entity.
-         */
-        public Class<I> getIdClass() {
-            return idClass;
-        }
-
-        /**
-         * Obtains the class of the stored entity.
-         */
-        public Class<? extends io.spine.server.entity.Entity> getEntityClass() {
-            return entityClass;
-        }
-
-        final void checkRequiredFields() {
-            checkNotNull(descriptor, "State descriptor is not set.");
-            checkNotNull(datastore, "Datastore is not set.");
-            checkNotNull(columnTypeRegistry, "Column type registry is not set.");
-        }
-
-        abstract B self();
-    }
 }
