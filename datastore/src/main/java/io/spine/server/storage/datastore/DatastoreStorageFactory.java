@@ -49,11 +49,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 
 /**
- * Creates storages based on GAE {@link Datastore}.
+ * Creates storages based on {@link Datastore}.
  *
- * @author Alexander Litus
- * @author Mikhail Mikhaylov
- * @author Dmytro Dashenkov
  * @see io.spine.server.datastore.Contexts#onTopOf for the recommended usage description
  */
 @SuppressWarnings("WeakerAccess") // Part of API
@@ -105,25 +102,16 @@ public class DatastoreStorageFactory implements StorageFactory {
         return wrapped;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isMultitenant() {
         return multitenant;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ColumnTypeRegistry getTypeRegistry() {
         return typeRegistry;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public StorageFactory toSingleTenant() {
         return isMultitenant()
@@ -135,9 +123,6 @@ public class DatastoreStorageFactory implements StorageFactory {
                : this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(
@@ -145,60 +130,57 @@ public class DatastoreStorageFactory implements StorageFactory {
         EntityClass<? extends Projection<I, ?, ?>> entityClass = asEntityClass(projectionClass);
         TypeUrl stateType = entityClass.getStateType();
         Class<I> idClass = (Class<I>) entityClass.getIdClass();
-        DsProjectionStorageDelegate<I> recordStorage =
-                DsProjectionStorageDelegate.<I>newDelegateBuilder()
-                                           .setDatastore(getDatastore())
-                                           .setMultitenant(isMultitenant())
-                                           .setIdClass(idClass)
-                                           .setEntityClass(projectionClass)
-                                           .setStateType(stateType)
-                                           .setColumnTypeRegistry(typeRegistry)
-                                           .build();
+        DsProjectionStorageDelegate<I> recordStorage = DsProjectionStorageDelegate
+                .<I>newDelegateBuilder()
+                .setDatastore(getDatastore())
+                .setMultitenant(isMultitenant())
+                .setIdClass(idClass)
+                .setEntityClass(projectionClass)
+                .setStateType(stateType)
+                .setColumnTypeRegistry(typeRegistry)
+                .build();
         DsPropertyStorage propertyStorage = createPropertyStorage();
-        DsProjectionStorage<I> result = new DsProjectionStorage<>(recordStorage,
-                                                                        propertyStorage,
-                                                                        projectionClass,
-                                                                        multitenant);
+        DsProjectionStorage<I> result =
+                new DsProjectionStorage<>(recordStorage,
+                                          propertyStorage,
+                                          projectionClass,
+                                          multitenant);
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         EntityClass<? extends Entity<I, ?>> wrappedEntityClass = asEntityClass(entityClass);
         TypeUrl stateType = wrappedEntityClass.getStateType();
         Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
-        DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
-                                                         .setStateType(stateType)
-                                                         .setDatastore(getDatastore())
-                                                         .setMultitenant(isMultitenant())
-                                                         .setColumnTypeRegistry(typeRegistry)
-                                                         .setIdClass(idClass)
-                                                         .setEntityClass(entityClass)
-                                                         .build();
+        DsRecordStorage<I> result = DsRecordStorage
+                .<I>newBuilder()
+                .setStateType(stateType)
+                .setDatastore(getDatastore())
+                .setMultitenant(isMultitenant())
+                .setColumnTypeRegistry(typeRegistry)
+                .setIdClass(idClass)
+                .setEntityClass(entityClass)
+                .build();
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(
-            Class<? extends Aggregate<I, ?, ?>> entityClass) {
+    public <I>
+    AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> entityClass) {
         checkNotNull(entityClass);
         EntityClass<? extends Aggregate<I, ?, ?>> wrappedEntityClass = asEntityClass(entityClass);
         DsPropertyStorage propertyStorage = createPropertyStorage();
         Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
         Class<? extends Message> stateClass = wrappedEntityClass.getStateClass();
-        DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(),
-                                                                      propertyStorage,
-                                                                      multitenant,
-                                                                      idClass,
-                                                                      stateClass);
+        DsAggregateStorage<I> result =
+                new DsAggregateStorage<>(getDatastore(),
+                                         propertyStorage,
+                                         multitenant,
+                                         idClass,
+                                         stateClass);
         return result;
     }
 
@@ -211,12 +193,12 @@ public class DatastoreStorageFactory implements StorageFactory {
      * Performs no action.
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         // NOP
     }
 
     /**
-     * @return an instance of a wrapper of the passed {@link Datastore}
+     * Obtains an instance of a wrapper of the passed {@link Datastore}.
      */
     @Internal
     public DatastoreWrapper getDatastore() {
@@ -248,13 +230,12 @@ public class DatastoreStorageFactory implements StorageFactory {
         private NamespaceSupplier namespaceSupplier;
         private NamespaceToTenantIdConverter namespaceToTenantIdConverter;
 
+        /** Avoid direct initialization. */
         private Builder() {
-            // Avoid direct initialization
         }
 
         /**
-         * @param datastore the {@link Datastore} to use for the DB interactions
-         * @return self for method chaining
+         * Assigns the {@link Datastore} to use for the DB interactions.
          */
         public Builder setDatastore(Datastore datastore) {
             this.datastore = checkNotNull(datastore);
@@ -346,8 +327,8 @@ public class DatastoreStorageFactory implements StorageFactory {
                                             .getNamespace();
             }
             NamespaceSupplier result = NamespaceSupplier.instance(multitenant,
-                                                                        defaultNamespace,
-                                                                        ProjectId.of(datastore));
+                                                                  defaultNamespace,
+                                                                  ProjectId.of(datastore));
             return result;
         }
 

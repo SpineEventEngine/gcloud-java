@@ -71,6 +71,8 @@ import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
+import static io.spine.server.storage.datastore.Entities.entityToMessage;
+import static io.spine.server.storage.datastore.Entities.messageToEntity;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.isDefault;
 import static java.util.Collections.emptyIterator;
@@ -81,8 +83,6 @@ import static java.util.stream.Collectors.toList;
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
  *
- * @author Alexander Litus
- * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
 public class DsRecordStorage<I> extends RecordStorage<I> {
@@ -99,19 +99,33 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private static final Function<@Nullable Entity, @Nullable EntityRecord> recordFromEntity =
             input -> {
                 if (input == null) {
+                    //noinspection ReturnOfNull
                     return null;
                 }
-                EntityRecord record = Entities.entityToMessage(input, RECORD_TYPE_URL);
+                EntityRecord record = entityToMessage(input, RECORD_TYPE_URL);
                 return record;
             };
 
     /**
      * Creates a new storage instance.
      *
-     * @param descriptor the descriptor of the type of messages to save to the storage
-     * @param datastore  the Datastore implementation to use
+     * @param descriptor
+     *         the descriptor of the type of messages to save to the storage
+     * @param datastore
+     *         the Datastore implementation to use
+     * @param multitenant
+     *         {@code true} if the storage supports multiple tenants,
+     *         {@code false} for the single tenant storage
+     * @param columnTypeRegistry
+     *          the registry of column types to be used by the storage
+     * @param idClass
+     *          the class of identifiers of stored entities
+     * @param entityClass
+     *          the class of stored entities
      */
-    protected DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore,
+    @SuppressWarnings("ConstructorWithTooManyParameters")
+    protected DsRecordStorage(Descriptor descriptor,
+                              DatastoreWrapper datastore,
                               boolean multitenant,
                               ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
                               Class<I> idClass,
@@ -156,7 +170,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return empty();
         }
 
-        EntityRecord result = Entities.entityToMessage(response, RECORD_TYPE_URL);
+        EntityRecord result = entityToMessage(response, RECORD_TYPE_URL);
         return of(result);
     }
 
@@ -168,14 +182,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids,
                                                          FieldMask fieldMask) {
-        Function<Entity, @Nullable EntityRecord> transformer = input -> {
+        Function<@Nullable Entity, @Nullable EntityRecord> transformer = input -> {
             if (input == null) {
+                //noinspection ReturnOfNull
                 return null;
             }
-            EntityRecord readRecord = Entities.entityToMessage(input, RECORD_TYPE_URL);
+            EntityRecord readRecord = entityToMessage(input, RECORD_TYPE_URL);
             Message state = unpack(readRecord.getState());
-            TypeUrl typeUrl = TypeUrl.from(state.getDescriptorForType());
-            Message maskedState = applyMask(fieldMask, state, typeUrl);
+            Message maskedState = applyMask(fieldMask, state);
             Any wrappedState = AnyPacker.pack(maskedState);
 
             EntityRecord record = EntityRecord.newBuilder(readRecord)
@@ -196,8 +210,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
         StructuredQuery<Entity> allQuery = buildAllQuery(typeUrl);
-        Iterator<EntityRecord> result = queryAll(typeUrl,
-                                                 allQuery,
+        Iterator<EntityRecord> result = queryAll(
+                allQuery,
                                                  fieldMask,
                                                  activeEntity());
         return result;
@@ -271,8 +285,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @param fieldMask the {@code FieldMask} to apply to all the retrieved entity states
      * @return an iterator over the resulting entity records
      */
-    private Iterator<EntityRecord> queryByColumnsOnly(QueryParameters params,
-                                                      FieldMask fieldMask) {
+    private Iterator<EntityRecord> queryByColumnsOnly(QueryParameters params, FieldMask fieldMask) {
         StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                               .setKind(getKind().getValue());
         Collection<Filter> filters = buildColumnFilters(params);
@@ -301,8 +314,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                                  FieldMask fieldMask) {
         Iterator<EntityRecord> result = emptyIterator();
         for (StructuredQuery<Entity> query : queries) {
-            Iterator<EntityRecord> records = queryAll(typeUrl,
-                                                      query,
+            Iterator<EntityRecord> records = queryAll(
+                    query,
                                                       fieldMask,
                                                       entity -> true);
             result = concat(result, records);
@@ -352,7 +365,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
         Collection<Key> keys = toKeys(ids);
         Iterator<Entity> records = datastore.read(keys);
-        Iterator<EntityRecord> result = toRecords(records, predicate, typeUrl, fieldMask);
+        Iterator<EntityRecord> result = toRecords(records, predicate, fieldMask);
         return result;
     }
 
@@ -365,17 +378,15 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                               .iterator();
     }
 
-    private Iterator<EntityRecord> queryAll(TypeUrl typeUrl,
-                                            StructuredQuery<Entity> query,
+    private Iterator<EntityRecord> queryAll(StructuredQuery<Entity> query,
                                             FieldMask fieldMask,
                                             Predicate<Entity> inMemFilter) {
         Iterator<Entity> results = datastore.read(query);
-        return toRecords(results, inMemFilter, typeUrl, fieldMask);
+        return toRecords(results, inMemFilter, fieldMask);
     }
 
     protected final Iterator<EntityRecord> toRecords(Iterator<Entity> queryResults,
                                                      Predicate<Entity> filter,
-                                                     TypeUrl typeUrl,
                                                      FieldMask fieldMask) {
         Stream<Entity> filtered = stream(queryResults).filter(filter);
         Function<Entity, EntityRecord> transformer = input -> {
@@ -383,7 +394,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             EntityRecord record = getRecordFromEntity(input);
             if (!isDefault(fieldMask)) {
                 Message state = unpack(record.getState());
-                state = applyMask(fieldMask, state, typeUrl);
+                state = applyMask(fieldMask, state);
                 record = EntityRecord.newBuilder(record)
                                      .setState(AnyPacker.pack(state))
                                      .build();
@@ -398,7 +409,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
         EntityRecord entityRecord = record.getRecord();
         Key key = keyFor(datastore, kindFrom(entityRecord), ofEntityId(id));
-        Entity incompleteEntity = Entities.messageToEntity(entityRecord, key);
+        Entity incompleteEntity = messageToEntity(entityRecord, key);
         Entity.Builder entity = Entity.newBuilder(incompleteEntity);
 
         populateFromStorageFields(entity, record);
@@ -457,7 +468,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     EntityRecord getRecordFromEntity(Entity entity) {
-        EntityRecord record = Entities.entityToMessage(entity, RECORD_TYPE_URL);
+        EntityRecord record = entityToMessage(entity, RECORD_TYPE_URL);
         return record;
     }
 
@@ -641,8 +652,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param stateTypeUrl the type URL of the entity state, which is stored in the resulting
-         *                     storage
+         * Sets the type URL of the entity state, which is stored in the resulting storage.
          */
         public B setStateType(TypeUrl stateTypeUrl) {
             checkNotNull(stateTypeUrl);
@@ -652,7 +662,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param datastore the {@link DatastoreWrapper} to use in this storage
+         * Sets the {@link DatastoreWrapper} to use in this storage.
          */
         public B setDatastore(DatastoreWrapper datastore) {
             this.datastore = checkNotNull(datastore);
@@ -660,6 +670,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
+         * Configures multitenancy mode for the storage.
+         *
          * @param multitenant {@code true} if the storage should be
          *                    {@link Storage#isMultitenant multitenant}
          *                    or not
@@ -670,9 +682,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param columnTypeRegistry the type registry of the
-         *                           {@linkplain EntityColumn
-         *                           entity columns}
+         * Assigns the type registry of the {@linkplain EntityColumn entity columns}.
          */
         public B setColumnTypeRegistry(
                 ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
@@ -681,7 +691,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param idClass the ID class of the stored entity
+         * Assignts the ID class of the stored entities.
          */
         public B setIdClass(Class<I> idClass) {
             this.idClass = checkNotNull(idClass);
@@ -689,7 +699,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @param entityClass the class of the stored entity
+         * Assigns the class of the stored entity.
          */
         public B setEntityClass(Class<? extends io.spine.server.entity.Entity> entityClass) {
             this.entityClass = checkNotNull(entityClass);
@@ -697,44 +707,42 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         /**
-         * @return the {@link Descriptor} of the stored entity state type
+         * Obtains the {@link Descriptor} of the stored entity state type.
          */
         public Descriptor getDescriptor() {
             return descriptor;
         }
 
         /**
-         * @return the {@link DatastoreWrapper} used in this storage
+         * Obtains the {@link DatastoreWrapper} used in this storage.
          */
         public DatastoreWrapper getDatastore() {
             return datastore;
         }
 
         /**
-         * @return {@code true} if the storage should be
-         * {@link Storage#isMultitenant multitenant} or not
+         * Verifies if the storage is multitenant.
          */
         public boolean isMultitenant() {
             return multitenant;
         }
 
         /**
-         * @return the type registry of the {@linkplain EntityColumn
-         * entity columns}
+         * Obtains the type registry of the {@linkplain EntityColumn entity columns}.
          */
         public ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> getColumnTypeRegistry() {
             return columnTypeRegistry;
         }
 
         /**
-         * @return the ID class of the stored entity
+         * Obtains the ID class of the stored entity.
          */
         public Class<I> getIdClass() {
             return idClass;
         }
 
         /**
-         * @return the class of the stored entity
+         * Obtains the class of the stored entity.
          */
         public Class<? extends io.spine.server.entity.Entity> getEntityClass() {
             return entityClass;

@@ -36,19 +36,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.Verify.assertContains;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("DatastoreTenants should")
 class DatastoreTenantsTest {
 
@@ -63,7 +58,7 @@ class DatastoreTenantsTest {
     void testCreateIndex() {
         TenantIndex index = DatastoreTenants.index(mockDatastore());
         assertNotNull(index);
-        assertThat(index, instanceOf(NamespaceIndex.class));
+        assertThat(index).isInstanceOf(NamespaceIndex.class);
 
         String customNamespace = "my-namespace";
         TenantId customId = TenantId.newBuilder()
@@ -71,7 +66,7 @@ class DatastoreTenantsTest {
                                           .build();
         index.keep(customId);
         Set<TenantId> ids = index.getAll();
-        assertContains(customId, ids);
+        assertThat(ids).contains(customId);
     }
 
     private static Datastore mockDatastore() {
@@ -79,6 +74,7 @@ class DatastoreTenantsTest {
         DatastoreOptions options = mock(DatastoreOptions.class);
         when(datastore.getOptions()).thenReturn(options);
         when(options.getProjectId()).thenReturn("some-project-id-DatastoreTenantsTest");
+        //noinspection unchecked
         when(datastore.run(any(Query.class))).thenReturn(new MockKeyQueryResults());
         return datastore;
     }
@@ -89,6 +85,7 @@ class DatastoreTenantsTest {
         return key;
     }
 
+    @SuppressWarnings("NewExceptionWithoutArguments")
     private static class MockKeyQueryResults implements QueryResults<Key> {
 
         @SuppressWarnings({"serial", "ClassExtendsConcreteCollection"}) // For test purposes

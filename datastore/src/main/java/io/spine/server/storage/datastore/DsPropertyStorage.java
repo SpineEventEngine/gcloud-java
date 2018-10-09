@@ -31,16 +31,13 @@ import io.spine.type.TypeUrl;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.storage.datastore.Entities.entityToMessage;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
 
 /**
  * Special Storage type for storing and retrieving global properties with unique keys.
- *
- * @author Mikhail Mikhaylov
- * @author Dmytro Dashenkov
  */
-@SuppressWarnings("WeakerAccess")   // Part of API
 public class DsPropertyStorage {
 
     private static final TypeUrl ANY_TYPE_URL = TypeUrl.from(Any.getDescriptor());
@@ -68,12 +65,11 @@ public class DsPropertyStorage {
         datastore.createOrUpdate(entity);
     }
 
-    protected <V extends Message> Optional<V> read(RecordId propertyId,
-                                                   Descriptor targetTypeDescriptor) {
+    protected Optional<Message> read(RecordId propertyId, Descriptor targetType) {
         checkNotNull(propertyId);
-        checkNotNull(targetTypeDescriptor);
+        checkNotNull(targetType);
 
-        Kind kind = Kind.of(targetTypeDescriptor);
+        Kind kind = Kind.of(targetType);
 
         Key key = DsIdentifiers.keyFor(datastore, kind, propertyId);
         Entity response = datastore.read(key);
@@ -83,7 +79,7 @@ public class DsPropertyStorage {
         }
 
         Any anyResult = entityToMessage(response, ANY_TYPE_URL);
-        V result = AnyPacker.unpack(anyResult);
+        Message result = unpack(anyResult);
         return Optional.ofNullable(result);
     }
 

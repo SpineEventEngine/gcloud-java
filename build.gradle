@@ -27,12 +27,13 @@ buildscript {
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
     repositories {
-        jcenter()
-        google()
-        mavenCentral()
-        mavenLocal()
+        maven { url = repos.oldSpine }
+        maven { url = repos.oldSpineSnapshots }
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
+        google()
+        maven { url = repos.gradlePlugins }
+        mavenLocal()
     }
 }
 
@@ -51,7 +52,7 @@ allprojects {
     apply plugin: 'jacoco'
 
     group = 'io.spine'
-    version = project.spineGaeVersion
+    version = project.versionToPublish
 }
 
 subprojects {
@@ -65,10 +66,11 @@ subprojects {
     targetCompatibility = 1.8
 
     repositories {
-        jcenter()
         google()
-        mavenCentral()
+        maven { url = repos.gradlePlugins }
         mavenLocal()
+        maven { url = repos.oldSpine }
+        maven { url = repos.oldSpineSnapshots }
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
     }

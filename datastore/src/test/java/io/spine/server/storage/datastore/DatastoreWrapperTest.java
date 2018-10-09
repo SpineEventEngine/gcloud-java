@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.server.storage.datastore.Entities.messageToEntity;
 import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.given.Given.testProjectId;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
@@ -294,7 +295,7 @@ class DatastoreWrapperTest {
                 Any message = Any.getDefaultInstance();
                 RecordId recordId = new RecordId(String.format("record-%s", i));
                 Key key = DsIdentifiers.keyFor(wrapper, GENERIC_ENTITY_KIND, recordId);
-                Entity entity = Entities.messageToEntity(message, key);
+                Entity entity = messageToEntity(message, key);
                 result.put(key, entity);
             }
             return result;

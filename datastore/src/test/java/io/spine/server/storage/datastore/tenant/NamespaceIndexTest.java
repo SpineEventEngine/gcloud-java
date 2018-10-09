@@ -26,6 +26,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.IterableSubject;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.ProjectId;
@@ -41,16 +42,12 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.given.TestCases.DO_NOTHING_ON_CLOSE;
 import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.server.storage.datastore.tenant.Namespace.of;
-import static io.spine.testing.Verify.assertContains;
-import static io.spine.testing.Verify.assertContainsAll;
-import static io.spine.testing.Verify.assertSize;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
@@ -60,9 +57,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("NamespaceIndex should")
 class NamespaceIndexTest {
 
@@ -95,8 +89,9 @@ class NamespaceIndexTest {
         namespaceIndex.keep(newId);
 
         Set<TenantId> ids = namespaceIndex.getAll();
-        assertFalse(ids.isEmpty());
-        assertSize(1, ids);
+        IterableSubject assertIds = assertThat(ids);
+        assertIds.isNotNull();
+        assertIds.hasSize(1);
 
         TenantId actual = ids.iterator()
                              .next();
@@ -180,18 +175,18 @@ class NamespaceIndexTest {
             // Initial value check
             Set<TenantId> initialIdsActual = namespaceIndex.getAll(); // sync
             // The keep may already be called
-            assertThat(initialIdsActual.size(), greaterThanOrEqualTo(initialTenantIds.size()));
-            @SuppressWarnings("ZeroLengthArrayAllocation") TenantId[] elements = initialTenantIds.toArray(
-                    new TenantId[0]);
-            assertContainsAll(initialIdsActual, elements);
+            assertTrue(initialIdsActual.size() >= initialTenantIds.size());
+            assertThat(initialIdsActual).containsAllIn(initialTenantIds);
 
             // Add new element
-            InternetDomain domain = InternetDomain.newBuilder()
-                                                  .setValue("my.tenant.com")
-                                                  .build();
-            TenantId newTenantId = TenantId.newBuilder()
-                                           .setDomain(domain)
-                                           .build();
+            InternetDomain domain = InternetDomain
+                    .newBuilder()
+                    .setValue("my.tenant.com")
+                    .build();
+            TenantId newTenantId = TenantId
+                    .newBuilder()
+                    .setDomain(domain)
+                    .build();
             namespaceIndex.keep(newTenantId); // sync
 
             // Check new value added
@@ -202,7 +197,7 @@ class NamespaceIndexTest {
             // Check returned set has newly added element
             Set<TenantId> updatedIds = namespaceIndex.getAll(); // sync
             assertEquals(updatedIds.size(), initialTenantIds.size() + 1);
-            assertContains(newTenantId, updatedIds);
+            assertThat(updatedIds).contains(newTenantId);
         };
 
         // Test execution threads
@@ -244,6 +239,7 @@ class NamespaceIndexTest {
         when(datastore.getOptions()).thenReturn(options);
         when(options.getProjectId()).thenReturn("some-project-id-NamespaceIndexTest");
         QueryResults results = mock(QueryResults.class);
+        //noinspection unchecked
         when(datastore.run(any(Query.class))).thenReturn(results);
         return datastore;
     }

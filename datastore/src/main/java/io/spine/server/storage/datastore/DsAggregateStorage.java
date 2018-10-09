@@ -115,11 +115,12 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         RecordId datastoreId = toRecordId(id);
-        Optional<Int32Value> count = propertyStorage.read(datastoreId,
-                                                          Int32Value.getDescriptor());
-        int countValue = count.map(Int32Value::getValue)
-                              .orElse(0);
-        return countValue;
+        Optional<Message> optional = propertyStorage.read(datastoreId, Int32Value.getDescriptor());
+        if (!optional.isPresent()) {
+            return 0;
+        }
+        Int32Value count = (Int32Value) optional.get();
+        return count.getValue();
     }
 
     @Override

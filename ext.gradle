@@ -19,15 +19,17 @@
  */
 
 /**
- *  The versions of the libraries used.
+ * The versions of the libraries to be used.
  *
- *  This file is used wherever the library versions are required.
+ * <p>This file defines versions for the dependencies that are not covered by
+ * {@code .config/gradle/dependencies.gradle}.
  */
 
 ext {
-    spineGaeVersion = '0.10.88-SNAPSHOT'
-    spineVersion = '0.10.88-SNAPSHOT'
-    spineBaseVersion = '0.10.69-SNAPSHOT'
+    spineBaseVersion = '0.11.2-SNAPSHOT'
+    spineVersion = '0.11.00-SNAPSHOT'
 
     datastoreVersion = '1.35.0'
+
+    versionToPublish = '0.11.00-SNAPSHOT'
 }
