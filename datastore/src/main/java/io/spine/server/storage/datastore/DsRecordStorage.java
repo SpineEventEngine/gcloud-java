@@ -81,11 +81,11 @@ import static java.util.stream.Collectors.toList;
 public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
+    private final Class<I> idClass;
     private final TypeUrl typeUrl;
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
     private final ColumnFilterAdapter columnFilterAdapter;
-    private final Class<I> idClass;
 
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
 
@@ -98,6 +98,16 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                 EntityRecord record = entityToMessage(input, RECORD_TYPE_URL);
                 return record;
             };
+
+    /**
+     * Creates new instance of the {@link Builder}.
+     *
+     * @param <I> the ID type of the instances built by the created {@link Builder}
+     * @return new instance of the {@link Builder}
+     */
+    public static <I> Builder<I> newBuilder() {
+        return new Builder<>();
+    }
 
     /**
      * Creates a new storage instance.
@@ -126,9 +136,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
         super(multitenant, entityClass);
         this.typeUrl = TypeUrl.from(descriptor);
+        this.idClass = checkNotNull(idClass);
         this.datastore = datastore;
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
-        this.idClass = checkNotNull(idClass);
         this.columnFilterAdapter = ColumnFilterAdapter.of(this.columnTypeRegistry);
     }
 
@@ -211,11 +221,12 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        if (query.getIds()
-                 .isEmpty()
-        && !query.getParameters()
-                 .iterator()
-                 .hasNext()) {
+        boolean noIds = query.getIds()
+                             .isEmpty();
+        boolean noParameters = !query.getParameters()
+                                     .iterator()
+                                     .hasNext();
+        if (noIds && noParameters) {
             return readAll(fieldMask);
         }
         return queryBy(query, fieldMask);
@@ -463,7 +474,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return kindFrom(typeUrl);
     }
 
-    EntityRecord getRecordFromEntity(Entity entity) {
+    private EntityRecord getRecordFromEntity(Entity entity) {
         EntityRecord record = entityToMessage(entity, RECORD_TYPE_URL);
         return record;
     }
@@ -496,37 +507,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     /**
-     * A function transforming the input {@link Filter} into a {@link StructuredQuery} with
-     * the given newBuilder.
-     */
-    private static final class FilterToQuery implements Function<Filter, StructuredQuery<Entity>> {
-
-        private final StructuredQuery.Builder<Entity> builder;
-
-        private FilterToQuery(StructuredQuery.Builder<Entity> builder) {
-            this.builder = builder;
-        }
-
-        @Override
-        public StructuredQuery<Entity> apply(@Nullable Filter filter) {
-            checkNotNull(filter);
-            StructuredQuery<Entity> query = builder.setFilter(filter)
-                                                   .build();
-            return query;
-        }
-    }
-
-    /**
-     * Creates new instance of the {@link Builder}.
-     *
-     * @param <I> the ID type of the instances built by the created {@link Builder}
-     * @return new instance of the {@link Builder}
-     */
-    public static <I> Builder<I> newBuilder() {
-        return new Builder<>();
-    }
-
-    /**
      * A newBuilder for the {@code DsRecordStorage}.
      */
     public static final class Builder<I> extends AbstractBuilder<I, Builder<I>> {
@@ -552,5 +532,4 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return this;
         }
     }
-
 }
