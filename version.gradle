@@ -29,7 +29,7 @@ ext {
     spineBaseVersion = '0.11.2-SNAPSHOT'
     spineCoreVersion = '0.11.00-SNAPSHOT'
 
-    datastoreVersion = '1.35.0'
+    datastoreVersion = '1.48.0'
 
     versionToPublish = '0.11.2-SNAPSHOT'
 }
