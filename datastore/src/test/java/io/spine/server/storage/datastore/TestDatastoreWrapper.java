@@ -29,13 +29,12 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -43,10 +42,9 @@ import static com.google.common.collect.Lists.newArrayList;
 /**
  * Custom extension of the {@link DatastoreWrapper} for the integration testing.
  *
- * @author Dmytro Dashenkov
  * @see TestDatastoreStorageFactory
  */
-class TestDatastoreWrapper extends DatastoreWrapper {
+class TestDatastoreWrapper extends DatastoreWrapper implements Logging {
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
@@ -62,7 +60,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
      */
     private static final int MAX_CLEANUP_ATTEMPTS = 5;
 
-    private static final Collection<String> kindsCache = new LinkedList<>();
+    private static final Collection<String> kindsCache = new ArrayList<>();
 
     private final boolean waitForConsistency;
 
@@ -165,7 +163,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
             log().debug("Wait for consistency is not required.");
             return;
         }
-        log().info("Waiting for data consistency to establish.");
+        log().debug("Waiting for data consistency to establish.");
 
         for (int awaitCycle = 0; awaitCycle < CONSISTENCY_AWAIT_ITERATIONS; awaitCycle++) {
             try {
@@ -180,21 +178,11 @@ class TestDatastoreWrapper extends DatastoreWrapper {
      * Deletes all records from the datastore.
      */
     void dropAllTables() {
-        log().info("Dropping all tables");
+        log().debug("Dropping all tables");
         for (String kind : kindsCache) {
             dropTable(kind);
         }
 
         kindsCache.clear();
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(TestDatastoreWrapper.class);
     }
 }
