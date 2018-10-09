@@ -28,13 +28,10 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Functions;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.ColumnRecords;
@@ -67,7 +64,6 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
-import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
@@ -96,10 +92,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
 
+    @SuppressWarnings("ReturnOfNull") // as annotated.
     private static final Function<@Nullable Entity, @Nullable EntityRecord> recordFromEntity =
             input -> {
                 if (input == null) {
-                    //noinspection ReturnOfNull
                     return null;
                 }
                 EntityRecord record = entityToMessage(input, RECORD_TYPE_URL);
@@ -108,28 +104,29 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     /**
      * Creates a new storage instance.
-     *
+     * 
+     * @param multitenant
+     *         {@code true} if the storage supports multiple tenants,
+     *         {@code false} for the single tenant storage
+     * @param entityClass
+     *         the class of entities stored in the storage
+     * @param idClass
+     *         the class of identifiers of stored entities
      * @param descriptor
      *         the descriptor of the type of messages to save to the storage
      * @param datastore
      *         the Datastore implementation to use
-     * @param multitenant
-     *         {@code true} if the storage supports multiple tenants,
-     *         {@code false} for the single tenant storage
      * @param columnTypeRegistry
-     *          the registry of column types to be used by the storage
-     * @param idClass
-     *          the class of identifiers of stored entities
-     * @param entityClass
-     *          the class of stored entities
+     *         the registry with column type information
      */
     @SuppressWarnings("ConstructorWithTooManyParameters")
-    protected DsRecordStorage(Descriptor descriptor,
-                              DatastoreWrapper datastore,
-                              boolean multitenant,
-                              ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
-                              Class<I> idClass,
-                              Class<? extends io.spine.server.entity.Entity> entityClass) {
+    protected DsRecordStorage(
+            boolean multitenant,
+            Class<? extends io.spine.server.entity.Entity> entityClass,
+            Class<I> idClass,
+            Descriptor descriptor,
+            DatastoreWrapper datastore,
+            ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
         super(multitenant, entityClass);
         this.typeUrl = TypeUrl.from(descriptor);
         this.datastore = datastore;
@@ -139,19 +136,22 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private DsRecordStorage(Builder<I> builder) {
-        this(builder.getDescriptor(),
-             builder.getDatastore(),
-             builder.isMultitenant(),
-             builder.getColumnTypeRegistry(),
+        this(builder.isMultitenant(),
+             builder.getEntityClass(),
              builder.getIdClass(),
-             builder.getEntityClass());
+             builder.getDescriptor(),
+             builder.getDatastore(),
+             builder.getColumnTypeRegistry()
+        );
+    }
+
+    private Key keyOf(I id) {
+        return keyFor(datastore, getKind(), ofEntityId(id));
     }
 
     @Override
     public boolean delete(I id) {
-        Key key = keyFor(datastore,
-                         getKind(),
-                         ofEntityId(id));
+        Key key = keyOf(id);
         datastore.delete(key);
 
         // Check presence
@@ -161,9 +161,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected @Nullable Optional<EntityRecord> readRecord(I id) {
-        Key key = keyFor(datastore,
-                         getKind(),
-                         ofEntityId(id));
+        Key key = keyOf(id);
         Entity response = datastore.read(key);
 
         if (response == null) {
@@ -180,8 +178,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids,
-                                                         FieldMask fieldMask) {
+    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
         Function<@Nullable Entity, @Nullable EntityRecord> transformer = input -> {
             if (input == null) {
                 //noinspection ReturnOfNull
@@ -192,9 +189,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             Message maskedState = applyMask(fieldMask, state);
             Any wrappedState = AnyPacker.pack(maskedState);
 
-            EntityRecord record = EntityRecord.newBuilder(readRecord)
-                                              .setState(wrappedState)
-                                              .build();
+            EntityRecord record = EntityRecord
+                    .newBuilder(readRecord)
+                    .setState(wrappedState)
+                    .build();
             return record;
         };
 
@@ -210,10 +208,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
         StructuredQuery<Entity> allQuery = buildAllQuery(typeUrl);
-        Iterator<EntityRecord> result = queryAll(
-                allQuery,
-                                                 fieldMask,
-                                                 activeEntity());
+        Iterator<EntityRecord> result = queryAll(allQuery, fieldMask, activeEntity());
         return result;
     }
 
@@ -289,9 +284,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         StructuredQuery.Builder<Entity> datastoreQuery = Query.newEntityQueryBuilder()
                                                               .setKind(getKind().getValue());
         Collection<Filter> filters = buildColumnFilters(params);
-        Collection<StructuredQuery<Entity>> queries = filters.stream()
-                                                             .map(new FilterToQuery(datastoreQuery))
-                                                             .collect(toList());
+        Collection<StructuredQuery<Entity>> queries =
+                filters.stream()
+                       .map(new FilterToQuery(datastoreQuery))
+                       .collect(toList());
         Iterator<EntityRecord> result = queryAndMerge(queries, fieldMask);
         return result;
     }
@@ -369,8 +365,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return result;
     }
 
-    private <T> Iterator<T> lookup(Iterable<I> ids,
-                                   Function<Entity, @Nullable T> transformer) {
+    private <T> Iterator<T> lookup(Iterable<I> ids, Function<Entity, @Nullable T> transformer) {
         Collection<Key> keys = toKeys(ids);
         Iterator<Entity> results = datastore.read(keys);
         return stream(results).filter(activeEntity())
@@ -479,11 +474,15 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @return new {@link StructuredQuery}
      */
     protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
-        String entityKind = kindFrom(typeUrl).getValue();
-        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                             .setKind(entityKind)
-                                             .build();
+        Kind kind = kindFrom(typeUrl);
+        StructuredQuery<Entity> query = newQuery(kind);
         return query;
+    }
+
+    private static com.google.cloud.datastore.EntityQuery newQuery(Kind kind) {
+        return Query.newEntityQueryBuilder()
+                    .setKind(kind.getValue())
+                    .build();
     }
 
     private Collection<Key> toKeys(Iterable<I> ids) {
@@ -495,87 +494,11 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return keys;
     }
 
-    private static class EntityColumnPredicate implements Predicate<Entity> {
-
-        private final ColumnFilterAdapter adapter;
-        private final Iterable<CompositeQueryParameter> queryParams;
-
-        private EntityColumnPredicate(Iterable<CompositeQueryParameter> queryParams,
-                                      ColumnFilterAdapter adapter) {
-            this.adapter = adapter;
-            this.queryParams = queryParams;
-        }
-
-        @Override
-        public boolean test(@Nullable Entity entity) {
-            if (entity == null) {
-                return false;
-            }
-            for (CompositeQueryParameter filter : queryParams) {
-                boolean match;
-                CompositeColumnFilter.CompositeOperator operator = filter.getOperator();
-                switch (operator) {
-                    case ALL:
-                        match = checkAll(filter.getFilters(), entity);
-                        break;
-                    case EITHER:
-                        match = checkEither(filter.getFilters(), entity);
-                        break;
-                    case UNRECOGNIZED:      // Fall through to default strategy
-                    case CCF_CO_UNDEFINED:  // for the `default` and `faulty` enum values.
-                    default:
-                        throw newIllegalArgumentException("Composite operator %s is invalid.",
-                                                          operator);
-                }
-                if (!match) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private boolean checkAll(Multimap<EntityColumn, ColumnFilter> filters, Entity entity) {
-            for (Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
-                EntityColumn column = filter.getKey();
-                boolean matches = checkSingleParam(filter.getValue(), entity, column);
-                if (!matches) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private boolean checkEither(Multimap<EntityColumn, ColumnFilter> filters, Entity entity) {
-            for (Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
-                EntityColumn column = filter.getKey();
-                boolean matches = checkSingleParam(filter.getValue(), entity, column);
-                if (matches) {
-                    return true;
-                }
-            }
-            return filters.isEmpty();
-        }
-
-        private boolean checkSingleParam(ColumnFilter filter, Entity entity, EntityColumn column) {
-            String columnName = column.getName();
-            if (!entity.contains(columnName)) {
-                return false;
-            }
-            Object actual = entity.getValue(columnName)
-                                  .get();
-            Object expected = adapter.toValue(column, filter)
-                                     .get();
-
-            boolean result = eval(actual, filter.getOperator(), expected);
-            return result;
-        }
-    }
-
     /**
      * A function transforming the input {@link Filter} into a {@link StructuredQuery} with
      * the given newBuilder.
      */
-    private static class FilterToQuery implements Function<Filter, StructuredQuery<Entity>> {
+    private static final class FilterToQuery implements Function<Filter, StructuredQuery<Entity>> {
 
         private final StructuredQuery.Builder<Entity> builder;
 
@@ -605,8 +528,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * A newBuilder for the {@code DsRecordStorage}.
      */
-    public static final class Builder<I>
-            extends AbstractBuilder<I, Builder<I>> {
+    public static final class Builder<I> extends AbstractBuilder<I, Builder<I>> {
 
         /**
          * Prevents direct instantiation.

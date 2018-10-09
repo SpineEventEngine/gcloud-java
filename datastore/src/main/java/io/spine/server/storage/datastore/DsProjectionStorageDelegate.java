@@ -34,29 +34,29 @@ import static io.spine.server.storage.datastore.DsFilters.activeEntity;
  * A {@link io.spine.server.storage.RecordStorage RecordStorage} to which
  * {@link DsProjectionStorage} delegates its operations.
  *
- * <p>It's required to override specific database connection routines for storing projections. This
- * is done for performance reasons.
- *
- * @author Dmytro Dashenkov
+ * <p>It's required to override specific database connection routines for storing projections.
+ * This is done for performance reasons.
  */
 public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
 
-    protected DsProjectionStorageDelegate(Descriptor descriptor,
-                                          DatastoreWrapper datastore,
-                                          boolean multitenant,
-                                          ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
-                                          Class<I> idClass,
-                                          Class<? extends io.spine.server.entity.Entity> entityClass) {
-        super(descriptor, datastore, multitenant, columnTypeRegistry, idClass, entityClass);
+    protected DsProjectionStorageDelegate(
+            boolean multitenant,
+            Class<? extends io.spine.server.entity.Entity> entityClass,
+            Class<I> idClass,
+            Descriptor descriptor,
+            DatastoreWrapper datastore,
+            ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
+        super(multitenant, entityClass, idClass, descriptor, datastore, columnTypeRegistry);
     }
 
     private DsProjectionStorageDelegate(Builder<I> builder) {
-        this(builder.getDescriptor(),
-             builder.getDatastore(),
-             builder.isMultitenant(),
-             builder.getColumnTypeRegistry(),
+        this(builder.isMultitenant(),
+             builder.getEntityClass(),
              builder.getIdClass(),
-             builder.getEntityClass());
+             builder.getDescriptor(),
+             builder.getDatastore(),
+             builder.getColumnTypeRegistry()
+        );
     }
 
     /**
@@ -72,10 +72,11 @@ public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
     @Override
     protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
         String entityKind = kindFrom(typeUrl).getValue();
-        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                                   .setKind(entityKind)
-                                                   .setFilter(activeEntity())
-                                                   .build();
+        StructuredQuery<Entity> query =
+                Query.newEntityQueryBuilder()
+                     .setKind(entityKind)
+                     .setFilter(activeEntity())
+                     .build();
         return query;
     }
 

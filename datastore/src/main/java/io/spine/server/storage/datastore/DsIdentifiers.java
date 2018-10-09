@@ -27,13 +27,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Utilities for working with GAE Datastore record identifiers and keys.
- *
- * @author Alex Tymchenko
  */
-@SuppressWarnings({
-        "UtilityClass",
-        "WeakerAccess"  /* as it's part of API */})
-public class DsIdentifiers {
+public final class DsIdentifiers {
 
     private DsIdentifiers() {
     }
