@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 
 import java.util.function.Function;
@@ -35,8 +36,9 @@ final class FilterToQuery implements Function<StructuredQuery.Filter, Structured
 
     private final StructuredQuery.Builder<Entity> builder;
 
-    FilterToQuery(StructuredQuery.Builder<Entity> builder) {
-        this.builder = builder;
+    FilterToQuery(Kind kind) {
+        this.builder = Query.newEntityQueryBuilder()
+                            .setKind(kind.getValue());
     }
 
     @Override

@@ -23,9 +23,6 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
-import com.google.protobuf.Descriptors.Descriptor;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
-import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.type.TypeUrl;
 
 import static io.spine.server.storage.datastore.DsFilters.activeEntity;
@@ -39,24 +36,8 @@ import static io.spine.server.storage.datastore.DsFilters.activeEntity;
  */
 public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
 
-    protected DsProjectionStorageDelegate(
-            boolean multitenant,
-            Class<? extends io.spine.server.entity.Entity> entityClass,
-            Class<I> idClass,
-            Descriptor descriptor,
-            DatastoreWrapper datastore,
-            ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
-        super(multitenant, entityClass, idClass, descriptor, datastore, columnTypeRegistry);
-    }
-
     private DsProjectionStorageDelegate(Builder<I> builder) {
-        this(builder.isMultitenant(),
-             builder.getEntityClass(),
-             builder.getIdClass(),
-             builder.getDescriptor(),
-             builder.getDatastore(),
-             builder.getColumnTypeRegistry()
-        );
+        super(builder);
     }
 
     /**
@@ -96,8 +77,7 @@ public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
     /**
      * A builder for the {@code DsProjectionStorageDelegate}.
      */
-    public static final class Builder<I>
-            extends AbstractBuilder<I, Builder<I>> {
+    public static final class Builder<I> extends AbstractBuilder<I, Builder<I>> {
 
         /**
          * Prevents direct instantiation.
