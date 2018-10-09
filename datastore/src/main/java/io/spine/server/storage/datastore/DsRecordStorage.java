@@ -69,7 +69,6 @@ import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.server.storage.datastore.Entities.entityToMessage;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.isDefault;
 import static java.util.Collections.emptyIterator;
 import static java.util.Optional.empty;
@@ -179,24 +178,24 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
-        Function<@Nullable Entity, @Nullable EntityRecord> transformer = input -> {
-            if (input == null) {
-                //noinspection ReturnOfNull
-                return null;
-            }
-            EntityRecord readRecord = entityToMessage(input, RECORD_TYPE_URL);
-            Message state = unpack(readRecord.getState());
-            Message maskedState = applyMask(fieldMask, state);
-            Any wrappedState = AnyPacker.pack(maskedState);
+        return lookup(ids, input -> entityToRecord(input, fieldMask));
+    }
 
-            EntityRecord record = EntityRecord
-                    .newBuilder(readRecord)
-                    .setState(wrappedState)
-                    .build();
-            return record;
-        };
+    private static
+    @Nullable EntityRecord entityToRecord(@Nullable Entity input, FieldMask fieldMask) {
+        if (input == null) {
+            return null;
+        }
+        EntityRecord readRecord = entityToMessage(input, RECORD_TYPE_URL);
+        Message state = unpack(readRecord.getState());
+        Message maskedState = applyMask(fieldMask, state);
+        Any wrappedState = AnyPacker.pack(maskedState);
 
-        return lookup(ids, transformer);
+        EntityRecord record = EntityRecord
+                .newBuilder(readRecord)
+                .setState(wrappedState)
+                .build();
+        return record;
     }
 
     @Override
@@ -310,10 +309,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                                  FieldMask fieldMask) {
         Iterator<EntityRecord> result = emptyIterator();
         for (StructuredQuery<Entity> query : queries) {
-            Iterator<EntityRecord> records = queryAll(
-                    query,
-                                                      fieldMask,
-                                                      entity -> true);
+            Iterator<EntityRecord> records = queryAll(query, fieldMask, entity -> true);
             result = concat(result, records);
         }
         return result;
@@ -384,19 +380,26 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
                                                      Predicate<Entity> filter,
                                                      FieldMask fieldMask) {
         Stream<Entity> filtered = stream(queryResults).filter(filter);
-        Function<Entity, EntityRecord> transformer = input -> {
-            checkNotNull(input);
-            EntityRecord record = getRecordFromEntity(input);
-            if (!isDefault(fieldMask)) {
-                Message state = unpack(record.getState());
-                state = applyMask(fieldMask, state);
-                record = EntityRecord.newBuilder(record)
-                                     .setState(AnyPacker.pack(state))
-                                     .build();
+
+        Function<Entity, EntityRecord> applyFieldMask = new Function<Entity, EntityRecord>() {
+
+            private final boolean maskNotEmpty = !isDefault(fieldMask);
+
+            @Override
+            public EntityRecord apply(Entity input) {
+                checkNotNull(input);
+                EntityRecord record = DsRecordStorage.this.getRecordFromEntity(input);
+                if (maskNotEmpty) {
+                    Message state = unpack(record.getState());
+                    state = applyMask(fieldMask, state);
+                    record = EntityRecord.newBuilder(record)
+                                         .setState(AnyPacker.pack(state))
+                                         .build();
+                }
+                return record;
             }
-            return record;
         };
-        Iterator<EntityRecord> result = filtered.map(transformer)
+        Iterator<EntityRecord> result = filtered.map(applyFieldMask)
                                                 .iterator();
         return result;
     }
