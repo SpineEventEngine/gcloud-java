@@ -23,16 +23,11 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,7 +39,7 @@ import static com.google.common.collect.Lists.newArrayList;
  *
  * @see TestDatastoreStorageFactory
  */
-class TestDatastoreWrapper extends DatastoreWrapper implements Logging {
+class TestDatastoreWrapper extends DatastoreWrapper {
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
@@ -131,29 +126,15 @@ class TestDatastoreWrapper extends DatastoreWrapper implements Logging {
             remainingEntityCount = entities.size();
 
             if (remainingEntityCount > 0) {
-                Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
-                    @Nullable
-                    @Override
-                    public Key apply(@Nullable Entity input) {
-                        if (input == null) {
-                            return null;
-                        }
-
-                        return input.getKey();
-                    }
-                });
-
-                Key[] keysArray = new Key[keys.size()];
-                keys.toArray(keysArray);
-                dropTableInternal(keysArray);
-
+                deleteEntities(entities);
                 cleanupAttempts++;
             }
         }
 
         if (cleanupAttempts >= MAX_CLEANUP_ATTEMPTS && remainingEntityCount > 0) {
             throw new RuntimeException("Cannot cleanup the table: " + table +
-                                               ". Remaining entity count is " + remainingEntityCount);
+                                               ". Remaining entity count is " +
+                                               remainingEntityCount);
         }
     }
 

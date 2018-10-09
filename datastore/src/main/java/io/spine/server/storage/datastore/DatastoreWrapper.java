@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
@@ -39,15 +40,12 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.common.base.Supplier;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
+import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -65,15 +63,15 @@ import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Math.min;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Represents a wrapper above GAE {@link Datastore}.
  *
  * <p>Provides API for Datastore to be used in storages.
- *
- * @author Dmytro Dashenkov
  */
-public class DatastoreWrapper {
+@SuppressWarnings("ClassWithTooManyMethods")
+public class DatastoreWrapper implements Logging {
 
     private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE =
             "Transaction should be active.";
@@ -109,14 +107,16 @@ public class DatastoreWrapper {
      * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns
      * the instance.
      *
-     * @param datastore         {@link Datastore} to wrap
-     * @param namespaceSupplier an instance of {@link Supplier Supplier&lt;Namespace&gt;} to get the
-     *                          namespaces for the queries from
+     * @param datastore
+     *         {@link Datastore} to wrap
+     * @param namespaceSupplier
+     *         an instance of {@link Supplier Supplier&lt;Namespace&gt;} to get the namespaces for
+     *         the queries from
      * @return new instance of {@code DatastoreWrapper}
      */
     @SuppressWarnings("WeakerAccess") // Part of API
-    protected static DatastoreWrapper wrap(Datastore datastore,
-                                           NamespaceSupplier namespaceSupplier) {
+    protected static
+    DatastoreWrapper wrap(Datastore datastore, NamespaceSupplier namespaceSupplier) {
         return new DatastoreWrapper(datastore, namespaceSupplier);
     }
 
@@ -127,7 +127,6 @@ public class DatastoreWrapper {
      * @throws DatastoreException upon failure
      * @see DatastoreWriter#put(FullEntity)
      */
-    @SuppressWarnings("WeakerAccess")
     public void create(Entity entity) throws DatastoreException {
         actor.add(entity);
     }
@@ -139,7 +138,6 @@ public class DatastoreWrapper {
      * @throws DatastoreException if the {@link Entity} with such {@link Key} does not exist
      * @see DatastoreWriter#update(Entity...)
      */
-    @SuppressWarnings("WeakerAccess")
     public void update(Entity entity) throws DatastoreException {
         actor.update(entity);
     }
@@ -232,13 +230,12 @@ public class DatastoreWrapper {
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @see DatastoreReader#run(Query)
      */
-    @SuppressWarnings("LoopConditionNotUpdatedInsideLoop")
-        // Implicit call to Iterator.next() in Iterators.addAll
     public Iterator<Entity> read(StructuredQuery<Entity> query) {
         Namespace namespace = getNamespace();
-        StructuredQuery<Entity> queryWithNamespace = query.toBuilder()
-                                                                .setNamespace(namespace.getValue())
-                                                                .build();
+        StructuredQuery<Entity> queryWithNamespace =
+                query.toBuilder()
+                     .setNamespace(namespace.getValue())
+                     .build();
         Iterator<Entity> result = new DsQueryIterator(queryWithNamespace, actor);
         return result;
     }
@@ -259,31 +256,28 @@ public class DatastoreWrapper {
      */
     void dropTable(String table) {
         Namespace namespace = getNamespace();
-        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                                   .setNamespace(namespace.getValue())
-                                                   .setKind(table)
-                                                   .build();
+        StructuredQuery<Entity> query =
+                Query.newEntityQueryBuilder()
+                     .setNamespace(namespace.getValue())
+                     .setKind(table)
+                     .build();
         Iterator<Entity> queryResult = read(query);
         List<Entity> entities = newArrayList(queryResult);
-        Collection<Key> keys = Collections2.transform(entities, new Function<Entity, Key>() {
-            @Nullable
-            @Override
-            public Key apply(@Nullable Entity input) {
-                if (input == null) {
-                    return null;
-                }
-
-                return input.getKey();
-            }
-        });
-
-        Key[] keysArray = new Key[keys.size()];
-        keys.toArray(keysArray);
-        dropTableInternal(keysArray);
+        deleteEntities(entities);
     }
 
-    void dropTableInternal(Key[] keysArray) {
-        if (keysArray.length > MAX_ENTITIES_PER_WRITE_REQUEST) {
+    void deleteEntities(List<Entity> entities) {
+        List<Key> keyList =
+                entities.stream()
+                        .map(BaseEntity::getKey)
+                        .collect(toList());
+        Key[] keys = new Key[keyList.size()];
+        keyList.toArray(keys);
+        deleteEntities(keys);
+    }
+
+    private void deleteEntities(Key[] keys) {
+        if (keys.length > MAX_ENTITIES_PER_WRITE_REQUEST) {
             int start = 0;
             int end = MAX_ENTITIES_PER_WRITE_REQUEST;
             while (true) {
@@ -292,14 +286,14 @@ public class DatastoreWrapper {
                     return;
                 }
                 Key[] keysSubarray = new Key[length];
-                System.arraycopy(keysArray, start, keysSubarray, 0, keysSubarray.length);
+                System.arraycopy(keys, start, keysSubarray, 0, keysSubarray.length);
                 delete(keysSubarray);
 
                 start = end;
-                end = min(MAX_ENTITIES_PER_WRITE_REQUEST, keysArray.length - end);
+                end = min(MAX_ENTITIES_PER_WRITE_REQUEST, keys.length - end);
             }
         } else {
-            delete(keysArray);
+            delete(keys);
         }
     }
 
@@ -388,9 +382,10 @@ public class DatastoreWrapper {
     }
 
     public DatastoreOptions getDatastoreOptions() {
-        DatastoreOptions options = datastore.getOptions()
-                                                  .toBuilder()
-                                                  .build();
+        DatastoreOptions options =
+                datastore.getOptions()
+                         .toBuilder()
+                         .build();
         return options;
     }
 
@@ -401,7 +396,7 @@ public class DatastoreWrapper {
 
     private KeyFactory initKeyFactory(Kind kind) {
         KeyFactory keyFactory = datastore.newKeyFactory()
-                                               .setKind(kind.getValue());
+                                         .setKind(kind.getValue());
         keyFactories.put(kind, keyFactory);
         return keyFactory;
     }
@@ -460,8 +455,8 @@ public class DatastoreWrapper {
         actor.put(entities);
     }
 
-    private static Iterator<Entity> concat(@Nullable Iterator<Entity> first,
-                                           Iterator<Entity> second) {
+    private static
+    Iterator<Entity> concat(@Nullable Iterator<Entity> first, Iterator<Entity> second) {
         if (first == null) {
             return second;
         }
@@ -526,22 +521,12 @@ public class DatastoreWrapper {
 
         private QueryResults<Entity> computeNextPage() {
             Cursor cursorAfter = currentPage.getCursorAfter();
-            Query<Entity> queryForMoreResults = query.toBuilder()
-                                                           .setStartCursor(cursorAfter)
-                                                           .build();
+            Query<Entity> queryForMoreResults =
+                    query.toBuilder()
+                         .setStartCursor(cursorAfter)
+                         .build();
             QueryResults<Entity> nextPage = datastore.run(queryForMoreResults);
             return nextPage;
         }
-
-    }
-
-    private static Logger log() {
-        return LoggerSingleton.INSTANCE.logger;
-    }
-
-    private enum LoggerSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger logger = LoggerFactory.getLogger(DatastoreWrapper.class);
     }
 }
