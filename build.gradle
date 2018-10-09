@@ -22,8 +22,8 @@ buildscript {
 
     // Define the versions of the library and its dependencies.
     // As long as `buildscript` section is always evaluated first, we need to apply
-    // `ext.gradle` explicitly here.
-    apply from: "ext.gradle"
+    // `version.gradle` explicitly here.
+    apply from: "version.gradle"
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
     repositories {
@@ -37,7 +37,7 @@ buildscript {
     }
 }
 
-apply from: 'ext.gradle'
+apply from: 'version.gradle'
 
 ext {
     credentialsPropertyFile = 'credentials.properties'
