@@ -107,6 +107,21 @@ public class DatastoreWrapper implements Logging {
     }
 
     /**
+     * Creates an instance of {@link com.google.cloud.datastore.Key} basing on the Datastore
+     * entity {@code kind} and {@code recordId}.
+     *
+     * @param kind      the kind of the Datastore entity
+     * @param recordId  the ID of the record
+     * @return the Datastore {@code Key} instance
+     */
+    Key keyFor(Kind kind, RecordId recordId) {
+        KeyFactory keyFactory = getKeyFactory(kind);
+        Key key = keyFactory.newKey(recordId.getValue());
+
+        return key;
+    }
+
+    /**
      * Writes new {@link Entity} into the Datastore.
      *
      * @param entity new {@link Entity} to put into the Datastore

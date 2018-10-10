@@ -59,7 +59,7 @@ public class DsPropertyStorage {
         Descriptor typeDescriptor = value.getDescriptorForType();
         Kind kind = Kind.of(typeDescriptor);
 
-        Key key = DsIdentifiers.keyFor(datastore, kind, propertyId);
+        Key key = datastore.keyFor(kind, propertyId);
 
         Entity entity = messageToEntity(AnyPacker.pack(value), key);
         datastore.createOrUpdate(entity);
@@ -71,7 +71,7 @@ public class DsPropertyStorage {
 
         Kind kind = Kind.of(targetType);
 
-        Key key = DsIdentifiers.keyFor(datastore, kind, propertyId);
+        Key key = datastore.keyFor(kind, propertyId);
         Entity response = datastore.read(key);
 
         if (response == null) {

@@ -204,9 +204,9 @@ public class DsRecordStorageTest
 
         // Read Datastore Entity
         DatastoreWrapper datastore = storage.getDatastore();
-        Key key = DsIdentifiers.keyFor(datastore,
-                                       Kind.of(state),
-                                       DsIdentifiers.ofEntityId(id));
+        Key key = datastore.keyFor(
+                Kind.of(state),
+                                          RecordId.ofEntityId(id));
         com.google.cloud.datastore.Entity datastoreEntity = datastore.read(key);
 
         // Check entity record
@@ -348,6 +348,8 @@ public class DsRecordStorageTest
 
         DatastoreWrapper spy = storageFactory.getDatastore();
         verify(spy).read(anyIterable());
+        // Suppress using comment to avoid method-wide suppression.
+        //noinspection unchecked
         verify(spy, never()).read(any(StructuredQuery.class));
     }
 

@@ -50,8 +50,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.transform;
 import static io.spine.server.aggregate.AggregateField.aggregate_id;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
-import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
-import static io.spine.server.storage.datastore.DsIdentifiers.of;
+import static io.spine.server.storage.datastore.RecordId.of;
 import static io.spine.server.storage.datastore.DsProperties.addAggregateId;
 import static io.spine.server.storage.datastore.DsProperties.addVersion;
 import static io.spine.server.storage.datastore.DsProperties.addWhenCreated;
@@ -164,7 +163,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                 throw newIllegalArgumentException("Invalid kind of AggregateEventRecord \"%s\".",
                                                   record.getKindCase());
         }
-        Key key = keyFor(datastore, Kind.of(stateTypeName), of(recordId));
+        Key key = datastore.keyFor(Kind.of(stateTypeName), of(recordId));
         Entity incompleteEntity = messageToEntity(record, key);
         Entity.Builder builder = Entity.newBuilder(incompleteEntity);
         addAggregateId(builder, stringId);
@@ -293,7 +292,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private Key toKey(I id) {
         RecordId recordId = toRecordId(id);
-        Key key = keyFor(datastore, Kind.of(AGGREGATE_LIFECYCLE_KIND), recordId);
+        Key key = datastore.keyFor(Kind.of(AGGREGATE_LIFECYCLE_KIND), recordId);
         return key;
     }
 

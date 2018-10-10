@@ -17,38 +17,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.storage.datastore;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("DatastoreIdentifiers should")
-class DatastoreIdentifiersTest {
-
-    @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
-    void testPrivateCtor() {
-        assertHasPrivateParameterlessCtor(DsIdentifiers.class);
-    }
+@DisplayName("RecordId should")
+class RecordIdTest {
 
     @Test
     @DisplayName("not accept empty String for identifier")
     void testEmpty() {
-        assertThrows(IllegalArgumentException.class, () -> DsIdentifiers.of(""));
+        assertThrows(IllegalArgumentException.class, () -> RecordId.of(""));
     }
 
     @Test
     @DisplayName("wrap non empty String into record identifier")
     void testNonEmpty() {
         String idAsString = newUuid();
-        RecordId recordId = DsIdentifiers.of(idAsString);
+        RecordId recordId = RecordId.of(idAsString);
 
         assertNotNull(recordId);
         assertEquals(idAsString, recordId.getValue());

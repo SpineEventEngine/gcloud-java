@@ -26,7 +26,7 @@ import io.spine.value.StringTypeValue;
 /**
  * Abstract base for Datastore-related identifiers.
  */
-public abstract class DsIdentifier extends StringTypeValue {
+abstract class DsIdentifier extends StringTypeValue {
 
     private static final long serialVersionUID = 0L;
 

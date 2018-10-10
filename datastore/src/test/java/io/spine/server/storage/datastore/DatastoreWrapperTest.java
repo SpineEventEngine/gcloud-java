@@ -31,7 +31,6 @@ import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.datastore.TestEnvironment;
-import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import org.junit.jupiter.api.AfterAll;
@@ -189,9 +188,10 @@ class DatastoreWrapperTest {
         String tenantId2Prefixed = "Esecond-at-tenant.id";
         String tenantId3 = "third.id";
         String tenantId3Prefixed = "Dthird.id";
-        ensureNamespace(tenantId1Prefixed, wrapper.getDatastore());
-        ensureNamespace(tenantId2Prefixed, wrapper.getDatastore());
-        ensureNamespace(tenantId3Prefixed, wrapper.getDatastore());
+        Datastore datastore = wrapper.getDatastore();
+        ensureNamespace(tenantId1Prefixed, datastore);
+        ensureNamespace(tenantId2Prefixed, datastore);
+        ensureNamespace(tenantId3Prefixed, datastore);
         TenantId id1 = TenantId.newBuilder()
                                .setValue(tenantId1)
                                .build();
@@ -302,7 +302,7 @@ class DatastoreWrapperTest {
             for (int i = 0; i < n; i++) {
                 Any message = Any.getDefaultInstance();
                 RecordId recordId = new RecordId(String.format("record-%s", i));
-                Key key = DsIdentifiers.keyFor(wrapper, GENERIC_ENTITY_KIND, recordId);
+                Key key = wrapper.keyFor(GENERIC_ENTITY_KIND, recordId);
                 Entity entity = messageToEntity(message, key);
                 result.put(key, entity);
             }

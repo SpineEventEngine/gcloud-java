@@ -54,7 +54,7 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
         this.recordStorage = recordStorage;
         this.propertyStorage = propertyStorage;
         this.lastTimestampId =
-                DsIdentifiers.of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
+                RecordId.of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
     }
 
     @Override

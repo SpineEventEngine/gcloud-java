@@ -60,8 +60,7 @@ import static com.google.common.collect.Streams.stream;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.entity.storage.ColumnRecords.feedColumnsTo;
-import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
-import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
+import static io.spine.server.storage.datastore.RecordId.ofEntityId;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.server.storage.datastore.Entities.entityToMessage;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
@@ -117,7 +116,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private Key keyOf(I id) {
-        return keyFor(datastore, getKind(), ofEntityId(id));
+        return datastore.keyFor(getKind(), ofEntityId(id));
     }
 
     @Override
@@ -341,7 +340,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
         EntityRecord entityRecord = record.getRecord();
-        Key key = keyFor(datastore, kindFrom(entityRecord), ofEntityId(id));
+        Key key = datastore.keyFor(kindFrom(entityRecord), ofEntityId(id));
         Entity incompleteEntity = messageToEntity(entityRecord, key);
         Entity.Builder entity = Entity.newBuilder(incompleteEntity);
 
@@ -421,7 +420,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private Collection<Key> toKeys(Iterable<I> ids) {
         Collection<Key> keys = newLinkedList();
         for (I id : ids) {
-            Key key = keyFor(datastore, kindFrom(typeUrl), ofEntityId(id));
+            Key key = datastore.keyFor(kindFrom(typeUrl), ofEntityId(id));
             keys.add(key);
         }
         return keys;
