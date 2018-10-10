@@ -59,19 +59,23 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final @MonotonicNonNull NamespaceConverter namespaceConverter;
 
     DatastoreStorageFactory(Builder builder) {
-        this.datastore = createDatastoreWrapper(builder.datastore);
+        this.namespaceSupplier = builder.namespaceSupplier;
         this.multitenant = builder.multitenant;
         this.typeRegistry = builder.typeRegistry;
-        this.namespaceSupplier = builder.namespaceSupplier;
         this.namespaceConverter = builder.namespaceConverter;
+        this.datastore = createDatastoreWrapper(builder.datastore);
     }
 
     private Builder toBuilder() {
         Builder result = newBuilder()
                 .setDatastore(datastore.getDatastore())
                 .setMultitenant(multitenant)
-                .setNamespaceSupplier(namespaceSupplier)
-                .setNamespaceConverter(namespaceConverter);
+                .setNamespaceSupplier(namespaceSupplier);
+
+        if (!multitenant) {
+            result.setNamespaceConverter(namespaceConverter);
+        }
+
         return result;
     }
 
@@ -238,7 +242,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          * Sets the namespace supplier.
          */
         public Builder setNamespaceSupplier(NamespaceSupplier namespaceSupplier) {
-            this.namespaceSupplier = namespaceSupplier;
+            this.namespaceSupplier = checkNotNull(namespaceSupplier);
             return this;
         }
 

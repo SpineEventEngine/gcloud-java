@@ -126,7 +126,7 @@ class DatastoreStorageFactoryTest {
 
     @Test
     @DisplayName(DO_NOTHING_ON_CLOSE)
-    void testClose() throws Exception {
+    void testClose() {
         DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                                  .setDatastore(datastore)
                                                                  .build();
