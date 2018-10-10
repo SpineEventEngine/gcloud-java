@@ -57,7 +57,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
@@ -72,6 +71,9 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static java.lang.Math.abs;
 import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
+import static java.util.Comparator.nullsLast;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -189,7 +191,7 @@ public class DsRecordStorageTestEnv {
     public static <T extends Comparable<T>> List<CollegeId>
     sortedIds(List<CollegeEntity> entities, Function<CollegeEntity, T> property) {
         return entities.stream()
-                       .sorted(comparing(property))
+                       .sorted(comparing(property, nullsFirst(naturalOrder())))
                        .map(AbstractEntity::getId)
                        .collect(toList());
     }
@@ -204,7 +206,17 @@ public class DsRecordStorageTestEnv {
     createAndStoreEntities(RecordStorage<CollegeId> storage, int recordCount) {
         List<CollegeEntity> entities = new ArrayList<>(recordCount);
         for (int i = 0; i < recordCount; i++) {
-            CollegeEntity entity = createAndStoreEntity(storage);
+            CollegeEntity entity = createAndStoreEntity(storage, false);
+            entities.add(entity);
+        }
+        return entities;
+    }
+
+    public static List<CollegeEntity>
+    createAndStoreEntitiesWithNullStudentCount(RecordStorage<CollegeId> storage, int recordCount) {
+        List<CollegeEntity> entities = new ArrayList<>(recordCount);
+        for (int i = 0; i < recordCount; i++) {
+            CollegeEntity entity = createAndStoreEntity(storage, true);
             entities.add(entity);
         }
         return entities;
@@ -217,10 +229,14 @@ public class DsRecordStorageTestEnv {
                     .collect(toList());
     }
 
-    private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage) {
+    private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage,
+                                                      boolean nullStudentCount) {
         CollegeId id = newId();
         CollegeEntity entity = new CollegeEntity(id);
         entity.injectState(newCollege(id));
+        if (nullStudentCount) {
+            entity.hideStudentCount();
+        }
         storeEntity(storage, entity);
         return entity;
     }
@@ -383,6 +399,58 @@ public class DsRecordStorageTestEnv {
     public static class CollegeEntity
             extends AbstractVersionableEntity<CollegeId, College> {
 
+        private boolean isStudentCountHidden;
+
+        private final Timestamp creationTime;
+
+        public CollegeEntity(CollegeId id) {
+            super(id);
+            this.creationTime = getCurrentTime();
+            this.isStudentCountHidden = false;
+        }
+
+        public boolean studentCountHidden() {
+            return isStudentCountHidden;
+        }
+
+        public void hideStudentCount() {
+            this.isStudentCountHidden = true;
+        }
+
+        @Column
+        public String getName() {
+            return getState().getName();
+        }
+
+        @Column
+        public @Nullable Integer getStudentCount() {
+            return isStudentCountHidden ? null : getState().getStudentCount();
+        }
+
+        @Column
+        public Timestamp getAdmissionDeadline() {
+            return getState().getAdmissionDeadline();
+        }
+
+        @Column
+        public double getPassingGrade() {
+            return getState().getPassingGrade();
+        }
+
+        @Column
+        public boolean getStateSponsored() {
+            return getState().getStateSponsored();
+        }
+
+        @Column
+        public Timestamp getCreationTime() {
+            return creationTime;
+        }
+
+        private void injectState(College state) {
+            updateState(state);
+        }
+
         public enum Columns {
             CREATED("creationTime"),
             NAME("name"),
@@ -400,48 +468,6 @@ public class DsRecordStorageTestEnv {
             public String columnName() {
                 return name;
             }
-        }
-
-        private LifecycleFlags lifecycleFlags;
-        private final Timestamp creationTime;
-
-        public CollegeEntity(CollegeId id) {
-            super(id);
-            this.creationTime = getCurrentTime();
-        }
-
-        @Column
-        public String getName() {
-            return getState().getName();
-        }
-
-        @Column
-        public int getStudentCount() {
-            return getState().getStudentCount();
-        }
-
-        @Column
-        public Timestamp getAdmissionDeadline() {
-            return getState().getAdmissionDeadline();
-        }
-
-        @Column
-        public Double getPassingGrade() {
-            return getState().getPassingGrade();
-        }
-
-        @Column
-        public Boolean getStateSponsored() {
-            return getState().getStateSponsored();
-        }
-
-        @Column
-        public Timestamp getCreationTime() {
-            return creationTime;
-        }
-
-        private void injectState(College state) {
-            updateState(state);
         }
     }
 }

@@ -204,13 +204,6 @@ final class DsIdLookup<I> {
 
         @Override
         public int compare(Entity a, Entity b) {
-            if (!a.contains(column)) {
-                throw noColumnInEntity(a);
-            }
-            if (!b.contains(column)) {
-                throw noColumnInEntity(b);
-            }
-
             Comparable aValue = ComparableValueExtractor.comparable(a.getValue(column));
             Comparable bValue = ComparableValueExtractor.comparable(b.getValue(column));
 
