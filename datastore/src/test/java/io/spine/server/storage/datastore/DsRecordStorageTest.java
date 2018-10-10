@@ -84,6 +84,7 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.Tes
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.UNORDERED_COLLEGE_NAMES;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ascendingBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.assertSortedBooleans;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.combine;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.createAndStoreEntities;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.createAndStoreEntitiesWithNullStudentCount;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
@@ -97,9 +98,11 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.new
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityRecord;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newIdFilter;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.nullableStudentCount;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.pagination;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.recordIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedIds;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedValues;
 import static io.spine.testing.Verify.assertContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -504,9 +507,9 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         int recordCount = regularCount + nullCount;
         List<CollegeEntity> nullEntities = createAndStoreEntitiesWithNullStudentCount(storage,
                                                                                       nullCount);
-        List<CollegeEntity> entities = createAndStoreEntities(storage, regularCount);
+        List<CollegeEntity> regularEntities = createAndStoreEntities(storage, regularCount);
 
-        entities.addAll(nullEntities);
+        List<CollegeEntity> entities = combine(nullEntities, regularEntities);
 
         // Create ID filter.
         List<EntityId> targetIds = newEntityIds(entities);
@@ -529,9 +532,9 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         assertEquals(recordCount, resultList.size());
 
         // Check the entities were ordered.
-//        TODO:2018-10-10:mdrachuk: add ordering when master is merged
-//        List<CollegeId> expectedResults = sortedIds(entities, CollegeEntity::getStudentCount).stream();
-//        assertEquals(expectedResults, actualResults);
+        List<Integer> expectedCounts = sortedValues(entities, CollegeEntity::getStudentCount);
+        List<Integer> actualCounts = nullableStudentCount(resultList);
+        assertEquals(expectedCounts, actualCounts);
 
         // Check Datastore reads are performed by keys but not using a structured query.
         DatastoreWrapper spy = storageFactory.getDatastore();

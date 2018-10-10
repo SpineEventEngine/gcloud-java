@@ -60,6 +60,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.asList;
 import static io.spine.base.Identifier.newUuid;
@@ -70,11 +71,12 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static java.lang.Math.abs;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
-import static java.util.Comparator.nullsLast;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -196,6 +198,14 @@ public class DsRecordStorageTestEnv {
                        .collect(toList());
     }
 
+    public static <T extends Comparable<T>> List<T>
+    sortedValues(List<CollegeEntity> entities, Function<CollegeEntity, T> property) {
+        return entities.stream()
+                       .sorted(comparing(property, nullsFirst(naturalOrder())))
+                       .map(property)
+                       .collect(toList());
+    }
+
     public static Pagination pagination(int pageSize) {
         return PaginationVBuilder.newBuilder()
                                  .setPageSize(pageSize)
@@ -206,7 +216,7 @@ public class DsRecordStorageTestEnv {
     createAndStoreEntities(RecordStorage<CollegeId> storage, int recordCount) {
         List<CollegeEntity> entities = new ArrayList<>(recordCount);
         for (int i = 0; i < recordCount; i++) {
-            CollegeEntity entity = createAndStoreEntity(storage, false);
+            CollegeEntity entity = createAndStoreEntity(storage);
             entities.add(entity);
         }
         return entities;
@@ -216,27 +226,23 @@ public class DsRecordStorageTestEnv {
     createAndStoreEntitiesWithNullStudentCount(RecordStorage<CollegeId> storage, int recordCount) {
         List<CollegeEntity> entities = new ArrayList<>(recordCount);
         for (int i = 0; i < recordCount; i++) {
-            CollegeEntity entity = createAndStoreEntity(storage, true);
+            CollegeEntity entity = createAndStoreEntity(storage);
             entities.add(entity);
         }
         return entities;
     }
 
     public static List<CollegeEntity>
-    createAndStoreEntities(RecordStorage<CollegeId> storage, List<@Nullable String> names) {
+    createAndStoreEntities(RecordStorage<CollegeId> storage, List<String> names) {
         return names.stream()
                     .map(name -> createAndStoreEntity(storage, name))
                     .collect(toList());
     }
 
-    private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage,
-                                                      boolean nullStudentCount) {
+    private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage) {
         CollegeId id = newId();
         CollegeEntity entity = new CollegeEntity(id);
         entity.injectState(newCollege(id));
-        if (nullStudentCount) {
-            entity.hideStudentCount();
-        }
         storeEntity(storage, entity);
         return entity;
     }
@@ -245,24 +251,28 @@ public class DsRecordStorageTestEnv {
                                                       String name) {
         CollegeId id = newId();
         CollegeEntity entity = new CollegeEntity(id);
-        entity.injectState(newCollege(id, name));
+        entity.injectState(newCollege(id, name, false));
         storeEntity(storage, entity);
         return entity;
     }
 
-    private static College newCollege(CollegeId id, String name) {
+    private static College newCollege(CollegeId id, String name, boolean nullStudentCount) {
         return CollegeVBuilder.newBuilder()
                               .setId(id)
                               .setName(name)
                               .setAdmissionDeadline(randomTimestamp())
                               .setPassingGrade(randomPassingGrade())
-                              .setStudentCount(randomStudentCount())
+                              .setStudentCount(nullStudentCount ? 0 : randomStudentCount())
                               .setStateSponsored(RANDOM.nextBoolean())
                               .build();
     }
 
     private static College newCollege(CollegeId id) {
-        return newCollege(id, id.getValue());
+        return newCollege(id, id.getValue(), false);
+    }
+
+    private static College newCollege(CollegeId id, boolean nullStudentCount) {
+        return newCollege(id, id.getValue(), nullStudentCount);
     }
 
     private static int randomStudentCount() {
@@ -303,6 +313,21 @@ public class DsRecordStorageTestEnv {
                          .map(state -> (College) unpack(state))
                          .map(College::getStateSponsored)
                          .collect(toList());
+    }
+
+    public static List<Integer> nullableStudentCount(List<EntityRecord> resultList) {
+        return resultList.stream()
+                         .map(EntityRecord::getState)
+                         .map(state -> (College) unpack(state))
+                         .map(College::getStudentCount)
+                         .map(count -> count == 0 ? null : count)
+                         .collect(toList());
+    }
+
+    public static List<CollegeEntity> combine(Collection<CollegeEntity> nullEntities,
+                                              Collection<CollegeEntity> regularEntities) {
+        Stream<CollegeEntity> combination = concat(nullEntities.stream(), regularEntities.stream());
+        return unmodifiableList(combination.collect(toList()));
     }
 
     /*
@@ -399,22 +424,11 @@ public class DsRecordStorageTestEnv {
     public static class CollegeEntity
             extends AbstractVersionableEntity<CollegeId, College> {
 
-        private boolean isStudentCountHidden;
-
         private final Timestamp creationTime;
 
         public CollegeEntity(CollegeId id) {
             super(id);
             this.creationTime = getCurrentTime();
-            this.isStudentCountHidden = false;
-        }
-
-        public boolean studentCountHidden() {
-            return isStudentCountHidden;
-        }
-
-        public void hideStudentCount() {
-            this.isStudentCountHidden = true;
         }
 
         @Column
@@ -424,7 +438,8 @@ public class DsRecordStorageTestEnv {
 
         @Column
         public @Nullable Integer getStudentCount() {
-            return isStudentCountHidden ? null : getState().getStudentCount();
+            int count = getState().getStudentCount();
+            return count == 0 ? null : count;
         }
 
         @Column
