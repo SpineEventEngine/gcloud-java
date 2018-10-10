@@ -51,7 +51,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
 import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
-import static io.spine.server.storage.datastore.TestEnvironment.runsOnCi;
+import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
 import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;

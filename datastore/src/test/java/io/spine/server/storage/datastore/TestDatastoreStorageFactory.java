@@ -29,7 +29,7 @@ import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
 
-import static io.spine.server.storage.datastore.TestEnvironment.runsOnCi;
+import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
 
 /**
  * Creates storages based on the local Google {@link Datastore}.

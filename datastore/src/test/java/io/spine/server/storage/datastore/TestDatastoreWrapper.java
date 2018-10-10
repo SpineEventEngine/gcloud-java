@@ -64,7 +64,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
         this.waitForConsistency = waitForConsistency;
     }
 
-    static TestDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
+    public static TestDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
         return new TestDatastoreWrapper(datastore, waitForConsistency);
     }
 
@@ -158,7 +158,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
     /**
      * Deletes all records from the datastore.
      */
-    void dropAllTables() {
+    public void dropAllTables() {
         log().debug("Dropping all tables");
         for (String kind : kindsCache) {
             dropTable(kind);
