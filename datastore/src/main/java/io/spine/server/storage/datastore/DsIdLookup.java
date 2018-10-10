@@ -218,10 +218,6 @@ final class DsIdLookup<I> {
             return aValue.compareTo(bValue);
         }
 
-        private IllegalStateException noColumnInEntity(Entity b) {
-            return newIllegalStateException("Entity %s does not contain column %s", b, column);
-        }
-
         private static Comparator<Entity> implementing(OrderBy orderBy) {
             checkNotNull(orderBy);
             checkNotDefault(orderBy);
