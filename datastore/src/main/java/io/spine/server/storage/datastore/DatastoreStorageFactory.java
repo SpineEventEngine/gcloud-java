@@ -31,8 +31,8 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
+import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
@@ -41,9 +41,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
+import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 
 /**
  * Creates storages based on {@link Datastore}.
@@ -58,12 +58,17 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final NamespaceSupplier namespaceSupplier;
     private final @MonotonicNonNull NamespaceConverter namespaceConverter;
 
+    @SuppressWarnings({
+            /* Overridden method required for stub. impl. of test environments.  */
+            "OverridableMethodCallDuringObjectConstruction",
+            "OverriddenMethodCallDuringObjectConstruction"
+    })
     DatastoreStorageFactory(Builder builder) {
         this.namespaceSupplier = builder.namespaceSupplier;
         this.multitenant = builder.multitenant;
         this.typeRegistry = builder.typeRegistry;
         this.namespaceConverter = builder.namespaceConverter;
-        this.datastore = createDatastoreWrapper(builder.datastore);
+        this.datastore = createDatastoreWrapper(builder);
     }
 
     private Builder toBuilder() {
@@ -79,9 +84,8 @@ public class DatastoreStorageFactory implements StorageFactory {
         return result;
     }
 
-    protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
-        checkState(this.getDatastore() == null, "Datastore is already initialized");
-        DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore, namespaceSupplier);
+    protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
+        DatastoreWrapper wrapped = wrap(builder.datastore, builder.namespaceSupplier);
         return wrapped;
     }
 
@@ -202,6 +206,10 @@ public class DatastoreStorageFactory implements StorageFactory {
         public Builder setDatastore(Datastore datastore) {
             this.datastore = checkNotNull(datastore);
             return this;
+        }
+
+        public Datastore getDatastore() {
+            return this.datastore;
         }
 
         /**

@@ -67,8 +67,8 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     @Override
-    protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
-        return TestDatastoreWrapper.wrap(datastore, runsOnCi());
+    protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
+        return TestDatastoreWrapper.wrap(builder.getDatastore(), runsOnCi());
     }
 
     /**

@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.truth.IterableSubject;
@@ -458,7 +457,7 @@ public class DsRecordStorageTest
         }
 
         @Override
-        protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
+        protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
             return spyWrapper;
         }
     }
