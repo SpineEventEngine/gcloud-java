@@ -26,7 +26,7 @@ Such an approach is useful to optimize read-side querying. In this case more Dat
  be created.
 
 __Example:__
-Assuming you have a Projection type called `CustomerProjection`. It's state is declared in 
+Assuming you have a Projection type called `CustomerProjection`. Its state is declared in 
 the Protobuf type `my.company.Customer`. It has Entity Columns `country` and
 `companySize`. Once you try to make a query in those Columns, the Datastore will fail with 
 an internal Exception. To prevent this, you should create an index for your `CustomerProjection`:
