@@ -30,16 +30,16 @@ abstract class DsIdentifier extends StringTypeValue {
 
     private static final long serialVersionUID = 0L;
 
-    protected DsIdentifier(String value) {
+    DsIdentifier(String value) {
         super(value);
     }
 
-    public String getValue() {
+    public final String getValue() {
         return value();
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("value", value())
                           .toString();
