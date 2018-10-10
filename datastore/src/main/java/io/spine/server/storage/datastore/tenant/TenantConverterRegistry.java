@@ -36,7 +36,7 @@ import static java.util.Collections.synchronizedMap;
 import static java.util.Optional.ofNullable;
 
 /**
- * A registry of the {@link NamespaceToTenantIdConverter}s.
+ * A registry of the {@link NamespaceConverter}s.
  *
  * <p>The converters are mapped to the {@link ProjectId}s one-to-one, i.e. one GAE project may
  * have only one strategy of converting the {@link TenantId tenant IDs}.
@@ -46,7 +46,7 @@ import static java.util.Optional.ofNullable;
 @Internal
 public final class TenantConverterRegistry {
 
-    private static final Map<ProjectId, NamespaceToTenantIdConverter> tenantIdConverters =
+    private static final Map<ProjectId, NamespaceConverter> tenantIdConverters =
             synchronizedMap(newHashMap());
 
     /**
@@ -72,26 +72,26 @@ public final class TenantConverterRegistry {
      */
     @Internal
     public static void registerNamespaceConverter(ProjectId projectId,
-                                                  NamespaceToTenantIdConverter converter) {
+                                                  NamespaceConverter converter) {
         checkNotNull(projectId);
         checkNotNull(converter);
-        NamespaceToTenantIdConverter pastConverter = tenantIdConverters.put(projectId,
-                                                                                  converter);
+        NamespaceConverter pastConverter = tenantIdConverters.put(projectId,
+                                                                  converter);
         checkState(pastConverter == null,
                    "A namespace converter has already been registered.");
     }
 
     /**
-     * Retrieves the registered {@link NamespaceToTenantIdConverter}.
+     * Retrieves the registered {@link NamespaceConverter}.
      *
      * @return the {@linkplain #registerNamespaceConverter registered}
-     * {@link NamespaceToTenantIdConverter} wrapped into {@link Optional} or
+     * {@link NamespaceConverter} wrapped into {@link Optional} or
      * {@link Optional#empty() Optional.empty()} if the converter has never been registered
      */
     @VisibleForTesting
-    public static Optional<NamespaceToTenantIdConverter> getNamespaceConverter(ProjectId projectId) {
+    public static Optional<NamespaceConverter> getNamespaceConverter(ProjectId projectId) {
         checkNotNull(projectId);
-        NamespaceToTenantIdConverter converter = tenantIdConverters.get(projectId);
+        NamespaceConverter converter = tenantIdConverters.get(projectId);
         return ofNullable(converter);
     }
 }

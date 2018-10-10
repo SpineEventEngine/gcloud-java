@@ -22,22 +22,18 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A value-type representing the GAE project ID.
- *
- * @author Dmytro Dashenkov
  */
-public final class ProjectId {
+public final class ProjectId extends DsIdentifier {
 
-    private final String value;
+    private static final long serialVersionUID = 0L;
 
     private ProjectId(String value) {
-        this.value = value;
+        super(value);
     }
 
     /**
@@ -63,36 +59,5 @@ public final class ProjectId {
         DatastoreOptions options = datastore.getOptions();
         String value = options.getProjectId();
         return of(value);
-    }
-
-    /**
-     * @return the string value of the GAE project ID
-     */
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ProjectId projectId = (ProjectId) o;
-        return Objects.equal(value, projectId.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(value);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("value", value)
-                          .toString();
     }
 }

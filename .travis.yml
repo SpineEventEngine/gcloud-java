@@ -10,10 +10,10 @@ env:
 before_install:
   - chmod +x gradlew
   - chmod +x ./scripts/start-datastore.sh
-  # Decrypt the Google Cloud credentials file and copy it over to the destination.
-  - openssl aes-256-cbc -K $encrypted_e506c3a92d8d_key -iv $encrypted_e506c3a92d8d_iv -in credentials.tar.enc -out credentials.tar -d
+  # Decrypt the credentials file and copy it over to the destination.
+  - openssl aes-256-cbc -K $encrypted_ebb86cbccb5d_key -iv $encrypted_ebb86cbccb5d_iv -in credentials.tar.enc -out credentials.tar -d
   - tar xvf credentials.tar
-  # Create a target folder for the credentials file.
+  # Create a target folder for the credentials file of Google Cloud, and copy it.
   - mkdir -p ./datastore/src/test/resources/
   - cp spine-dev.json ./datastore/src/test/resources/spine-dev-62685282c0b9.json
 
@@ -22,8 +22,13 @@ script:
 
   # The publishing script should be executed in `script` section in order to
   # fail the Travis build if execution of this script is failed.
-  - chmod +x ./scripts/publish-artifacts.sh
-  - ./scripts/publish-artifacts.sh
+  - chmod +x ./config/scripts/publish-artifacts.sh
+  - ./config/scripts/publish-artifacts.sh
 
 after_success:
+  # See: https://github.com/codecov/example-java/blob/master/.travis.yml
   - bash <(curl -s https://codecov.io/bash)
+
+  # Publish Codacy reports
+  - chmod +x ./config/scripts/report-coverage.sh
+  - ./config/scripts/report-coverage.sh

@@ -25,7 +25,9 @@ import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.common.truth.IterableSubject;
 import io.spine.client.ColumnFilter;
+import io.spine.client.ColumnFilters;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.TestEntityWithStringColumn;
@@ -41,11 +43,12 @@ import java.util.Collections;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.Filter;
+import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
+import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.ge;
+import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.gt;
+import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.le;
 import static com.google.common.collect.ImmutableMultimap.of;
-import static io.spine.client.ColumnFilters.eq;
-import static io.spine.client.ColumnFilters.ge;
-import static io.spine.client.ColumnFilters.gt;
-import static io.spine.client.ColumnFilters.le;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.ColumnFilters.lt;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
@@ -56,17 +59,11 @@ import static io.spine.server.storage.datastore.DsFilters.fromParams;
 import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.Verify.assertContainsAll;
-import static io.spine.testing.Verify.assertSize;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("DsFilters should")
 class DsFiltersTest {
 
@@ -89,11 +86,11 @@ class DsFiltersTest {
         boolean deletedValue = true;
         Multimap<EntityColumn, ColumnFilter> conjunctiveFilters = of(
                 column(TestEntity.class, ID_STRING_GETTER_NAME),
-                gt(ID_STRING_COLUMN_NAME, idStringValue)
+                ColumnFilters.gt(ID_STRING_COLUMN_NAME, idStringValue)
         );
         ImmutableMultimap<EntityColumn, ColumnFilter> disjunctiveFilters = of(
-                column(TestEntity.class, DELETED_GETTER_NAME), eq(deleted.name(), deletedValue),
-                column(TestEntity.class, ARCHIVED_GETTER_NAME), eq(archived.name(), archivedValue)
+                column(TestEntity.class, DELETED_GETTER_NAME), ColumnFilters.eq(deleted.name(), deletedValue),
+                column(TestEntity.class, ARCHIVED_GETTER_NAME), ColumnFilters.eq(archived.name(), archivedValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(conjunctiveFilters, ALL),
@@ -102,11 +99,12 @@ class DsFiltersTest {
 
         ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
         Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
-        assertContainsAll(filters,
-                          and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
-                              PropertyFilter.eq(archived.name(), archivedValue)),
-                          and(PropertyFilter.gt(ID_STRING_COLUMN_NAME, idStringValue),
-                              PropertyFilter.eq(deleted.name(), deletedValue)));
+
+        IterableSubject assertFilters = assertThat(filters);
+        assertFilters.contains(and(gt(ID_STRING_COLUMN_NAME, idStringValue),
+                                   eq(archived.name(), archivedValue)));
+        assertFilters.contains(and(gt(ID_STRING_COLUMN_NAME, idStringValue),
+                                   eq(deleted.name(), deletedValue)));
     }
 
     @Test
@@ -114,8 +112,8 @@ class DsFiltersTest {
     void testSingleParameter() {
         String versionValue = "314";
         ImmutableMultimap<EntityColumn, ColumnFilter> singleFilter = of(
-                column(TestEntity.class, ID_STRING_GETTER_NAME), le(ID_STRING_COLUMN_NAME,
-                                                                    versionValue)
+                column(TestEntity.class, ID_STRING_GETTER_NAME),
+                ColumnFilters.le(ID_STRING_COLUMN_NAME, versionValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(singleFilter, ALL)
@@ -123,7 +121,8 @@ class DsFiltersTest {
 
         ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
         Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
-        assertContainsAll(filters, and(PropertyFilter.le(ID_STRING_COLUMN_NAME, versionValue)));
+        IterableSubject assertFilters = assertThat(filters);
+        assertFilters.contains(and(le(ID_STRING_COLUMN_NAME, versionValue)));
     }
 
     @Test
@@ -136,15 +135,15 @@ class DsFiltersTest {
         boolean deletedValue = true;
         EntityColumn idStringColumn = column(TestEntity.class, ID_STRING_GETTER_NAME);
         ImmutableMultimap<EntityColumn, ColumnFilter> versionFilters = of(
-                idStringColumn, ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
-                idStringColumn, eq(ID_STRING_COLUMN_NAME, standaloneValue),
+                idStringColumn, ColumnFilters.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
+                idStringColumn, ColumnFilters.eq(ID_STRING_COLUMN_NAME, standaloneValue),
                 idStringColumn, lt(ID_STRING_COLUMN_NAME, lessBoundDefiner)
         );
         ImmutableMultimap<EntityColumn, ColumnFilter> lifecycleFilters = of(
-                column(TestEntity.class, DELETED_GETTER_NAME), eq(deleted.name(),
-                                                                  deletedValue),
-                column(TestEntity.class, ARCHIVED_GETTER_NAME), eq(archived.name(),
-                                                                   archivedValue)
+                column(TestEntity.class, DELETED_GETTER_NAME), ColumnFilters.eq(deleted.name(),
+                                                                                deletedValue),
+                column(TestEntity.class, ARCHIVED_GETTER_NAME), ColumnFilters.eq(archived.name(),
+                                                                                 archivedValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(versionFilters, EITHER),
@@ -152,19 +151,20 @@ class DsFiltersTest {
         );
         ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
         Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
-        assertContainsAll(filters,
-                          and(PropertyFilter.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
-                              PropertyFilter.eq(archived.name(), archivedValue)),
-                          and(PropertyFilter.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
-                              PropertyFilter.eq(deleted.name(), deletedValue)),
-                          and(PropertyFilter.eq(ID_STRING_COLUMN_NAME, standaloneValue),
-                              PropertyFilter.eq(archived.name(), archivedValue)),
-                          and(PropertyFilter.eq(ID_STRING_COLUMN_NAME, standaloneValue),
-                              PropertyFilter.eq(deleted.name(), deletedValue)),
-                          and(PropertyFilter.lt(ID_STRING_COLUMN_NAME, lessBoundDefiner),
-                              PropertyFilter.eq(archived.name(), archivedValue)),
-                          and(PropertyFilter.lt(ID_STRING_COLUMN_NAME, lessBoundDefiner),
-                              PropertyFilter.eq(deleted.name(), deletedValue)));
+        assertThat(filters).containsExactly(
+                and(ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
+                    eq(archived.name(), archivedValue)),
+                and(ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
+                    eq(deleted.name(), deletedValue)),
+                and(eq(ID_STRING_COLUMN_NAME, standaloneValue),
+                    eq(archived.name(), archivedValue)),
+                and(eq(ID_STRING_COLUMN_NAME, standaloneValue),
+                    eq(deleted.name(), deletedValue)),
+                and(PropertyFilter.lt(ID_STRING_COLUMN_NAME, lessBoundDefiner),
+                    eq(archived.name(), archivedValue)),
+                and(PropertyFilter.lt(ID_STRING_COLUMN_NAME, lessBoundDefiner),
+                    eq(deleted.name(), deletedValue))
+        );
     }
 
     @Test
@@ -173,8 +173,9 @@ class DsFiltersTest {
         Collection<CompositeQueryParameter> parameters = Collections.emptySet();
         Collection<Filter> filters = fromParams(parameters,
                                                 ColumnFilterAdapter.of(defaultInstance()));
-        assertNotNull(filters);
-        assertSize(0, filters);
+        IterableSubject assertFilters = assertThat(filters);
+        assertFilters.isNotNull();
+        assertFilters.isEmpty();
     }
 
     //TODO:2018-06-08:dmytro.kuzmin: re-write without mocks when null column filters are available.
@@ -188,7 +189,7 @@ class DsFiltersTest {
         when(column.getPersistedType()).thenReturn(String.class);
         when(column.toPersistedValue(any())).thenReturn(null);
 
-        ColumnFilter filterWithStubValue = eq(ID_STRING_COLUMN_NAME, "");
+        ColumnFilter filterWithStubValue = ColumnFilters.eq(ID_STRING_COLUMN_NAME, "");
         ImmutableMultimap<EntityColumn, ColumnFilter> filter = of(
                 column, filterWithStubValue
         );
@@ -198,7 +199,7 @@ class DsFiltersTest {
 
         ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
         Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
-        assertContainsAll(filters, and(PropertyFilter.eq(ID_STRING_COLUMN_NAME, NullValue.of())));
+        assertThat(filters).contains(and(eq(ID_STRING_COLUMN_NAME, NullValue.of())));
     }
 
     private static EntityColumn column(Class<? extends Entity> cls, String methodName) {

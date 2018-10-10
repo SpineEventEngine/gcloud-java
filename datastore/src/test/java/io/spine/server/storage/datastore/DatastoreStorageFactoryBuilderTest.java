@@ -29,7 +29,7 @@ import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
+import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.storage.datastore.type.SimpleDatastoreColumnType;
@@ -52,9 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("DatastoreStorageFactory.Builder should")
 class DatastoreStorageFactoryBuilderTest {
 
@@ -158,21 +155,21 @@ class DatastoreStorageFactoryBuilderTest {
                 DatastoreOptions.newBuilder()
                                 .setProjectId(withCustomConverter.getValue())
                                 .build();
-        NamespaceToTenantIdConverter converter = mock(NamespaceToTenantIdConverter.class);
+        NamespaceConverter converter = mock(NamespaceConverter.class);
         DatastoreStorageFactory factory =
                 DatastoreStorageFactory.newBuilder()
                                        .setMultitenant(true)
                                        .setDatastore(options.getService())
-                                       .setNamespaceToTenantIdConverter(converter)
+                                       .setNamespaceConverter(converter)
                                        .build();
         assertNotNull(factory);
 
-        Optional<NamespaceToTenantIdConverter> restoredConverter =
+        Optional<NamespaceConverter> restoredConverter =
                 TenantConverterRegistry.getNamespaceConverter(withCustomConverter);
         assertTrue(restoredConverter.isPresent());
         assertSame(converter, restoredConverter.get());
 
-        Optional<NamespaceToTenantIdConverter> absentConverter =
+        Optional<NamespaceConverter> absentConverter =
                 TenantConverterRegistry.getNamespaceConverter(withDefaultConverter);
         assertFalse(absentConverter.isPresent());
     }

@@ -30,11 +30,13 @@ import com.google.common.base.Function;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateEventRecord.KindCase;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
@@ -47,8 +49,8 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.transform;
 import static io.spine.server.aggregate.AggregateField.aggregate_id;
-import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
-import static io.spine.server.storage.datastore.DsIdentifiers.of;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
+import static io.spine.server.storage.datastore.RecordId.of;
 import static io.spine.server.storage.datastore.DsProperties.addAggregateId;
 import static io.spine.server.storage.datastore.DsProperties.addVersion;
 import static io.spine.server.storage.datastore.DsProperties.addWhenCreated;
@@ -69,11 +71,8 @@ import static java.util.Optional.of;
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
  *
- * @author Alexander Litus
- * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
-@SuppressWarnings("WeakerAccess")   // Part of API
 public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
@@ -97,16 +96,20 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     private final Class<I> idClass;
     private final TypeName stateTypeName;
 
-    public DsAggregateStorage(DatastoreWrapper datastore,
-                              DsPropertyStorage propertyStorage,
-                              boolean multitenant,
-                              Class<I> idClass,
-                              Class<? extends Message> stateClass) {
+    protected DsAggregateStorage(Class<? extends Aggregate<I, ?, ?>> cls,
+                                 DatastoreWrapper datastore,
+                                 DsPropertyStorage propertyStorage,
+                                 boolean multitenant) {
         super(multitenant);
         this.datastore = datastore;
         this.propertyStorage = propertyStorage;
+
+        EntityClass<? extends Aggregate<I, ?, ?>> modelClass = asEntityClass(cls);
+        @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
+        Class<I> idClass = (Class<I>) modelClass.getIdClass();
         this.idClass = idClass;
-        this.stateTypeName = TypeName.of(stateClass);
+        this.stateTypeName = modelClass.getStateType()
+                                       .toName();
     }
 
     @Override
@@ -115,11 +118,12 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         RecordId datastoreId = toRecordId(id);
-        Optional<Int32Value> count = propertyStorage.read(datastoreId,
-                                                          Int32Value.getDescriptor());
-        int countValue = count.map(Int32Value::getValue)
-                              .orElse(0);
-        return countValue;
+        Optional<Message> optional = propertyStorage.read(datastoreId, Int32Value.getDescriptor());
+        if (!optional.isPresent()) {
+            return 0;
+        }
+        Int32Value count = (Int32Value) optional.get();
+        return count.getValue();
     }
 
     @Override
@@ -159,7 +163,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                 throw newIllegalArgumentException("Invalid kind of AggregateEventRecord \"%s\".",
                                                   record.getKindCase());
         }
-        Key key = keyFor(datastore, Kind.of(stateTypeName), of(recordId));
+        Key key = datastore.keyFor(Kind.of(stateTypeName), of(recordId));
         Entity incompleteEntity = messageToEntity(record, key);
         Entity.Builder builder = Entity.newBuilder(incompleteEntity);
         addAggregateId(builder, stringId);
@@ -288,7 +292,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private Key toKey(I id) {
         RecordId recordId = toRecordId(id);
-        Key key = keyFor(datastore, Kind.of(AGGREGATE_LIFECYCLE_KIND), recordId);
+        Key key = datastore.keyFor(Kind.of(AGGREGATE_LIFECYCLE_KIND), recordId);
         return key;
     }
 

@@ -17,42 +17,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.storage.datastore;
 
-import io.spine.string.Stringifiers;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import java.util.function.Function;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A wrapper type for the {@code String}-based record identifiers in the GAE Datastore.
+ * A function transforming the input {@link com.google.cloud.datastore.StructuredQuery.Filter}
+ * into a {@link com.google.cloud.datastore.StructuredQuery} with the given newBuilder.
  */
-final class RecordId extends DsIdentifier {
+final class FilterToQuery implements Function<StructuredQuery.Filter, StructuredQuery<Entity>> {
 
-    private static final long serialVersionUID = 0L;
+    private final StructuredQuery.Builder<Entity> builder;
 
-    /**
-     * Creates a new {@code RecordId} for the given {@code value}.
-     *
-     * @param value the identity as {@code String} to wrap into an identifier
-     */
-    RecordId(String value) {
-        super(value);
+    FilterToQuery(Kind kind) {
+        this.builder = Query.newEntityQueryBuilder()
+                            .setKind(kind.getValue());
     }
 
-    static RecordId of(String value) {
-        checkArgument(!value.isEmpty());
-        return new RecordId(value);
-    }
-
-    /**
-     * Creates an instance of {@code RecordId} for a
-     * given {@link io.spine.server.entity.Entity} identifier.
-     *
-     * @param id an identifier of an {@code Entity}
-     * @return the Datastore record identifier
-     */
-    static RecordId ofEntityId(Object id) {
-        String idAsString = Stringifiers.toString(id);
-        return of(idAsString);
+    @Override
+    public StructuredQuery<Entity> apply(StructuredQuery.Filter filter) {
+        checkNotNull(filter);
+        StructuredQuery<Entity> query = builder.setFilter(filter)
+                                               .build();
+        return query;
     }
 }

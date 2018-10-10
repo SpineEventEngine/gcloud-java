@@ -33,13 +33,13 @@ import static io.spine.server.datastore.TestEnvironment.runsOnCi;
 /**
  * Creates storages based on the local Google {@link Datastore}.
  */
-@SuppressWarnings("CallToSystemGetenv")
 public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
-    public static final String DEFAULT_DATASET_NAME = Given.testProjectIdValue();
+    static final String DEFAULT_DATASET_NAME = Given.testProjectIdValue();
 
     /**
-     * Returns a default factory instance. A {@link Datastore} is created with default {@link DatastoreOptions}:
+     * Returns a default factory instance. A {@link Datastore} is created with
+     * default {@link DatastoreOptions}:
      *
      * <p>Dataset name: {@code spine-dev}
      *
@@ -48,8 +48,8 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     static TestDatastoreStorageFactory getDefaultInstance() {
         boolean onCi = runsOnCi();
         String message = onCi
-                               ? "Running on CI. Connecting to remote Google Cloud Datastore"
-                               : "Running on local machine. Connecting to a local Datastore emulator";
+                         ? "Running on CI. Connecting to remote Google Cloud Datastore"
+                         : "Running on local machine. Connecting to a local Datastore emulator";
         log().info(message);
         return onCi
                ? TestingInstanceSingleton.INSTANCE.value
@@ -57,17 +57,18 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     protected TestDatastoreStorageFactory(Datastore datastore) {
-        super(datastore,
-              false,
-              DatastoreTypeRegistryFactory.defaultInstance(),
-              NamespaceSupplier.singleTenant(), null);
+        super(DatastoreStorageFactory
+                      .newBuilder()
+                      .setDatastore(datastore)
+                      .setMultitenant(false)
+                      .setTypeRegistry(DatastoreTypeRegistryFactory.defaultInstance())
+                      .setNamespaceSupplier(NamespaceSupplier.singleTenant())
+        );
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-        // Overrides the behavior for tests
     @Override
-    protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
-        return TestDatastoreWrapper.wrap(datastore, runsOnCi());
+    protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
+        return TestDatastoreWrapper.wrap(builder.getDatastore(), runsOnCi());
     }
 
     /**
@@ -77,7 +78,6 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      */
     @SuppressWarnings("EmptyMethod")
     public void setUp() {
-
     }
 
     /**

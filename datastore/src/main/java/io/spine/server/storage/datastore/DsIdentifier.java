@@ -18,16 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.storage.datastore;
+
+import com.google.common.base.MoreObjects;
+import io.spine.value.StringTypeValue;
+
 /**
- *  The versions of the libraries used.
- *
- *  This file is used wherever the library versions are required.
+ * Abstract base for Datastore-related identifiers.
  */
+abstract class DsIdentifier extends StringTypeValue {
 
-ext {
-    spineGaeVersion = '0.10.88-SNAPSHOT'
-    spineVersion = '0.10.88-SNAPSHOT'
-    spineBaseVersion = '0.10.69-SNAPSHOT'
+    private static final long serialVersionUID = 0L;
 
-    datastoreVersion = '1.35.0'
+    DsIdentifier(String value) {
+        super(value);
+    }
+
+    public final String getValue() {
+        return value();
+    }
+
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("value", value())
+                          .toString();
+    }
 }

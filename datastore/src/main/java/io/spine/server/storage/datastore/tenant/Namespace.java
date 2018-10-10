@@ -50,11 +50,11 @@ import static java.util.regex.Matcher.quoteReplacement;
  *     <li>{@code V} - for "String Value".
  * </ul>
  *
- * <p>If a {@link NamespaceToTenantIdConverter} is
+ * <p>If a {@link NamespaceConverter} is
  * {@linkplain TenantConverterRegistry#registerNamespaceConverter registered}, then the converter
  * is used and the prefixes are absent.
  *
- * <p>One should register a {@link NamespaceToTenantIdConverter} <b>if and only if</b>
+ * <p>One should register a {@link NamespaceConverter} <b>if and only if</b>
  * the used Datastore already contains namespaces to work with.
  *
  * <p>Please note, that for working with the Datastore namespaces, Spine requires one of the
@@ -64,12 +64,11 @@ import static java.util.regex.Matcher.quoteReplacement;
  *     preformed by the means of the framework.
  *     <li>All the present namespaces start with one of the prefixes listed above. In this case
  *     the described {@link TenantId} conversion behavior will be applied.
- *     <li>A custom {@link NamespaceToTenantIdConverter} is registered.
+ *     <li>A custom {@link NamespaceConverter} is registered.
  * </ul>
  *
  * <p>If none of the above conditions is met, runtime errors may happen.
  *
- * @author Dmytro Dashenkov
  * @see DatastoreTenants
  * @see NamespaceSupplier
  */
@@ -79,23 +78,23 @@ public final class Namespace {
     static final String EMAIL_PREFIX = "E";
     static final String STRING_VALUE_PREFIX = "V";
 
-    private static final ImmutableMap<String, TenantIdConverterType> TYPE_PREFIX_TO_CONVERTER =
-            ImmutableMap.of(DOMAIN_PREFIX, TenantIdConverterType.DOMAIN,
-                            EMAIL_PREFIX, TenantIdConverterType.EMAIL,
-                            STRING_VALUE_PREFIX, TenantIdConverterType.VALUE);
+    private static final ImmutableMap<String, ConverterType> TYPE_PREFIX_TO_CONVERTER =
+            ImmutableMap.of(DOMAIN_PREFIX, ConverterType.DOMAIN,
+                            EMAIL_PREFIX, ConverterType.EMAIL,
+                            STRING_VALUE_PREFIX, ConverterType.VALUE);
 
     private static final Pattern AT_SYMBOL_PATTERN = Pattern.compile("@", Pattern.LITERAL);
     private static final String AT_SYMBOL_REPLACEMENT = "-at-";
 
     private final String value;
-    private final NamespaceToTenantIdConverter converter;
+    private final NamespaceConverter converter;
 
     private Namespace() {
-        this("", TenantIdConverterType.SINGLE_CUSTOM.namespaceConverter);
+        this("", ConverterType.SINGLE_CUSTOM.namespaceConverter);
     }
 
     private Namespace(String value,
-                      NamespaceToTenantIdConverter customConverter) {
+                      NamespaceConverter customConverter) {
         this.value = escapeIllegalCharacters(value);
         this.converter = customConverter;
     }
@@ -111,7 +110,7 @@ public final class Namespace {
             return new Namespace();
         } else {
             return new Namespace(datastoreNamespace,
-                                 TenantIdConverterType.SINGLE_CUSTOM.namespaceConverter);
+                                 ConverterType.SINGLE_CUSTOM.namespaceConverter);
         }
     }
 
@@ -125,13 +124,10 @@ public final class Namespace {
         checkNotNull(id);
         checkNotNull(projectId);
 
-        Optional<NamespaceToTenantIdConverter> customConverter =
-                getNamespaceConverter(projectId);
+        Optional<NamespaceConverter> customConverter = getNamespaceConverter(projectId);
 
-        TenantIdConverterType tenantIdConverterType =
-                TenantIdConverterType.forTenantId(id, customConverter.orElse(null));
-        NamespaceToTenantIdConverter converter =
-                customConverter.orElse(tenantIdConverterType.namespaceConverter);
+        ConverterType converterType = ConverterType.forTenantId(id, customConverter.orElse(null));
+        NamespaceConverter converter = customConverter.orElse(converterType.namespaceConverter);
         String ns = converter.toString(id);
         return new Namespace(ns, converter);
     }
@@ -148,26 +144,26 @@ public final class Namespace {
 
         String projectIdString = key.getProjectId();
         ProjectId projectId = ProjectId.of(projectIdString);
-        Optional<NamespaceToTenantIdConverter> customConverter = getNamespaceConverter(projectId);
+        Optional<NamespaceConverter> customConverter = getNamespaceConverter(projectId);
         String namespace = key.getName();
         if (isNullOrEmpty(namespace)) {
             return null;
         }
 
-        TenantIdConverterType tenantIdConverterType;
+        ConverterType converterType;
         if (!multitenant) {
-            tenantIdConverterType = TenantIdConverterType.SINGLE_CUSTOM;
+            converterType = ConverterType.SINGLE_CUSTOM;
         } else if (customConverter.isPresent()) {
-            tenantIdConverterType = TenantIdConverterType.PREDEFINED_VALUE;
+            converterType = ConverterType.PREDEFINED_VALUE;
         } else {
             String typePrefix = String.valueOf(namespace.charAt(0));
-            tenantIdConverterType = TYPE_PREFIX_TO_CONVERTER.get(typePrefix);
-            checkState(tenantIdConverterType != null,
+            converterType = TYPE_PREFIX_TO_CONVERTER.get(typePrefix);
+            checkState(converterType != null,
                        "Could not determine a TenantId converter for namespace %s.",
                        namespace);
         }
 
-        NamespaceToTenantIdConverter defaultConverter = tenantIdConverterType.namespaceConverter;
+        NamespaceConverter defaultConverter = converterType.namespaceConverter;
         Namespace result = new Namespace(namespace,
                                          customConverter.orElse(defaultConverter));
         return result;
@@ -180,7 +176,7 @@ public final class Namespace {
     }
 
     /**
-     * @return a string value of this {@code Namespace}
+     * Obtains a string value of this {@code Namespace}.
      */
     public String getValue() {
         return value;
@@ -193,8 +189,8 @@ public final class Namespace {
      * {@link Namespace#of(TenantId, ProjectId)}, then the result will be
      * {@code equal} to that {@link TenantId}.
      *
-     * <p>If current instance was created with {@link Namespace#of(String)}, then the result will
-     * be equivalent to the result of
+     * <p>If current instance was created with {@link Namespace#of(String)},
+     * then the result will be equivalent to the result of
      * <pre>
      * {@code
      *         TenantId.newBuilder()
@@ -236,7 +232,7 @@ public final class Namespace {
      * An enumeration of converters of the {@code Namespace} into a {@link TenantId} of the specific
      * type.
      */
-    private enum TenantIdConverterType {
+    private enum ConverterType {
 
         /**
          * Converts the given {@code Namespace} into a {@link TenantId} which has a {@code domain}.
@@ -273,23 +269,21 @@ public final class Namespace {
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
             // This enum is ancillary and is not to be serialized
-        private final NamespaceToTenantIdConverter namespaceConverter;
+        private final NamespaceConverter namespaceConverter;
 
-        private static TenantIdConverterType forTenantId(
-                TenantId tenantId,
-                @Nullable NamespaceToTenantIdConverter customConverter) {
-            if (customConverter != null) {
+        private static ConverterType forTenantId(TenantId tenantId,
+                                                 @Nullable NamespaceConverter custom) {
+            if (custom != null) {
                 return PREDEFINED_VALUE;
             }
             TenantId.KindCase kindCase = tenantId.getKindCase();
             String kindCaseName = kindCase.name();
-            TenantIdConverterType converter = valueOf(kindCaseName);
+            ConverterType converter = valueOf(kindCaseName);
             return converter;
         }
 
-        TenantIdConverterType(NamespaceToTenantIdConverter namespaceConverter) {
+        ConverterType(NamespaceConverter namespaceConverter) {
             this.namespaceConverter = namespaceConverter;
         }
     }
-
 }

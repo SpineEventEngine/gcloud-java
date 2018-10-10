@@ -29,9 +29,6 @@ import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("NamespaceConverters should")
 class NamespaceConvertersTest {
 
@@ -44,7 +41,7 @@ class NamespaceConvertersTest {
     @Test
     @DisplayName("create stub faulty converter")
     void testFaulty() {
-        NamespaceToTenantIdConverter converter = NamespaceConverters.stub();
+        NamespaceConverter converter = NamespaceConverters.stub();
         try {
             converter.convert("");
             fail();
@@ -62,7 +59,7 @@ class NamespaceConvertersTest {
     @Test
     @DisplayName("create custom namespace converter")
     void testCustomConverter() {
-        NamespaceToTenantIdConverter converter = NamespaceConverters.forCustomNamespace();
+        NamespaceConverter converter = NamespaceConverters.forCustomNamespace();
         Namespace namespace = Namespace.of("namespace");
         TenantId fromInternalConverter = namespace.toTenantId();
         TenantId fromExternalConverter = converter.convert(namespace.getValue());

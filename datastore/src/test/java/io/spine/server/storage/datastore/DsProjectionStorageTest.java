@@ -39,9 +39,6 @@ import org.junit.jupiter.api.Test;
 import static io.spine.base.Time.getCurrentTime;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Mikhail Mikhaylov
- */
 @DisplayName("DsProjectionStorage should")
 class DsProjectionStorageTest extends ProjectionStorageTest {
 
@@ -53,7 +50,6 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
         return TestEntity.class;
     }
 
-    @SuppressWarnings({"MagicNumber", "MethodDoesntCallSuperMethod"})
     @Override
     protected EntityRecord newStorageRecord() {
         return EntityRecord.newBuilder()

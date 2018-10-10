@@ -20,9 +20,9 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -63,6 +63,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.toSeconds;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.ColumnFilters.all;
@@ -72,7 +73,6 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
-import static io.spine.testing.Verify.assertContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -82,9 +82,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("DsRecordStorage should")
 public class DsRecordStorageTest
         extends RecordStorageTest<DsRecordStorage<ProjectId>> {
@@ -186,27 +183,29 @@ public class DsRecordStorageTest
         Collection<String> columns = recordWithColumns.getColumnNames();
         assertNotNull(columns);
 
+        IterableSubject assertColumns = assertThat(columns);
+
         // Custom Columns
-        assertContains(counter, columns);
-        assertContains(bigCounter, columns);
-        assertContains(counterEven, columns);
-        assertContains(counterVersion, columns);
-        assertContains(creationTime, columns);
-        assertContains(counterState, columns);
+        assertColumns.contains(counter);
+        assertColumns.contains(bigCounter);
+        assertColumns.contains(counterEven);
+        assertColumns.contains(counterVersion);
+        assertColumns.contains(creationTime);
+        assertColumns.contains(counterState);
 
         // Columns defined in superclasses
-        assertContains(version, columns);
-        assertContains(archived, columns);
-        assertContains(deleted, columns);
+        assertColumns.contains(version);
+        assertColumns.contains(archived);
+        assertColumns.contains(deleted);
 
         // High level write operation
         storage.write(id, recordWithColumns);
 
         // Read Datastore Entity
         DatastoreWrapper datastore = storage.getDatastore();
-        Key key = DsIdentifiers.keyFor(datastore,
-                                       Kind.of(state),
-                                       DsIdentifiers.ofEntityId(id));
+        Key key = datastore.keyFor(
+                Kind.of(state),
+                                          RecordId.ofEntityId(id));
         com.google.cloud.datastore.Entity datastoreEntity = datastore.read(key);
 
         // Check entity record
@@ -348,6 +347,8 @@ public class DsRecordStorageTest
 
         DatastoreWrapper spy = storageFactory.getDatastore();
         verify(spy).read(anyIterable());
+        // Suppress using comment to avoid method-wide suppression.
+        //noinspection unchecked
         verify(spy, never()).read(any(StructuredQuery.class));
     }
 
@@ -456,7 +457,7 @@ public class DsRecordStorageTest
         }
 
         @Override
-        protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
+        protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
             return spyWrapper;
         }
     }

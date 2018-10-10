@@ -18,38 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-allprojects {
-    apply plugin: 'jacoco'
-}
+/**
+ * The versions of the libraries to be used.
+ *
+ * <p>This file defines versions for the dependencies that are not covered by
+ * {@code .config/gradle/dependencies.gradle}.
+ */
 
-subprojects {
-    project.afterEvaluate {
-        def junitPlatformTestTask = project.tasks.getByName('junitPlatformTest')
+ext {
+    spineBaseVersion = '0.11.2-SNAPSHOT'
+    spineCoreVersion = '0.11.00-SNAPSHOT'
 
-        // configure jacoco to analyze the junitPlatformTest task
-        jacoco {
-            // this tool version is known to be compatible with JUnit 5.
-            toolVersion = "0.7.6.201602180812"
-            applyTo junitPlatformTestTask
-        }
+    datastoreVersion = '1.48.0'
 
-        codeCoverageReport.dependsOn {
-            subprojects*.test
-        }
-    }
-}
-
-task codeCoverageReport(type: JacocoReport) {
-    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
-
-    subprojects.each {
-        sourceSets it.sourceSets.main
-    }
-
-    reports {
-        xml.enabled = true
-        xml.destination = "${buildDir}/reports/jacoco/report.xml"
-        html.enabled = false
-        csv.enabled = false
-    }
+    versionToPublish = '0.11.2-SNAPSHOT'
 }

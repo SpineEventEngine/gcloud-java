@@ -26,8 +26,10 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.EntityField;
 import io.spine.type.TypeUrl;
 
@@ -36,21 +38,24 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Streams.stream;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.storage.datastore.DsProperties.isArchived;
 import static io.spine.server.storage.datastore.DsProperties.isDeleted;
+import static io.spine.validate.Validate.isDefault;
 
 /**
- * Utility class for converting {@link Message proto messages} into {@link Entity Entities} and
- * vise versa.
- *
- * @author Dmytro Dashenkov
+ * Utility class for converting {@linkplain Message proto messages} into
+ * {@linkplain Entity entities} and vise versa.
  */
-@SuppressWarnings("UtilityClass")
-class Entities {
+final class Entities {
+
+    static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
 
     private static final Predicate<Entity> NOT_ARCHIVED_OR_DELETED = input -> {
         if (input == null) {
@@ -63,8 +68,8 @@ class Entities {
 
     private static final String DEFAULT_MESSAGE_FACTORY_METHOD_NAME = "getDefaultInstance";
 
+    /** Prevent utility class instantiation. */
     private Entities() {
-        // Prevent utility class instantiation.
     }
 
     /**
@@ -82,15 +87,21 @@ class Entities {
         if (entity == null) {
             return defaultMessage(type);
         }
+        Any wrapped = toAny(entity, type);
+        @SuppressWarnings("unchecked") // It's the caller responsibility to provide correct type.
+        M result = (M) unpack(wrapped);
+        return result;
+    }
 
+    private static Any toAny(Entity entity, TypeUrl type) {
+        String typeName = type.value();
         Blob value = entity.getBlob(EntityField.bytes.toString());
         ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
-
-        Any wrapped = Any.newBuilder()
-                               .setValue(valueBytes)
-                               .setTypeUrl(type.value())
-                               .build();
-        M result = AnyPacker.unpack(wrapped);
+        Any result = Any
+                .newBuilder()
+                .setValue(valueBytes)
+                .setTypeUrl(typeName)
+                .build();
         return result;
     }
 
@@ -105,8 +116,8 @@ class Entities {
      * @param <M>      required message type
      * @return message contained in the {@link Entity}
      */
-    static <M extends Message> Iterator<M> entitiesToMessages(Iterator<Entity> entities,
-                                                              TypeUrl type) {
+    static <M extends Message>
+    Iterator<M> entitiesToMessages(Iterator<Entity> entities, TypeUrl type) {
         Function<Entity, M> transformer = entityToMessage(type);
         return stream(entities).map(transformer)
                                .iterator();
@@ -122,29 +133,11 @@ class Entities {
      *         {@linkplain Message Messages}
      */
     static <M extends Message> Function<Entity, M> entityToMessage(TypeUrl type) {
-        String typeName = type.value();
-        Function<Entity, M> transformer = new Function<Entity, M>() {
-            @Override
-            public M apply(@Nullable Entity entity) {
-                if (entity == null) {
-                    return defaultMessage(type);
-                }
-                Blob value = entity.getBlob(EntityField.bytes.toString());
-                ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
-
-                Any wrapped = Any.newBuilder()
-                                       .setValue(valueBytes)
-                                       .setTypeUrl(typeName)
-                                       .build();
-                M message = AnyPacker.unpack(wrapped);
-                return message;
-            }
-        };
-        return transformer;
+        return entity -> entityToMessage(entity, type);
     }
 
     /**
-     * Generates an {@link Entity} with given {@link Key} and from given proto {@code Message}
+     * Generates an {@link Entity} with given {@link Key} and from given proto {@code Message}.
      *
      * @param message source of data to be put into the {@link Entity}
      * @param key     instance of {@link Key} to be assigned to the {@link Entity}
@@ -156,12 +149,14 @@ class Entities {
 
         byte[] messageBytes = message.toByteArray();
         Blob valueBlob = Blob.copyFrom(messageBytes);
-        BlobValue blobValue = BlobValue.newBuilder(valueBlob)
-                                             .setExcludeFromIndexes(true)
-                                             .build();
-        Entity entity = Entity.newBuilder(key)
-                                    .set(EntityField.bytes.toString(), blobValue)
-                                    .build();
+        BlobValue blobValue = BlobValue
+                .newBuilder(valueBlob)
+                .setExcludeFromIndexes(true)
+                .build();
+        Entity entity = Entity
+                .newBuilder(key)
+                .set(EntityField.bytes.toString(), blobValue)
+                .build();
         return entity;
     }
 
@@ -170,7 +165,7 @@ class Entities {
     }
 
     @SuppressWarnings("unchecked")
-    static <M extends Message> M defaultMessage(TypeUrl type) {
+    private static <M extends Message> M defaultMessage(TypeUrl type) {
         Class<?> messageClass = type.getJavaClass();
         checkState(messageClass != null, String.format(
                 "Not found class for type url \"%s\". Try to rebuild the project",
@@ -186,5 +181,42 @@ class Entities {
                     + DEFAULT_MESSAGE_FACTORY_METHOD_NAME + " of class "
                     + messageClass.getCanonicalName(), e);
         }
+    }
+
+    /**
+     * Filters query results with the passed filter and applies the passed field mask
+     * to the filtered results.
+     */
+    static Iterator<EntityRecord> toRecords(Iterator<Entity> queryResults,
+                                            Predicate<Entity> filter,
+                                            FieldMask fieldMask) {
+        Stream<Entity> filtered = stream(queryResults).filter(filter);
+
+        Function<Entity, EntityRecord> applyFieldMask = new Function<Entity, EntityRecord>() {
+
+            private final boolean maskNotEmpty = !isDefault(fieldMask);
+
+            @Override
+            public EntityRecord apply(Entity input) {
+                checkNotNull(input);
+                EntityRecord record = getRecordFromEntity(input);
+                if (maskNotEmpty) {
+                    Message state = unpack(record.getState());
+                    state = applyMask(fieldMask, state);
+                    record = EntityRecord.newBuilder(record)
+                                         .setState(AnyPacker.pack(state))
+                                         .build();
+                }
+                return record;
+            }
+        };
+        Iterator<EntityRecord> result = filtered.map(applyFieldMask)
+                                                .iterator();
+        return result;
+    }
+
+    private static EntityRecord getRecordFromEntity(Entity entity) {
+        EntityRecord record = entityToMessage(entity, RECORD_TYPE_URL);
+        return record;
     }
 }
