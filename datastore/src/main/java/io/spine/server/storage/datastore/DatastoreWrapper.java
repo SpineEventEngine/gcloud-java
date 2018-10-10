@@ -21,7 +21,6 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.DatastoreOptions;
@@ -36,7 +35,6 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.KeyQuery;
 import com.google.cloud.datastore.ProjectionEntityQuery;
 import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
@@ -54,7 +52,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -365,7 +362,8 @@ public class DatastoreWrapper implements Logging {
     }
 
     /**
-     * Retrieves an instance of {@link KeyFactory} unique for given Kind of data regarding the current namespace.
+     * Retrieves an instance of {@link KeyFactory} unique for given Kind of data
+     * regarding the current namespace.
      *
      * @param kind kind of {@link Entity} to generate keys for
      * @return an instance of {@link KeyFactory} for given kind
@@ -463,70 +461,4 @@ public class DatastoreWrapper implements Logging {
         return Iterators.concat(first, second);
     }
 
-    /**
-     * An {@code Iterator} over the {@link StructuredQuery} results.
-     *
-     * <p>This {@code Iterator} loads the results lazily by evaluating the {@link QueryResults} and
-     * performing cursor queries.
-     *
-     * <p>The first query to the datastore is performed on creating an instance of
-     * the {@code Iterator}.
-     *
-     * <p>A call to {@link #hasNext() hasNext()} may cause a query to the Datastore if the current
-     * {@linkplain QueryResults results page} is fully processed.
-     *
-     * <p>A call to {@link #next() next()} may not cause a Datastore query.
-     *
-     * <p>The {@link #remove() remove()} method throws an {@link UnsupportedOperationException}.
-     */
-    private static final class DsQueryIterator extends UnmodifiableIterator<Entity> {
-
-        private final StructuredQuery<Entity> query;
-        private final DatastoreReaderWriter datastore;
-        private QueryResults<Entity> currentPage;
-
-        private boolean terminated;
-
-        private DsQueryIterator(StructuredQuery<Entity> query, DatastoreReaderWriter datastore) {
-            super();
-            this.query = query;
-            this.datastore = datastore;
-            this.currentPage = datastore.run(query);
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (terminated) {
-                return false;
-            }
-            if (currentPage.hasNext()) {
-                return true;
-            }
-            currentPage = computeNextPage();
-            if (!currentPage.hasNext()) {
-                terminated = true;
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public Entity next() {
-            if (!hasNext()) {
-                throw new NoSuchElementException("The query results Iterator is empty.");
-            }
-            Entity result = currentPage.next();
-            return result;
-        }
-
-        private QueryResults<Entity> computeNextPage() {
-            Cursor cursorAfter = currentPage.getCursorAfter();
-            Query<Entity> queryForMoreResults =
-                    query.toBuilder()
-                         .setStartCursor(cursorAfter)
-                         .build();
-            QueryResults<Entity> nextPage = datastore.run(queryForMoreResults);
-            return nextPage;
-        }
-    }
 }
