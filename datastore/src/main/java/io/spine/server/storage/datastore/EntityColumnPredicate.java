@@ -23,7 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.common.collect.Multimap;
 import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter;
+import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -55,7 +55,7 @@ final class EntityColumnPredicate implements Predicate<Entity> {
         }
         for (CompositeQueryParameter filter : queryParams) {
             boolean match;
-            CompositeColumnFilter.CompositeOperator operator = filter.getOperator();
+            CompositeOperator operator = filter.getOperator();
             switch (operator) {
                 case ALL:
                     match = checkAll(filter.getFilters(), entity);
@@ -63,11 +63,14 @@ final class EntityColumnPredicate implements Predicate<Entity> {
                 case EITHER:
                     match = checkEither(filter.getFilters(), entity);
                     break;
-                case UNRECOGNIZED:      // Fall through to default strategy
-                case CCF_CO_UNDEFINED:  // for the `default` and `faulty` enum values.
+
+                // Fall through to default strategy for the `default` and `faulty` enum values.
+                case UNRECOGNIZED:
+                case CCF_CO_UNDEFINED:
                 default:
-                    throw newIllegalArgumentException("Composite operator %s is invalid.",
-                                                      operator);
+                    throw newIllegalArgumentException(
+                            "Composite operator %s is invalid.", operator
+                    );
             }
             if (!match) {
                 return false;
