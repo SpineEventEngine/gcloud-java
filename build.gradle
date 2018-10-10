@@ -34,6 +34,8 @@ buildscript {
         mavenLocal()
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
+        maven { url = repos.oldSpine }
+        maven { url = repos.oldSpineSnapshots }
     }
 
     dependencies {
