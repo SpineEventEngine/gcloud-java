@@ -20,44 +20,28 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.MoreObjects;
+import io.spine.value.StringTypeValue;
 
 /**
- * A value-type representing the GAE project ID.
+ * Abstract base for Datastore-related identifiers.
  */
-public final class ProjectId extends DsIdentifier {
+public abstract class DsIdentifier extends StringTypeValue {
 
     private static final long serialVersionUID = 0L;
 
-    private ProjectId(String value) {
+    protected DsIdentifier(String value) {
         super(value);
     }
 
-    /**
-     * Creates a new instance of {@code ProjectId} with the passed value.
-     *
-     * @param projectId the actual project ID value
-     * @return new instance of {@code ProjectId}
-     */
-    public static ProjectId of(String projectId) {
-        ProjectId result = new ProjectId(checkNotNull(projectId));
-        return result;
+    public String getValue() {
+        return value();
     }
 
-    /**
-     * Creates new instance of {@code ProjectId} with the value taken from the passed
-     * {@linkplain Datastore Datastore config}.
-     *
-     * @param datastore the {@link Datastore} instance to take the value from
-     * @return new instance of {@code ProjectId}
-     */
-    public static ProjectId of(Datastore datastore) {
-        checkNotNull(datastore);
-        DatastoreOptions options = datastore.getOptions();
-        String value = options.getProjectId();
-        return of(value);
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("value", value())
+                          .toString();
     }
 }

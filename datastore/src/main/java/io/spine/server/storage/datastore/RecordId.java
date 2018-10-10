@@ -21,13 +21,10 @@ package io.spine.server.storage.datastore;
 
 /**
  * A wrapper type for the {@code String}-based record identifiers in the GAE Datastore.
- *
- * @author Alex Tymchenko
  */
-public class RecordId {
+public final class RecordId extends DsIdentifier {
 
-    // The wrapped identifier value.
-    private final String value;
+    private static final long serialVersionUID = 0L;
 
     /**
      * Creates a new {@code RecordId} for the given {@code value}.
@@ -35,10 +32,6 @@ public class RecordId {
      * @param value the identity as {@code String} to wrap into an identifier
      */
     RecordId(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
+        super(value);
     }
 }
