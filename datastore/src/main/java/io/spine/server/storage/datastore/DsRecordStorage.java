@@ -35,6 +35,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
+import io.spine.client.OrderBy;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.ColumnRecords;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
@@ -52,6 +53,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -59,19 +61,20 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.google.cloud.datastore.Query.newEntityQueryBuilder;
+import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
+import static com.google.cloud.datastore.StructuredQuery.OrderBy.desc;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterators.concat;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Streams.stream;
+import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
+import static io.spine.server.storage.datastore.DsQueryHelper.maskRecord;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.server.storage.datastore.Entities.entityToMessage;
-import static io.spine.server.storage.datastore.DsQueryHelper.maskRecord;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static java.util.Collections.emptyIterator;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
@@ -88,7 +91,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
 
-    private final DsIdLookup<I> idLookup;
+    private final DsLookupById<I> idLookup;
+    private final DsLookupByColumn<I> columnLookup;
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
     private final ColumnFilterAdapter columnFilterAdapter;
@@ -115,7 +119,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
         this.idClass = checkNotNull(idClass);
         this.columnFilterAdapter = ColumnFilterAdapter.of(this.columnTypeRegistry);
-        this.idLookup = new DsIdLookup<I>(this.datastore, this.typeUrl);
+        this.idLookup = new DsLookupById<>(this.datastore, this.typeUrl);
+        this.columnLookup = new DsLookupByColumn<>(this.datastore, this.typeUrl);
     }
 
     private DsRecordStorage(Builder<I> builder) {
@@ -279,45 +284,48 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      *         the {@code FieldMask} to apply to all the retrieved entity states
      * @return an iterator over the resulting entity records
      */
-    private Iterator<EntityRecord> queryByColumnsOnly(QueryParameters params,
-                                                      FieldMask fieldMask) {
-        StructuredQuery.Builder<Entity> datastoreQuery =
-                newEntityQueryBuilder().setKind(getKind().getValue());
-        Collection<Filter> filters = buildColumnFilters(params);
-        Collection<StructuredQuery<Entity>> queries = filters.stream()
-                                                             .map(new FilterToQuery(datastoreQuery))
-                                                             .collect(toList());
-        Iterator<EntityRecord> result = queryAndMerge(queries, fieldMask);
-        return result;
+    private Iterator<EntityRecord> queryByColumnsOnly(QueryParameters params, FieldMask fieldMask) {
+        StructuredQuery.Builder<Entity> datastoreQuery = constructDsQuery(params);
+        Collection<StructuredQuery<Entity>> queries = splitQueriesByColumns(datastoreQuery, params);
+
+        if (params.ordered()) {
+            if (params.limited()) {
+                return columnLookup.execute(queries, params.orderBy(), params.limit(), fieldMask);
+            }
+            return columnLookup.execute(queries, params.orderBy(), fieldMask);
+        }
+        return columnLookup.execute(queries, fieldMask);
     }
 
-    /**
-     * Performs the given Datastore {@linkplain StructuredQuery queries} and combines results into
-     * a single lazy iterator.
-     *
-     * <p>The resulting iterator is constructed of
-     * {@linkplain DatastoreWrapper#read(StructuredQuery) Datastore query response iterators}
-     * concatenated together one by one. Each of them is evaluated only after the previous one runs
-     * out of records (i.e. {@code hasNext()} method returns {@code false}). The order of
-     * the iterators corresponds to the order of the {@code queries}.
-     *
-     * @param queries
-     *         the queries to perform
-     * @param fieldMask
-     *         the {@code FieldMask} to apply to all the retrieved entity states
-     * @return an iterator over the resulting entity records
-     */
-    private Iterator<EntityRecord> queryAndMerge(Iterable<StructuredQuery<Entity>> queries,
-                                                 FieldMask fieldMask) {
-        Iterator<EntityRecord> result = emptyIterator();
-        for (StructuredQuery<Entity> query : queries) {
-            Iterator<EntityRecord> records = queryAll(typeUrl,
-                                                      query,
-                                                      fieldMask,
-                                                      entity -> true);
-            result = concat(result, records);
+    private StructuredQuery.Builder<Entity> constructDsQuery(QueryParameters params) {
+        StructuredQuery.Builder<Entity> datastoreQuery = newEntityQueryBuilder();
+        datastoreQuery.setKind(getKind().getValue());
+
+        if (params.ordered()) {
+            orderQueryBy(params.orderBy(), datastoreQuery);
+            if (params.limited()) {
+                datastoreQuery.setLimit(params.limit());
+            }
         }
-        return result;
+
+        return datastoreQuery;
+    }
+
+    private List<StructuredQuery<Entity>>
+    splitQueriesByColumns(StructuredQuery.Builder<Entity> datastoreQuery, QueryParameters params) {
+        return buildColumnFilters(params)
+                .stream()
+                .map(new FilterToQuery(datastoreQuery))
+                .collect(toList());
+    }
+
+    private static void
+    orderQueryBy(OrderBy orderBy, StructuredQuery.Builder<Entity> datastoreQuery) {
+        if (orderBy.getDirection() == ASCENDING) {
+            datastoreQuery.setOrderBy(asc(orderBy.getColumn()));
+        } else {
+            datastoreQuery.setOrderBy(desc(orderBy.getColumn()));
+        }
     }
 
     private Predicate<Entity> buildMemoryPredicate(QueryParameters params) {
