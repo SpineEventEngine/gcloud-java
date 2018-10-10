@@ -30,6 +30,7 @@ import com.google.protobuf.Any;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import org.junit.jupiter.api.AfterAll;
@@ -51,7 +52,7 @@ import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
 import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.TestEnvironment.runsOnCi;
-import static io.spine.server.storage.datastore.TestDatastores.projectId;
+import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -180,7 +181,7 @@ class DatastoreWrapperTest {
     @Test
     @DisplayName("generate key factories aware of tenancy")
     void testGenerateKeyFactory() {
-        ProjectId projectId = ProjectId.of(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME);
+        ProjectId projectId = TestDatastores.projectId();
         DatastoreWrapper wrapper = wrap(Given.testDatastore(), multitenant(projectId));
         String tenantId1 = "first-tenant-ID";
         String tenantId1Prefixed = "Vfirst-tenant-ID";

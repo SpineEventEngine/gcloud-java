@@ -39,7 +39,7 @@ import static com.google.common.collect.Lists.newArrayList;
  *
  * @see TestDatastoreStorageFactory
  */
-class TestDatastoreWrapper extends DatastoreWrapper {
+public class TestDatastoreWrapper extends DatastoreWrapper {
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.

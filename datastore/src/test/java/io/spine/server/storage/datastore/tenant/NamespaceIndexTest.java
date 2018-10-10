@@ -30,7 +30,7 @@ import com.google.common.truth.IterableSubject;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.ProjectId;
-import io.spine.server.storage.datastore.TestDatastores;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.testing.TestValues;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

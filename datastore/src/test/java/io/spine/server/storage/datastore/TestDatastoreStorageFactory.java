@@ -23,6 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.logging.Logging;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -34,8 +35,6 @@ import static io.spine.server.storage.datastore.TestEnvironment.runsOnCi;
  * Creates storages based on the local Google {@link Datastore}.
  */
 public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
-
-    static final String DEFAULT_DATASET_NAME = TestDatastores.projectId().getValue();
 
     private static @MonotonicNonNull TestDatastoreStorageFactory instance = null;
 
@@ -107,7 +106,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * @see #tearDown()
      */
-    void clear() {
+    public void clear() {
         ((TestDatastoreWrapper) getDatastore()).dropAllTables();
     }
 

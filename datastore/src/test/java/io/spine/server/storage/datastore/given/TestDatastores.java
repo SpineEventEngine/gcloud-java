@@ -18,19 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore;
+package io.spine.server.storage.datastore.given;
 
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.logging.Logging;
+import io.spine.server.storage.datastore.ProjectId;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
-import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.DEFAULT_DATASET_NAME;
 
 /**
  * Provides test {@link Datastore} instances.
@@ -73,7 +73,7 @@ public class TestDatastores {
 
         private Options() {
             builder = DatastoreOptions.newBuilder()
-                                      .setProjectId(DEFAULT_DATASET_NAME);
+                                      .setProjectId(projectId().getValue());
         }
 
         final DatastoreOptions.Builder builder() {

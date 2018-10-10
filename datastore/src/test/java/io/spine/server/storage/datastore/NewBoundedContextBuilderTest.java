@@ -23,6 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.tenant.TestNamespaceIndex;
 import io.spine.server.tenant.TenantIndex;
 import org.junit.jupiter.api.DisplayName;
