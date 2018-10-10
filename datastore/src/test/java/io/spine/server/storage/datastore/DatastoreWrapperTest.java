@@ -50,7 +50,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
 import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
-import static io.spine.server.storage.datastore.given.Given.testProjectId;
+import static io.spine.server.storage.datastore.TestEnvironment.runsOnCi;
+import static io.spine.server.storage.datastore.TestDatastores.projectId;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -244,7 +245,7 @@ class DatastoreWrapperTest {
     @Test
     @DisplayName("allow to add new namespaces 'on the go'")
     void testNewNamespaces() {
-        DatastoreWrapper wrapper = wrap(Given.testDatastore(), multitenant(testProjectId()));
+        DatastoreWrapper wrapper = wrap(Given.testDatastore(), multitenant(projectId()));
         TenantId tenantId = TenantId.newBuilder()
                                     .setValue("Luke_I_am_your_tenant.")
                                     .build();
@@ -290,7 +291,7 @@ class DatastoreWrapperTest {
         private static final Kind GENERIC_ENTITY_KIND = Kind.of("my.entity");
 
         private static Datastore testDatastore() {
-            boolean onCi = TestEnvironment.runsOnCi();
+            boolean onCi = runsOnCi();
             return onCi
                    ? TestDatastores.remote()
                    : TestDatastores.local();

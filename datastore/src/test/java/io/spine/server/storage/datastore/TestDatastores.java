@@ -24,7 +24,6 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.logging.Logging;
-import org.slf4j.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -38,46 +37,87 @@ import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.DEFA
  */
 public class TestDatastores {
 
-    private static final String DEFAULT_HOST = "localhost:8080";
-    private static final String CREDENTIALS_FILE_PATH = "/spine-dev-62685282c0b9.json";
-
-    private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS =
-            DatastoreOptions.newBuilder()
-                            .setProjectId(DEFAULT_DATASET_NAME)
-                            .setHost(DEFAULT_HOST)
-                            .build();
-
-    private static final DatastoreOptions TESTING_OPTIONS = generateTestOptions();
-
-    private static DatastoreOptions generateTestOptions() {
-        DatastoreOptions.Builder result = DatastoreOptions
-                .newBuilder()
-                .setProjectId(DEFAULT_DATASET_NAME);
-        try {
-            InputStream is = TestDatastores.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-            BufferedInputStream bufferedStream = new BufferedInputStream(is);
-            ServiceAccountCredentials credentials = fromStream(bufferedStream);
-            result.setCredentials(credentials);
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
-            log().warn("Cannot find the credentials file {}.", CREDENTIALS_FILE_PATH);
-        }
-
-        return result.build();
-    }
-
-    public static Datastore local() {
-        return DEFAULT_LOCAL_OPTIONS.getService();
-    }
-
-    public static Datastore remote() {
-        return TESTING_OPTIONS.getService();
-    }
+    private static final ProjectId TEST_PROJECT_ID = ProjectId.of("spine-dev");
 
     /** Prevent this test utility class from being instantiated. */
     private TestDatastores() {
     }
 
-    private static Logger log() {
-        return Logging.get(TestDatastores.class);
+    /**
+     * Obtains Datastore instance used for testing on a developer's workstation.
+     */
+    public static Datastore local() {
+        return Local.INSTANCE.getService();
+    }
+
+    /**
+     * Obtains Datastore instance used for testing in a CI environment.
+     */
+    public static Datastore remote() {
+        return Ci.INSTANCE.getService();
+    }
+
+    /**
+     * Obtains ProjectId of the test environment.
+     */
+    public static ProjectId projectId() {
+        return TEST_PROJECT_ID;
+    }
+
+    /**
+     * Abstract base for options factories.
+     */
+    private abstract static class Options {
+
+        private final DatastoreOptions.Builder builder;
+
+        private Options() {
+            builder = DatastoreOptions.newBuilder()
+                                      .setProjectId(DEFAULT_DATASET_NAME);
+        }
+
+        final DatastoreOptions.Builder builder() {
+            return builder;
+        }
+
+        final DatastoreOptions create() {
+            return builder.build();
+        }
+    }
+
+    /**
+     * Local Datastore options used on developers' machines.
+     */
+    private static final class Local extends Options {
+
+        private static final String DEFAULT_HOST = "localhost:8080";
+        private static final DatastoreOptions INSTANCE = new Local().create();
+
+        private Local() {
+            super();
+            builder().setHost(DEFAULT_HOST);
+        }
+    }
+
+    /**
+     * Options used to run tests in CI environment, which uses connection to
+     * a real Datastore instance in the testing Google Cloud environment.
+     */
+    @SuppressWarnings("NewClassNamingConvention")
+    private static final class Ci extends Options implements Logging {
+
+        private static final String CREDENTIALS_FILE_PATH = "/spine-dev-62685282c0b9.json";
+        private static final DatastoreOptions INSTANCE = new Ci().create();
+
+        private Ci() {
+            try {
+                InputStream is = TestDatastores.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+                BufferedInputStream bufferedStream = new BufferedInputStream(is);
+                ServiceAccountCredentials credentials = fromStream(bufferedStream);
+                builder().setCredentials(credentials);
+            } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
+                log().warn("Cannot find the credentials file {}.", CREDENTIALS_FILE_PATH);
+            }
+        }
     }
 }

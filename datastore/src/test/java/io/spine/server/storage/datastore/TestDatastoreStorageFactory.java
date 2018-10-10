@@ -23,7 +23,6 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.logging.Logging;
-import io.spine.server.storage.datastore.given.Given;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -36,7 +35,7 @@ import static io.spine.server.storage.datastore.TestEnvironment.runsOnCi;
  */
 public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
-    static final String DEFAULT_DATASET_NAME = Given.testProjectIdValue();
+    static final String DEFAULT_DATASET_NAME = TestDatastores.projectId().getValue();
 
     private static @MonotonicNonNull TestDatastoreStorageFactory instance = null;
 
