@@ -20,7 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 abstract class AbstractBuilder<I, B extends AbstractBuilder<I, B>> {
 
-    private Descriptors.Descriptor descriptor;
+    private Descriptor descriptor;
     private DatastoreWrapper datastore;
     private boolean multitenant;
     private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
@@ -55,7 +55,7 @@ abstract class AbstractBuilder<I, B extends AbstractBuilder<I, B>> {
      */
     public B setStateType(TypeUrl stateTypeUrl) {
         checkNotNull(stateTypeUrl);
-        Descriptors.Descriptor descriptor = (Descriptors.Descriptor) stateTypeUrl.getDescriptor();
+        Descriptor descriptor = (Descriptor) stateTypeUrl.getDescriptor();
         this.descriptor = checkNotNull(descriptor);
         return self();
     }
@@ -129,7 +129,7 @@ abstract class AbstractBuilder<I, B extends AbstractBuilder<I, B>> {
      * Obtains the {@linkplain com.google.protobuf.Descriptors.Descriptor descriptor}
      * of the stored entity state type.
      */
-    public Descriptors.Descriptor getDescriptor() {
+    public Descriptor getDescriptor() {
         return descriptor;
     }
 
