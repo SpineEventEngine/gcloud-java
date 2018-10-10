@@ -270,7 +270,7 @@ class DatastoreWrapperTest {
         new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
-                Key key = wrapper.getKeyFactory(DatastoreWrapperTest.Given.GENERIC_ENTITY_KIND)
+                Key key = wrapper.getKeyFactory(Given.GENERIC_ENTITY_KIND)
                                  .newKey(42L);
                 assertEquals(id, key.getNamespace());
             }
