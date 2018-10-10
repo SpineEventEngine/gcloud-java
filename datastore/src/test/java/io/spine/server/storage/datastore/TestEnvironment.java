@@ -18,11 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package contains components for working with the aspects of Google Cloud Datastore usage
- * beyond the {@linkplain io.spine.server.storage.Storage storage} itself.
- */
-@ParametersAreNonnullByDefault
-package io.spine.server.datastore;
+package io.spine.server.storage.datastore;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import static java.lang.System.getenv;
+
+/**
+ * A utility class for analyzing the test environment at runtime.
+ */
+final class TestEnvironment {
+
+    private static final String TRUE = "true";
+
+    /** Prevents the utility class instantiation. */
+    private TestEnvironment() {
+    }
+
+    /**
+     * Shows if the current test JVM is started within a continuous integration service.
+     *
+     * <p>This method relies on the convention for the CI services to set the {@code CI}
+     * environmental variable to {@code "true"}.
+     *
+     * @return {@code true} if the tests are run on a CI service, {@code false} otherwise
+     * @see System#getenv()
+     */
+    @SuppressWarnings("CallToSystemGetenv")
+    public static boolean runsOnCi() {
+        String ciEnvValue = getenv("CI");
+        boolean onCi = TRUE.equalsIgnoreCase(ciEnvValue);
+        return onCi;
+    }
+}

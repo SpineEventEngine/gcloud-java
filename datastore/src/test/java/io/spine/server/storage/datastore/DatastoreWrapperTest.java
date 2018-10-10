@@ -30,7 +30,6 @@ import com.google.protobuf.Any;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
-import io.spine.server.datastore.TestEnvironment;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import org.junit.jupiter.api.AfterAll;
