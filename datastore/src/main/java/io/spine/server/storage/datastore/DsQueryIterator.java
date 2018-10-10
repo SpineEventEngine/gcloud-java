@@ -26,8 +26,11 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
 
+import javax.annotation.Nullable;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -94,5 +97,12 @@ final class DsQueryIterator extends UnmodifiableIterator<Entity> {
                      .build();
         QueryResults<Entity> nextPage = datastore.run(queryForMoreResults);
         return nextPage;
+    }
+
+    static Iterator<Entity> concat(@Nullable Iterator<Entity> first, Iterator<Entity> second) {
+        if (first == null) {
+            return second;
+        }
+        return Iterators.concat(first, second);
     }
 }

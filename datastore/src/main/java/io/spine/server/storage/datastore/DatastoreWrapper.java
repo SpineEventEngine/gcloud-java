@@ -39,13 +39,11 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -59,13 +57,12 @@ import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.storage.datastore.DsQueryIterator.concat;
 import static java.lang.Math.min;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Represents a wrapper above GAE {@link Datastore}.
- *
- * <p>Provides API for Datastore to be used in storages.
+ * Adapts {@link Datastore} API for being used for storages.
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public class DatastoreWrapper implements Logging {
@@ -90,31 +87,23 @@ public class DatastoreWrapper implements Logging {
     /**
      * Creates a new instance of {@code DatastoreWrapper}.
      *
-     * @param datastore         {@link Datastore} to wrap
-     * @param namespaceSupplier the instance of {@link Supplier Namespace Supplier}, providing
-     *                          the namespaces for Datastore queries
+     * @param datastore
+     *         {@link Datastore} to wrap
+     * @param supplier
+     *         an instance of {@link Supplier Supplier&lt;Namespace&gt;} to get the namespaces for
+     *         the queries from the datastore
      */
-    protected DatastoreWrapper(Datastore datastore, NamespaceSupplier namespaceSupplier) {
-        this.namespaceSupplier = checkNotNull(namespaceSupplier);
+    protected DatastoreWrapper(Datastore datastore, NamespaceSupplier supplier) {
+        this.namespaceSupplier = checkNotNull(supplier);
         this.datastore = checkNotNull(datastore);
         this.actor = datastore;
     }
 
     /**
-     * Wraps {@link Datastore} into an instance of {@code DatastoreWrapper} and returns
-     * the instance.
-     *
-     * @param datastore
-     *         {@link Datastore} to wrap
-     * @param namespaceSupplier
-     *         an instance of {@link Supplier Supplier&lt;Namespace&gt;} to get the namespaces for
-     *         the queries from
-     * @return new instance of {@code DatastoreWrapper}
+     * Shortcut method for calling the constructor.
      */
-    @SuppressWarnings("WeakerAccess") // Part of API
-    protected static
-    DatastoreWrapper wrap(Datastore datastore, NamespaceSupplier namespaceSupplier) {
-        return new DatastoreWrapper(datastore, namespaceSupplier);
+    static DatastoreWrapper wrap(Datastore datastore, NamespaceSupplier supplier) {
+        return new DatastoreWrapper(datastore, supplier);
     }
 
     /**
@@ -305,7 +294,6 @@ public class DatastoreWrapper implements Logging {
      * {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
-    @SuppressWarnings("WeakerAccess") // Part of API
     public void startTransaction() throws IllegalStateException {
         checkState(!isTransactionActive(), NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction = datastore.newTransaction();
@@ -323,8 +311,6 @@ public class DatastoreWrapper implements Logging {
      * {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
-    @SuppressWarnings("WeakerAccess")
-    // Part of API
     public void commitTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.commit();
@@ -344,7 +330,6 @@ public class DatastoreWrapper implements Logging {
      * instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
-    @SuppressWarnings("WeakerAccess") // Part of API
     public void rollbackTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.rollback();
@@ -356,7 +341,6 @@ public class DatastoreWrapper implements Logging {
      *
      * @return {@code true} if there is an active transaction, {@code false} otherwise
      */
-    @SuppressWarnings("WeakerAccess") // Part of API
     public boolean isTransactionActive() {
         return activeTransaction != null && activeTransaction.isActive();
     }
@@ -452,13 +436,4 @@ public class DatastoreWrapper implements Logging {
     private void writeSmallBulk(Entity[] entities) {
         actor.put(entities);
     }
-
-    private static
-    Iterator<Entity> concat(@Nullable Iterator<Entity> first, Iterator<Entity> second) {
-        if (first == null) {
-            return second;
-        }
-        return Iterators.concat(first, second);
-    }
-
 }
