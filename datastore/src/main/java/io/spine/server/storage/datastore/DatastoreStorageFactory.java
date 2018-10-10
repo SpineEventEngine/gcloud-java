@@ -32,7 +32,7 @@ import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
-import io.spine.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
+import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
@@ -56,7 +56,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final boolean multitenant;
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
     private final NamespaceSupplier namespaceSupplier;
-    private final @MonotonicNonNull NamespaceToTenantIdConverter namespaceConverter;
+    private final @MonotonicNonNull NamespaceConverter namespaceConverter;
 
     DatastoreStorageFactory(Builder builder) {
         this.datastore = createDatastoreWrapper(builder.datastore);
@@ -186,7 +186,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         private boolean multitenant;
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
         private NamespaceSupplier namespaceSupplier;
-        private NamespaceToTenantIdConverter namespaceConverter;
+        private NamespaceConverter namespaceConverter;
 
         /** Avoid direct initialization. */
         private Builder() {
@@ -243,7 +243,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
 
         /**
-         * Sets a {@link NamespaceToTenantIdConverter} for converting the Datastore namespaces and
+         * Sets a {@link io.spine.server.storage.datastore.tenant.NamespaceConverter} for converting the Datastore namespaces and
          * the {@link io.spine.core.TenantId Tenant IDs} back and forth.
          *
          * <p>Setting this parameter is reasonable (but not required) only if the storage is
@@ -252,7 +252,7 @@ public class DatastoreStorageFactory implements StorageFactory {
          * @param converter a custom converter for the Tenant IDs
          * @return self for method chaining
          */
-        public Builder setNamespaceConverter(NamespaceToTenantIdConverter converter) {
+        public Builder setNamespaceConverter(NamespaceConverter converter) {
             this.namespaceConverter = checkNotNull(converter);
             return this;
         }

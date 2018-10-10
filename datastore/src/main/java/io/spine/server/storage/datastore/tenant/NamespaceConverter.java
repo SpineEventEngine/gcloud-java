@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see Namespace
  */
 @SPI
-public abstract class NamespaceToTenantIdConverter extends Converter<String, TenantId> {
+public abstract class NamespaceConverter extends Converter<String, TenantId> {
 
     @Override
     protected final TenantId doForward(String s) {

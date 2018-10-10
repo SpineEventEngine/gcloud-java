@@ -37,9 +37,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("Namespace with custom converter should")
 class NamespaceWithCustomConverterTest {
 
@@ -58,7 +55,7 @@ class NamespaceWithCustomConverterTest {
                                     .setValue(ns)
                                     .build();
         Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
-        Optional<NamespaceToTenantIdConverter> converter =
+        Optional<NamespaceConverter> converter =
                 getNamespaceConverter(PROJECT_ID);
         assertTrue(converter.isPresent());
         assertEquals(converter.get()
@@ -89,13 +86,13 @@ class NamespaceWithCustomConverterTest {
     }
 
     /**
-     * An example of custom {@link NamespaceToTenantIdConverter}.
+     * An example of custom {@link NamespaceConverter}.
      *
      * <p>Note that this implementation uses the default
      * {@link Stringifier Stringifier} for the conversion, which is not acceptable
      * to use in production code, but good enough for these tests.
      */
-    private static class CustomNamespaceConverter extends NamespaceToTenantIdConverter {
+    private static class CustomNamespaceConverter extends NamespaceConverter {
 
         @Override
         protected String toString(TenantId tenantId) {
