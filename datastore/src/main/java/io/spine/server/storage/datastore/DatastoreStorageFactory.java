@@ -66,16 +66,13 @@ public class DatastoreStorageFactory implements StorageFactory {
         this.namespaceConverter = builder.namespaceConverter;
     }
 
-    protected DatastoreStorageFactory(DatastoreWrapper datastore,
-                                      boolean multitenant,
-                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
-                                      NamespaceSupplier namespaceSupplier,
-                                      @Nullable NamespaceToTenantIdConverter namespaceConverter) {
-        this.datastore = checkNotNull(datastore);
-        this.multitenant = multitenant;
-        this.typeRegistry = typeRegistry;
-        this.namespaceSupplier = namespaceSupplier;
-        this.namespaceConverter = namespaceConverter;
+    private Builder toBuilder() {
+        Builder result = newBuilder()
+                .setDatastore(datastore.getDatastore())
+                .setMultitenant(multitenant)
+                .setNamespaceSupplier(namespaceSupplier)
+                .setNamespaceConverter(namespaceConverter);
+        return result;
     }
 
     protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
@@ -97,12 +94,14 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public StorageFactory toSingleTenant() {
         return isMultitenant()
-               ? new DatastoreStorageFactory(getDatastore(),
-                                             false,
-                                             typeRegistry,
-                                             NamespaceSupplier.singleTenant(),
-                                             namespaceConverter)
+               ? newSingleTenant()
                : this;
+    }
+
+    private DatastoreStorageFactory newSingleTenant() {
+        Builder builder = toBuilder().setMultitenant(false)
+                                     .setNamespaceSupplier(NamespaceSupplier.singleTenant());
+        return new DatastoreStorageFactory(builder);
     }
 
     @Override

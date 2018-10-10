@@ -32,16 +32,14 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A supplier for the {@linkplain Namespace namespaces}, based on the current multitenancy configuration and
- * {@linkplain TenantId tenant ID}.
- *
- * @author Dmytro Dashenkov
+ * A supplier for the {@linkplain Namespace namespaces}, based on the current multitenancy
+ * configuration and {@linkplain TenantId tenant ID}.
  */
 @Internal
 public abstract class NamespaceSupplier implements Supplier<Namespace> {
 
+    /** Avoid direct initialization from outside the package. */
     NamespaceSupplier() {
-        // Avoid direct initialization from outside the package
     }
 
     /**
@@ -77,8 +75,6 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
      * default namespace if the {@linkplain DatastoreStorageFactory storage factory} passed upon
      * the initialization is configured to be single tenant
      */
-    @SuppressWarnings("AbstractMethodOverridesAbstractMethod")
-        // Overrides to provide a descriptive documentation
     @Override
     public abstract Namespace get();
 
