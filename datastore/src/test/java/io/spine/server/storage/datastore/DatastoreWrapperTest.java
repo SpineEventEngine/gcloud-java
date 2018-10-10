@@ -293,8 +293,8 @@ class DatastoreWrapperTest {
         private static Datastore testDatastore() {
             boolean onCi = TestEnvironment.runsOnCi();
             return onCi
-                   ? TestDatastoreFactory.getTestRemoteDatastore()
-                   : TestDatastoreFactory.getLocalDatastore();
+                   ? TestDatastores.remote()
+                   : TestDatastores.local();
         }
 
         private static Map<Key, Entity> nEntities(int n, DatastoreWrapper wrapper) {

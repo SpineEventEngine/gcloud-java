@@ -67,6 +67,6 @@ class NewBoundedContextBuilderTest {
     }
 
     private static Datastore givenDatastore() {
-        return TestDatastoreFactory.getLocalDatastore();
+        return TestDatastores.local();
     }
 }

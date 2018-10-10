@@ -23,24 +23,24 @@ package io.spine.server.storage.datastore;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import io.spine.logging.Logging;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.DEFAULT_DATASET_NAME;
 
 /**
- * The factory for the test {@link Datastore} instances.
- *
- * @author Dmytro Dashenkov
+ * Provides test {@link Datastore} instances.
  */
-public class TestDatastoreFactory {
+public class TestDatastores {
 
     private static final String DEFAULT_HOST = "localhost:8080";
     private static final String CREDENTIALS_FILE_PATH = "/spine-dev-62685282c0b9.json";
+
     private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS =
             DatastoreOptions.newBuilder()
                             .setProjectId(DEFAULT_DATASET_NAME)
@@ -50,55 +50,34 @@ public class TestDatastoreFactory {
     private static final DatastoreOptions TESTING_OPTIONS = generateTestOptions();
 
     private static DatastoreOptions generateTestOptions() {
+        DatastoreOptions.Builder result = DatastoreOptions
+                .newBuilder()
+                .setProjectId(DEFAULT_DATASET_NAME);
         try {
-            InputStream is = TestDatastoreFactory.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+            InputStream is = TestDatastores.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
             BufferedInputStream bufferedStream = new BufferedInputStream(is);
-
-            ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(bufferedStream);
-            return DatastoreOptions.newBuilder()
-                                   .setProjectId(DEFAULT_DATASET_NAME)
-                                   .setCredentials(credentials)
-                                   .build();
+            ServiceAccountCredentials credentials = fromStream(bufferedStream);
+            result.setCredentials(credentials);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
-            log().warn("Cannot find the configuration file {}", CREDENTIALS_FILE_PATH);
-            DatastoreOptions defaultOptions = DatastoreOptions.newBuilder()
-                                                                    .setProjectId(DEFAULT_DATASET_NAME)
-                                                                    .build();
-            return defaultOptions;
+            log().warn("Cannot find the credentials file {}.", CREDENTIALS_FILE_PATH);
         }
+
+        return result.build();
     }
 
-    public static Datastore getLocalDatastore() {
-        return DefaultDatastoreSingleton.INSTANCE.value;
+    public static Datastore local() {
+        return DEFAULT_LOCAL_OPTIONS.getService();
     }
 
-    public static Datastore getTestRemoteDatastore() {
-        return TestingDatastoreSingleton.INSTANCE.value;
+    public static Datastore remote() {
+        return TESTING_OPTIONS.getService();
     }
 
-    private TestDatastoreFactory() {
-        // Prevent this test utility class from being instantiated.
-    }
-
-    enum DefaultDatastoreSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        final Datastore value = DEFAULT_LOCAL_OPTIONS.getService();
-    }
-
-    enum TestingDatastoreSingleton {
-        INSTANCE;
-        @SuppressWarnings({"NonSerializableFieldInSerializableClass", "PackageVisibleField"})
-        final Datastore value = TESTING_OPTIONS.getService();
+    /** Prevent this test utility class from being instantiated. */
+    private TestDatastores() {
     }
 
     private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(TestDatastoreFactory.class);
+        return Logging.get(TestDatastores.class);
     }
 }

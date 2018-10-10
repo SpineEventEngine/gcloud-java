@@ -181,7 +181,7 @@ class DatastoreStorageFactoryBuilderTest {
     }
 
     private static Datastore mockDatastore() {
-        return TestDatastoreFactory.getLocalDatastore();
+        return TestDatastores.local();
     }
 
     private static <T> EntityColumn mockColumn(Class<T> type) {
