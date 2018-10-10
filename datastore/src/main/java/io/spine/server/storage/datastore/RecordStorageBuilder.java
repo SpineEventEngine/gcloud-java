@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the ID type of the stored entities
  * @param <B> the builder own type
  */
-abstract class AbstractBuilder<I, B extends AbstractBuilder<I, B>> {
+abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
 
     private Descriptor descriptor;
     private DatastoreWrapper datastore;
@@ -47,7 +47,7 @@ abstract class AbstractBuilder<I, B extends AbstractBuilder<I, B>> {
     /**
      * Prevents direct instantiation.
      */
-    AbstractBuilder() {
+    RecordStorageBuilder() {
     }
 
     /**

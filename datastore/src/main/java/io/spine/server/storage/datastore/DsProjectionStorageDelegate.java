@@ -77,7 +77,7 @@ public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
     /**
      * A builder for the {@code DsProjectionStorageDelegate}.
      */
-    public static final class Builder<I> extends AbstractBuilder<I, Builder<I>> {
+    public static final class Builder<I> extends RecordStorageBuilder<I, Builder<I>> {
 
         /**
          * Prevents direct instantiation.

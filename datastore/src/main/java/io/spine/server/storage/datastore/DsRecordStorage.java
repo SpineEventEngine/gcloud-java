@@ -106,7 +106,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * Creates new instance by the passed builder.
      */
-    protected DsRecordStorage(AbstractBuilder<I, ? extends AbstractBuilder> builder) {
+    protected DsRecordStorage(RecordStorageBuilder<I, ? extends RecordStorageBuilder> builder) {
         super(builder.isMultitenant(), builder.getEntityClass());
         this.typeUrl = TypeUrl.from(builder.getDescriptor());
         this.idClass = checkNotNull(builder.getIdClass());
@@ -429,7 +429,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * A newBuilder for the {@code DsRecordStorage}.
      */
-    public static final class Builder<I> extends AbstractBuilder<I, Builder<I>> {
+    public static final class Builder<I> extends RecordStorageBuilder<I, Builder<I>> {
 
         /**
          * Prevents direct instantiation.

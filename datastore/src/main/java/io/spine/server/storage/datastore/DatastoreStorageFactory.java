@@ -132,7 +132,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     /**
      * Configures the passed builder of the storage to serve the passed entity class.
      */
-    private <I, B extends AbstractBuilder<I, B>>
+    private <I, B extends RecordStorageBuilder<I, B>>
     B configure(B builder, Class<? extends Entity<I, ?>> cls) {
         builder.setModelClass(asEntityClass(cls))
                .setDatastore(getDatastore())
