@@ -18,14 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.datastore;
+package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.common.testing.NullPointerTester;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.datastore.DatastoreStorageFactory;
-import io.spine.server.storage.datastore.TestDatastoreFactory;
 import io.spine.server.storage.datastore.tenant.TestNamespaceIndex;
 import io.spine.server.tenant.TenantIndex;
 import org.junit.jupiter.api.DisplayName;
@@ -34,40 +31,21 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
-import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
-@DisplayName("Contexts should")
-class ContextsTest {
+@DisplayName("DatastoreStorageFactory should")
+class NewBoundedContextBuilderTest {
 
     @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
-    void testPrivateCtor() {
-        assertHasPrivateParameterlessCtor(Contexts.class);
-    }
-
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void testNulls() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(Contexts.class);
-    }
-
-    @Test
-    @DisplayName("produce BoundedContext Builder for given storage factory")
+    @DisplayName("create BoundedContextBuilder")
     void testProduceBCBuilder() {
         DatastoreStorageFactory factory = givenFactory();
-        BoundedContextBuilder builder = Contexts.onTopOf(factory);
+        BoundedContextBuilder builder = factory.newBoundedContextBuilder();
         Optional<Supplier<StorageFactory>> supplierOptional =
                 builder.getStorageFactorySupplier();
         assertTrue(supplierOptional.isPresent());

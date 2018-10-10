@@ -19,7 +19,7 @@
  */
 
 ext {
-    artifactId = 'gae-java'
+    artifactId = 'gcloud-java'
 }
 
 dependencies {

@@ -23,6 +23,8 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.annotation.Internal;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
@@ -31,13 +33,17 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.datastore.tenant.DatastoreTenants;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
+import io.spine.server.tenant.TenantIndex;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -48,7 +54,7 @@ import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 /**
  * Creates storages based on {@link Datastore}.
  *
- * @see io.spine.server.datastore.Contexts#onTopOf for the recommended usage description
+ * @see DatastoreStorageFactory#newBoundedContextBuilder for the recommended usage description
  */
 public class DatastoreStorageFactory implements StorageFactory {
 
@@ -69,6 +75,38 @@ public class DatastoreStorageFactory implements StorageFactory {
         this.typeRegistry = builder.typeRegistry;
         this.namespaceConverter = builder.namespaceConverter;
         this.datastore = createDatastoreWrapper(builder);
+    }
+
+    /**
+     * Creates new instance of the {@link io.spine.server.BoundedContextBuilder}.
+     *
+     * <p>The returned instance has the following attributes pre-configured:
+     * <ul>
+     *     <li>{@link io.spine.server.BoundedContextBuilder#setStorageFactorySupplier(java.util.function.Supplier) Supplier}
+     *     of {@code StorageFactory};
+     *     <li>{@link io.spine.server.BoundedContextBuilder#setTenantIndex(io.spine.server.tenant.TenantIndex) TenantIndex};
+     *     <li>{@linkplain io.spine.server.BoundedContextBuilder#setMultitenant(boolean) multitenancy flag}.
+     * </ul>
+     *
+     * <p>In a majority of use cases the configuration of the produced
+     * {@link io.spine.server.BoundedContextBuilder builder} is enough for operation.
+     * However, it is still possible to use the returned instance for further customization.
+     *
+     * @return new instance of {@link io.spine.server.BoundedContextBuilder BoundedContextBuilder}
+     *         with the specified parameters
+     */
+    public BoundedContextBuilder newBoundedContextBuilder() {
+        Datastore datastore = getDatastore()
+                .getDatastoreOptions()
+                .getService();
+        TenantIndex tenantIndex = DatastoreTenants.index(datastore);
+        Supplier<StorageFactory> storageFactorySupplier = () -> this;
+        BoundedContextBuilder resultBuilder =
+                BoundedContext.newBuilder()
+                              .setMultitenant(isMultitenant())
+                              .setStorageFactorySupplier(storageFactorySupplier)
+                              .setTenantIndex(tenantIndex);
+        return resultBuilder;
     }
 
     private Builder toBuilder() {
