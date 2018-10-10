@@ -120,8 +120,8 @@ class TestDatastoreWrapper extends DatastoreWrapper {
             }
 
             StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                                       .setKind(table)
-                                                       .build();
+                                                 .setKind(table)
+                                                 .build();
             List<Entity> entities = newArrayList(read(query));
             remainingEntityCount = entities.size();
 
