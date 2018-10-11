@@ -36,7 +36,8 @@ import static io.spine.server.storage.datastore.DsEntityComparator.implementing;
 import static io.spine.server.storage.datastore.DsQueryHelper.maskRecord;
 
 /**
- * An {@code Entity} lookup in Google Datastore using {@code Entity} identifiers.
+ * An {@code Entity} lookup in Google Datastore using {@code Entity}
+ * {@link io.spine.server.entity.storage.Column columns}.
  *
  * @author Mykhailo Drachuk
  */
