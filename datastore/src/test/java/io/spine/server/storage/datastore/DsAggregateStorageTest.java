@@ -22,7 +22,6 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.EntityQuery;
 import com.google.common.base.Suppliers;
-import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
@@ -36,19 +35,25 @@ import io.spine.server.storage.datastore.given.aggregate.ProjectAggregateReposit
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.testdata.Sample;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.spine.testing.client.TestActorRequestFactory.newInstance;
+import java.util.Optional;
+
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
+import static io.spine.testing.client.TestActorRequestFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("DsAggregateStorage should")
 class DsAggregateStorageTest extends AggregateStorageTest {
@@ -134,36 +139,51 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         assertEquals(batchSize, queryLimit);
     }
 
-    @Test
-    @DisplayName("still load aggregates properly after snapshot trigger decrease at runtime")
-    void testLoadHistoryAfterSnapshotTriggerChange() {
-        BoundedContext boundedContext =
-                BoundedContext.newBuilder()
-                              .setName(DsAggregateStorageTest.class.getName())
-                              .setStorageFactorySupplier(Suppliers.ofInstance(datastoreFactory))
-                              .build();
-        ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        boundedContext.register(repository);
+    @Nested
+    class DynamicSnapshotTrigger {
 
-        ProjectId id = newId();
-        int initialSnapshotTrigger = 10;
+        private ProjectAggregateRepository repository;
+        private TestActorRequestFactory factory;
+        private ProjectId id;
 
-        // To restore an aggregate using a snapshot and events.
-        int tasksCount = initialSnapshotTrigger * 2 - 1;
+        @BeforeEach
+        void setUp() {
+            BoundedContext boundedContext =
+                    BoundedContext.newBuilder()
+                                  .setName(DsAggregateStorageTest.class.getName())
+                                  .setStorageFactorySupplier(Suppliers.ofInstance(datastoreFactory))
+                                  .build();
+            repository = new ProjectAggregateRepository();
+            boundedContext.register(repository);
 
-        repository.setSnapshotTrigger(initialSnapshotTrigger);
-        TestActorRequestFactory factory = newInstance(DsAggregateStorageTest.class);
-        for (int i = 0; i < tasksCount; i++) {
-            AggAddTask command = addTask(id);
-            CommandEnvelope envelope = CommandEnvelope.of(factory.createCommand(command));
-            repository.dispatch(envelope);
+            factory = newInstance(DsAggregateStorageTest.class);
+            id = newId();
         }
 
-        int minimalSnapshotTrigger = 1;
-        repository.setSnapshotTrigger(minimalSnapshotTrigger);
-        ProjectAggregate aggregate = repository.find(id).get();
-        assertEquals(tasksCount, aggregate.getState()
-                                          .getTaskCount());
+        @Test
+        @DisplayName("still load aggregates properly after snapshot trigger decrease at runtime")
+        void testLoadHistoryAfterSnapshotTriggerChange() {
+            int initialSnapshotTrigger = 10;
+
+            // To restore an aggregate using a snapshot and events.
+            int tasksCount = initialSnapshotTrigger * 2 - 1;
+
+            repository.setSnapshotTrigger(initialSnapshotTrigger);
+            for (int i = 0; i < tasksCount; i++) {
+                AggAddTask command = addTask(id);
+                CommandEnvelope envelope = CommandEnvelope.of(factory.createCommand(command));
+                ProjectId target = repository.dispatch(envelope);
+                assertEquals(id, target);
+            }
+
+            int minimalSnapshotTrigger = 1;
+            repository.setSnapshotTrigger(minimalSnapshotTrigger);
+            Optional<ProjectAggregate> optional = repository.find(id);
+            assertTrue(optional.isPresent());
+            ProjectAggregate aggregate = optional.get();
+            assertEquals(tasksCount, aggregate.getState()
+                                              .getTaskCount());
+        }
     }
 
     private static Logger log() {
