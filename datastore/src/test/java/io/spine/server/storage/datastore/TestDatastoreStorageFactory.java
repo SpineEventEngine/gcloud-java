@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
 
 import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
+import static java.lang.String.format;
 
 /**
  * Creates storages based on the local Google {@link Datastore}.
@@ -112,7 +113,13 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      * @see #tearDown()
      */
     public void clear() {
-        ((TestDatastoreWrapper) getDatastore()).dropAllTables();
+        TestDatastoreWrapper datastore = (TestDatastoreWrapper) getDatastore();
+        try {
+            datastore.dropAllTables();
+        } catch (Throwable e) {
+            log().error(format("Unable to drop tables in datastore %s", datastore), e);
+            throw new IllegalStateException(e);
+        }
     }
 
     private static Logger log() {
