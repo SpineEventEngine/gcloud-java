@@ -27,6 +27,7 @@ import com.google.cloud.datastore.Key;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.FieldMask;
+import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
@@ -34,7 +35,6 @@ import io.spine.server.storage.EntityField;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -66,8 +66,6 @@ final class Entities {
         return isNotArchived && isNotDeleted;
     };
 
-    private static final String DEFAULT_MESSAGE_FACTORY_METHOD_NAME = "getDefaultInstance";
-
     /** Prevent utility class instantiation. */
     private Entities() {
     }
@@ -83,12 +81,12 @@ final class Entities {
      * @param <M>    required message type
      * @return message contained in the {@link Entity}
      */
+    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"} /* Rely on caller. */)
     static <M extends Message> M entityToMessage(@Nullable Entity entity, TypeUrl type) {
         if (entity == null) {
             return defaultMessage(type);
         }
         Any wrapped = toAny(entity, type);
-        @SuppressWarnings("unchecked") // It's the caller responsibility to provide correct type.
         M result = (M) unpack(wrapped);
         return result;
     }
@@ -164,23 +162,14 @@ final class Entities {
         return NOT_ARCHIVED_OR_DELETED;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"} /* Rely on caller. */)
     private static <M extends Message> M defaultMessage(TypeUrl type) {
-        Class<?> messageClass = type.getJavaClass();
-        checkState(messageClass != null, String.format(
-                "Not found class for type url \"%s\". Try to rebuild the project",
-                type.getTypeName()));
-        M message;
-        try {
-            Method factoryMethod =
-                    messageClass.getDeclaredMethod(DEFAULT_MESSAGE_FACTORY_METHOD_NAME);
-            message = (M) factoryMethod.invoke(null);
-            return message;
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
-            throw new IllegalStateException("Couldn't invoke static method "
-                    + DEFAULT_MESSAGE_FACTORY_METHOD_NAME + " of class "
-                    + messageClass.getCanonicalName(), e);
-        }
+        Class<M> messageClass = (Class<M>) type.getJavaClass();
+        checkState(messageClass != null,
+                   "Not found class for type url \"%s\". Try to rebuild the project.",
+                   type.getTypeName());
+        M message = Internal.getDefaultInstance(messageClass);
+        return message;
     }
 
     /**

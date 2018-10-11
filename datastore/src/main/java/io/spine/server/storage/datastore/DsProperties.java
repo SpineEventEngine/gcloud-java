@@ -148,6 +148,7 @@ final class DsProperties {
         }
     }
 
+    @SuppressWarnings("ImmutableEnumChecker") // `OrderBy` is effectively immutable.
     private enum AggregateEventRecordOrdering {
 
         BY_CREATED(desc(AggregateEventRecordProperty.created)),

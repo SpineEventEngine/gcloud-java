@@ -27,6 +27,7 @@ import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.ProjectId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -72,6 +73,7 @@ import static java.util.regex.Matcher.quoteReplacement;
  * @see DatastoreTenants
  * @see NamespaceSupplier
  */
+@Immutable
 public final class Namespace {
 
     static final String DOMAIN_PREFIX = "D";
@@ -93,8 +95,7 @@ public final class Namespace {
         this("", ConverterType.SINGLE_CUSTOM.namespaceConverter);
     }
 
-    private Namespace(String value,
-                      NamespaceConverter customConverter) {
+    private Namespace(String value, NamespaceConverter customConverter) {
         this.value = escapeIllegalCharacters(value);
         this.converter = customConverter;
     }

@@ -36,6 +36,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -151,7 +152,7 @@ class NamespaceIndexTest {
     @SuppressWarnings("OverlyLongMethod")
     private static void testSynchronizeAccessMethods() throws InterruptedException {
         // Initial data
-        Collection<Key> keys = new LinkedList<>();
+        Collection<Key> keys = new ArrayList<>();
         keys.add(mockKey("Vtenant1"));
         keys.add(mockKey("Vtenant2"));
         keys.add(mockKey("Vtenant3"));

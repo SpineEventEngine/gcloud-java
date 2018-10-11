@@ -49,6 +49,7 @@ final class EntityColumnPredicate implements Predicate<Entity> {
     }
 
     @Override
+    @SuppressWarnings("FallThrough") // defines strategy for default and faulty values.
     public boolean test(@Nullable Entity entity) {
         if (entity == null) {
             return false;
