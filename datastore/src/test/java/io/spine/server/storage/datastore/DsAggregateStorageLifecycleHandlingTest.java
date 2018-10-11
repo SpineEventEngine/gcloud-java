@@ -28,26 +28,14 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
- * @author Dmytro Dashenkov.
- */
+import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
+
 @DisplayName("DsAggregateStorage lifecycle handling should")
-class DsAggregateStorageLifecycleHandlingTest extends AggregateStorageVisibilityHandlingTest {
+class DsAggregateStorageLifecycleHandlingTest
+        extends AggregateStorageVisibilityHandlingTest {
 
-    private static final TestDatastoreStorageFactory datastoreFactory;
-
-    // Guarantees any stacktrace to be informative
-    static {
-        try {
-            datastoreFactory = TestDatastoreStorageFactory.getDefaultInstance();
-        } catch (Throwable e) {
-            log().error("Could not initialize test datastore factory {}", e);
-            throw new RuntimeException(e);
-        }
-    }
+    private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
 
     @BeforeAll
     static void setUpClass() {
@@ -69,16 +57,4 @@ class DsAggregateStorageLifecycleHandlingTest extends AggregateStorageVisibility
             Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
         return datastoreFactory.createAggregateStorage(aggregateClass);
     }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(
-                DsAggregateStorageLifecycleHandlingTest.class);
-    }
-
 }

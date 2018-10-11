@@ -73,6 +73,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
+import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -86,9 +87,8 @@ import static org.mockito.Mockito.verify;
 public class DsRecordStorageTest
         extends RecordStorageTest<DsRecordStorage<ProjectId>> {
 
+    private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
     private static final String COLUMN_NAME_FOR_STORING = "columnName";
-    private static final TestDatastoreStorageFactory datastoreFactory =
-            TestDatastoreStorageFactory.getDefaultInstance();
 
     @SuppressWarnings("unchecked") // OK for tests.
     @Override
@@ -105,12 +105,13 @@ public class DsRecordStorageTest
 
     @Override
     protected Message newState(ProjectId projectId) {
-        Project project = Project.newBuilder()
-                                 .setId(projectId)
-                                 .setName("Some test name")
-                                 .addTask(Task.getDefaultInstance())
-                                 .setStatus(Project.Status.CREATED)
-                                 .build();
+        Project project = Project
+                .newBuilder()
+                .setId(projectId)
+                .setName("Some test name")
+                .addTask(Task.getDefaultInstance())
+                .setStatus(Project.Status.CREATED)
+                .build();
         return project;
     }
 
@@ -131,7 +132,6 @@ public class DsRecordStorageTest
         datastoreFactory.tearDown();
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
     @Test
     @DisplayName("provide access to DatastoreWrapper for extensibility")
     void testAccessDatastoreWrapper() {
@@ -268,14 +268,16 @@ public class DsRecordStorageTest
     @DisplayName("write and read records with lifecycle flags")
     void testLifecycleFlags() {
         ProjectId id = newId();
-        LifecycleFlags lifecycle = LifecycleFlags.newBuilder()
-                                                 .setArchived(true)
-                                                 .build();
-        EntityRecord record = EntityRecord.newBuilder()
-                                          .setState(pack(newState(id)))
-                                          .setLifecycleFlags(lifecycle)
-                                          .setEntityId(pack(id))
-                                          .build();
+        LifecycleFlags lifecycle = LifecycleFlags
+                .newBuilder()
+                .setArchived(true)
+                .build();
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setState(pack(newState(id)))
+                .setLifecycleFlags(lifecycle)
+                .setEntityId(pack(id))
+                .build();
         TestConstCounterEntity entity = new TestConstCounterEntity(id);
         entity.injectLifecycle(lifecycle);
         RecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
@@ -294,9 +296,10 @@ public class DsRecordStorageTest
     void testUseColumnStoreName() {
         DsRecordStorage<ProjectId> storage = newStorage(EntityWithCustomColumnName.class);
         ProjectId id = newId();
-        EntityRecord record = EntityRecord.newBuilder()
-                                          .setState(pack(newState(id)))
-                                          .build();
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setState(pack(newState(id)))
+                .build();
         Entity entity = new EntityWithCustomColumnName(id);
         EntityRecordWithColumns entityRecordWithColumns = create(record, entity, storage);
         com.google.cloud.datastore.Entity datastoreEntity =
@@ -318,26 +321,30 @@ public class DsRecordStorageTest
         for (int i = 0; i < recordCount; i++) {
             TestConstCounterEntity entity = new TestConstCounterEntity(newId());
             entities.add(entity);
-            EntityRecord record = EntityRecord.newBuilder()
-                                              .setState(pack(entity.getState()))
-                                              .build();
+            EntityRecord record = EntityRecord
+                    .newBuilder()
+                    .setState(pack(entity.getState()))
+                    .build();
             EntityRecordWithColumns withColumns = create(record, entity, storage);
             storage.write(entity.getId(), withColumns);
         }
         TestConstCounterEntity targetEntity = entities.get(targetEntityIndex);
-        EntityId targetId = EntityId.newBuilder()
-                                    .setId(pack(targetEntity.getId()))
-                                    .build();
+        EntityId targetId = EntityId
+                .newBuilder()
+                .setId(pack(targetEntity.getId()))
+                .build();
         Object columnTargetValue = targetEntity.getCreationTime();
-        EntityIdFilter idFilter = EntityIdFilter.newBuilder()
-                                                .addIds(targetId)
-                                                .build();
+        EntityIdFilter idFilter = EntityIdFilter
+                .newBuilder()
+                .addIds(targetId)
+                .build();
         CompositeColumnFilter columnFilter =
                 all(eq(TestConstCounterEntity.CREATED_COLUMN_NAME, columnTargetValue));
-        EntityFilters entityFilters = EntityFilters.newBuilder()
-                                                   .setIdFilter(idFilter)
-                                                   .addFilter(columnFilter)
-                                                   .build();
+        EntityFilters entityFilters = EntityFilters
+                .newBuilder()
+                .setIdFilter(idFilter)
+                .addFilter(columnFilter)
+                .build();
         EntityQuery<ProjectId> entityQuery = from(entityFilters, storage);
         Iterator<EntityRecord> readResult = storage.readAll(entityQuery,
                                                             FieldMask.getDefaultInstance());

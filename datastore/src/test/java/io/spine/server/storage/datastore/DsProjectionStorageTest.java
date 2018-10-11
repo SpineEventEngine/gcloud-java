@@ -37,13 +37,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("DsProjectionStorage should")
 class DsProjectionStorageTest extends ProjectionStorageTest {
 
-    private static final TestDatastoreStorageFactory datastoreFactory =
-            TestDatastoreStorageFactory.getDefaultInstance();
+    private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
 
     @Override
     protected Class<? extends TestCounterEntity> getTestEntityClass() {
@@ -53,8 +53,7 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
     @Override
     protected EntityRecord newStorageRecord() {
         return EntityRecord.newBuilder()
-                .setState(
-                        AnyPacker.pack(Sample.messageOfType(Project.class)))
+                .setState(AnyPacker.pack(Sample.messageOfType(Project.class)))
                 .setVersion(Version.newBuilder().setNumber(42).setTimestamp(getCurrentTime()))
                 .build();
     }

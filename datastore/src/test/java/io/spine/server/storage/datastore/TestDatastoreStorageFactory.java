@@ -46,14 +46,19 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
      */
-    static synchronized TestDatastoreStorageFactory getDefaultInstance() {
-        if (instance == null) {
-            boolean onCi = runsOnCi();
-            instance = onCi
-                        ? createCiInstance()
-                        : createLocalInstance();
+    static synchronized TestDatastoreStorageFactory defaultInstance() {
+        try {
+            if (instance == null) {
+                boolean onCi = runsOnCi();
+                instance = onCi
+                            ? createCiInstance()
+                            : createLocalInstance();
+            }
+            return instance;
+        } catch (Throwable e) {
+            log().error("Failed to initialize local datastore factory", e);
+            throw new IllegalStateException(e);
         }
-        return instance;
     }
 
     private static TestDatastoreStorageFactory createLocalInstance() {

@@ -43,12 +43,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
+import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static io.spine.testing.client.TestActorRequestFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -58,17 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("DsAggregateStorage should")
 class DsAggregateStorageTest extends AggregateStorageTest {
 
-    private static final TestDatastoreStorageFactory datastoreFactory;
-
-    // Guarantees any stacktrace to be informative
-    static {
-        try {
-            datastoreFactory = TestDatastoreStorageFactory.getDefaultInstance();
-        } catch (Throwable e) {
-            log().error("Failed to initialize local datastore factory", e);
-            throw new RuntimeException(e);
-        }
-    }
+    private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
 
     @BeforeAll
     static void setUpClass() {
@@ -184,15 +173,5 @@ class DsAggregateStorageTest extends AggregateStorageTest {
             assertEquals(tasksCount, aggregate.getState()
                                               .getTaskCount());
         }
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(DsAggregateStorageTest.class);
     }
 }
