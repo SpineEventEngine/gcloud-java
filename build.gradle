@@ -50,7 +50,7 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'jacoco'
 
-    group = 'io.spine'
+    group = 'io.spine.gcloud'
     version = project.versionToPublish
 }
 
