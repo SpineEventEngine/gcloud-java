@@ -19,20 +19,11 @@
  */
 package io.spine.server.storage.datastore;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.spine.testing.UtilityClassTest;
 
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+class DatastorePropertiesTest extends UtilityClassTest<DsProperties> {
 
-/**
- * @author Alex Tymchenko
- */
-class DatastorePropertiesTest {
-
-    @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
-    void testPrivateCtor() {
-        assertHasPrivateParameterlessCtor(DsProperties.class);
+    DatastorePropertiesTest() {
+        super(DsProperties.class);
     }
 }

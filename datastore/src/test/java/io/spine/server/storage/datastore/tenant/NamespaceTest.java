@@ -27,31 +27,28 @@ import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.ProjectId;
-import io.spine.server.storage.datastore.given.Given;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
-import static io.spine.server.storage.datastore.given.TestCases.SUPPORT_EQUALITY;
 import static io.spine.server.storage.datastore.tenant.Namespace.of;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Dashenkov
- */
 class NamespaceTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
         new NullPointerTester()
-                .setDefault(ProjectId.class, Given.testProjectId())
+                .setDefault(ProjectId.class, TestDatastores.projectId())
                 .setDefault(TenantId.class, TenantId.getDefaultInstance())
-                .setDefault(Key.class, Key.newBuilder(Given.testProjectIdValue(),
+                .setDefault(Key.class, Key.newBuilder(TestDatastores.projectId()
+                                                                    .getValue(),
                                                       "kind",
                                                       "name")
                                           .build())
@@ -69,13 +66,13 @@ class NamespaceTest {
     @SuppressWarnings("LocalVariableNamingConvention")
         // Required comprehensive naming
     @Test
-    @DisplayName(SUPPORT_EQUALITY)
+    @DisplayName("support equality")
     void testEquals() {
         String aGroupValue = "namespace1";
         TenantId aGroupTenantId = TenantId.newBuilder()
                                           .setValue(aGroupValue)
                                           .build();
-        Namespace aGroupNamespaceFromTenantId = of(aGroupTenantId, Given.testProjectId());
+        Namespace aGroupNamespaceFromTenantId = of(aGroupTenantId, TestDatastores.projectId());
         Namespace aGroupNamespaceFromString = of(aGroupValue);
         Namespace duplicateAGroupNamespaceFromString = of(aGroupValue);
 
@@ -84,7 +81,7 @@ class NamespaceTest {
                                           .setEmail(EmailAddress.newBuilder()
                                                                 .setValue(bGroupValue))
                                           .build();
-        Namespace bGroupNamespaceFromTenantId = of(bGroupTenantId, Given.testProjectId());
+        Namespace bGroupNamespaceFromTenantId = of(bGroupTenantId, TestDatastores.projectId());
         // Same string but other type
         Namespace cGroupNamespaceFromString = of(bGroupValue);
 
@@ -116,9 +113,9 @@ class NamespaceTest {
         assertNotEquals(domainId, stringId);
         assertNotEquals(emailId, stringId);
 
-        Namespace fromDomainId = of(domainId, Given.testProjectId());
-        Namespace fromEmailId = of(emailId, Given.testProjectId());
-        Namespace fromStringId = of(stringId, Given.testProjectId());
+        Namespace fromDomainId = of(domainId, TestDatastores.projectId());
+        Namespace fromEmailId = of(emailId, TestDatastores.projectId());
+        Namespace fromStringId = of(stringId, TestDatastores.projectId());
 
         assertNotEquals(fromDomainId, fromEmailId);
         assertNotEquals(fromDomainId, fromStringId);

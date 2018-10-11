@@ -44,7 +44,8 @@ public final class DatastoreTenants {
      *
      * <p>This method is intended for a manual {@code BoundedContext} configuration. To automate
      * the setup routine please use
-     * {@link io.spine.server.datastore.Contexts#onTopOf Contexts.onTopOf()} method.
+     * {@link io.spine.server.storage.datastore.DatastoreStorageFactory#newBoundedContextBuilder
+     * DatastoreStorageFactory.newBoundedContextBuilder()} method.
      *
      * <p>In a multitenant application it's necessary to pass an instance of
      * the {@link TenantIndex} to a
@@ -54,25 +55,25 @@ public final class DatastoreTenants {
      * <p>An example of creating a multitenant
      * {@link io.spine.server.BoundedContext BoundedContext} using the Datastore Storage:
      * <pre>
-     *     {@code
-     *         final Datastore myDatastoreConfig = myDatastoreOptions.getService();
+     * {@code
+     *     Datastore myDatastoreConfig = myDatastoreOptions.getService();
      *
-     *         // Create DatastoreStorageFactories using this instance of Datastore
-     *         final Supplier<StorageFactory> dsStorageFactorySupplier =
-     *                                      getDatastoreStorageFactorySupplier(myDatastoreConfig);
+     *     // Create DatastoreStorageFactories using this instance of Datastore
+     *     Supplier<StorageFactory> dsStorageFactorySupplier =
+     *                                  getDatastoreStorageFactorySupplier(myDatastoreConfig);
      *
-     *         // Use the same instance for the TenantIndex
-     *         final TenantIndex myTenantIndex = DatastoreTenants.index(myDatastoreConfig);
+     *     // Use the same instance for the TenantIndex
+     *     TenantIndex myTenantIndex = DatastoreTenants.index(myDatastoreConfig);
      *
-     *         // Pass both to the BoundedContext.Builder
-     *         final BoundedContext multitenantAppBc =
-     *                              BoundedContext.newBuilder()
-     *                                            .setStorageFactorySupplier(dsStorageFactorySupplier)
-     *                                            .setTenantIndex(myTenantIndex)
-     *                                            .setMultitenant(true)
-     *                                            // set other params
-     *                                            .build();
-     *     }
+     *     // Pass both to the BoundedContext.Builder
+     *     BoundedContext multitenantAppBc =
+     *                          BoundedContext.newBuilder()
+     *                                        .setStorageFactorySupplier(dsStorageFactorySupplier)
+     *                                        .setTenantIndex(myTenantIndex)
+     *                                        .setMultitenant(true)
+     *                                        // set other params
+     *                                        .build();
+     * }
      * </pre>
      *
      * <p>A single-tenant app (or a single-tenant BoundedContext in a multitenant app) does not
@@ -81,7 +82,7 @@ public final class DatastoreTenants {
      *
      * @param datastore the {@link Datastore} to get the {@link TenantIndex} for
      * @return a new instance of the {@link TenantIndex}
-     * @see io.spine.server.datastore.Contexts
+     * @see io.spine.server.storage.datastore.DatastoreStorageFactory#newBoundedContextBuilder()
      */
     public static TenantIndex index(Datastore datastore) {
         checkNotNull(datastore);

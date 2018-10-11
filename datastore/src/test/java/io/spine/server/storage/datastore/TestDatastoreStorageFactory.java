@@ -22,20 +22,22 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
-import io.spine.server.storage.datastore.given.Given;
+import io.spine.logging.Logging;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static io.spine.server.datastore.TestEnvironment.runsOnCi;
+import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
+import static java.lang.String.format;
 
 /**
  * Creates storages based on the local Google {@link Datastore}.
  */
 public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
-    static final String DEFAULT_DATASET_NAME = Given.testProjectIdValue();
+    private static @MonotonicNonNull TestDatastoreStorageFactory instance = null;
 
     /**
      * Returns a default factory instance. A {@link Datastore} is created with
@@ -45,15 +47,29 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
      */
-    static TestDatastoreStorageFactory getDefaultInstance() {
-        boolean onCi = runsOnCi();
-        String message = onCi
-                         ? "Running on CI. Connecting to remote Google Cloud Datastore"
-                         : "Running on local machine. Connecting to a local Datastore emulator";
-        log().info(message);
-        return onCi
-               ? TestingInstanceSingleton.INSTANCE.value
-               : LocalInstanceSingleton.INSTANCE.value;
+    static synchronized TestDatastoreStorageFactory defaultInstance() {
+        try {
+            if (instance == null) {
+                boolean onCi = runsOnCi();
+                instance = onCi
+                            ? createCiInstance()
+                            : createLocalInstance();
+            }
+            return instance;
+        } catch (Throwable e) {
+            log().error("Failed to initialize local datastore factory", e);
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static TestDatastoreStorageFactory createLocalInstance() {
+        log().info("Running on local machine. Connecting to a local Datastore emulator.");
+        return new TestDatastoreStorageFactory(TestDatastores.local());
+    }
+
+    private static TestDatastoreStorageFactory createCiInstance() {
+        log().info("Running on CI. Connecting to remote Google Cloud Datastore.");
+        return new TestDatastoreStorageFactory(TestDatastores.remote());
     }
 
     protected TestDatastoreStorageFactory(Datastore datastore) {
@@ -96,33 +112,17 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * @see #tearDown()
      */
-    void clear() {
-        ((TestDatastoreWrapper) getDatastore()).dropAllTables();
+    public void clear() {
+        TestDatastoreWrapper datastore = (TestDatastoreWrapper) getDatastore();
+        try {
+            datastore.dropAllTables();
+        } catch (Throwable e) {
+            log().error(format("Unable to drop tables in datastore %s", datastore), e);
+            throw new IllegalStateException(e);
+        }
     }
-
-    private enum LocalInstanceSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final TestDatastoreStorageFactory value =
-                new TestDatastoreStorageFactory(TestDatastoreFactory.getLocalDatastore());
-    }
-
-    private enum TestingInstanceSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final TestDatastoreStorageFactory value =
-                new TestDatastoreStorageFactory(TestDatastoreFactory.getTestRemoteDatastore());
-    }
-
-
 
     private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(TestDatastoreStorageFactory.class);
+        return Logging.get(TestDatastoreStorageFactory.class);
     }
 }

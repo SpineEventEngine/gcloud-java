@@ -18,31 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.given;
-
-import io.spine.annotation.Internal;
-import io.spine.server.storage.datastore.ProjectId;
-
 /**
- * A container for the Spine test environment constants.
- *
- * @author Dmytro Dashenkov
+ * This package provides testing environment for testing DsAggregateStorage.
  */
-@Internal
-public final class Given {
 
-    private static final String TEST_PROJECT_ID_VALUE = "spine-dev";
-    private static final ProjectId TEST_PROJECT_ID = ProjectId.of(TEST_PROJECT_ID_VALUE);
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.storage.datastore.given.aggregate;
 
-    private Given() {
-        // Prevent utility class instantiation.
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    public static String testProjectIdValue() {
-        return TEST_PROJECT_ID_VALUE;
-    }
-
-    public static ProjectId testProjectId() {
-        return TEST_PROJECT_ID;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

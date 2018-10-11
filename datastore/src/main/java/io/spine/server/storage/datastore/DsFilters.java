@@ -30,9 +30,10 @@ import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityColumn;
 
 import javax.annotation.Nullable;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -218,10 +219,6 @@ final class DsFilters {
         expressionTree.traverse(processor);
     }
 
-    private static <T> Collection<T> newPath(Collection<T> oldOne) {
-        return new LinkedList<>(oldOne);
-    }
-
     /**
      * Builds a tree from the given query parameter expression.
      *
@@ -329,9 +326,7 @@ final class DsFilters {
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>This implementation performs sequential {@link Filter} conjunction.
+     * Performs sequential {@link Filter} conjunction.
      *
      * <p>The walker transforms all the {@link ColumnFilterNode} instances into {@link Filter}
      * instances and merges them using
@@ -384,10 +379,9 @@ final class DsFilters {
 
         private final Collection<ColumnFilterNode> subtrees;
 
-        private ColumnFilterNode(@Nullable EntityColumn column,
-                                 @Nullable ColumnFilter columnFilter) {
+        private ColumnFilterNode(@Nullable EntityColumn column, @Nullable ColumnFilter filter) {
             this.column = column;
-            this.columnFilter = columnFilter;
+            this.columnFilter = filter;
             this.subtrees = newLinkedList();
         }
 
@@ -403,7 +397,7 @@ final class DsFilters {
             return columnFilter;
         }
 
-        @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
+        @SuppressWarnings({"EnumSwitchStatementWhichMissesCases", "MethodOnlyUsedFromInnerClass"})
             // Only non-faulty values are used.
         private Filter toFilter(ColumnFilterAdapter adapter) {
             Value<?> value = adapter.toValue(column, columnFilter);
@@ -426,7 +420,7 @@ final class DsFilters {
         }
 
         /**
-         * Traverses the tree of the {@linkplain ColumnFilterNode column filters} starting from
+         * Traverses the tree of the {@code ColumnFilterNode column filters} starting from
          * the current node, passing all the found paths from the tree top to a leaf to the given
          * result processor.
          *
@@ -435,16 +429,17 @@ final class DsFilters {
         @SuppressWarnings("MethodWithMultipleLoops")
             // To make the traversal algorithm more obvious.
         private void traverse(TreePathWalker processor) {
-            Queue<ColumnFilterNode> nodes = new LinkedList<>();
-            Queue<Collection<ColumnFilterNode>> paths = new LinkedList<>();
+            Queue<ColumnFilterNode> nodes = new ArrayDeque<>();
+            Queue<Collection<ColumnFilterNode>> paths = new ArrayDeque<>();
             nodes.offer(this);
             // Initial path is intentionally left empty.
-            paths.offer(new LinkedList<ColumnFilterNode>());
+            paths.offer(new ArrayList<>());
 
             while (!nodes.isEmpty()) {
                 ColumnFilterNode node = nodes.poll();
                 Collection<ColumnFilterNode> path = paths.poll();
 
+                checkNotNull(path);
                 if (node.isLeaf()) {
                     processor.walk(path);
                 } else {
@@ -456,6 +451,10 @@ final class DsFilters {
                     }
                 }
             }
+        }
+
+        private static <T> Collection<T> newPath(Collection<T> oldOne) {
+            return new ArrayList<>(oldOne);
         }
 
         private boolean isLeaf() {
@@ -531,6 +530,7 @@ final class DsFilters {
      *
      * @see ColumnFilterReducer for the implementation
      */
+    @FunctionalInterface
     private interface TreePathWalker {
 
         /**

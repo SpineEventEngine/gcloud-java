@@ -31,8 +31,7 @@ import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
-import static io.spine.server.storage.datastore.given.TestCases.SUPPORT_EQUALITY;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -43,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class KindTest {
 
     @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void testNulls() {
         new NullPointerTester()
                 .setDefault(TypeUrl.class, TypeUrl.from(Any.getDescriptor()))
@@ -54,7 +53,7 @@ class KindTest {
     }
 
     @Test
-    @DisplayName(SUPPORT_EQUALITY)
+    @DisplayName("support equality")
     void testEquals() {
         Kind anyFromDesc = Kind.of(Any.getDescriptor());
         Kind anyFromTypeUrl = Kind.of(TypeUrl.of(Any.class));

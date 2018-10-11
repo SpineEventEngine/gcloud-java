@@ -21,11 +21,10 @@
 package io.spine.server.storage.datastore;
 
 import com.google.common.base.Throwables;
+import io.spine.logging.Logging;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,8 +42,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * the specified time
  * limit) upon a big amount of records.
  *
- * <p>The default count of records is {@link #DEFAULT_BULK_SIZE}. Use {@link Builder#setBulkSize(int)} to modify this
- * number.
+ * <p>The default count of records is {@link #DEFAULT_BULK_SIZE}.
+ * Use {@link Builder#setBulkSize(int)} to modify this number.
  *
  * <p>Note: the operations expected to be executed upon the whole bulk of records, not each record
  * separately.
@@ -54,9 +53,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * the operations and the consistency of the data (i.e. count of the records written and read).
  *
  * @param <I> the type of the ID in the tested {@linkplain RecordStorage}
- * @author Dmytro Dashenkov
  */
-public class BigDataTester<I> {
+public class BigDataTester<I> implements Logging {
 
     private static final int DEFAULT_BULK_SIZE = 500;
 
@@ -150,16 +148,6 @@ public class BigDataTester<I> {
         EntityRecordWithColumns newRecord();
     }
 
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(BigDataTester.class);
-    }
-
     /**
      * A builder for the {@code BigDataTester}.
      *
@@ -179,10 +167,13 @@ public class BigDataTester<I> {
         }
 
         /**
+         * Assigns the site of the test bulk.
+         *
          * @param bulkSize the size of the test bulk; the {@link EntryFactory} methods will be
          *                 called exactly this number of times; the default value is
          *                 {@link #DEFAULT_BULK_SIZE}
          */
+        @SuppressWarnings("unused")
         public Builder<I> setBulkSize(int bulkSize) {
             checkArgument(bulkSize > 0,
                           "The records bulk size should be greater then 0.");
@@ -191,7 +182,7 @@ public class BigDataTester<I> {
         }
 
         /**
-         * @param entryFactory the {@link EntryFactory} which generates the test data
+         * Assigns an {@link EntryFactory} which generates the test data.
          */
         public Builder<I> setEntryFactory(EntryFactory<I> entryFactory) {
             this.entryFactory = entryFactory;
@@ -199,8 +190,8 @@ public class BigDataTester<I> {
         }
 
         /**
-         * @param writeMillisLimit the max time in milliseconds which is allowed for the write
-         *                         operation to execute for
+         * Assigns the the max time in milliseconds which is allowed for the write
+         * operation to execute for.
          */
         public Builder<I> setWriteLimit(long writeMillisLimit) {
             checkArgument(writeMillisLimit > 0,
@@ -210,8 +201,8 @@ public class BigDataTester<I> {
         }
 
         /**
-         * @param readMillisLimit the max time in milliseconds which is allowed for the read
-         *                        operation to execute for
+         * Assigns the max time in milliseconds which is allowed for the read
+         * operation to execute for.
          */
         public Builder<I> setReadLimit(long readMillisLimit) {
             checkArgument(readMillisLimit > 0,
@@ -221,7 +212,7 @@ public class BigDataTester<I> {
         }
 
         /**
-         * @return new instance of the {@code BigDataTester}
+         * Creates new instance of the {@code BigDataTester}.
          */
         public BigDataTester<I> build() {
             checkNotNull(entryFactory);

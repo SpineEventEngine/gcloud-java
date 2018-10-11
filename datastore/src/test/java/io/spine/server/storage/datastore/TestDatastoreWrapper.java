@@ -39,7 +39,7 @@ import static com.google.common.collect.Lists.newArrayList;
  *
  * @see TestDatastoreStorageFactory
  */
-class TestDatastoreWrapper extends DatastoreWrapper {
+public class TestDatastoreWrapper extends DatastoreWrapper {
 
     // Default time to wait before each read operation to ensure the data is consistent.
     // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
@@ -64,7 +64,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
         this.waitForConsistency = waitForConsistency;
     }
 
-    static TestDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
+    public static TestDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
         return new TestDatastoreWrapper(datastore, waitForConsistency);
     }
 
@@ -120,8 +120,8 @@ class TestDatastoreWrapper extends DatastoreWrapper {
             }
 
             StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                                       .setKind(table)
-                                                       .build();
+                                                 .setKind(table)
+                                                 .build();
             List<Entity> entities = newArrayList(read(query));
             remainingEntityCount = entities.size();
 
@@ -158,7 +158,7 @@ class TestDatastoreWrapper extends DatastoreWrapper {
     /**
      * Deletes all records from the datastore.
      */
-    void dropAllTables() {
+    public void dropAllTables() {
         log().debug("Dropping all tables");
         for (String kind : kindsCache) {
             dropTable(kind);

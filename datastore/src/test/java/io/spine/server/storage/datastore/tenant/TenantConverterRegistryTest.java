@@ -23,7 +23,7 @@ package io.spine.server.storage.datastore.tenant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -33,7 +33,7 @@ import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 class TenantConverterRegistryTest {
 
     @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void have_private_ctor() {
         assertHasPrivateParameterlessCtor(TenantConverterRegistry.class);
     }

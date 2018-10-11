@@ -22,15 +22,13 @@ package io.spine.server.storage.datastore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Alex Tymchenko
- */
 @DisplayName("DsPropertyStorage should")
 class DsPropertyStorageTest {
-    private static final TestDatastoreStorageFactory datastoreFactory =
-            TestDatastoreStorageFactory.getDefaultInstance();
+
+    private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
     @Test

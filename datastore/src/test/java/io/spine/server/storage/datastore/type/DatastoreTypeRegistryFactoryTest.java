@@ -29,7 +29,7 @@ import io.spine.server.entity.storage.EntityColumn;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -37,14 +37,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("DatastoreTypeRegistryFactory should")
 class DatastoreTypeRegistryFactoryTest {
 
     @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void testPrivateCtor() {
         assertHasPrivateParameterlessCtor(DatastoreTypeRegistryFactory.class);
     }

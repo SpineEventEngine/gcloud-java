@@ -18,31 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.given;
+package io.spine.server.storage.datastore.given.aggregate;
 
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv;
 import io.spine.test.aggregate.ProjectId;
 
 /**
- * @author Dmytro Grankin
+ * A repository to check loading of an aggregates by the storage for different snapshot triggers.
  */
-public class DsAggregateStorageTestEnv {
+public class ProjectAggregateRepository
+        extends AggregateRepository<ProjectId, AggregateRepositoryTestEnv.ProjectAggregate> {
 
-    private DsAggregateStorageTestEnv() {
-        // Prevent instantiation of this class.
-    }
-
-    /**
-     * A repository to check loading of an aggregates by the storage for different snapshot triggers.
-     */
-    public static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> {
-
-        @SuppressWarnings("RedundantMethodOverride") // To expose the method for testing.
-        @Override
-        public void setSnapshotTrigger(int snapshotTrigger) {
-            super.setSnapshotTrigger(snapshotTrigger);
-        }
+    @Override
+    public void setSnapshotTrigger(int snapshotTrigger) {
+        super.setSnapshotTrigger(snapshotTrigger);
     }
 }

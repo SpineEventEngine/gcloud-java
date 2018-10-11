@@ -27,8 +27,7 @@ import com.google.common.testing.NullPointerTester;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
-import static io.spine.server.storage.datastore.given.TestCases.SUPPORT_EQUALITY;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.mock;
@@ -48,7 +47,7 @@ class ProjectIdTest {
     }
 
     @Test
-    @DisplayName(SUPPORT_EQUALITY)
+    @DisplayName("support equality")
     void testEquals() {
         ProjectId a1 = ProjectId.of("a");
         ProjectId a2 = ProjectId.of(mockDatastore("a"));
