@@ -24,8 +24,8 @@ import com.google.common.testing.NullPointerTester;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
-import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.mockito.Mockito.mock;
 
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 class IndexesTest {
 
     @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void testPrivateCtor() {
         assertHasPrivateParameterlessCtor(Indexes.class);
     }

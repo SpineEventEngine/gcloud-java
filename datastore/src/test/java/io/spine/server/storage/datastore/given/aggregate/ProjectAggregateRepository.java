@@ -18,26 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.given;
+package io.spine.server.storage.datastore.given.aggregate;
+
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.aggregate.given.AggregateRepositoryTestEnv;
+import io.spine.test.aggregate.ProjectId;
 
 /**
- * Common names of test cases.
- *
- * <p>This is a temporary constant-holder class. Remove after the values are migrated to a test
- * library.
- *
- * @author Dmytro Dashenkov
+ * A repository to check loading of an aggregates by the storage for different snapshot triggers.
  */
-public final class TestCases {
+public class ProjectAggregateRepository
+        extends AggregateRepository<ProjectId, AggregateRepositoryTestEnv.ProjectAggregate> {
 
-    public static final String HAVE_PRIVATE_UTILITY_CTOR = "have private utility constructor";
-    public static final String NOT_ACCEPT_NULLS = "not accept nulls";
-    public static final String SUPPORT_EQUALITY = "support equality";
-    public static final String DO_NOTHING_ON_CLOSE = "do nothing on close";
-
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private TestCases() {
+    @Override
+    public void setSnapshotTrigger(int snapshotTrigger) {
+        super.setSnapshotTrigger(snapshotTrigger);
     }
 }

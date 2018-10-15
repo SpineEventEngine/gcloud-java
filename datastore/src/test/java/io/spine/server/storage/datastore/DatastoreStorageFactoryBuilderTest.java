@@ -29,18 +29,22 @@ import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
+import io.spine.server.storage.datastore.given.TestDatastores;
+import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.storage.datastore.type.SimpleDatastoreColumnType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
-import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
+import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,14 +56,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("DatastoreStorageFactory.Builder should")
 class DatastoreStorageFactoryBuilderTest {
 
     @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void testPrivateCtor() {
         assertHasPrivateParameterlessCtor(DatastoreStorageFactory.Builder.class);
     }
@@ -112,40 +113,49 @@ class DatastoreStorageFactoryBuilderTest {
         assertNotNull(type);
     }
 
-    @Test
-    @DisplayName("ensure datastore has no namespace if multitenant")
-    void testDatastoreNamespaceInOptions() {
-        DatastoreOptions options =
-                DatastoreOptions.newBuilder()
-                                .setNamespace("non-null-or-empty-namespace")
-                                .setProjectId(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME)
-                                .build();
-        DatastoreStorageFactory.Builder builder = DatastoreStorageFactory
-                .newBuilder()
-                .setMultitenant(true)
-                .setDatastore(options.getService());
-        assertThrows(IllegalArgumentException.class, builder::build);
-    }
+    @Nested
+    class Namespaces {
 
-    @Test
-    @DisplayName("allow custom namespace for single tenant instances")
-    void testCustomNamespace() {
-        String namespace = "my.custom.namespace";
-        DatastoreOptions options =
-                DatastoreOptions.newBuilder()
-                                .setProjectId(TestDatastoreStorageFactory.DEFAULT_DATASET_NAME)
-                                .setNamespace(namespace)
-                                .build();
-        DatastoreStorageFactory factory =
-                DatastoreStorageFactory.newBuilder()
-                                       .setMultitenant(false)
-                                       .setDatastore(options.getService())
-                                       .build();
-        assertNotNull(factory);
-        String actualNamespace = factory.getDatastore()
-                                        .getDatastoreOptions()
-                                        .getNamespace();
-        assertEquals(namespace, actualNamespace);
+        private DatastoreOptions.Builder builder;
+
+        @BeforeEach
+        void setUp() {
+            builder = DatastoreOptions
+                    .newBuilder()
+                    .setProjectId(projectId().getValue());
+        }
+
+        @Test
+        @DisplayName("ensure datastore has no namespace if multitenant")
+        void testDatastoreNamespaceInOptions() {
+            DatastoreOptions options =
+                    builder.setNamespace("non-null-or-empty-namespace")
+                           .build();
+            DatastoreStorageFactory.Builder builder = DatastoreStorageFactory
+                    .newBuilder()
+                    .setMultitenant(true)
+                    .setDatastore(options.getService());
+            assertThrows(IllegalArgumentException.class, builder::build);
+        }
+
+        @Test
+        @DisplayName("allow custom namespace for single tenant instances")
+        void testCustomNamespace() {
+            String namespace = "my.custom.namespace";
+            DatastoreOptions options =
+                    builder.setNamespace(namespace)
+                           .build();
+            DatastoreStorageFactory factory = DatastoreStorageFactory
+                    .newBuilder()
+                    .setMultitenant(false)
+                    .setDatastore(options.getService())
+                    .build();
+            assertNotNull(factory);
+            String actualNamespace = factory.getDatastore()
+                                            .getDatastoreOptions()
+                                            .getNamespace();
+            assertEquals(namespace, actualNamespace);
+        }
     }
 
     @Test
@@ -158,21 +168,21 @@ class DatastoreStorageFactoryBuilderTest {
                 DatastoreOptions.newBuilder()
                                 .setProjectId(withCustomConverter.getValue())
                                 .build();
-        NamespaceToTenantIdConverter converter = mock(NamespaceToTenantIdConverter.class);
+        NamespaceConverter converter = mock(NamespaceConverter.class);
         DatastoreStorageFactory factory =
                 DatastoreStorageFactory.newBuilder()
                                        .setMultitenant(true)
                                        .setDatastore(options.getService())
-                                       .setNamespaceToTenantIdConverter(converter)
+                                       .setNamespaceConverter(converter)
                                        .build();
         assertNotNull(factory);
 
-        Optional<NamespaceToTenantIdConverter> restoredConverter =
+        Optional<NamespaceConverter> restoredConverter =
                 TenantConverterRegistry.getNamespaceConverter(withCustomConverter);
         assertTrue(restoredConverter.isPresent());
         assertSame(converter, restoredConverter.get());
 
-        Optional<NamespaceToTenantIdConverter> absentConverter =
+        Optional<NamespaceConverter> absentConverter =
                 TenantConverterRegistry.getNamespaceConverter(withDefaultConverter);
         assertFalse(absentConverter.isPresent());
     }
@@ -184,7 +194,7 @@ class DatastoreStorageFactoryBuilderTest {
     }
 
     private static Datastore mockDatastore() {
-        return TestDatastoreFactory.getLocalDatastore();
+        return TestDatastores.local();
     }
 
     private static <T> EntityColumn mockColumn(Class<T> type) {

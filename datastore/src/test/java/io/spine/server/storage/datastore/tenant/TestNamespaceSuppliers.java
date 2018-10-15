@@ -22,10 +22,10 @@ package io.spine.server.storage.datastore.tenant;
 
 import io.spine.server.storage.datastore.ProjectId;
 
-/**
- * @author Dmytro Dashenkov
- */
 public class TestNamespaceSuppliers {
+
+    private TestNamespaceSuppliers() {
+    }
 
     public static NamespaceSupplier singleTenant() {
         return NamespaceSupplier.singleTenant();

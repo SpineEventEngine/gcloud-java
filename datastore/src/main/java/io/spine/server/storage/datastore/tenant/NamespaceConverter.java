@@ -24,6 +24,8 @@ import com.google.common.base.Converter;
 import io.spine.annotation.SPI;
 import io.spine.core.TenantId;
 
+import javax.annotation.concurrent.Immutable;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -35,11 +37,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>The implementation of the conversion must be commutative, meaning that the restored
  * {@link TenantId} values should be {@linkplain TenantId#equals(Object) equal} to the initial.
  *
- * @author Dmytro Dashenkov
  * @see Namespace
  */
 @SPI
-public abstract class NamespaceToTenantIdConverter extends Converter<String, TenantId> {
+@Immutable
+public abstract class NamespaceConverter extends Converter<String, TenantId> {
 
     @Override
     protected final TenantId doForward(String s) {

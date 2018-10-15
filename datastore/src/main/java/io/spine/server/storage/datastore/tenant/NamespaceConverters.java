@@ -29,7 +29,7 @@ import static io.spine.server.storage.datastore.tenant.Namespace.EMAIL_PREFIX;
 import static io.spine.server.storage.datastore.tenant.Namespace.STRING_VALUE_PREFIX;
 
 /**
- * A factory of {@link NamespaceToTenantIdConverter} instances for the particular purposes.
+ * A factory of {@link NamespaceConverter} instances for the particular purposes.
  *
  * @author Dmytro Dashenkov
  */
@@ -49,8 +49,8 @@ final class NamespaceConverters {
      *
      * @return new instance of the domain-based {@link TenantId} converter
      */
-    static NamespaceToTenantIdConverter forDomain() {
-        return new DomainNamespaceToTenantIdConverter();
+    static NamespaceConverter forDomain() {
+        return new DomainNamespaceConverter();
     }
 
     /**
@@ -61,8 +61,8 @@ final class NamespaceConverters {
      *
      * @return new instance of the email-based {@link TenantId} converter
      */
-    static NamespaceToTenantIdConverter forEmail() {
-        return new EmailNamespaceToTenantIdConverter();
+    static NamespaceConverter forEmail() {
+        return new EmailNamespaceConverter();
     }
 
     /**
@@ -74,8 +74,8 @@ final class NamespaceConverters {
      *
      * @return new instance of the string-based {@link TenantId} converter
      */
-    static NamespaceToTenantIdConverter forStringValue() {
-        return new StringValueNamespaceToTenantIdConverter();
+    static NamespaceConverter forStringValue() {
+        return new StringValueNamespaceConverter();
     }
 
     /**
@@ -87,29 +87,29 @@ final class NamespaceConverters {
      *
      * @return new instance of the domain-based {@link TenantId} converter
      */
-    static NamespaceToTenantIdConverter forCustomNamespace() {
+    static NamespaceConverter forCustomNamespace() {
         return new CustomNamespaceConverter();
     }
 
     /**
-     * Creates a stub {@link NamespaceToTenantIdConverter}.
+     * Creates a stub {@link NamespaceConverter}.
      *
      * <p>This implementation throws {@link UnsupportedOperationException} on any operation.
      *
      * <p>The result of this method should be used if there is a custom user-defined
-     * {@link NamespaceToTenantIdConverter converter} which should be used instead.
+     * {@link NamespaceConverter converter} which should be used instead.
      *
-     * @return a stub instance of {@link NamespaceToTenantIdConverter}
+     * @return a stub instance of {@link NamespaceConverter}
      */
-    static NamespaceToTenantIdConverter stub() {
-        return new StubNamespaceToTenantIdConverter();
+    static NamespaceConverter stub() {
+        return new StubNamespaceConverter();
     }
 
     /**
      * A converter for the framework-defined namespaces, which are stored with a type prefix.
      */
     abstract static class PrefixedNamespaceToTenantIddConverter
-            extends NamespaceToTenantIdConverter {
+            extends NamespaceConverter {
 
         private final String prefix;
 
@@ -135,10 +135,10 @@ final class NamespaceConverters {
         abstract String toSignificantString(TenantId tenantId);
     }
 
-    private static class DomainNamespaceToTenantIdConverter
+    private static class DomainNamespaceConverter
             extends PrefixedNamespaceToTenantIddConverter {
 
-        private DomainNamespaceToTenantIdConverter() {
+        private DomainNamespaceConverter() {
             super(DOMAIN_PREFIX);
         }
 
@@ -161,10 +161,10 @@ final class NamespaceConverters {
         }
     }
 
-    private static class EmailNamespaceToTenantIdConverter
+    private static class EmailNamespaceConverter
             extends PrefixedNamespaceToTenantIddConverter {
 
-        private EmailNamespaceToTenantIdConverter() {
+        private EmailNamespaceConverter() {
             super(EMAIL_PREFIX);
         }
 
@@ -187,10 +187,10 @@ final class NamespaceConverters {
         }
     }
 
-    private static class StringValueNamespaceToTenantIdConverter
+    private static class StringValueNamespaceConverter
             extends PrefixedNamespaceToTenantIddConverter {
 
-        private StringValueNamespaceToTenantIdConverter() {
+        private StringValueNamespaceConverter() {
             super(STRING_VALUE_PREFIX);
         }
 
@@ -209,7 +209,7 @@ final class NamespaceConverters {
         }
     }
 
-    private static class StubNamespaceToTenantIdConverter extends NamespaceToTenantIdConverter {
+    private static class StubNamespaceConverter extends NamespaceConverter {
 
         @Override
         protected String toString(TenantId tenantId) {
@@ -226,7 +226,7 @@ final class NamespaceConverters {
         }
     }
 
-    private static class CustomNamespaceConverter extends NamespaceToTenantIdConverter {
+    private static class CustomNamespaceConverter extends NamespaceConverter {
 
         @Override
         protected String toString(TenantId tenantId) {

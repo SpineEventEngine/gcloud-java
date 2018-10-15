@@ -25,7 +25,6 @@ import com.google.cloud.datastore.StructuredQuery.OrderBy;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
-import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.StorageField;
 import io.spine.string.Stringifiers;
 
@@ -33,18 +32,15 @@ import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.aggregate.AggregateField.aggregate_id;
 import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
  * Utility class, which simplifies creation of the Datastore properties.
- *
- * @author Mikhail Mikhaylov
- * @author Dmytro Dashenkov
  */
-@SuppressWarnings("UtilityClass")
 final class DsProperties {
 
+    /** Prevent utility class instantiation. */
     private DsProperties() {
-        // Prevent utility class instantiation.
     }
 
     /**
@@ -56,9 +52,11 @@ final class DsProperties {
     }
 
     static void addWhenCreated(Entity.Builder entity, Timestamp when) {
-        com.google.cloud.Timestamp value = ofTimeSecondsAndNanos(when.getSeconds(),
-                                                                       when.getNanos());
-        AggregateEventRecordProperty.created.setProperty(entity, value);
+        AggregateEventRecordProperty.created.setProperty(entity, toCloudTimestamp(when));
+    }
+
+    private static com.google.cloud.Timestamp toCloudTimestamp(Timestamp when) {
+        return ofTimeSecondsAndNanos(when.getSeconds(), when.getNanos());
     }
 
     static void addVersion(Entity.Builder entity, Version version) {
@@ -66,16 +64,16 @@ final class DsProperties {
         AggregateEventRecordProperty.version.setProperty(entity, number);
     }
 
-    static void markAsSnapshot(Entity.Builder entity, boolean snapshot) {
-        AggregateEventRecordProperty.snapshot.setProperty(entity, snapshot);
+    static void markAsSnapshot(Entity.Builder entity, boolean value) {
+        AggregateEventRecordProperty.snapshot.setProperty(entity, value);
     }
 
-    static void markAsArchived(Entity.Builder entity, boolean archived) {
-        entity.set(LifecycleFlagField.archived.toString(), archived);
+    static void markAsArchived(Entity.Builder entity, boolean value) {
+        entity.set(archived.toString(), value);
     }
 
-    static void markAsDeleted(Entity.Builder entity, boolean deleted) {
-        entity.set(LifecycleFlagField.deleted.toString(), deleted);
+    static void markAsDeleted(Entity.Builder entity, boolean value) {
+        entity.set(deleted.toString(), value);
     }
 
     static boolean isArchived(Entity entity) {
@@ -85,7 +83,7 @@ final class DsProperties {
 
     static boolean isDeleted(Entity entity) {
         checkNotNull(entity);
-        return hasFlag(entity, LifecycleFlagField.deleted.toString());
+        return hasFlag(entity, deleted.toString());
     }
 
     static OrderBy byCreatedTime() {
@@ -104,14 +102,6 @@ final class DsProperties {
         boolean result = entity.contains(flagName)
                             && entity.getBoolean(flagName);
         return result;
-    }
-
-    private static OrderBy asc(StorageField property) {
-        return OrderBy.asc(property.toString());
-    }
-
-    private static OrderBy desc(StorageField property) {
-        return OrderBy.desc(property.toString());
     }
 
     private enum AggregateEventRecordProperty implements StorageField {
@@ -158,6 +148,7 @@ final class DsProperties {
         }
     }
 
+    @SuppressWarnings("ImmutableEnumChecker") // `OrderBy` is effectively immutable.
     private enum AggregateEventRecordOrdering {
 
         BY_CREATED(desc(AggregateEventRecordProperty.created)),
@@ -172,6 +163,14 @@ final class DsProperties {
 
         private OrderBy getOrdering() {
             return ordering;
+        }
+
+        private static OrderBy asc(StorageField property) {
+            return OrderBy.asc(property.toString());
+        }
+
+        private static OrderBy desc(StorageField property) {
+            return OrderBy.desc(property.toString());
         }
     }
 }

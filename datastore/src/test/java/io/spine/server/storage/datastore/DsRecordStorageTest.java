@@ -20,9 +20,11 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.common.truth.IterableSubject;
+import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.CompositeColumnFilter;
@@ -64,6 +66,7 @@ import java.util.function.Function;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.toSeconds;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.ColumnFilters.all;
@@ -113,11 +116,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-/**
- * Tests for {@link DsRecordStorage}.
- *
- * @author Dmytro Dashenkov
- */
 @DisplayName("DsRecordStorage should")
 class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> {
 
@@ -138,12 +136,13 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
     @Override
     protected Message newState(ProjectId projectId) {
-        Project project = Project.newBuilder()
-                                 .setId(projectId)
-                                 .setName("Some test name")
-                                 .addTask(Task.getDefaultInstance())
-                                 .setStatus(Project.Status.CREATED)
-                                 .build();
+        Project project = Project
+                .newBuilder()
+                .setId(projectId)
+                .setName("Some test name")
+                .addTask(Task.getDefaultInstance())
+                .setStatus(Project.Status.CREATED)
+                .build();
         return project;
     }
 
@@ -164,7 +163,6 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         datastoreFactory.tearDown();
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
     @Test
     @DisplayName("provide access to DatastoreWrapper for extensibility")
     void testAccessDatastoreWrapper() {
@@ -216,27 +214,29 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         Collection<String> columns = recordWithColumns.getColumnNames();
         assertNotNull(columns);
 
+        IterableSubject assertColumns = assertThat(columns);
+
         // Custom Columns
-        assertContains(counter, columns);
-        assertContains(bigCounter, columns);
-        assertContains(counterEven, columns);
-        assertContains(counterVersion, columns);
-        assertContains(creationTime, columns);
-        assertContains(counterState, columns);
+        assertColumns.contains(counter);
+        assertColumns.contains(bigCounter);
+        assertColumns.contains(counterEven);
+        assertColumns.contains(counterVersion);
+        assertColumns.contains(creationTime);
+        assertColumns.contains(counterState);
 
         // Columns defined in superclasses
-        assertContains(version, columns);
-        assertContains(archived, columns);
-        assertContains(deleted, columns);
+        assertColumns.contains(version);
+        assertColumns.contains(archived);
+        assertColumns.contains(deleted);
 
         // High level write operation
         storage.write(id, recordWithColumns);
 
         // Read Datastore Entity
         DatastoreWrapper datastore = storage.getDatastore();
-        Key key = DsIdentifiers.keyFor(datastore,
-                                       Kind.of(state),
-                                       DsIdentifiers.ofEntityId(id));
+        Key key = datastore.keyFor(
+                Kind.of(state),
+                RecordId.ofEntityId(id));
         com.google.cloud.datastore.Entity datastoreEntity = datastore.read(key);
 
         // Check entity record
@@ -299,14 +299,16 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     @DisplayName("write and read records with lifecycle flags")
     void testLifecycleFlags() {
         ProjectId id = newId();
-        LifecycleFlags lifecycle = LifecycleFlags.newBuilder()
-                                                 .setArchived(true)
-                                                 .build();
-        EntityRecord record = EntityRecord.newBuilder()
-                                          .setState(pack(newState(id)))
-                                          .setLifecycleFlags(lifecycle)
-                                          .setEntityId(pack(id))
-                                          .build();
+        LifecycleFlags lifecycle = LifecycleFlags
+                .newBuilder()
+                .setArchived(true)
+                .build();
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setState(pack(newState(id)))
+                .setLifecycleFlags(lifecycle)
+                .setEntityId(pack(id))
+                .build();
         TestConstCounterEntity entity = new TestConstCounterEntity(id);
         entity.injectLifecycle(lifecycle);
         RecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
@@ -658,7 +660,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         }
 
         @Override
-        protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
+        protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
             return spyWrapper;
         }
     }

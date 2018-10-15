@@ -19,15 +19,16 @@
  */
 package io.spine.server.storage.datastore;
 
+import io.spine.string.Stringifiers;
+
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * A wrapper type for the {@code String}-based record identifiers in the GAE Datastore.
- *
- * @author Alex Tymchenko
  */
-public class RecordId {
+final class RecordId extends DsIdentifier {
 
-    // The wrapped identifier value.
-    private final String value;
+    private static final long serialVersionUID = 0L;
 
     /**
      * Creates a new {@code RecordId} for the given {@code value}.
@@ -35,10 +36,23 @@ public class RecordId {
      * @param value the identity as {@code String} to wrap into an identifier
      */
     RecordId(String value) {
-        this.value = value;
+        super(value);
     }
 
-    public String getValue() {
-        return value;
+    static RecordId of(String value) {
+        checkArgument(!value.isEmpty());
+        return new RecordId(value);
+    }
+
+    /**
+     * Creates an instance of {@code RecordId} for a
+     * given {@link io.spine.server.entity.Entity} identifier.
+     *
+     * @param id an identifier of an {@code Entity}
+     * @return the Datastore record identifier
+     */
+    static RecordId ofEntityId(Object id) {
+        String idAsString = Stringifiers.toString(id);
+        return of(idAsString);
     }
 }

@@ -33,8 +33,7 @@ import io.spine.test.storage.Project;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.storage.datastore.given.TestCases.DO_NOTHING_ON_CLOSE;
-import static io.spine.server.storage.datastore.given.TestCases.NOT_ACCEPT_NULLS;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -125,8 +124,8 @@ class DatastoreStorageFactoryTest {
     }
 
     @Test
-    @DisplayName(DO_NOTHING_ON_CLOSE)
-    void testClose() throws Exception {
+    @DisplayName("do nothing on close")
+    void testClose() {
         DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                                  .setDatastore(datastore)
                                                                  .build();

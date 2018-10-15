@@ -18,16 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used wherever the library versions are required.
- */
+package io.spine.server.storage.datastore;
 
-ext {
-    spineGaeVersion = '0.10.89-SNAPSHOT'
-    spineVersion = '0.10.89-SNAPSHOT'
-    spineBaseVersion = '0.10.70-SNAPSHOT'
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-    datastoreVersion = '1.35.0'
+import static io.spine.base.Identifier.newUuid;
+import static org.junit.jupiter.api.Assertions.*;
+
+@DisplayName("RecordId should")
+class RecordIdTest {
+
+    @Test
+    @DisplayName("not accept empty String for identifier")
+    void testEmpty() {
+        assertThrows(IllegalArgumentException.class, () -> RecordId.of(""));
+    }
+
+    @Test
+    @DisplayName("wrap non empty String into record identifier")
+    void testNonEmpty() {
+        String idAsString = newUuid();
+        RecordId recordId = RecordId.of(idAsString);
+
+        assertNotNull(recordId);
+        assertEquals(idAsString, recordId.getValue());
+    }
 }

@@ -21,24 +21,22 @@
 package io.spine.server.storage.datastore;
 
 import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
-import io.spine.validate.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;
 
+import static io.spine.validate.Validate.isDefault;
+
 /**
- * GAE Datastore implementation of the {@link ProjectionStorage}.
- *
- * @author Dmytro Dashenkov
- * @author Mikhail Mikhaylov
+ * Datastore implementation of the {@link ProjectionStorage}.
  */
-@SuppressWarnings("WeakerAccess")   // Part of API
 public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     private static final String LAST_EVENT_TIMESTAMP_ID = "datastore_event_timestamp_";
@@ -48,15 +46,15 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     private final RecordId lastTimestampId;
 
-    public DsProjectionStorage(DsRecordStorage<I> recordStorage,
-                               DsPropertyStorage propertyStorage,
-                               Class<? extends Entity<I, ?>> projectionClass,
-                               boolean multitenant) {
+    protected DsProjectionStorage(Class<? extends Projection<I, ?, ?>> projectionClass,
+                                  DsRecordStorage<I> recordStorage,
+                                  DsPropertyStorage propertyStorage,
+                                  boolean multitenant) {
         super(multitenant);
         this.recordStorage = recordStorage;
         this.propertyStorage = propertyStorage;
         this.lastTimestampId =
-                DsIdentifiers.of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
+                RecordId.of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
     }
 
     @Override
@@ -66,13 +64,16 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     public @Nullable Timestamp readLastHandledEventTime() {
-        Optional<Timestamp> readTimestamp = propertyStorage.read(lastTimestampId,
-                                                                       Timestamp.getDescriptor());
-        if ((!readTimestamp.isPresent()) || Validate.isDefault(readTimestamp.get())) {
+        Optional<Message> optional =
+                propertyStorage.read(lastTimestampId, Timestamp.getDescriptor());
+        if (!optional.isPresent()) {
             return null;
         }
-        Timestamp result = readTimestamp.get();
-        return result;
+        Timestamp timestamp = (Timestamp) optional.get();
+        if (isDefault(timestamp)) {
+            return null;
+        }
+        return timestamp;
     }
 
     @Override

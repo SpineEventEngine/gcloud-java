@@ -18,31 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.given;
+package io.spine.server.storage.datastore;
 
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
-import io.spine.test.aggregate.ProjectId;
+import com.google.common.base.MoreObjects;
+import io.spine.value.StringTypeValue;
 
 /**
- * @author Dmytro Grankin
+ * Abstract base for Datastore-related identifiers.
  */
-public class DsAggregateStorageTestEnv {
+abstract class DsIdentifier extends StringTypeValue {
 
-    private DsAggregateStorageTestEnv() {
-        // Prevent instantiation of this class.
+    private static final long serialVersionUID = 0L;
+
+    DsIdentifier(String value) {
+        super(value);
     }
 
-    /**
-     * A repository to check loading of an aggregates by the storage for different snapshot triggers.
-     */
-    public static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> {
+    public final String getValue() {
+        return value();
+    }
 
-        @SuppressWarnings("RedundantMethodOverride") // To expose the method for testing.
-        @Override
-        public void setSnapshotTrigger(int snapshotTrigger) {
-            super.setSnapshotTrigger(snapshotTrigger);
-        }
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("value", value())
+                          .toString();
     }
 }

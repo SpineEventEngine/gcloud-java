@@ -22,183 +22,169 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.datastore.tenant.DatastoreTenants;
+import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
-import io.spine.server.storage.datastore.tenant.NamespaceToTenantIdConverter;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
-import io.spine.type.TypeUrl;
+import io.spine.server.tenant.TenantIndex;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
+import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 
 /**
- * Creates storages based on GAE {@link Datastore}.
+ * Creates storages based on {@link Datastore}.
  *
- * @author Alexander Litus
- * @author Mikhail Mikhaylov
- * @author Dmytro Dashenkov
- * @see io.spine.server.datastore.Contexts#onTopOf for the recommended usage description
+ * @see DatastoreStorageFactory#newBoundedContextBuilder for the recommended usage description
  */
-@SuppressWarnings("WeakerAccess") // Part of API
 public class DatastoreStorageFactory implements StorageFactory {
 
     private final DatastoreWrapper datastore;
     private final boolean multitenant;
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
     private final NamespaceSupplier namespaceSupplier;
-    private final NamespaceToTenantIdConverter namespaceToTenantIdConverter;
+    private final @MonotonicNonNull NamespaceConverter namespaceConverter;
 
-    private DatastoreStorageFactory(Builder builder) {
-        this(builder.datastore,
-             builder.multitenant,
-             builder.typeRegistry,
-             builder.namespaceSupplier,
-             builder.namespaceToTenantIdConverter);
-    }
-
-    @VisibleForTesting
-    @SuppressWarnings({"OverridableMethodCallDuringObjectConstruction", "OverriddenMethodCallDuringObjectConstruction"})
-    protected DatastoreStorageFactory(Datastore datastore,
-                                      boolean multitenant,
-                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
-                                      NamespaceSupplier namespaceSupplier,
-                                      @Nullable NamespaceToTenantIdConverter namespaceConverter) {
-        this.multitenant = multitenant;
-        this.typeRegistry = typeRegistry;
-        this.namespaceSupplier = namespaceSupplier;
-        this.datastore = createDatastoreWrapper(datastore);
-        this.namespaceToTenantIdConverter = namespaceConverter;
-    }
-
-    protected DatastoreStorageFactory(DatastoreWrapper datastore,
-                                      boolean multitenant,
-                                      ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry,
-                                      NamespaceSupplier namespaceSupplier,
-                                      @Nullable NamespaceToTenantIdConverter namespaceConverter) {
-        this.datastore = checkNotNull(datastore);
-        this.multitenant = multitenant;
-        this.typeRegistry = typeRegistry;
-        this.namespaceSupplier = namespaceSupplier;
-        this.namespaceToTenantIdConverter = namespaceConverter;
-    }
-
-    protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
-        checkState(this.getDatastore() == null, "Datastore is already initialized");
-        DatastoreWrapper wrapped = DatastoreWrapper.wrap(datastore, namespaceSupplier);
-        return wrapped;
+    @SuppressWarnings({
+            /* Overridden method required for stub. impl. of test environments.  */
+            "OverridableMethodCallDuringObjectConstruction",
+            "OverriddenMethodCallDuringObjectConstruction"
+    })
+    DatastoreStorageFactory(Builder builder) {
+        this.namespaceSupplier = builder.namespaceSupplier;
+        this.multitenant = builder.multitenant;
+        this.typeRegistry = builder.typeRegistry;
+        this.namespaceConverter = builder.namespaceConverter;
+        this.datastore = createDatastoreWrapper(builder);
     }
 
     /**
-     * {@inheritDoc}
+     * Creates new instance of the {@link io.spine.server.BoundedContextBuilder}.
+     *
+     * <p>The returned instance has the following attributes pre-configured:
+     * <ul>
+     *     <li>{@link io.spine.server.BoundedContextBuilder#setStorageFactorySupplier(java.util.function.Supplier) Supplier}
+     *     of {@code StorageFactory};
+     *     <li>{@link io.spine.server.BoundedContextBuilder#setTenantIndex(io.spine.server.tenant.TenantIndex) TenantIndex};
+     *     <li>{@linkplain io.spine.server.BoundedContextBuilder#setMultitenant(boolean) multitenancy flag}.
+     * </ul>
+     *
+     * <p>In a majority of use cases the configuration of the produced
+     * {@link io.spine.server.BoundedContextBuilder builder} is enough for operation.
+     * However, it is still possible to use the returned instance for further customization.
+     *
+     * @return new instance of {@link io.spine.server.BoundedContextBuilder BoundedContextBuilder}
+     *         with the specified parameters
      */
+    public BoundedContextBuilder newBoundedContextBuilder() {
+        Datastore datastore = getDatastore()
+                .getDatastoreOptions()
+                .getService();
+        TenantIndex tenantIndex = DatastoreTenants.index(datastore);
+        Supplier<StorageFactory> storageFactorySupplier = () -> this;
+        BoundedContextBuilder resultBuilder =
+                BoundedContext.newBuilder()
+                              .setMultitenant(isMultitenant())
+                              .setStorageFactorySupplier(storageFactorySupplier)
+                              .setTenantIndex(tenantIndex);
+        return resultBuilder;
+    }
+
+    private Builder toBuilder() {
+        Builder result = newBuilder()
+                .setDatastore(datastore.getDatastore())
+                .setMultitenant(multitenant)
+                .setNamespaceSupplier(namespaceSupplier);
+
+        if (!multitenant) {
+            result.setNamespaceConverter(namespaceConverter);
+        }
+
+        return result;
+    }
+
+    protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
+        DatastoreWrapper wrapped = wrap(builder.datastore, builder.namespaceSupplier);
+        return wrapped;
+    }
+
     @Override
     public boolean isMultitenant() {
         return multitenant;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ColumnTypeRegistry getTypeRegistry() {
         return typeRegistry;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public StorageFactory toSingleTenant() {
         return isMultitenant()
-               ? new DatastoreStorageFactory(getDatastore(),
-                                             false,
-                                             typeRegistry,
-                                             NamespaceSupplier.singleTenant(),
-                                             namespaceToTenantIdConverter)
+               ? newSingleTenant()
                : this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
+    private DatastoreStorageFactory newSingleTenant() {
+        Builder builder = toBuilder().setMultitenant(false)
+                                     .setNamespaceSupplier(NamespaceSupplier.singleTenant());
+        return new DatastoreStorageFactory(builder);
+    }
+
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage(
-            Class<? extends Projection<I, ?, ?>> projectionClass) {
-        EntityClass<? extends Projection<I, ?, ?>> entityClass = asEntityClass(projectionClass);
-        TypeUrl stateType = entityClass.getStateType();
-        Class<I> idClass = (Class<I>) entityClass.getIdClass();
+    public <I>
+    ProjectionStorage<I> createProjectionStorage(Class<? extends Projection<I, ?, ?>> cls) {
         DsProjectionStorageDelegate<I> recordStorage =
-                DsProjectionStorageDelegate.<I>newDelegateBuilder()
-                                           .setDatastore(getDatastore())
-                                           .setMultitenant(isMultitenant())
-                                           .setIdClass(idClass)
-                                           .setEntityClass(projectionClass)
-                                           .setStateType(stateType)
-                                           .setColumnTypeRegistry(typeRegistry)
-                                           .build();
+                configure(DsProjectionStorageDelegate.newDelegateBuilder(), cls).build();
         DsPropertyStorage propertyStorage = createPropertyStorage();
-        DsProjectionStorage<I> result = new DsProjectionStorage<>(recordStorage,
-                                                                        propertyStorage,
-                                                                        projectionClass,
-                                                                        multitenant);
+        DsProjectionStorage<I> result =
+                new DsProjectionStorage<>(cls, recordStorage, propertyStorage, multitenant);
+        return result;
+    }
+
+    @Override
+    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> cls) {
+        DsRecordStorage<I> result = configure(DsRecordStorage.newBuilder(), cls).build();
         return result;
     }
 
     /**
-     * {@inheritDoc}
+     * Configures the passed builder of the storage to serve the passed entity class.
      */
-    @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
-    @Override
-    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        EntityClass<? extends Entity<I, ?>> wrappedEntityClass = asEntityClass(entityClass);
-        TypeUrl stateType = wrappedEntityClass.getStateType();
-        Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
-        DsRecordStorage<I> result = DsRecordStorage.<I>newBuilder()
-                                                         .setStateType(stateType)
-                                                         .setDatastore(getDatastore())
-                                                         .setMultitenant(isMultitenant())
-                                                         .setColumnTypeRegistry(typeRegistry)
-                                                         .setIdClass(idClass)
-                                                         .setEntityClass(entityClass)
-                                                         .build();
-        return result;
+    private <I, B extends RecordStorageBuilder<I, B>>
+    B configure(B builder, Class<? extends Entity<I, ?>> cls) {
+        builder.setModelClass(asEntityClass(cls))
+               .setDatastore(getDatastore())
+               .setMultitenant(isMultitenant())
+               .setColumnTypeRegistry(typeRegistry);
+        return builder;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(
-            Class<? extends Aggregate<I, ?, ?>> entityClass) {
-        checkNotNull(entityClass);
-        EntityClass<? extends Aggregate<I, ?, ?>> wrappedEntityClass = asEntityClass(entityClass);
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> cls) {
+        checkNotNull(cls);
         DsPropertyStorage propertyStorage = createPropertyStorage();
-        Class<I> idClass = (Class<I>) wrappedEntityClass.getIdClass();
-        Class<? extends Message> stateClass = wrappedEntityClass.getStateClass();
-        DsAggregateStorage<I> result = new DsAggregateStorage<>(getDatastore(),
-                                                                      propertyStorage,
-                                                                      multitenant,
-                                                                      idClass,
-                                                                      stateClass);
+        DsAggregateStorage<I> result =
+                new DsAggregateStorage<>(cls, getDatastore(), propertyStorage, multitenant);
         return result;
     }
 
@@ -211,12 +197,12 @@ public class DatastoreStorageFactory implements StorageFactory {
      * Performs no action.
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         // NOP
     }
 
     /**
-     * @return an instance of a wrapper of the passed {@link Datastore}
+     * Obtains an instance of a wrapper of the passed {@link Datastore}.
      */
     @Internal
     public DatastoreWrapper getDatastore() {
@@ -246,19 +232,22 @@ public class DatastoreStorageFactory implements StorageFactory {
         private boolean multitenant;
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
         private NamespaceSupplier namespaceSupplier;
-        private NamespaceToTenantIdConverter namespaceToTenantIdConverter;
+        private NamespaceConverter namespaceConverter;
 
+        /** Avoid direct initialization. */
         private Builder() {
-            // Avoid direct initialization
         }
 
         /**
-         * @param datastore the {@link Datastore} to use for the DB interactions
-         * @return self for method chaining
+         * Assigns the {@link Datastore} to use for the DB interactions.
          */
         public Builder setDatastore(Datastore datastore) {
             this.datastore = checkNotNull(datastore);
             return this;
+        }
+
+        public Datastore getDatastore() {
+            return this.datastore;
         }
 
         /**
@@ -296,7 +285,15 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
 
         /**
-         * Sets a {@link NamespaceToTenantIdConverter} for converting the Datastore namespaces and
+         * Sets the namespace supplier.
+         */
+        public Builder setNamespaceSupplier(NamespaceSupplier namespaceSupplier) {
+            this.namespaceSupplier = checkNotNull(namespaceSupplier);
+            return this;
+        }
+
+        /**
+         * Sets a {@link io.spine.server.storage.datastore.tenant.NamespaceConverter} for converting the Datastore namespaces and
          * the {@link io.spine.core.TenantId Tenant IDs} back and forth.
          *
          * <p>Setting this parameter is reasonable (but not required) only if the storage is
@@ -305,8 +302,8 @@ public class DatastoreStorageFactory implements StorageFactory {
          * @param converter a custom converter for the Tenant IDs
          * @return self for method chaining
          */
-        public Builder setNamespaceToTenantIdConverter(NamespaceToTenantIdConverter converter) {
-            this.namespaceToTenantIdConverter = checkNotNull(converter);
+        public Builder setNamespaceConverter(NamespaceConverter converter) {
+            this.namespaceConverter = checkNotNull(converter);
             return this;
         }
 
@@ -324,20 +321,19 @@ public class DatastoreStorageFactory implements StorageFactory {
                 typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
             }
             if (!multitenant) {
-                checkArgument(namespaceToTenantIdConverter == null,
+                checkArgument(namespaceConverter == null,
                               REDUNDANT_TENANT_ID_CONVERTER_ERROR_MESSAGE);
             }
-            if (namespaceToTenantIdConverter != null) {
+            if (namespaceConverter != null) {
                 ProjectId projectId = ProjectId.of(datastore);
-                TenantConverterRegistry.registerNamespaceConverter(projectId,
-                                                                   namespaceToTenantIdConverter);
+                TenantConverterRegistry.registerNamespaceConverter(projectId, namespaceConverter);
             }
 
             return new DatastoreStorageFactory(this);
         }
 
         private NamespaceSupplier createNamespaceSupplier() {
-            String defaultNamespace;
+            @Nullable String defaultNamespace;
             if (multitenant) {
                 checkHasNoNamespace(datastore);
                 defaultNamespace = null;
@@ -345,9 +341,9 @@ public class DatastoreStorageFactory implements StorageFactory {
                 defaultNamespace = datastore.getOptions()
                                             .getNamespace();
             }
-            NamespaceSupplier result = NamespaceSupplier.instance(multitenant,
-                                                                        defaultNamespace,
-                                                                        ProjectId.of(datastore));
+            ProjectId projectId = ProjectId.of(datastore);
+            NamespaceSupplier result =
+                    NamespaceSupplier.instance(multitenant, defaultNamespace, projectId);
             return result;
         }
 
@@ -355,8 +351,7 @@ public class DatastoreStorageFactory implements StorageFactory {
             checkNotNull(datastore);
             DatastoreOptions options = datastore.getOptions();
             String namespace = options.getNamespace();
-            checkArgument(isNullOrEmpty(namespace),
-                          DEFAULT_NAMESPACE_ERROR_MESSAGE);
+            checkArgument(isNullOrEmpty(namespace), DEFAULT_NAMESPACE_ERROR_MESSAGE);
         }
     }
 }

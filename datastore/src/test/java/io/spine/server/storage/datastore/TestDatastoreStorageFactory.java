@@ -22,52 +22,69 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
-import io.spine.server.storage.datastore.given.Given;
+import io.spine.logging.Logging;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static io.spine.server.datastore.TestEnvironment.runsOnCi;
+import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
+import static java.lang.String.format;
 
 /**
  * Creates storages based on the local Google {@link Datastore}.
  */
-@SuppressWarnings("CallToSystemGetenv")
 public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
-    public static final String DEFAULT_DATASET_NAME = Given.testProjectIdValue();
+    private static @MonotonicNonNull TestDatastoreStorageFactory instance = null;
 
     /**
-     * Returns a default factory instance. A {@link Datastore} is created with default {@link DatastoreOptions}:
+     * Returns a default factory instance. A {@link Datastore} is created with
+     * default {@link DatastoreOptions}:
      *
      * <p>Dataset name: {@code spine-dev}
      *
      * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
      */
-    public static TestDatastoreStorageFactory getDefaultInstance() {
-        boolean onCi = runsOnCi();
-        String message = onCi
-                               ? "Running on CI. Connecting to remote Google Cloud Datastore"
-                               : "Running on local machine. Connecting to a local Datastore emulator";
-        log().info(message);
-        return onCi
-               ? TestingInstanceSingleton.INSTANCE.value
-               : LocalInstanceSingleton.INSTANCE.value;
+    public static synchronized TestDatastoreStorageFactory defaultInstance() {
+        try {
+            if (instance == null) {
+                boolean onCi = runsOnCi();
+                instance = onCi
+                            ? createCiInstance()
+                            : createLocalInstance();
+            }
+            return instance;
+        } catch (Throwable e) {
+            log().error("Failed to initialize local datastore factory", e);
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static TestDatastoreStorageFactory createLocalInstance() {
+        log().info("Running on local machine. Connecting to a local Datastore emulator.");
+        return new TestDatastoreStorageFactory(TestDatastores.local());
+    }
+
+    private static TestDatastoreStorageFactory createCiInstance() {
+        log().info("Running on CI. Connecting to remote Google Cloud Datastore.");
+        return new TestDatastoreStorageFactory(TestDatastores.remote());
     }
 
     protected TestDatastoreStorageFactory(Datastore datastore) {
-        super(datastore,
-              false,
-              DatastoreTypeRegistryFactory.defaultInstance(),
-              NamespaceSupplier.singleTenant(), null);
+        super(DatastoreStorageFactory
+                      .newBuilder()
+                      .setDatastore(datastore)
+                      .setMultitenant(false)
+                      .setTypeRegistry(DatastoreTypeRegistryFactory.defaultInstance())
+                      .setNamespaceSupplier(NamespaceSupplier.singleTenant())
+        );
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-        // Overrides the behavior for tests
     @Override
-    protected DatastoreWrapper createDatastoreWrapper(Datastore datastore) {
-        return TestDatastoreWrapper.wrap(datastore, runsOnCi());
+    protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
+        return TestDatastoreWrapper.wrap(builder.getDatastore(), runsOnCi());
     }
 
     /**
@@ -77,7 +94,6 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      */
     @SuppressWarnings("EmptyMethod")
     public void setUp() {
-
     }
 
     /**
@@ -96,33 +112,17 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * @see #tearDown()
      */
-    void clear() {
-        ((TestDatastoreWrapper) getDatastore()).dropAllTables();
+    public void clear() {
+        TestDatastoreWrapper datastore = (TestDatastoreWrapper) getDatastore();
+        try {
+            datastore.dropAllTables();
+        } catch (Throwable e) {
+            log().error(format("Unable to drop tables in datastore %s", datastore), e);
+            throw new IllegalStateException(e);
+        }
     }
-
-    private enum LocalInstanceSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final TestDatastoreStorageFactory value =
-                new TestDatastoreStorageFactory(TestDatastoreFactory.getLocalDatastore());
-    }
-
-    private enum TestingInstanceSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final TestDatastoreStorageFactory value =
-                new TestDatastoreStorageFactory(TestDatastoreFactory.getTestRemoteDatastore());
-    }
-
-
 
     private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(TestDatastoreStorageFactory.class);
+        return Logging.get(TestDatastoreStorageFactory.class);
     }
 }

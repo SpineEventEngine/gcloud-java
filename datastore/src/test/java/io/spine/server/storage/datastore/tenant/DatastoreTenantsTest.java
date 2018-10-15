@@ -26,34 +26,29 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
+import com.google.common.collect.ImmutableList;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantIndex;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.Verify.assertContains;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("DatastoreTenants should")
 class DatastoreTenantsTest {
 
     @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void have_private_utility_ctor() {
         assertHasPrivateParameterlessCtor(DatastoreTenants.class);
     }
@@ -63,17 +58,19 @@ class DatastoreTenantsTest {
     void testCreateIndex() {
         TenantIndex index = DatastoreTenants.index(mockDatastore());
         assertNotNull(index);
-        assertThat(index, instanceOf(NamespaceIndex.class));
+        assertThat(index).isInstanceOf(NamespaceIndex.class);
 
         String customNamespace = "my-namespace";
-        TenantId customId = TenantId.newBuilder()
-                                          .setValue(customNamespace)
-                                          .build();
+        TenantId customId = TenantId
+                .newBuilder()
+                .setValue(customNamespace)
+                .build();
         index.keep(customId);
         Set<TenantId> ids = index.getAll();
-        assertContains(customId, ids);
+        assertThat(ids).contains(customId);
     }
 
+    @SuppressWarnings("unchecked") // Mocking.
     private static Datastore mockDatastore() {
         Datastore datastore = mock(Datastore.class);
         DatastoreOptions options = mock(DatastoreOptions.class);
@@ -83,21 +80,20 @@ class DatastoreTenantsTest {
         return datastore;
     }
 
-    private static Key mockKey(String name) {
-        Key key = Key.newBuilder("my-proj", "my-kind", name)
-                           .build();
-        return key;
-    }
 
+    @SuppressWarnings("NewExceptionWithoutArguments")
     private static class MockKeyQueryResults implements QueryResults<Key> {
 
-        @SuppressWarnings({"serial", "ClassExtendsConcreteCollection"}) // For test purposes
-        private static final List<Key> keys = new LinkedList<Key>() {{
-            add(mockKey("Vfoo"));
-            add(mockKey("Vbar"));
-            add(mockKey("Vbaz"));
-        }};
+        private static final List<Key> keys =
+                ImmutableList.of(mockKey("Vfoo"), mockKey("Vbar"), mockKey("Vbaz"));
+
         private final Iterator<Key> keyIterator = keys.iterator();
+
+        private static Key mockKey(String name) {
+            Key key = Key.newBuilder("my-proj", "my-kind", name)
+                         .build();
+            return key;
+        }
 
         @Override
         public Class<?> getResultClass() {

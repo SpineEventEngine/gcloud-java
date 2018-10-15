@@ -18,37 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.datastore;
+package io.spine.server.storage.datastore;
 
-import static java.lang.System.getenv;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
+
+import java.util.function.Function;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A utility class for analyzing the test environment at runtime.
- *
- * @author Dmytro Dashenkov
+ * A function transforming the input {@link com.google.cloud.datastore.StructuredQuery.Filter}
+ * into a {@link com.google.cloud.datastore.StructuredQuery} with the given newBuilder.
  */
-public final class TestEnvironment {
+final class FilterToQuery implements Function<StructuredQuery.Filter, StructuredQuery<Entity>> {
 
-    private static final String TRUE = "true";
+    private final StructuredQuery.Builder<Entity> builder;
 
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private TestEnvironment() {
+    FilterToQuery(Kind kind) {
+        this.builder = Query.newEntityQueryBuilder()
+                            .setKind(kind.getValue());
     }
 
-    /**
-     * Shows if the current test JVM is started within a continuous integration service.
-     *
-     * <p>This method relies on the convention for the CI services to set the {@code CI}
-     * environmental variable to {@code "true"}.
-     *
-     * @return {@code true} if the tests are run on a CI service, {@code false} otherwise
-     * @see System#getenv()
-     */
-    public static boolean runsOnCi() {
-        String ciEnvValue = getenv("CI");
-        boolean onCi = TRUE.equalsIgnoreCase(ciEnvValue);
-        return onCi;
+    @Override
+    public StructuredQuery<Entity> apply(StructuredQuery.Filter filter) {
+        checkNotNull(filter);
+        StructuredQuery<Entity> query = builder.setFilter(filter)
+                                               .build();
+        return query;
     }
 }

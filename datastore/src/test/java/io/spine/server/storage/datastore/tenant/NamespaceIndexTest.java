@@ -26,14 +26,17 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.IterableSubject;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.ProjectId;
-import io.spine.server.storage.datastore.given.Given;
+import io.spine.server.storage.datastore.given.TestDatastores;
+import io.spine.testing.TestValues;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -41,16 +44,11 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
-import static io.spine.server.storage.datastore.given.TestCases.DO_NOTHING_ON_CLOSE;
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.tenant.Namespace.of;
-import static io.spine.testing.Verify.assertContains;
-import static io.spine.testing.Verify.assertContainsAll;
-import static io.spine.testing.Verify.assertSize;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
@@ -60,16 +58,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("NamespaceIndex should")
 class NamespaceIndexTest {
 
-    private static final String TENANT_ID_STRING = "some-tenant";
+    private static TenantId newTenantId() {
+        return TenantId.newBuilder()
+                       .setValue(TestValues.randomString())
+                       .build();
+    }
 
     @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void testNulls() {
         Namespace defaultNamespace = of("some-string");
         TenantId tenantId = TenantId.getDefaultInstance();
@@ -89,14 +88,13 @@ class NamespaceIndexTest {
         Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
-        TenantId newId = TenantId.newBuilder()
-                                 .setValue(TENANT_ID_STRING)
-                                 .build();
+        TenantId newId = newTenantId();
         namespaceIndex.keep(newId);
 
         Set<TenantId> ids = namespaceIndex.getAll();
-        assertFalse(ids.isEmpty());
-        assertSize(1, ids);
+        IterableSubject assertIds = assertThat(ids);
+        assertIds.isNotNull();
+        assertIds.hasSize(1);
 
         TenantId actual = ids.iterator()
                              .next();
@@ -104,7 +102,7 @@ class NamespaceIndexTest {
     }
 
     @Test
-    @DisplayName(DO_NOTHING_ON_CLOSE)
+    @DisplayName("do nothing on close")
     void testClose() {
         NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), false);
 
@@ -122,10 +120,8 @@ class NamespaceIndexTest {
         Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
-        TenantId newId = TenantId.newBuilder()
-                                 .setValue(TENANT_ID_STRING)
-                                 .build();
-        Namespace newNamespace = of(newId, Given.testProjectId());
+        TenantId newId = newTenantId();
+        Namespace newNamespace = of(newId, TestDatastores.projectId());
 
         namespaceIndex.keep(newId);
         assertTrue(namespaceIndex.contains(newNamespace));
@@ -140,9 +136,7 @@ class NamespaceIndexTest {
         Set<TenantId> initialEmptySet = namespaceIndex.getAll();
         assertTrue(initialEmptySet.isEmpty());
 
-        TenantId fakeId = TenantId.newBuilder()
-                                  .setValue(TENANT_ID_STRING)
-                                  .build();
+        TenantId fakeId = newTenantId();
         Namespace fakeNamespace = of(fakeId, ProjectId.of("fake-prj"));
 
         assertFalse(namespaceIndex.contains(fakeNamespace));
@@ -158,7 +152,7 @@ class NamespaceIndexTest {
     @SuppressWarnings("OverlyLongMethod")
     private static void testSynchronizeAccessMethods() throws InterruptedException {
         // Initial data
-        Collection<Key> keys = new LinkedList<>();
+        Collection<Key> keys = new ArrayList<>();
         keys.add(mockKey("Vtenant1"));
         keys.add(mockKey("Vtenant2"));
         keys.add(mockKey("Vtenant3"));
@@ -172,7 +166,7 @@ class NamespaceIndexTest {
         NamespaceIndex.NamespaceQuery namespaceQuery = keys::iterator;
         // The tested object
         NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery,
-                                                           Given.testProjectId(),
+                                                           TestDatastores.projectId(),
                                                            true);
 
         // The test flow
@@ -180,29 +174,29 @@ class NamespaceIndexTest {
             // Initial value check
             Set<TenantId> initialIdsActual = namespaceIndex.getAll(); // sync
             // The keep may already be called
-            assertThat(initialIdsActual.size(), greaterThanOrEqualTo(initialTenantIds.size()));
-            @SuppressWarnings("ZeroLengthArrayAllocation") TenantId[] elements = initialTenantIds.toArray(
-                    new TenantId[0]);
-            assertContainsAll(initialIdsActual, elements);
+            assertTrue(initialIdsActual.size() >= initialTenantIds.size());
+            assertThat(initialIdsActual).containsAllIn(initialTenantIds);
 
             // Add new element
-            InternetDomain domain = InternetDomain.newBuilder()
-                                                  .setValue("my.tenant.com")
-                                                  .build();
-            TenantId newTenantId = TenantId.newBuilder()
-                                           .setDomain(domain)
-                                           .build();
+            InternetDomain domain = InternetDomain
+                    .newBuilder()
+                    .setValue("my.tenant.com")
+                    .build();
+            TenantId newTenantId = TenantId
+                    .newBuilder()
+                    .setDomain(domain)
+                    .build();
             namespaceIndex.keep(newTenantId); // sync
 
             // Check new value added
             boolean success = namespaceIndex.contains(of(newTenantId,    // sync
-                                                         Given.testProjectId()));
+                                                         TestDatastores.projectId()));
             assertTrue(success);
 
             // Check returned set has newly added element
             Set<TenantId> updatedIds = namespaceIndex.getAll(); // sync
             assertEquals(updatedIds.size(), initialTenantIds.size() + 1);
-            assertContains(newTenantId, updatedIds);
+            assertThat(updatedIds).contains(newTenantId);
         };
 
         // Test execution threads
@@ -238,6 +232,7 @@ class NamespaceIndexTest {
         return key;
     }
 
+    @SuppressWarnings("unchecked") // OK for mocking in this method.
     private static Datastore mockDatastore() {
         Datastore datastore = mock(Datastore.class);
         DatastoreOptions options = mock(DatastoreOptions.class);

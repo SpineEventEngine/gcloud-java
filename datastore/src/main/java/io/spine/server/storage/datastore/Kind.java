@@ -33,8 +33,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A data transfer object representing a Datastore
  * <a href="https://cloud.google.com/datastore/docs/concepts/entities#kinds_and_identifiers">kind</a>.
- *
- * @author Dmytro Dashenkov
  */
 public final class Kind {
 

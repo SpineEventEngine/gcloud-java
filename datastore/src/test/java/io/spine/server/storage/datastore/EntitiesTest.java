@@ -31,23 +31,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.Entities.entitiesToMessages;
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.Verify.assertSize;
 import static java.util.Collections.emptyIterator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("Entities should")
 class EntitiesTest {
 
     @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void testPrivateCtor() {
         assertHasPrivateParameterlessCtor(Entities.class);
     }
@@ -69,7 +66,8 @@ class EntitiesTest {
         List<Entity> listOfNulls = newArrayList(null, null, null, null);
         Iterator<Message> iterOfDefaults = entitiesToMessages(listOfNulls.iterator(), typeUrl);
         List<Message> listOfDefaults = newArrayList(iterOfDefaults);
-        assertSize(listOfNulls.size(), listOfDefaults);
+
+        assertThat(listOfDefaults).hasSize(listOfNulls.size());
         Project expectedValue = Project.getDefaultInstance();
         for (Message message : listOfDefaults) {
             assertEquals(expectedValue, message);

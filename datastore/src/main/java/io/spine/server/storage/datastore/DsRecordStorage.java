@@ -28,24 +28,20 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Functions;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.OrderBy;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.ColumnRecords;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.CompositeQueryParameter;
-import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.Storage;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -72,6 +68,13 @@ import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
 import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static io.spine.server.storage.datastore.Entities.entityToMessage;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.server.entity.FieldMasks.applyMask;
+import static io.spine.server.entity.storage.ColumnRecords.feedColumnsTo;
+import static io.spine.server.storage.datastore.RecordId.ofEntityId;
+import static io.spine.server.storage.datastore.Entities.activeEntity;
+import static io.spine.server.storage.datastore.Entities.entityToMessage;
+import static io.spine.server.storage.datastore.Entities.messageToEntity;
+import static java.util.Collections.emptyIterator;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
@@ -79,13 +82,12 @@ import static java.util.stream.Collectors.toList;
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
  *
- * @author Alexander Litus
- * @author Dmytro Dashenkov
  * @see DatastoreStorageFactory
  */
 public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final DatastoreWrapper datastore;
+    private final Class<I> idClass;
     private final TypeUrl typeUrl;
 
     private final DsLookupById<I> idLookup;
@@ -95,45 +97,38 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final ColumnFilterAdapter columnFilterAdapter;
     private final Class<I> idClass;
 
-    private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
+    /**
+     * Creates new {@link Builder} instance.
+     *
+     * @param <I>
+     *         the ID type of the instances built by the created {@link Builder}
+     * @return new instance of the {@link Builder}
+     */
+    public static <I> Builder<I> newBuilder() {
+        return new Builder<>();
+    }
 
     /**
-     * Creates a new storage instance.
-     *
-     * @param descriptor
-     *         the descriptor of the type of messages to save to the storage
-     * @param datastore
-     *         the Datastore implementation to use
+     * Creates new instance by the passed builder.
      */
-    protected DsRecordStorage(Descriptor descriptor, DatastoreWrapper datastore,
-                              boolean multitenant,
-                              ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry,
-                              Class<I> idClass,
-                              Class<? extends io.spine.server.entity.Entity> entityClass) {
-        super(multitenant, entityClass);
-        this.typeUrl = TypeUrl.from(descriptor);
-        this.datastore = datastore;
-        this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
-        this.idClass = checkNotNull(idClass);
+    protected DsRecordStorage(RecordStorageBuilder<I, ? extends RecordStorageBuilder> builder) {
+        super(builder.isMultitenant(), builder.getEntityClass());
+        this.typeUrl = TypeUrl.from(builder.getDescriptor());
+        this.idClass = checkNotNull(builder.getIdClass());
+        this.datastore = builder.getDatastore();
+        this.columnTypeRegistry = checkNotNull(builder.getColumnTypeRegistry());
         this.columnFilterAdapter = ColumnFilterAdapter.of(this.columnTypeRegistry);
         this.idLookup = new DsLookupById<>(this.datastore, this.typeUrl);
         this.columnLookup = new DsLookupByColumn<>(this.datastore, this.typeUrl);
     }
 
-    private DsRecordStorage(Builder<I> builder) {
-        this(builder.getDescriptor(),
-             builder.getDatastore(),
-             builder.isMultitenant(),
-             builder.getColumnTypeRegistry(),
-             builder.getIdClass(),
-             builder.getEntityClass());
+    private Key keyOf(I id) {
+        return datastore.keyFor(getKind(), ofEntityId(id));
     }
 
     @Override
     public boolean delete(I id) {
-        Key key = keyFor(datastore,
-                         getKind(),
-                         ofEntityId(id));
+        Key key = keyOf(id);
         datastore.delete(key);
 
         // Check presence
@@ -142,15 +137,16 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected @Nullable Optional<EntityRecord> readRecord(I id) {
-        Key key = keyFor(datastore, getKind(), ofEntityId(id));
+    protected @Nullable
+    Optional<EntityRecord> readRecord(I id) {
+        Key key = keyOf(id);
         Entity response = datastore.read(key);
 
         if (response == null) {
             return empty();
         }
 
-        EntityRecord result = entityToMessage(response, RECORD_TYPE_URL);
+        EntityRecord result = entityToMessage(response, Entities.RECORD_TYPE_URL);
         return of(result);
     }
 
@@ -229,12 +225,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private Iterator<EntityRecord> queryBy(EntityQuery<I> entityQuery, FieldMask fieldMask) {
         Collection<I> idFilter = entityQuery.getIds();
         QueryParameters params = entityQuery.getParameters();
-        Iterator<EntityRecord> result;
-        if (!idFilter.isEmpty()) {
-            result = queryByIdsAndColumns(idFilter, params, fieldMask);
-        } else {
-            result = queryByColumnsOnly(params, fieldMask);
-        }
+        Iterator<EntityRecord> result = idFilter.isEmpty()
+                                        ? queryByColumnsOnly(params, fieldMask)
+                                        : queryByIdsAndColumns(idFilter, params, fieldMask);
         return result;
     }
 
@@ -330,7 +323,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     splitQueriesByColumns(StructuredQuery.Builder<Entity> datastoreQuery, QueryParameters params) {
         return buildColumnFilters(params)
                 .stream()
-                .map(new FilterToQuery(datastoreQuery))
+                .map(new FilterToQuery(getKind()))
                 .collect(toList());
     }
 
@@ -367,8 +360,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
         EntityRecord entityRecord = record.getRecord();
-        Key key = keyFor(datastore, kindFrom(entityRecord), ofEntityId(id));
-        Entity incompleteEntity = Entities.messageToEntity(entityRecord, key);
+        Key key = datastore.keyFor(kindFrom(entityRecord), ofEntityId(id));
+        Entity incompleteEntity = messageToEntity(entityRecord, key);
         Entity.Builder entity = Entity.newBuilder(incompleteEntity);
 
         populateFromStorageFields(entity, record);
@@ -377,10 +370,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return completeEntity;
     }
 
-    protected void populateFromStorageFields(BaseEntity.Builder<Key, Entity.Builder> entity,
-                                             EntityRecordWithColumns record) {
+    private void populateFromStorageFields(BaseEntity.Builder<Key, Entity.Builder> entity,
+                                           EntityRecordWithColumns record) {
         if (record.hasColumns()) {
-            ColumnRecords.feedColumnsTo(entity, record, columnTypeRegistry, Functions.identity());
+            feedColumnsTo(entity, record, columnTypeRegistry, Functions.identity());
         }
     }
 
@@ -434,125 +427,21 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @return new {@link StructuredQuery}
      */
     protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
-        String entityKind = kindFrom(typeUrl).getValue();
-        StructuredQuery<Entity> query = newEntityQueryBuilder().setKind(entityKind)
-                                                               .build();
+        Kind kind = kindFrom(typeUrl);
+        StructuredQuery<Entity> query = newQuery(kind);
         return query;
     }
 
-    private static class EntityColumnPredicate implements Predicate<Entity> {
-
-        private final ColumnFilterAdapter adapter;
-        private final Iterable<CompositeQueryParameter> queryParams;
-
-        private EntityColumnPredicate(Iterable<CompositeQueryParameter> queryParams,
-                                      ColumnFilterAdapter adapter) {
-            this.adapter = adapter;
-            this.queryParams = queryParams;
-        }
-
-        @Override
-        public boolean test(@Nullable Entity entity) {
-            if (entity == null) {
-                return false;
-            }
-            for (CompositeQueryParameter filter : queryParams) {
-                boolean match;
-                CompositeColumnFilter.CompositeOperator operator = filter.getOperator();
-                switch (operator) {
-                    case ALL:
-                        match = checkAll(filter.getFilters(), entity);
-                        break;
-                    case EITHER:
-                        match = checkEither(filter.getFilters(), entity);
-                        break;
-                    case UNRECOGNIZED:      // Fall through to default strategy
-                    case CCF_CO_UNDEFINED:  // for the `default` and `faulty` enum values.
-                    default:
-                        throw newIllegalArgumentException("Composite operator %s is invalid.",
-                                                          operator);
-                }
-                if (!match) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private boolean checkAll(Multimap<EntityColumn, ColumnFilter> filters, Entity entity) {
-            for (Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
-                EntityColumn column = filter.getKey();
-                boolean matches = checkSingleParam(filter.getValue(), entity, column);
-                if (!matches) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private boolean checkEither(Multimap<EntityColumn, ColumnFilter> filters, Entity entity) {
-            for (Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
-                EntityColumn column = filter.getKey();
-                boolean matches = checkSingleParam(filter.getValue(), entity, column);
-                if (matches) {
-                    return true;
-                }
-            }
-            return filters.isEmpty();
-        }
-
-        private boolean checkSingleParam(ColumnFilter filter, Entity entity, EntityColumn column) {
-            String columnName = column.getName();
-            if (!entity.contains(columnName)) {
-                return false;
-            }
-            Object actual = entity.getValue(columnName)
-                                  .get();
-            Object expected = adapter.toValue(column, filter)
-                                     .get();
-
-            boolean result = eval(actual, filter.getOperator(), expected);
-            return result;
-        }
-    }
-
-    /**
-     * A function transforming the input {@link Filter} into a {@link StructuredQuery} with
-     * the given newBuilder.
-     */
-    private static class FilterToQuery implements Function<Filter, StructuredQuery<Entity>> {
-
-        private final StructuredQuery.Builder<Entity> builder;
-
-        private FilterToQuery(StructuredQuery.Builder<Entity> builder) {
-            this.builder = builder;
-        }
-
-        @Override
-        public StructuredQuery<Entity> apply(@Nullable Filter filter) {
-            checkNotNull(filter);
-            StructuredQuery<Entity> query = builder.setFilter(filter)
-                                                   .build();
-            return query;
-        }
-    }
-
-    /**
-     * Creates new instance of the {@link Builder}.
-     *
-     * @param <I>
-     *         the ID type of the instances built by the created {@link Builder}
-     * @return new instance of the {@link Builder}
-     */
-    public static <I> AbstractBuilder<I, Builder<I>> newBuilder() {
-        return new Builder<>();
+    private static com.google.cloud.datastore.EntityQuery newQuery(Kind kind) {
+        return Query.newEntityQueryBuilder()
+                    .setKind(kind.getValue())
+                    .build();
     }
 
     /**
      * A newBuilder for the {@code DsRecordStorage}.
      */
-    public static final class Builder<I>
-            extends AbstractBuilder<I, Builder<I>> {
+    public static final class Builder<I> extends RecordStorageBuilder<I, Builder<I>> {
 
         /**
          * Prevents direct instantiation.
@@ -574,143 +463,5 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         Builder<I> self() {
             return this;
         }
-    }
-
-    /**
-     * An implementation base for {@code DsRecordStorage} builders.
-     *
-     * @param <I>
-     *         the ID type of the stored entities
-     * @param <B>
-     *         the builder own type
-     */
-    protected abstract static class AbstractBuilder<I, B extends AbstractBuilder<I, B>> {
-
-        private Descriptor descriptor;
-        private DatastoreWrapper datastore;
-        private boolean multitenant;
-        private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
-        private Class<I> idClass;
-        private Class<? extends io.spine.server.entity.Entity> entityClass;
-
-        /**
-         * Prevents direct instantiation.
-         */
-        AbstractBuilder() {
-        }
-
-        /**
-         * @param stateTypeUrl
-         *         the type URL of the entity state, which is stored in the resulting
-         *         storage
-         */
-        public B setStateType(TypeUrl stateTypeUrl) {
-            checkNotNull(stateTypeUrl);
-            Descriptor descriptor = (Descriptor) stateTypeUrl.getDescriptor();
-            this.descriptor = checkNotNull(descriptor);
-            return self();
-        }
-
-        /**
-         * @param datastore
-         *         the {@link DatastoreWrapper} to use in this storage
-         */
-        public B setDatastore(DatastoreWrapper datastore) {
-            this.datastore = checkNotNull(datastore);
-            return self();
-        }
-
-        /**
-         * @param multitenant
-         *         {@code true} if the storage should be
-         *         {@link Storage#isMultitenant multitenant}
-         *         or not
-         */
-        public B setMultitenant(boolean multitenant) {
-            this.multitenant = multitenant;
-            return self();
-        }
-
-        /**
-         * @param columnTypeRegistry
-         *         the type registry of the
-         *         {@linkplain EntityColumn
-         *         entity columns}
-         */
-        public B setColumnTypeRegistry(
-                ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
-            this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
-            return self();
-        }
-
-        /**
-         * @param idClass
-         *         the ID class of the stored entity
-         */
-        public B setIdClass(Class<I> idClass) {
-            this.idClass = checkNotNull(idClass);
-            return self();
-        }
-
-        /**
-         * @param entityClass
-         *         the class of the stored entity
-         */
-        public B setEntityClass(Class<? extends io.spine.server.entity.Entity> entityClass) {
-            this.entityClass = checkNotNull(entityClass);
-            return self();
-        }
-
-        /**
-         * @return the {@link Descriptor} of the stored entity state type
-         */
-        public Descriptor getDescriptor() {
-            return descriptor;
-        }
-
-        /**
-         * @return the {@link DatastoreWrapper} used in this storage
-         */
-        public DatastoreWrapper getDatastore() {
-            return datastore;
-        }
-
-        /**
-         * @return {@code true} if the storage should be
-         *         {@link Storage#isMultitenant multitenant} or not
-         */
-        public boolean isMultitenant() {
-            return multitenant;
-        }
-
-        /**
-         * @return the type registry of the {@linkplain EntityColumn
-         *         entity columns}
-         */
-        public ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> getColumnTypeRegistry() {
-            return columnTypeRegistry;
-        }
-
-        /**
-         * @return the ID class of the stored entity
-         */
-        public Class<I> getIdClass() {
-            return idClass;
-        }
-
-        /**
-         * @return the class of the stored entity
-         */
-        public Class<? extends io.spine.server.entity.Entity> getEntityClass() {
-            return entityClass;
-        }
-
-        final void checkRequiredFields() {
-            checkNotNull(descriptor, "State descriptor is not set.");
-            checkNotNull(datastore, "Datastore is not set.");
-            checkNotNull(columnTypeRegistry, "Column type registry is not set.");
-        }
-
-        abstract B self();
     }
 }

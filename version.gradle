@@ -19,10 +19,17 @@
  */
 
 /**
- * This package contains components for working with the aspects of Google Cloud Datastore usage
- * beyond the {@linkplain io.spine.server.storage.Storage storage} itself.
+ * The versions of the libraries to be used.
+ *
+ * <p>This file defines versions for the dependencies that are not covered by
+ * {@code .config/gradle/dependencies.gradle}.
  */
-@ParametersAreNonnullByDefault
-package io.spine.server.datastore;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+ext {
+    spineBaseVersion = '0.11.2-SNAPSHOT'
+    spineCoreVersion = '0.11.00-SNAPSHOT'
+
+    datastoreVersion = '1.48.0'
+
+    versionToPublish = '0.11.3-SNAPSHOT'
+}

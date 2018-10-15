@@ -18,38 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-allprojects {
-    apply plugin: 'jacoco'
-}
+package io.spine.server.storage.datastore.given;
 
-subprojects {
-    project.afterEvaluate {
-        def junitPlatformTestTask = project.tasks.getByName('junitPlatformTest')
+import static java.lang.System.getenv;
 
-        // configure jacoco to analyze the junitPlatformTest task
-        jacoco {
-            // this tool version is known to be compatible with JUnit 5.
-            toolVersion = "0.7.6.201602180812"
-            applyTo junitPlatformTestTask
-        }
+/**
+ * A utility class for analyzing the test environment at runtime.
+ */
+public final class TestEnvironment {
 
-        codeCoverageReport.dependsOn {
-            subprojects*.test
-        }
-    }
-}
+    private static final String TRUE = "true";
 
-task codeCoverageReport(type: JacocoReport) {
-    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
-
-    subprojects.each {
-        sourceSets it.sourceSets.main
+    /** Prevents the utility class instantiation. */
+    private TestEnvironment() {
     }
 
-    reports {
-        xml.enabled = true
-        xml.destination = "${buildDir}/reports/jacoco/report.xml"
-        html.enabled = false
-        csv.enabled = false
+    /**
+     * Shows if the current test JVM is started within a continuous integration service.
+     *
+     * <p>This method relies on the convention for the CI services to set the {@code CI}
+     * environmental variable to {@code "true"}.
+     *
+     * @return {@code true} if the tests are run on a CI service, {@code false} otherwise
+     * @see System#getenv()
+     */
+    @SuppressWarnings("CallToSystemGetenv")
+    public static boolean runsOnCi() {
+        String ciEnvValue = getenv("CI");
+        boolean onCi = TRUE.equalsIgnoreCase(ciEnvValue);
+        return onCi;
     }
 }

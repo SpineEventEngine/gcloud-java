@@ -26,8 +26,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * A {@link NamespaceSupplier} for single-tenant storage factories.
- *
- * @author Dmytro Dashenkov
  */
 final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
 
@@ -38,14 +36,12 @@ final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
     SingleTenantNamespaceSupplier(@Nullable String namespace) {
         super();
         this.namespace = isNullOrEmpty(namespace)
-                         ? NamespaceSingleton.INSTANCE.value
+                         ? Namespace.of(DEFAULT_NAMESPACE)
                          : Namespace.of(namespace);
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @return the {@link Namespace} representing the empty string
+     * Obtains {@link Namespace} representing the empty string.
      */
     @Override
     public Namespace get() {
@@ -55,11 +51,5 @@ final class SingleTenantNamespaceSupplier extends NamespaceSupplier {
     @Override
     public boolean isMultitenant() {
         return false;
-    }
-
-    private enum NamespaceSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Namespace value = Namespace.of(DEFAULT_NAMESPACE);
     }
 }

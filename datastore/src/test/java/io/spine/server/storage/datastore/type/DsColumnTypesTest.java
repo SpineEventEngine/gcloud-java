@@ -40,17 +40,14 @@ import static com.google.cloud.datastore.BooleanValue.of;
 import static com.google.cloud.datastore.LongValue.of;
 import static com.google.cloud.datastore.StringValue.of;
 import static com.google.cloud.datastore.TimestampValue.of;
-import static io.spine.server.storage.datastore.given.TestCases.HAVE_PRIVATE_UTILITY_CTOR;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.timestampType;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("DsColumnTypes should")
 class DsColumnTypesTest {
 
@@ -63,7 +60,7 @@ class DsColumnTypesTest {
     }
 
     @Test
-    @DisplayName(HAVE_PRIVATE_UTILITY_CTOR)
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void testPrivateCtor() {
         assertHasPrivateParameterlessCtor(DsColumnTypes.class);
     }
