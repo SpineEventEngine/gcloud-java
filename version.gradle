@@ -26,10 +26,10 @@
  */
 
 ext {
-    spineBaseVersion = '0.11.2-SNAPSHOT'
-    spineCoreVersion = '0.11.00-SNAPSHOT'
+    spineBaseVersion = '0.11.4-SNAPSHOT'
+    spineCoreVersion = '0.11.4-SNAPSHOT'
 
     datastoreVersion = '1.48.0'
 
-    versionToPublish = '0.11.3-SNAPSHOT'
+    versionToPublish = '0.11.4-SNAPSHOT'
 }
