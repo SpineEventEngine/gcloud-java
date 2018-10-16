@@ -34,15 +34,12 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Streams.stream;
-import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
-import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
 import static io.spine.server.storage.datastore.DsQueryHelper.maskRecord;
 import static io.spine.server.storage.datastore.Entities.activeEntity;
+import static io.spine.server.storage.datastore.RecordId.ofEntityId;
 
 /**
  * An {@code Entity} lookup in Google Datastore using {@code Entity} identifiers.
- *
- * @author Mykhailo Drachuk
  */
 final class DsLookupById<I> {
 
@@ -78,7 +75,7 @@ final class DsLookupById<I> {
                 .filter(predicate)
                 .sorted(DsEntityComparator.implementing(orderBy))
                 .map(DsQueryHelper::toRecord)
-                .map(maskRecord(typeUrl, fieldMask))
+                .map(maskRecord(fieldMask))
                 .limit(limit)
                 .iterator();
     }
@@ -106,7 +103,7 @@ final class DsLookupById<I> {
                 .filter(predicate)
                 .sorted(DsEntityComparator.implementing(orderBy))
                 .map(DsQueryHelper::toRecord)
-                .map(maskRecord(typeUrl, fieldMask))
+                .map(maskRecord(fieldMask))
                 .iterator();
     }
 
@@ -128,7 +125,7 @@ final class DsLookupById<I> {
         return read(ids)
                 .filter(predicate)
                 .map(DsQueryHelper::toRecord)
-                .map(maskRecord(typeUrl, fieldMask))
+                .map(maskRecord(fieldMask))
                 .iterator();
     }
 
@@ -145,7 +142,7 @@ final class DsLookupById<I> {
         return read(ids)
                 .filter(activeEntity())
                 .map(DsQueryHelper::toRecord)
-                .map(maskRecord(typeUrl, fieldMask))
+                .map(maskRecord(fieldMask))
                 .iterator();
     }
 
@@ -171,7 +168,7 @@ final class DsLookupById<I> {
     private Collection<Key> toKeys(Iterable<I> ids) {
         Collection<Key> keys = newLinkedList();
         for (I id : ids) {
-            Key key = keyFor(datastore, kindFrom(typeUrl), ofEntityId(id));
+            Key key = datastore.keyFor(kindFrom(typeUrl), ofEntityId(id));
             keys.add(key);
         }
         return keys;

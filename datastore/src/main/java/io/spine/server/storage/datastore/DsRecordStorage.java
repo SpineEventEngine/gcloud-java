@@ -31,10 +31,7 @@ import com.google.common.base.Functions;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter;
 import io.spine.client.OrderBy;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.CompositeQueryParameter;
@@ -53,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.google.cloud.datastore.Query.newEntityQueryBuilder;
@@ -63,18 +59,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.storage.OperatorEvaluator.eval;
-import static io.spine.server.storage.datastore.DsIdentifiers.keyFor;
-import static io.spine.server.storage.datastore.DsIdentifiers.ofEntityId;
-import static io.spine.server.storage.datastore.Entities.entityToMessage;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.entity.storage.ColumnRecords.feedColumnsTo;
-import static io.spine.server.storage.datastore.RecordId.ofEntityId;
-import static io.spine.server.storage.datastore.Entities.activeEntity;
+import static io.spine.server.storage.datastore.Entities.RECORD_TYPE_URL;
 import static io.spine.server.storage.datastore.Entities.entityToMessage;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
-import static java.util.Collections.emptyIterator;
+import static io.spine.server.storage.datastore.RecordId.ofEntityId;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
@@ -95,7 +84,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
     private final ColumnFilterAdapter columnFilterAdapter;
-    private final Class<I> idClass;
 
     /**
      * Creates new {@link Builder} instance.
@@ -146,7 +134,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
             return empty();
         }
 
-        EntityRecord result = entityToMessage(response, Entities.RECORD_TYPE_URL);
+        EntityRecord result = entityToMessage(response, RECORD_TYPE_URL);
         return of(result);
     }
 

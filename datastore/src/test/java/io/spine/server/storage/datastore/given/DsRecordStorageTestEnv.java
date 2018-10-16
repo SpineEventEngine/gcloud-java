@@ -101,7 +101,7 @@ public class DsRecordStorageTestEnv {
     }
 
     public static TestDatastoreStorageFactory datastoreFactory() {
-        return TestDatastoreStorageFactory.getDefaultInstance();
+        return TestDatastoreStorageFactory.defaultInstance();
     }
 
     public static Pagination emptyPagination() {

@@ -38,8 +38,6 @@ import static io.spine.server.storage.datastore.DsQueryHelper.maskRecord;
 /**
  * An {@code Entity} lookup in Google Datastore using {@code Entity}
  * {@link io.spine.server.entity.storage.Column columns}.
- *
- * @author Mykhailo Drachuk
  */
 final class DsLookupByColumn<I> {
 
@@ -73,7 +71,7 @@ final class DsLookupByColumn<I> {
                                    FieldMask fieldMask) {
         return read(queries)
                 .map(DsQueryHelper::toRecord)
-                .map(maskRecord(typeUrl, fieldMask))
+                .map(maskRecord(fieldMask))
                 .iterator();
     }
 
@@ -82,7 +80,7 @@ final class DsLookupByColumn<I> {
         return read(queries)
                 .sorted(implementing(orderBy))
                 .map(DsQueryHelper::toRecord)
-                .map(maskRecord(typeUrl, fieldMask))
+                .map(maskRecord(fieldMask))
                 .iterator();
     }
 
@@ -92,7 +90,7 @@ final class DsLookupByColumn<I> {
                 .sorted(implementing(orderBy))
                 .limit(limit)
                 .map(DsQueryHelper::toRecord)
-                .map(maskRecord(typeUrl, fieldMask))
+                .map(maskRecord(fieldMask))
                 .iterator();
     }
 

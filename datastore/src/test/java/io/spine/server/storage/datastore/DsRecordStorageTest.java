@@ -23,8 +23,6 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.truth.IterableSubject;
-import com.google.protobuf.Any;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.CompositeColumnFilter;
@@ -106,7 +104,6 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.pag
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.recordIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedValues;
-import static io.spine.testing.Verify.assertContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;

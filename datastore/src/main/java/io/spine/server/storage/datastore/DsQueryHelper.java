@@ -35,19 +35,16 @@ import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.storage.datastore.Entities.entityToMessage;
 import static io.spine.validate.Validate.isDefault;
 
-/**
- * @author Mykhailo Drachuk
- */
 final class DsQueryHelper {
 
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
 
-    static Function<EntityRecord, EntityRecord> maskRecord(TypeUrl typeUrl, FieldMask fieldMask) {
+    static Function<EntityRecord, EntityRecord> maskRecord(FieldMask fieldMask) {
         return record -> {
             checkNotNull(record);
             if (!isDefault(fieldMask)) {
                 Message state = unpack(record.getState());
-                Message maskedState = applyMask(fieldMask, state, typeUrl);
+                Message maskedState = applyMask(fieldMask, state);
                 return EntityRecord.newBuilder(record)
                                    .setState(pack(maskedState))
                                    .build();
