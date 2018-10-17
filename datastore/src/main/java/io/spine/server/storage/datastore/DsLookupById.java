@@ -26,17 +26,23 @@ import com.google.protobuf.FieldMask;
 import io.spine.client.OrderBy;
 import io.spine.server.entity.EntityRecord;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Streams.stream;
+import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordActive;
+import static io.spine.server.storage.datastore.DsEntityComparator.implementing;
+import static io.spine.server.storage.datastore.DsQueryHelper.maskNullableRecord;
 import static io.spine.server.storage.datastore.DsQueryHelper.maskRecord;
-import static io.spine.server.storage.datastore.Entities.activeEntity;
 import static io.spine.server.storage.datastore.RecordId.ofEntityId;
+import static java.util.stream.Collectors.toList;
 
 /**
  * An {@code Entity} lookup in Google Datastore using {@code Entity} identifiers.
@@ -68,12 +74,15 @@ final class DsLookupById<I> {
      *         a specification of order in which the query results must be returned
      * @return an iterator over the matching entity records
      */
-    Iterator<EntityRecord> execute(Iterable<I> ids, FieldMask fieldMask,
-                                   Predicate<Entity> predicate, OrderBy orderBy,
-                                   long limit) {
+    Iterator<EntityRecord> find(Iterable<I> ids,
+                                FieldMask fieldMask,
+                                Predicate<Entity> predicate,
+                                OrderBy orderBy,
+                                long limit) {
         return read(ids)
+                .filter(Objects::nonNull)
                 .filter(predicate)
-                .sorted(DsEntityComparator.implementing(orderBy))
+                .sorted(implementing(orderBy))
                 .map(DsQueryHelper::toRecord)
                 .map(maskRecord(fieldMask))
                 .limit(limit)
@@ -84,7 +93,7 @@ final class DsLookupById<I> {
      * Queries the records with supplied identifiers which match the provided predicate,
      * and applies a field mask to the query results.
      *
-     * The results are returned in an order specified by the provided
+     * <p>The results are returned in an order specified by the provided
      * {@linkplain io.spine.client.OrderBy order clause}.
      *
      * @param ids
@@ -97,11 +106,14 @@ final class DsLookupById<I> {
      *         a specification of order in which the query results must be returned
      * @return an iterator over the matching entity records
      */
-    Iterator<EntityRecord> execute(Iterable<I> ids, FieldMask fieldMask,
-                                   Predicate<Entity> predicate, OrderBy orderBy) {
+    Iterator<EntityRecord> find(Iterable<I> ids,
+                                FieldMask fieldMask,
+                                Predicate<Entity> predicate,
+                                OrderBy orderBy) {
         return read(ids)
+                .filter(Objects::nonNull)
                 .filter(predicate)
-                .sorted(DsEntityComparator.implementing(orderBy))
+                .sorted(implementing(orderBy))
                 .map(DsQueryHelper::toRecord)
                 .map(maskRecord(fieldMask))
                 .iterator();
@@ -111,6 +123,8 @@ final class DsLookupById<I> {
      * Queries the records with supplied identifiers which match the provided predicate,
      * and applies a field mask to the query results.
      *
+     * <p>The order of the results guaranteed.
+     *
      * @param ids
      *         entity identifiers which are translated to Datastore keys
      * @param fieldMask
@@ -119,45 +133,56 @@ final class DsLookupById<I> {
      *         a predicate which must be matched by entities to be returned as results
      * @return an iterator over the matching entity records
      */
-    Iterator<EntityRecord> execute(Iterable<I> ids,
-                                   FieldMask fieldMask,
-                                   Predicate<Entity> predicate) {
+    Iterator<EntityRecord> find(Iterable<I> ids,
+                                FieldMask fieldMask,
+                                Predicate<Entity> predicate) {
         return read(ids)
+                .filter(Objects::nonNull)
                 .filter(predicate)
-                .map(DsQueryHelper::toRecord)
-                .map(maskRecord(fieldMask))
+                .map(DsQueryHelper::nullableToRecord)
+                .map(maskNullableRecord(fieldMask))
                 .iterator();
     }
 
     /**
      * Queries the records with supplied identifiers and applies a field mask to the query results.
      *
+     * <p>The results are returned in an order matching that of the provided IDs with nulls
+     * in place of missing and inactive entities.
+     *
      * @param ids
      *         entity identifiers which are translated to Datastore keys
      * @param fieldMask
      *         a field mask specifying fields to be included in resulting entities
-     * @return an iterator over the matching entity records
+     * @return an iterator over the matching nullable entity records
      */
-    Iterator<EntityRecord> execute(Iterable<I> ids, FieldMask fieldMask) {
+    Iterator<@Nullable EntityRecord> findActive(Iterable<I> ids, FieldMask fieldMask) {
         return read(ids)
-                .filter(activeEntity())
-                .map(DsQueryHelper::toRecord)
-                .map(maskRecord(fieldMask))
+                .map(DsQueryHelper::nullableToRecord)
+                .map(nullIfNot(isRecordActive()))
+                .map(maskNullableRecord(fieldMask))
                 .iterator();
     }
 
     /**
      * Queries the records with supplied identifiers.
      *
+     * <p>The results are returned in an order matching that of the provided IDs with nulls
+     * in place of missing and inactive entities.
+     *
      * @param ids
      *         entity identifiers which are translated to Datastore keys
-     * @return an iterator over the matching entity records
+     * @return an iterator over the matching nullable entity records
      */
-    Iterator<EntityRecord> execute(Iterable<I> ids) {
+    Iterator<@Nullable EntityRecord> findActive(Iterable<I> ids) {
         return read(ids)
-                .filter(activeEntity())
-                .map(DsQueryHelper::toRecord)
+                .map(DsQueryHelper::nullableToRecord)
+                .map(nullIfNot(isRecordActive()))
                 .iterator();
+    }
+
+    private static <O> Function<O, @Nullable O> nullIfNot(Predicate<O> predicate) {
+        return obj -> predicate.test(checkNotNull(obj)) ? obj : null;
     }
 
     private Stream<Entity> read(Iterable<I> ids) {
@@ -166,15 +191,8 @@ final class DsLookupById<I> {
     }
 
     private Collection<Key> toKeys(Iterable<I> ids) {
-        Collection<Key> keys = newLinkedList();
-        for (I id : ids) {
-            Key key = datastore.keyFor(kindFrom(typeUrl), ofEntityId(id));
-            keys.add(key);
-        }
-        return keys;
-    }
-
-    private static Kind kindFrom(TypeUrl typeUrl) {
-        return Kind.of(typeUrl);
+        return stream(ids)
+                .map(id -> datastore.keyFor(Kind.of(typeUrl), ofEntityId(id)))
+                .collect(toList());
     }
 }

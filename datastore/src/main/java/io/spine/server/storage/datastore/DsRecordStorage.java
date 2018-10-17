@@ -55,6 +55,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.ColumnRecords.feedColumnsTo;
+import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryParams;
 import static io.spine.server.storage.datastore.Entities.RECORD_TYPE_URL;
 import static io.spine.server.storage.datastore.Entities.entityToMessage;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
@@ -134,33 +135,27 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        return idLookup.execute(ids);
+    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids) {
+        return idLookup.findActive(ids);
     }
 
     @Override
-    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids,
-                                                         FieldMask fieldMask) {
-        return idLookup.execute(ids, fieldMask);
+    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids,
+                                                                   FieldMask fieldMask) {
+        return idLookup.findActive(ids, fieldMask);
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords() {
-        //TODO:2018-10-11:mdrachuk: return only active entities
         Iterator<EntityRecord> result = readAllRecords(FieldMask.getDefaultInstance());
         return result;
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        //TODO:2018-10-11:mdrachuk: return only active entities
-        Iterator<EntityRecord> result = queryByColumnsOnly(emptyQueryParams(), fieldMask);
+        Iterator<EntityRecord> result = queryByColumnsOnly(activeEntityQueryParams(this),
+                                                           fieldMask);
         return result;
-    }
-
-    private static QueryParameters emptyQueryParams() {
-        return QueryParameters.newBuilder()
-                              .build();
     }
 
     @Override
@@ -206,12 +201,19 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @return an iterator over the resulting entity records
      */
     private Iterator<EntityRecord> queryBy(EntityQuery<I> entityQuery, FieldMask fieldMask) {
-        Collection<I> idFilter = entityQuery.getIds();
-        QueryParameters params = entityQuery.getParameters();
+        EntityQuery<I> completeQuery = includeLifecycle(entityQuery);
+        Collection<I> idFilter = completeQuery.getIds();
+        QueryParameters params = completeQuery.getParameters();
         Iterator<EntityRecord> result = idFilter.isEmpty()
                                         ? queryByColumnsOnly(params, fieldMask)
                                         : queryByIdsAndColumns(idFilter, params, fieldMask);
         return result;
+    }
+
+    private EntityQuery<I> includeLifecycle(EntityQuery<I> entityQuery) {
+        return isLifecycleSupported() && !entityQuery.isLifecycleAttributesSet()
+               ? entityQuery.withActiveLifecycle(this)
+               : entityQuery;
     }
 
     /**
@@ -234,12 +236,12 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         Predicate<Entity> inMemPredicate = columnPredicate(params);
         if (params.ordered()) {
             if (params.limited()) {
-                return idLookup.execute(acceptableIds, fieldMask, inMemPredicate,
-                                        params.orderBy(), params.limit());
+                return idLookup.find(acceptableIds, fieldMask, inMemPredicate,
+                                     params.orderBy(), params.limit());
             }
-            return idLookup.execute(acceptableIds, fieldMask, inMemPredicate, params.orderBy());
+            return idLookup.find(acceptableIds, fieldMask, inMemPredicate, params.orderBy());
         }
-        return idLookup.execute(acceptableIds, fieldMask, inMemPredicate);
+        return idLookup.find(acceptableIds, fieldMask, inMemPredicate);
     }
 
     private Predicate<Entity> columnPredicate(QueryParameters params) {

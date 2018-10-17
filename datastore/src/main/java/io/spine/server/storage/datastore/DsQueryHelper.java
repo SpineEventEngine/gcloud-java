@@ -25,6 +25,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;
 
@@ -40,20 +41,58 @@ final class DsQueryHelper {
     private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
 
     static Function<EntityRecord, EntityRecord> maskRecord(FieldMask fieldMask) {
-        return record -> {
+        checkNotNull(fieldMask);
+        return new FieldMasker(fieldMask);
+    }
+
+    static Function<@Nullable EntityRecord, @Nullable EntityRecord>
+    maskNullableRecord(FieldMask fieldMask) {
+        checkNotNull(fieldMask);
+        return new FieldMasker(fieldMask)::applyToNullable;
+    }
+
+    private static class FieldMasker implements Function<EntityRecord, EntityRecord> {
+
+        private final FieldMask fieldMask;
+
+        private FieldMasker(FieldMask fieldMask) {
+            this.fieldMask = fieldMask;
+        }
+
+        public @Nullable EntityRecord applyToNullable(@Nullable EntityRecord record) {
+            if (record == null) {
+                return null;
+            }
+            return apply(record);
+        }
+
+        @Override
+        public EntityRecord apply(EntityRecord record) {
             checkNotNull(record);
             if (!isDefault(fieldMask)) {
-                Message state = unpack(record.getState());
-                Message maskedState = applyMask(fieldMask, state);
-                return EntityRecord.newBuilder(record)
-                                   .setState(pack(maskedState))
-                                   .build();
+                return maskRecord(record);
             }
             return record;
-        };
+        }
+
+        private EntityRecord maskRecord(EntityRecord record) {
+            Message state = unpack(record.getState());
+            Message maskedState = applyMask(fieldMask, state);
+            return EntityRecord.newBuilder(record)
+                               .setState(pack(maskedState))
+                               .build();
+        }
+    }
+
+    static @Nullable EntityRecord nullableToRecord(@Nullable Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        return toRecord(entity);
     }
 
     static EntityRecord toRecord(Entity entity) {
+        checkNotNull(entity);
         return entityToMessage(entity, RECORD_TYPE_URL);
     }
 }

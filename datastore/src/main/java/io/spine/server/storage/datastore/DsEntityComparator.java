@@ -37,7 +37,7 @@ import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotDefault;
 
-class DsEntityComparator implements Comparator<Entity>, Serializable {
+class DsEntityComparator implements Comparator<@Nullable Entity>, Serializable {
 
     private static final long serialVersionUID = 0L;
     private final String column;
@@ -47,7 +47,14 @@ class DsEntityComparator implements Comparator<Entity>, Serializable {
     }
 
     @Override
-    public int compare(Entity a, Entity b) {
+    public int compare(@Nullable Entity a, @Nullable Entity b) {
+        if (a == null) {
+            return -1;
+        }
+        if (b == null) {
+            return +1;
+        }
+
         Comparable aValue = ComparableValueExtractor.comparable(a.getValue(column));
         Comparable bValue = ComparableValueExtractor.comparable(b.getValue(column));
 
