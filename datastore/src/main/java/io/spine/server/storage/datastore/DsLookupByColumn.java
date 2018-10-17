@@ -42,11 +42,9 @@ import static io.spine.server.storage.datastore.DsQueryHelper.maskRecord;
 final class DsLookupByColumn<I> {
 
     private final DatastoreWrapper datastore;
-    private final TypeUrl typeUrl;
 
-    DsLookupByColumn(DatastoreWrapper datastore, TypeUrl url) {
+    DsLookupByColumn(DatastoreWrapper datastore) {
         this.datastore = datastore;
-        this.typeUrl = url;
     }
 
     /**
