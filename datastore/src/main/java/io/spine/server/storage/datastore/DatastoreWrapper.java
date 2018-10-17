@@ -39,10 +39,10 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
-import com.google.common.collect.UnmodifiableIterator;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,6 +57,7 @@ import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Streams.stream;
 import static io.spine.server.storage.datastore.DsQueryIterator.concat;
 import static java.lang.Math.min;
 import static java.util.stream.Collectors.toList;
@@ -197,21 +198,41 @@ public class DatastoreWrapper implements Logging {
      * <p>The resulting {@code Iterator} is evaluated lazily. A call to
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
-     * @param keys {@link Key Keys} to search for
+     * @param keys
+     *         {@link Key Keys} to search for
      * @return an {@code Iterator} over the found entities in the order of keys
-     * (including {@code null} values for nonexistent keys)
+     *         (including {@code null} values for nonexistent keys)
      * @see DatastoreReader#get(Key...)
      */
-    public Iterator<Entity> read(Iterable<Key> keys) {
+    public Iterator<@Nullable Entity> read(Iterable<Key> keys) {
+        Iterator<@Nullable Entity> dsIterator = readByKeys(keys);
+        Iterator<@Nullable Entity> result = orderByKeys(keys, dsIterator);
+        return unmodifiableIterator(result);
+    }
+
+    private Iterator<Entity> readByKeys(Iterable<Key> keys) {
         List<Key> keysList = newLinkedList(keys);
-        Iterator<Entity> result;
-        if (keysList.size() <= MAX_KEYS_PER_READ_REQUEST) {
-            result = actor.get(toArray(keys, Key.class));
-        } else {
-            result = readBulk(keysList);
+        return keysList.size() <= MAX_KEYS_PER_READ_REQUEST
+               ? actor.get(toArray(keys, Key.class))
+               : readBulk(keysList);
+    }
+
+    private static Iterator<@Nullable Entity> orderByKeys(Iterable<Key> keys, Iterator<Entity> items) {
+        List<Entity> entities = newLinkedList(() -> items);
+        return stream(keys)
+                .map(key -> getEntityOrNull(key, entities.iterator()))
+                .iterator();
+    }
+
+    private static @Nullable Entity getEntityOrNull(Key key, Iterator<Entity> entities) {
+        while (entities.hasNext()) {
+            Entity entity = entities.next();
+            if (key.equals(entity.getKey())) {
+                entities.remove();
+                return entity;
+            }
         }
-        UnmodifiableIterator<Entity> unmodifiableResult = unmodifiableIterator(result);
-        return unmodifiableResult;
+        return null;
     }
 
     /**
