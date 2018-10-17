@@ -31,7 +31,6 @@ import com.google.common.base.Functions;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.OrderBy;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.CompositeQueryParameter;
@@ -52,12 +51,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static com.google.cloud.datastore.Query.newEntityQueryBuilder;
-import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
-import static com.google.cloud.datastore.StructuredQuery.OrderBy.desc;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.ColumnRecords.feedColumnsTo;
 import static io.spine.server.storage.datastore.Entities.RECORD_TYPE_URL;
@@ -272,8 +267,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @return an iterator over the resulting entity records
      */
     private Iterator<EntityRecord> queryByColumnsOnly(QueryParameters params, FieldMask fieldMask) {
-        StructuredQuery.Builder<Entity> datastoreQuery = constructDsQuery(params);
-        Collection<StructuredQuery<Entity>> queries = splitQueriesByColumns(datastoreQuery, params);
+        Collection<StructuredQuery<Entity>> queries = splitQueriesByColumns(params);
 
         if (params.limited()) {
             return columnLookup.execute(queries, params.orderBy(), params.limit(), fieldMask);
@@ -284,31 +278,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return columnLookup.execute(queries, fieldMask);
     }
 
-    private StructuredQuery.Builder<Entity> constructDsQuery(QueryParameters params) {
-        StructuredQuery.Builder<Entity> datastoreQuery = newEntityQueryBuilder();
-        datastoreQuery.setKind(getKind().getValue());
-
-        if (params.ordered()) {
-            orderQueryBy(params.orderBy(), datastoreQuery);
-            if (params.limited()) {
-                datastoreQuery.setLimit(params.limit());
-            }
-        }
-
-        return datastoreQuery;
-    }
-
-    private static void
-    orderQueryBy(OrderBy orderBy, StructuredQuery.Builder<Entity> datastoreQuery) {
-        if (orderBy.getDirection() == ASCENDING) {
-            datastoreQuery.setOrderBy(asc(orderBy.getColumn()));
-        } else {
-            datastoreQuery.setOrderBy(desc(orderBy.getColumn()));
-        }
-    }
-
-    private List<StructuredQuery<Entity>>
-    splitQueriesByColumns(StructuredQuery.Builder<Entity> datastoreQuery, QueryParameters params) {
+    private List<StructuredQuery<Entity>> splitQueriesByColumns(QueryParameters params) {
         return buildColumnFilters(params)
                 .stream()
                 .map(new FilterToQuery(getKind()))
