@@ -49,12 +49,10 @@ final class DsLookupByColumn<I> {
 
     /**
      * Performs the given Datastore {@linkplain com.google.cloud.datastore.StructuredQuery queries}
-     * and combines results into
-     * a single lazy iterator.
+     * and combines results into a single lazy iterator.
      *
-     * <p>The resulting iterator is constructed of
-     * {@linkplain DatastoreWrapper#read(com.google.cloud.datastore.StructuredQuery) Datastore query
-     * response iterators}
+     * <p>The resulting iterator is constructed from
+     * {@linkplain DatastoreWrapper#read(StructuredQuery) Datastore query response iterators}
      * concatenated together one by one. Each of them is evaluated only after the previous one runs
      * out of records (i.e. {@code hasNext()} method returns {@code false}). The order of
      * the iterators corresponds to the order of the {@code queries}.

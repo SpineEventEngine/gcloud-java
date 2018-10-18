@@ -256,7 +256,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     /**
-     * Performs a query by entity columns.
+     * Performs a query by entity columns and other provided query parameters.
      *
      * <p>The query is performed on Datastore. A single call to this method may turn into several
      * API calls. See {@link DsFilters} for details.

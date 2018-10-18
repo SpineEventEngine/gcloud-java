@@ -58,10 +58,10 @@ final class DsLookupById<I> {
     }
 
     /**
-     * Queries the specified amount of records with supplied identifiers which match the
+     * Queries at most the specified amount of records with supplied identifiers which match the
      * provided predicate, and applies a field mask to the query results.
      *
-     * The results are returned in an order specified by the provided
+     * <p>The results are returned in an order specified by the provided
      * {@linkplain io.spine.client.OrderBy order clause}.
      *
      * @param ids
@@ -123,7 +123,7 @@ final class DsLookupById<I> {
      * Queries the records with supplied identifiers which match the provided predicate,
      * and applies a field mask to the query results.
      *
-     * <p>The order of the results guaranteed.
+     * <p>The order of the results is not guaranteed.
      *
      * @param ids
      *         entity identifiers which are translated to Datastore keys
