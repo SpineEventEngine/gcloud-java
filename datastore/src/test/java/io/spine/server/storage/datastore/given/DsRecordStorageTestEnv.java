@@ -141,23 +141,17 @@ public class DsRecordStorageTestEnv {
     }
 
     public static EntityId
-    newEntityId(AbstractEntity<? extends Message, ? extends Message> targetEntity) {
+    extractEntityId(AbstractEntity<? extends Message, ? extends Message> targetEntity) {
         return EntityId.newBuilder()
                        .setId(pack(targetEntity.getId()))
                        .build();
     }
 
     public static List<EntityId>
-    newEntityIds(Collection<CollegeEntity> targetEntities) {
+    extractEntityIds(Collection<CollegeEntity> targetEntities) {
         return targetEntities.stream()
-                             .map(DsRecordStorageTestEnv::newEntityId)
+                             .map(DsRecordStorageTestEnv::extractEntityId)
                              .collect(toList());
-    }
-
-    public static void storeEntity(RecordStorage<CollegeId> storage, CollegeEntity entity) {
-        EntityRecord record = newEntityRecord(entity.getId(), entity.getState());
-        EntityRecordWithColumns withColumns = create(record, entity, storage);
-        storage.write(entity.getId(), withColumns);
     }
 
     public static EntityRecord newEntityRecord(Message id, Message state) {
@@ -182,7 +176,7 @@ public class DsRecordStorageTestEnv {
                               .build();
     }
 
-    public static List<CollegeId> recordIds(List<EntityRecord> resultList) {
+    public static List<CollegeId> recordIds(Collection<EntityRecord> resultList) {
         return resultList.stream()
                          .map(EntityRecord::getEntityId)
                          .map(AnyPacker::unpack)
@@ -191,7 +185,7 @@ public class DsRecordStorageTestEnv {
     }
 
     public static <T extends Comparable<T>> List<CollegeId>
-    sortedIds(List<CollegeEntity> entities, Function<CollegeEntity, T> property) {
+    sortedIds(Collection<CollegeEntity> entities, Function<CollegeEntity, T> property) {
         return entities.stream()
                        .sorted(comparing(property, nullsFirst(naturalOrder())))
                        .map(AbstractEntity::getId)
@@ -199,7 +193,7 @@ public class DsRecordStorageTestEnv {
     }
 
     public static <T extends Comparable<T>> List<T>
-    sortedValues(List<CollegeEntity> entities, Function<CollegeEntity, T> property) {
+    sortedValues(Collection<CollegeEntity> entities, Function<CollegeEntity, T> property) {
         return entities.stream()
                        .sorted(comparing(property, nullsFirst(naturalOrder())))
                        .map(property)
@@ -233,7 +227,7 @@ public class DsRecordStorageTestEnv {
     }
 
     public static List<CollegeEntity>
-    createAndStoreEntities(RecordStorage<CollegeId> storage, List<String> names) {
+    createAndStoreEntities(RecordStorage<CollegeId> storage, Collection<String> names) {
         return names.stream()
                     .map(name -> createAndStoreEntity(storage, name))
                     .collect(toList());
@@ -251,28 +245,30 @@ public class DsRecordStorageTestEnv {
                                                       String name) {
         CollegeId id = newId();
         CollegeEntity entity = new CollegeEntity(id);
-        entity.injectState(newCollege(id, name, false));
+        entity.injectState(newCollege(id, name));
         storeEntity(storage, entity);
         return entity;
     }
 
-    private static College newCollege(CollegeId id, String name, boolean nullStudentCount) {
+    private static void storeEntity(RecordStorage<CollegeId> storage, CollegeEntity entity) {
+        EntityRecord record = newEntityRecord(entity.getId(), entity.getState());
+        EntityRecordWithColumns withColumns = create(record, entity, storage);
+        storage.write(entity.getId(), withColumns);
+    }
+
+    private static College newCollege(CollegeId id, String name) {
         return CollegeVBuilder.newBuilder()
                               .setId(id)
                               .setName(name)
                               .setAdmissionDeadline(randomTimestamp())
                               .setPassingGrade(randomPassingGrade())
-                              .setStudentCount(nullStudentCount ? 0 : randomStudentCount())
+                              .setStudentCount(randomStudentCount())
                               .setStateSponsored(RANDOM.nextBoolean())
                               .build();
     }
 
     private static College newCollege(CollegeId id) {
-        return newCollege(id, id.getValue(), false);
-    }
-
-    private static College newCollege(CollegeId id, boolean nullStudentCount) {
-        return newCollege(id, id.getValue(), nullStudentCount);
+        return newCollege(id, id.getValue());
     }
 
     private static int randomStudentCount() {
@@ -295,7 +291,7 @@ public class DsRecordStorageTestEnv {
                                 .build();
     }
 
-    public static void assertSortedBooleans(List<Boolean> values) {
+    public static void assertSortedBooleans(Iterable<Boolean> values) {
         int boolSwitches = 0;
         boolean lastBool = false;
         for (boolean value : values) {
@@ -307,7 +303,7 @@ public class DsRecordStorageTestEnv {
         assertEquals(1, boolSwitches);
     }
 
-    public static List<Boolean> getStateSponsoredValues(List<EntityRecord> resultList) {
+    public static List<Boolean> getStateSponsoredValues(Collection<EntityRecord> resultList) {
         return resultList.stream()
                          .map(EntityRecord::getState)
                          .map(state -> (College) unpack(state))
@@ -315,7 +311,7 @@ public class DsRecordStorageTestEnv {
                          .collect(toList());
     }
 
-    public static List<Integer> nullableStudentCount(List<EntityRecord> resultList) {
+    public static List<Integer> nullableStudentCount(Collection<EntityRecord> resultList) {
         return resultList.stream()
                          .map(EntityRecord::getState)
                          .map(state -> (College) unpack(state))
@@ -357,8 +353,6 @@ public class DsRecordStorageTestEnv {
     public static class TestConstCounterEntity
             extends AbstractVersionableEntity<ProjectId, Project> {
 
-        public static final String CREATED_COLUMN = "creationTime";
-        public static final String COUNTER_ID_COLUMN = "counterName";
         private static final int COUNTER = 42;
 
         private final Timestamp creationTime;
@@ -468,10 +462,12 @@ public class DsRecordStorageTestEnv {
 
         public enum Columns {
             CREATED("creationTime"),
+            @SuppressWarnings("DuplicateStringLiteralInspection") // "name" is a common word
             NAME("name"),
             STUDENT_COUNT("studentCount"),
             PASSING_GRADE("passingGrade"),
             ADMISSION_DEADLINE("admissionDeadline"),
+            @SuppressWarnings("DuplicateStringLiteralInspection") // generated code duplicates
             STATE_SPONSORED("stateSponsored");
 
             private final String name;

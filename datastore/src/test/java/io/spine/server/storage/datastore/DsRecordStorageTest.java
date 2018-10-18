@@ -81,7 +81,6 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.Col
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.Columns.PASSING_GRADE;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.Columns.STATE_SPONSORED;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.Columns.STUDENT_COUNT;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestConstCounterEntity.CREATED_COLUMN;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.UNORDERED_COLLEGE_NAMES;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ascendingBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.assertSortedBooleans;
@@ -95,8 +94,8 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emp
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyPagination;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.getStateSponsoredValues;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityFilters;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityId;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityIds;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.extractEntityId;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.extractEntityIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityRecord;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newIdFilter;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.nullableStudentCount;
@@ -190,7 +189,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         String bigCounter = "bigCounter";
         String counterEven = "counterEven";
         String counterVersion = "counterVersion";
-        String creationTime = CREATED_COLUMN;
+        String creationTime = CollegeEntity.Columns.CREATED.columnName();
         String counterState = "counterState";
         String version = "version";
         String archived = "archived";
@@ -348,7 +347,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         CollegeEntity targetEntity = entities.get(targetEntityIndex);
 
         // Create ID filter.
-        EntityId targetId = newEntityId(targetEntity);
+        EntityId targetId = extractEntityId(targetEntity);
         EntityIdFilter idFilter = newIdFilter(targetId);
 
         // Create column filter.
@@ -393,7 +392,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
 
         // Create ID filter.
-        List<EntityId> targetIds = newEntityIds(entities);
+        List<EntityId> targetIds = extractEntityIds(entities);
         EntityIdFilter idFilter = newIdFilter(targetIds);
 
         // Compose Query filters.
@@ -462,7 +461,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         List<CollegeEntity> entities = createAndStoreEntities(storage, recordCount);
 
         // Create ID filter.
-        List<EntityId> targetIds = newEntityIds(entities);
+        List<EntityId> targetIds = extractEntityIds(entities);
         EntityIdFilter idFilter = newIdFilter(targetIds);
 
         // Compose Query filters.
@@ -511,7 +510,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         List<CollegeEntity> entities = combine(nullEntities, regularEntities);
 
         // Create ID filter.
-        List<EntityId> targetIds = newEntityIds(entities);
+        List<EntityId> targetIds = extractEntityIds(entities);
         EntityIdFilter idFilter = newIdFilter(targetIds);
 
         // Compose Query filters.
@@ -557,7 +556,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
 
         // Create ID filter.
-        List<EntityId> targetIds = newEntityIds(entities);
+        List<EntityId> targetIds = extractEntityIds(entities);
         EntityIdFilter idFilter = newIdFilter(targetIds);
 
         // Compose Query filters.
@@ -601,7 +600,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
 
         // Create ID filter.
-        List<EntityId> targetIds = newEntityIds(entities);
+        List<EntityId> targetIds = extractEntityIds(entities);
         EntityIdFilter idFilter = newIdFilter(targetIds);
 
         // Compose Query filters.
