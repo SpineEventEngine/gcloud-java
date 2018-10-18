@@ -26,14 +26,13 @@ import com.google.common.collect.Streams;
 import com.google.protobuf.FieldMask;
 import io.spine.client.OrderBy;
 import io.spine.server.entity.EntityRecord;
-import io.spine.type.TypeUrl;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
 import static io.spine.server.storage.datastore.DsEntityComparator.implementing;
-import static io.spine.server.storage.datastore.DsQueryHelper.maskRecord;
+import static io.spine.server.storage.datastore.FieldMaskApplier.maskRecord;
 
 /**
  * An {@code Entity} lookup in Google Datastore using {@code Entity}
@@ -66,7 +65,7 @@ final class DsLookupByColumn<I> {
     Iterator<EntityRecord> execute(Collection<StructuredQuery<Entity>> queries,
                                    FieldMask fieldMask) {
         return read(queries)
-                .map(DsQueryHelper::toRecord)
+                .map(Entities::toRecord)
                 .map(maskRecord(fieldMask))
                 .iterator();
     }
@@ -75,7 +74,7 @@ final class DsLookupByColumn<I> {
                                    OrderBy orderBy, FieldMask fieldMask) {
         return read(queries)
                 .sorted(implementing(orderBy))
-                .map(DsQueryHelper::toRecord)
+                .map(Entities::toRecord)
                 .map(maskRecord(fieldMask))
                 .iterator();
     }
@@ -85,7 +84,7 @@ final class DsLookupByColumn<I> {
         return read(queries)
                 .sorted(implementing(orderBy))
                 .limit(limit)
-                .map(DsQueryHelper::toRecord)
+                .map(Entities::toRecord)
                 .map(maskRecord(fieldMask))
                 .iterator();
     }

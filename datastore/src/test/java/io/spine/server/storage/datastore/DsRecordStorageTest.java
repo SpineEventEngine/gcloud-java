@@ -248,7 +248,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         // Check entity record
         TypeUrl recordType = TypeUrl.from(EntityRecord.getDescriptor());
-        EntityRecord readRecord = Entities.entityToMessage(datastoreEntity, recordType);
+        EntityRecord readRecord = Entities.toMessage(datastoreEntity, recordType);
         assertEquals(record, readRecord);
 
         // Check custom Columns

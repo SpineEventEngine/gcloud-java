@@ -20,11 +20,9 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;
@@ -33,66 +31,47 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
-import static io.spine.server.storage.datastore.Entities.entityToMessage;
 import static io.spine.validate.Validate.isDefault;
 
-final class DsQueryHelper {
+class FieldMaskApplier {
 
-    private static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
+    private final FieldMask fieldMask;
+
+    private FieldMaskApplier(FieldMask fieldMask) {
+        this.fieldMask = fieldMask;
+    }
 
     static Function<EntityRecord, EntityRecord> maskRecord(FieldMask fieldMask) {
         checkNotNull(fieldMask);
-        return new FieldMasker(fieldMask);
+        return new FieldMaskApplier(fieldMask)::mask;
     }
 
     static Function<@Nullable EntityRecord, @Nullable EntityRecord>
     maskNullableRecord(FieldMask fieldMask) {
         checkNotNull(fieldMask);
-        return new FieldMasker(fieldMask)::applyToNullable;
+        return new FieldMaskApplier(fieldMask)::maskNullable;
     }
 
-    private static class FieldMasker implements Function<EntityRecord, EntityRecord> {
-
-        private final FieldMask fieldMask;
-
-        private FieldMasker(FieldMask fieldMask) {
-            this.fieldMask = fieldMask;
-        }
-
-        public @Nullable EntityRecord applyToNullable(@Nullable EntityRecord record) {
-            if (record == null) {
-                return null;
-            }
-            return apply(record);
-        }
-
-        @Override
-        public EntityRecord apply(EntityRecord record) {
-            checkNotNull(record);
-            if (!isDefault(fieldMask)) {
-                return maskRecord(record);
-            }
-            return record;
-        }
-
-        private EntityRecord maskRecord(EntityRecord record) {
-            Message state = unpack(record.getState());
-            Message maskedState = applyMask(fieldMask, state);
-            return EntityRecord.newBuilder(record)
-                               .setState(pack(maskedState))
-                               .build();
-        }
-    }
-
-    static @Nullable EntityRecord nullableToRecord(@Nullable Entity entity) {
-        if (entity == null) {
+    private @Nullable EntityRecord maskNullable(@Nullable EntityRecord record) {
+        if (record == null) {
             return null;
         }
-        return toRecord(entity);
+        return mask(record);
     }
 
-    static EntityRecord toRecord(Entity entity) {
-        checkNotNull(entity);
-        return entityToMessage(entity, RECORD_TYPE_URL);
+    private EntityRecord mask(EntityRecord record) {
+        checkNotNull(record);
+        if (!isDefault(fieldMask)) {
+            return maskRecord(record);
+        }
+        return record;
+    }
+
+    private EntityRecord maskRecord(EntityRecord record) {
+        Message state = unpack(record.getState());
+        Message maskedState = applyMask(fieldMask, state);
+        return EntityRecord.newBuilder(record)
+                           .setState(pack(maskedState))
+                           .build();
     }
 }

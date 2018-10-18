@@ -39,8 +39,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordActive;
 import static io.spine.server.storage.datastore.DsEntityComparator.implementing;
-import static io.spine.server.storage.datastore.DsQueryHelper.maskNullableRecord;
-import static io.spine.server.storage.datastore.DsQueryHelper.maskRecord;
+import static io.spine.server.storage.datastore.FieldMaskApplier.maskNullableRecord;
+import static io.spine.server.storage.datastore.FieldMaskApplier.maskRecord;
 import static io.spine.server.storage.datastore.RecordId.ofEntityId;
 import static java.util.stream.Collectors.toList;
 
@@ -83,7 +83,7 @@ final class DsLookupById<I> {
                 .filter(Objects::nonNull)
                 .filter(predicate)
                 .sorted(implementing(orderBy))
-                .map(DsQueryHelper::toRecord)
+                .map(Entities::toRecord)
                 .map(maskRecord(fieldMask))
                 .limit(limit)
                 .iterator();
@@ -114,7 +114,7 @@ final class DsLookupById<I> {
                 .filter(Objects::nonNull)
                 .filter(predicate)
                 .sorted(implementing(orderBy))
-                .map(DsQueryHelper::toRecord)
+                .map(Entities::toRecord)
                 .map(maskRecord(fieldMask))
                 .iterator();
     }
@@ -139,7 +139,7 @@ final class DsLookupById<I> {
         return read(ids)
                 .filter(Objects::nonNull)
                 .filter(predicate)
-                .map(DsQueryHelper::toRecord)
+                .map(Entities::toRecord)
                 .map(maskRecord(fieldMask))
                 .iterator();
     }
@@ -158,7 +158,7 @@ final class DsLookupById<I> {
      */
     Iterator<@Nullable EntityRecord> findActive(Iterable<I> ids, FieldMask fieldMask) {
         return read(ids)
-                .map(DsQueryHelper::nullableToRecord)
+                .map(Entities::nullableToRecord)
                 .map(nullIfNot(isRecordActive()))
                 .map(maskNullableRecord(fieldMask))
                 .iterator();
@@ -176,7 +176,7 @@ final class DsLookupById<I> {
      */
     Iterator<@Nullable EntityRecord> findActive(Iterable<I> ids) {
         return read(ids)
-                .map(DsQueryHelper::nullableToRecord)
+                .map(Entities::nullableToRecord)
                 .map(nullIfNot(isRecordActive()))
                 .iterator();
     }

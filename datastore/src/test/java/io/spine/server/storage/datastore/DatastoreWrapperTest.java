@@ -50,7 +50,6 @@ import java.util.NoSuchElementException;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
-import static io.spine.server.storage.datastore.Entities.messageToEntity;
 import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.GENERIC_ENTITY_KIND;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.NAMESPACE_HOLDER_KIND;
@@ -354,15 +353,14 @@ class DatastoreWrapperTest {
 
     /**
      * Cannot be moved to test environment because it uses package-local
-     * {@link io.spine.server.storage.datastore.Entities#messageToEntity(
-     *com.google.protobuf.Message, com.google.cloud.datastore.Key) messageToEntity()}.
+     * {@link Entities#fromMessage(com.google.protobuf.Message, Key) fromMessage()}.
      */
     private static Map<Key, Entity> newTestEntities(int n, DatastoreWrapper wrapper) {
         Map<Key, Entity> result = new HashMap<>(n);
         for (int i = 0; i < n; i++) {
             Any message = Any.getDefaultInstance();
             Key key = newKey(format("record-%s", i), wrapper);
-            Entity entity = messageToEntity(message, key);
+            Entity entity = Entities.fromMessage(message, key);
             result.put(key, entity);
         }
         return result;
