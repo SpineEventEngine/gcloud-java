@@ -25,6 +25,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
@@ -42,10 +43,12 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.Entities.messageToEntity;
 import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
@@ -57,10 +60,10 @@ import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.te
 import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isIn;
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -142,7 +145,7 @@ class DatastoreWrapperTest {
         void testBulkRead() throws InterruptedException {
             int bulkSize = 1001;
 
-            Map<Key, Entity> entities = createTestEntities(bulkSize, wrapper);
+            Map<Key, Entity> entities = newTestEntities(bulkSize, wrapper);
             Collection<Entity> expectedEntities = entities.values();
 
             wrapper.createOrUpdate(expectedEntities);
@@ -161,7 +164,7 @@ class DatastoreWrapperTest {
         void testBigBulkRead() throws InterruptedException {
             int bulkSize = 2001;
 
-            Map<Key, Entity> entities = createTestEntities(bulkSize, wrapper);
+            Map<Key, Entity> entities = newTestEntities(bulkSize, wrapper);
             Collection<Entity> expectedEntities = entities.values();
 
             wrapper.createOrUpdate(expectedEntities);
@@ -175,6 +178,88 @@ class DatastoreWrapperTest {
             Collection<Entity> readEntities = newArrayList(wrapper.read(query));
             assertEquals(entities.size(), readEntities.size());
             assertTrue(expectedEntities.containsAll(readEntities));
+        }
+    }
+
+    @Nested
+    @DisplayName("read entities by keys")
+    class ReadByKeys {
+
+        private TestDatastoreWrapper wrapper;
+
+        @BeforeEach
+        void setUp() {
+            wrapper = wrap(testDatastore(), false);
+        }
+
+        @AfterEach
+        void tearDown() {
+            wrapper.dropAllTables();
+        }
+
+        @Test
+        @DisplayName("replacing missing entities with null")
+        void testMissingAreNull() throws InterruptedException {
+            int bulkSize = 3;
+
+            Map<Key, Entity> entities = createAndStoreTestEntities(bulkSize);
+
+            // Wait for some time to make sure the writing is complete
+            Thread.sleep(bulkSize * 5L);
+
+            List<Key> presentKeys = newArrayList(entities.keySet());
+
+            List<Key> queryKeys = new ImmutableList.Builder<Key>()
+                    .add(newKey("missing-key-1", wrapper))
+                    .add(presentKeys.get(0))
+                    .add(presentKeys.get(1))
+                    .add(newKey("missing-key-2", wrapper))
+                    .add(presentKeys.get(2))
+                    .build();
+
+            Iterator<Entity> actualEntities = wrapper.read(queryKeys);
+
+            assertNull(actualEntities.next());
+            assertEquals(entities.get(presentKeys.get(0)), actualEntities.next());
+            assertEquals(entities.get(presentKeys.get(1)), actualEntities.next());
+            assertNull(actualEntities.next());
+            assertEquals(entities.get(presentKeys.get(2)), actualEntities.next());
+
+            assertFalse(actualEntities.hasNext());
+        }
+
+        @Test
+        @DisplayName("preserving order")
+        void test() throws InterruptedException {
+            int bulkSize = 3;
+
+            Map<Key, Entity> entities = createAndStoreTestEntities(bulkSize);
+
+            // Wait for some time to make sure the writing is complete
+            Thread.sleep(bulkSize * 5L);
+
+            List<Key> presentKeys = newArrayList(entities.keySet());
+
+            List<Key> queryKeys = new ImmutableList.Builder<Key>()
+                    .add(presentKeys.get(2))
+                    .add(presentKeys.get(0))
+                    .add(presentKeys.get(1))
+                    .build();
+
+            Iterator<Entity> actualEntities = wrapper.read(queryKeys);
+
+            assertEquals(entities.get(queryKeys.get(0)), actualEntities.next());
+            assertEquals(entities.get(queryKeys.get(1)), actualEntities.next());
+            assertEquals(entities.get(queryKeys.get(2)), actualEntities.next());
+
+            assertFalse(actualEntities.hasNext());
+        }
+
+        private Map<Key, Entity> createAndStoreTestEntities(int bulkSize) {
+            Map<Key, Entity> entities = newTestEntities(bulkSize, wrapper);
+            Collection<Entity> expectedEntities = entities.values();
+            wrapper.createOrUpdate(expectedEntities);
+            return entities;
         }
     }
 
@@ -215,7 +300,7 @@ class DatastoreWrapperTest {
     void testLazyIterator() {
         DatastoreWrapper wrapper = wrap(testDatastore(), singleTenant());
         int count = 2;
-        Map<?, Entity> entities = createTestEntities(count, wrapper);
+        Map<?, Entity> entities = newTestEntities(count, wrapper);
         Collection<Entity> expctedEntities = entities.values();
         wrapper.createOrUpdate(expctedEntities);
 
@@ -229,8 +314,8 @@ class DatastoreWrapperTest {
         assertTrue(result.hasNext());
         Entity second = result.next();
 
-        assertThat(first, isIn(expctedEntities));
-        assertThat(second, isIn(expctedEntities));
+        assertThat(expctedEntities).contains(first);
+        assertThat(expctedEntities).contains(second);
 
         assertFalse(result.hasNext());
         assertFalse(result.hasNext());
@@ -268,19 +353,26 @@ class DatastoreWrapperTest {
     }
 
     /**
-     * Cannot be moved to test environment because it uses package-local {@link RecordId} and 
+     * Cannot be moved to test environment because it uses package-local
      * {@link io.spine.server.storage.datastore.Entities#messageToEntity(
-     * com.google.protobuf.Message, com.google.cloud.datastore.Key) messageToEntity()}.
+     *com.google.protobuf.Message, com.google.cloud.datastore.Key) messageToEntity()}.
      */
-    private static Map<Key, Entity> createTestEntities(int n, DatastoreWrapper wrapper) {
+    private static Map<Key, Entity> newTestEntities(int n, DatastoreWrapper wrapper) {
         Map<Key, Entity> result = new HashMap<>(n);
         for (int i = 0; i < n; i++) {
             Any message = Any.getDefaultInstance();
-            RecordId recordId = new RecordId(String.format("record-%s", i));
-            Key key = wrapper.keyFor(GENERIC_ENTITY_KIND, recordId);
+            Key key = newKey(format("record-%s", i), wrapper);
             Entity entity = messageToEntity(message, key);
             result.put(key, entity);
         }
         return result;
+    }
+
+    /**
+     * Cannot be moved to test environment because it uses package-local {@link RecordId}.
+     */
+    private static Key newKey(String id, DatastoreWrapper wrapper) {
+        RecordId recordId = new RecordId(id);
+        return wrapper.keyFor(GENERIC_ENTITY_KIND, recordId);
     }
 }
