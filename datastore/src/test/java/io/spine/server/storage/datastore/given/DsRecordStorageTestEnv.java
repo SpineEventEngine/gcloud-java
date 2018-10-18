@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -56,11 +57,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.asList;
 import static io.spine.base.Identifier.newUuid;
@@ -71,6 +72,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static java.lang.Math.abs;
+import static java.util.Collections.shuffle;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
@@ -114,6 +116,14 @@ public class DsRecordStorageTestEnv {
 
     public static FieldMask emptyFieldMask() {
         return FieldMask.getDefaultInstance();
+    }
+
+    public static EntityIdFilter emptyIdFilter() {
+        return EntityIdFilter.getDefaultInstance();
+    }
+
+    public static EntityFilters emptyFilters() {
+        return EntityFilters.getDefaultInstance();
     }
 
     public static EntityFilters newEntityFilters(EntityIdFilter idFilter) {
@@ -161,12 +171,12 @@ public class DsRecordStorageTestEnv {
                            .build();
     }
 
-    public static OrderBy ascendingBy(String column) {
-        return orderBy(column, ASCENDING);
+    public static OrderBy ascendingBy(CollegeEntity.CollegeColumn column) {
+        return orderBy(column.columnName(), ASCENDING);
     }
 
-    public static OrderBy descendingBy(String column) {
-        return orderBy(column, DESCENDING);
+    public static OrderBy descendingBy(CollegeEntity.CollegeColumn column) {
+        return orderBy(column.columnName(), DESCENDING);
     }
 
     private static OrderBy orderBy(String column, OrderBy.Direction descending) {
@@ -206,6 +216,7 @@ public class DsRecordStorageTestEnv {
                                  .build();
     }
 
+    @CanIgnoreReturnValue
     public static List<CollegeEntity>
     createAndStoreEntities(RecordStorage<CollegeId> storage, int recordCount) {
         List<CollegeEntity> entities = new ArrayList<>(recordCount);
@@ -220,7 +231,7 @@ public class DsRecordStorageTestEnv {
     createAndStoreEntitiesWithNullStudentCount(RecordStorage<CollegeId> storage, int recordCount) {
         List<CollegeEntity> entities = new ArrayList<>(recordCount);
         for (int i = 0; i < recordCount; i++) {
-            CollegeEntity entity = createAndStoreEntity(storage);
+            CollegeEntity entity = createAndStoreEntityWithNullStudentCount(storage);
             entities.add(entity);
         }
         return entities;
@@ -234,16 +245,25 @@ public class DsRecordStorageTestEnv {
     }
 
     private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage) {
-        CollegeId id = newId();
+        CollegeId id = newCollegeId();
         CollegeEntity entity = new CollegeEntity(id);
         entity.injectState(newCollege(id));
         storeEntity(storage, entity);
         return entity;
     }
 
+    private static CollegeEntity 
+    createAndStoreEntityWithNullStudentCount(RecordStorage<CollegeId> storage) {
+        CollegeId id = newCollegeId();
+        CollegeEntity entity = new CollegeEntity(id);
+        entity.injectState(newCollege(id, 0));
+        storeEntity(storage, entity);
+        return entity;
+    }
+
     private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage,
                                                       String name) {
-        CollegeId id = newId();
+        CollegeId id = newCollegeId();
         CollegeEntity entity = new CollegeEntity(id);
         entity.injectState(newCollege(id, name));
         storeEntity(storage, entity);
@@ -256,19 +276,33 @@ public class DsRecordStorageTestEnv {
         storage.write(entity.getId(), withColumns);
     }
 
+    public static CollegeId newCollegeId() {
+        return CollegeIdVBuilder.newBuilder()
+                                .setValue(newUuid())
+                                .build();
+    }
+
+    private static College newCollege(CollegeId id) {
+        return newCollege(id, id.getValue());
+    }
+
     private static College newCollege(CollegeId id, String name) {
+        return newCollege(id, name, randomStudentCount());
+    }
+
+    private static College newCollege(CollegeId id, int studentCount) {
+        return newCollege(id, id.getValue(), studentCount);
+    }
+
+    private static College newCollege(CollegeId id, String name, int studentCount) {
         return CollegeVBuilder.newBuilder()
                               .setId(id)
                               .setName(name)
                               .setAdmissionDeadline(randomTimestamp())
                               .setPassingGrade(randomPassingGrade())
-                              .setStudentCount(randomStudentCount())
+                              .setStudentCount(studentCount)
                               .setStateSponsored(RANDOM.nextBoolean())
                               .build();
-    }
-
-    private static College newCollege(CollegeId id) {
-        return newCollege(id, id.getValue());
     }
 
     private static int randomStudentCount() {
@@ -285,10 +319,10 @@ public class DsRecordStorageTestEnv {
                                 .build();
     }
 
-    private static CollegeId newId() {
-        return CollegeIdVBuilder.newBuilder()
-                                .setValue(newUuid())
-                                .build();
+    public static FieldMask newFieldMask(String... paths) {
+        return FieldMask.newBuilder()
+                        .addAllPaths(Arrays.asList(paths))
+                        .build();
     }
 
     public static void assertSortedBooleans(Iterable<Boolean> values) {
@@ -322,8 +356,16 @@ public class DsRecordStorageTestEnv {
 
     public static List<CollegeEntity> combine(Collection<CollegeEntity> nullEntities,
                                               Collection<CollegeEntity> regularEntities) {
-        Stream<CollegeEntity> combination = concat(nullEntities.stream(), regularEntities.stream());
-        return unmodifiableList(combination.collect(toList()));
+        List<CollegeEntity> combination =
+                concat(nullEntities.stream(), regularEntities.stream()).collect(toList());
+        shuffle(combination);
+        return unmodifiableList(combination);
+    }
+
+    public static EntityId newEntityId(Message message) {
+        return EntityId.newBuilder()
+                       .setId(pack(message))
+                       .build();
     }
 
     /*
@@ -460,19 +502,19 @@ public class DsRecordStorageTestEnv {
             updateState(state);
         }
 
-        public enum Columns {
+        public enum CollegeColumn {
             CREATED("creationTime"),
             @SuppressWarnings("DuplicateStringLiteralInspection") // "name" is a common word
-            NAME("name"),
+                    NAME("name"),
             STUDENT_COUNT("studentCount"),
             PASSING_GRADE("passingGrade"),
             ADMISSION_DEADLINE("admissionDeadline"),
             @SuppressWarnings("DuplicateStringLiteralInspection") // generated code duplicates
-            STATE_SPONSORED("stateSponsored");
+                    STATE_SPONSORED("stateSponsored");
 
             private final String name;
 
-            Columns(String name) {
+            CollegeColumn(String name) {
                 this.name = name;
             }
 
