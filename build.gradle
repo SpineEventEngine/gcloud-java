@@ -57,6 +57,8 @@ ext {
 allprojects {
     apply plugin: 'maven'
     apply plugin: 'jacoco'
+    apply plugin: 'idea'
+
 
     group = 'io.spine.gcloud'
     version = project.versionToPublish
@@ -131,6 +133,32 @@ subprojects {
         testImplementation deps.test.guavaTestlib
 
         testRuntime deps.test.slf4j
+    }
+
+    // Apply the same IDEA module configuration for each of sub-projects.
+    idea {
+        module {
+            generatedSourceDirs += file(generatedJavaDir)
+            generatedSourceDirs += file(generatedGrpcDir)
+            generatedSourceDirs += file(generatedSpineDir)
+            generatedSourceDirs += file(generatedTestJavaDir)
+            generatedSourceDirs += file(generatedTestGrpcDir)
+            generatedSourceDirs += file(generatedTestSpineDir)
+            
+            testSourceDirs += file(generatedTestJavaDir)
+            
+            downloadJavadoc = true
+            downloadSources = true
+
+            iml {
+                beforeMerged { final module ->
+                    module.dependencies.clear()
+                }
+                whenMerged { final module ->
+                    module.dependencies*.exported = true
+                }
+            }
+        }
     }
 
     apply from: "$rootDir/config/gradle/test-output.gradle"
