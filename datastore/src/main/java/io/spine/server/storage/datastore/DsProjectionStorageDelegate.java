@@ -20,13 +20,6 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.StructuredQuery;
-import io.spine.type.TypeUrl;
-
-import static io.spine.server.storage.datastore.DsFilters.activeEntity;
-
 /**
  * A {@link io.spine.server.storage.RecordStorage RecordStorage} to which
  * {@link DsProjectionStorage} delegates its operations.
@@ -38,27 +31,6 @@ public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
 
     private DsProjectionStorageDelegate(Builder<I> builder) {
         super(builder);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>{@code DsProjectionStorageDelegate} implementation takes advantage of
-     * {@link io.spine.server.projection.Projection Projection} being an
-     * {@link io.spine.server.entity.EntityWithLifecycle EntityWithLifecycle} by filtering out
-     * the non-active entities on the database side.
-     *
-     * @see DsFilters#activeEntity() the active entity filter
-     */
-    @Override
-    protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
-        String entityKind = kindFrom(typeUrl).getValue();
-        StructuredQuery<Entity> query =
-                Query.newEntityQueryBuilder()
-                     .setKind(entityKind)
-                     .setFilter(activeEntity())
-                     .build();
-        return query;
     }
 
     /**

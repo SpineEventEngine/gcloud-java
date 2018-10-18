@@ -52,8 +52,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Optional.empty;
@@ -66,11 +64,6 @@ import static java.util.stream.Collectors.toList;
  * @author Dmytro Dashenkov
  */
 final class DsFilters {
-
-    private static final Filter ACTIVE_ENTITY_FILTER = and(
-            eq(archived.name(), false),
-            eq(deleted.name(), false)
-    );
 
     /**
      * Matches the {@link CompositeQueryParameter} instances joined by
@@ -95,16 +88,6 @@ final class DsFilters {
      * Prevents the utility class instantiation.
      */
     private DsFilters() {
-    }
-
-    /**
-     * Retrieves a {@linkplain Filter Datastore entity filter}, which filters out all records marked
-     * as {@code archived} or {@code deleted}.
-     *
-     * @return active entity Datastore filter
-     */
-    static Filter activeEntity() {
-        return ACTIVE_ENTITY_FILTER;
     }
 
     /**

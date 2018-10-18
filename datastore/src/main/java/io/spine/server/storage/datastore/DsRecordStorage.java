@@ -23,7 +23,6 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.annotations.VisibleForTesting;
@@ -377,25 +376,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     protected Kind getKind() {
         return kindFrom(typeUrl);
-    }
-
-    /**
-     * Constructs a Datastore {@link Query}, which fetches all the records of the given type.
-     *
-     * @param typeUrl
-     *         the type of the records to fetch
-     * @return new {@link StructuredQuery}
-     */
-    protected StructuredQuery<Entity> buildAllQuery(TypeUrl typeUrl) {
-        Kind kind = kindFrom(typeUrl);
-        StructuredQuery<Entity> query = newQuery(kind);
-        return query;
-    }
-
-    private static com.google.cloud.datastore.EntityQuery newQuery(Kind kind) {
-        return Query.newEntityQueryBuilder()
-                    .setKind(kind.getValue())
-                    .build();
     }
 
     /**
