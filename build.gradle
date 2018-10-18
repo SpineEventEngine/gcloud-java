@@ -137,7 +137,6 @@ subprojects {
     apply plugin: 'com.google.protobuf'
     apply plugin: spineProtobufPluginId
 
-
     sourceSets {
         main {
             proto.srcDirs "$sourcesRootDir/main/proto"
