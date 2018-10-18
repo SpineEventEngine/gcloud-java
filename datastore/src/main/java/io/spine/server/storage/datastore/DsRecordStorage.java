@@ -268,7 +268,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * @return an iterator over the resulting entity records
      */
     private Iterator<EntityRecord> queryByColumnsOnly(QueryParameters params, FieldMask fieldMask) {
-        Collection<StructuredQuery<Entity>> queries = splitQueriesByColumns(params);
+        Collection<StructuredQuery<Entity>> queries = splitToMultipleDsQueries(params);
 
         if (params.limited()) {
             return columnLookup.execute(queries, params.orderBy(), params.limit(), fieldMask);
@@ -279,15 +279,15 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return columnLookup.execute(queries, fieldMask);
     }
 
-    private List<StructuredQuery<Entity>> splitQueriesByColumns(QueryParameters params) {
-        return buildColumnFilters(params)
+    private List<StructuredQuery<Entity>> splitToMultipleDsQueries(QueryParameters params) {
+        return buildDsFilters(params)
                 .stream()
                 .map(new FilterToQuery(getKind()))
                 .collect(toList());
     }
 
     private Collection<Filter>
-    buildColumnFilters(Iterable<CompositeQueryParameter> compositeParameters) {
+    buildDsFilters(Iterable<CompositeQueryParameter> compositeParameters) {
         Collection<CompositeQueryParameter> params = newArrayList(compositeParameters);
         Collection<Filter> predicate = DsFilters.fromParams(params, columnFilterAdapter);
         return predicate;
