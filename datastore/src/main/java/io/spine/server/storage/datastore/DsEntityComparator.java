@@ -47,13 +47,9 @@ class DsEntityComparator implements Comparator<@Nullable Entity>, Serializable {
     }
 
     @Override
-    public int compare(@Nullable Entity a, @Nullable Entity b) {
-        if (a == null) {
-            return -1;
-        }
-        if (b == null) {
-            return +1;
-        }
+    public int compare(Entity a, Entity b) {
+        checkNotNull(a);
+        checkNotNull(b);
 
         Comparable aValue = ComparableValueExtractor.comparable(a.getValue(column));
         Comparable bValue = ComparableValueExtractor.comparable(b.getValue(column));
