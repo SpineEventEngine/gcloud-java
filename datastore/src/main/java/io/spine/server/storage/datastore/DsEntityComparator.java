@@ -37,7 +37,7 @@ import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotDefault;
 
-class DsEntityComparator implements Comparator<@Nullable Entity>, Serializable {
+class DsEntityComparator implements Comparator<Entity>, Serializable {
 
     private static final long serialVersionUID = 0L;
     private final String column;
