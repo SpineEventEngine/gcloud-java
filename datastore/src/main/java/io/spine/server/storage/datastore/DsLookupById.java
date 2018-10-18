@@ -139,8 +139,8 @@ final class DsLookupById<I> {
         return read(ids)
                 .filter(Objects::nonNull)
                 .filter(predicate)
-                .map(DsQueryHelper::nullableToRecord)
-                .map(maskNullableRecord(fieldMask))
+                .map(DsQueryHelper::toRecord)
+                .map(maskRecord(fieldMask))
                 .iterator();
     }
 
