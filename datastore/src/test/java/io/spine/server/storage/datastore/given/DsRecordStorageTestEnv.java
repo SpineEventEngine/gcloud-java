@@ -80,7 +80,7 @@ import static java.util.stream.Stream.concat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * A test environment for {@link io.spine.server.storage.datastore.DsRecordStorageTest}
+ * A test environment for {@link io.spine.server.storage.datastore.DsRecordStorageTest}.
  *
  * @author Mykhailo Drachuk
  */
