@@ -179,7 +179,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         if (params.ordered()) {
             return false;
         }
-
+        //noinspection RedundantIfStatement cleaner with each rule out condition stated explicitly
         if (params.limited()) {
             return false;
         }
