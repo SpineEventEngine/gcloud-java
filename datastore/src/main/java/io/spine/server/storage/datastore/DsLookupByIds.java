@@ -185,7 +185,7 @@ final class DsLookupByIds<I> {
         return obj -> predicate.test(checkNotNull(obj)) ? obj : null;
     }
 
-    private Stream<Entity> read(Iterable<I> ids) {
+    private Stream<@Nullable Entity> read(Iterable<I> ids) {
         Collection<Key> keys = toKeys(ids);
         return stream(datastore.read(keys));
     }

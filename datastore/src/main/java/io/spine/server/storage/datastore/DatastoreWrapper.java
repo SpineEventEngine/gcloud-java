@@ -210,7 +210,7 @@ public class DatastoreWrapper implements Logging {
         return unmodifiableIterator(result);
     }
 
-    private Iterator<Entity> readByKeys(Iterable<Key> keys) {
+    private Iterator<@Nullable Entity> readByKeys(Iterable<Key> keys) {
         List<Key> keysList = newLinkedList(keys);
         return keysList.size() <= MAX_KEYS_PER_READ_REQUEST
                ? actor.get(toArray(keys, Key.class))
