@@ -37,6 +37,12 @@ import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotDefault;
 
+/**
+ * A comparator for {@linkplain Entity Datastore entities} by attributes corresponding to
+ * {@linkplain io.spine.server.entity.storage.Column Spine entity columns}.
+ *
+ * <p>Comparator instances are supplied column and direction using {@link OrderBy} clause.
+ */
 class DsEntityComparator implements Comparator<Entity>, Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -65,6 +71,9 @@ class DsEntityComparator implements Comparator<Entity>, Serializable {
         return aValue.compareTo(bValue);
     }
 
+    /**
+     * Creates an entity comparator instance which implements the provided {@link OrderBy} clause.
+     */
     static Comparator<Entity> implementing(OrderBy orderBy) {
         checkNotNull(orderBy);
         checkNotDefault(orderBy);
