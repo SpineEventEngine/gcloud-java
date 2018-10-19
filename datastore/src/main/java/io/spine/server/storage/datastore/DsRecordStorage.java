@@ -370,12 +370,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return kind;
     }
 
-    static Kind kindFrom(TypeUrl typeUrl) {
-        return Kind.of(typeUrl);
-    }
-
     protected Kind getKind() {
-        return kindFrom(typeUrl);
+        return Kind.of(typeUrl);
     }
 
     /**
