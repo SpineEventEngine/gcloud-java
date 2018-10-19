@@ -46,8 +46,6 @@ import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
  *     <li>{@link Version};
  *     <li>and {@link AbstractMessage} values.
  * </ul>
- *
- * @author Dmytro Dashenkov
  */
 final class DsColumnTypes {
 
