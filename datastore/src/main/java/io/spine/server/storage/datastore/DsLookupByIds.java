@@ -47,12 +47,12 @@ import static java.util.stream.Collectors.toList;
 /**
  * An {@code Entity} lookup in Google Datastore using {@code Entity} identifiers.
  */
-final class DsLookupById<I> {
+final class DsLookupByIds<I> {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
 
-    DsLookupById(DatastoreWrapper datastore, TypeUrl url) {
+    DsLookupByIds(DatastoreWrapper datastore, TypeUrl url) {
         this.datastore = datastore;
         this.typeUrl = url;
     }

@@ -252,13 +252,13 @@ public class DatastoreWrapper implements Logging {
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @see DatastoreReader#run(Query)
      */
-    public Iterator<Entity> read(StructuredQuery<Entity> query) {
+    public DsQueryIterator read(StructuredQuery<Entity> query) {
         Namespace namespace = getNamespace();
         StructuredQuery<Entity> queryWithNamespace =
                 query.toBuilder()
                      .setNamespace(namespace.getValue())
                      .build();
-        Iterator<Entity> result = new DsQueryIterator(queryWithNamespace, actor);
+        DsQueryIterator result = new DsQueryIterator(queryWithNamespace, actor);
         return result;
     }
 

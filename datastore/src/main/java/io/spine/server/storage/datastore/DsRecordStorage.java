@@ -23,7 +23,6 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Functions;
@@ -44,7 +43,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -61,7 +59,6 @@ import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.server.storage.datastore.RecordId.ofEntityId;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static java.util.stream.Collectors.toList;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -74,8 +71,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final Class<I> idClass;
     private final TypeUrl typeUrl;
 
-    private final DsLookupById<I> idLookup;
-    private final DsLookupByColumn<I> columnLookup;
+    private final DsLookupByIds<I> idLookup;
+    private final DsLookupByQueries columnLookup;
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
     private final ColumnFilterAdapter columnFilterAdapter;
@@ -101,8 +98,9 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.datastore = builder.getDatastore();
         this.columnTypeRegistry = checkNotNull(builder.getColumnTypeRegistry());
         this.columnFilterAdapter = ColumnFilterAdapter.of(this.columnTypeRegistry);
-        this.idLookup = new DsLookupById<>(this.datastore, this.typeUrl);
-        this.columnLookup = new DsLookupByColumn<>(this.datastore);
+        this.idLookup = new DsLookupByIds<>(this.datastore, this.typeUrl);
+        this.columnLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
+                                                  this.columnFilterAdapter);
     }
 
     private Key keyOf(I id) {
@@ -152,8 +150,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        Iterator<EntityRecord> result = queryByColumnsOnly(activeEntityQueryParams(this),
-                                                           fieldMask);
+        Iterator<EntityRecord> result = columnLookup.find(activeEntityQueryParams(this), fieldMask);
         return result;
     }
 
@@ -204,7 +201,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         Collection<I> idFilter = completeQuery.getIds();
         QueryParameters params = completeQuery.getParameters();
         Iterator<EntityRecord> result = idFilter.isEmpty()
-                                        ? queryByColumnsOnly(params, fieldMask)
+                                        ? columnLookup.find(params, fieldMask)
                                         : queryByIdsAndColumns(idFilter, params, fieldMask);
         return result;
     }
@@ -253,44 +250,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private static boolean notEmpty(QueryParameters params) {
         return params.iterator()
                      .hasNext();
-    }
-
-    /**
-     * Performs a query by entity columns and other provided query parameters.
-     *
-     * <p>The query is performed on Datastore. A single call to this method may turn into several
-     * API calls. See {@link DsFilters} for details.
-     *
-     * @param params
-     *         the by-column query parameters
-     * @param fieldMask
-     *         the {@code FieldMask} to apply to all the retrieved entity states
-     * @return an iterator over the resulting entity records
-     */
-    private Iterator<EntityRecord> queryByColumnsOnly(QueryParameters params, FieldMask fieldMask) {
-        Collection<StructuredQuery<Entity>> queries = splitToMultipleDsQueries(params);
-
-        if (params.limited()) {
-            return columnLookup.execute(queries, params.orderBy(), params.limit(), fieldMask);
-        }
-        if (params.ordered()) {
-            return columnLookup.execute(queries, params.orderBy(), fieldMask);
-        }
-        return columnLookup.execute(queries, fieldMask);
-    }
-
-    private List<StructuredQuery<Entity>> splitToMultipleDsQueries(QueryParameters params) {
-        return buildDsFilters(params)
-                .stream()
-                .map(new FilterToQuery(getKind()))
-                .collect(toList());
-    }
-
-    private Collection<Filter>
-    buildDsFilters(Iterable<CompositeQueryParameter> compositeParameters) {
-        Collection<CompositeQueryParameter> params = newArrayList(compositeParameters);
-        Collection<Filter> predicate = DsFilters.fromParams(params, columnFilterAdapter);
-        return predicate;
     }
 
     /**

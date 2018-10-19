@@ -23,7 +23,6 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.DatastoreReaderWriter;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.Iterators;
@@ -52,15 +51,17 @@ import java.util.NoSuchElementException;
 final class DsQueryIterator extends UnmodifiableIterator<Entity> {
 
     private final StructuredQuery<Entity> query;
-    private final DatastoreReaderWriter datastore;
-    private QueryResults<Entity> currentPage;
+    private final QueryResults<Entity> currentPage;
+
+    private final Integer limit;
+    private int readCount = 0;
 
     private boolean terminated;
 
     DsQueryIterator(StructuredQuery<Entity> query, DatastoreReaderWriter datastore) {
         super();
         this.query = query;
-        this.datastore = datastore;
+        this.limit = query.getLimit();
         this.currentPage = datastore.run(query);
     }
 
@@ -69,15 +70,32 @@ final class DsQueryIterator extends UnmodifiableIterator<Entity> {
         if (terminated) {
             return false;
         }
-        if (currentPage.hasNext()) {
-            return true;
+        if (limitMet()) {
+            terminate();
+            return false;
         }
-        currentPage = computeNextPage();
         if (!currentPage.hasNext()) {
-            terminated = true;
+            terminate();
             return false;
         }
         return true;
+    }
+
+    private boolean limitMet() {
+        return limit != null && readCount >= limit;
+    }
+
+    private void terminate() {
+        terminated = true;
+    }
+
+    StructuredQuery<Entity> nextPageQuery() {
+        Cursor cursorAfter = currentPage.getCursorAfter();
+        StructuredQuery<Entity> queryForMoreResults =
+                query.toBuilder()
+                     .setStartCursor(cursorAfter)
+                     .build();
+        return queryForMoreResults;
     }
 
     @Override
@@ -86,17 +104,8 @@ final class DsQueryIterator extends UnmodifiableIterator<Entity> {
             throw new NoSuchElementException("The query results Iterator is empty.");
         }
         Entity result = currentPage.next();
+        readCount++;
         return result;
-    }
-
-    private QueryResults<Entity> computeNextPage() {
-        Cursor cursorAfter = currentPage.getCursorAfter();
-        Query<Entity> queryForMoreResults =
-                query.toBuilder()
-                     .setStartCursor(cursorAfter)
-                     .build();
-        QueryResults<Entity> nextPage = datastore.run(queryForMoreResults);
-        return nextPage;
     }
 
     static Iterator<Entity> concat(@Nullable Iterator<Entity> first, Iterator<Entity> second) {

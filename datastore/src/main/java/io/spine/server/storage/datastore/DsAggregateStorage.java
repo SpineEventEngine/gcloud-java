@@ -26,6 +26,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Streams;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
@@ -39,11 +40,12 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -105,7 +107,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         EntityClass<? extends Aggregate<I, ?, ?>> modelClass = asEntityClass(cls);
         @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
-        Class<I> idClass = (Class<I>) modelClass.getIdClass();
+                Class<I> idClass = (Class<I>) modelClass.getIdClass();
         this.idClass = idClass;
         this.stateTypeName = modelClass.getStateType()
                                        .toName();
@@ -186,11 +188,13 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         StructuredQuery<Entity> query = historyBackwardQuery(request);
-        Iterator<Entity> eventEntities = datastore.read(query);
-        Function<Entity, AggregateEventRecord> toRecords = 
+        Function<Entity, AggregateEventRecord> toRecords =
                 Entities.toMessage(AGGREGATE_RECORD_TYPE_URL);
-        Iterator<AggregateEventRecord> result = stream(eventEntities).map(toRecords)
-                                                                     .iterator();
+        Iterator<AggregateEventRecord> result =
+                stream(new DsQueryPageIterator(query, datastore))
+                        .flatMap(Streams::stream)
+                        .map(toRecords)
+                        .iterator();
         return result;
     }
 
