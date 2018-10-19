@@ -54,12 +54,13 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.toArray;
+import static com.google.common.collect.Iterators.concat;
 import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Streams.stream;
-import static io.spine.server.storage.datastore.DsQueryIterator.concat;
 import static java.lang.Math.min;
+import static java.util.Collections.emptyIterator;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -426,7 +427,8 @@ public class DatastoreWrapper implements Logging {
      * single call — 1000 entities per query. To deal with this limitation we read the entities in
      * pagination fashion 1000 entity per page.
      *
-     * @param keys {@link Key keys} to find the entities for
+     * @param keys
+     *         {@link Key keys} to find the entities for
      * @return ordered sequence of {@link Entity entities}
      * @see #read(Iterable)
      */
@@ -437,7 +439,7 @@ public class DatastoreWrapper implements Logging {
         int lowerBound = 0;
         int higherBound = MAX_KEYS_PER_READ_REQUEST;
         int keysLeft = keys.size();
-        Iterator<Entity> result = null;
+        Iterator<Entity> result = emptyIterator();
         for (int i = 0; i < pageCount; i++) {
             List<Key> keysPage = keys.subList(lowerBound, higherBound);
 

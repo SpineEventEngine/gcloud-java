@@ -107,11 +107,4 @@ final class DsQueryIterator extends UnmodifiableIterator<Entity> {
         readCount++;
         return result;
     }
-
-    static Iterator<Entity> concat(@Nullable Iterator<Entity> first, Iterator<Entity> second) {
-        if (first == null) {
-            return second;
-        }
-        return Iterators.concat(first, second);
-    }
 }
