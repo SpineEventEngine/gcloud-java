@@ -659,7 +659,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
     @Nested
     @DisplayName("lookup records in Datastore by columns")
-    class LookupByColumnsOnly {
+    class LookupByQueries {
 
         private DatastoreStorageFactory storageFactory;
         private RecordStorage<CollegeId> storage;
@@ -784,7 +784,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @Test
         @DisplayName("in descending sort order")
-        void testQueryByIDsWithDescendingOrder() {
+        void testQueryWithDescendingOrder() {
             // Create entities.
             int expectedRecordCount = UNORDERED_COLLEGE_NAMES.size();
             List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
@@ -811,26 +811,26 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @Test
         @DisplayName("in an order specified by string field")
-        void testQueryByIDsWithOrderByString() {
+        void testQueryWithOrderByString() {
             testOrdering(NAME, CollegeEntity::getName);
         }
 
         @Test
         @DisplayName("in order specified by double field")
-        void testQueryByIDsWithOrderByDouble() {
+        void testQueryWithOrderByDouble() {
             testOrdering(PASSING_GRADE, CollegeEntity::getPassingGrade);
         }
 
         @Test
         @DisplayName("in order specified by timestamp field")
-        void testQueryByIDsWithOrderByTimestamp() {
+        void testQueryWithOrderByTimestamp() {
             testOrdering(ADMISSION_DEADLINE, entity -> entity.getAdmissionDeadline()
                                                              .getSeconds());
         }
 
         @Test
         @DisplayName("in an order specified by integer")
-        void testQueryByIDsWithOrderByInt() {
+        void testQueryWithOrderByInt() {
             testOrdering(STUDENT_COUNT, CollegeEntity::getStudentCount);
         }
 
@@ -865,7 +865,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @Test
         @DisplayName("in an order specified by boolean")
-        void testQueryByIDsWithOrderByBoolean() {
+        void testQueryWithOrderByBoolean() {
             // Create entities.
             int recordCount = 20;
             createAndStoreEntities(storage, recordCount);
@@ -892,7 +892,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @Test
         @DisplayName("in specified order with nulls")
-        void testQueryByIDsWithOrderWithNulls() {
+        void testQueryWithOrderWithNulls() {
             // Create entities.
             int nullCount = 5;
             int regularCount = 12;
@@ -926,7 +926,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @Test
         @DisplayName("a specified number of entities")
-        void testQueryByIDsWithLimit() {
+        void testQueryWithLimit() {
             // Create entities.
             int expectedRecordCount = 4;
             List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
