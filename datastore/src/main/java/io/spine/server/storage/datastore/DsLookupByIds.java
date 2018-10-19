@@ -46,6 +46,9 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * An {@code Entity} lookup in Google Datastore using {@code Entity} identifiers.
+ *
+ * @implNote Lookup is performed by reading the all entities with Keys matching IDs from
+ *         Datastore and all processing executed in-memory.
  */
 final class DsLookupByIds<I> {
 
