@@ -143,7 +143,7 @@ class DsEntityComparator implements Comparator<Entity>, Serializable {
             return type == valueType;
         }
 
-        static @Nullable Comparable comparable(Value<?> value) {
+        private static @Nullable Comparable comparable(Value<?> value) {
             ValueType type = value.getType();
             ComparableValueExtractor extractor = pickForType(type);
             return extractor.extract(value);
