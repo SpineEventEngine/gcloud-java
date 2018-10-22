@@ -25,7 +25,6 @@ import com.google.cloud.datastore.Key;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
-import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
