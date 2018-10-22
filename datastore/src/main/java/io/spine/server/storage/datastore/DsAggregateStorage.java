@@ -45,7 +45,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
