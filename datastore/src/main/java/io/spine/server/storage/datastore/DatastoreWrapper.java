@@ -218,7 +218,8 @@ public class DatastoreWrapper implements Logging {
                : readBulk(keysList);
     }
 
-    private static Iterator<@Nullable Entity> orderByKeys(Iterable<Key> keys, Iterator<Entity> items) {
+    private static Iterator<@Nullable Entity> orderByKeys(Iterable<Key> keys,
+                                                          Iterator<Entity> items) {
         List<Entity> entities = newLinkedList(() -> items);
         return stream(keys)
                 .map(key -> getEntityOrNull(key, entities.iterator()))
@@ -245,7 +246,7 @@ public class DatastoreWrapper implements Logging {
      * <p>The limit included in the {@link StructuredQuery}, will be a maximum count of entities
      * in the returned iterator.
      *
-     * <p>The returned {@link DsQueryIterator} allows to {@link DsQueryIterator#nextPageQuery()
+     * <p>The returned {@link DsQueryIterator} allows to {@linkplain DsQueryIterator#nextPageQuery()
      * create a query} to the next page of entities reusing an existing cursor.
      *
      * <p>The resulting {@code Iterator} is evaluated lazily. A call to
