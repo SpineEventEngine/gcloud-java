@@ -33,7 +33,13 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.validate.Validate.isDefault;
 
-class FieldMaskApplier {
+/**
+ * Applies the provided mask to nullable or non-null records.
+ *
+ * <p>Instantiated using one of {@link #maskNullableRecord(FieldMask) maskNullableRecord(mask)} or
+ * {@link #maskRecord(FieldMask) maskRecord(mask)}.
+ */
+final class FieldMaskApplier {
 
     private final FieldMask fieldMask;
 
@@ -41,11 +47,22 @@ class FieldMaskApplier {
         this.fieldMask = fieldMask;
     }
 
+    /**
+     * Creates a {@code Function} which applies the provided {@link FieldMask fieldMask}
+     * to the {@link EntityRecord EntityRecords} supplied to it.
+     *
+     * <p>If the supplied {@code EntityRecord} is {@code null}, the {@code Function} will
+     * throw an {@link java.lang.NullPointerException}.
+     */
     static Function<EntityRecord, EntityRecord> maskRecord(FieldMask fieldMask) {
         checkNotNull(fieldMask);
         return new FieldMaskApplier(fieldMask)::mask;
     }
 
+    /**
+     * Creates a {@code Function} which returns {@code null} if the input was {@code null},
+     * applying the provided {@link FieldMask fieldMask} otherwise.
+     */
     static Function<@Nullable EntityRecord, @Nullable EntityRecord>
     maskNullableRecord(FieldMask fieldMask) {
         checkNotNull(fieldMask);
