@@ -66,15 +66,15 @@ public final class DatastoreTypeRegistryFactory {
      * The returned registry contains the
      * {@linkplain io.spine.server.entity.storage.ColumnType column types} declarations for:
      * <ul>
-     * <li> {@code String}
-     * <li> {@code Integer}
-     * <li> {@code Long}
-     * <li> {@code Boolean}
-     * <li> {@link Timestamp} stored as {@link com.google.cloud.Timestamp
-     * com.google.cloud.Timestamp}
-     * <li> {@link AbstractMessage Message} stored as a {@code String} retrieved form a
-     * {@link io.spine.string.Stringifier Stringifier}
-     * <li> {@link Version} stored as an {@code int} version number
+     *      <li> {@code String}
+     *      <li> {@code Integer}
+     *      <li> {@code Long}
+     *      <li> {@code Boolean}
+     *      <li> {@link Timestamp} stored as 
+     *           {@link com.google.cloud.Timestamp com.google.cloud.Timestamp}
+     *      <li> {@link AbstractMessage Message} stored as a {@code String} retrieved form a
+     *           {@link io.spine.string.Stringifier Stringifier}
+     *      <li> {@link Version} stored as an {@code int} version number
      * </ul>
      *
      * @return the default {@code ColumnTypeRegistry} for storing the Entity Columns in Datastore
