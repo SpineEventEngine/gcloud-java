@@ -28,12 +28,9 @@ import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.DatastoreReaderWriter;
 import com.google.cloud.datastore.DatastoreWriter;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.KeyQuery;
-import com.google.cloud.datastore.ProjectionEntityQuery;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
@@ -199,6 +196,9 @@ public class DatastoreWrapper implements Logging {
      * <p>The resulting {@code Iterator} is evaluated lazily. A call to
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
+     * <p>The results are returned in an order matching that of the provided keys with nulls
+     * in place of missing and inactive entities.
+     *
      * @param keys
      *         {@link Key Keys} to search for
      * @return an {@code Iterator} over the found entities in the order of keys
@@ -239,17 +239,20 @@ public class DatastoreWrapper implements Logging {
     /**
      * Queries the Datastore with the given arguments.
      *
-     * <p>As the Datastore may return a partial result set for {@link EntityQuery},
-     * {@link KeyQuery} and {@link ProjectionEntityQuery}, it is required to repeat a query with
-     * the adjusted cursor position.
+     * <p>The Datastore may return a partial result set, so an execution of this method may
+     * result in several Datastore queries.
      *
-     * <p>Therefore, an execution of this method may in fact result in several queries to
-     * the Datastore instance.
+     * <p>The limit included in the {@link StructuredQuery}, will be a maximum count of entities
+     * in the returned iterator.
+     *
+     * <p>The returned {@link DsQueryIterator} allows to {@link DsQueryIterator#nextPageQuery()
+     * create a query} to the next page of entities reusing an existing cursor.
      *
      * <p>The resulting {@code Iterator} is evaluated lazily. A call to
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
-     * @param query {@link Query} to execute upon the Datastore
+     * @param query
+     *         {@link Query} to execute upon the Datastore
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @see DatastoreReader#run(Query)
      */
