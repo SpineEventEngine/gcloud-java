@@ -36,15 +36,15 @@ import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 /**
  * A utility for creating the basic {@link DatastoreColumnType} implementations of
  * <ul>
- *     <li>{@code String};
- *     <li>{@code Integer};
- *     <li>{@code Long};
- *     <li>{@code Double};
- *     <li>{@code Float};
- *     <li>{@code Boolean};
- *     <li>{@link Timestamp};
- *     <li>{@link Version};
- *     <li>and {@link AbstractMessage} values.
+ * <li>{@code String};
+ * <li>{@code Integer};
+ * <li>{@code Long};
+ * <li>{@code Double};
+ * <li>{@code Float};
+ * <li>{@code Boolean};
+ * <li>{@link Timestamp};
+ * <li>{@link Version};
+ * <li>and {@link AbstractMessage} values.
  * </ul>
  */
 final class DsColumnTypes {
@@ -130,9 +130,9 @@ final class DsColumnTypes {
     /**
      * A column type for {@link AbstractMessage}.
      *
-     * @return new instance of {@link DatastoreColumnType} storing {@link AbstractMessage} as its
-     *         {@code String} representation taken from a {@link io.spine.string.Stringifier
-     *         Stringifier}
+     * @return new instance of {@link DatastoreColumnType} storing {@link AbstractMessage}
+     *         as its {@code String} representation taken from a
+     *         {@link io.spine.string.Stringifier Stringifier}
      */
     static DatastoreColumnType<AbstractMessage, String> messageType() {
         return new MessageType();
