@@ -28,7 +28,6 @@ import io.spine.client.OrderBy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Supplier;
 
@@ -36,6 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotDefault;
+import static java.util.Arrays.stream;
 
 /**
  * A comparator for {@linkplain Entity Datastore entities} by attributes corresponding to
@@ -150,13 +150,13 @@ class DsEntityComparator implements Comparator<Entity>, Serializable {
         }
 
         private static ComparableValueExtractor pickForType(ValueType type) {
-            return Arrays.stream(values())
-                         .filter(extractType -> extractType.matches(type))
-                         .findFirst()
-                         .orElseThrow(unrecognizedType(type));
+            return stream(values())
+                    .filter(extractType -> extractType.matches(type))
+                    .findFirst()
+                    .orElseThrow(unrecognized(type));
         }
 
-        private static Supplier<IllegalStateException> unrecognizedType(ValueType type) {
+        private static Supplier<IllegalStateException> unrecognized(ValueType type) {
             return () -> newIllegalStateException("Unrecognized Datastore type %s.", type);
         }
     }
