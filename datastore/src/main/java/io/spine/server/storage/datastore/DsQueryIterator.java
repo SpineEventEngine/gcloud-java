@@ -25,11 +25,8 @@ import com.google.cloud.datastore.DatastoreReaderWriter;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
 
-import javax.annotation.Nullable;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -89,6 +86,12 @@ final class DsQueryIterator extends UnmodifiableIterator<Entity> {
         terminated = true;
     }
 
+    /**
+     * Creates a query to the next batch of entities.
+     *
+     * <p>The query is built utilizing the {@linkplain Cursor Datastore Cursor} from the current
+     * query results.
+     */
     StructuredQuery<Entity> nextPageQuery() {
         Cursor cursorAfter = currentPage.getCursorAfter();
         StructuredQuery<Entity> queryForMoreResults =
