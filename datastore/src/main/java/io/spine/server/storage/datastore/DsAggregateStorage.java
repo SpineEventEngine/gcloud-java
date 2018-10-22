@@ -62,6 +62,7 @@ import static io.spine.server.storage.datastore.DsProperties.markAsArchived;
 import static io.spine.server.storage.datastore.DsProperties.markAsDeleted;
 import static io.spine.server.storage.datastore.DsProperties.markAsSnapshot;
 import static io.spine.server.storage.datastore.Entities.fromMessage;
+import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.server.storage.datastore.RecordId.of;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.Optional.empty;
@@ -186,8 +187,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         StructuredQuery<Entity> query = historyBackwardQuery(request);
-        Function<Entity, AggregateEventRecord> toRecords =
-                Entities.toMessage(AGGREGATE_RECORD_TYPE_URL);
+        Function<Entity, AggregateEventRecord> toRecords = toMessage(AGGREGATE_RECORD_TYPE_URL);
         int limit = request.getBatchSize();
         Iterator<AggregateEventRecord> result =
                 stream(datastore.readAll(query, limit))
