@@ -26,7 +26,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Streams;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
@@ -106,7 +105,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         EntityClass<? extends Aggregate<I, ?, ?>> modelClass = asEntityClass(cls);
         @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
-        Class<I> idClass = (Class<I>) modelClass.getIdClass();
+                Class<I> idClass = (Class<I>) modelClass.getIdClass();
         this.idClass = idClass;
         this.stateTypeName = modelClass.getStateType()
                                        .toName();
@@ -189,9 +188,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         StructuredQuery<Entity> query = historyBackwardQuery(request);
         Function<Entity, AggregateEventRecord> toRecords =
                 Entities.toMessage(AGGREGATE_RECORD_TYPE_URL);
+        int limit = request.getBatchSize();
         Iterator<AggregateEventRecord> result =
-                stream(new DsQueryPageIterator(query, datastore))
-                        .flatMap(Streams::stream)
+                stream(datastore.readAll(query, limit))
                         .map(toRecords)
                         .iterator();
         return result;
@@ -201,7 +200,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     EntityQuery historyBackwardQuery(AggregateReadRequest<I> request) {
         checkNotNull(request);
         String idString = Stringifiers.toString(request.getRecordId());
-        int limit = request.getBatchSize();
         return Query.newEntityQueryBuilder()
                     .setKind(stateTypeName.value())
                     .setFilter(eq(aggregate_id.toString(),
@@ -209,7 +207,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                     .setOrderBy(byVersion(),
                                 byCreatedTime(),
                                 byRecordType())
-                    .setLimit(limit)
                     .build();
     }
 
@@ -291,9 +288,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         StructuredQuery<Entity> allQuery = Query.newEntityQueryBuilder()
                                                 .setKind(stateTypeName.value())
                                                 .build();
-        Iterator<Entity> allRecords = datastore.read(allQuery);
-        Iterator<I> index = stream(allRecords).map(new IndexTransformer<>(idClass))
-                                              .iterator();
+        Iterator<I> index = stream(datastore.readAll(allQuery))
+                .map(new IndexTransformer<>(idClass))
+                .iterator();
         return index;
     }
 

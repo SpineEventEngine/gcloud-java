@@ -28,22 +28,28 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * A lazy iterator over pages retrieved by reading from Datastore using queries 
- * represented by {@link DsQueryIterator}s. The pages are organized bounded by 
- * {@linkplain StructuredQuery#getLimit() query limit}.
+ * A lazy iterator over pages retrieved by reading from Datastore using queries.
  *
- * <p>This iterators contents can be used in paginated manner or combined to a single iterator 
- * using {@code flatMap}.
+ * <p>Each page is represented by a {@link DsQueryIterator}. The pages are formed by performing
+ * batch reads restricted to the {@linkplain StructuredQuery#getLimit() query limit}, and reusing
+ * the cursor for consequent operations.
+ *
+ * <p>This iterators contents can be used in paginated manner or combined to a single iterator
+ * using the {@code flatMap}.
+ *
+ * <p>If the limit is not specified, then the page size is determined by the Datastore
+ * query restrictions.
  */
-class DsQueryPageIterator implements Iterator<DsQueryIterator> {
+final class DsQueryPageIterator implements Iterator<DsQueryIterator> {
 
     private final DatastoreWrapper datastore;
+
     private DsQueryIterator currentPage;
     private @Nullable DsQueryIterator nextPage;
 
     DsQueryPageIterator(StructuredQuery<Entity> query, DatastoreWrapper datastore) {
         this.datastore = datastore;
-        currentPage = datastore.read(query);
+        this.currentPage = datastore.read(query);
     }
 
     @Override

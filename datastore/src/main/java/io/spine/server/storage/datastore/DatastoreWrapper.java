@@ -36,6 +36,7 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
+import com.google.common.collect.Streams;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
@@ -48,6 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.toArray;
@@ -265,6 +267,78 @@ public class DatastoreWrapper implements Logging {
                      .build();
         DsQueryIterator result = new DsQueryIterator(queryWithNamespace, actor);
         return result;
+    }
+
+    /**
+     * Queries the Datastore for all entities matching query.
+     *
+     * <p>Read is performed from datastore using batches of the specified size, which leads to
+     * multiple queries being executed.
+     *
+     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
+     *
+     * @param query
+     *         {@link Query} to execute upon the Datastore
+     * @return results fo the query as a lazily evaluated {@link Iterator}
+     * @throws IllegalArgumentException
+     *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
+     */
+    Iterator<Entity> readAll(StructuredQuery<Entity> query, int batchSize) {
+        return readAllInBatches(query, batchSize);
+    }
+
+    /**
+     * Queries the Datastore for all entities matching query.
+     *
+     * <p>Read is performed in batches until all of the matching entities are fetched, resulting
+     * in multiple Datastore queries.
+     *
+     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
+     *
+     * @param query
+     *         {@link Query} to execute upon the Datastore
+     * @return results fo the query as a lazily evaluated {@link Iterator}
+     * @throws IllegalArgumentException
+     *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
+     */
+    Iterator<Entity> readAll(StructuredQuery<Entity> query) {
+        return readAllInBatches(query, null);
+    }
+
+    /**
+     * Queries the Datastore for all entities matching query, executing queries split in batches.
+     *
+     * <p>Read is performed from datastore using batches of the specified size, which leads to
+     * multiple queries being executed.
+     *
+     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
+     *
+     * @param query
+     *         {@link Query} to execute upon the Datastore
+     * @return results fo the query as a lazily evaluated {@link Iterator}
+     * @throws IllegalArgumentException
+     *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
+     */
+    private Iterator<Entity> readAllInBatches(StructuredQuery<Entity> query,
+                                              @Nullable Integer batchSize) {
+        checkArgument(query.getLimit() == null,
+                      "Cannot limit a number of entities for \"read all\" operation.");
+        StructuredQuery<Entity> limitedQuery = limit(query, batchSize);
+        return stream(new DsQueryPageIterator(limitedQuery, this))
+                .flatMap(Streams::stream)
+                .iterator();
+    }
+
+    private static StructuredQuery<Entity> limit(StructuredQuery<Entity> query,
+                                                 @Nullable Integer batchSize) {
+        return batchSize == null
+               ? query
+               : query.toBuilder()
+                      .setLimit(batchSize)
+                      .build();
     }
 
     /**
