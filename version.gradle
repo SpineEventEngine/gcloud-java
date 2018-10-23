@@ -31,5 +31,5 @@ ext {
 
     datastoreVersion = '1.48.0'
 
-    versionToPublish = '0.11.8-SNAPSHOT'
+    versionToPublish = '0.11.9-SNAPSHOT'
 }
