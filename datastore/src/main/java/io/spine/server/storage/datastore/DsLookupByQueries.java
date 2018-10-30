@@ -145,7 +145,7 @@ final class DsLookupByQueries {
         if (!isDefault(inMemOrderBy)) {
             entities = entities.sorted(implementing(inMemOrderBy));
         }
-        if (limit != 0) {
+        if (limit != MISSING_LIMIT) {
             entities = entities.limit(limit);
         }
 
