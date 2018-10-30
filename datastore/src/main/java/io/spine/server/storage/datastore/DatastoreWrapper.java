@@ -49,6 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.toArray;
@@ -57,7 +58,6 @@ import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Streams.stream;
-import static com.sun.tools.javac.util.Assert.checkNull;
 import static java.lang.Math.min;
 import static java.util.Collections.emptyIterator;
 import static java.util.stream.Collectors.toList;
@@ -324,8 +324,8 @@ public class DatastoreWrapper implements Logging {
      */
     private Iterator<Entity> readAllInBatches(StructuredQuery<Entity> query,
                                               @Nullable Integer batchSize) {
-        checkNull(query.getLimit(),
-                  "Cannot limit a number of entities for \"read all\" operation.");
+        checkArgument(query.getLimit() == null,
+                      "Cannot limit a number of entities for \"read all\" operation.");
         StructuredQuery<Entity> limitedQuery = limit(query, batchSize);
         return stream(new DsQueryPageIterator(limitedQuery, this))
                 .flatMap(Streams::stream)
