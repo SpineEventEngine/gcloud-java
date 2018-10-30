@@ -69,7 +69,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final TypeUrl typeUrl;
 
     private final DsLookupByIds<I> idLookup;
-    private final DsLookupByQueries columnLookup;
+    private final DsLookupByQueries queryLookup;
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
     private final ColumnFilterAdapter columnFilterAdapter;
@@ -96,8 +96,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.columnTypeRegistry = checkNotNull(builder.getColumnTypeRegistry());
         this.columnFilterAdapter = ColumnFilterAdapter.of(this.columnTypeRegistry);
         this.idLookup = new DsLookupByIds<>(this.datastore, this.typeUrl);
-        this.columnLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
-                                                  this.columnFilterAdapter);
+        this.queryLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
+                                                 this.columnFilterAdapter);
     }
 
     private Key keyOf(I id) {
@@ -147,7 +147,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        Iterator<EntityRecord> result = columnLookup.find(activeEntityQueryParams(this), fieldMask);
+        Iterator<EntityRecord> result = queryLookup.find(activeEntityQueryParams(this), fieldMask);
         return result;
     }
 
@@ -198,7 +198,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         Collection<I> idFilter = completeQuery.getIds();
         QueryParameters params = completeQuery.getParameters();
         Iterator<EntityRecord> result = idFilter.isEmpty()
-                                        ? columnLookup.find(params, fieldMask)
+                                        ? queryLookup.find(params, fieldMask)
                                         : queryByIdsAndColumns(idFilter, params, fieldMask);
         return result;
     }
