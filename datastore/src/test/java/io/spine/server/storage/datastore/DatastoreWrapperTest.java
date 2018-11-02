@@ -23,7 +23,6 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
@@ -47,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import static com.google.cloud.datastore.Query.newEntityQueryBuilder;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
@@ -171,9 +171,9 @@ class DatastoreWrapperTest {
             // Wait for some time to make sure the writing is complete
             Thread.sleep(bulkSize * 3L);
 
-            StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                                 .setKind(GENERIC_ENTITY_KIND.getValue())
-                                                 .build();
+            StructuredQuery<Entity> query = newEntityQueryBuilder()
+                    .setKind(GENERIC_ENTITY_KIND.getValue())
+                    .build();
             Collection<Entity> readEntities = newArrayList(wrapper.read(query));
             assertEquals(entities.size(), readEntities.size());
             assertTrue(expectedEntities.containsAll(readEntities));
@@ -262,6 +262,39 @@ class DatastoreWrapperTest {
         }
     }
 
+    @Nested
+    @DisplayName("read with structured query")
+    class ReadWithStructuredQuery {
+
+        private TestDatastoreWrapper wrapper;
+
+        @BeforeEach
+        void setUp() {
+            wrapper = wrap(testDatastore(), false);
+        }
+
+        @AfterEach
+        void tearDown() {
+            wrapper.dropAllTables();
+        }
+
+        @Test
+        @DisplayName("throws IAE during batch read with limit")
+        void testIaeOnBatchReadWithLimit() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> wrapper.readAll(newEntityQueryBuilder()
+                                                       .setLimit(5)
+                                                       .build(), 1));
+        }
+
+        @Test
+        @DisplayName("throws IAE during batch read of 0 size")
+        void testIaeOnBatchReadWithZeroSize() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> wrapper.readAll(newEntityQueryBuilder().build(), 0));
+        }
+    }
+
     @Test
     @DisplayName("generate key factories aware of tenancy")
     void testGenerateKeyFactory() {
@@ -303,9 +336,9 @@ class DatastoreWrapperTest {
         Collection<Entity> expctedEntities = entities.values();
         wrapper.createOrUpdate(expctedEntities);
 
-        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                             .setKind(GENERIC_ENTITY_KIND.getValue())
-                                             .build();
+        StructuredQuery<Entity> query = newEntityQueryBuilder()
+                .setKind(GENERIC_ENTITY_KIND.getValue())
+                .build();
         Iterator<Entity> result = wrapper.read(query);
 
         assertTrue(result.hasNext());
