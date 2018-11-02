@@ -317,15 +317,21 @@ public class DatastoreWrapper implements Logging {
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
      * @param query
-     *         {@link Query} to execute upon the Datastore
+     *         a {@link Query} to execute upon the Datastore
+     * @param batchSize
+     *         a non-zero number of elements to be returned per a single read from Datastore
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @throws IllegalArgumentException
-     *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
+     *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit} or
+     *         the provided {@code batchSize} is 0 
      */
     private Iterator<Entity> readAllInBatches(StructuredQuery<Entity> query,
                                               @Nullable Integer batchSize) {
         checkArgument(query.getLimit() == null,
                       "Cannot limit a number of entities for \"read all\" operation.");
+        checkArgument(batchSize == null || batchSize != 0,
+                      "The size of a single read operation cannot be 0.");
+        
         StructuredQuery<Entity> limitedQuery = limit(query, batchSize);
         return stream(new DsQueryPageIterator(limitedQuery, this))
                 .flatMap(Streams::stream)
