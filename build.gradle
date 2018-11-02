@@ -57,8 +57,6 @@ ext {
 allprojects {
     apply plugin: 'maven'
     apply plugin: 'jacoco'
-    apply plugin: 'idea'
-
 
     group = 'io.spine.gcloud'
     version = project.versionToPublish
@@ -69,6 +67,7 @@ subprojects {
     apply plugin: 'java-library'
     apply plugin: 'net.ltgt.errorprone'
     apply plugin: 'maven-publish'
+    apply plugin: 'idea'
     
     configurations {
         // Avoid collisions of Java classes defined both in `protobuf-lite` and `protobuf-java`
