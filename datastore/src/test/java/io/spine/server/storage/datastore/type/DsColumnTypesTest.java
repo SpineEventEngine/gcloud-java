@@ -40,6 +40,7 @@ import static com.google.cloud.datastore.BooleanValue.of;
 import static com.google.cloud.datastore.LongValue.of;
 import static com.google.cloud.datastore.StringValue.of;
 import static com.google.cloud.datastore.TimestampValue.of;
+import static com.google.cloud.datastore.DoubleValue.of;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.timestampType;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -81,6 +82,28 @@ class DsColumnTypesTest {
     void testInt() {
         SimpleDatastoreColumnType<Integer> type = DsColumnTypes.integerType();
         int value = 42;
+
+        setSimpleType(type, value);
+
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
+    }
+
+    @Test
+    @DisplayName("provide simple float type")
+    void testFloat() {
+        SimpleDatastoreColumnType<Float> type = DsColumnTypes.floatType();
+        float value = 3.14f;
+
+        setSimpleType(type, value);
+
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
+    }
+
+    @Test
+    @DisplayName("provide simple double type")
+    void testDouble() {
+        SimpleDatastoreColumnType<Double> type = DsColumnTypes.doubleType();
+        double value = 2.7182818284590452353602874713527;
 
         setSimpleType(type, value);
 
