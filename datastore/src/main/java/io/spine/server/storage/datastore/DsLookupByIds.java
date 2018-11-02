@@ -190,7 +190,8 @@ final class DsLookupByIds<I> {
 
     private Stream<@Nullable Entity> read(Iterable<I> ids) {
         Collection<Key> keys = toKeys(ids);
-        return stream(datastore.read(keys));
+        Stream<@Nullable Entity> entities = stream(datastore.read(keys));
+        return entities;
     }
 
     private Collection<Key> toKeys(Iterable<I> ids) {

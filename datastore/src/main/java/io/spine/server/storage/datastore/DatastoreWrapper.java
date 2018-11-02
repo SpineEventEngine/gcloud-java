@@ -223,9 +223,10 @@ public class DatastoreWrapper implements Logging {
     private static Iterator<@Nullable Entity> orderByKeys(Iterable<Key> keys,
                                                           Iterator<Entity> items) {
         List<Entity> entities = newLinkedList(() -> items);
-        return stream(keys)
+        Iterator<Entity> entitiesIterator = stream(keys)
                 .map(key -> getEntityOrNull(key, entities.iterator()))
                 .iterator();
+        return entitiesIterator;
     }
 
     private static @Nullable Entity getEntityOrNull(Key key, Iterator<Entity> entities) {
