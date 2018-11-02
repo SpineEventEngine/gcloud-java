@@ -198,8 +198,8 @@ public class DatastoreWrapper implements Logging {
      * <p>The resulting {@code Iterator} is evaluated lazily. A call to
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
-     * <p>The results are returned in an order matching that of the provided keys with nulls
-     * in place of missing and inactive entities.
+     * <p>The results are returned in an order matching that of the provided keys 
+     * with {@code null}s in place of missing and inactive entities.
      *
      * @param keys
      *         {@link Key Keys} to search for
