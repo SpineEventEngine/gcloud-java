@@ -35,6 +35,7 @@ import io.spine.core.Versions;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordReadRequest;
@@ -60,6 +61,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -72,7 +74,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.toSeconds;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.ColumnFilters.all;
+import static io.spine.client.ColumnFilters.either;
 import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.ColumnFilters.gt;
+import static io.spine.client.ColumnFilters.lt;
 import static io.spine.json.Json.toCompactJson;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -112,6 +117,8 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.pag
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.recordIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedValues;
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -120,6 +127,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @DisplayName("DsRecordStorage should")
@@ -649,6 +657,34 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertDsReadByKeys();
         }
 
+        @Test
+        @DisplayName("for entities without lifecycle")
+        void testQueryEntityWithoutLifecycleById() {
+            DsRecordStorage<ProjectId> storage = newStorage(EntityWithCustomColumnName.class);
+            ProjectId id = newId();
+            EntityRecord record = newEntityRecord(id, newState(id));
+            EntityWithCustomColumnName entity = new EntityWithCustomColumnName(id);
+            storage.writeRecord(entity.getId(), create(record, entity, storage));
+
+            // Create ID filter.
+            List<EntityId> targetIds = singletonList(extractEntityId(entity));
+            EntityIdFilter idFilter = newIdFilter(targetIds);
+
+            // Compose Query filters.
+            EntityFilters entityFilters = newEntityFilters(idFilter);
+
+            // Compose Query.
+            EntityQuery<ProjectId> entityQuery = from(entityFilters,
+                                                      emptyOrderBy(),
+                                                      emptyPagination(),
+                                                      storage);
+
+            // Execute Query.
+            Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
+            assertEquals(record, readResult.next());
+            assertFalse(readResult.hasNext());
+        }
+
         private void assertDsReadByKeys() {
             DatastoreWrapper spy = storageFactory.getDatastore();
             verify(spy).read(anyIterable());
@@ -953,11 +989,50 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertDsReadByStructuredQuery();
         }
 
+        @Test
+        @DisplayName("with multiple Datastore reads")
+        void performsMultipleReads() {
+            createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES, 300, false);
+            createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES, 250, true);
+            createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES, 150, false);
+            List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES,
+                                                                  150, true);
+            EntityFilters filters =
+                    EntityFilters.newBuilder()
+                                 .addFilter(either(
+                                         lt(NAME.columnName(), UNORDERED_COLLEGE_NAMES.get(2)),
+                                         gt(NAME.columnName(), UNORDERED_COLLEGE_NAMES.get(2))
+                                 ))
+                                 .addFilter(all(
+                                         eq(STATE_SPONSORED.columnName(), true),
+                                         eq(STUDENT_COUNT.columnName(), 150)
+                                 ))
+                                 .build();
+            int recordCount = 5;
+            EntityQuery<CollegeId> query = EntityQueries.from(filters, ascendingBy(NAME),
+                                                              pagination(recordCount), storage);
+            Iterator<EntityRecord> recordIterator = storage.readAll(query, emptyFieldMask());
+            List<EntityRecord> resultList = newArrayList(recordIterator);
+
+            assertEquals(recordCount, resultList.size());
+
+            // Check the entities were ordered.
+            entities.remove(2);
+            List<CollegeId> expectedResults = sortedIds(entities, CollegeEntity::getName);
+            List<CollegeId> actualResults = recordIds(resultList);
+            assertEquals(expectedResults, actualResults);
+            assertDsReadByStructuredQuery(2);
+        }
+
         private void assertDsReadByStructuredQuery() {
+            assertDsReadByStructuredQuery(1);
+        }
+
+        private void assertDsReadByStructuredQuery(int invocationCount) {
             DatastoreWrapper spy = storageFactory.getDatastore();
             verify(spy, never()).read(anyIterable());
             //noinspection unchecked OK for a generic class assignment in tests.
-            verify(spy).read(any(StructuredQuery.class));
+            verify(spy, times(invocationCount)).read(any(StructuredQuery.class));
         }
     }
 

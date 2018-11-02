@@ -227,6 +227,7 @@ public class DsRecordStorageTestEnv {
         return entities;
     }
 
+    @CanIgnoreReturnValue
     public static List<CollegeEntity>
     createAndStoreEntitiesWithNullStudentCount(RecordStorage<CollegeId> storage, int recordCount) {
         List<CollegeEntity> entities = new ArrayList<>(recordCount);
@@ -237,6 +238,7 @@ public class DsRecordStorageTestEnv {
         return entities;
     }
 
+    @CanIgnoreReturnValue
     public static List<CollegeEntity>
     createAndStoreEntities(RecordStorage<CollegeId> storage, Collection<String> names) {
         return names.stream()
@@ -244,6 +246,27 @@ public class DsRecordStorageTestEnv {
                     .collect(toList());
     }
 
+    @CanIgnoreReturnValue
+    public static List<CollegeEntity>
+    createAndStoreEntities(RecordStorage<CollegeId> storage, Collection<String> names,
+                           int studentCount, boolean stateSponsored) {
+        return names.stream()
+                    .map(name -> createAndStoreEntity(storage, name, studentCount, stateSponsored))
+                    .collect(toList());
+    }
+
+    @CanIgnoreReturnValue
+    private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage,
+                                                      String name, int studentCount,
+                                                      boolean stateSponsored) {
+        CollegeId id = newCollegeId();
+        CollegeEntity entity = new CollegeEntity(id);
+        entity.injectState(newCollege(id, name, studentCount, stateSponsored));
+        storeEntity(storage, entity);
+        return entity;
+    }
+
+    @CanIgnoreReturnValue
     private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage) {
         CollegeId id = newCollegeId();
         CollegeEntity entity = new CollegeEntity(id);
@@ -270,7 +293,7 @@ public class DsRecordStorageTestEnv {
         return entity;
     }
 
-    private static void storeEntity(RecordStorage<CollegeId> storage, CollegeEntity entity) {
+    public static void storeEntity(RecordStorage<CollegeId> storage, CollegeEntity entity) {
         EntityRecord record = newEntityRecord(entity.getId(), entity.getState());
         EntityRecordWithColumns withColumns = create(record, entity, storage);
         storage.write(entity.getId(), withColumns);
@@ -302,6 +325,18 @@ public class DsRecordStorageTestEnv {
                               .setPassingGrade(randomPassingGrade())
                               .setStudentCount(studentCount)
                               .setStateSponsored(RANDOM.nextBoolean())
+                              .build();
+    }
+
+    private static College newCollege(CollegeId id, String name, int studentCount,
+                                      boolean stateSponsored) {
+        return CollegeVBuilder.newBuilder()
+                              .setId(id)
+                              .setName(name)
+                              .setAdmissionDeadline(randomTimestamp())
+                              .setPassingGrade(randomPassingGrade())
+                              .setStudentCount(studentCount)
+                              .setStateSponsored(stateSponsored)
                               .build();
     }
 
@@ -379,7 +414,7 @@ public class DsRecordStorageTestEnv {
         }
     }
 
-    public static class EntityWithCustomColumnName extends AbstractEntity<ProjectId, Any> {
+    public static class EntityWithCustomColumnName extends AbstractEntity<ProjectId, Project> {
 
         public EntityWithCustomColumnName(ProjectId id) {
             super(id);
