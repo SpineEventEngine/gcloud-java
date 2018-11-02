@@ -52,6 +52,7 @@ class DsEntityComparator implements Comparator<Entity>, Serializable {
         this.column = column;
     }
 
+    @SuppressWarnings("unchecked") // Entity values are required to be comparable by Spine.
     @Override
     public int compare(Entity a, Entity b) {
         checkNotNull(a);
@@ -67,7 +68,6 @@ class DsEntityComparator implements Comparator<Entity>, Serializable {
             return +1;
         }
 
-        //noinspection unchecked entity values are required to be comparable by Spine
         return aValue.compareTo(bValue);
     }
 
@@ -139,6 +139,7 @@ class DsEntityComparator implements Comparator<Entity>, Serializable {
 
         abstract @Nullable Comparable extract(Value<?> value);
 
+        @SuppressWarnings("ReferenceEquality") // Enum value is checked.
         private boolean matches(ValueType type) {
             return type == valueType;
         }

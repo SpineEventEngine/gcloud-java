@@ -159,6 +159,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return queryBy(query, fieldMask);
     }
 
+    @SuppressWarnings("RedundantIfStatement")
+    // Cleaner with each rule out condition stated explicitly.
     private static <I> boolean isQueryForAll(EntityQuery<I> query) {
         if (!query.getIds()
                   .isEmpty()) {
@@ -173,7 +175,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         if (params.ordered()) {
             return false;
         }
-        //noinspection RedundantIfStatement cleaner with each rule out condition stated explicitly
+
         if (params.limited()) {
             return false;
         }
