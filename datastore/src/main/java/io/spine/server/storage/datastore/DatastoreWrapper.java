@@ -281,12 +281,14 @@ public class DatastoreWrapper implements Logging {
      *
      * @param query
      *         {@link Query} to execute upon the Datastore
+     * @param pageSize
+     *         a non-zero number of elements to be returned per a single read from Datastore
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
-    Iterator<Entity> readAll(StructuredQuery<Entity> query, int batchSize) {
-        return readAllInBatches(query, batchSize);
+    Iterator<Entity> readAll(StructuredQuery<Entity> query, int pageSize) {
+        return readAllPageByPage(query, pageSize);
     }
 
     /**
@@ -305,7 +307,7 @@ public class DatastoreWrapper implements Logging {
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
     Iterator<Entity> readAll(StructuredQuery<Entity> query) {
-        return readAllInBatches(query, null);
+        return readAllPageByPage(query, null);
     }
 
     /**
@@ -319,21 +321,22 @@ public class DatastoreWrapper implements Logging {
      *
      * @param query
      *         a {@link Query} to execute upon the Datastore
-     * @param batchSize
-     *         a non-zero number of elements to be returned per a single read from Datastore
+     * @param pageSize
+     *         a non-zero number of elements to be returned per a single read from Datastore;
+     *         if {@code null} the page size will be dictated by the Datastore
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit} or
      *         the provided {@code batchSize} is 0 
      */
-    private Iterator<Entity> readAllInBatches(StructuredQuery<Entity> query,
-                                              @Nullable Integer batchSize) {
+    private Iterator<Entity> readAllPageByPage(StructuredQuery<Entity> query,
+                                               @Nullable Integer pageSize) {
         checkArgument(query.getLimit() == null,
                       "Cannot limit a number of entities for \"read all\" operation.");
-        checkArgument(batchSize == null || batchSize != 0,
+        checkArgument(pageSize == null || pageSize != 0,
                       "The size of a single read operation cannot be 0.");
-        
-        StructuredQuery<Entity> limitedQuery = limit(query, batchSize);
+
+        StructuredQuery<Entity> limitedQuery = limit(query, pageSize);
         return stream(new DsQueryPageIterator(limitedQuery, this))
                 .flatMap(Streams::stream)
                 .iterator();

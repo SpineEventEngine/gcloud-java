@@ -188,9 +188,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected Iterator<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         StructuredQuery<Entity> query = historyBackwardQuery(request);
         Function<Entity, AggregateEventRecord> toRecords = toMessage(AGGREGATE_RECORD_TYPE_URL);
-        int limit = request.getBatchSize();
+        int batchSize = request.getBatchSize();
         Iterator<AggregateEventRecord> result =
-                stream(datastore.readAll(query, limit))
+                stream(datastore.readAll(query, batchSize))
                         .map(toRecords)
                         .iterator();
         return result;

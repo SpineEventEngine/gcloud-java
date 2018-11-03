@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -195,8 +196,8 @@ final class DsLookupByIds<I> {
     }
 
     private Collection<Key> toKeys(Iterable<I> ids) {
-        return stream(ids)
-                .map(id -> datastore.keyFor(Kind.of(typeUrl), ofEntityId(id)))
-                .collect(toList());
+        List<Key> keys = stream(ids).map(id -> datastore.keyFor(Kind.of(typeUrl), ofEntityId(id)))
+                                    .collect(toList());
+        return keys;
     }
 }
