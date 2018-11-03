@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.server.storage.datastore.DsEntityComparator.implementing;
-import static io.spine.server.storage.datastore.FieldMaskApplier.maskRecord;
+import static io.spine.server.storage.datastore.FieldMaskApplier.recordMasker;
 import static io.spine.validate.Validate.isDefault;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
@@ -79,25 +79,28 @@ final class DsLookupByQueries {
     Iterator<EntityRecord> find(QueryParameters params, FieldMask fieldMask) {
         List<StructuredQuery<Entity>> queries = splitToMultipleDsQueries(params);
         if (queries.size() == 1) {
-            return find(queries.get(0), fieldMask);
+            Iterator<EntityRecord> results = find(queries.get(0), fieldMask);
+            return results;
         }
-        return find(queries, params.orderBy(), params.limit(), fieldMask);
+        Iterator<EntityRecord> results = find(queries, params.orderBy(), params.limit(), fieldMask);
+        return results;
     }
 
     private List<StructuredQuery<Entity>> splitToMultipleDsQueries(QueryParameters params) {
         checkNotNull(params);
 
-        return buildDsFilters(params.iterator())
+        List<StructuredQuery<Entity>> queries = buildDsFilters(params.iterator())
                 .stream()
                 .map(new QueryWithFilter(params, Kind.of(typeUrl)))
                 .collect(toList());
+        return queries;
     }
 
     private Collection<StructuredQuery.Filter>
     buildDsFilters(Iterator<CompositeQueryParameter> compositeParameters) {
         Collection<CompositeQueryParameter> params = newArrayList(compositeParameters);
-        Collection<StructuredQuery.Filter> predicate = DsFilters.fromParams(params,
-                                                                            columnFilterAdapter);
+        Collection<StructuredQuery.Filter> predicate =
+                DsFilters.fromParams(params, columnFilterAdapter);
         return predicate;
     }
 
@@ -149,15 +152,18 @@ final class DsLookupByQueries {
             entities = entities.limit(limit);
         }
 
-        return entities
-                .map(Entities::toRecord)
-                .map(maskRecord(fieldMask))
-                .iterator();
+        Iterator<EntityRecord> recordIterator =
+                entities.map(Entities::toRecord)
+                        .map(recordMasker(fieldMask))
+                        .iterator();
+
+        return recordIterator;
     }
 
     private Stream<Entity> read(Collection<StructuredQuery<Entity>> queries) {
-        return queries.stream()
-                      .map(datastore::read)
-                      .flatMap(Streams::stream);
+        Stream<Entity> entities = queries.stream()
+                                         .map(datastore::read)
+                                         .flatMap(Streams::stream);
+        return entities;
     }
 }

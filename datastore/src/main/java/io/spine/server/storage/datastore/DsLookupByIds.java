@@ -40,8 +40,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordActive;
 import static io.spine.server.storage.datastore.DsEntityComparator.implementing;
-import static io.spine.server.storage.datastore.FieldMaskApplier.maskNullableRecord;
-import static io.spine.server.storage.datastore.FieldMaskApplier.maskRecord;
+import static io.spine.server.storage.datastore.Entities.toRecord;
+import static io.spine.server.storage.datastore.FieldMaskApplier.nullableRecordMasker;
+import static io.spine.server.storage.datastore.FieldMaskApplier.recordMasker;
 import static io.spine.server.storage.datastore.RecordId.ofEntityId;
 import static java.util.stream.Collectors.toList;
 
@@ -83,14 +84,11 @@ final class DsLookupByIds<I> {
                                 Predicate<Entity> predicate,
                                 OrderBy orderBy,
                                 long limit) {
-        return read(ids)
-                .filter(Objects::nonNull)
-                .filter(predicate)
-                .sorted(implementing(orderBy))
-                .map(Entities::toRecord)
-                .map(maskRecord(fieldMask))
-                .limit(limit)
-                .iterator();
+        Iterator<EntityRecord> recordIterator =
+                findSortedRecords(ids, fieldMask, predicate, orderBy)
+                        .limit(limit)
+                        .iterator();
+        return recordIterator;
     }
 
     /**
@@ -114,13 +112,19 @@ final class DsLookupByIds<I> {
                                 FieldMask fieldMask,
                                 Predicate<Entity> predicate,
                                 OrderBy orderBy) {
-        return read(ids)
-                .filter(Objects::nonNull)
-                .filter(predicate)
-                .sorted(implementing(orderBy))
-                .map(Entities::toRecord)
-                .map(maskRecord(fieldMask))
-                .iterator();
+        Iterator<EntityRecord> recordIterator =
+                findSortedRecords(ids, fieldMask, predicate, orderBy)
+                        .iterator();
+        return recordIterator;
+    }
+
+    private Stream<EntityRecord> findSortedRecords(Iterable<I> ids, FieldMask fieldMask,
+                                                   Predicate<Entity> predicate, OrderBy orderBy) {
+        Stream<EntityRecord> records =
+                readFiltered(ids, predicate)
+                        .sorted(implementing(orderBy))
+                        .map(toMaskedRecord(fieldMask));
+        return records;
     }
 
     /**
@@ -140,12 +144,25 @@ final class DsLookupByIds<I> {
     Iterator<EntityRecord> find(Iterable<I> ids,
                                 FieldMask fieldMask,
                                 Predicate<Entity> predicate) {
-        return read(ids)
-                .filter(Objects::nonNull)
-                .filter(predicate)
-                .map(Entities::toRecord)
-                .map(maskRecord(fieldMask))
+        return readFiltered(ids, predicate)
+                .map(toMaskedRecord(fieldMask))
                 .iterator();
+    }
+
+    private static Function<Entity, EntityRecord> toMaskedRecord(FieldMask mask) {
+        Function<EntityRecord, EntityRecord> masker = recordMasker(mask);
+        return entity -> {
+            EntityRecord record = toRecord(entity);
+            EntityRecord maskedRecord = masker.apply(record);
+            return maskedRecord;
+        };
+    }
+
+    private Stream<Entity> readFiltered(Iterable<I> ids, Predicate<Entity> predicate) {
+        Stream<@Nullable Entity> entities = read(ids)
+                .filter(Objects::nonNull)
+                .filter(predicate);
+        return entities;
     }
 
     /**
@@ -161,11 +178,10 @@ final class DsLookupByIds<I> {
      * @return an iterator over the matching nullable entity records
      */
     Iterator<@Nullable EntityRecord> findActive(Iterable<I> ids, FieldMask fieldMask) {
-        return read(ids)
-                .map(Entities::nullableToRecord)
-                .map(nullIfNot(isRecordActive()))
-                .map(maskNullableRecord(fieldMask))
+        Iterator<EntityRecord> recordIterator = readActiveRecords(ids)
+                .map(nullableRecordMasker(fieldMask))
                 .iterator();
+        return recordIterator;
     }
 
     /**
@@ -179,10 +195,16 @@ final class DsLookupByIds<I> {
      * @return an iterator over the matching nullable entity records
      */
     Iterator<@Nullable EntityRecord> findActive(Iterable<I> ids) {
-        return read(ids)
-                .map(Entities::nullableToRecord)
-                .map(nullIfNot(isRecordActive()))
+        Iterator<EntityRecord> recordIterator = readActiveRecords(ids)
                 .iterator();
+        return recordIterator;
+    }
+
+    private Stream<EntityRecord> readActiveRecords(Iterable<I> ids) {
+        Stream<EntityRecord> records = read(ids)
+                .map(Entities::nullableToRecord)
+                .map(nullIfNot(isRecordActive()));
+        return records;
     }
 
     private static <O> Function<O, @Nullable O> nullIfNot(Predicate<O> predicate) {

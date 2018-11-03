@@ -34,10 +34,10 @@ import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.validate.Validate.isDefault;
 
 /**
- * Applies the provided mask to nullable or non-null records.
+ * Applies the provided mask to nullable or non-nullable records.
  *
- * <p>Instantiated using one of {@link #maskNullableRecord(FieldMask) maskNullableRecord(mask)} or
- * {@link #maskRecord(FieldMask) maskRecord(mask)}.
+ * <p>Instantiated using one of {@link #nullableRecordMasker(FieldMask) nullableRecordMasker(mask)} or
+ * {@link #recordMasker(FieldMask) recordMasker(mask)}.
  */
 final class FieldMaskApplier {
 
@@ -54,7 +54,7 @@ final class FieldMaskApplier {
      * <p>If the supplied {@code EntityRecord} is {@code null}, the {@code Function} will
      * throw an {@link java.lang.NullPointerException}.
      */
-    static Function<EntityRecord, EntityRecord> maskRecord(FieldMask fieldMask) {
+    static Function<EntityRecord, EntityRecord> recordMasker(FieldMask fieldMask) {
         checkNotNull(fieldMask);
         return new FieldMaskApplier(fieldMask)::mask;
     }
@@ -64,7 +64,7 @@ final class FieldMaskApplier {
      * applying the provided {@link FieldMask fieldMask} otherwise.
      */
     static Function<@Nullable EntityRecord, @Nullable EntityRecord>
-    maskNullableRecord(FieldMask fieldMask) {
+    nullableRecordMasker(FieldMask fieldMask) {
         checkNotNull(fieldMask);
         return new FieldMaskApplier(fieldMask)::maskNullable;
     }
@@ -79,12 +79,12 @@ final class FieldMaskApplier {
     private EntityRecord mask(EntityRecord record) {
         checkNotNull(record);
         if (!isDefault(fieldMask)) {
-            return maskRecord(record);
+            return recordMasker(record);
         }
         return record;
     }
 
-    private EntityRecord maskRecord(EntityRecord record) {
+    private EntityRecord recordMasker(EntityRecord record) {
         Message state = unpack(record.getState());
         Message maskedState = applyMask(fieldMask, state);
         return EntityRecord.newBuilder(record)
