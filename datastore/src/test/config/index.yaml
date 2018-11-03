@@ -72,3 +72,9 @@ indexes:
     - name: archived
     - name: deleted
     - name: passingGrade
+
+  - kind: spine.test.datastore.College
+    properties:
+    - name: stateSponsored
+    - name: studentCount
+    - name: name
