@@ -139,7 +139,7 @@ class DsEntityComparator implements Comparator<Entity>, Serializable {
 
         abstract @Nullable Comparable extract(Value<?> value);
 
-        @SuppressWarnings("All") // Enum value is checked.
+        @SuppressWarnings("PMD.ReferenceEquality") // Enum value is checked.
         private boolean matches(ValueType type) {
             return type == valueType;
         }
