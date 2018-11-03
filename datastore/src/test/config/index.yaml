@@ -1,4 +1,4 @@
-# The GAE Datastore indexes required to run the Spine Gae-Java library tests in the test
+# The GAE Datastore indexes required to run the Spine gcloud-java library tests in the test
 # remote environment.
 
 indexes:
@@ -35,3 +35,46 @@ indexes:
     - name: created
       direction: desc
     - name: snapshot
+
+  - kind: spine.test.datastore.College
+    properties:
+    - name: archived
+    - name: deleted
+    - name: stateSponsored
+
+  - kind: spine.test.datastore.College
+    properties:
+    - name: archived
+    - name: deleted
+    - name: name
+      direction: desc
+
+  - kind: spine.test.datastore.College
+    properties:
+    - name: archived
+    - name: deleted
+    - name: studentCount
+      
+  - kind: spine.test.datastore.College
+    properties:
+    - name: archived
+    - name: deleted
+    - name: admissionDeadline
+      
+  - kind: spine.test.datastore.College
+    properties:
+    - name: archived
+    - name: deleted
+    - name: name
+      
+  - kind: spine.test.datastore.College
+    properties:
+    - name: archived
+    - name: deleted
+    - name: passingGrade
+
+  - kind: spine.test.datastore.College
+    properties:
+    - name: stateSponsored
+    - name: studentCount
+    - name: name

@@ -23,22 +23,42 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
+import io.spine.client.OrderBy;
+import io.spine.server.entity.storage.QueryParameters;
 
 import java.util.function.Function;
 
+import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
+import static com.google.cloud.datastore.StructuredQuery.OrderBy.desc;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.OrderBy.Direction.ASCENDING;
 
 /**
  * A function transforming the input {@link com.google.cloud.datastore.StructuredQuery.Filter}
  * into a {@link com.google.cloud.datastore.StructuredQuery} with the given newBuilder.
  */
-final class FilterToQuery implements Function<StructuredQuery.Filter, StructuredQuery<Entity>> {
+final class QueryWithFilter implements Function<StructuredQuery.Filter, StructuredQuery<Entity>> {
 
     private final StructuredQuery.Builder<Entity> builder;
 
-    FilterToQuery(Kind kind) {
+    QueryWithFilter(QueryParameters params, Kind kind) {
+        checkNotNull(params);
+        checkNotNull(kind);
+
         this.builder = Query.newEntityQueryBuilder()
                             .setKind(kind.getValue());
+        if (params.ordered()) {
+            this.builder.setOrderBy(translateOrderBy(params.orderBy()));
+        }
+        if (params.limited()) {
+            this.builder.setLimit(params.limit());
+        }
+    }
+
+    private static StructuredQuery.OrderBy translateOrderBy(OrderBy orderBy) {
+        return orderBy.getDirection() == ASCENDING
+               ? asc(orderBy.getColumn())
+               : desc(orderBy.getColumn());
     }
 
     @Override

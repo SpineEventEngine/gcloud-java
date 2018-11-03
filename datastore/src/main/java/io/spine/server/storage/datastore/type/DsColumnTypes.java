@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BooleanValue;
+import com.google.cloud.datastore.DoubleValue;
 import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
@@ -33,17 +34,18 @@ import io.spine.string.Stringifiers;
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 
 /**
- * A utility for creating the basic {@link DatastoreColumnType} implementations for
+ * A utility for creating the basic {@link DatastoreColumnType} implementations of
  * <ul>
- *     <li>{@code String}
- *     <li>{@code Integer}
- *     <li>{@code Boolean}
- *     <li>{@link Timestamp}
- *     <li>{@link Version}
- *     <li>{@link AbstractMessage}
+ *      <li>{@code String};
+ *      <li>{@code Integer};
+ *      <li>{@code Long};
+ *      <li>{@code Double};
+ *      <li>{@code Float};
+ *      <li>{@code Boolean};
+ *      <li>{@link Timestamp};
+ *      <li>{@link Version};
+ *      <li>and {@link AbstractMessage} values.
  * </ul>
- *
- * @author Dmytro Dashenkov
  */
 final class DsColumnTypes {
 
@@ -52,52 +54,85 @@ final class DsColumnTypes {
     }
 
     /**
-     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<String>}
+     * A column type for {@link String}.
+     *
+     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType&lt;String&gt;}
      */
     static SimpleDatastoreColumnType<String> stringType() {
         return new StringColumnType();
     }
 
     /**
-     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Integer>}
+     * A column type for {@link Integer}.
+     *
+     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType&lt;Integer&gt;}
      */
     static SimpleDatastoreColumnType<Integer> integerType() {
         return new IntegerColumnType();
     }
 
     /**
-     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Long>}
+     * A column type for {@link Long}.
+     *
+     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType&lt;Long&gt;}
      */
     static SimpleDatastoreColumnType<Long> longType() {
         return new LongColumnType();
     }
 
     /**
-     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType<Boolean>}
+     * A column type for {@link Double}.
+     *
+     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType&lt;Double&gt;}
+     */
+    static SimpleDatastoreColumnType<Double> doubleType() {
+        return new DoubleColumnType();
+    }
+
+    /**
+     * A column type for {@link Float}.
+     *
+     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType&lt;Float&gt;}
+     */
+    static SimpleDatastoreColumnType<Float> floatType() {
+        return new FloatColumnType();
+    }
+
+    /**
+     * A column type for {@link Boolean}.
+     *
+     * @return new instance of {@link SimpleDatastoreColumnType SimpleDatastoreColumnType&lt;Boolean&gt;}
      */
     static SimpleDatastoreColumnType<Boolean> booleanType() {
         return new BooleanColumnType();
     }
 
     /**
+     * A column type for {@link Timestamp}.
+     *
      * @return new instance of {@link DatastoreColumnType} storing Protobuf {@link Timestamp} as the
-     * Datastore {@link com.google.cloud.Timestamp Timestamp}
+     *         Datastore {@link com.google.cloud.Timestamp Timestamp}
      */
     static DatastoreColumnType<Timestamp, com.google.cloud.Timestamp> timestampType() {
         return new TimestampColumnType();
     }
 
     /**
+     * A column type for {@link Version}.
+     *
      * @return new instance of {@link DatastoreColumnType} storing {@link Version} as the version
-     * {@link Version#getNumber() number}.
+     *         {@link Version#getNumber() number}.
      */
     static DatastoreColumnType<Version, Integer> versionType() {
         return new VersionColumnType();
     }
 
     /**
-     * @return new instance of {@link DatastoreColumnType} storing {@link AbstractMessage} as its
-     * {@code String} representation taken from a {@link io.spine.string.Stringifier Stringifier}
+     * A column type for {@link AbstractMessage}.
+     *
+     * @return new instance of {@link DatastoreColumnType} storing {@link AbstractMessage}
+     *         as its {@code String} representation taken from a
+     *         {@link io.spine.string.Stringifier Stringifier}
      */
     static DatastoreColumnType<AbstractMessage, String> messageType() {
         return new MessageType();
@@ -127,6 +162,24 @@ final class DsColumnTypes {
         @Override
         public Value<?> toValue(Long data) {
             return LongValue.of(data);
+        }
+    }
+
+    private static class DoubleColumnType
+            extends SimpleDatastoreColumnType<Double> {
+
+        @Override
+        public Value<?> toValue(Double data) {
+            return DoubleValue.of(data);
+        }
+    }
+
+    private static class FloatColumnType
+            extends SimpleDatastoreColumnType<Float> {
+
+        @Override
+        public Value<?> toValue(Float data) {
+            return DoubleValue.of(data);
         }
     }
 

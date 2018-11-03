@@ -28,21 +28,19 @@ import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.DatastoreReaderWriter;
 import com.google.cloud.datastore.DatastoreWriter;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.KeyQuery;
-import com.google.cloud.datastore.ProjectionEntityQuery;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
-import com.google.common.collect.UnmodifiableIterator;
+import com.google.common.collect.Streams;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,14 +49,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.toArray;
+import static com.google.common.collect.Iterators.concat;
 import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.server.storage.datastore.DsQueryIterator.concat;
+import static com.google.common.collect.Streams.stream;
 import static java.lang.Math.min;
+import static java.util.Collections.emptyIterator;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -197,48 +198,157 @@ public class DatastoreWrapper implements Logging {
      * <p>The resulting {@code Iterator} is evaluated lazily. A call to
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
-     * @param keys {@link Key Keys} to search for
+     * <p>The results are returned in an order matching that of the provided keys 
+     * with {@code null}s in place of missing and inactive entities.
+     *
+     * @param keys
+     *         {@link Key Keys} to search for
      * @return an {@code Iterator} over the found entities in the order of keys
-     * (including {@code null} values for nonexistent keys)
+     *         (including {@code null} values for nonexistent keys)
      * @see DatastoreReader#get(Key...)
      */
-    public Iterator<Entity> read(Iterable<Key> keys) {
+    public Iterator<@Nullable Entity> read(Iterable<Key> keys) {
+        Iterator<@Nullable Entity> dsIterator = readByKeys(keys);
+        Iterator<@Nullable Entity> result = orderByKeys(keys, dsIterator);
+        return unmodifiableIterator(result);
+    }
+
+    private Iterator<@Nullable Entity> readByKeys(Iterable<Key> keys) {
         List<Key> keysList = newLinkedList(keys);
-        Iterator<Entity> result;
-        if (keysList.size() <= MAX_KEYS_PER_READ_REQUEST) {
-            result = actor.get(toArray(keys, Key.class));
-        } else {
-            result = readBulk(keysList);
+        return keysList.size() <= MAX_KEYS_PER_READ_REQUEST
+               ? actor.get(toArray(keys, Key.class))
+               : readBulk(keysList);
+    }
+
+    private static Iterator<@Nullable Entity> orderByKeys(Iterable<Key> keys,
+                                                          Iterator<Entity> items) {
+        List<Entity> entities = newLinkedList(() -> items);
+        Iterator<Entity> entitiesIterator = stream(keys)
+                .map(key -> getEntityOrNull(key, entities.iterator()))
+                .iterator();
+        return entitiesIterator;
+    }
+
+    private static @Nullable Entity getEntityOrNull(Key key, Iterator<Entity> entities) {
+        while (entities.hasNext()) {
+            Entity entity = entities.next();
+            if (key.equals(entity.getKey())) {
+                entities.remove();
+                return entity;
+            }
         }
-        UnmodifiableIterator<Entity> unmodifiableResult = unmodifiableIterator(result);
-        return unmodifiableResult;
+        return null;
     }
 
     /**
      * Queries the Datastore with the given arguments.
      *
-     * <p>As the Datastore may return a partial result set for {@link EntityQuery},
-     * {@link KeyQuery} and {@link ProjectionEntityQuery}, it is required to repeat a query with
-     * the adjusted cursor position.
+     * <p>The Datastore may return a partial result set, so an execution of this method may
+     * result in several Datastore queries.
      *
-     * <p>Therefore, an execution of this method may in fact result in several queries to
-     * the Datastore instance.
+     * <p>The limit included in the {@link StructuredQuery}, will be a maximum count of entities
+     * in the returned iterator.
+     *
+     * <p>The returned {@link DsQueryIterator} allows to {@linkplain DsQueryIterator#nextPageQuery()
+     * create a query} to the next page of entities reusing an existing cursor.
      *
      * <p>The resulting {@code Iterator} is evaluated lazily. A call to
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
-     * @param query {@link Query} to execute upon the Datastore
+     * @param query
+     *         {@link Query} to execute upon the Datastore
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @see DatastoreReader#run(Query)
      */
-    public Iterator<Entity> read(StructuredQuery<Entity> query) {
+    public DsQueryIterator read(StructuredQuery<Entity> query) {
         Namespace namespace = getNamespace();
         StructuredQuery<Entity> queryWithNamespace =
                 query.toBuilder()
                      .setNamespace(namespace.getValue())
                      .build();
-        Iterator<Entity> result = new DsQueryIterator(queryWithNamespace, actor);
+        DsQueryIterator result = new DsQueryIterator(queryWithNamespace, actor);
         return result;
+    }
+
+    /**
+     * Queries the Datastore for all entities matching query.
+     *
+     * <p>Read is performed from datastore using batches of the specified size, which leads to
+     * multiple queries being executed.
+     *
+     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
+     *
+     * @param query
+     *         {@link Query} to execute upon the Datastore
+     * @param pageSize
+     *         a non-zero number of elements to be returned per a single read from Datastore
+     * @return results fo the query as a lazily evaluated {@link Iterator}
+     * @throws IllegalArgumentException
+     *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
+     */
+    Iterator<Entity> readAll(StructuredQuery<Entity> query, int pageSize) {
+        return readAllPageByPage(query, pageSize);
+    }
+
+    /**
+     * Queries the Datastore for all entities matching query.
+     *
+     * <p>Read is performed in batches until all of the matching entities are fetched, resulting
+     * in multiple Datastore queries.
+     *
+     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
+     *
+     * @param query
+     *         {@link Query} to execute upon the Datastore
+     * @return results fo the query as a lazily evaluated {@link Iterator}
+     * @throws IllegalArgumentException
+     *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
+     */
+    Iterator<Entity> readAll(StructuredQuery<Entity> query) {
+        return readAllPageByPage(query, null);
+    }
+
+    /**
+     * Queries the Datastore for all entities matching query, executing queries split in batches.
+     *
+     * <p>Read is performed from datastore using batches of the specified size, which leads to
+     * multiple queries being executed.
+     *
+     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
+     *
+     * @param query
+     *         a {@link Query} to execute upon the Datastore
+     * @param pageSize
+     *         a non-zero number of elements to be returned per a single read from Datastore;
+     *         if {@code null} the page size will be dictated by the Datastore
+     * @return results fo the query as a lazily evaluated {@link Iterator}
+     * @throws IllegalArgumentException
+     *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit} or
+     *         the provided {@code batchSize} is 0 
+     */
+    private Iterator<Entity> readAllPageByPage(StructuredQuery<Entity> query,
+                                               @Nullable Integer pageSize) {
+        checkArgument(query.getLimit() == null,
+                      "Cannot limit a number of entities for \"read all\" operation.");
+        checkArgument(pageSize == null || pageSize != 0,
+                      "The size of a single read operation cannot be 0.");
+
+        StructuredQuery<Entity> limitedQuery = limit(query, pageSize);
+        return stream(new DsQueryPageIterator(limitedQuery, this))
+                .flatMap(Streams::stream)
+                .iterator();
+    }
+
+    private static StructuredQuery<Entity> limit(StructuredQuery<Entity> query,
+                                                 @Nullable Integer batchSize) {
+        return batchSize == null
+               ? query
+               : query.toBuilder()
+                      .setLimit(batchSize)
+                      .build();
     }
 
     /**
@@ -405,7 +515,8 @@ public class DatastoreWrapper implements Logging {
      * single call — 1000 entities per query. To deal with this limitation we read the entities in
      * pagination fashion 1000 entity per page.
      *
-     * @param keys {@link Key keys} to find the entities for
+     * @param keys
+     *         {@link Key keys} to find the entities for
      * @return ordered sequence of {@link Entity entities}
      * @see #read(Iterable)
      */
@@ -416,7 +527,7 @@ public class DatastoreWrapper implements Logging {
         int lowerBound = 0;
         int higherBound = MAX_KEYS_PER_READ_REQUEST;
         int keysLeft = keys.size();
-        Iterator<Entity> result = null;
+        Iterator<Entity> result = emptyIterator();
         for (int i = 0; i < pageCount; i++) {
             List<Key> keysPage = keys.subList(lowerBound, higherBound);
 

@@ -20,25 +20,14 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
-import com.google.protobuf.Message;
 import io.spine.test.storage.Project;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.storage.datastore.Entities.entitiesToMessages;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static java.util.Collections.emptyIterator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("Entities should")
 class EntitiesTest {
@@ -54,32 +43,8 @@ class EntitiesTest {
     void testNull() {
         TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
         Project expected = Project.getDefaultInstance();
-        Project actual = Entities.entityToMessage(null, typeUrl);
+        Project actual = Entities.toMessage(null, typeUrl);
 
         assertEquals(expected, actual);
-    }
-
-    @Test
-    @DisplayName("retrieve default message instance for null entity in collection")
-    void testNullInCollection() {
-        TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
-        List<Entity> listOfNulls = newArrayList(null, null, null, null);
-        Iterator<Message> iterOfDefaults = entitiesToMessages(listOfNulls.iterator(), typeUrl);
-        List<Message> listOfDefaults = newArrayList(iterOfDefaults);
-
-        assertThat(listOfDefaults).hasSize(listOfNulls.size());
-        Project expectedValue = Project.getDefaultInstance();
-        for (Message message : listOfDefaults) {
-            assertEquals(expectedValue, message);
-        }
-    }
-
-    @Test
-    @DisplayName("retrieve empty collection on empty list")
-    void testEmptyCollection() {
-        TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
-        Iterator<Message> converted = entitiesToMessages(emptyIterator(), typeUrl);
-        assertNotNull(converted);
-        assertFalse(converted.hasNext());
     }
 }

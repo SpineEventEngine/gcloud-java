@@ -51,6 +51,7 @@ import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defa
 import static io.spine.testing.client.TestActorRequestFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -116,7 +117,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     }
 
     @Test
-    @DisplayName("set limit for history backward query")
+    @DisplayName("not set limit for history backward query")
     void testHistoryQueryLimit() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         int batchSize = 10;
@@ -124,8 +125,8 @@ class DsAggregateStorageTest extends AggregateStorageTest {
                                                                              batchSize);
         EntityQuery historyBackwardQuery = storage.historyBackwardQuery(request);
 
-        int queryLimit = historyBackwardQuery.getLimit();
-        assertEquals(batchSize, queryLimit);
+        Integer queryLimit = historyBackwardQuery.getLimit();
+        assertNull(queryLimit);
     }
 
     @Nested

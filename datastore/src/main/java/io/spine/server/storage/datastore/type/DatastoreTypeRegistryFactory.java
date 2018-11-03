@@ -26,6 +26,8 @@ import io.spine.core.Version;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 
 import static io.spine.server.storage.datastore.type.DsColumnTypes.booleanType;
+import static io.spine.server.storage.datastore.type.DsColumnTypes.doubleType;
+import static io.spine.server.storage.datastore.type.DsColumnTypes.floatType;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.integerType;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.longType;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.messageType;
@@ -45,6 +47,8 @@ public final class DatastoreTypeRegistryFactory {
                               .put(String.class, stringType())
                               .put(Integer.class, integerType())
                               .put(Long.class, longType())
+                              .put(Double.class, doubleType())
+                              .put(Float.class, floatType())
                               .put(Boolean.class, booleanType())
                               .put(Timestamp.class, timestampType())
                               .put(Version.class, versionType())
@@ -62,15 +66,15 @@ public final class DatastoreTypeRegistryFactory {
      * The returned registry contains the
      * {@linkplain io.spine.server.entity.storage.ColumnType column types} declarations for:
      * <ul>
-     *     <li> {@code String}
-     *     <li> {@code Integer}
-     *     <li> {@code Long}
-     *     <li> {@code Boolean}
-     *     <li> {@link Timestamp} stored as {@link com.google.cloud.Timestamp
-     *          com.google.cloud.Timestamp}
-     *     <li> {@link AbstractMessage Message} stored as a {@code String} retrieved form a
-     *          {@link io.spine.string.Stringifier Stringifier}
-     *     <li> {@link Version} stored as an {@code int} version number
+     *      <li> {@code String}
+     *      <li> {@code Integer}
+     *      <li> {@code Long}
+     *      <li> {@code Boolean}
+     *      <li> {@link Timestamp} stored as 
+     *           {@link com.google.cloud.Timestamp com.google.cloud.Timestamp}
+     *      <li> {@link AbstractMessage Message} stored as a {@code String} retrieved form a
+     *           {@link io.spine.string.Stringifier Stringifier}
+     *      <li> {@link Version} stored as an {@code int} version number
      * </ul>
      *
      * @return the default {@code ColumnTypeRegistry} for storing the Entity Columns in Datastore

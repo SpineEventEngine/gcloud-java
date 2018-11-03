@@ -47,7 +47,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
      */
-    static synchronized TestDatastoreStorageFactory defaultInstance() {
+    public static synchronized TestDatastoreStorageFactory defaultInstance() {
         try {
             if (instance == null) {
                 boolean onCi = runsOnCi();

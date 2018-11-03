@@ -39,8 +39,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * A test utility that checks that the data read/write operations perform well (i.e. execute within
- * the specified time
- * limit) upon a big amount of records.
+ * the specified time limit) upon a big amount of records.
  *
  * <p>The default count of records is {@link #DEFAULT_BULK_SIZE}.
  * Use {@link Builder#setBulkSize(int)} to modify this number.

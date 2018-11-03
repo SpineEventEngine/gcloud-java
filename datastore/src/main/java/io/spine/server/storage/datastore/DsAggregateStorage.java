@@ -26,7 +26,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
@@ -40,17 +39,17 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterators.transform;
+import static com.google.common.collect.Streams.stream;
 import static io.spine.server.aggregate.AggregateField.aggregate_id;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
-import static io.spine.server.storage.datastore.RecordId.of;
 import static io.spine.server.storage.datastore.DsProperties.addAggregateId;
 import static io.spine.server.storage.datastore.DsProperties.addVersion;
 import static io.spine.server.storage.datastore.DsProperties.addWhenCreated;
@@ -62,8 +61,9 @@ import static io.spine.server.storage.datastore.DsProperties.isDeleted;
 import static io.spine.server.storage.datastore.DsProperties.markAsArchived;
 import static io.spine.server.storage.datastore.DsProperties.markAsDeleted;
 import static io.spine.server.storage.datastore.DsProperties.markAsSnapshot;
-import static io.spine.server.storage.datastore.Entities.entitiesToMessages;
-import static io.spine.server.storage.datastore.Entities.messageToEntity;
+import static io.spine.server.storage.datastore.Entities.fromMessage;
+import static io.spine.server.storage.datastore.Entities.toMessage;
+import static io.spine.server.storage.datastore.RecordId.of;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -106,7 +106,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         EntityClass<? extends Aggregate<I, ?, ?>> modelClass = asEntityClass(cls);
         @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
-        Class<I> idClass = (Class<I>) modelClass.getIdClass();
+                Class<I> idClass = (Class<I>) modelClass.getIdClass();
         this.idClass = idClass;
         this.stateTypeName = modelClass.getStateType()
                                        .toName();
@@ -164,7 +164,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                                                   record.getKindCase());
         }
         Key key = datastore.keyFor(Kind.of(stateTypeName), of(recordId));
-        Entity incompleteEntity = messageToEntity(record, key);
+        Entity incompleteEntity = fromMessage(record, key);
         Entity.Builder builder = Entity.newBuilder(incompleteEntity);
         addAggregateId(builder, stringId);
         addWhenCreated(builder, record.getTimestamp());
@@ -180,15 +180,19 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      *
      * <p>Size of the batch is specified by the given {@link AggregateReadRequest}.
      *
-     * @param request the read request
+     * @param request
+     *         the read request
      * @return a new iterator instance
      */
     @Override
     protected Iterator<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         StructuredQuery<Entity> query = historyBackwardQuery(request);
-        Iterator<Entity> eventEntities = datastore.read(query);
-        Iterator<AggregateEventRecord> result = entitiesToMessages(eventEntities,
-                                                                         AGGREGATE_RECORD_TYPE_URL);
+        Function<Entity, AggregateEventRecord> toRecords = toMessage(AGGREGATE_RECORD_TYPE_URL);
+        int batchSize = request.getBatchSize();
+        Iterator<AggregateEventRecord> result =
+                stream(datastore.readAll(query, batchSize))
+                        .map(toRecords)
+                        .iterator();
         return result;
     }
 
@@ -196,7 +200,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     EntityQuery historyBackwardQuery(AggregateReadRequest<I> request) {
         checkNotNull(request);
         String idString = Stringifiers.toString(request.getRecordId());
-        int limit = request.getBatchSize();
         return Query.newEntityQueryBuilder()
                     .setKind(stateTypeName.value())
                     .setFilter(eq(aggregate_id.toString(),
@@ -204,7 +207,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                     .setOrderBy(byVersion(),
                                 byCreatedTime(),
                                 byRecordType())
-                    .setLimit(limit)
                     .build();
     }
 
@@ -212,7 +214,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      * Generates an identifier of the Datastore record basing on the given {@code Aggregate}
      * identifier.
      *
-     * @param id an identifier of the {@code Aggregate}
+     * @param id
+     *         an identifier of the {@code Aggregate}
      * @return the Datastore record ID
      */
     protected RecordId toRecordId(I id) {
@@ -283,10 +286,11 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotClosed();
 
         StructuredQuery<Entity> allQuery = Query.newEntityQueryBuilder()
-                                                      .setKind(stateTypeName.value())
-                                                      .build();
-        Iterator<Entity> allRecords = datastore.read(allQuery);
-        Iterator<I> index = transform(allRecords, new IndexTransformer<>(idClass));
+                                                .setKind(stateTypeName.value())
+                                                .build();
+        Iterator<I> index = stream(datastore.readAll(allQuery))
+                .map(new IndexTransformer<>(idClass))
+                .iterator();
         return index;
     }
 
@@ -299,7 +303,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     /**
      * A {@linkplain Function} type transforming String IDs into the specified generic type.
      *
-     * @param <I> the generic ID type
+     * @param <I>
+     *         the generic ID type
      */
     private static class IndexTransformer<I> implements Function<Entity, I> {
 

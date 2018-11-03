@@ -22,7 +22,7 @@ package io.spine.server.storage.datastore;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.aggregate.AggregateStorageVisibilityHandlingTest;
+import io.spine.server.aggregate.AggregateStorageLifecycleFlagsHandlingTest;
 import io.spine.test.aggregate.ProjectId;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -33,7 +33,7 @@ import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defa
 
 @DisplayName("DsAggregateStorage lifecycle handling should")
 class DsAggregateStorageLifecycleHandlingTest
-        extends AggregateStorageVisibilityHandlingTest {
+        extends AggregateStorageLifecycleFlagsHandlingTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
 

@@ -23,16 +23,14 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.tenant.TenantAwareFunction0;
-import io.spine.server.tenant.TenantAwareOperation;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,21 +42,27 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import static com.google.cloud.datastore.Query.newEntityQueryBuilder;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
-import static io.spine.server.storage.datastore.Entities.messageToEntity;
 import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
-import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
+import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.GENERIC_ENTITY_KIND;
+import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.NAMESPACE_HOLDER_KIND;
+import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.checkTenantIdInKey;
+import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.ensureNamespace;
+import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.testDatastore;
 import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isIn;
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -66,11 +70,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 @DisplayName("DatastoreWrapper should")
 class DatastoreWrapperTest {
 
-    private static final String NAMESPACE_HOLDER_KIND = "spine.test.NAMESPACE_HOLDER_KIND";
-
     @AfterAll
     static void tearDown() {
-        DatastoreWrapper wrapper = wrap(Given.testDatastore(), singleTenant());
+        DatastoreWrapper wrapper = wrap(testDatastore(), singleTenant());
         wrapper.dropTable(NAMESPACE_HOLDER_KIND);
     }
 
@@ -81,7 +83,7 @@ class DatastoreWrapperTest {
 
         @BeforeEach
         void setUp() {
-            wrapper = wrap(Given.testDatastore(), singleTenant());
+            wrapper = wrap(testDatastore(), singleTenant());
             wrapper.startTransaction();
         }
 
@@ -129,7 +131,7 @@ class DatastoreWrapperTest {
 
         @BeforeEach
         void setUp() {
-            wrapper = wrap(Given.testDatastore(), false);
+            wrapper = wrap(testDatastore(), false);
         }
 
         @AfterEach
@@ -142,7 +144,7 @@ class DatastoreWrapperTest {
         void testBulkRead() throws InterruptedException {
             int bulkSize = 1001;
 
-            Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
+            Map<Key, Entity> entities = newTestEntities(bulkSize, wrapper);
             Collection<Entity> expectedEntities = entities.values();
 
             wrapper.createOrUpdate(expectedEntities);
@@ -161,7 +163,7 @@ class DatastoreWrapperTest {
         void testBigBulkRead() throws InterruptedException {
             int bulkSize = 2001;
 
-            Map<Key, Entity> entities = Given.nEntities(bulkSize, wrapper);
+            Map<Key, Entity> entities = newTestEntities(bulkSize, wrapper);
             Collection<Entity> expectedEntities = entities.values();
 
             wrapper.createOrUpdate(expectedEntities);
@@ -169,12 +171,127 @@ class DatastoreWrapperTest {
             // Wait for some time to make sure the writing is complete
             Thread.sleep(bulkSize * 3L);
 
-            StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                                 .setKind(Given.GENERIC_ENTITY_KIND.getValue())
-                                                 .build();
+            StructuredQuery<Entity> query = newEntityQueryBuilder()
+                    .setKind(GENERIC_ENTITY_KIND.getValue())
+                    .build();
             Collection<Entity> readEntities = newArrayList(wrapper.read(query));
             assertEquals(entities.size(), readEntities.size());
             assertTrue(expectedEntities.containsAll(readEntities));
+        }
+    }
+
+    @Nested
+    @DisplayName("read entities by keys")
+    class ReadByKeys {
+
+        private TestDatastoreWrapper wrapper;
+
+        @BeforeEach
+        void setUp() {
+            wrapper = wrap(testDatastore(), false);
+        }
+
+        @AfterEach
+        void tearDown() {
+            wrapper.dropAllTables();
+        }
+
+        @Test
+        @DisplayName("replacing missing entities with null")
+        void testMissingAreNull() throws InterruptedException {
+            int bulkSize = 3;
+
+            Map<Key, Entity> entities = createAndStoreTestEntities(bulkSize);
+
+            // Wait for some time to make sure the writing is complete
+            Thread.sleep(bulkSize * 5L);
+
+            List<Key> presentKeys = newArrayList(entities.keySet());
+
+            List<Key> queryKeys = new ImmutableList.Builder<Key>()
+                    .add(newKey("missing-key-1", wrapper))
+                    .add(presentKeys.get(0))
+                    .add(presentKeys.get(1))
+                    .add(newKey("missing-key-2", wrapper))
+                    .add(presentKeys.get(2))
+                    .build();
+
+            Iterator<Entity> actualEntities = wrapper.read(queryKeys);
+
+            assertNull(actualEntities.next());
+            assertEquals(entities.get(presentKeys.get(0)), actualEntities.next());
+            assertEquals(entities.get(presentKeys.get(1)), actualEntities.next());
+            assertNull(actualEntities.next());
+            assertEquals(entities.get(presentKeys.get(2)), actualEntities.next());
+
+            assertFalse(actualEntities.hasNext());
+        }
+
+        @Test
+        @DisplayName("preserving order")
+        void test() throws InterruptedException {
+            int bulkSize = 3;
+
+            Map<Key, Entity> entities = createAndStoreTestEntities(bulkSize);
+
+            // Wait for some time to make sure the writing is complete
+            Thread.sleep(bulkSize * 5L);
+
+            List<Key> presentKeys = newArrayList(entities.keySet());
+
+            List<Key> queryKeys = new ImmutableList.Builder<Key>()
+                    .add(presentKeys.get(2))
+                    .add(presentKeys.get(0))
+                    .add(presentKeys.get(1))
+                    .build();
+
+            Iterator<Entity> actualEntities = wrapper.read(queryKeys);
+
+            assertEquals(entities.get(queryKeys.get(0)), actualEntities.next());
+            assertEquals(entities.get(queryKeys.get(1)), actualEntities.next());
+            assertEquals(entities.get(queryKeys.get(2)), actualEntities.next());
+
+            assertFalse(actualEntities.hasNext());
+        }
+
+        private Map<Key, Entity> createAndStoreTestEntities(int bulkSize) {
+            Map<Key, Entity> entities = newTestEntities(bulkSize, wrapper);
+            Collection<Entity> expectedEntities = entities.values();
+            wrapper.createOrUpdate(expectedEntities);
+            return entities;
+        }
+    }
+
+    @Nested
+    @DisplayName("read with structured query")
+    class ReadWithStructuredQuery {
+
+        private TestDatastoreWrapper wrapper;
+
+        @BeforeEach
+        void setUp() {
+            wrapper = wrap(testDatastore(), false);
+        }
+
+        @AfterEach
+        void tearDown() {
+            wrapper.dropAllTables();
+        }
+
+        @Test
+        @DisplayName("throws IAE during batch read with limit")
+        void testIaeOnBatchReadWithLimit() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> wrapper.readAll(newEntityQueryBuilder()
+                                                       .setLimit(5)
+                                                       .build(), 1));
+        }
+
+        @Test
+        @DisplayName("throws IAE during batch read of 0 size")
+        void testIaeOnBatchReadWithZeroSize() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> wrapper.readAll(newEntityQueryBuilder().build(), 0));
         }
     }
 
@@ -182,7 +299,7 @@ class DatastoreWrapperTest {
     @DisplayName("generate key factories aware of tenancy")
     void testGenerateKeyFactory() {
         ProjectId projectId = TestDatastores.projectId();
-        DatastoreWrapper wrapper = wrap(Given.testDatastore(), multitenant(projectId));
+        DatastoreWrapper wrapper = wrap(testDatastore(), multitenant(projectId));
         String tenantId1 = "first-tenant-ID";
         String tenantId1Prefixed = "Vfirst-tenant-ID";
         String tenantId2 = "second@tenant.id";
@@ -213,15 +330,15 @@ class DatastoreWrapperTest {
     @Test
     @DisplayName("produce lazy iterator on query read")
     void testLazyIterator() {
-        DatastoreWrapper wrapper = wrap(Given.testDatastore(), singleTenant());
+        DatastoreWrapper wrapper = wrap(testDatastore(), singleTenant());
         int count = 2;
-        Map<?, Entity> entities = Given.nEntities(count, wrapper);
+        Map<?, Entity> entities = newTestEntities(count, wrapper);
         Collection<Entity> expctedEntities = entities.values();
         wrapper.createOrUpdate(expctedEntities);
 
-        StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                             .setKind(Given.GENERIC_ENTITY_KIND.getValue())
-                                             .build();
+        StructuredQuery<Entity> query = newEntityQueryBuilder()
+                .setKind(GENERIC_ENTITY_KIND.getValue())
+                .build();
         Iterator<Entity> result = wrapper.read(query);
 
         assertTrue(result.hasNext());
@@ -229,8 +346,8 @@ class DatastoreWrapperTest {
         assertTrue(result.hasNext());
         Entity second = result.next();
 
-        assertThat(first, isIn(expctedEntities));
-        assertThat(second, isIn(expctedEntities));
+        assertThat(expctedEntities).contains(first);
+        assertThat(expctedEntities).contains(second);
 
         assertFalse(result.hasNext());
         assertFalse(result.hasNext());
@@ -246,7 +363,7 @@ class DatastoreWrapperTest {
     @Test
     @DisplayName("allow to add new namespaces 'on the go'")
     void testNewNamespaces() {
-        DatastoreWrapper wrapper = wrap(Given.testDatastore(), multitenant(projectId()));
+        DatastoreWrapper wrapper = wrap(testDatastore(), multitenant(projectId()));
         TenantId tenantId = TenantId.newBuilder()
                                     .setValue("Luke_I_am_your_tenant.")
                                     .build();
@@ -267,47 +384,26 @@ class DatastoreWrapperTest {
         wrapper.delete(entityKey);
     }
 
-    private static void checkTenantIdInKey(String id, TenantId tenantId, DatastoreWrapper wrapper) {
-        new TenantAwareOperation(tenantId) {
-            @Override
-            public void run() {
-                Key key = wrapper.getKeyFactory(Given.GENERIC_ENTITY_KIND)
-                                 .newKey(42L);
-                assertEquals(id, key.getNamespace());
-            }
-        }.execute();
+    /**
+     * Cannot be moved to test environment because it uses package-local
+     * {@link Entities#fromMessage(com.google.protobuf.Message, Key) fromMessage()}.
+     */
+    private static Map<Key, Entity> newTestEntities(int n, DatastoreWrapper wrapper) {
+        Map<Key, Entity> result = new HashMap<>(n);
+        for (int i = 0; i < n; i++) {
+            Any message = Any.getDefaultInstance();
+            Key key = newKey(format("record-%s", i), wrapper);
+            Entity entity = Entities.fromMessage(message, key);
+            result.put(key, entity);
+        }
+        return result;
     }
 
-    private static void ensureNamespace(String namespaceValue, Datastore datastore) {
-        KeyFactory keyFactory = datastore.newKeyFactory()
-                                         .setNamespace(namespaceValue)
-                                         .setKind(NAMESPACE_HOLDER_KIND);
-        Entity entity = Entity.newBuilder(keyFactory.newKey(42L))
-                              .build();
-        datastore.put(entity);
-    }
-
-    private static class Given {
-
-        private static final Kind GENERIC_ENTITY_KIND = Kind.of("my.entity");
-
-        private static Datastore testDatastore() {
-            boolean onCi = runsOnCi();
-            return onCi
-                   ? TestDatastores.remote()
-                   : TestDatastores.local();
-        }
-
-        private static Map<Key, Entity> nEntities(int n, DatastoreWrapper wrapper) {
-            Map<Key, Entity> result = new HashMap<>(n);
-            for (int i = 0; i < n; i++) {
-                Any message = Any.getDefaultInstance();
-                RecordId recordId = new RecordId(String.format("record-%s", i));
-                Key key = wrapper.keyFor(GENERIC_ENTITY_KIND, recordId);
-                Entity entity = messageToEntity(message, key);
-                result.put(key, entity);
-            }
-            return result;
-        }
+    /**
+     * Cannot be moved to test environment because it uses package-local {@link RecordId}.
+     */
+    private static Key newKey(String id, DatastoreWrapper wrapper) {
+        RecordId recordId = new RecordId(id);
+        return wrapper.keyFor(GENERIC_ENTITY_KIND, recordId);
     }
 }

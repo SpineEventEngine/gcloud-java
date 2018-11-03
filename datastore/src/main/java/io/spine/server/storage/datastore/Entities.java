@@ -26,28 +26,18 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.EntityField;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
-import java.util.Iterator;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Streams.stream;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.FieldMasks.applyMask;
-import static io.spine.server.storage.datastore.DsProperties.isArchived;
-import static io.spine.server.storage.datastore.DsProperties.isDeleted;
-import static io.spine.validate.Validate.isDefault;
 
 /**
  * Utility class for converting {@linkplain Message proto messages} into
@@ -56,15 +46,6 @@ import static io.spine.validate.Validate.isDefault;
 final class Entities {
 
     static final TypeUrl RECORD_TYPE_URL = TypeUrl.of(EntityRecord.class);
-
-    private static final Predicate<Entity> NOT_ARCHIVED_OR_DELETED = input -> {
-        if (input == null) {
-            return false;
-        }
-        boolean isNotArchived = !isArchived(input);
-        boolean isNotDeleted = !isDeleted(input);
-        return isNotArchived && isNotDeleted;
-    };
 
     /** Prevent utility class instantiation. */
     private Entities() {
@@ -76,13 +57,16 @@ final class Entities {
      * <p>If passed {@link Entity} is {@code null}, a default instance for the given type
      * is returned.
      *
-     * @param entity source {@link Entity} to get message form
-     * @param type   {@link TypeUrl} of required message
-     * @param <M>    required message type
+     * @param entity
+     *         source {@link Entity} to get message form
+     * @param type
+     *         {@link TypeUrl} of required message
+     * @param <M>
+     *         required message type
      * @return message contained in the {@link Entity}
      */
     @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"} /* Rely on caller. */)
-    static <M extends Message> M entityToMessage(@Nullable Entity entity, TypeUrl type) {
+    static <M extends Message> M toMessage(@Nullable Entity entity, TypeUrl type) {
         if (entity == null) {
             return defaultMessage(type);
         }
@@ -104,44 +88,30 @@ final class Entities {
     }
 
     /**
-     * Maps the elements of the given {@code Iterator} from {@linkplain Entity Entities} to enclosed
-     * {@linkplain Message Messages}.
-     *
-     * <p>The runtime type of the messages is specified within the {@code type} parameter.
-     *
-     * @param entities a collection of the source {@link Entity Entities} to get message form
-     * @param type     {@link TypeUrl} of required message
-     * @param <M>      required message type
-     * @return message contained in the {@link Entity}
-     */
-    static <M extends Message>
-    Iterator<M> entitiesToMessages(Iterator<Entity> entities, TypeUrl type) {
-        Function<Entity, M> transformer = entityToMessage(type);
-        return stream(entities).map(transformer)
-                               .iterator();
-    }
-
-    /**
      * Retrieves a {@link Function} transforming {@linkplain Entity Entities} into
      * {@linkplain Message Messages} of the given type.
      *
-     * @param type the desired type of the messages
-     * @param <M>  the compile-time type of the messages
+     * @param type
+     *         the desired type of the messages
+     * @param <M>
+     *         the compile-time type of the messages
      * @return a {@link Function} transforming {@linkplain Entity Entities} into
      *         {@linkplain Message Messages}
      */
-    static <M extends Message> Function<Entity, M> entityToMessage(TypeUrl type) {
-        return entity -> entityToMessage(entity, type);
+    static <M extends Message> Function<Entity, M> toMessage(TypeUrl type) {
+        return entity -> toMessage(entity, type);
     }
 
     /**
      * Generates an {@link Entity} with given {@link Key} and from given proto {@code Message}.
      *
-     * @param message source of data to be put into the {@link Entity}
-     * @param key     instance of {@link Key} to be assigned to the {@link Entity}
+     * @param message
+     *         source of data to be put into the {@link Entity}
+     * @param key
+     *         instance of {@link Key} to be assigned to the {@link Entity}
      * @return new instance of {@link Entity} containing serialized proto message
      */
-    static Entity messageToEntity(Message message, Key key) {
+    static Entity fromMessage(Message message, Key key) {
         checkNotNull(message);
         checkNotNull(key);
 
@@ -158,10 +128,6 @@ final class Entities {
         return entity;
     }
 
-    static Predicate<Entity> activeEntity() {
-        return NOT_ARCHIVED_OR_DELETED;
-    }
-
     @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"} /* Rely on caller. */)
     private static <M extends Message> M defaultMessage(TypeUrl type) {
         Class<M> messageClass = (Class<M>) type.getJavaClass();
@@ -172,40 +138,15 @@ final class Entities {
         return message;
     }
 
-    /**
-     * Filters query results with the passed filter and applies the passed field mask
-     * to the filtered results.
-     */
-    static Iterator<EntityRecord> toRecords(Iterator<Entity> queryResults,
-                                            Predicate<Entity> filter,
-                                            FieldMask fieldMask) {
-        Stream<Entity> filtered = stream(queryResults).filter(filter);
-
-        Function<Entity, EntityRecord> applyFieldMask = new Function<Entity, EntityRecord>() {
-
-            private final boolean maskNotEmpty = !isDefault(fieldMask);
-
-            @Override
-            public EntityRecord apply(Entity input) {
-                checkNotNull(input);
-                EntityRecord record = getRecordFromEntity(input);
-                if (maskNotEmpty) {
-                    Message state = unpack(record.getState());
-                    state = applyMask(fieldMask, state);
-                    record = EntityRecord.newBuilder(record)
-                                         .setState(AnyPacker.pack(state))
-                                         .build();
-                }
-                return record;
-            }
-        };
-        Iterator<EntityRecord> result = filtered.map(applyFieldMask)
-                                                .iterator();
-        return result;
+    static @Nullable EntityRecord nullableToRecord(@Nullable Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        return toRecord(entity);
     }
 
-    private static EntityRecord getRecordFromEntity(Entity entity) {
-        EntityRecord record = entityToMessage(entity, RECORD_TYPE_URL);
-        return record;
+    static EntityRecord toRecord(Entity entity) {
+        checkNotNull(entity);
+        return toMessage(entity, RECORD_TYPE_URL);
     }
 }
