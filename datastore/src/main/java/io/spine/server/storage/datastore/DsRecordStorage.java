@@ -159,7 +159,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         return queryBy(query, fieldMask);
     }
 
-    @SuppressWarnings("SimplifyBooleanReturns")// Cleaner with each rule out condition explicitly.
+    @SuppressWarnings("PMD.SimplifyBooleanReturns")
+    // Cleaner with each rule out condition stated explicitly.
     private static <I> boolean isQueryForAll(EntityQuery<I> query) {
         if (!query.getIds()
                   .isEmpty()) {
