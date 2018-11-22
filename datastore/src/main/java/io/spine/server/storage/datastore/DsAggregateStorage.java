@@ -228,20 +228,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     /**
-     * Generates an identifier for the Datastore record which represents event count after the last
-     * snapshot.
-     *
-     * @param id
-     *         an identifier of the {@code Aggregate}
-     * @return the identifier for the Datastore record
-     */
-    protected RecordId toEventCountId(I id) {
-        String stringId = Stringifiers.toString(id);
-        String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stateTypeName + '_' + stringId;
-        return of(datastoreId);
-    }
-
-    /**
      * Generates an identifier for the Datastore record which represents an Aggregate snapshot.
      *
      * @param id
@@ -253,6 +239,20 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         String snapshotTimeStamp = Timestamps.toString(snapshot.getTimestamp());
         String snapshotId = SNAPSHOT + '_' + stringId + '_' + snapshotTimeStamp;
         return of(snapshotId);
+    }
+
+    /**
+     * Generates an identifier for the Datastore record which represents event count after the last
+     * snapshot.
+     *
+     * @param id
+     *         an identifier of the {@code Aggregate}
+     * @return the identifier for the Datastore record
+     */
+    protected RecordId toEventCountId(I id) {
+        String stringId = Stringifiers.toString(id);
+        String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stateTypeName + '_' + stringId;
+        return of(datastoreId);
     }
 
     /**
