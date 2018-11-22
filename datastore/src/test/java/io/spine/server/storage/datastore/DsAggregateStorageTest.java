@@ -167,7 +167,6 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
         int actualFirstCount = storage.readEventCountAfterLastSnapshot(id);
         int actualSecondCount = secondStorage.readEventCountAfterLastSnapshot(id);
-
         assertEquals(firstCount, actualFirstCount);
         assertEquals(secondCount, actualSecondCount);
     }
