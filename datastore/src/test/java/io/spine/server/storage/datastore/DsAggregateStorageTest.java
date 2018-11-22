@@ -22,6 +22,7 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.EntityQuery;
 import com.google.common.base.Suppliers;
+import com.google.protobuf.Int32Value;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
@@ -127,6 +128,21 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
         Integer queryLimit = historyBackwardQuery.getLimit();
         assertNull(queryLimit);
+    }
+
+    @Test
+    @DisplayName("read event count stored in the old format")
+    void readEventCountOldFormat() {
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        ProjectId id = Sample.messageOfType(ProjectId.class);
+        RecordId oldFormatId = storage.toRecordId(id);
+        int eventCount = 15;
+        storage.getPropertyStorage()
+               .write(oldFormatId, Int32Value.newBuilder()
+                                             .setValue(eventCount)
+                                             .build());
+        int actualEventCount = storage.readEventCountAfterLastSnapshot(id);
+        assertEquals(eventCount, actualEventCount);
     }
 
     @Nested
