@@ -181,9 +181,9 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         writeSnapshotWithTimestamp(id, Timestamps.fromMillis(15000));
 
         int batchSize = 10;
-        Iterator<AggregateEventRecord> read =
-                storage.historyBackward(new AggregateReadRequest<>(id, batchSize));
-        long snapshotCount = Streams.stream(read)
+        AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(id, batchSize);
+        Iterator<AggregateEventRecord> records = storage.historyBackward(request);
+        long snapshotCount = Streams.stream(records)
                                     .count();
         assertEquals(2, snapshotCount);
     }
@@ -235,15 +235,15 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         }
     }
 
-    private void writeSnapshotWithTimestamp(ProjectId id, Timestamp timestamp2) {
+    private void writeSnapshotWithTimestamp(ProjectId id, Timestamp timestamp) {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
-        Snapshot snapshot2 = Snapshot.newBuilder()
-                                     .setTimestamp(timestamp2)
-                                     .build();
-        AggregateEventRecord record2 = AggregateEventRecordVBuilder
+        Snapshot snapshot = Snapshot.newBuilder()
+                                    .setTimestamp(timestamp)
+                                    .build();
+        AggregateEventRecord record = AggregateEventRecordVBuilder
                 .newBuilder()
-                .setSnapshot(snapshot2)
+                .setSnapshot(snapshot)
                 .build();
-        storage.writeRecord(id, record2);
+        storage.writeRecord(id, record);
     }
 }
