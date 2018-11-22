@@ -129,15 +129,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         return result;
     }
 
-    private Optional<Int32Value> lookUpEventCount(RecordId recordId) {
-        Optional<Message> eventCount = propertyStorage.read(recordId, Int32Value.getDescriptor());
-        if (!eventCount.isPresent()) {
-            return Optional.empty();
-        }
-        Int32Value count = (Int32Value) eventCount.get();
-        return Optional.of(count);
-    }
-
     @Override
     public void writeEventCountAfterLastSnapshot(I id, int eventCount) {
         checkNotClosed();
@@ -355,6 +346,15 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         int result = eventCount.get()
                                .getValue();
         return result;
+    }
+
+    private Optional<Int32Value> lookUpEventCount(RecordId recordId) {
+        Optional<Message> eventCount = propertyStorage.read(recordId, Int32Value.getDescriptor());
+        if (!eventCount.isPresent()) {
+            return Optional.empty();
+        }
+        Int32Value count = (Int32Value) eventCount.get();
+        return Optional.of(count);
     }
 
     /**
