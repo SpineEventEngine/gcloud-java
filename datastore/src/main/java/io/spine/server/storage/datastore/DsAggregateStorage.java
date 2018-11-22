@@ -260,7 +260,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected RecordId toSnapshotId(I id, Snapshot snapshot) {
         String stringId = Stringifiers.toString(id);
         String snapshotTimeStamp = Timestamps.toString(snapshot.getTimestamp());
-        String snapshotId = SNAPSHOT + stringId + snapshotTimeStamp;
+        String snapshotId = SNAPSHOT + '_' + stringId + '_' + snapshotTimeStamp;
         return of(snapshotId);
     }
 
