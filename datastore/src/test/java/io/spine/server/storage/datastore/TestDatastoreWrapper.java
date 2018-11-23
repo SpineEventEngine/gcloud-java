@@ -112,11 +112,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
 
             // sleep in between the cleanup attempts.
             if (cleanupAttempts > 0) {
-                try {
-                    Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                waitForConsistency();
             }
 
             StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
