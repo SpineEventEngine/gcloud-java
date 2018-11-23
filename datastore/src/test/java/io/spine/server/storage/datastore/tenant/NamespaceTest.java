@@ -27,7 +27,7 @@ import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.ProjectId;
-import io.spine.server.storage.datastore.given.TestDatastores;
+import io.spine.server.storage.datastore.given.TestDatastore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -45,10 +45,10 @@ class NamespaceTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
         new NullPointerTester()
-                .setDefault(ProjectId.class, TestDatastores.projectId())
+                .setDefault(ProjectId.class, TestDatastore.projectId())
                 .setDefault(TenantId.class, TenantId.getDefaultInstance())
-                .setDefault(Key.class, Key.newBuilder(TestDatastores.projectId()
-                                                                    .getValue(),
+                .setDefault(Key.class, Key.newBuilder(TestDatastore.projectId()
+                                                                   .getValue(),
                                                       "kind",
                                                       "name")
                                           .build())
@@ -72,7 +72,7 @@ class NamespaceTest {
         TenantId aGroupTenantId = TenantId.newBuilder()
                                           .setValue(aGroupValue)
                                           .build();
-        Namespace aGroupNamespaceFromTenantId = of(aGroupTenantId, TestDatastores.projectId());
+        Namespace aGroupNamespaceFromTenantId = of(aGroupTenantId, TestDatastore.projectId());
         Namespace aGroupNamespaceFromString = of(aGroupValue);
         Namespace duplicateAGroupNamespaceFromString = of(aGroupValue);
 
@@ -81,7 +81,7 @@ class NamespaceTest {
                                           .setEmail(EmailAddress.newBuilder()
                                                                 .setValue(bGroupValue))
                                           .build();
-        Namespace bGroupNamespaceFromTenantId = of(bGroupTenantId, TestDatastores.projectId());
+        Namespace bGroupNamespaceFromTenantId = of(bGroupTenantId, TestDatastore.projectId());
         // Same string but other type
         Namespace cGroupNamespaceFromString = of(bGroupValue);
 
@@ -113,9 +113,9 @@ class NamespaceTest {
         assertNotEquals(domainId, stringId);
         assertNotEquals(emailId, stringId);
 
-        Namespace fromDomainId = of(domainId, TestDatastores.projectId());
-        Namespace fromEmailId = of(emailId, TestDatastores.projectId());
-        Namespace fromStringId = of(stringId, TestDatastores.projectId());
+        Namespace fromDomainId = of(domainId, TestDatastore.projectId());
+        Namespace fromEmailId = of(emailId, TestDatastore.projectId());
+        Namespace fromStringId = of(stringId, TestDatastore.projectId());
 
         assertNotEquals(fromDomainId, fromEmailId);
         assertNotEquals(fromDomainId, fromStringId);

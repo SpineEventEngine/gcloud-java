@@ -29,7 +29,6 @@ import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.tenant.TenantAwareOperation;
 
-import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -67,9 +66,6 @@ public class DatastoreWrapperTestEnv {
     }
 
     public static Datastore testDatastore() {
-        boolean onCi = runsOnCi();
-        return onCi
-               ? TestDatastores.remote()
-               : TestDatastores.local();
+        return TestDatastore.instance();
     }
 }

@@ -22,7 +22,6 @@ package io.spine.server.storage.datastore.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -83,16 +82,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * A test environment for {@link io.spine.server.storage.datastore.DsRecordStorageTest}.
- *
- * @author Mykhailo Drachuk
  */
 public class DsRecordStorageTestEnv {
 
     public static final String COLUMN_NAME_FOR_STORING = "columnName";
+
+    @SuppressWarnings("PublicStaticCollectionField") // OK for immutable list of strings.
     public static final ImmutableList<String> UNORDERED_COLLEGE_NAMES = ImmutableList.of(
             "Ivy University", "Doonesbury", "Winston University", "Springfield A&M",
             "Greendale Community College", "Monsters University"
     );
+
     private static final Random RANDOM = new SecureRandom();
     private static final long MAX_TIMESTAMP_SECONDS = 250000000000L;
 

@@ -29,12 +29,11 @@ import com.google.protobuf.Any;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
-import io.spine.server.storage.datastore.given.TestDatastores;
+import io.spine.server.storage.datastore.given.TestDatastore;
 import io.spine.server.tenant.TenantAwareFunction0;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -56,7 +55,7 @@ import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.NA
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.checkTenantIdInKey;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.ensureNamespace;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.testDatastore;
-import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
+import static io.spine.server.storage.datastore.given.TestDatastore.projectId;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
 import static java.lang.String.format;
@@ -131,7 +130,7 @@ class DatastoreWrapperTest {
 
         @BeforeEach
         void setUp() {
-            wrapper = wrap(testDatastore(), false);
+            wrapper = wrap(testDatastore());
         }
 
         @AfterEach
@@ -157,7 +156,6 @@ class DatastoreWrapperTest {
             assertTrue(expectedEntities.containsAll(readEntities));
         }
 
-        @Disabled("This test rarely passes on Travis CI due to eventual consistency.")
         @Test
         @DisplayName("support big bulk reads")
         void testBigBulkRead() throws InterruptedException {
@@ -188,7 +186,7 @@ class DatastoreWrapperTest {
 
         @BeforeEach
         void setUp() {
-            wrapper = wrap(testDatastore(), false);
+            wrapper = wrap(testDatastore());
         }
 
         @AfterEach
@@ -270,7 +268,7 @@ class DatastoreWrapperTest {
 
         @BeforeEach
         void setUp() {
-            wrapper = wrap(testDatastore(), false);
+            wrapper = wrap(testDatastore());
         }
 
         @AfterEach
@@ -298,7 +296,7 @@ class DatastoreWrapperTest {
     @Test
     @DisplayName("generate key factories aware of tenancy")
     void testGenerateKeyFactory() {
-        ProjectId projectId = TestDatastores.projectId();
+        ProjectId projectId = TestDatastore.projectId();
         DatastoreWrapper wrapper = wrap(testDatastore(), multitenant(projectId));
         String tenantId1 = "first-tenant-ID";
         String tenantId1Prefixed = "Vfirst-tenant-ID";

@@ -30,7 +30,7 @@ import com.google.common.truth.IterableSubject;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.ProjectId;
-import io.spine.server.storage.datastore.given.TestDatastores;
+import io.spine.server.storage.datastore.given.TestDatastore;
 import io.spine.testing.TestValues;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -121,7 +120,7 @@ class NamespaceIndexTest {
         assertTrue(initialEmptySet.isEmpty());
 
         TenantId newId = newTenantId();
-        Namespace newNamespace = of(newId, TestDatastores.projectId());
+        Namespace newNamespace = of(newId, TestDatastore.projectId());
 
         namespaceIndex.keep(newId);
         assertTrue(namespaceIndex.contains(newNamespace));
@@ -166,7 +165,7 @@ class NamespaceIndexTest {
         NamespaceIndex.NamespaceQuery namespaceQuery = keys::iterator;
         // The tested object
         NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery,
-                                                           TestDatastores.projectId(),
+                                                           TestDatastore.projectId(),
                                                            true);
 
         // The test flow
@@ -190,7 +189,7 @@ class NamespaceIndexTest {
 
             // Check new value added
             boolean success = namespaceIndex.contains(of(newTenantId,    // sync
-                                                         TestDatastores.projectId()));
+                                                         TestDatastore.projectId()));
             assertTrue(success);
 
             // Check returned set has newly added element

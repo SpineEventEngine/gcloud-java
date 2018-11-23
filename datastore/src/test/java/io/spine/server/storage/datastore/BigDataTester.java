@@ -74,7 +74,7 @@ public class BigDataTester<I> implements Logging {
     }
 
     /**
-     * Preforms the actual check.
+     * Performs the actual check.
      *
      * <p>The execution flow is as follows:
      * <ol>

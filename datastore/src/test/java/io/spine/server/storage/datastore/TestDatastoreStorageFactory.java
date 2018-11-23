@@ -23,13 +23,12 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.logging.Logging;
-import io.spine.server.storage.datastore.given.TestDatastores;
+import io.spine.server.storage.datastore.given.TestDatastore;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
 
-import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
 import static java.lang.String.format;
 
 /**
@@ -45,15 +44,12 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * <p>Dataset name: {@code spine-dev}
      *
-     * <p>Connects to a localhost Datastore emulator or to a remote Datastore if run on CI.
+     * <p>Connects to a localhost Datastore emulator.
      */
     public static synchronized TestDatastoreStorageFactory defaultInstance() {
         try {
             if (instance == null) {
-                boolean onCi = runsOnCi();
-                instance = onCi
-                            ? createCiInstance()
-                            : createLocalInstance();
+                instance = createInstance();
             }
             return instance;
         } catch (Throwable e) {
@@ -62,14 +58,8 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         }
     }
 
-    private static TestDatastoreStorageFactory createLocalInstance() {
-        log().info("Running on local machine. Connecting to a local Datastore emulator.");
-        return new TestDatastoreStorageFactory(TestDatastores.local());
-    }
-
-    private static TestDatastoreStorageFactory createCiInstance() {
-        log().info("Running on CI. Connecting to remote Google Cloud Datastore.");
-        return new TestDatastoreStorageFactory(TestDatastores.remote());
+    private static TestDatastoreStorageFactory createInstance() {
+        return new TestDatastoreStorageFactory(TestDatastore.instance());
     }
 
     protected TestDatastoreStorageFactory(Datastore datastore) {
@@ -84,11 +74,12 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     @Override
     protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
-        return TestDatastoreWrapper.wrap(builder.getDatastore(), runsOnCi());
+        return TestDatastoreWrapper.wrap(builder.getDatastore());
     }
 
     /**
-     * Performs operations on setting up local datastore.
+     * Performs operations on setting up the local datastore.
+     *
      * <p>General usage is testing.
      * <p>By default is a NoOp, but can be overridden.
      */
@@ -98,6 +89,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     /**
      * Clears all data in the local Datastore.
+     *
      * <p>May be effectively the same as {@link #clear()}.
      *
      * <p>NOTE: does not stop the server but just deletes all records.

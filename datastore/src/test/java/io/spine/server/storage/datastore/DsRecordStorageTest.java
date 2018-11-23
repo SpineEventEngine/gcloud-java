@@ -55,13 +55,11 @@ import io.spine.test.storage.Task;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -281,7 +279,6 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         assertEquals(entity.isDeleted(), datastoreEntity.getBoolean(deleted));
     }
 
-    @Disabled("This test rarely passes on Travis CI due to eventual consistency.")
     @Test
     @DisplayName("pass big data speed test")
     void testBigData() {
@@ -696,7 +693,6 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     /**
      * Overrides and disables test from parent: {@link RecordStorageTest#rewritingExisting()}.
      */
-    @Disabled("This test rarely passes on Travis CI due to eventual consistency.")
     @Test
     @DisplayName("given bulk of records, write them re-writing existing ones")
     void rewritingExisting() {
