@@ -21,8 +21,7 @@ before_install:
   # Setup the SDK to take over standard Travis version.
   - source $HOME/google-cloud-sdk/path.bash.inc
 
-before_script:
-  - ./scripts/start-datastore.sh $
+install: true
 
 script:
   - ./scripts/start-datastore.sh $
