@@ -24,7 +24,7 @@ before_install:
 install: true
 
 script:
-  - (gcloud beta emulators datastore start --project=spine-dev --host-port=localhost:8080 --consistency 1.0 --no-store-on-disk &)
+  - gcloud beta emulators datastore start --project=spine-dev --host-port=localhost:8080 --consistency 1.0 --no-store-on-disk &
   - ./gradlew build --stacktrace
 
   # The publishing script should be executed in `script` section in order to
