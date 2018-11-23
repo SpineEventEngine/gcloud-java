@@ -67,8 +67,6 @@ import static io.spine.server.storage.datastore.Entities.fromMessage;
 import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.server.storage.datastore.RecordId.of;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -284,20 +282,20 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         Key key = toKey(id);
         Entity entityStateRecord = datastore.read(key);
         if (entityStateRecord == null) {
-            return empty();
+            return Optional.empty();
         }
 
         boolean archived = isArchived(entityStateRecord);
         boolean deleted = isDeleted(entityStateRecord);
 
         if (!archived && !deleted) {
-            return empty();
+            return Optional.empty();
         }
         LifecycleFlags flags = LifecycleFlags.newBuilder()
                                              .setArchived(archived)
                                              .setDeleted(deleted)
                                              .build();
-        return of(flags);
+        return Optional.of(flags);
     }
 
     @Override
