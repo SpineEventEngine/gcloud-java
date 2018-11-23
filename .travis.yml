@@ -24,7 +24,7 @@ before_install:
 install: true
 
 script:
-  - ./scripts/start-datastore.sh $
+  - (./scripts/start-datastore.sh $)
   - ./gradlew build --stacktrace
 
   # The publishing script should be executed in `script` section in order to
