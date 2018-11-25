@@ -15,7 +15,8 @@ before_install:
   - chmod +x ./scripts/start-datastore.sh
   # Decrypt the credentials file and copy it over to the destination.
   - openssl aes-256-cbc -K $encrypted_ebb86cbccb5d_key -iv $encrypted_ebb86cbccb5d_iv -in credentials.tar.enc -out credentials.tar -d
-  #- tar xvf credentials.tar
+  - tar xvf credentials.tar
+  - export GOOGLE_APPLICATION_CREDENTIALS=`pwd`/spine-dev.json
   # Ignore all stdout as the gcloud SDK installation is overly verbose.
   - curl https://sdk.cloud.google.com | bash > /dev/null;
   # Setup the SDK to take over standard Travis version.
