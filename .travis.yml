@@ -7,8 +7,6 @@ env:
   global:
   # A Google Cloud Storage secret (`GCS_SECRET`) for test execution data storage.
   - secure: tnnoDKT8QMEj7270VTYIj26c/rU3uBuNKl/j1SlKkZPM4xtFgkNnC4AEdtZ5JNJtDvGEdFe93Q8SQ/eKwZtORPWPFFRjmxqOsmJhC9yFtS/53JryMZGFyOnfv2iuKafRgHkwH6MAQByeA9rm3hyFle3R8w25CzwqaivbR3rdZol1aWVXCTpcxf5e3NvUijTKkm1coPIDAaw8F9Y+A5rth/X9QH6DkZJtIw89TXTanZDsmymqD8aiR4QVcsaEqrpOauSF9aLFZ/Y+DF+MgmDTNpNZlHdxzxuwb1qy3mFcKRp452vO0ufNmWxQPjXI1avTcwsRLaAxZHFLAoMZ+lSgD3chPAIFDPPak7wXB+2G0PMqKQk/9xreweqYxGCS6ousaMxzlC0U32gYcc825/+3kUr5ox/id7fjDoSI2Fd4tM4cdaKomKa6T4HNPM1Puzfqtd1aW2hUotAc0t3k+q0FaxwEISx0rRSz3VH1VoTMhf5K45EYaayoU20zMdRKNfQ7H6NkM622KSjMTx36D+cyuzgvZRqKNRTgXT5IpOJeMzmDpaGNeFwLaJGXTSpLM0Bio0T26W4ZhBNY8cTpBOpePxYdFnZEwouS8YO98UMsVq1KvAWYi6/xI/nbt+FXSmelvSvcmrC+7UatehlwuyDQTSiXqynO+37V7/CJ7zUqRjQ=
-  # Do not prompt for user input during Google Cloud SDK installation.
-  - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
 before_install:
   - chmod +x gradlew
@@ -16,10 +14,7 @@ before_install:
   # Decrypt the credentials file and copy it over to the destination.
   - openssl aes-256-cbc -K $encrypted_ebb86cbccb5d_key -iv $encrypted_ebb86cbccb5d_iv -in credentials.tar.enc -out credentials.tar -d
   - tar xvf credentials.tar
-  # Ignore all stdout as the gcloud SDK installation is overly verbose.
-  - curl https://sdk.cloud.google.com | bash > /dev/null;
-  # Setup the SDK to take over standard Travis version.
-  - source $HOME/google-cloud-sdk/path.bash.inc
+  - ./scripts/install-gcloud.sh
 
 install: true
 
