@@ -10,6 +10,7 @@ env:
 
 before_install:
   - chmod +x gradlew
+  - chmod +x ./scripts/install-gcloud.sh
   - chmod +x ./scripts/start-datastore.sh
   # Decrypt the credentials file and copy it over to the destination.
   - openssl aes-256-cbc -K $encrypted_ebb86cbccb5d_key -iv $encrypted_ebb86cbccb5d_iv -in credentials.tar.enc -out credentials.tar -d
