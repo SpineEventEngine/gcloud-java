@@ -240,8 +240,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     /**
-     * Generates an identifier for the Datastore record which represents event count after the last
-     * snapshot.
+     * Generates an identifier for the Datastore record which represents an event count after the
+     * last snapshot.
      *
      * @param id
      *         an identifier of the {@code Aggregate}
