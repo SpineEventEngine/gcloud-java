@@ -138,7 +138,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     }
 
     @Test
-    @DisplayName("read event count stored in the old format")
+    @DisplayName("read the event count stored in the old format")
     void readEventCountOldFormat() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         ProjectId id = newId();
@@ -153,7 +153,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     }
 
     @Test
-    @DisplayName("not overwrite event count when saving other aggregate type")
+    @DisplayName("not overwrite the event count when saving other aggregate type")
     void notOverwriteEventCount() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         DsAggregateStorage<ProjectId> secondStorage = (DsAggregateStorage<ProjectId>)
