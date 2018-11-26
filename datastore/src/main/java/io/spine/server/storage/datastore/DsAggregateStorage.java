@@ -67,6 +67,7 @@ import static io.spine.server.storage.datastore.Entities.fromMessage;
 import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.server.storage.datastore.RecordId.of;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.lang.String.format;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -75,7 +76,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
-    private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
+    private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT";
 
     /**
      * Prefix for the string IDs of the {@link AggregateEventRecord records} which represent
@@ -221,7 +222,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      */
     protected RecordId toRecordId(I id) {
         String stringId = Stringifiers.toString(id);
-        String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
+        String datastoreId = format("%s_%s", EVENTS_AFTER_LAST_SNAPSHOT_PREFIX, stringId);
         return of(datastoreId);
     }
 
@@ -235,7 +236,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected RecordId toSnapshotId(I id, Snapshot snapshot) {
         String stringId = Stringifiers.toString(id);
         String snapshotTimeStamp = Timestamps.toString(snapshot.getTimestamp());
-        String snapshotId = SNAPSHOT + '_' + stringId + '_' + snapshotTimeStamp;
+        String snapshotId = format("%s_%s_%s", SNAPSHOT, stringId, snapshotTimeStamp);
         return of(snapshotId);
     }
 
@@ -249,7 +250,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      */
     protected RecordId toEventCountId(I id) {
         String stringId = Stringifiers.toString(id);
-        String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stateTypeName + '_' + stringId;
+        String datastoreId =
+                format("%s_%s_%s", EVENTS_AFTER_LAST_SNAPSHOT_PREFIX, stateTypeName, stringId);
         return of(datastoreId);
     }
 
