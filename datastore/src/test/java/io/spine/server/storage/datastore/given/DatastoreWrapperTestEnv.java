@@ -65,7 +65,11 @@ public class DatastoreWrapperTestEnv {
         datastore.put(entity);
     }
 
-    public static Datastore testDatastore() {
-        return TestDatastore.instance();
+    public static Datastore localDatastore() {
+        return TestDatastores.local();
+    }
+
+    public static Datastore remoteDatastore() {
+        return TestDatastores.remote();
     }
 }

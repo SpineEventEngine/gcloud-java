@@ -29,7 +29,7 @@ import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.datastore.given.TestDatastore;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.server.storage.datastore.given.TestDatastore.projectId;
+import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -194,7 +194,7 @@ class DatastoreStorageFactoryBuilderTest {
     }
 
     private static Datastore mockDatastore() {
-        return TestDatastore.instance();
+        return TestDatastores.local();
     }
 
     private static <T> EntityColumn mockColumn(Class<T> type) {

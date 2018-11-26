@@ -21,11 +21,18 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreException;
+import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * Custom extension of the {@link DatastoreWrapper} for the integration testing.
@@ -34,20 +41,118 @@ import java.util.Collection;
  */
 public class TestDatastoreWrapper extends DatastoreWrapper {
 
+    // Default time to wait before each read operation to ensure the data is consistent.
+    // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
+    private static final int CONSISTENCY_AWAIT_TIME_MS = 10;
+    private static final int CONSISTENCY_AWAIT_ITERATIONS = 20;
+
+    /**
+     * Due to eventual consistency, {@link #dropTable(String) is performed iteratively until
+     * the table has no records}.
+     *
+     * This constant represents the maximum number of cleanup attempts before the execution
+     * is continued
+     */
+    private static final int MAX_CLEANUP_ATTEMPTS = 5;
+
     private static final Collection<String> kindsCache = new ArrayList<>();
 
-    private TestDatastoreWrapper(Datastore datastore) {
+    private final boolean waitForConsistency;
+
+    private TestDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
         super(datastore, TestNamespaceSuppliers.singleTenant());
+        this.waitForConsistency = waitForConsistency;
     }
 
-    public static TestDatastoreWrapper wrap(Datastore datastore) {
-        return new TestDatastoreWrapper(datastore);
+    public static TestDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
+        return new TestDatastoreWrapper(datastore, waitForConsistency);
     }
 
     @Override
     public KeyFactory getKeyFactory(Kind kind) {
         kindsCache.add(kind.getValue());
         return super.getKeyFactory(kind);
+    }
+
+    @Override
+    public void createOrUpdate(Entity entity) {
+        super.createOrUpdate(entity);
+        waitForConsistency();
+    }
+
+    @Override
+    public void create(Entity entity) throws DatastoreException {
+        super.create(entity);
+        waitForConsistency();
+    }
+
+    @Override
+    public void update(Entity entity) throws DatastoreException {
+        super.update(entity);
+        waitForConsistency();
+    }
+
+    @Override
+    void dropTable(String table) {
+        if (!waitForConsistency) {
+            super.dropTable(table);
+        } else {
+            dropTableConsistently(table);
+        }
+    }
+
+    @SuppressWarnings("BusyWait")   // allow Datastore some time between cleanup attempts.
+    private void dropTableConsistently(String table) {
+        Integer remainingEntityCount = null;
+        int cleanupAttempts = 0;
+
+        while ((remainingEntityCount == null
+                || remainingEntityCount > 0)
+                && cleanupAttempts < MAX_CLEANUP_ATTEMPTS) {
+
+            // sleep in between the cleanup attempts.
+            if (cleanupAttempts > 0) {
+                try {
+                    Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
+                                                 .setKind(table)
+                                                 .build();
+            List<Entity> entities = newArrayList(read(query));
+            remainingEntityCount = entities.size();
+
+            if (remainingEntityCount > 0) {
+                deleteEntities(entities);
+                cleanupAttempts++;
+            }
+        }
+
+        if (cleanupAttempts >= MAX_CLEANUP_ATTEMPTS && remainingEntityCount > 0) {
+            throw new RuntimeException("Cannot cleanup the table: " + table +
+                                               ". Remaining entity count is " +
+                                               remainingEntityCount);
+        }
+    }
+
+    @SuppressWarnings("BusyWait")   // allow Datastore to become consistent before reading.
+    private void waitForConsistency() {
+        if (!waitForConsistency) {
+            log().debug("Wait for consistency is not required.");
+            return;
+        }
+        log().debug("Waiting for data consistency to establish.");
+
+        for (int awaitCycle = 0; awaitCycle < CONSISTENCY_AWAIT_ITERATIONS; awaitCycle++) {
+            try {
+                Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**

@@ -23,7 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.logging.Logging;
-import io.spine.server.storage.datastore.given.TestDatastore;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -59,7 +59,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private static TestDatastoreStorageFactory createInstance() {
-        return new TestDatastoreStorageFactory(TestDatastore.instance());
+        return new TestDatastoreStorageFactory(TestDatastores.local());
     }
 
     protected TestDatastoreStorageFactory(Datastore datastore) {
@@ -74,7 +74,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     @Override
     protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
-        return TestDatastoreWrapper.wrap(builder.getDatastore());
+        return TestDatastoreWrapper.wrap(builder.getDatastore(), false);
     }
 
     /**
