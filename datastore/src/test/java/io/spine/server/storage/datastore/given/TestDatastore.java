@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore.given;
 
+import com.google.cloud.NoCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.server.storage.datastore.ProjectId;
@@ -56,6 +57,7 @@ public class TestDatastore {
                 .newBuilder()
                 .setProjectId(projectId().getValue())
                 .setHost(DEFAULT_HOST)
+                .setCredentials(NoCredentials.getInstance())
                 .build();
         return result;
     }
