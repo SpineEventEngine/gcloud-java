@@ -184,6 +184,15 @@ class DatastoreWrapperTest {
         }
     }
 
+    /**
+     * The acceptance test for the remote datastore.
+     *
+     * <p>The suite performs basic read/write operations on the real datastore of the
+     * {@code spine-dev} project. The purpose of the test is to make sure that everything related
+     * to the real storage configuration (like indices) is done correctly.
+     *
+     * <p>Runs only on CI.
+     */
     @Nested
     class Remote {
 
