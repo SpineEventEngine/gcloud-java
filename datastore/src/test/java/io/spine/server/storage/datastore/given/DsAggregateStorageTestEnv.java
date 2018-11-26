@@ -20,19 +20,24 @@
 
 package io.spine.server.storage.datastore.given;
 
-import com.google.protobuf.StringValue;
-import com.google.protobuf.StringValueVBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.Task;
+import io.spine.test.aggregate.TaskVBuilder;
 
 public final class DsAggregateStorageTestEnv {
 
     private DsAggregateStorageTestEnv() {
     }
 
-    public static class ProjectAsStringAggregate
-            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
-        private ProjectAsStringAggregate(ProjectId id) {
+    /**
+     * An aggregate with ID and state mismatching.
+     *
+     * <p>Allows to test for the "same-ID-different-state" scenarios for the aggregate storages.
+     */
+    public static class NonProjectStateAggregate
+            extends Aggregate<ProjectId, Task, TaskVBuilder> {
+        private NonProjectStateAggregate(ProjectId id) {
             super(id);
         }
     }

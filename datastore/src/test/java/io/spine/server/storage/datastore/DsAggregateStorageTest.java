@@ -37,7 +37,7 @@ import io.spine.server.aggregate.AggregateStorageTest;
 import io.spine.server.aggregate.Snapshot;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
 import io.spine.server.entity.Entity;
-import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.ProjectAsStringAggregate;
+import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.NonProjectStateAggregate;
 import io.spine.server.storage.datastore.given.aggregate.ProjectAggregateRepository;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -157,7 +157,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     void notOverwriteEventCount() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         DsAggregateStorage<ProjectId> secondStorage = (DsAggregateStorage<ProjectId>)
-                newStorage(ProjectId.class, ProjectAsStringAggregate.class);
+                newStorage(ProjectId.class, NonProjectStateAggregate.class);
 
         ProjectId id = newId();
         int firstCount = 15;
