@@ -21,8 +21,6 @@ before_install:
   # Add the newly installed gcloud SDK to PATH overriding the default Travis version.
   - source $HOME/google-cloud-sdk/path.bash.inc
 
-install: true
-
 script:
   - ./scripts/start-datastore.sh &
   - ./gradlew build --stacktrace
