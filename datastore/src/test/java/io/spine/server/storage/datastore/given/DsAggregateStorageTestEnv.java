@@ -31,9 +31,9 @@ public final class DsAggregateStorageTestEnv {
     }
 
     /**
-     * An aggregate with ID and state mismatching.
+     * An aggregate with the ID and state purposefully mismatched.
      *
-     * <p>Allows to test for the "same-ID-different-state" scenarios for the aggregate storages.
+     * <p>Allows to test for the "same-ID-different-state" scenarios in the aggregate storages.
      */
     public static class NonProjectStateAggregate
             extends Aggregate<ProjectId, Task, TaskVBuilder> {
