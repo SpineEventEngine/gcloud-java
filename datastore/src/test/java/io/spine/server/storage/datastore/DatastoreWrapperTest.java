@@ -30,6 +30,7 @@ import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.given.TestDatastores;
+import io.spine.server.storage.datastore.given.TestEnvironment;
 import io.spine.server.tenant.TenantAwareFunction0;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -55,8 +57,10 @@ import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.GE
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.NAMESPACE_HOLDER_KIND;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.checkTenantIdInKey;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.ensureNamespace;
-import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.testDatastore;
+import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.localDatastore;
+import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.remoteDatastore;
 import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
+import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
 import static java.lang.String.format;
@@ -66,13 +70,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @DisplayName("DatastoreWrapper should")
 class DatastoreWrapperTest {
 
     @AfterAll
     static void tearDown() {
-        DatastoreWrapper wrapper = wrap(testDatastore(), singleTenant());
+        DatastoreWrapper wrapper = wrap(localDatastore(), singleTenant());
         wrapper.dropTable(NAMESPACE_HOLDER_KIND);
     }
 
@@ -83,7 +88,7 @@ class DatastoreWrapperTest {
 
         @BeforeEach
         void setUp() {
-            wrapper = wrap(testDatastore(), singleTenant());
+            wrapper = wrap(localDatastore(), singleTenant());
             wrapper.startTransaction();
         }
 
@@ -131,7 +136,7 @@ class DatastoreWrapperTest {
 
         @BeforeEach
         void setUp() {
-            wrapper = wrap(testDatastore(), false);
+            wrapper = wrap(localDatastore(), false);
         }
 
         @AfterEach
@@ -157,7 +162,6 @@ class DatastoreWrapperTest {
             assertTrue(expectedEntities.containsAll(readEntities));
         }
 
-        @Disabled("This test rarely passes on Travis CI due to eventual consistency.")
         @Test
         @DisplayName("support big bulk reads")
         void testBigBulkRead() throws InterruptedException {
@@ -180,6 +184,47 @@ class DatastoreWrapperTest {
         }
     }
 
+    /**
+     * The acceptance test for the remote datastore.
+     *
+     * <p>The suite performs basic read/write operations on the real datastore of the
+     * {@code spine-dev} project. The purpose of the test is to make sure that everything related
+     * to the real storage configuration (like indices) is done correctly.
+     *
+     * <p>Runs only on CI.
+     */
+    @Nested
+    class Remote {
+
+        private TestDatastoreWrapper wrapper;
+
+        @BeforeEach
+        void setUp() {
+            wrapper = wrap(remoteDatastore(), true);
+        }
+
+        @AfterEach
+        void tearDown() {
+            wrapper.dropAllTables();
+        }
+
+        @Test
+        @DisplayName("read and write entities in the remote datastore")
+        void testBulkRead() throws InterruptedException {
+            assumeTrue(runsOnCi());
+
+            int entityCount = 5;
+            Map<Key, Entity> entities = newTestEntities(entityCount, wrapper);
+            Collection<Entity> expectedEntities = entities.values();
+
+            wrapper.createOrUpdate(expectedEntities);
+
+            Collection<Entity> readEntities = newArrayList(wrapper.read(entities.keySet()));
+            assertEquals(entities.size(), readEntities.size());
+            assertTrue(expectedEntities.containsAll(readEntities));
+        }
+    }
+
     @Nested
     @DisplayName("read entities by keys")
     class ReadByKeys {
@@ -188,7 +233,7 @@ class DatastoreWrapperTest {
 
         @BeforeEach
         void setUp() {
-            wrapper = wrap(testDatastore(), false);
+            wrapper = wrap(localDatastore(), false);
         }
 
         @AfterEach
@@ -270,7 +315,7 @@ class DatastoreWrapperTest {
 
         @BeforeEach
         void setUp() {
-            wrapper = wrap(testDatastore(), false);
+            wrapper = wrap(localDatastore(), false);
         }
 
         @AfterEach
@@ -299,7 +344,7 @@ class DatastoreWrapperTest {
     @DisplayName("generate key factories aware of tenancy")
     void testGenerateKeyFactory() {
         ProjectId projectId = TestDatastores.projectId();
-        DatastoreWrapper wrapper = wrap(testDatastore(), multitenant(projectId));
+        DatastoreWrapper wrapper = wrap(localDatastore(), multitenant(projectId));
         String tenantId1 = "first-tenant-ID";
         String tenantId1Prefixed = "Vfirst-tenant-ID";
         String tenantId2 = "second@tenant.id";
@@ -330,7 +375,7 @@ class DatastoreWrapperTest {
     @Test
     @DisplayName("produce lazy iterator on query read")
     void testLazyIterator() {
-        DatastoreWrapper wrapper = wrap(testDatastore(), singleTenant());
+        DatastoreWrapper wrapper = wrap(localDatastore(), singleTenant());
         int count = 2;
         Map<?, Entity> entities = newTestEntities(count, wrapper);
         Collection<Entity> expctedEntities = entities.values();
@@ -363,7 +408,7 @@ class DatastoreWrapperTest {
     @Test
     @DisplayName("allow to add new namespaces 'on the go'")
     void testNewNamespaces() {
-        DatastoreWrapper wrapper = wrap(testDatastore(), multitenant(projectId()));
+        DatastoreWrapper wrapper = wrap(localDatastore(), multitenant(projectId()));
         TenantId tenantId = TenantId.newBuilder()
                                     .setValue("Luke_I_am_your_tenant.")
                                     .build();

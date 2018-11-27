@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore.given;
 
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.NoCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.logging.Logging;
@@ -96,6 +97,7 @@ public class TestDatastores {
         private Local() {
             super();
             builder().setHost(DEFAULT_HOST);
+            builder().setCredentials(NoCredentials.getInstance());
         }
     }
 

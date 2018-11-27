@@ -18,32 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore;
+package io.spine.server.storage.datastore.given;
 
-import com.google.common.testing.NullPointerTester;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.Task;
+import io.spine.test.aggregate.TaskVBuilder;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static org.mockito.Mockito.mock;
+public final class DsAggregateStorageTestEnv {
 
-@DisplayName("Indexes should")
-class IndexesTest {
-
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void testPrivateCtor() {
-        assertHasPrivateParameterlessCtor(Indexes.class);
+    private DsAggregateStorageTestEnv() {
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void testNulls() {
-        new NullPointerTester()
-                .setDefault(Kind.class, Kind.of("arbitrary-kind"))
-                .setDefault(DatastoreWrapper.class, mock(DatastoreWrapper.class))
-                .testStaticMethods(Indexes.class, NullPointerTester.Visibility.PACKAGE);
+    /**
+     * An aggregate with the ID and state purposefully mismatched.
+     *
+     * <p>Allows to test for the "same-ID-different-state" scenarios in the aggregate storages.
+     */
+    public static class NonProjectStateAggregate
+            extends Aggregate<ProjectId, Task, TaskVBuilder> {
+        private NonProjectStateAggregate(ProjectId id) {
+            super(id);
+        }
     }
 }

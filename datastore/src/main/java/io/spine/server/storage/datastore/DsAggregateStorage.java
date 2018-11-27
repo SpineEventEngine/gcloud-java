@@ -28,12 +28,14 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
+import com.google.protobuf.util.Timestamps;
 import io.spine.core.Version;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateEventRecord.KindCase;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.aggregate.Snapshot;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.string.Stringifiers;
@@ -65,8 +67,7 @@ import static io.spine.server.storage.datastore.Entities.fromMessage;
 import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.server.storage.datastore.RecordId.of;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import static java.lang.String.format;
 
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
@@ -75,14 +76,14 @@ import static java.util.Optional.of;
  */
 public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
-    private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT_";
+    private static final String EVENTS_AFTER_LAST_SNAPSHOT_PREFIX = "EVENTS_AFTER_SNAPSHOT";
 
     /**
      * Prefix for the string IDs of the {@link AggregateEventRecord records} which represent
      * an aggregate snapshot, not an event.
      *
-     * <p>The aggregate snapshots are stored under an ID composed from {@code SNAPSHOT} and
-     * the aggregate ID.
+     * <p>The aggregate snapshots are stored under an ID composed from {@code SNAPSHOT}, the
+     * aggregate ID and the snapshot's {@linkplain com.google.protobuf.Timestamp timestamp}.
      */
     private static final String SNAPSHOT = "SNAPSHOT";
 
@@ -117,13 +118,14 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotClosed();
         checkNotNull(id);
 
-        RecordId datastoreId = toRecordId(id);
-        Optional<Message> optional = propertyStorage.read(datastoreId, Int32Value.getDescriptor());
-        if (!optional.isPresent()) {
-            return 0;
+        RecordId recordId = toEventCountId(id);
+        Optional<Int32Value> eventCount = lookUpEventCount(recordId);
+        if (!eventCount.isPresent()) {
+            return readEventCountOldFormat(id);
         }
-        Int32Value count = (Int32Value) optional.get();
-        return count.getValue();
+        int result = eventCount.get()
+                               .getValue();
+        return result;
     }
 
     @Override
@@ -131,7 +133,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotClosed();
         checkNotNull(id);
 
-        RecordId datastoreId = toRecordId(id);
+        RecordId datastoreId = toEventCountId(id);
         propertyStorage.write(datastoreId, Int32Value.newBuilder()
                                                      .setValue(eventCount)
                                                      .build());
@@ -142,31 +144,31 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected void writeRecord(I id, AggregateEventRecord record) {
         checkNotNull(id);
 
-        String stringId = Stringifiers.toString(id);
-        String recordId;
+        RecordId recordId;
         Version version;
         KindCase kind = record.getKindCase();
         switch (kind) {
             case EVENT:
-                recordId = Stringifiers.toString(record.getEvent()
-                                                       .getId());
+                String eventIdString = Stringifiers.toString(record.getEvent()
+                                                                   .getId());
+                recordId = of(eventIdString);
                 version = record.getEvent()
                                 .getContext()
                                 .getVersion();
                 break;
             case SNAPSHOT:
-                recordId = SNAPSHOT + stringId;
-                version = record.getSnapshot()
-                                .getVersion();
+                Snapshot snapshot = record.getSnapshot();
+                recordId = toSnapshotId(id, snapshot);
+                version = snapshot.getVersion();
                 break;
             default:
                 throw newIllegalArgumentException("Invalid kind of AggregateEventRecord \"%s\".",
                                                   record.getKindCase());
         }
-        Key key = datastore.keyFor(Kind.of(stateTypeName), of(recordId));
+        Key key = datastore.keyFor(Kind.of(stateTypeName), recordId);
         Entity incompleteEntity = fromMessage(record, key);
         Entity.Builder builder = Entity.newBuilder(incompleteEntity);
-        addAggregateId(builder, stringId);
+        addAggregateId(builder, Stringifiers.toString(id));
         addWhenCreated(builder, record.getTimestamp());
         addVersion(builder, version);
         markAsSnapshot(builder, kind == KindCase.SNAPSHOT);
@@ -220,7 +222,36 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      */
     protected RecordId toRecordId(I id) {
         String stringId = Stringifiers.toString(id);
-        String datastoreId = EVENTS_AFTER_LAST_SNAPSHOT_PREFIX + stringId;
+        String datastoreId = format("%s_%s", EVENTS_AFTER_LAST_SNAPSHOT_PREFIX, stringId);
+        return of(datastoreId);
+    }
+
+    /**
+     * Generates an identifier for the Datastore record which represents an Aggregate snapshot.
+     *
+     * @param id
+     *         an identifier of the {@code Aggregate}
+     * @return the identifier for the Datastore record
+     */
+    protected RecordId toSnapshotId(I id, Snapshot snapshot) {
+        String stringId = Stringifiers.toString(id);
+        String snapshotTimeStamp = Timestamps.toString(snapshot.getTimestamp());
+        String snapshotId = format("%s_%s_%s", SNAPSHOT, stringId, snapshotTimeStamp);
+        return of(snapshotId);
+    }
+
+    /**
+     * Generates an identifier for the Datastore record which represents an event count after the
+     * last snapshot.
+     *
+     * @param id
+     *         an identifier of the {@code Aggregate}
+     * @return the identifier for the Datastore record
+     */
+    protected RecordId toEventCountId(I id) {
+        String stringId = Stringifiers.toString(id);
+        String datastoreId =
+                format("%s_%s_%s", EVENTS_AFTER_LAST_SNAPSHOT_PREFIX, stateTypeName, stringId);
         return of(datastoreId);
     }
 
@@ -253,20 +284,20 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         Key key = toKey(id);
         Entity entityStateRecord = datastore.read(key);
         if (entityStateRecord == null) {
-            return empty();
+            return Optional.empty();
         }
 
         boolean archived = isArchived(entityStateRecord);
         boolean deleted = isDeleted(entityStateRecord);
 
         if (!archived && !deleted) {
-            return empty();
+            return Optional.empty();
         }
         LifecycleFlags flags = LifecycleFlags.newBuilder()
                                              .setArchived(archived)
                                              .setDeleted(deleted)
                                              .build();
-        return of(flags);
+        return Optional.of(flags);
     }
 
     @Override
@@ -298,6 +329,32 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         RecordId recordId = toRecordId(id);
         Key key = datastore.keyFor(Kind.of(AGGREGATE_LIFECYCLE_KIND), recordId);
         return key;
+    }
+
+    /**
+     * Tries to look up the event count among the records saved with the old format ID.
+     *
+     * <p>The method exists so the {@code DsAggregateStorage} is compatible with the data saved
+     * pre-ID format change.
+     */
+    private int readEventCountOldFormat(I id) {
+        RecordId oldFormatId = toRecordId(id);
+        Optional<Int32Value> eventCount = lookUpEventCount(oldFormatId);
+        if (!eventCount.isPresent()) {
+            return 0;
+        }
+        int result = eventCount.get()
+                               .getValue();
+        return result;
+    }
+
+    private Optional<Int32Value> lookUpEventCount(RecordId recordId) {
+        Optional<Message> eventCount = propertyStorage.read(recordId, Int32Value.getDescriptor());
+        if (!eventCount.isPresent()) {
+            return Optional.empty();
+        }
+        Int32Value count = (Int32Value) eventCount.get();
+        return Optional.of(count);
     }
 
     /**

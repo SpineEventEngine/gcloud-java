@@ -22,15 +22,22 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.EntityQuery;
 import com.google.common.base.Suppliers;
+import com.google.common.collect.Streams;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
+import io.spine.server.aggregate.AggregateEventRecordVBuilder;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageTest;
+import io.spine.server.aggregate.Snapshot;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
 import io.spine.server.entity.Entity;
+import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.NonProjectStateAggregate;
 import io.spine.server.storage.datastore.given.aggregate.ProjectAggregateRepository;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -44,6 +51,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
@@ -129,6 +137,57 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         assertNull(queryLimit);
     }
 
+    @Test
+    @DisplayName("read the event count stored in the old format")
+    void readEventCountOldFormat() {
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        ProjectId id = newId();
+        RecordId oldFormatId = storage.toRecordId(id);
+        int eventCount = 15;
+        storage.getPropertyStorage()
+               .write(oldFormatId, Int32Value.newBuilder()
+                                             .setValue(eventCount)
+                                             .build());
+        int actualEventCount = storage.readEventCountAfterLastSnapshot(id);
+        assertEquals(eventCount, actualEventCount);
+    }
+
+    @Test
+    @DisplayName("not overwrite the event count when saving other aggregate type")
+    void notOverwriteEventCount() {
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DsAggregateStorage<ProjectId> secondStorage = (DsAggregateStorage<ProjectId>)
+                newStorage(ProjectId.class, NonProjectStateAggregate.class);
+
+        ProjectId id = newId();
+        int firstCount = 15;
+        storage.writeEventCountAfterLastSnapshot(id, firstCount);
+        int secondCount = 17;
+        secondStorage.writeEventCountAfterLastSnapshot(id, secondCount);
+
+        int actualFirstCount = storage.readEventCountAfterLastSnapshot(id);
+        int actualSecondCount = secondStorage.readEventCountAfterLastSnapshot(id);
+        assertEquals(firstCount, actualFirstCount);
+        assertEquals(secondCount, actualSecondCount);
+    }
+
+    @Test
+    @DisplayName("not overwrite the snapshot when saving a new one")
+    void notOverwriteSnapshot() throws InterruptedException {
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        ProjectId id = newId();
+
+        writeSnapshotWithTimestamp(id, Timestamps.fromMillis(15));
+        writeSnapshotWithTimestamp(id, Timestamps.fromMillis(15000));
+
+        int batchSize = 10;
+        AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(id, batchSize);
+        Iterator<AggregateEventRecord> records = storage.historyBackward(request);
+        long snapshotCount = Streams.stream(records)
+                                    .count();
+        assertEquals(2, snapshotCount);
+    }
+
     @Nested
     class DynamicSnapshotTrigger {
 
@@ -174,5 +233,17 @@ class DsAggregateStorageTest extends AggregateStorageTest {
             assertEquals(tasksCount, aggregate.getState()
                                               .getTaskCount());
         }
+    }
+
+    private void writeSnapshotWithTimestamp(ProjectId id, Timestamp timestamp) {
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        Snapshot snapshot = Snapshot.newBuilder()
+                                    .setTimestamp(timestamp)
+                                    .build();
+        AggregateEventRecord record = AggregateEventRecordVBuilder
+                .newBuilder()
+                .setSnapshot(snapshot)
+                .build();
+        storage.writeRecord(id, record);
     }
 }
