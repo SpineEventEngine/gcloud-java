@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,14 +21,14 @@
 package io.spine.server.storage.datastore.given.aggregate;
 
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv;
+import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.test.aggregate.ProjectId;
 
 /**
  * A repository to check loading of an aggregates by the storage for different snapshot triggers.
  */
 public class ProjectAggregateRepository
-        extends AggregateRepository<ProjectId, AggregateRepositoryTestEnv.ProjectAggregate> {
+        extends AggregateRepository<ProjectId, ProjectAggregate> {
 
     @Override
     public void setSnapshotTrigger(int snapshotTrigger) {

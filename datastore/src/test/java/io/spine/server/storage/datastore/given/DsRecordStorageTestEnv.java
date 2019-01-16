@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -34,12 +34,9 @@ import io.spine.client.OrderBy;
 import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
 import io.spine.client.PaginationVBuilder;
-import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
@@ -51,8 +48,6 @@ import io.spine.test.datastore.CollegeIdVBuilder;
 import io.spine.test.datastore.CollegeVBuilder;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
-import io.spine.validate.TimestampVBuilder;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -64,7 +59,6 @@ import java.util.function.Function;
 
 import static com.google.common.collect.Lists.asList;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -87,14 +81,13 @@ public class DsRecordStorageTestEnv {
 
     public static final String COLUMN_NAME_FOR_STORING = "columnName";
 
-    @SuppressWarnings("PublicStaticCollectionField") // OK for immutable list of strings.
     public static final ImmutableList<String> UNORDERED_COLLEGE_NAMES = ImmutableList.of(
             "Ivy University", "Doonesbury", "Winston University", "Springfield A&M",
             "Greendale Community College", "Monsters University"
     );
 
     private static final Random RANDOM = new SecureRandom();
-    private static final long MAX_TIMESTAMP_SECONDS = 250000000000L;
+    private static final int MAX_TIMESTAMP_SECONDS = 250000000;
 
     /**
      * Prevents instantiation of this test environment.
@@ -260,8 +253,8 @@ public class DsRecordStorageTestEnv {
                                                       String name, int studentCount,
                                                       boolean stateSponsored) {
         CollegeId id = newCollegeId();
-        CollegeEntity entity = new CollegeEntity(id);
-        entity.injectState(newCollege(id, name, studentCount, stateSponsored));
+        College state = newCollege(id, name, studentCount, stateSponsored);
+        CollegeEntity entity = CollegeEntity.create(id, state);
         storeEntity(storage, entity);
         return entity;
     }
@@ -269,8 +262,7 @@ public class DsRecordStorageTestEnv {
     @CanIgnoreReturnValue
     private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage) {
         CollegeId id = newCollegeId();
-        CollegeEntity entity = new CollegeEntity(id);
-        entity.injectState(newCollege(id));
+        CollegeEntity entity = CollegeEntity.create(id, newCollege(id));
         storeEntity(storage, entity);
         return entity;
     }
@@ -278,8 +270,8 @@ public class DsRecordStorageTestEnv {
     private static CollegeEntity 
     createAndStoreEntityWithNullStudentCount(RecordStorage<CollegeId> storage) {
         CollegeId id = newCollegeId();
-        CollegeEntity entity = new CollegeEntity(id);
-        entity.injectState(newCollege(id, 0));
+        College state = newCollege(id, 0);
+        CollegeEntity entity = CollegeEntity.create(id, state);
         storeEntity(storage, entity);
         return entity;
     }
@@ -287,8 +279,8 @@ public class DsRecordStorageTestEnv {
     private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage,
                                                       String name) {
         CollegeId id = newCollegeId();
-        CollegeEntity entity = new CollegeEntity(id);
-        entity.injectState(newCollege(id, name));
+        College state = newCollege(id, name);
+        CollegeEntity entity = CollegeEntity.create(id, state);
         storeEntity(storage, entity);
         return entity;
     }
@@ -300,9 +292,10 @@ public class DsRecordStorageTestEnv {
     }
 
     public static CollegeId newCollegeId() {
-        return CollegeIdVBuilder.newBuilder()
-                                .setValue(newUuid())
-                                .build();
+        return CollegeIdVBuilder
+                .newBuilder()
+                .setValue(newUuid())
+                .build();
     }
 
     private static College newCollege(CollegeId id) {
@@ -318,26 +311,28 @@ public class DsRecordStorageTestEnv {
     }
 
     private static College newCollege(CollegeId id, String name, int studentCount) {
-        return CollegeVBuilder.newBuilder()
-                              .setId(id)
-                              .setName(name)
-                              .setAdmissionDeadline(randomTimestamp())
-                              .setPassingGrade(randomPassingGrade())
-                              .setStudentCount(studentCount)
-                              .setStateSponsored(RANDOM.nextBoolean())
-                              .build();
+        return CollegeVBuilder
+                .newBuilder()
+                .setId(id)
+                .setName(name)
+                .setAdmissionDeadline(randomTimestamp())
+                .setPassingGrade(randomPassingGrade())
+                .setStudentCount(studentCount)
+                .setStateSponsored(RANDOM.nextBoolean())
+                .build();
     }
 
     private static College newCollege(CollegeId id, String name, int studentCount,
                                       boolean stateSponsored) {
-        return CollegeVBuilder.newBuilder()
-                              .setId(id)
-                              .setName(name)
-                              .setAdmissionDeadline(randomTimestamp())
-                              .setPassingGrade(randomPassingGrade())
-                              .setStudentCount(studentCount)
-                              .setStateSponsored(stateSponsored)
-                              .build();
+        return CollegeVBuilder
+                .newBuilder()
+                .setId(id)
+                .setName(name)
+                .setAdmissionDeadline(randomTimestamp())
+                .setPassingGrade(randomPassingGrade())
+                .setStudentCount(studentCount)
+                .setStateSponsored(stateSponsored)
+                .build();
     }
 
     private static int randomStudentCount() {
@@ -349,9 +344,11 @@ public class DsRecordStorageTestEnv {
     }
 
     private static Timestamp randomTimestamp() {
-        return TimestampVBuilder.newBuilder()
-                                .setSeconds(abs(RANDOM.nextLong()) % MAX_TIMESTAMP_SECONDS)
-                                .build();
+        long seconds = RANDOM.nextInt(MAX_TIMESTAMP_SECONDS);
+        return Timestamp
+                .newBuilder()
+                .setSeconds(seconds)
+                .build();
     }
 
     public static FieldMask newFieldMask(String... paths) {
@@ -426,136 +423,4 @@ public class DsRecordStorageTestEnv {
         }
     }
 
-    @SuppressWarnings("unused") // Reflective access
-    public static class TestConstCounterEntity
-            extends AbstractVersionableEntity<ProjectId, Project> {
-
-        private static final int COUNTER = 42;
-
-        private final Timestamp creationTime;
-        private LifecycleFlags lifecycleFlags;
-
-        public TestConstCounterEntity(ProjectId id) {
-            super(id);
-            this.creationTime = getCurrentTime();
-        }
-
-        @Column
-        public int getCounter() {
-            return COUNTER;
-        }
-
-        @Column
-        public long getBigCounter() {
-            return getCounter();
-        }
-
-        @Column
-        public boolean isCounterEven() {
-            return true;
-        }
-
-        @Column
-        public String getCounterName() {
-            return getId().toString();
-        }
-
-        @Column
-        public Version getCounterVersion() {
-            return Version.newBuilder()
-                          .setNumber(COUNTER)
-                          .build();
-        }
-
-        @Column
-        public Timestamp getCreationTime() {
-            return creationTime;
-        }
-
-        @Column
-        public Project getCounterState() {
-            return getState();
-        }
-
-        @Override
-        public LifecycleFlags getLifecycleFlags() {
-            return lifecycleFlags == null ? super.getLifecycleFlags() : lifecycleFlags;
-        }
-
-        public void injectState(Project state, Version version) {
-            updateState(state);
-        }
-
-        public void injectLifecycle(LifecycleFlags flags) {
-            this.lifecycleFlags = flags;
-        }
-    }
-
-    @SuppressWarnings("unused") // Reflective access
-    public static class CollegeEntity
-            extends AbstractVersionableEntity<CollegeId, College> {
-
-        private final Timestamp creationTime;
-
-        public CollegeEntity(CollegeId id) {
-            super(id);
-            this.creationTime = getCurrentTime();
-        }
-
-        @Column
-        public String getName() {
-            return getState().getName();
-        }
-
-        @Column
-        public @Nullable Integer getStudentCount() {
-            int count = getState().getStudentCount();
-            return count == 0 ? null : count;
-        }
-
-        @Column
-        public Timestamp getAdmissionDeadline() {
-            return getState().getAdmissionDeadline();
-        }
-
-        @Column
-        public double getPassingGrade() {
-            return getState().getPassingGrade();
-        }
-
-        @Column
-        public boolean getStateSponsored() {
-            return getState().getStateSponsored();
-        }
-
-        @Column
-        public Timestamp getCreationTime() {
-            return creationTime;
-        }
-
-        private void injectState(College state) {
-            updateState(state);
-        }
-
-        public enum CollegeColumn {
-            CREATED("creationTime"),
-            @SuppressWarnings("DuplicateStringLiteralInspection") // "name" is a common word
-                    NAME("name"),
-            STUDENT_COUNT("studentCount"),
-            PASSING_GRADE("passingGrade"),
-            ADMISSION_DEADLINE("admissionDeadline"),
-            @SuppressWarnings("DuplicateStringLiteralInspection") // generated code duplicates
-                    STATE_SPONSORED("stateSponsored");
-
-            private final String name;
-
-            CollegeColumn(String name) {
-                this.name = name;
-            }
-
-            public String columnName() {
-                return name;
-            }
-        }
-    }
 }

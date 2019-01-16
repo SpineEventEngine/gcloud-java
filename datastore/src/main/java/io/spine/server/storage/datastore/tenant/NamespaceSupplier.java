@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,9 +23,9 @@ package io.spine.server.storage.datastore.tenant;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import io.spine.annotation.Internal;
+import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.ProjectId;
-import io.spine.core.TenantId;
 
 import javax.annotation.Nullable;
 
@@ -59,7 +59,8 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
         }
     }
 
-    public static NamespaceSupplier singleTenant() {
+    @VisibleForTesting
+    static NamespaceSupplier singleTenant() {
         return new SingleTenantNamespaceSupplier(null);
     }
 

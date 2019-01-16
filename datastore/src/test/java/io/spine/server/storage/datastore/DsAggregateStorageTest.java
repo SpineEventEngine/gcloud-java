@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -35,7 +35,7 @@ import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageTest;
 import io.spine.server.aggregate.Snapshot;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
+import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.server.entity.Entity;
 import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.NonProjectStateAggregate;
 import io.spine.server.storage.datastore.given.aggregate.ProjectAggregateRepository;
@@ -173,7 +173,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
     @Test
     @DisplayName("not overwrite the snapshot when saving a new one")
-    void notOverwriteSnapshot() throws InterruptedException {
+    void notOverwriteSnapshot() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         ProjectId id = newId();
 

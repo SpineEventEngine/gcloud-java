@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,7 +24,6 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.given.TestDatastores;
-import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
@@ -68,7 +67,6 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
                       .setDatastore(datastore)
                       .setMultitenant(false)
                       .setTypeRegistry(DatastoreTypeRegistryFactory.defaultInstance())
-                      .setNamespaceSupplier(NamespaceSupplier.singleTenant())
         );
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,7 +27,7 @@ buildscript {
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
     repositories {
-        google()
+        jcenter()
         maven { url = repos.gradlePlugins }
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
@@ -48,7 +48,6 @@ apply from: 'version.gradle'
 
 ext {
     credentialsPropertyFile = 'credentials.properties'
-    runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
     spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
 
     projectsToPublish = ['datastore']
@@ -106,7 +105,7 @@ subprojects {
     }
     
     repositories {
-        google()
+        jcenter()
         maven { url = repos.gradlePlugins }
         maven { url = repos.spine }
         maven { url = repos.spineSnapshots }
@@ -202,18 +201,6 @@ subprojects {
         classifier = "javadoc"
     }
 }
-
-task startDatastore {
-    description = "Starts local in-memory datastore using scripts from ./scripts folder."
-    group = "Build Setup"
-
-    doLast {
-        // Start Datastore emulator with the CLI command.
-        ".${File.separatorChar}scripts${File.separatorChar}start-datastore.${runsOnWindows ? 'bat' : 'sh'}".execute()
-    }
-}
-
-tasks["check"].dependsOn startDatastore
 
 apply from: "$rootDir/config/gradle/jacoco.gradle"
 apply from: "$rootDir/config/gradle/publish.gradle"

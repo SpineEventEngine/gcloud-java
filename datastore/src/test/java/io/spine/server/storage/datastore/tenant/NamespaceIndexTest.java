@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -44,7 +44,6 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.storage.datastore.tenant.Namespace.of;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -69,7 +68,7 @@ class NamespaceIndexTest {
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void testNulls() {
-        Namespace defaultNamespace = of("some-string");
+        Namespace defaultNamespace = Namespace.of("some-string");
         TenantId tenantId = TenantId.getDefaultInstance();
 
         new NullPointerTester()
@@ -120,7 +119,7 @@ class NamespaceIndexTest {
         assertTrue(initialEmptySet.isEmpty());
 
         TenantId newId = newTenantId();
-        Namespace newNamespace = of(newId, TestDatastores.projectId());
+        Namespace newNamespace = Namespace.of(newId, TestDatastores.projectId());
 
         namespaceIndex.keep(newId);
         assertTrue(namespaceIndex.contains(newNamespace));
@@ -136,7 +135,7 @@ class NamespaceIndexTest {
         assertTrue(initialEmptySet.isEmpty());
 
         TenantId fakeId = newTenantId();
-        Namespace fakeNamespace = of(fakeId, ProjectId.of("fake-prj"));
+        Namespace fakeNamespace = Namespace.of(fakeId, ProjectId.of("fake-prj"));
 
         assertFalse(namespaceIndex.contains(fakeNamespace));
     }
@@ -188,8 +187,8 @@ class NamespaceIndexTest {
             namespaceIndex.keep(newTenantId); // sync
 
             // Check new value added
-            boolean success = namespaceIndex.contains(of(newTenantId,    // sync
-                                                         TestDatastores.projectId()));
+            boolean success = namespaceIndex.contains(Namespace.of(newTenantId,    // sync
+                                                                   TestDatastores.projectId()));
             assertTrue(success);
 
             // Check returned set has newly added element

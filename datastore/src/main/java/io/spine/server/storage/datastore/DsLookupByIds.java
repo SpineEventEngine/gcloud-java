@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -38,7 +38,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Streams.stream;
-import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordActive;
 import static io.spine.server.storage.datastore.DsEntityComparator.implementing;
 import static io.spine.server.storage.datastore.Entities.toRecord;
 import static io.spine.server.storage.datastore.FieldMaskApplier.nullableRecordMasker;
@@ -203,7 +202,8 @@ final class DsLookupByIds<I> {
     private Stream<EntityRecord> readActiveRecords(Iterable<I> ids) {
         Stream<EntityRecord> records = read(ids)
                 .map(Entities::nullableToRecord)
-                .map(nullIfNot(isRecordActive()));
+                .filter(Objects::nonNull)
+                .map(nullIfNot(EntityRecord::isActive));
         return records;
     }
 

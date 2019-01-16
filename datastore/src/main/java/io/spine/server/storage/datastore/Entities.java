@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,7 +29,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.EntityField;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -38,6 +37,7 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.storage.StateField.bytes;
 
 /**
  * Utility class for converting {@linkplain Message proto messages} into
@@ -77,7 +77,7 @@ final class Entities {
 
     private static Any toAny(Entity entity, TypeUrl type) {
         String typeName = type.value();
-        Blob value = entity.getBlob(EntityField.bytes.toString());
+        Blob value = entity.getBlob(bytes.toString());
         ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
         Any result = Any
                 .newBuilder()
@@ -123,7 +123,7 @@ final class Entities {
                 .build();
         Entity entity = Entity
                 .newBuilder(key)
-                .set(EntityField.bytes.toString(), blobValue)
+                .set(bytes.toString(), blobValue)
                 .build();
         return entity;
     }
