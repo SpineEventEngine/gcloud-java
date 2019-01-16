@@ -55,7 +55,6 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -182,7 +181,7 @@ final class DsFilters {
                     conjunctiveParams.subList(1, conjunctiveParams.size());
             CompositeQueryParameter mergedConjunctiveParams =
                     new ParameterReducer(tailParams).apply(firstParam);
-            return of(mergedConjunctiveParams);
+            return Optional.of(mergedConjunctiveParams);
         } else {
             return empty();
         }
@@ -444,6 +443,14 @@ final class DsFilters {
             return subtrees.isEmpty();
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>An arbitrary node is never equal to the tree head. The tree head is only equal to
+         * itself.
+         */
+        @SuppressWarnings("EqualsGetClass")
+            // This is a private class as well as the descendant overriding equals().
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -493,6 +500,14 @@ final class DsFilters {
             return new ColumnFilterTreeHead();
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>A tree head is only equal to itself.
+         *
+         * @implNote
+         * Uses reference equality.
+         */
         @Override
         public boolean equals(Object o) {
             return o == this;

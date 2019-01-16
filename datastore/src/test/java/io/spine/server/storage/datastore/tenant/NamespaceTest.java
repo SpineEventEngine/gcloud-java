@@ -31,7 +31,6 @@ import io.spine.server.storage.datastore.given.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.storage.datastore.tenant.Namespace.of;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -60,7 +59,7 @@ class NamespaceTest {
     void testEmptyTenantId() {
         TenantId emptyId = TenantId.getDefaultInstance();
         assertThrows(IllegalArgumentException.class,
-                     () -> of(emptyId, ProjectId.of("no-matter-what")));
+                     () -> Namespace.of(emptyId, ProjectId.of("no-matter-what")));
     }
 
     @SuppressWarnings("LocalVariableNamingConvention")
@@ -72,18 +71,18 @@ class NamespaceTest {
         TenantId aGroupTenantId = TenantId.newBuilder()
                                           .setValue(aGroupValue)
                                           .build();
-        Namespace aGroupNamespaceFromTenantId = of(aGroupTenantId, TestDatastores.projectId());
-        Namespace aGroupNamespaceFromString = of(aGroupValue);
-        Namespace duplicateAGroupNamespaceFromString = of(aGroupValue);
+        Namespace aGroupNamespaceFromTenantId = Namespace.of(aGroupTenantId, TestDatastores.projectId());
+        Namespace aGroupNamespaceFromString = Namespace.of(aGroupValue);
+        Namespace duplicateAGroupNamespaceFromString = Namespace.of(aGroupValue);
 
         String bGroupValue = "namespace2";
         TenantId bGroupTenantId = TenantId.newBuilder()
                                           .setEmail(EmailAddress.newBuilder()
                                                                 .setValue(bGroupValue))
                                           .build();
-        Namespace bGroupNamespaceFromTenantId = of(bGroupTenantId, TestDatastores.projectId());
+        Namespace bGroupNamespaceFromTenantId = Namespace.of(bGroupTenantId, TestDatastores.projectId());
         // Same string but other type
-        Namespace cGroupNamespaceFromString = of(bGroupValue);
+        Namespace cGroupNamespaceFromString = Namespace.of(bGroupValue);
 
         new EqualsTester()
                 .addEqualityGroup(aGroupNamespaceFromTenantId)
@@ -113,9 +112,9 @@ class NamespaceTest {
         assertNotEquals(domainId, stringId);
         assertNotEquals(emailId, stringId);
 
-        Namespace fromDomainId = of(domainId, TestDatastores.projectId());
-        Namespace fromEmailId = of(emailId, TestDatastores.projectId());
-        Namespace fromStringId = of(stringId, TestDatastores.projectId());
+        Namespace fromDomainId = Namespace.of(domainId, TestDatastores.projectId());
+        Namespace fromEmailId = Namespace.of(emailId, TestDatastores.projectId());
+        Namespace fromStringId = Namespace.of(stringId, TestDatastores.projectId());
 
         assertNotEquals(fromDomainId, fromEmailId);
         assertNotEquals(fromDomainId, fromStringId);
@@ -160,7 +159,7 @@ class NamespaceTest {
         TenantId expectedId = TenantId.newBuilder()
                                       .setValue(namespaceString)
                                       .build();
-        Namespace namespace = of(namespaceString);
+        Namespace namespace = Namespace.of(namespaceString);
         TenantId actualId = namespace.toTenantId();
         assertEquals(expectedId, actualId);
     }

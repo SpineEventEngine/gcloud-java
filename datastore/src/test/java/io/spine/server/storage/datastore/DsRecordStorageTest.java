@@ -80,7 +80,6 @@ import static io.spine.json.Json.toCompactJson;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
-import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.ADMISSION_DEADLINE;
 import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.CREATED;
@@ -386,7 +385,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Compose Query.
             EntityQuery<CollegeId> entityQuery =
-                    from(entityFilters, emptyOrderBy(), emptyPagination(), storage);
+                    EntityQueries.from(entityFilters, emptyOrderBy(), emptyPagination(), storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -417,10 +416,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             EntityFilters entityFilters = newEntityFilters(idFilter);
 
             // Compose Query.
-            EntityQuery<CollegeId> entityQuery = from(entityFilters,
-                                                      descendingBy(NAME),
-                                                      emptyPagination(),
-                                                      storage);
+            EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
+                                                                    descendingBy(NAME),
+                                                                    emptyPagination(),
+                                                                    storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -481,10 +480,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             EntityFilters entityFilters = newEntityFilters(idFilter);
 
             // Compose Query.
-            EntityQuery<CollegeId> entityQuery = from(entityFilters,
-                                                      ascendingBy(column),
-                                                      emptyPagination(),
-                                                      storage);
+            EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
+                                                                    ascendingBy(column),
+                                                                    emptyPagination(),
+                                                                    storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -515,10 +514,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             EntityFilters entityFilters = newEntityFilters(idFilter);
 
             // Compose Query.
-            EntityQuery<CollegeId> entityQuery = from(entityFilters,
-                                                      ascendingBy(STATE_SPONSORED),
-                                                      emptyPagination(),
-                                                      storage);
+            EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
+                                                                    ascendingBy(STATE_SPONSORED),
+                                                                    emptyPagination(),
+                                                                    storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -555,10 +554,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             EntityFilters entityFilters = newEntityFilters(idFilter);
 
             // Compose Query.
-            EntityQuery<CollegeId> entityQuery = from(entityFilters,
-                                                      ascendingBy(STUDENT_COUNT),
-                                                      emptyPagination(),
-                                                      storage);
+            EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
+                                                                    ascendingBy(STUDENT_COUNT),
+                                                                    emptyPagination(),
+                                                                    storage);
 
             // Execute Query.k
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -597,10 +596,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             EntityFilters entityFilters = newEntityFilters(idFilter);
 
             // Compose Query.
-            EntityQuery<CollegeId> entityQuery = from(entityFilters,
-                                                      ascendingBy(STUDENT_COUNT),
-                                                      emptyPagination(),
-                                                      storage);
+            EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
+                                                                    ascendingBy(STUDENT_COUNT),
+                                                                    emptyPagination(),
+                                                                    storage);
 
             // Execute Query.k
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -632,10 +631,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             EntityFilters entityFilters = newEntityFilters(idFilter);
 
             // Compose Query.
-            EntityQuery<CollegeId> entityQuery = from(entityFilters,
-                                                      ascendingBy(NAME),
-                                                      pagination(expectedRecordCount),
-                                                      storage);
+            EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
+                                                                    ascendingBy(NAME),
+                                                                    pagination(expectedRecordCount),
+                                                                    storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -670,10 +669,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             EntityFilters entityFilters = newEntityFilters(idFilter);
 
             // Compose Query.
-            EntityQuery<ProjectId> entityQuery = from(entityFilters,
-                                                      emptyOrderBy(),
-                                                      emptyPagination(),
-                                                      storage);
+            EntityQuery<ProjectId> entityQuery = EntityQueries.from(entityFilters,
+                                                                    emptyOrderBy(),
+                                                                    emptyPagination(),
+                                                                    storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -731,7 +730,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Compose Query.
             EntityQuery<CollegeId> entityQuery =
-                    from(entityFilters, emptyOrderBy(), emptyPagination(), storage);
+                    EntityQueries.from(entityFilters, emptyOrderBy(), emptyPagination(), storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -766,7 +765,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Compose Query.
             EntityQuery<CollegeId> entityQuery =
-                    from(entityFilters, emptyOrderBy(), emptyPagination(), storage);
+                    EntityQueries.from(entityFilters, emptyOrderBy(), emptyPagination(), storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -801,7 +800,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Compose Query.
             EntityQuery<CollegeId> query =
-                    from(entityFilters, emptyOrderBy(), emptyPagination(), storage);
+                    EntityQueries.from(entityFilters, emptyOrderBy(), emptyPagination(), storage);
 
             // Execute Query.
             FieldMask mask = DsRecordStorageTestEnv.newFieldMask("id", "name");
@@ -830,10 +829,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             int expectedRecordCount = UNORDERED_COLLEGE_NAMES.size();
             List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
 
-            EntityQuery<CollegeId> entityQuery = from(emptyFilters(),
-                                                      descendingBy(NAME),
-                                                      emptyPagination(),
-                                                      storage);
+            EntityQuery<CollegeId> entityQuery = EntityQueries.from(emptyFilters(),
+                                                                    descendingBy(NAME),
+                                                                    emptyPagination(),
+                                                                    storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -885,10 +884,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
 
             // Compose Query.
-            EntityQuery<CollegeId> entityQuery = from(emptyFilters(),
-                                                      ascendingBy(column),
-                                                      emptyPagination(),
-                                                      storage);
+            EntityQuery<CollegeId> entityQuery = EntityQueries.from(emptyFilters(),
+                                                                    ascendingBy(column),
+                                                                    emptyPagination(),
+                                                                    storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -912,10 +911,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             createAndStoreEntities(storage, recordCount);
 
             // Compose Query.
-            EntityQuery<CollegeId> entityQuery = from(emptyFilters(),
-                                                      ascendingBy(STATE_SPONSORED),
-                                                      emptyPagination(),
-                                                      storage);
+            EntityQuery<CollegeId> entityQuery = EntityQueries.from(emptyFilters(),
+                                                                    ascendingBy(STATE_SPONSORED),
+                                                                    emptyPagination(),
+                                                                    storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -945,10 +944,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             List<CollegeEntity> entities = combine(nullEntities, regularEntities);
 
             // Compose Query.
-            EntityQuery<CollegeId> entityQuery = from(emptyFilters(),
-                                                      ascendingBy(STUDENT_COUNT),
-                                                      emptyPagination(),
-                                                      storage);
+            EntityQuery<CollegeId> entityQuery = EntityQueries.from(emptyFilters(),
+                                                                    ascendingBy(STUDENT_COUNT),
+                                                                    emptyPagination(),
+                                                                    storage);
 
             // Execute Query.k
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
@@ -973,10 +972,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
 
             // Compose Query.
-            EntityQuery<CollegeId> entityQuery = from(emptyFilters(),
-                                                      ascendingBy(NAME),
-                                                      pagination(expectedRecordCount),
-                                                      storage);
+            EntityQuery<CollegeId> entityQuery = EntityQueries.from(emptyFilters(),
+                                                                    ascendingBy(NAME),
+                                                                    pagination(expectedRecordCount),
+                                                                    storage);
 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());

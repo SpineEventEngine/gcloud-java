@@ -55,7 +55,6 @@ import static io.spine.server.storage.datastore.Entities.fromMessage;
 import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.server.storage.datastore.RecordId.ofEntityId;
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -125,7 +124,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         EntityRecord result = toMessage(response, RECORD_TYPE_URL);
-        return of(result);
+        return Optional.of(result);
     }
 
     @Override

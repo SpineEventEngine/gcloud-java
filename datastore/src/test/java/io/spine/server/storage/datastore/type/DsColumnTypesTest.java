@@ -21,8 +21,13 @@
 package io.spine.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
+import com.google.cloud.datastore.BooleanValue;
+import com.google.cloud.datastore.DoubleValue;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.LongValue;
+import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.TimestampValue;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
@@ -36,11 +41,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
-import static com.google.cloud.datastore.BooleanValue.of;
-import static com.google.cloud.datastore.LongValue.of;
-import static com.google.cloud.datastore.StringValue.of;
-import static com.google.cloud.datastore.TimestampValue.of;
-import static com.google.cloud.datastore.DoubleValue.of;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.timestampType;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -74,7 +74,7 @@ class DsColumnTypesTest {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(StringValue.of(value)));
     }
 
     @Test
@@ -85,7 +85,7 @@ class DsColumnTypesTest {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(LongValue.of(value)));
     }
 
     @Test
@@ -96,18 +96,18 @@ class DsColumnTypesTest {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(DoubleValue.of(value)));
     }
 
     @Test
     @DisplayName("provide simple double type")
     void testDouble() {
         SimpleDatastoreColumnType<Double> type = DsColumnTypes.doubleType();
-        double value = 2.7182818284590452353602874713527;
+        double value = 2.718281828459045;
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(DoubleValue.of(value)));
     }
 
     @Test
@@ -118,7 +118,7 @@ class DsColumnTypesTest {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(LongValue.of(value)));
     }
 
     @Test
@@ -129,7 +129,7 @@ class DsColumnTypesTest {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(value)));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(BooleanValue.of(value)));
     }
 
     @Test
@@ -143,7 +143,7 @@ class DsColumnTypesTest {
 
         setDatastoreType(type, value, timestamp);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(timestamp)));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(TimestampValue.of(timestamp)));
     }
 
     @Test
@@ -156,7 +156,7 @@ class DsColumnTypesTest {
 
         setDatastoreType(type, value, number);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(number)));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(LongValue.of(number)));
     }
 
     @Test
@@ -169,7 +169,7 @@ class DsColumnTypesTest {
 
         setDatastoreType(type, value, stringMessage);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(of(stringMessage)));
+        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(StringValue.of(stringMessage)));
     }
 
     @Test

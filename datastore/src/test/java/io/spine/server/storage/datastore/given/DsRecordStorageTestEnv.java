@@ -87,7 +87,7 @@ public class DsRecordStorageTestEnv {
     );
 
     private static final Random RANDOM = new SecureRandom();
-    private static final long MAX_TIMESTAMP_SECONDS = 250000000000L;
+    private static final int MAX_TIMESTAMP_SECONDS = 250000000;
 
     /**
      * Prevents instantiation of this test environment.
@@ -344,9 +344,10 @@ public class DsRecordStorageTestEnv {
     }
 
     private static Timestamp randomTimestamp() {
+        long seconds = RANDOM.nextInt(MAX_TIMESTAMP_SECONDS);
         return Timestamp
                 .newBuilder()
-                .setSeconds(abs(RANDOM.nextLong()) % MAX_TIMESTAMP_SECONDS)
+                .setSeconds(seconds)
                 .build();
     }
 
