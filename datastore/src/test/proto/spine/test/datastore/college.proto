@@ -45,7 +45,7 @@ message College {
 
     google.protobuf.Timestamp admission_deadline = 4 [(required) = true];
 
-    double passing_grade = 5 [(required) = true];
+    double passing_grade = 5;
 
     bool stateSponsored = 6;
 
