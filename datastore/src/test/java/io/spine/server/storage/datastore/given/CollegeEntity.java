@@ -81,13 +81,11 @@ public class CollegeEntity
 
     public enum CollegeColumn {
         CREATED("creationTime"),
-        @SuppressWarnings("DuplicateStringLiteralInspection") // "name" is a common word
-                NAME("name"),
+        NAME("name"),
         STUDENT_COUNT("studentCount"),
         PASSING_GRADE("passingGrade"),
         ADMISSION_DEADLINE("admissionDeadline"),
-        @SuppressWarnings("DuplicateStringLiteralInspection") // generated code duplicates
-                STATE_SPONSORED("stateSponsored");
+        STATE_SPONSORED("stateSponsored");
 
         private final String name;
 
