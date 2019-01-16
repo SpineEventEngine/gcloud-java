@@ -48,7 +48,6 @@ apply from: 'version.gradle'
 
 ext {
     credentialsPropertyFile = 'credentials.properties'
-    runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
     spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
 
     projectsToPublish = ['datastore']
@@ -202,18 +201,6 @@ subprojects {
         classifier = "javadoc"
     }
 }
-
-task startDatastore {
-    description = "Starts local in-memory datastore using scripts from ./scripts folder."
-    group = "Build Setup"
-
-    doLast {
-        // Start Datastore emulator with the CLI command.
-        ".${File.separatorChar}scripts${File.separatorChar}start-datastore.${runsOnWindows ? 'bat' : 'sh'}".execute()
-    }
-}
-
-tasks["check"].dependsOn startDatastore
 
 apply from: "$rootDir/config/gradle/jacoco.gradle"
 apply from: "$rootDir/config/gradle/publish.gradle"

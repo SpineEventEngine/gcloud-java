@@ -28,7 +28,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.truth.IterableSubject;
 import io.spine.client.ColumnFilter;
 import io.spine.client.ColumnFilters;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.storage.CompositeQueryParameter;
@@ -214,7 +214,7 @@ class DsFiltersTest {
     }
 
     private static class TestEntity
-            extends AbstractVersionableEntity<String, Project>
+            extends AbstractEntity<String, Project>
             implements TestEntityWithStringColumn {
 
         protected TestEntity(String id) {

@@ -18,6 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+ext {
+    runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
+}
+
 dependencies {
     // Google Cloud Datastore
     implementation(group: 'com.google.cloud', name: 'google-cloud-datastore', version: datastoreVersion) {
@@ -25,3 +29,16 @@ dependencies {
         exclude group: 'com.google.guava'
     }
 }
+
+task startDatastore {
+    description = "Starts local in-memory datastore using scripts from ./scripts folder."
+    group = "Build Setup"
+
+    doLast {
+        // Start Datastore emulator with the CLI command.
+        "$rootDir/scripts/start-datastore.${runsOnWindows ? 'bat' : 'sh'}".execute()
+    }
+}
+
+check.dependsOn startDatastore
+

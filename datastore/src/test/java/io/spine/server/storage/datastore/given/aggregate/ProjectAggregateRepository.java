@@ -21,14 +21,14 @@
 package io.spine.server.storage.datastore.given.aggregate;
 
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv;
+import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.test.aggregate.ProjectId;
 
 /**
  * A repository to check loading of an aggregates by the storage for different snapshot triggers.
  */
 public class ProjectAggregateRepository
-        extends AggregateRepository<ProjectId, AggregateRepositoryTestEnv.ProjectAggregate> {
+        extends AggregateRepository<ProjectId, ProjectAggregate> {
 
     @Override
     public void setSnapshotTrigger(int snapshotTrigger) {

@@ -106,6 +106,11 @@ class DatastoreTenantsTest {
         }
 
         @Override
+        public int getSkippedResults() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public boolean hasNext() {
             return keyIterator.hasNext();
         }

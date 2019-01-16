@@ -115,7 +115,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected @Nullable
+    protected
     Optional<EntityRecord> readRecord(I id) {
         Key key = keyOf(id);
         Entity response = datastore.read(key);
@@ -206,7 +206,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private EntityQuery<I> includeLifecycle(EntityQuery<I> entityQuery) {
-        return isLifecycleSupported() && !entityQuery.isLifecycleAttributesSet()
+        return !entityQuery.isLifecycleAttributesSet()
                ? entityQuery.withActiveLifecycle(this)
                : entityQuery;
     }

@@ -41,11 +41,11 @@ import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageTest;
+import io.spine.server.storage.datastore.given.CollegeEntity;
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv;
-import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity;
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.EntityWithCustomColumnName;
-import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestConstCounterEntity;
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestEntity;
+import io.spine.server.storage.datastore.given.TestConstCounterEntity;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
@@ -82,13 +82,13 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
+import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.ADMISSION_DEADLINE;
+import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.CREATED;
+import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.NAME;
+import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.PASSING_GRADE;
+import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.STATE_SPONSORED;
+import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.STUDENT_COUNT;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.COLUMN_NAME_FOR_STORING;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.CollegeColumn.ADMISSION_DEADLINE;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.CollegeColumn.CREATED;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.CollegeColumn.NAME;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.CollegeColumn.PASSING_GRADE;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.CollegeColumn.STATE_SPONSORED;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.CollegeEntity.CollegeColumn.STUDENT_COUNT;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.UNORDERED_COLLEGE_NAMES;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ascendingBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.assertSortedBooleans;
@@ -160,7 +160,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
     private EntityRecordWithColumns newRecordWithColumns(RecordStorage<ProjectId> storage) {
         EntityRecord record = newStorageRecord();
-        Entity<ProjectId, Project> entity = new TestConstCounterEntity(newId());
+        Entity<ProjectId, Project> entity = TestConstCounterEntity.create(newId());
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
         return recordWithColumns;
     }
@@ -215,8 +215,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         ProjectId id = newId();
         Project state = (Project) newState(id);
         Version versionValue = Versions.newVersion(5, getCurrentTime());
-        TestConstCounterEntity entity = new TestConstCounterEntity(id);
-        entity.injectState(state, versionValue);
+        TestConstCounterEntity entity = TestConstCounterEntity.create(id, state);
         EntityRecord record = EntityRecord.newBuilder()
                                           .setState(pack(state))
                                           .setEntityId(pack(id))
@@ -321,7 +320,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
                 .setLifecycleFlags(lifecycle)
                 .setEntityId(pack(id))
                 .build();
-        TestConstCounterEntity entity = new TestConstCounterEntity(id);
+        TestConstCounterEntity entity = TestConstCounterEntity.create(id);
         entity.injectLifecycle(lifecycle);
         RecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
