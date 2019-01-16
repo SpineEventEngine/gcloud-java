@@ -30,16 +30,13 @@ import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.given.TestDatastores;
-import io.spine.server.storage.datastore.given.TestEnvironment;
 import io.spine.server.tenant.TenantAwareFunction0;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIf;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -210,7 +207,7 @@ class DatastoreWrapperTest {
 
         @Test
         @DisplayName("read and write entities in the remote datastore")
-        void testBulkRead() throws InterruptedException {
+        void testBulkRead() {
             assumeTrue(runsOnCi());
 
             int entityCount = 5;
