@@ -57,10 +57,10 @@ final class DsLookupByQueries {
 
     private final DatastoreWrapper datastore;
     private final TypeUrl typeUrl;
-    private final ColumnFilterAdapter columnFilterAdapter;
+    private final FilterAdapter columnFilterAdapter;
 
     DsLookupByQueries(DatastoreWrapper datastore, TypeUrl typeUrl,
-                      ColumnFilterAdapter columnFilterAdapter) {
+                      FilterAdapter columnFilterAdapter) {
         this.datastore = datastore;
         this.typeUrl = typeUrl;
         this.columnFilterAdapter = columnFilterAdapter;

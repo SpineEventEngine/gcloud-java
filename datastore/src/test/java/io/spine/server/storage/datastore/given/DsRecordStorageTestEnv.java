@@ -22,18 +22,19 @@ package io.spine.server.storage.datastore.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.client.CompositeColumnFilter;
-import io.spine.client.EntityFilters;
+import io.spine.client.CompositeFilter;
 import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
-import io.spine.client.EntityIdFilterVBuilder;
+import io.spine.client.IdFilter;
+import io.spine.client.IdFilterVBuilder;
 import io.spine.client.OrderBy;
 import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
 import io.spine.client.PaginationVBuilder;
+import io.spine.client.TargetFilters;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.EntityRecord;
@@ -64,7 +65,6 @@ import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
-import static java.lang.Math.abs;
 import static java.util.Collections.shuffle;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
@@ -111,36 +111,36 @@ public class DsRecordStorageTestEnv {
         return FieldMask.getDefaultInstance();
     }
 
-    public static EntityIdFilter emptyIdFilter() {
-        return EntityIdFilter.getDefaultInstance();
+    public static IdFilter emptyIdFilter() {
+        return IdFilter.getDefaultInstance();
     }
 
-    public static EntityFilters emptyFilters() {
-        return EntityFilters.getDefaultInstance();
+    public static TargetFilters emptyFilters() {
+        return TargetFilters.getDefaultInstance();
     }
 
-    public static EntityFilters newEntityFilters(EntityIdFilter idFilter) {
-        return EntityFilters.newBuilder()
+    public static TargetFilters newTargetFilters(IdFilter idFilter) {
+        return TargetFilters.newBuilder()
                             .setIdFilter(idFilter)
                             .build();
     }
 
-    public static EntityFilters newEntityFilters(EntityIdFilter idFilter,
-                                                 CompositeColumnFilter columnFilter) {
-        return EntityFilters.newBuilder()
+    public static TargetFilters newTargetFilters(IdFilter idFilter,
+                                                 CompositeFilter columnFilter) {
+        return TargetFilters.newBuilder()
                             .setIdFilter(idFilter)
                             .addFilter(columnFilter)
                             .build();
     }
 
-    public static EntityIdFilter newIdFilter(EntityId firstId, EntityId... otherIds) {
+    public static IdFilter newIdFilter(Any firstId, Any... otherIds) {
         return newIdFilter(asList(firstId, otherIds));
     }
 
-    public static EntityIdFilter newIdFilter(List<EntityId> targetIds) {
-        return EntityIdFilterVBuilder.newBuilder()
-                                     .addAllIds(targetIds)
-                                     .build();
+    public static IdFilter newIdFilter(List<Any> targetIds) {
+        return IdFilterVBuilder.newBuilder()
+                               .addAllIds(targetIds)
+                               .build();
     }
 
     public static EntityId

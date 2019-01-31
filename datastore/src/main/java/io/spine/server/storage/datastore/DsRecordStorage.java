@@ -71,7 +71,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final DsLookupByQueries queryLookup;
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
-    private final ColumnFilterAdapter columnFilterAdapter;
+    private final FilterAdapter columnFilterAdapter;
 
     /**
      * Creates new {@link Builder} instance.
@@ -93,7 +93,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.idClass = checkNotNull(builder.getIdClass());
         this.datastore = builder.getDatastore();
         this.columnTypeRegistry = checkNotNull(builder.getColumnTypeRegistry());
-        this.columnFilterAdapter = ColumnFilterAdapter.of(this.columnTypeRegistry);
+        this.columnFilterAdapter = FilterAdapter.of(this.columnTypeRegistry);
         this.idLookup = new DsLookupByIds<>(this.datastore, this.typeUrl);
         this.queryLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
                                                  this.columnFilterAdapter);
