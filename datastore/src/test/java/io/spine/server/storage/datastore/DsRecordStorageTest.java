@@ -23,15 +23,17 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.truth.IterableSubject;
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.client.CompositeColumnFilter;
-import io.spine.client.EntityFilters;
+import io.spine.client.CompositeFilter;
 import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
+import io.spine.client.IdFilter;
+import io.spine.client.TargetFilters;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
@@ -53,6 +55,7 @@ import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -71,11 +74,11 @@ import static com.google.common.collect.Lists.reverse;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.toSeconds;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.client.ColumnFilters.all;
-import static io.spine.client.ColumnFilters.either;
-import static io.spine.client.ColumnFilters.eq;
-import static io.spine.client.ColumnFilters.gt;
-import static io.spine.client.ColumnFilters.lt;
+import static io.spine.client.Filters.all;
+import static io.spine.client.Filters.either;
+import static io.spine.client.Filters.eq;
+import static io.spine.client.Filters.gt;
+import static io.spine.client.Filters.lt;
 import static io.spine.json.Json.toCompactJson;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -105,16 +108,17 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ext
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.extractEntityIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.getStateSponsoredValues;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newCollegeId;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityFilters;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityId;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityRecord;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newIdFilter;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newTargetFilters;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.nullableStudentCount;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.pagination;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.recordIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedValues;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -373,15 +377,15 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             CollegeEntity targetEntity = entities.get(targetEntityIndex);
 
             // Create ID filter.
-            EntityId targetId = extractEntityId(targetEntity);
-            EntityIdFilter idFilter = newIdFilter(targetId);
+            Any targetId = pack(targetEntity.getId());
+            IdFilter idFilter = newIdFilter(targetId);
 
             // Create column filter.
             Timestamp targetColumnValue = targetEntity.getCreationTime();
-            CompositeColumnFilter columnFilter = all(eq(CREATED.columnName(), targetColumnValue));
+            CompositeFilter columnFilter = all(eq(CREATED.columnName(), targetColumnValue));
 
             // Compose Query filters.
-            EntityFilters entityFilters = newEntityFilters(idFilter, columnFilter);
+            TargetFilters entityFilters = newTargetFilters(idFilter, columnFilter);
 
             // Compose Query.
             EntityQuery<CollegeId> entityQuery =
@@ -409,11 +413,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
 
             // Create ID filter.
-            List<EntityId> targetIds = extractEntityIds(entities);
-            EntityIdFilter idFilter = newIdFilter(targetIds);
+            List<Any> targetIds = idsAsAny(entities);
+            IdFilter idFilter = newIdFilter(targetIds);
 
             // Compose Query filters.
-            EntityFilters entityFilters = newEntityFilters(idFilter);
+            TargetFilters entityFilters = newTargetFilters(idFilter);
 
             // Compose Query.
             EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
@@ -473,11 +477,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
                             .subList(0, expectedRecordCount);
 
             // Create ID filter.
-            List<EntityId> targetIds = extractEntityIds(entities);
-            EntityIdFilter idFilter = newIdFilter(targetIds);
+            List<Any> targetIds = idsAsAny(entities);
+            IdFilter idFilter = newIdFilter(targetIds);
 
             // Compose Query filters.
-            EntityFilters entityFilters = newEntityFilters(idFilter);
+            TargetFilters entityFilters = newTargetFilters(idFilter);
 
             // Compose Query.
             EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
@@ -499,6 +503,13 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertDsReadByKeys();
         }
 
+        private List<Any> idsAsAny(List<CollegeEntity> entities) {
+            return entities.stream()
+                           .map(Entity::getId)
+                           .map(AnyPacker::pack)
+                           .collect(toList());
+        }
+
         @Test
         @DisplayName("in an order specified by boolean")
         void testQueryByIDsWithOrderByBoolean() {
@@ -507,11 +518,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             List<CollegeEntity> entities = createAndStoreEntities(storage, recordCount);
 
             // Create ID filter.
-            List<EntityId> targetIds = extractEntityIds(entities);
-            EntityIdFilter idFilter = newIdFilter(targetIds);
+            List<Any> targetIds = idsAsAny(entities);
+            IdFilter idFilter = newIdFilter(targetIds);
 
             // Compose Query filters.
-            EntityFilters entityFilters = newEntityFilters(idFilter);
+            TargetFilters entityFilters = newTargetFilters(idFilter);
 
             // Compose Query.
             EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
@@ -547,11 +558,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             List<CollegeEntity> entities = combine(nullEntities, regularEntities);
 
             // Create ID filter.
-            List<EntityId> targetIds = extractEntityIds(entities);
-            EntityIdFilter idFilter = newIdFilter(targetIds);
+            List<Any> targetIds = idsAsAny(entities);
+            IdFilter idFilter = newIdFilter(targetIds);
 
             // Compose Query filters.
-            EntityFilters entityFilters = newEntityFilters(idFilter);
+            TargetFilters entityFilters = newTargetFilters(idFilter);
 
             // Compose Query.
             EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
@@ -586,14 +597,14 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             List<CollegeEntity> entities = createAndStoreEntities(storage, recordCount);
 
             // Create ID filter.
-            List<EntityId> targetIds = extractEntityIds(entities);
-            targetIds.add(2, newEntityId(newCollegeId()));
-            targetIds.add(5, newEntityId(newCollegeId()));
-            targetIds.add(7, newEntityId(newCollegeId()));
-            EntityIdFilter idFilter = newIdFilter(targetIds);
+            List<Any> targetIds = idsAsAny(entities);
+            targetIds.add(2, pack(newCollegeId()));
+            targetIds.add(5, pack(newCollegeId()));
+            targetIds.add(7, pack(newCollegeId()));
+            IdFilter idFilter = newIdFilter(targetIds);
 
             // Compose Query filters.
-            EntityFilters entityFilters = newEntityFilters(idFilter);
+            TargetFilters entityFilters = newTargetFilters(idFilter);
 
             // Compose Query.
             EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
@@ -624,11 +635,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES);
 
             // Create ID filter.
-            List<EntityId> targetIds = extractEntityIds(entities);
-            EntityIdFilter idFilter = newIdFilter(targetIds);
+            List<Any> targetIds = idsAsAny(entities);
+            IdFilter idFilter = newIdFilter(targetIds);
 
             // Compose Query filters.
-            EntityFilters entityFilters = newEntityFilters(idFilter);
+            TargetFilters entityFilters = newTargetFilters(idFilter);
 
             // Compose Query.
             EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters,
@@ -662,11 +673,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             storage.writeRecord(entity.getId(), create(record, entity, storage));
 
             // Create ID filter.
-            List<EntityId> targetIds = singletonList(extractEntityId(entity));
-            EntityIdFilter idFilter = newIdFilter(targetIds);
+            List<Any> targetIds = singletonList(pack(entity.getId()));
+            IdFilter idFilter = newIdFilter(targetIds);
 
             // Compose Query filters.
-            EntityFilters entityFilters = newEntityFilters(idFilter);
+            TargetFilters entityFilters = newTargetFilters(idFilter);
 
             // Compose Query.
             EntityQuery<ProjectId> entityQuery = EntityQueries.from(entityFilters,
@@ -722,10 +733,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Create column filter.
             String targetColumnValue = targetEntity.getName();
-            CompositeColumnFilter columnFilter = all(eq(NAME.columnName(), targetColumnValue));
+            CompositeFilter columnFilter = all(eq(NAME.columnName(), targetColumnValue));
 
             // Compose Query filters.
-            EntityFilters entityFilters = newEntityFilters(emptyIdFilter(),
+            TargetFilters entityFilters = newTargetFilters(emptyIdFilter(),
                                                            columnFilter);
 
             // Compose Query.
@@ -756,11 +767,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             CollegeEntity targetEntity = entities.get(targetEntityIndex);
 
             // Create column filter.
-            CompositeColumnFilter columnFilter = all(
+            CompositeFilter columnFilter = all(
                     eq(NAME.columnName(), targetEntity.getName()),
                     eq(CREATED.columnName(), targetEntity.getCreationTime())
             );
-            EntityFilters entityFilters = newEntityFilters(emptyIdFilter(),
+            TargetFilters entityFilters = newTargetFilters(emptyIdFilter(),
                                                            columnFilter);
 
             // Compose Query.
@@ -791,11 +802,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             CollegeEntity targetEntity = entities.get(targetEntityIndex);
 
             // Create column filter.
-            CompositeColumnFilter columnFilter = all(
+            CompositeFilter columnFilter = all(
                     eq(NAME.columnName(), targetEntity.getName()),
                     eq(CREATED.columnName(), targetEntity.getCreationTime())
             );
-            EntityFilters entityFilters = newEntityFilters(emptyIdFilter(),
+            TargetFilters entityFilters = newTargetFilters(emptyIdFilter(),
                                                            columnFilter);
 
             // Compose Query.
@@ -1001,8 +1012,8 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES, 150, false);
             List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES,
                                                                   150, true);
-            EntityFilters filters =
-                    EntityFilters.newBuilder()
+            TargetFilters filters =
+                    TargetFilters.newBuilder()
                                  .addFilter(either(
                                          lt(NAME.columnName(), UNORDERED_COLLEGE_NAMES.get(2)),
                                          gt(NAME.columnName(), UNORDERED_COLLEGE_NAMES.get(2))
