@@ -24,7 +24,7 @@ ext {
 
 dependencies {
     // Google Cloud Datastore
-    implementation(group: 'com.google.cloud', name: 'google-cloud-datastore', version: datastoreVersion) {
+    api(group: 'com.google.cloud', name: 'google-cloud-datastore', version: datastoreVersion) {
         exclude group: 'com.google.protobuf'
         exclude group: 'com.google.guava'
     }
