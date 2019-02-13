@@ -42,7 +42,7 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
     private boolean multitenant;
     private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
     private Class<I> idClass;
-    private Class<? extends io.spine.server.entity.Entity> entityClass;
+    private Class<? extends Entity> entityClass;
 
     /**
      * Prevents direct instantiation.
@@ -71,7 +71,7 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
     /**
      * Assigns the class of the stored entity.
      */
-    public B setEntityClass(Class<? extends io.spine.server.entity.Entity> entityClass) {
+    public B setEntityClass(Class<? extends Entity> entityClass) {
         this.entityClass = checkNotNull(entityClass);
         return self();
     }
@@ -165,7 +165,7 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
     /**
      * Obtains the class of the stored entity.
      */
-    public Class<? extends io.spine.server.entity.Entity> getEntityClass() {
+    public Class<? extends Entity> getEntityClass() {
         return entityClass;
     }
 
