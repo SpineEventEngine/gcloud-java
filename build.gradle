@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
+buildscript { final scriptHandler ->
 
     // Define the versions of the library and its dependencies.
     // As long as `buildscript` section is always evaluated first, we need to apply
@@ -26,13 +26,7 @@ buildscript {
     apply from: "version.gradle"
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
-    repositories {
-        jcenter()
-        maven { url = repos.gradlePlugins }
-        maven { url = repos.spine }
-        maven { url = repos.spineSnapshots }
-        mavenLocal()
-    }
+    defaultRepositories(scriptHandler)
 
     dependencies {
         classpath deps.build.guava
@@ -65,6 +59,7 @@ subprojects {
 
     apply plugin: 'java-library'
     apply plugin: 'net.ltgt.errorprone'
+    apply plugin: 'pmd'
     apply plugin: 'maven-publish'
     apply plugin: 'idea'
     
@@ -103,14 +98,8 @@ subprojects {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    
-    repositories {
-        jcenter()
-        maven { url = repos.gradlePlugins }
-        maven { url = repos.spine }
-        maven { url = repos.spineSnapshots }
-        mavenLocal()
-    }
+
+    defaultRepositories(project)
 
     dependencies {
         errorprone deps.build.errorProneCore
@@ -200,6 +189,8 @@ subprojects {
         from("$projectDir/build/docs/javadoc")
         classifier = "javadoc"
     }
+
+    apply from: deps.scripts.pmd
 }
 
 apply from: "$rootDir/config/gradle/jacoco.gradle"
