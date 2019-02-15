@@ -1041,8 +1041,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             CollegeEntity entity = createAndStoreEntity(storage);
 
             // Create `EITHER` column filter.
+            int randomStudentCount = 15;
             CompositeFilter eitherFilter = either(
                     eq(NAME.columnName(), entity.getName()),
+                    eq(STUDENT_COUNT.columnName(), randomStudentCount),
                     eq(PASSING_GRADE.columnName(), entity.getPassingGrade())
             );
             TargetFilters entityFilters = newTargetFilters(emptyIdFilter(), eitherFilter);
@@ -1063,7 +1065,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertEquals(entity.getState(), unpack(record.getState()));
 
             // Check there were actually 2 Datastore reads.
-            assertDsReadByStructuredQuery(2);
+            assertDsReadByStructuredQuery(3);
         }
 
         private void assertDsReadByStructuredQuery() {
