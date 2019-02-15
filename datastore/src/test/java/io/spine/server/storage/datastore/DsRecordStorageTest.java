@@ -1064,7 +1064,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             EntityRecord record = foundEntities.get(0);
             assertEquals(entity.getState(), unpack(record.getState()));
 
-            // Check there were actually 2 Datastore reads.
+            // Check there was a correct amount of Datastore reads.
             assertDsReadByStructuredQuery(3);
         }
 
