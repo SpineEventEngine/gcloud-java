@@ -258,7 +258,8 @@ public class DsRecordStorageTestEnv {
 
     @CanIgnoreReturnValue
     private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage,
-                                                      String name, int studentCount,
+                                                      String name,
+                                                      int studentCount,
                                                       boolean stateSponsored) {
         CollegeId id = newCollegeId();
         College state = newCollege(id, name, studentCount, stateSponsored);
