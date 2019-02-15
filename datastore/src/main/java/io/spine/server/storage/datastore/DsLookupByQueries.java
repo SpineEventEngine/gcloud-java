@@ -47,9 +47,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * An {@code Entity} lookup using {@linkplain QueryParameters Spine query parameters}.
  *
- * @implNote A single {@linkplain #find(QueryParameters, FieldMask) find()} call may turn
- *         into several Datastore reads.
- *         See {@link DsFilters} for details.
+ * @implNote
+ * A single {@linkplain #find(QueryParameters, FieldMask) find()} call may turn into several
+ * Datastore reads. See {@link DsFilters} for details.
  */
 final class DsLookupByQueries {
 
@@ -160,10 +160,18 @@ final class DsLookupByQueries {
         return recordIterator;
     }
 
+    /**
+     * Runs multiple Datastore queries in series.
+     *
+     * <p>In case of overlapping results, only one instance of {@code Entity} is taken
+     * (i.e. no duplications).
+     */
     private Stream<Entity> read(Collection<StructuredQuery<Entity>> queries) {
-        Stream<Entity> entities = queries.stream()
-                                         .map(datastore::read)
-                                         .flatMap(Streams::stream);
+        Stream<Entity> entities = queries
+                .stream()
+                .map(datastore::read)
+                .flatMap(Streams::stream)
+                .distinct();
         return entities;
     }
 }

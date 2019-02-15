@@ -249,20 +249,21 @@ public class DsRecordStorageTestEnv {
     }
 
     @CanIgnoreReturnValue
-    private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage,
-                                                      String name, int studentCount,
-                                                      boolean stateSponsored) {
+    public static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage) {
         CollegeId id = newCollegeId();
-        College state = newCollege(id, name, studentCount, stateSponsored);
-        CollegeEntity entity = CollegeEntity.create(id, state);
+        CollegeEntity entity = CollegeEntity.create(id, newCollege(id));
         storeEntity(storage, entity);
         return entity;
     }
 
     @CanIgnoreReturnValue
-    private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage) {
+    private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage,
+                                                      String name,
+                                                      int studentCount,
+                                                      boolean stateSponsored) {
         CollegeId id = newCollegeId();
-        CollegeEntity entity = CollegeEntity.create(id, newCollege(id));
+        College state = newCollege(id, name, studentCount, stateSponsored);
+        CollegeEntity entity = CollegeEntity.create(id, state);
         storeEntity(storage, entity);
         return entity;
     }
