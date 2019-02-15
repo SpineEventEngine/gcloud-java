@@ -28,7 +28,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.CompositeFilter;
-import io.spine.client.EntityId;
 import io.spine.client.IdFilter;
 import io.spine.client.TargetFilters;
 import io.spine.core.Version;
@@ -55,7 +54,6 @@ import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -97,6 +95,7 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ass
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.combine;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.createAndStoreEntities;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.createAndStoreEntitiesWithNullStudentCount;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.createAndStoreEntity;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.descendingBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyFieldMask;
@@ -104,11 +103,8 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emp
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyIdFilter;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyOrderBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.emptyPagination;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.extractEntityId;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.extractEntityIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.getStateSponsoredValues;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newCollegeId;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityId;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityRecord;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newIdFilter;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newTargetFilters;
@@ -1037,6 +1033,36 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             List<CollegeId> actualResults = recordIds(resultList);
             assertEquals(expectedResults, actualResults);
             assertDsReadByStructuredQuery(2);
+        }
+
+        @Test
+        @DisplayName("returning single entity for multiple `EITHER` filter matches")
+        void testEitherFilterDuplicates() {
+            CollegeEntity entity = createAndStoreEntity(storage);
+
+            // Create `EITHER` column filter.
+            CompositeFilter eitherFilter = either(
+                    eq(NAME.columnName(), entity.getName()),
+                    eq(PASSING_GRADE.columnName(), entity.getPassingGrade())
+            );
+            TargetFilters entityFilters = newTargetFilters(emptyIdFilter(), eitherFilter);
+
+            // Compose Query.
+            EntityQuery<CollegeId> entityQuery =
+                    EntityQueries.from(entityFilters, emptyOrderBy(), emptyPagination(), storage);
+
+            // Execute Query.
+            Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
+
+            // Check the query results.
+            List<EntityRecord> foundEntities = newArrayList(readResult);
+            assertEquals(1, foundEntities.size());
+
+            // Check the record state.
+            EntityRecord record = foundEntities.get(0);
+            assertEquals(entity.getState(), unpack(record.getState()));
+
+            assertDsReadByStructuredQuery();
         }
 
         private void assertDsReadByStructuredQuery() {
