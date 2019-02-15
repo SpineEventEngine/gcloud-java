@@ -1054,14 +1054,15 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             // Execute Query.
             Iterator<EntityRecord> readResult = storage.readAll(entityQuery, emptyFieldMask());
 
-            // Check the query results.
+            // Check the entity is "found" only once.
             List<EntityRecord> foundEntities = newArrayList(readResult);
             assertEquals(1, foundEntities.size());
 
-            // Check the record state.
+            // Check it's the target entity.
             EntityRecord record = foundEntities.get(0);
             assertEquals(entity.getState(), unpack(record.getState()));
 
+            // Check there were actually 2 Datastore reads.
             assertDsReadByStructuredQuery(2);
         }
 
