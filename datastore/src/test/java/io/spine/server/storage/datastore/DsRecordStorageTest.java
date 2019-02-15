@@ -1062,7 +1062,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             EntityRecord record = foundEntities.get(0);
             assertEquals(entity.getState(), unpack(record.getState()));
 
-            assertDsReadByStructuredQuery();
+            assertDsReadByStructuredQuery(2);
         }
 
         private void assertDsReadByStructuredQuery() {
