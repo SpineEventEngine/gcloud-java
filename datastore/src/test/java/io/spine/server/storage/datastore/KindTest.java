@@ -91,7 +91,7 @@ class KindTest {
         TypeUrl type = TypeUrl.from(descriptor);
         Kind kind = Kind.of(type);
         assertEquals(descriptor.getFullName(), kind.getValue());
-        assertEquals(type.getTypeName(), kind.getValue());
+        assertEquals(type.toTypeName().value(), kind.getValue());
     }
 
     @Test

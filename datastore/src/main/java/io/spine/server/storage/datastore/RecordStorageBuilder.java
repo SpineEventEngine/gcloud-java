@@ -55,7 +55,7 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
      */
     public B setStateType(TypeUrl stateTypeUrl) {
         checkNotNull(stateTypeUrl);
-        Descriptor descriptor = (Descriptor) stateTypeUrl.getDescriptor();
+        Descriptor descriptor = stateTypeUrl.toTypeName().messageDescriptor();
         this.descriptor = checkNotNull(descriptor);
         return self();
     }

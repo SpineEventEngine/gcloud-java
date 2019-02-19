@@ -66,7 +66,7 @@ public final class Kind {
     }
 
     public static Kind of(TypeUrl typeUrl) {
-        return new Kind(typeUrl.getTypeName());
+        return new Kind(typeUrl.toTypeName().value());
     }
 
     public static Kind of(Descriptor descriptor) {
