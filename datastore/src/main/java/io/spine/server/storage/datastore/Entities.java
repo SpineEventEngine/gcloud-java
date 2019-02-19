@@ -130,10 +130,10 @@ final class Entities {
 
     @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"} /* Rely on caller. */)
     private static <M extends Message> M defaultMessage(TypeUrl type) {
-        Class<M> messageClass = (Class<M>) type.getJavaClass();
+        Class<M> messageClass = (Class<M>) type.toJavaClass();
         checkState(messageClass != null,
                    "Not found class for type url \"%s\". Try to rebuild the project.",
-                   type.getTypeName());
+                   type.toTypeName().value());
         M message = Internal.getDefaultInstance(messageClass);
         return message;
     }

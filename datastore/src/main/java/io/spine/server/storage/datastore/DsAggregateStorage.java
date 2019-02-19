@@ -109,7 +109,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                 Class<I> idClass = (Class<I>) modelClass.getIdClass();
         this.idClass = idClass;
         this.stateTypeName = modelClass.getStateType()
-                                       .toName();
+                                       .toTypeName();
     }
 
     @Override
