@@ -225,7 +225,7 @@ class DsFiltersTest {
 
         @Override
         public String getIdString() {
-            return getId();
+            return id();
         }
     }
 }

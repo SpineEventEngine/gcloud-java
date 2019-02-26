@@ -106,9 +106,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         EntityClass<? extends Aggregate<I, ?, ?>> modelClass = asEntityClass(cls);
         @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
-                Class<I> idClass = (Class<I>) modelClass.getIdClass();
+                Class<I> idClass = (Class<I>) modelClass.idClass();
         this.idClass = idClass;
-        this.stateTypeName = modelClass.getStateType()
+        this.stateTypeName = modelClass.stateType()
                                        .toTypeName();
     }
 

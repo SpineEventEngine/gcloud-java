@@ -50,28 +50,28 @@ public class CollegeEntity
 
     @Column
     public String getName() {
-        return getState().getName();
+        return state().getName();
     }
 
     @Column
     public @Nullable Integer getStudentCount() {
-        int count = getState().getStudentCount();
+        int count = state().getStudentCount();
         return count == 0 ? null : count;
     }
 
     @Column
     public Timestamp getAdmissionDeadline() {
-        return getState().getAdmissionDeadline();
+        return state().getAdmissionDeadline();
     }
 
     @Column
     public double getPassingGrade() {
-        return getState().getPassingGrade();
+        return state().getPassingGrade();
     }
 
     @Column
     public boolean getStateSponsored() {
-        return getState().getStateSponsored();
+        return state().getStateSponsored();
     }
 
     @Column

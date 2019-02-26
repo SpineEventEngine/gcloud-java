@@ -75,7 +75,7 @@ public class TestConstCounterEntity
 
     @Column
     public String getCounterName() {
-        return getId().toString();
+        return id().toString();
     }
 
     @Column
@@ -92,7 +92,7 @@ public class TestConstCounterEntity
 
     @Column
     public Project getCounterState() {
-        return getState();
+        return state();
     }
 
     @Override

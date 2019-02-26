@@ -373,7 +373,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             CollegeEntity targetEntity = entities.get(targetEntityIndex);
 
             // Create ID filter.
-            Any targetId = pack(targetEntity.getId());
+            Any targetId = pack(targetEntity.id());
             IdFilter idFilter = newIdFilter(targetId);
 
             // Create column filter.
@@ -396,7 +396,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Check the record state.
             EntityRecord record = resultList.get(0);
-            assertEquals(targetEntity.getState(), unpack(record.getState()));
+            assertEquals(targetEntity.state(), unpack(record.getState()));
 
             assertDsReadByKeys();
         }
@@ -501,7 +501,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         private List<Any> idsAsAny(List<CollegeEntity> entities) {
             return entities.stream()
-                           .map(Entity::getId)
+                           .map(Entity::id)
                            .map(AnyPacker::pack)
                            .collect(toList());
         }
@@ -666,10 +666,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             ProjectId id = newId();
             EntityRecord record = newEntityRecord(id, newState(id));
             EntityWithCustomColumnName entity = new EntityWithCustomColumnName(id);
-            storage.writeRecord(entity.getId(), create(record, entity, storage));
+            storage.writeRecord(entity.id(), create(record, entity, storage));
 
             // Create ID filter.
-            List<Any> targetIds = singletonList(pack(entity.getId()));
+            List<Any> targetIds = singletonList(pack(entity.id()));
             IdFilter idFilter = newIdFilter(targetIds);
 
             // Compose Query filters.
@@ -748,7 +748,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Check the record state.
             EntityRecord record = resultList.get(0);
-            assertEquals(targetEntity.getState(), unpack(record.getState()));
+            assertEquals(targetEntity.state(), unpack(record.getState()));
 
             assertDsReadByStructuredQuery();
         }
@@ -783,7 +783,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Check the record state.
             EntityRecord record = resultList.get(0);
-            assertEquals(targetEntity.getState(), unpack(record.getState()));
+            assertEquals(targetEntity.state(), unpack(record.getState()));
 
             assertDsReadByStructuredQuery();
         }
@@ -821,9 +821,9 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Check the record state.
             EntityRecord record = resultList.get(0);
-            College expectedState = applyMask(mask, targetEntity.getState());
+            College expectedState = applyMask(mask, targetEntity.state());
             College actualState = (College) unpack(record.getState());
-            assertNotEquals(targetEntity.getState(), actualState);
+            assertNotEquals(targetEntity.state(), actualState);
             assertEquals(expectedState, actualState);
 
             assertDsReadByStructuredQuery();
@@ -1062,7 +1062,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Check it's the target entity.
             EntityRecord record = foundEntities.get(0);
-            assertEquals(entity.getState(), unpack(record.getState()));
+            assertEquals(entity.state(), unpack(record.getState()));
 
             // Check there was a correct amount of Datastore reads.
             assertDsReadByStructuredQuery(3);
