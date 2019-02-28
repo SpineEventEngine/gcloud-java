@@ -146,7 +146,7 @@ public class DsRecordStorageTestEnv {
     public static EntityId
     extractEntityId(AbstractEntity<? extends Message, ? extends Message> targetEntity) {
         return EntityId.newBuilder()
-                       .setId(pack(targetEntity.getId()))
+                       .setId(pack(targetEntity.id()))
                        .build();
     }
 
@@ -191,7 +191,7 @@ public class DsRecordStorageTestEnv {
     sortedIds(Collection<CollegeEntity> entities, Function<CollegeEntity, T> property) {
         return entities.stream()
                        .sorted(comparing(property, nullsFirst(naturalOrder())))
-                       .map(AbstractEntity::getId)
+                       .map(AbstractEntity::id)
                        .collect(toList());
     }
 
@@ -287,9 +287,9 @@ public class DsRecordStorageTestEnv {
     }
 
     public static void storeEntity(RecordStorage<CollegeId> storage, CollegeEntity entity) {
-        EntityRecord record = newEntityRecord(entity.getId(), entity.getState());
+        EntityRecord record = newEntityRecord(entity.id(), entity.state());
         EntityRecordWithColumns withColumns = create(record, entity, storage);
-        storage.write(entity.getId(), withColumns);
+        storage.write(entity.id(), withColumns);
     }
 
     public static CollegeId newCollegeId() {

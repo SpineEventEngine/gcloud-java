@@ -85,8 +85,8 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
      */
     @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     public B setModelClass(EntityClass<? extends Entity<I, ?>> modelClass) {
-        TypeUrl stateType = modelClass.getStateType();
-        Class<I> idClass = (Class<I>) modelClass.getIdClass();
+        TypeUrl stateType = modelClass.stateType();
+        Class<I> idClass = (Class<I>) modelClass.idClass();
 
         setStateType(stateType);
         setIdClass(idClass);

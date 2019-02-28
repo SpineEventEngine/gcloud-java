@@ -26,7 +26,7 @@ import com.google.common.collect.Streams;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.core.CommandEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
@@ -230,7 +230,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
             Optional<ProjectAggregate> optional = repository.find(id);
             assertTrue(optional.isPresent());
             ProjectAggregate aggregate = optional.get();
-            assertEquals(tasksCount, aggregate.getState()
+            assertEquals(tasksCount, aggregate.state()
                                               .getTaskCount());
         }
     }
