@@ -48,11 +48,11 @@ class NewBoundedContextBuilderTest {
         DatastoreStorageFactory factory = givenFactory();
         BoundedContextBuilder builder = factory.newBoundedContextBuilder();
         Optional<Supplier<StorageFactory>> supplierOptional =
-                builder.getStorageFactorySupplier();
+                builder.storageFactorySupplier();
         assertTrue(supplierOptional.isPresent());
         assertSame(factory, supplierOptional.get().get());
         assertEquals(builder.isMultitenant(), factory.isMultitenant());
-        Optional<? extends TenantIndex> tenantIndexOptional = builder.getTenantIndex();
+        Optional<? extends TenantIndex> tenantIndexOptional = builder.tenantIndex();
         assertTrue(tenantIndexOptional.isPresent());
         assertThat(tenantIndexOptional.get(), instanceOf(TestNamespaceIndex.getType()));
     }

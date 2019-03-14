@@ -71,7 +71,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.toSeconds;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.either;
 import static io.spine.client.Filters.eq;
@@ -213,7 +213,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         ProjectId id = newId();
         Project state = (Project) newState(id);
-        Version versionValue = Versions.newVersion(5, getCurrentTime());
+        Version versionValue = Versions.newVersion(5, currentTime());
         TestConstCounterEntity entity = TestConstCounterEntity.create(id, state);
         EntityRecord record = EntityRecord.newBuilder()
                                           .setState(pack(state))

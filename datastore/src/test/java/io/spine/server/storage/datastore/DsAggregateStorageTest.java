@@ -26,7 +26,6 @@ import com.google.common.collect.Streams;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.server.type.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
@@ -39,6 +38,7 @@ import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.server.entity.Entity;
 import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.NonProjectStateAggregate;
 import io.spine.server.storage.datastore.given.aggregate.ProjectAggregateRepository;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.testdata.Sample;
@@ -56,7 +56,6 @@ import java.util.Optional;
 
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
-import static io.spine.testing.client.TestActorRequestFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -205,7 +204,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
             repository = new ProjectAggregateRepository();
             boundedContext.register(repository);
 
-            factory = newInstance(DsAggregateStorageTest.class);
+            factory = new TestActorRequestFactory(DsAggregateStorageTest.class);
             id = newId();
         }
 
