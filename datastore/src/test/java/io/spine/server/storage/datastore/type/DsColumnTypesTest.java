@@ -30,7 +30,6 @@ import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Time;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.json.Json;
@@ -41,6 +40,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
+import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.timestampType;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -136,7 +136,7 @@ class DsColumnTypesTest {
     @DisplayName("provide Timestamp as DateTime type")
     void testTimestampToDateTime() {
         DatastoreColumnType<Timestamp, com.google.cloud.Timestamp> type = timestampType();
-        Timestamp value = Time.getCurrentTime();
+        Timestamp value = currentTime();
 
         com.google.cloud.Timestamp timestamp = ofTimeSecondsAndNanos(value.getSeconds(),
                                                                      value.getNanos());

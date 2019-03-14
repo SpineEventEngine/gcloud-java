@@ -36,7 +36,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -54,7 +54,7 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
     protected EntityRecord newStorageRecord() {
         return EntityRecord.newBuilder()
                 .setState(AnyPacker.pack(Sample.messageOfType(Project.class)))
-                .setVersion(Version.newBuilder().setNumber(42).setTimestamp(getCurrentTime()))
+                .setVersion(Version.newBuilder().setNumber(42).setTimestamp(currentTime()))
                 .build();
     }
 

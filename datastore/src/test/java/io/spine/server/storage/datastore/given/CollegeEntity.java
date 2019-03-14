@@ -29,7 +29,7 @@ import io.spine.test.datastore.CollegeVBuilder;
 import io.spine.testing.server.entity.given.Given;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 public class CollegeEntity
         extends Projection<CollegeId, College, CollegeVBuilder> {
@@ -38,7 +38,7 @@ public class CollegeEntity
 
     private CollegeEntity(CollegeId id) {
         super(id);
-        this.creationTime = getCurrentTime();
+        this.creationTime = currentTime();
     }
 
     public static CollegeEntity create(CollegeId id, College state) {

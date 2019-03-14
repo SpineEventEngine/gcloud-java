@@ -30,7 +30,7 @@ import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testing.server.entity.given.Given;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 public class TestConstCounterEntity
         extends Projection<ProjectId, Project, ProjectVBuilder> {
@@ -42,7 +42,7 @@ public class TestConstCounterEntity
 
     private TestConstCounterEntity(ProjectId id) {
         super(id);
-        this.creationTime = getCurrentTime();
+        this.creationTime = currentTime();
     }
 
     public static TestConstCounterEntity create(ProjectId id) {
