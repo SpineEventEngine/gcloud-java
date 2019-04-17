@@ -37,10 +37,6 @@ after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
   - bash <(curl -s https://codecov.io/bash)
 
-  # Publish Codacy reports
-  - chmod +x ./config/scripts/report-coverage.sh
-  - ./config/scripts/report-coverage.sh
-
 after_script:
 - chmod +x ./scripts/upload-artifacts.sh
 - ./scripts/upload-artifacts.sh
