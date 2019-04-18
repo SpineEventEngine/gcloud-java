@@ -148,7 +148,6 @@ subprojects {
         }
     }
 
-    apply from: "$rootDir/config/gradle/test-output.gradle"
     apply plugin: 'com.google.protobuf'
     apply plugin: spineProtobufPluginId
 
