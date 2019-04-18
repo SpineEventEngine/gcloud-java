@@ -150,6 +150,7 @@ subprojects {
 
     apply plugin: 'com.google.protobuf'
     apply plugin: spineProtobufPluginId
+    apply from: deps.scripts.modelCompiler
 
     sourceSets {
         main {
