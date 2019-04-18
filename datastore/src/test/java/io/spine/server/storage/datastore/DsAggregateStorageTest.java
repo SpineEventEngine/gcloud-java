@@ -29,7 +29,6 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
-import io.spine.server.aggregate.AggregateEventRecordVBuilder;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageTest;
@@ -85,7 +84,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     @Override
     protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
         @SuppressWarnings("unchecked") // Logically checked; OK for test purposes.
-        Class<? extends Aggregate<ProjectId, ?, ?>> aggCls =
+                Class<? extends Aggregate<ProjectId, ?, ?>> aggCls =
                 (Class<? extends Aggregate<ProjectId, ?, ?>>) cls;
         return datastoreFactory.createAggregateStorage(aggCls);
     }
@@ -236,11 +235,12 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
     private void writeSnapshotWithTimestamp(ProjectId id, Timestamp timestamp) {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
-        Snapshot snapshot = Snapshot.newBuilder()
-                                    .setTimestamp(timestamp)
-                                    .build();
-        AggregateEventRecord record = AggregateEventRecordVBuilder
-                .newBuilder()
+        Snapshot snapshot = Snapshot
+                .vBuilder()
+                .setTimestamp(timestamp)
+                .build();
+        AggregateEventRecord record = AggregateEventRecord
+                .vBuilder()
                 .setSnapshot(snapshot)
                 .build();
         storage.writeRecord(id, record);

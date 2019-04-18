@@ -103,7 +103,8 @@ public final class Namespace {
     /**
      * Creates new instance of {@code Namespace} from the given string.
      *
-     * @param datastoreNamespace a string representing the datastore namespace
+     * @param datastoreNamespace
+     *         a string representing the datastore namespace
      * @return new instance of {@code Namespace}
      */
     static Namespace of(String datastoreNamespace) {
@@ -118,7 +119,8 @@ public final class Namespace {
     /**
      * Creates new instance of {@code Namespace} from the given {@link TenantId}.
      *
-     * @param id the {@link TenantId} to create the {@code Namespace} from
+     * @param id
+     *         the {@link TenantId} to create the {@code Namespace} from
      * @return new instance of {@code Namespace}
      */
     static Namespace of(TenantId id, ProjectId projectId) {
@@ -136,9 +138,10 @@ public final class Namespace {
     /**
      * Creates new instance of {@code Namespace} from the name of the given {@link Key}.
      *
-     * @param key the {@link Key} to get a {@code Namespace} from
+     * @param key
+     *         the {@link Key} to get a {@code Namespace} from
      * @return a {@code Namespace} of the given Key name or {@code null} if the name is
-     * {@code null} or empty
+     *         {@code null} or empty
      */
     static @Nullable Namespace fromNameOf(Key key, boolean multitenant) {
         checkNotNull(key);
@@ -165,8 +168,7 @@ public final class Namespace {
         }
 
         NamespaceConverter defaultConverter = converterType.namespaceConverter;
-        Namespace result = new Namespace(namespace,
-                                         customConverter.orElse(defaultConverter));
+        Namespace result = new Namespace(namespace, customConverter.orElse(defaultConverter));
         return result;
     }
 
@@ -193,11 +195,11 @@ public final class Namespace {
      * <p>If current instance was created with {@link Namespace#of(String)},
      * then the result will be equivalent to the result of
      * <pre>
-     * {@code
-     *         TenantId.newBuilder()
-     *                 .setValue(namespace.getValue())
-     *                 .build();
-     * }
+     *     {@code
+     *     TenantId.vBuilder()
+     *             .setValue(namespace.getValue())
+     *             .build();
+     *     }
      * </pre>
      *
      * @return a {@link TenantId} represented by this {@code Namespace}

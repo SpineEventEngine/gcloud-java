@@ -29,6 +29,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
+import io.spine.net.InternetDomainVBuilder;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.testing.TestValues;
@@ -60,9 +61,10 @@ import static org.mockito.Mockito.when;
 class NamespaceIndexTest {
 
     private static TenantId newTenantId() {
-        return TenantId.newBuilder()
-                       .setValue(TestValues.randomString())
-                       .build();
+        return TenantId
+                .vBuilder()
+                .setValue(TestValues.randomString())
+                .build();
     }
 
     @Test
@@ -156,8 +158,9 @@ class NamespaceIndexTest {
         keys.add(mockKey("Vtenant3"));
         Collection<TenantId> initialTenantIds =
                 keys.stream()
-                    .map(key -> TenantId.newBuilder()
-                                        .setValue(key.getName().substring(1))
+                    .map(key -> TenantId.vBuilder()
+                                        .setValue(key.getName()
+                                                     .substring(1))
                                         .build())
                     .collect(toList());
 
@@ -176,12 +179,12 @@ class NamespaceIndexTest {
             assertThat(initialIdsActual).containsAllIn(initialTenantIds);
 
             // Add new element
-            InternetDomain domain = InternetDomain
+            InternetDomain domain = InternetDomainVBuilder
                     .newBuilder()
                     .setValue("my.tenant.com")
                     .build();
             TenantId newTenantId = TenantId
-                    .newBuilder()
+                    .vBuilder()
                     .setDomain(domain)
                     .build();
             namespaceIndex.keep(newTenantId); // sync

@@ -29,11 +29,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.client.CompositeFilter;
 import io.spine.client.EntityId;
 import io.spine.client.IdFilter;
-import io.spine.client.IdFilterVBuilder;
 import io.spine.client.OrderBy;
-import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
-import io.spine.client.PaginationVBuilder;
 import io.spine.client.TargetFilters;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
@@ -45,8 +42,6 @@ import io.spine.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.server.storage.given.RecordStorageTestEnv;
 import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
-import io.spine.test.datastore.CollegeIdVBuilder;
-import io.spine.test.datastore.CollegeVBuilder;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 
@@ -120,17 +115,18 @@ public class DsRecordStorageTestEnv {
     }
 
     public static TargetFilters newTargetFilters(IdFilter idFilter) {
-        return TargetFilters.newBuilder()
-                            .setIdFilter(idFilter)
-                            .build();
+        return TargetFilters
+                .vBuilder()
+                .setIdFilter(idFilter)
+                .build();
     }
 
-    public static TargetFilters newTargetFilters(IdFilter idFilter,
-                                                 CompositeFilter columnFilter) {
-        return TargetFilters.newBuilder()
-                            .setIdFilter(idFilter)
-                            .addFilter(columnFilter)
-                            .build();
+    public static TargetFilters newTargetFilters(IdFilter idFilter, CompositeFilter columnFilter) {
+        return TargetFilters
+                .vBuilder()
+                .setIdFilter(idFilter)
+                .addFilter(columnFilter)
+                .build();
     }
 
     public static IdFilter newIdFilter(Any firstId, Any... otherIds) {
@@ -138,30 +134,34 @@ public class DsRecordStorageTestEnv {
     }
 
     public static IdFilter newIdFilter(List<Any> targetIds) {
-        return IdFilterVBuilder.newBuilder()
-                               .addAllIds(targetIds)
-                               .build();
+        return IdFilter
+                .vBuilder()
+                .addAllIds(targetIds)
+                .build();
     }
 
     public static EntityId
     extractEntityId(AbstractEntity<? extends Message, ? extends Message> targetEntity) {
-        return EntityId.newBuilder()
-                       .setId(pack(targetEntity.id()))
-                       .build();
+        return EntityId
+                .vBuilder()
+                .setId(pack(targetEntity.id()))
+                .build();
     }
 
     public static List<EntityId>
     extractEntityIds(Collection<CollegeEntity> targetEntities) {
-        return targetEntities.stream()
-                             .map(DsRecordStorageTestEnv::extractEntityId)
-                             .collect(toList());
+        return targetEntities
+                .stream()
+                .map(DsRecordStorageTestEnv::extractEntityId)
+                .collect(toList());
     }
 
     public static EntityRecord newEntityRecord(Message id, Message state) {
-        return EntityRecord.newBuilder()
-                           .setEntityId(pack(id))
-                           .setState(pack(state))
-                           .build();
+        return EntityRecord
+                .vBuilder()
+                .setEntityId(pack(id))
+                .setState(pack(state))
+                .build();
     }
 
     public static OrderBy ascendingBy(CollegeEntity.CollegeColumn column) {
@@ -173,40 +173,45 @@ public class DsRecordStorageTestEnv {
     }
 
     private static OrderBy orderBy(String column, OrderBy.Direction descending) {
-        return OrderByVBuilder.newBuilder()
-                              .setColumn(column)
-                              .setDirection(descending)
-                              .build();
+        return OrderBy
+                .vBuilder()
+                .setColumn(column)
+                .setDirection(descending)
+                .build();
     }
 
     public static List<CollegeId> recordIds(Collection<EntityRecord> resultList) {
-        return resultList.stream()
-                         .map(EntityRecord::getEntityId)
-                         .map(AnyPacker::unpack)
-                         .map(id -> (CollegeId) id)
-                         .collect(toList());
+        return resultList
+                .stream()
+                .map(EntityRecord::getEntityId)
+                .map(AnyPacker::unpack)
+                .map(id -> (CollegeId) id)
+                .collect(toList());
     }
 
     public static <T extends Comparable<T>> List<CollegeId>
     sortedIds(Collection<CollegeEntity> entities, Function<CollegeEntity, T> property) {
-        return entities.stream()
-                       .sorted(comparing(property, nullsFirst(naturalOrder())))
-                       .map(AbstractEntity::id)
-                       .collect(toList());
+        return entities
+                .stream()
+                .sorted(comparing(property, nullsFirst(naturalOrder())))
+                .map(AbstractEntity::id)
+                .collect(toList());
     }
 
     public static <T extends Comparable<T>> List<T>
     sortedValues(Collection<CollegeEntity> entities, Function<CollegeEntity, T> property) {
-        return entities.stream()
-                       .sorted(comparing(property, nullsFirst(naturalOrder())))
-                       .map(property)
-                       .collect(toList());
+        return entities
+                .stream()
+                .sorted(comparing(property, nullsFirst(naturalOrder())))
+                .map(property)
+                .collect(toList());
     }
 
     public static Pagination pagination(int pageSize) {
-        return PaginationVBuilder.newBuilder()
-                                 .setPageSize(pageSize)
-                                 .build();
+        return Pagination
+                .vBuilder()
+                .setPageSize(pageSize)
+                .build();
     }
 
     @CanIgnoreReturnValue
@@ -234,18 +239,20 @@ public class DsRecordStorageTestEnv {
     @CanIgnoreReturnValue
     public static List<CollegeEntity>
     createAndStoreEntities(RecordStorage<CollegeId> storage, Collection<String> names) {
-        return names.stream()
-                    .map(name -> createAndStoreEntity(storage, name))
-                    .collect(toList());
+        return names
+                .stream()
+                .map(name -> createAndStoreEntity(storage, name))
+                .collect(toList());
     }
 
     @CanIgnoreReturnValue
     public static List<CollegeEntity>
     createAndStoreEntities(RecordStorage<CollegeId> storage, Collection<String> names,
                            int studentCount, boolean stateSponsored) {
-        return names.stream()
-                    .map(name -> createAndStoreEntity(storage, name, studentCount, stateSponsored))
-                    .collect(toList());
+        return names
+                .stream()
+                .map(name -> createAndStoreEntity(storage, name, studentCount, stateSponsored))
+                .collect(toList());
     }
 
     @CanIgnoreReturnValue
@@ -268,7 +275,7 @@ public class DsRecordStorageTestEnv {
         return entity;
     }
 
-    private static CollegeEntity 
+    private static CollegeEntity
     createAndStoreEntityWithNullStudentCount(RecordStorage<CollegeId> storage) {
         CollegeId id = newCollegeId();
         College state = newCollege(id, 0);
@@ -293,8 +300,8 @@ public class DsRecordStorageTestEnv {
     }
 
     public static CollegeId newCollegeId() {
-        return CollegeIdVBuilder
-                .newBuilder()
+        return CollegeId
+                .vBuilder()
                 .setValue(newUuid())
                 .build();
     }
@@ -312,8 +319,8 @@ public class DsRecordStorageTestEnv {
     }
 
     private static College newCollege(CollegeId id, String name, int studentCount) {
-        return CollegeVBuilder
-                .newBuilder()
+        return College
+                .vBuilder()
                 .setId(id)
                 .setName(name)
                 .setAdmissionDeadline(randomTimestamp())
@@ -325,8 +332,8 @@ public class DsRecordStorageTestEnv {
 
     private static College newCollege(CollegeId id, String name, int studentCount,
                                       boolean stateSponsored) {
-        return CollegeVBuilder
-                .newBuilder()
+        return College
+                .vBuilder()
                 .setId(id)
                 .setName(name)
                 .setAdmissionDeadline(randomTimestamp())
@@ -353,9 +360,10 @@ public class DsRecordStorageTestEnv {
     }
 
     public static FieldMask newFieldMask(String... paths) {
-        return FieldMask.newBuilder()
-                        .addAllPaths(Arrays.asList(paths))
-                        .build();
+        return FieldMask
+                .newBuilder()
+                .addAllPaths(Arrays.asList(paths))
+                .build();
     }
 
     public static void assertSortedBooleans(Iterable<Boolean> values) {
@@ -371,20 +379,22 @@ public class DsRecordStorageTestEnv {
     }
 
     public static List<Boolean> getStateSponsoredValues(Collection<EntityRecord> resultList) {
-        return resultList.stream()
-                         .map(EntityRecord::getState)
-                         .map(state -> (College) unpack(state))
-                         .map(College::getStateSponsored)
-                         .collect(toList());
+        return resultList
+                .stream()
+                .map(EntityRecord::getState)
+                .map(state -> (College) unpack(state))
+                .map(College::getStateSponsored)
+                .collect(toList());
     }
 
     public static List<Integer> nullableStudentCount(Collection<EntityRecord> resultList) {
-        return resultList.stream()
-                         .map(EntityRecord::getState)
-                         .map(state -> (College) unpack(state))
-                         .map(College::getStudentCount)
-                         .map(count -> count == 0 ? null : count)
-                         .collect(toList());
+        return resultList
+                .stream()
+                .map(EntityRecord::getState)
+                .map(state -> (College) unpack(state))
+                .map(College::getStudentCount)
+                .map(count -> count == 0 ? null : count)
+                .collect(toList());
     }
 
     public static List<CollegeEntity> combine(Collection<CollegeEntity> nullEntities,
@@ -396,9 +406,10 @@ public class DsRecordStorageTestEnv {
     }
 
     public static EntityId newEntityId(Message message) {
-        return EntityId.newBuilder()
-                       .setId(pack(message))
-                       .build();
+        return EntityId
+                .vBuilder()
+                .setId(pack(message))
+                .build();
     }
 
     /*
