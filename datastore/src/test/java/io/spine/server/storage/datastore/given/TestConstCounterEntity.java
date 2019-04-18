@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore.given;
 
 import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.core.Version;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
@@ -80,8 +81,9 @@ public class TestConstCounterEntity
 
     @Column
     public Version getCounterVersion() {
-        return Version.newBuilder()
+        return Version.vBuilder()
                       .setNumber(COUNTER)
+                      .setTimestamp(Time.currentTime())
                       .build();
     }
 

@@ -20,7 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
-import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -52,9 +52,10 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
 
     @Override
     protected EntityRecord newStorageRecord() {
-        return EntityRecord.newBuilder()
+        return EntityRecord
+                .vBuilder()
                 .setState(AnyPacker.pack(Sample.messageOfType(Project.class)))
-                .setVersion(Version.newBuilder().setNumber(42).setTimestamp(currentTime()))
+                .setVersion(Versions.newVersion(42, currentTime()))
                 .build();
     }
 
@@ -84,8 +85,9 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
     }
 
     private static class TestProjection extends Projection<ProjectId,
-                                                           Project,
-                                                           ProjectVBuilder> {
+            Project,
+            ProjectVBuilder> {
+
         private TestProjection(ProjectId id) {
             super(id);
         }

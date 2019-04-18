@@ -51,9 +51,10 @@ class NamespaceWithCustomConverterTest {
     @DisplayName("construct from TenantId")
     void testFromTenantId() {
         String ns = "my.test.namespace.from.tenant.id";
-        TenantId tenantId = TenantId.newBuilder()
-                                    .setValue(ns)
-                                    .build();
+        TenantId tenantId = TenantId
+                .vBuilder()
+                .setValue(ns)
+                .build();
         Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
         Optional<NamespaceConverter> converter =
                 getNamespaceConverter(PROJECT_ID);
@@ -78,9 +79,10 @@ class NamespaceWithCustomConverterTest {
     @DisplayName("restore to TenantId")
     void testToTenantId() {
         String ns = "my.test.namespace.to.tenant.id";
-        TenantId tenantId = TenantId.newBuilder()
-                                    .setValue(ns)
-                                    .build();
+        TenantId tenantId = TenantId
+                .vBuilder()
+                .setValue(ns)
+                .build();
         Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
         assertEquals(tenantId, namespace.toTenantId());
     }
