@@ -87,8 +87,9 @@ final class FieldMaskApplier {
     private EntityRecord recordMasker(EntityRecord record) {
         Message state = unpack(record.getState());
         Message maskedState = applyMask(fieldMask, state);
-        return EntityRecord.newBuilder(record)
-                           .setState(pack(maskedState))
-                           .build();
+        return record
+                .toVBuilder()
+                .setState(pack(maskedState))
+                .build();
     }
 }

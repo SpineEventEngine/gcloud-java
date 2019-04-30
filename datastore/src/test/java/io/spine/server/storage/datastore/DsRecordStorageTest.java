@@ -193,10 +193,14 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         assertEquals(TypeUrl.of(Project.class), typeUrl);
     }
 
-    @SuppressWarnings("OverlyLongMethod")
-    // A complicated test case verifying right Datastore behavior on
-    // a low level of DatastoreWrapper and Datastore Entity.
-    // Additionally checks the standard predefined Datastore Column Types
+    @SuppressWarnings({
+            "OverlyLongMethod",
+                // A complicated test case verifying right Datastore behavior on
+                // a low level of DatastoreWrapper and Datastore Entity.
+                // Additionally checks the standard predefined Datastore Column Types
+            "ProtoTimestampGetSecondsGetNano"
+                // Compares points in time field-by-field.
+    })
     @Test
     @DisplayName("persist entity columns beside the corresponding record")
     void testPersistColumns() {
@@ -264,9 +268,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         com.google.cloud.Timestamp actualCreationTime =
                 datastoreEntity.getTimestamp(creationTime);
-        assertEquals(toSeconds(entity.getCreationTime()), actualCreationTime.getSeconds());
-        assertEquals(entity.getCreationTime()
-                           .getNanos(), actualCreationTime.getNanos());
+        assertEquals(toSeconds(entity.getCreationTime()),
+                     actualCreationTime.getSeconds());
+        assertEquals(entity.getCreationTime().getNanos(),
+                     actualCreationTime.getNanos());
         assertEquals(entity.isCounterEven(), datastoreEntity.getBoolean(counterEven));
         assertEquals(toCompactJson(entity.getCounterState()),
                      datastoreEntity.getString(counterState));
@@ -541,6 +546,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertDsReadByKeys();
         }
 
+        @SuppressWarnings("unchecked") // For the purposes of mocking.
         @Test
         @DisplayName("in specified order with nulls")
         void testQueryByIDsWithOrderWithNulls() {
@@ -582,7 +588,6 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             // Check Datastore reads are performed by keys but not using a structured query.
             DatastoreWrapper spy = storageFactory.getDatastore();
             verify(spy).read(anyIterable());
-            //noinspection unchecked OK for a generic class assignment in tests.
             verify(spy, never()).read(any(StructuredQuery.class));
         }
 
@@ -688,10 +693,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertFalse(readResult.hasNext());
         }
 
+        @SuppressWarnings("unchecked") // For the purposes of mocking.
         private void assertDsReadByKeys() {
             DatastoreWrapper spy = storageFactory.getDatastore();
             verify(spy).read(anyIterable());
-            //noinspection unchecked OK for a generic class assignment in tests.
             verify(spy, never()).read(any(StructuredQuery.class));
         }
     }
@@ -1073,10 +1078,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertDsReadByStructuredQuery(1);
         }
 
+        @SuppressWarnings("unchecked") // For the purposes of mocking.
         private void assertDsReadByStructuredQuery(int invocationCount) {
             DatastoreWrapper spy = storageFactory.getDatastore();
             verify(spy, never()).read(anyIterable());
-            //noinspection unchecked OK for a generic class assignment in tests.
             verify(spy, times(invocationCount)).read(any(StructuredQuery.class));
         }
     }

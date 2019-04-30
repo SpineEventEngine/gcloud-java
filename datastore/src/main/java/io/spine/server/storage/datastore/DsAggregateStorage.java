@@ -292,10 +292,11 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         if (!archived && !deleted) {
             return Optional.empty();
         }
-        LifecycleFlags flags = LifecycleFlags.newBuilder()
-                                             .setArchived(archived)
-                                             .setDeleted(deleted)
-                                             .build();
+        LifecycleFlags flags = LifecycleFlags
+                .vBuilder()
+                .setArchived(archived)
+                .setDeleted(deleted)
+                .build();
         return Optional.of(flags);
     }
 

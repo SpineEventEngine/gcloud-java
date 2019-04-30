@@ -176,7 +176,7 @@ class NamespaceIndexTest {
             Set<TenantId> initialIdsActual = namespaceIndex.getAll(); // sync
             // The keep may already be called
             assertTrue(initialIdsActual.size() >= initialTenantIds.size());
-            assertThat(initialIdsActual).containsAllIn(initialTenantIds);
+            assertThat(initialIdsActual).containsAtLeastElementsIn(initialTenantIds);
 
             // Add new element
             InternetDomain domain = InternetDomainVBuilder
