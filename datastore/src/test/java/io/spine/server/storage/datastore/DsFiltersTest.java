@@ -84,14 +84,14 @@ class DsFiltersTest {
         boolean archivedValue = true;
         boolean deletedValue = true;
         Multimap<EntityColumn, Filter> conjunctiveFilters = ImmutableMultimap.of(
-                column(TestEntity.class, ID_STRING_GETTER_NAME),
+                column(TestEntityWithStringColumn.class, ID_STRING_GETTER_NAME),
                 Filters.gt(ID_STRING_COLUMN_NAME, idStringValue)
         );
         ImmutableMultimap<EntityColumn, Filter> disjunctiveFilters = ImmutableMultimap.of(
-                column(TestEntity.class, DELETED_GETTER_NAME),
+                column(Entity.class, DELETED_GETTER_NAME),
                 Filters.eq(deleted.name(), deletedValue),
 
-                column(TestEntity.class, ARCHIVED_GETTER_NAME),
+                column(Entity.class, ARCHIVED_GETTER_NAME),
                 Filters.eq(archived.name(), archivedValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
@@ -114,7 +114,7 @@ class DsFiltersTest {
     void testSingleParameter() {
         String versionValue = "314";
         ImmutableMultimap<EntityColumn, Filter> singleFilter = ImmutableMultimap.of(
-                column(TestEntity.class, ID_STRING_GETTER_NAME),
+                column(TestEntityWithStringColumn.class, ID_STRING_GETTER_NAME),
                 Filters.le(ID_STRING_COLUMN_NAME, versionValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
@@ -135,17 +135,18 @@ class DsFiltersTest {
         String lessBoundDefiner = "42";
         boolean archivedValue = true;
         boolean deletedValue = true;
-        EntityColumn idStringColumn = column(TestEntity.class, ID_STRING_GETTER_NAME);
+        EntityColumn idStringColumn = column(TestEntityWithStringColumn.class, ID_STRING_GETTER_NAME);
         ImmutableMultimap<EntityColumn, Filter> versionFilters = ImmutableMultimap.of(
                 idStringColumn, Filters.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
                 idStringColumn, Filters.eq(ID_STRING_COLUMN_NAME, standaloneValue),
                 idStringColumn, lt(ID_STRING_COLUMN_NAME, lessBoundDefiner)
         );
         ImmutableMultimap<EntityColumn, Filter> lifecycleFilters = ImmutableMultimap.of(
-                column(TestEntity.class, DELETED_GETTER_NAME), Filters.eq(deleted.name(),
-                                                                                deletedValue),
-                column(TestEntity.class, ARCHIVED_GETTER_NAME), Filters.eq(archived.name(),
-                                                                                 archivedValue)
+                column(Entity.class, DELETED_GETTER_NAME),
+                Filters.eq(deleted.name(), deletedValue),
+
+                column(Entity.class, ARCHIVED_GETTER_NAME),
+                Filters.eq(archived.name(), archivedValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(versionFilters, EITHER),
@@ -213,19 +214,5 @@ class DsFiltersTest {
         }
         EntityColumn column = EntityColumn.from(method);
         return column;
-    }
-
-    private static class TestEntity
-            extends AbstractEntity<String, Project>
-            implements TestEntityWithStringColumn {
-
-        protected TestEntity(String id) {
-            super(id);
-        }
-
-        @Override
-        public String getIdString() {
-            return id();
-        }
     }
 }
