@@ -134,7 +134,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
     @SuppressWarnings("unchecked") // OK for tests.
     @Override
-    protected DsRecordStorage<ProjectId> newStorage(Class<? extends Entity> entityClass) {
+    protected DsRecordStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> entityClass) {
         Class<? extends Entity<ProjectId, ?>> cls =
                 (Class<? extends Entity<ProjectId, ?>>) entityClass;
         return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(cls);
@@ -233,17 +233,14 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         IterableSubject assertColumns = assertThat(columns);
 
         // Custom Columns
-        assertColumns.contains(counter);
-        assertColumns.contains(bigCounter);
-        assertColumns.contains(counterEven);
-        assertColumns.contains(counterVersion);
-        assertColumns.contains(creationTime);
-        assertColumns.contains(counterState);
-
+        assertColumns.containsAtLeast(counter,
+                                      bigCounter,
+                                      counterEven,
+                                      counterVersion,
+                                      creationTime,
+                                      counterState);
         // Columns defined in superclasses
-        assertColumns.contains(version);
-        assertColumns.contains(archived);
-        assertColumns.contains(deleted);
+        assertColumns.containsAtLeast(version, archived, deleted);
 
         // High level write operation
         storage.write(id, recordWithColumns);
