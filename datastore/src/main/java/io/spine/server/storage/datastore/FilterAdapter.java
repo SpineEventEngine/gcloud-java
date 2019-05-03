@@ -34,8 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A {@link ColumnTypeRegistry} based {@link Filter} to {@link Value} adapter.
- *
- * @author Dmytro Dashenkov
  */
 final class FilterAdapter {
 
@@ -69,7 +67,8 @@ final class FilterAdapter {
         checkArgument(type != null, "Column of unknown type: %s.", column);
 
         Any filterValue = columnFilter.getValue();
-        Object filterValueUnpacked = TypeConverter.toObject(filterValue, column.getType());
+        Class<?> columnClass = column.getType();
+        Object filterValueUnpacked = TypeConverter.toObject(filterValue, columnClass);
         Object columnValue = column.toPersistedValue(filterValueUnpacked);
 
         if (columnValue == null) {

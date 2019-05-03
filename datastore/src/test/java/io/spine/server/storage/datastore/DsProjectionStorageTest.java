@@ -66,7 +66,7 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
 
     @SuppressWarnings("unchecked") // Required for test purposes.
     @Override
-    protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
+    protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
         Class<? extends Projection<ProjectId, ?, ?>> projectionClass =
                 (Class<? extends Projection<ProjectId, ?, ?>>) cls;
         ProjectionStorage<ProjectId> result =
