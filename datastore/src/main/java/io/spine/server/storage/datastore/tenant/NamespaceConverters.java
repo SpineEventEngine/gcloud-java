@@ -22,9 +22,7 @@ package io.spine.server.storage.datastore.tenant;
 
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
-import io.spine.net.EmailAddressVBuilder;
 import io.spine.net.InternetDomain;
-import io.spine.net.InternetDomainVBuilder;
 
 import static io.spine.server.storage.datastore.tenant.Namespace.DOMAIN_PREFIX;
 import static io.spine.server.storage.datastore.tenant.Namespace.EMAIL_PREFIX;
@@ -152,14 +150,14 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            InternetDomain domain = InternetDomainVBuilder
+            InternetDomain domain = InternetDomain
                     .newBuilder()
                     .setValue(namespace)
-                    .build();
+                    .vBuild();
             TenantId tenantId = TenantId
-                    .vBuilder()
+                    .newBuilder()
                     .setDomain(domain)
-                    .build();
+                    .vBuild();
             return tenantId;
         }
     }
@@ -180,14 +178,14 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            EmailAddress email = EmailAddressVBuilder
+            EmailAddress email = EmailAddress
                     .newBuilder()
                     .setValue(namespace)
-                    .build();
+                    .vBuild();
             TenantId tenantId = TenantId
-                    .vBuilder()
+                    .newBuilder()
                     .setEmail(email)
-                    .build();
+                    .vBuild();
             return tenantId;
         }
     }
@@ -208,9 +206,9 @@ final class NamespaceConverters {
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
             TenantId tenantId = TenantId
-                    .vBuilder()
+                    .newBuilder()
                     .setValue(namespace)
-                    .build();
+                   .vBuild();
             return tenantId;
         }
     }
@@ -243,9 +241,9 @@ final class NamespaceConverters {
         @Override
         protected TenantId toTenantId(String namespace) {
             TenantId tenantId = TenantId
-                    .vBuilder()
+                    .newBuilder()
                     .setValue(namespace)
-                    .build();
+                    .vBuild();
             return tenantId;
         }
     }

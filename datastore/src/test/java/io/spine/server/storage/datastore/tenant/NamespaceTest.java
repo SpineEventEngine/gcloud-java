@@ -25,9 +25,7 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
-import io.spine.net.EmailAddressVBuilder;
 import io.spine.net.InternetDomain;
-import io.spine.net.InternetDomainVBuilder;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
@@ -71,23 +69,23 @@ class NamespaceTest {
     void testEquals() {
         String aGroupValue = "namespace1";
         TenantId aGroupTenantId = TenantId
-                .vBuilder()
+                .newBuilder()
                 .setValue(aGroupValue)
-                .build();
+               .vBuild();
         Namespace aGroupNamespaceFromTenantId =
                 Namespace.of(aGroupTenantId, TestDatastores.projectId());
         Namespace aGroupNamespaceFromString = Namespace.of(aGroupValue);
         Namespace duplicateAGroupNamespaceFromString = Namespace.of(aGroupValue);
 
         String bGroupValue = "namespace2";
-        EmailAddress bgGroupEmail = EmailAddressVBuilder
+        EmailAddress bgGroupEmail = EmailAddress
                 .newBuilder()
                 .setValue(bGroupValue)
-                .build();
+                .vBuild();
         TenantId bGroupTenantId = TenantId
-                .vBuilder()
+                .newBuilder()
                 .setEmail(bgGroupEmail)
-                .build();
+                .vBuild();
         Namespace bGroupNamespaceFromTenantId = Namespace.of(bGroupTenantId,
                                                              TestDatastores.projectId());
         // Same string but other type
@@ -105,26 +103,26 @@ class NamespaceTest {
     @DisplayName("restore self to TenantId")
     void testToTenantId() {
         String randomTenantIdString = "arbitrary-tenant-id";
-        InternetDomain internetDomain = InternetDomainVBuilder
+        InternetDomain internetDomain = InternetDomain
                 .newBuilder()
                 .setValue(randomTenantIdString)
-                .build();
+                .vBuild();
         TenantId domainId = TenantId
-                .vBuilder()
+                .newBuilder()
                 .setDomain(internetDomain)
-                .build();
-        EmailAddress emailAddress = EmailAddressVBuilder
+                .vBuild();
+        EmailAddress emailAddress = EmailAddress
                 .newBuilder()
                 .setValue(randomTenantIdString)
-                .build();
+                .vBuild();
         TenantId emailId = TenantId
-                .vBuilder()
+                .newBuilder()
                 .setEmail(emailAddress)
-                .build();
+                .vBuild();
         TenantId stringId = TenantId
-                .vBuilder()
+                .newBuilder()
                 .setValue(randomTenantIdString)
-                .build();
+                .vBuild();
         assertNotEquals(domainId, emailId);
         assertNotEquals(domainId, stringId);
         assertNotEquals(emailId, stringId);
@@ -174,9 +172,9 @@ class NamespaceTest {
         String namespaceString = "my.namespace";
 
         TenantId expectedId = TenantId
-                .vBuilder()
+                .newBuilder()
                 .setValue(namespaceString)
-                .build();
+                .vBuild();
         Namespace namespace = Namespace.of(namespaceString);
         TenantId actualId = namespace.toTenantId();
         assertEquals(expectedId, actualId);

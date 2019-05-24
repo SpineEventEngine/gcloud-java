@@ -129,7 +129,6 @@ public class DatastoreStorageFactory implements StorageFactory {
         return multitenant;
     }
 
-    @Override
     public ColumnTypeRegistry getTypeRegistry() {
         return typeRegistry;
     }

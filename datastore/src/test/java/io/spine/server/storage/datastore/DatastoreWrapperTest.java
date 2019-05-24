@@ -28,9 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
-import io.spine.net.EmailAddressVBuilder;
 import io.spine.net.InternetDomain;
-import io.spine.net.InternetDomainVBuilder;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.tenant.TenantAwareFunction0;
 import org.junit.jupiter.api.AfterAll;
@@ -354,24 +352,23 @@ class DatastoreWrapperTest {
         ensureNamespace(tenantId1Prefixed, datastore);
         ensureNamespace(tenantId2Prefixed, datastore);
         ensureNamespace(tenantId3Prefixed, datastore);
-        EmailAddress emailAddress2 = EmailAddressVBuilder
+        EmailAddress emailAddress2 = EmailAddress
                 .newBuilder()
                 .setValue(tenantId2)
-                .build();
-        InternetDomain internetDomain3 = InternetDomainVBuilder
+                .vBuild();
+        InternetDomain internetDomain3 = InternetDomain
                 .newBuilder()
                 .setValue(tenantId3)
-                .build();
-        TenantId id1 = TenantId.vBuilder()
+                .vBuild();
+        TenantId id1 = TenantId.newBuilder()
                                .setValue(tenantId1)
-                               .build();
-        TenantId id2 = TenantId.vBuilder()
+                               .vBuild();
+        TenantId id2 = TenantId.newBuilder()
                                .setEmail(emailAddress2)
-                               .build();
-        TenantId id3 = TenantId.vBuilder()
+                               .vBuild();
+        TenantId id3 = TenantId.newBuilder()
                                .setDomain(internetDomain3)
-                               .build();
-
+                               .vBuild();
         checkTenantIdInKey(tenantId1Prefixed, id1, wrapper);
         checkTenantIdInKey(tenantId2Prefixed, id2, wrapper);
         checkTenantIdInKey(tenantId3Prefixed, id3, wrapper);
@@ -415,9 +412,9 @@ class DatastoreWrapperTest {
     void testNewNamespaces() {
         DatastoreWrapper wrapper = wrap(localDatastore(), multitenant(projectId()));
         TenantId tenantId = TenantId
-                .vBuilder()
+                .newBuilder()
                 .setValue("Luke_I_am_your_tenant.")
-                .build();
+                .vBuild();
         String key = "noooooo";
         Key entityKey = new TenantAwareFunction0<Key>(tenantId) {
             @Override

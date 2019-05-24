@@ -196,9 +196,9 @@ public final class Namespace {
      * then the result will be equivalent to the result of
      * <pre>
      *     {@code
-     *     TenantId.vBuilder()
+     *     TenantId.newBuilder()
      *             .setValue(namespace.getValue())
-     *             .build();
+     *            .vBuild();
      *     }
      * </pre>
      *

@@ -116,17 +116,17 @@ public class DsRecordStorageTestEnv {
 
     public static TargetFilters newTargetFilters(IdFilter idFilter) {
         return TargetFilters
-                .vBuilder()
+                .newBuilder()
                 .setIdFilter(idFilter)
-                .build();
+                .vBuild();
     }
 
     public static TargetFilters newTargetFilters(IdFilter idFilter, CompositeFilter columnFilter) {
         return TargetFilters
-                .vBuilder()
+                .newBuilder()
                 .setIdFilter(idFilter)
                 .addFilter(columnFilter)
-                .build();
+                .vBuild();
     }
 
     public static IdFilter newIdFilter(Any firstId, Any... otherIds) {
@@ -135,17 +135,17 @@ public class DsRecordStorageTestEnv {
 
     public static IdFilter newIdFilter(List<Any> targetIds) {
         return IdFilter
-                .vBuilder()
+                .newBuilder()
                 .addAllIds(targetIds)
-                .build();
+                .vBuild();
     }
 
     public static EntityId
     extractEntityId(AbstractEntity<? extends Message, ? extends Message> targetEntity) {
         return EntityId
-                .vBuilder()
+                .newBuilder()
                 .setId(pack(targetEntity.id()))
-                .build();
+                .vBuild();
     }
 
     public static List<EntityId>
@@ -158,10 +158,10 @@ public class DsRecordStorageTestEnv {
 
     public static EntityRecord newEntityRecord(Message id, Message state) {
         return EntityRecord
-                .vBuilder()
+                .newBuilder()
                 .setEntityId(pack(id))
                 .setState(pack(state))
-                .build();
+                .vBuild();
     }
 
     public static OrderBy ascendingBy(CollegeEntity.CollegeColumn column) {
@@ -174,10 +174,10 @@ public class DsRecordStorageTestEnv {
 
     private static OrderBy orderBy(String column, OrderBy.Direction descending) {
         return OrderBy
-                .vBuilder()
+                .newBuilder()
                 .setColumn(column)
                 .setDirection(descending)
-                .build();
+                .vBuild();
     }
 
     public static List<CollegeId> recordIds(Collection<EntityRecord> resultList) {
@@ -209,9 +209,9 @@ public class DsRecordStorageTestEnv {
 
     public static Pagination pagination(int pageSize) {
         return Pagination
-                .vBuilder()
+                .newBuilder()
                 .setPageSize(pageSize)
-                .build();
+                .vBuild();
     }
 
     @CanIgnoreReturnValue
@@ -301,9 +301,9 @@ public class DsRecordStorageTestEnv {
 
     public static CollegeId newCollegeId() {
         return CollegeId
-                .vBuilder()
+                .newBuilder()
                 .setValue(newUuid())
-                .build();
+                .vBuild();
     }
 
     private static College newCollege(CollegeId id) {
@@ -320,27 +320,27 @@ public class DsRecordStorageTestEnv {
 
     private static College newCollege(CollegeId id, String name, int studentCount) {
         return College
-                .vBuilder()
+                .newBuilder()
                 .setId(id)
                 .setName(name)
                 .setAdmissionDeadline(randomTimestamp())
                 .setPassingGrade(randomPassingGrade())
                 .setStudentCount(studentCount)
                 .setStateSponsored(RANDOM.nextBoolean())
-                .build();
+                .vBuild();
     }
 
     private static College newCollege(CollegeId id, String name, int studentCount,
                                       boolean stateSponsored) {
         return College
-                .vBuilder()
+                .newBuilder()
                 .setId(id)
                 .setName(name)
                 .setAdmissionDeadline(randomTimestamp())
                 .setPassingGrade(randomPassingGrade())
                 .setStudentCount(studentCount)
                 .setStateSponsored(stateSponsored)
-                .build();
+                .vBuild();
     }
 
     private static int randomStudentCount() {
@@ -407,9 +407,9 @@ public class DsRecordStorageTestEnv {
 
     public static EntityId newEntityId(Message message) {
         return EntityId
-                .vBuilder()
+                .newBuilder()
                 .setId(pack(message))
-                .build();
+               .vBuild();
     }
 
     /*

@@ -52,9 +52,9 @@ class NamespaceWithCustomConverterTest {
     void testFromTenantId() {
         String ns = "my.test.namespace.from.tenant.id";
         TenantId tenantId = TenantId
-                .vBuilder()
+                .newBuilder()
                 .setValue(ns)
-                .build();
+                .vBuild();
         Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
         Optional<NamespaceConverter> converter =
                 getNamespaceConverter(PROJECT_ID);
@@ -80,9 +80,9 @@ class NamespaceWithCustomConverterTest {
     void testToTenantId() {
         String ns = "my.test.namespace.to.tenant.id";
         TenantId tenantId = TenantId
-                .vBuilder()
+                .newBuilder()
                 .setValue(ns)
-                .build();
+                .vBuild();
         Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
         assertEquals(tenantId, namespace.toTenantId());
     }

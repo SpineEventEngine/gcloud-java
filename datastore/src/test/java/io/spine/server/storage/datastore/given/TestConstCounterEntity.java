@@ -28,13 +28,12 @@ import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testing.server.entity.given.Given;
 
 import static io.spine.base.Time.currentTime;
 
 public class TestConstCounterEntity
-        extends Projection<ProjectId, Project, ProjectVBuilder> {
+        extends Projection<ProjectId, Project, Project.Builder> {
 
     private static final int COUNTER = 42;
 
@@ -81,10 +80,10 @@ public class TestConstCounterEntity
 
     @Column
     public Version getCounterVersion() {
-        return Version.vBuilder()
+        return Version.newBuilder()
                       .setNumber(COUNTER)
                       .setTimestamp(Time.currentTime())
-                      .build();
+                     .vBuild();
     }
 
     @Column

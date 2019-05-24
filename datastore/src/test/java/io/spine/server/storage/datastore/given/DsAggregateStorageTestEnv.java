@@ -23,7 +23,6 @@ package io.spine.server.storage.datastore.given;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
-import io.spine.test.aggregate.TaskVBuilder;
 
 public final class DsAggregateStorageTestEnv {
 
@@ -36,7 +35,7 @@ public final class DsAggregateStorageTestEnv {
      * <p>Allows to test for the "same-ID-different-state" scenarios in the aggregate storages.
      */
     public static class NonProjectStateAggregate
-            extends Aggregate<ProjectId, Task, TaskVBuilder> {
+            extends Aggregate<ProjectId, Task, Task.Builder> {
         private NonProjectStateAggregate(ProjectId id) {
             super(id);
         }

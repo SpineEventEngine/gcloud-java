@@ -148,12 +148,12 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     @Override
     protected Message newState(ProjectId projectId) {
         Project project = Project
-                .vBuilder()
+                .newBuilder()
                 .setId(projectId)
                 .setName("Some test name")
                 .addTask(Task.getDefaultInstance())
                 .setStatus(Project.Status.CREATED)
-                .build();
+               .vBuild();
         return project;
     }
 
@@ -220,11 +220,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         Version versionValue = Versions.newVersion(5, currentTime());
         TestConstCounterEntity entity = TestConstCounterEntity.create(id, state);
         EntityRecord record = EntityRecord
-                .vBuilder()
+                .newBuilder()
                 .setState(pack(state))
                 .setEntityId(pack(id))
                 .setVersion(versionValue)
-                .build();
+               .vBuild();
         DsRecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
         Collection<String> columns = recordWithColumns.getColumnNames();
@@ -313,15 +313,15 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     void testLifecycleFlags() {
         ProjectId id = newId();
         LifecycleFlags lifecycle = LifecycleFlags
-                .vBuilder()
+                .newBuilder()
                 .setArchived(true)
-                .build();
+                .vBuild();
         EntityRecord record = EntityRecord
-                .vBuilder()
+                .newBuilder()
                 .setState(pack(newState(id)))
                 .setLifecycleFlags(lifecycle)
                 .setEntityId(pack(id))
-                .build();
+                .vBuild();
         TestConstCounterEntity entity = TestConstCounterEntity.create(id);
         entity.injectLifecycle(lifecycle);
         RecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
@@ -1012,7 +1012,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             List<CollegeEntity> entities = createAndStoreEntities(storage, UNORDERED_COLLEGE_NAMES,
                                                                   150, true);
             TargetFilters filters = TargetFilters
-                    .vBuilder()
+                    .newBuilder()
                     .addFilter(either(
                             lt(NAME.columnName(), UNORDERED_COLLEGE_NAMES.get(2)),
                             gt(NAME.columnName(), UNORDERED_COLLEGE_NAMES.get(2))
@@ -1021,7 +1021,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
                             eq(STATE_SPONSORED.columnName(), true),
                             eq(STUDENT_COUNT.columnName(), 150)
                     ))
-                    .build();
+                   .vBuild();
             int recordCount = 5;
             EntityQuery<CollegeId> query = EntityQueries.from(filters, ascendingBy(NAME),
                                                               pagination(recordCount), storage);

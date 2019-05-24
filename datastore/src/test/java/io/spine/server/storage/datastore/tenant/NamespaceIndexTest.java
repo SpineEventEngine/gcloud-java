@@ -29,7 +29,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
-import io.spine.net.InternetDomainVBuilder;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.testing.TestValues;
@@ -62,9 +61,9 @@ class NamespaceIndexTest {
 
     private static TenantId newTenantId() {
         return TenantId
-                .vBuilder()
+                .newBuilder()
                 .setValue(TestValues.randomString())
-                .build();
+               .vBuild();
     }
 
     @Test
@@ -158,10 +157,10 @@ class NamespaceIndexTest {
         keys.add(mockKey("Vtenant3"));
         Collection<TenantId> initialTenantIds =
                 keys.stream()
-                    .map(key -> TenantId.vBuilder()
+                    .map(key -> TenantId.newBuilder()
                                         .setValue(key.getName()
                                                      .substring(1))
-                                        .build())
+                                       .vBuild())
                     .collect(toList());
 
         NamespaceIndex.NamespaceQuery namespaceQuery = keys::iterator;
@@ -179,14 +178,14 @@ class NamespaceIndexTest {
             assertThat(initialIdsActual).containsAtLeastElementsIn(initialTenantIds);
 
             // Add new element
-            InternetDomain domain = InternetDomainVBuilder
+            InternetDomain domain = InternetDomain
                     .newBuilder()
                     .setValue("my.tenant.com")
-                    .build();
+                    .vBuild();
             TenantId newTenantId = TenantId
-                    .vBuilder()
+                    .newBuilder()
                     .setDomain(domain)
-                    .build();
+                    .vBuild();
             namespaceIndex.keep(newTenantId); // sync
 
             // Check new value added

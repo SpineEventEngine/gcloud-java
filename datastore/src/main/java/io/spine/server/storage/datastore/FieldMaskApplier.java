@@ -88,8 +88,8 @@ final class FieldMaskApplier {
         Message state = unpack(record.getState());
         Message maskedState = applyMask(fieldMask, state);
         return record
-                .toVBuilder()
+                .toBuilder()
                 .setState(pack(maskedState))
-                .build();
+                .vBuild();
     }
 }

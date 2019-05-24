@@ -86,7 +86,8 @@ public final class DatastoreTypeRegistryFactory {
     /**
      * Retrieves a builder with all the {@linkplain #defaultInstance() predefined values} set.
      */
-    public static ColumnTypeRegistry.Builder<? extends DatastoreColumnType<?, ?>> predefinedValuesAnd() {
+    public static ColumnTypeRegistry.Builder<? extends DatastoreColumnType<?, ?>>
+    predefinedValuesAnd() {
         return ColumnTypeRegistry.newBuilder(DEFAULT_REGISTRY);
     }
 }

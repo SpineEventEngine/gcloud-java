@@ -64,7 +64,7 @@ class DatastoreTenantsTest {
         TenantId customId = TenantId
                 .newBuilder()
                 .setValue(customNamespace)
-                .build();
+               .vBuild();
         index.keep(customId);
         Set<TenantId> ids = index.getAll();
         assertThat(ids).contains(customId);
