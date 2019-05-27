@@ -32,8 +32,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * An implementation base for {@code DsRecordStorage} builders.
  *
- * @param <I> the ID type of the stored entities
- * @param <B> the builder own type
+ * @param <I>
+ *         the ID type of the stored entities
+ * @param <B>
+ *         the builder own type
  */
 abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
 
@@ -55,7 +57,8 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
      */
     public B setStateType(TypeUrl stateTypeUrl) {
         checkNotNull(stateTypeUrl);
-        Descriptor descriptor = stateTypeUrl.toTypeName().messageDescriptor();
+        Descriptor descriptor = stateTypeUrl.toTypeName()
+                                            .messageDescriptor();
         this.descriptor = checkNotNull(descriptor);
         return self();
     }
@@ -106,9 +109,10 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
     /**
      * Configures multitenancy mode for the storage.
      *
-     * @param multitenant {@code true} if the storage should be
-     *                    {@link io.spine.server.storage.Storage#isMultitenant multitenant},
-     *                    {@code false} otherwise
+     * @param multitenant
+     *         {@code true} if the storage should be
+     *         {@link io.spine.server.storage.Storage#isMultitenant multitenant},
+     *         {@code false} otherwise
      */
     public B setMultitenant(boolean multitenant) {
         this.multitenant = multitenant;

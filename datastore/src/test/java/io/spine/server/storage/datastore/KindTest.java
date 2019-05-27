@@ -88,7 +88,8 @@ class KindTest {
         TypeUrl type = TypeUrl.from(descriptor);
         Kind kind = Kind.of(type);
         assertEquals(descriptor.getFullName(), kind.getValue());
-        assertEquals(type.toTypeName().value(), kind.getValue());
+        assertEquals(type.toTypeName()
+                         .value(), kind.getValue());
     }
 
     @Test
@@ -104,7 +105,8 @@ class KindTest {
     void testFromMessage() {
         Message message = Any.getDefaultInstance();
         Kind kind = Kind.of(message);
-        assertEquals(message.getDescriptorForType().getFullName(), kind.getValue());
+        assertEquals(message.getDescriptorForType()
+                            .getFullName(), kind.getValue());
     }
 
     @Test

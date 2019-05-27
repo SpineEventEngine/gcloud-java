@@ -83,7 +83,7 @@ public class TestConstCounterEntity
         return Version.newBuilder()
                       .setNumber(COUNTER)
                       .setTimestamp(Time.currentTime())
-                     .vBuild();
+                      .vBuild();
     }
 
     @Column

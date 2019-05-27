@@ -53,8 +53,10 @@ public final class Kind {
     /**
      * Creates a new instance of {@code Kind} representing an ancillary Datastore kind.
      *
-     * @param value the name of the kind
-     * @param ancillary the flag showing that the {@code Kind} is ancillary; must be set to {@code true}
+     * @param value
+     *         the name of the kind
+     * @param ancillary
+     *         the flag showing that the {@code Kind} is ancillary; must be set to {@code true}
      */
     private Kind(String value, boolean ancillary) {
         checkArgument(ancillary);
@@ -66,7 +68,8 @@ public final class Kind {
     }
 
     public static Kind of(TypeUrl typeUrl) {
-        return new Kind(typeUrl.toTypeName().value());
+        return new Kind(typeUrl.toTypeName()
+                               .value());
     }
 
     public static Kind of(Descriptor descriptor) {

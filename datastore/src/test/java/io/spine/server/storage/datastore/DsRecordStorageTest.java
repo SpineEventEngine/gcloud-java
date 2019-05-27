@@ -153,7 +153,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
                 .setName("Some test name")
                 .addTask(Task.getDefaultInstance())
                 .setStatus(Project.Status.CREATED)
-               .vBuild();
+                .vBuild();
         return project;
     }
 
@@ -195,11 +195,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
     @SuppressWarnings({
             "OverlyLongMethod",
-                // A complicated test case verifying right Datastore behavior on
-                // a low level of DatastoreWrapper and Datastore Entity.
-                // Additionally checks the standard predefined Datastore Column Types
+            // A complicated test case verifying right Datastore behavior on
+            // a low level of DatastoreWrapper and Datastore Entity.
+            // Additionally checks the standard predefined Datastore Column Types
             "ProtoTimestampGetSecondsGetNano"
-                // Compares points in time field-by-field.
+            // Compares points in time field-by-field.
     })
     @Test
     @DisplayName("persist entity columns beside the corresponding record")
@@ -224,7 +224,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
                 .setState(pack(state))
                 .setEntityId(pack(id))
                 .setVersion(versionValue)
-               .vBuild();
+                .vBuild();
         DsRecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
         Collection<String> columns = recordWithColumns.getColumnNames();
@@ -267,7 +267,8 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
                 datastoreEntity.getTimestamp(creationTime);
         assertEquals(toSeconds(entity.getCreationTime()),
                      actualCreationTime.getSeconds());
-        assertEquals(entity.getCreationTime().getNanos(),
+        assertEquals(entity.getCreationTime()
+                           .getNanos(),
                      actualCreationTime.getNanos());
         assertEquals(entity.isCounterEven(), datastoreEntity.getBoolean(counterEven));
         assertEquals(toCompactJson(entity.getCounterState()),
@@ -1021,7 +1022,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
                             eq(STATE_SPONSORED.columnName(), true),
                             eq(STUDENT_COUNT.columnName(), 150)
                     ))
-                   .vBuild();
+                    .vBuild();
             int recordCount = 5;
             EntityQuery<CollegeId> query = EntityQueries.from(filters, ascendingBy(NAME),
                                                               pagination(recordCount), storage);

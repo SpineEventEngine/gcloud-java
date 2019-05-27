@@ -29,12 +29,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.truth.IterableSubject;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityColumn;
-import io.spine.test.storage.Project;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -135,7 +133,8 @@ class DsFiltersTest {
         String lessBoundDefiner = "42";
         boolean archivedValue = true;
         boolean deletedValue = true;
-        EntityColumn idStringColumn = column(TestEntityWithStringColumn.class, ID_STRING_GETTER_NAME);
+        EntityColumn idStringColumn = column(TestEntityWithStringColumn.class,
+                                             ID_STRING_GETTER_NAME);
         ImmutableMultimap<EntityColumn, Filter> versionFilters = ImmutableMultimap.of(
                 idStringColumn, Filters.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
                 idStringColumn, Filters.eq(ID_STRING_COLUMN_NAME, standaloneValue),

@@ -47,9 +47,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * An {@code Entity} lookup using {@linkplain QueryParameters Spine query parameters}.
  *
- * @implNote
- * A single {@linkplain #find(QueryParameters, FieldMask) find()} call may turn into several
- * Datastore reads. See {@link DsFilters} for details.
+ * @implNote A single {@linkplain #find(QueryParameters, FieldMask) find()} call may turn
+ *         into several
+ *         Datastore reads. See {@link DsFilters} for details.
  */
 final class DsLookupByQueries {
 

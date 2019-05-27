@@ -409,7 +409,7 @@ public class DsRecordStorageTestEnv {
         return EntityId
                 .newBuilder()
                 .setId(pack(message))
-               .vBuild();
+                .vBuild();
     }
 
     /*

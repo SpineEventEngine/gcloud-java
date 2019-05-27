@@ -63,7 +63,7 @@ class NamespaceIndexTest {
         return TenantId
                 .newBuilder()
                 .setValue(TestValues.randomString())
-               .vBuild();
+                .vBuild();
     }
 
     @Test
@@ -160,7 +160,7 @@ class NamespaceIndexTest {
                     .map(key -> TenantId.newBuilder()
                                         .setValue(key.getName()
                                                      .substring(1))
-                                       .vBuild())
+                                        .vBuild())
                     .collect(toList());
 
         NamespaceIndex.NamespaceQuery namespaceQuery = keys::iterator;

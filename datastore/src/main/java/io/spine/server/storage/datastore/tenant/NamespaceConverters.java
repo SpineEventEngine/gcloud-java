@@ -208,7 +208,7 @@ final class NamespaceConverters {
             TenantId tenantId = TenantId
                     .newBuilder()
                     .setValue(namespace)
-                   .vBuild();
+                    .vBuild();
             return tenantId;
         }
     }

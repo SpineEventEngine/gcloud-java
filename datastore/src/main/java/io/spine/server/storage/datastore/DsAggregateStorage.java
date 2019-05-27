@@ -294,7 +294,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                 .newBuilder()
                 .setArchived(archived)
                 .setDeleted(deleted)
-               .vBuild();
+                .vBuild();
         return Optional.of(flags);
     }
 

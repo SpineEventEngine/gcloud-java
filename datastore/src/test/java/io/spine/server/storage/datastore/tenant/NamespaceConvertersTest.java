@@ -66,7 +66,8 @@ class NamespaceConvertersTest {
 
         assertEquals(fromInternalConverter, fromExternalConverter);
 
-        String restored = converter.reverse().convert(fromExternalConverter);
+        String restored = converter.reverse()
+                                   .convert(fromExternalConverter);
         assertEquals(namespace.getValue(), restored);
     }
 }

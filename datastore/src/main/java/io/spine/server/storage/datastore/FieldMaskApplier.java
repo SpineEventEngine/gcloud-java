@@ -36,7 +36,8 @@ import static io.spine.validate.Validate.isDefault;
 /**
  * Applies the provided mask to nullable or non-nullable records.
  *
- * <p>Instantiated using one of {@link #nullableRecordMasker(FieldMask) nullableRecordMasker(mask)} or
+ * <p>Instantiated using one of {@link #nullableRecordMasker(FieldMask) nullableRecordMasker(mask)}
+ * or
  * {@link #recordMasker(FieldMask) recordMasker(mask)}.
  */
 final class FieldMaskApplier {

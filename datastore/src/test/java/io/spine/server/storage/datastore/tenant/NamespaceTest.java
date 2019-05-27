@@ -71,7 +71,7 @@ class NamespaceTest {
         TenantId aGroupTenantId = TenantId
                 .newBuilder()
                 .setValue(aGroupValue)
-               .vBuild();
+                .vBuild();
         Namespace aGroupNamespaceFromTenantId =
                 Namespace.of(aGroupTenantId, TestDatastores.projectId());
         Namespace aGroupNamespaceFromString = Namespace.of(aGroupValue);

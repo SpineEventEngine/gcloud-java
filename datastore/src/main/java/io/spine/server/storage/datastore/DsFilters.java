@@ -122,9 +122,11 @@ final class DsFilters {
      * <p>If the given parameter {@code Collection} is empty, and empty {@code Collection}
      * is returned.
      *
-     * @param parameters          the {@linkplain CompositeQueryParameter query parameters} to convert
-     * @param columnFilterAdapter an instance of {@linkplain FilterAdapter} performing
-     *                            the required type conversions
+     * @param parameters
+     *         the {@linkplain CompositeQueryParameter query parameters} to convert
+     * @param columnFilterAdapter
+     *         an instance of {@linkplain FilterAdapter} performing
+     *         the required type conversions
      * @return the equivalent expression of in Datastore {@link Filter} instances
      */
     static Collection<StructuredQuery.Filter>
@@ -170,9 +172,10 @@ final class DsFilters {
     /**
      * Merges conjunctive parameters into a single {@link Filter}.
      *
-     * @param conjunctiveParams list of parameters
+     * @param conjunctiveParams
+     *         list of parameters
      * @return resulting filter or {@code Optional.empty()} if there {@code conjunctiveParams} is
-     * empty
+     *         empty
      */
     private static Optional<CompositeQueryParameter> mergeConjunctiveParameters(
             List<CompositeQueryParameter> conjunctiveParams) {
@@ -191,9 +194,12 @@ final class DsFilters {
     /**
      * Performs the logical multiplication of the given query predicates.
      *
-     * @param constant   the single non-disjunctive query parameter
-     * @param parameters the disjunctive query parameters
-     * @param processor  the result processor
+     * @param constant
+     *         the single non-disjunctive query parameter
+     * @param parameters
+     *         the disjunctive query parameters
+     * @param processor
+     *         the result processor
      */
     private static void multiply(@Nullable CompositeQueryParameter constant,
                                  Iterable<CompositeQueryParameter> parameters,
@@ -230,8 +236,10 @@ final class DsFilters {
      * <p>Despite the severe data duplication, which can be noticed on the schema, the tree gives
      * a handy way to {@linkplain FilterNode#traverse traverse} over.
      *
-     * @param constant   the single non-disjunctive query parameter
-     * @param parameters the disjunctive query parameters
+     * @param constant
+     *         the single non-disjunctive query parameter
+     * @param parameters
+     *         the disjunctive query parameters
      * @return the top node of the build tree
      * @see #fromParams for the expression explanation
      */
@@ -323,7 +331,7 @@ final class DsFilters {
         private final Collection<StructuredQuery.Filter> destination;
 
         private FilterReducer(FilterAdapter columnFilterAdapter,
-                                    Collection<StructuredQuery.Filter> destination) {
+                              Collection<StructuredQuery.Filter> destination) {
             this.columnFilterAdapter = columnFilterAdapter;
             this.destination = destination;
         }
@@ -338,12 +346,12 @@ final class DsFilters {
             Function<FilterNode, StructuredQuery.Filter> mapper =
                     FilterNode.toFilterFunction(columnFilterAdapter);
             List<StructuredQuery.Filter> filters = conjunctionGroup.stream()
-                                                   .map(mapper)
-                                                   .collect(toList());
+                                                                   .map(mapper)
+                                                                   .collect(toList());
             checkState(!filters.isEmpty());
             StructuredQuery.Filter first = filters.get(0);
             StructuredQuery.Filter[] other = filters.subList(1, filters.size())
-                                    .toArray(new StructuredQuery.Filter[0]);
+                                                    .toArray(new StructuredQuery.Filter[0]);
             StructuredQuery.Filter group = and(first, other);
             destination.add(group);
         }
@@ -407,7 +415,8 @@ final class DsFilters {
          * the current node, passing all the found paths from the tree top to a leaf to the given
          * result processor.
          *
-         * @param processor the result processor
+         * @param processor
+         *         the result processor
          */
         @SuppressWarnings("MethodWithMultipleLoops")
             // To make the traversal algorithm more obvious.
@@ -506,8 +515,7 @@ final class DsFilters {
          *
          * <p>A tree head is only equal to itself.
          *
-         * @implNote
-         * Uses reference equality.
+         * @implNote Uses reference equality.
          */
         @Override
         public boolean equals(Object o) {
@@ -538,9 +546,10 @@ final class DsFilters {
          *
          * <p>The given path represents a single conjunction group.
          *
-         * @param conjunctionGroup the path in
-         *                         the {@linkplain #buildConjunctionTree conjunction tree}
-         *                         representing a single conjunction group
+         * @param conjunctionGroup
+         *         the path in
+         *         the {@linkplain #buildConjunctionTree conjunction tree}
+         *         representing a single conjunction group
          */
         void walk(Collection<FilterNode> conjunctionGroup);
     }

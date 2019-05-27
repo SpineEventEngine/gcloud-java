@@ -238,11 +238,11 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         Snapshot snapshot = Snapshot
                 .newBuilder()
                 .setTimestamp(timestamp)
-               .vBuild();
+                .vBuild();
         AggregateEventRecord record = AggregateEventRecord
                 .newBuilder()
                 .setSnapshot(snapshot)
-               .vBuild();
+                .vBuild();
         storage.writeRecord(id, record);
     }
 }

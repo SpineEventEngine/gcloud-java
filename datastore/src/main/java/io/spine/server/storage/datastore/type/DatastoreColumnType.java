@@ -37,7 +37,7 @@ import io.spine.server.entity.storage.ColumnType;
  */
 @SPI
 public interface DatastoreColumnType<J, C>
-       extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
+        extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
 
     Value<?> toValue(C data);
 }

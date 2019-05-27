@@ -73,8 +73,9 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
      * Generates a {@link Namespace} based on the current {@linkplain TenantId tenant ID}.
      *
      * @return an instance of {@link Namespace} representing either the current tenant ID or the
-     * default namespace if the {@linkplain DatastoreStorageFactory storage factory} passed upon
-     * the initialization is configured to be single tenant
+     *         default namespace if the {@linkplain DatastoreStorageFactory storage factory} passed
+     *         upon
+     *         the initialization is configured to be single tenant
      */
     @Override
     public abstract Namespace get();

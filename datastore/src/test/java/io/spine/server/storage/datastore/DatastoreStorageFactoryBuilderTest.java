@@ -131,7 +131,7 @@ class DatastoreStorageFactoryBuilderTest {
         void testDatastoreNamespaceInOptions() {
             DatastoreOptions options =
                     builder.setNamespace("non-null-or-empty-namespace")
-                          .build();
+                           .build();
             DatastoreStorageFactory.Builder builder = DatastoreStorageFactory
                     .newBuilder()
                     .setMultitenant(true)
@@ -145,12 +145,12 @@ class DatastoreStorageFactoryBuilderTest {
             String namespace = "my.custom.namespace";
             DatastoreOptions options =
                     builder.setNamespace(namespace)
-                          .build();
+                           .build();
             DatastoreStorageFactory factory = DatastoreStorageFactory
                     .newBuilder()
                     .setMultitenant(false)
                     .setDatastore(options.getService())
-                   .build();
+                    .build();
             assertNotNull(factory);
             String actualNamespace = factory.getDatastore()
                                             .getDatastoreOptions()
@@ -168,14 +168,14 @@ class DatastoreStorageFactoryBuilderTest {
         DatastoreOptions options =
                 DatastoreOptions.newBuilder()
                                 .setProjectId(withCustomConverter.getValue())
-                               .build();
+                                .build();
         NamespaceConverter converter = mock(NamespaceConverter.class);
         DatastoreStorageFactory factory =
                 DatastoreStorageFactory.newBuilder()
                                        .setMultitenant(true)
                                        .setDatastore(options.getService())
                                        .setNamespaceConverter(converter)
-                                      .build();
+                                       .build();
         assertNotNull(factory);
 
         Optional<NamespaceConverter> restoredConverter =

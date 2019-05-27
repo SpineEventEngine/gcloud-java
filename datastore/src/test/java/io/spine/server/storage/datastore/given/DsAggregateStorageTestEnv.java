@@ -36,6 +36,7 @@ public final class DsAggregateStorageTestEnv {
      */
     public static class NonProjectStateAggregate
             extends Aggregate<ProjectId, Task, Task.Builder> {
+
         private NonProjectStateAggregate(ProjectId id) {
             super(id);
         }

@@ -64,7 +64,7 @@ class DatastoreTenantsTest {
         TenantId customId = TenantId
                 .newBuilder()
                 .setValue(customNamespace)
-               .vBuild();
+                .vBuild();
         index.keep(customId);
         Set<TenantId> ids = index.getAll();
         assertThat(ids).contains(customId);
@@ -79,7 +79,6 @@ class DatastoreTenantsTest {
         when(datastore.run(any(Query.class))).thenReturn(new MockKeyQueryResults());
         return datastore;
     }
-
 
     @SuppressWarnings("NewExceptionWithoutArguments")
     private static class MockKeyQueryResults implements QueryResults<Key> {

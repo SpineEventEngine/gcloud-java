@@ -51,7 +51,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * those that were written or not. Instead they should just check the time consumed by
  * the operations and the consistency of the data (i.e. count of the records written and read).
  *
- * @param <I> the type of the ID in the tested {@linkplain RecordStorage}
+ * @param <I>
+ *         the type of the ID in the tested {@linkplain RecordStorage}
  */
 public class BigDataTester<I> implements Logging {
 
@@ -140,17 +141,21 @@ public class BigDataTester<I> implements Logging {
      * <p>It's recommended to provide generic non-empty records to make the check closer to a
      * real-life cases.
      *
-     * @param <I> the type of the record ID
+     * @param <I>
+     *         the type of the record ID
      */
     public interface EntryFactory<I> {
+
         I newId();
+
         EntityRecordWithColumns newRecord();
     }
 
     /**
      * A builder for the {@code BigDataTester}.
      *
-     * @param <I> the target type of the ID in the tested {@linkplain RecordStorage}
+     * @param <I>
+     *         the target type of the ID in the tested {@linkplain RecordStorage}
      */
     public static class Builder<I> {
 
@@ -168,9 +173,10 @@ public class BigDataTester<I> implements Logging {
         /**
          * Assigns the site of the test bulk.
          *
-         * @param bulkSize the size of the test bulk; the {@link EntryFactory} methods will be
-         *                 called exactly this number of times; the default value is
-         *                 {@link #DEFAULT_BULK_SIZE}
+         * @param bulkSize
+         *         the size of the test bulk; the {@link EntryFactory} methods will be
+         *         called exactly this number of times; the default value is
+         *         {@link #DEFAULT_BULK_SIZE}
          */
         @SuppressWarnings("unused")
         public Builder<I> setBulkSize(int bulkSize) {

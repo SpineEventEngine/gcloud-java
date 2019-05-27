@@ -55,7 +55,7 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
                 .newBuilder()
                 .setState(AnyPacker.pack(Sample.messageOfType(Project.class)))
                 .setVersion(Versions.newVersion(42, currentTime()))
-               .vBuild();
+                .vBuild();
     }
 
     @AfterEach
