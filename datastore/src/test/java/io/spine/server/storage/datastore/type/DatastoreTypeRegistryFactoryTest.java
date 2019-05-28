@@ -103,6 +103,7 @@ class DatastoreTypeRegistryFactoryTest {
     }
 
     private static class ByteColumnType extends SimpleDatastoreColumnType<Byte> {
+
         @Override
         public Value<?> toValue(Byte data) {
             return LongValue.of(data);

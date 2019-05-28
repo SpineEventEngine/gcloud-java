@@ -30,7 +30,6 @@ import io.spine.server.projection.ProjectionStorageTest;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,10 +52,10 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
     @Override
     protected EntityRecord newStorageRecord() {
         return EntityRecord
-                .vBuilder()
+                .newBuilder()
                 .setState(AnyPacker.pack(Sample.messageOfType(Project.class)))
                 .setVersion(Versions.newVersion(42, currentTime()))
-                .build();
+                .vBuild();
     }
 
     @AfterEach
@@ -85,8 +84,8 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
     }
 
     private static class TestProjection extends Projection<ProjectId,
-            Project,
-            ProjectVBuilder> {
+                                                           Project,
+                                                           Project.Builder> {
 
         private TestProjection(ProjectId id) {
             super(id);

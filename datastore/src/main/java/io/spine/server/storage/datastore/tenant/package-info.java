@@ -19,7 +19,8 @@
  */
 
 /**
- * This package contains the types which work with the Datastore-specific Tenant policy implementation.
+ * This package contains the types which work with the Datastore-specific Tenant policy
+ * implementation.
  *
  * @see io.spine.server.storage.datastore.tenant.DatastoreTenants
  */

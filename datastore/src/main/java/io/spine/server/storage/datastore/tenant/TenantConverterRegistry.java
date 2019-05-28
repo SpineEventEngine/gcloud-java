@@ -65,9 +65,10 @@ public final class TenantConverterRegistry {
      * <p>Note, that this method should be called only once per one instance of {@link ProjectId}.
      * All the subsequent invocations will cause {@code IllegalStateException}s.
      *
-     * @param converter the converter to use for the
-     *                  namespace-to-{@link TenantId TenantId} and vice versa
-     *                  conversions
+     * @param converter
+     *         the converter to use for the
+     *         namespace-to-{@link TenantId TenantId} and vice versa
+     *         conversions
      * @see Namespace
      */
     @Internal
@@ -85,8 +86,8 @@ public final class TenantConverterRegistry {
      * Retrieves the registered {@link NamespaceConverter}.
      *
      * @return the {@linkplain #registerNamespaceConverter registered}
-     * {@link NamespaceConverter} wrapped into {@link Optional} or
-     * {@link Optional#empty() Optional.empty()} if the converter has never been registered
+     *         {@link NamespaceConverter} wrapped into {@link Optional} or
+     *         {@link Optional#empty() Optional.empty()} if the converter has never been registered
      */
     @VisibleForTesting
     public static Optional<NamespaceConverter> getNamespaceConverter(ProjectId projectId) {

@@ -129,7 +129,6 @@ public class DatastoreStorageFactory implements StorageFactory {
         return multitenant;
     }
 
-    @Override
     public ColumnTypeRegistry getTypeRegistry() {
         return typeRegistry;
     }
@@ -255,8 +254,9 @@ public class DatastoreStorageFactory implements StorageFactory {
          * <p>If the multitenancy is enabled, the passed {@link Datastore} should not have
          * a {@code namespace} set explicitly.
          *
-         * @param multitenant {@code true} if the {@code DatastoreStorageFactory} should
-         *                    be multitenant or not
+         * @param multitenant
+         *         {@code true} if the {@code DatastoreStorageFactory} should
+         *         be multitenant or not
          * @return self for method chaining
          * @see io.spine.server.storage.datastore.tenant.DatastoreTenants
          */
@@ -270,9 +270,10 @@ public class DatastoreStorageFactory implements StorageFactory {
          *
          * <p>Default value is {@link DatastoreTypeRegistryFactory#defaultInstance()}.
          *
-         * @param typeRegistry the type registry containing all the required
-         *                     {@linkplain io.spine.server.entity.storage.ColumnType column types}
-         *                     to handle the existing Entity Columns
+         * @param typeRegistry
+         *         the type registry containing all the required
+         *         {@linkplain io.spine.server.entity.storage.ColumnType column types}
+         *         to handle the existing Entity Columns
          * @return self for method chaining
          */
         public Builder
@@ -288,7 +289,8 @@ public class DatastoreStorageFactory implements StorageFactory {
          * <p>Setting this parameter is reasonable (but not required) only if the storage is
          * multitenant. Otherwise, an exception will be thrown on {@linkplain #build() build}.
          *
-         * @param converter a custom converter for the Tenant IDs
+         * @param converter
+         *         a custom converter for the Tenant IDs
          * @return self for method chaining
          */
         public Builder setNamespaceConverter(NamespaceConverter converter) {

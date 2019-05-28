@@ -114,8 +114,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected
-    Optional<EntityRecord> readRecord(I id) {
+    protected Optional<EntityRecord> readRecord(I id) {
         Key key = keyOf(id);
         Entity response = datastore.read(key);
 

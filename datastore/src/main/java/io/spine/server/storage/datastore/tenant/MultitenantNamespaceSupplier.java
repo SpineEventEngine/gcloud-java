@@ -20,9 +20,9 @@
 
 package io.spine.server.storage.datastore.tenant;
 
+import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.tenant.TenantFunction;
-import io.spine.core.TenantId;
 
 import javax.annotation.Nullable;
 
@@ -67,14 +67,14 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
     /**
      * A function declosuring the current tenant {@linkplain TenantId ID}.
-     *
      */
     private static class TenantIdRetriever extends TenantFunction<TenantId> {
 
         /**
          * Creates a new instance of {@code TenantIdRetriever}.
          *
-         * @throws IllegalStateException if the application has a single tenant
+         * @throws IllegalStateException
+         *         if the application has a single tenant
          */
         private TenantIdRetriever() throws IllegalStateException {
             super(true);
@@ -83,7 +83,8 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
         /**
          * Retrieves the passed {@link TenantId}, ensuring it's not equal to {@code null}.
          *
-         * @param input current {@link TenantId}
+         * @param input
+         *         current {@link TenantId}
          * @return the input
          */
         @Override

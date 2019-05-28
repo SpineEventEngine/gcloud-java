@@ -133,7 +133,8 @@ final class Entities {
         Class<M> messageClass = (Class<M>) type.toJavaClass();
         checkState(messageClass != null,
                    "Not found class for type url \"%s\". Try to rebuild the project.",
-                   type.toTypeName().value());
+                   type.toTypeName()
+                       .value());
         M message = Internal.getDefaultInstance(messageClass);
         return message;
     }

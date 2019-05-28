@@ -46,9 +46,9 @@ import static java.util.regex.Matcher.quoteReplacement;
  * <p>A namespace constructed from a {@link TenantId} by default will have a one capital letter type
  * prefix depending on which field of the {@link TenantId} has the actual value. These prefixes are:
  * <ul>
- *     <li>{@code D} - for "Internet Domain";
- *     <li>{@code E} - for "Email";
- *     <li>{@code V} - for "String Value".
+ * <li>{@code D} - for "Internet Domain";
+ * <li>{@code E} - for "Email";
+ * <li>{@code V} - for "String Value".
  * </ul>
  *
  * <p>If a {@link NamespaceConverter} is
@@ -196,9 +196,9 @@ public final class Namespace {
      * then the result will be equivalent to the result of
      * <pre>
      *     {@code
-     *     TenantId.vBuilder()
+     *     TenantId.newBuilder()
      *             .setValue(namespace.getValue())
-     *             .build();
+     *            .vBuild();
      *     }
      * </pre>
      *
@@ -270,8 +270,6 @@ public final class Namespace {
          */
         SINGLE_CUSTOM(NamespaceConverters.forCustomNamespace());
 
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            // This enum is ancillary and is not to be serialized
         private final NamespaceConverter namespaceConverter;
 
         private static ConverterType forTenantId(TenantId tenantId,

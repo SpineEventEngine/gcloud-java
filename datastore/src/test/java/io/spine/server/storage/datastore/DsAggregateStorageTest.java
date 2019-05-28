@@ -236,13 +236,13 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     private void writeSnapshotWithTimestamp(ProjectId id, Timestamp timestamp) {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         Snapshot snapshot = Snapshot
-                .vBuilder()
+                .newBuilder()
                 .setTimestamp(timestamp)
-                .build();
+                .vBuild();
         AggregateEventRecord record = AggregateEventRecord
-                .vBuilder()
+                .newBuilder()
                 .setSnapshot(snapshot)
-                .build();
+                .vBuild();
         storage.writeRecord(id, record);
     }
 }

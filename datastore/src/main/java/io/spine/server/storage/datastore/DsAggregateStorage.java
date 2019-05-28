@@ -133,9 +133,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         RecordId datastoreId = toEventCountId(id);
-        propertyStorage.write(datastoreId, Int32Value.newBuilder()
-                                                     .setValue(eventCount)
-                                                     .build());
+        propertyStorage.write(datastoreId, Int32Value.of(eventCount));
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases.
@@ -293,10 +291,10 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             return Optional.empty();
         }
         LifecycleFlags flags = LifecycleFlags
-                .vBuilder()
+                .newBuilder()
                 .setArchived(archived)
                 .setDeleted(deleted)
-                .build();
+                .vBuild();
         return Optional.of(flags);
     }
 

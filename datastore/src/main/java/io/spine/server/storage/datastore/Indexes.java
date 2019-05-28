@@ -51,9 +51,12 @@ final class Indexes {
     /**
      * Retrieves the ID index for the given {@code kind} or the storage records.
      *
-     * @param datastore datastore to get the indexes for
-     * @param kind      the kind if the records in the datastore
-     * @param <I>       type of the IDs to retrieve
+     * @param datastore
+     *         datastore to get the indexes for
+     * @param kind
+     *         the kind if the records in the datastore
+     * @param <I>
+     *         type of the IDs to retrieve
      * @return an {@link Iterator} of the IDs matching given record kind
      */
     static <I> Iterator<I> indexIterator(DatastoreWrapper datastore, Kind kind, Class<I> idType) {
