@@ -215,7 +215,7 @@ task startDatastore {
 
 tasks["check"].dependsOn startDatastore
 
-apply from: "$rootDir/config/gradle/jacoco.gradle"
-apply from: "$rootDir/config/gradle/publish.gradle"
+apply from: deps.scripts.jacoco
+apply from: deps.scripts.publish
 
 apply from: deps.scripts.generatePom
