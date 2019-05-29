@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,19 +26,18 @@ import com.google.common.collect.Streams;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
-import io.spine.server.aggregate.AggregateEventRecordVBuilder;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageTest;
 import io.spine.server.aggregate.Snapshot;
-import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ProjectAggregate;
+import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.server.entity.Entity;
 import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.NonProjectStateAggregate;
 import io.spine.server.storage.datastore.given.aggregate.ProjectAggregateRepository;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.testdata.Sample;
@@ -56,7 +55,6 @@ import java.util.Optional;
 
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
-import static io.spine.testing.client.TestActorRequestFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -84,9 +82,9 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     }
 
     @Override
-    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
+    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
         @SuppressWarnings("unchecked") // Logically checked; OK for test purposes.
-        Class<? extends Aggregate<ProjectId, ?, ?>> aggCls =
+                Class<? extends Aggregate<ProjectId, ?, ?>> aggCls =
                 (Class<? extends Aggregate<ProjectId, ?, ?>>) cls;
         return datastoreFactory.createAggregateStorage(aggCls);
     }
@@ -173,7 +171,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
     @Test
     @DisplayName("not overwrite the snapshot when saving a new one")
-    void notOverwriteSnapshot() throws InterruptedException {
+    void notOverwriteSnapshot() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
         ProjectId id = newId();
 
@@ -205,7 +203,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
             repository = new ProjectAggregateRepository();
             boundedContext.register(repository);
 
-            factory = newInstance(DsAggregateStorageTest.class);
+            factory = new TestActorRequestFactory(DsAggregateStorageTest.class);
             id = newId();
         }
 
@@ -230,20 +228,21 @@ class DsAggregateStorageTest extends AggregateStorageTest {
             Optional<ProjectAggregate> optional = repository.find(id);
             assertTrue(optional.isPresent());
             ProjectAggregate aggregate = optional.get();
-            assertEquals(tasksCount, aggregate.getState()
+            assertEquals(tasksCount, aggregate.state()
                                               .getTaskCount());
         }
     }
 
     private void writeSnapshotWithTimestamp(ProjectId id, Timestamp timestamp) {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
-        Snapshot snapshot = Snapshot.newBuilder()
-                                    .setTimestamp(timestamp)
-                                    .build();
-        AggregateEventRecord record = AggregateEventRecordVBuilder
+        Snapshot snapshot = Snapshot
+                .newBuilder()
+                .setTimestamp(timestamp)
+                .vBuild();
+        AggregateEventRecord record = AggregateEventRecord
                 .newBuilder()
                 .setSnapshot(snapshot)
-                .build();
+                .vBuild();
         storage.writeRecord(id, record);
     }
 }

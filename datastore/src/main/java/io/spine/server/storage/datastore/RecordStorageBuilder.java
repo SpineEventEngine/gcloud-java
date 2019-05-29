@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -32,8 +32,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * An implementation base for {@code DsRecordStorage} builders.
  *
- * @param <I> the ID type of the stored entities
- * @param <B> the builder own type
+ * @param <I>
+ *         the ID type of the stored entities
+ * @param <B>
+ *         the builder own type
  */
 abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
 
@@ -42,7 +44,7 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
     private boolean multitenant;
     private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
     private Class<I> idClass;
-    private Class<? extends io.spine.server.entity.Entity> entityClass;
+    private Class<? extends Entity<?, ?>> entityClass;
 
     /**
      * Prevents direct instantiation.
@@ -55,7 +57,8 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
      */
     public B setStateType(TypeUrl stateTypeUrl) {
         checkNotNull(stateTypeUrl);
-        Descriptor descriptor = (Descriptor) stateTypeUrl.getDescriptor();
+        Descriptor descriptor = stateTypeUrl.toTypeName()
+                                            .messageDescriptor();
         this.descriptor = checkNotNull(descriptor);
         return self();
     }
@@ -71,7 +74,7 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
     /**
      * Assigns the class of the stored entity.
      */
-    public B setEntityClass(Class<? extends io.spine.server.entity.Entity> entityClass) {
+    public B setEntityClass(Class<? extends Entity<?, ?>> entityClass) {
         this.entityClass = checkNotNull(entityClass);
         return self();
     }
@@ -85,8 +88,8 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
      */
     @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     public B setModelClass(EntityClass<? extends Entity<I, ?>> modelClass) {
-        TypeUrl stateType = modelClass.getStateType();
-        Class<I> idClass = (Class<I>) modelClass.getIdClass();
+        TypeUrl stateType = modelClass.stateType();
+        Class<I> idClass = (Class<I>) modelClass.idClass();
 
         setStateType(stateType);
         setIdClass(idClass);
@@ -106,9 +109,10 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
     /**
      * Configures multitenancy mode for the storage.
      *
-     * @param multitenant {@code true} if the storage should be
-     *                    {@link io.spine.server.storage.Storage#isMultitenant multitenant},
-     *                    {@code false} otherwise
+     * @param multitenant
+     *         {@code true} if the storage should be
+     *         {@link io.spine.server.storage.Storage#isMultitenant multitenant},
+     *         {@code false} otherwise
      */
     public B setMultitenant(boolean multitenant) {
         this.multitenant = multitenant;
@@ -165,7 +169,7 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
     /**
      * Obtains the class of the stored entity.
      */
-    public Class<? extends io.spine.server.entity.Entity> getEntityClass() {
+    public Class<? extends Entity<?, ?>> getEntityClass() {
         return entityClass;
     }
 

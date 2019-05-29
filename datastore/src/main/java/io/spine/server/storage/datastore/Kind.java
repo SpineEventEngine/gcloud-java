@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -53,8 +53,10 @@ public final class Kind {
     /**
      * Creates a new instance of {@code Kind} representing an ancillary Datastore kind.
      *
-     * @param value the name of the kind
-     * @param ancillary the flag showing that the {@code Kind} is ancillary; must be set to {@code true}
+     * @param value
+     *         the name of the kind
+     * @param ancillary
+     *         the flag showing that the {@code Kind} is ancillary; must be set to {@code true}
      */
     private Kind(String value, boolean ancillary) {
         checkArgument(ancillary);
@@ -66,7 +68,8 @@ public final class Kind {
     }
 
     public static Kind of(TypeUrl typeUrl) {
-        return new Kind(typeUrl.getTypeName());
+        return new Kind(typeUrl.toTypeName()
+                               .value());
     }
 
     public static Kind of(Descriptor descriptor) {

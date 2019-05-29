@@ -16,6 +16,8 @@
 build/*
 */build/*
 
+.spine/
+
 # Credentials to Maven repositories and Google Cloud Storage used for Travis build reports
 credentials.tar
 credentials.properties

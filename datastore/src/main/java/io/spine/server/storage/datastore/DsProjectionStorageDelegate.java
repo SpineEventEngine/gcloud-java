@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -39,7 +39,8 @@ public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
      * <p>Not to be confused with {@link DsRecordStorage#newBuilder()}, which creates a builder for
      * a {@code DsRecordStorage}. This method has a different name to avoid method hiding clash.
      *
-     * @param <I> the ID type of the instances built by the created {@link Builder}
+     * @param <I>
+     *         the ID type of the instances built by the created {@link Builder}
      * @return new instance of the {@link Builder}
      */
     public static <I> Builder<I> newDelegateBuilder() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,19 +21,18 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.NullValue;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.truth.IterableSubject;
-import io.spine.client.ColumnFilter;
-import io.spine.client.ColumnFilters;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.client.Filter;
+import io.spine.client.Filters;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityColumn;
-import io.spine.test.storage.Project;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -42,16 +41,14 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
-import static com.google.cloud.datastore.StructuredQuery.Filter;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.ge;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.gt;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.le;
-import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.client.ColumnFilters.lt;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
+import static io.spine.client.Filters.lt;
 import static io.spine.server.entity.storage.TestCompositeQueryParameterFactory.createParams;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
@@ -84,21 +81,24 @@ class DsFiltersTest {
         String idStringValue = "42";
         boolean archivedValue = true;
         boolean deletedValue = true;
-        Multimap<EntityColumn, ColumnFilter> conjunctiveFilters = of(
-                column(TestEntity.class, ID_STRING_GETTER_NAME),
-                ColumnFilters.gt(ID_STRING_COLUMN_NAME, idStringValue)
+        Multimap<EntityColumn, Filter> conjunctiveFilters = ImmutableMultimap.of(
+                column(TestEntityWithStringColumn.class, ID_STRING_GETTER_NAME),
+                Filters.gt(ID_STRING_COLUMN_NAME, idStringValue)
         );
-        ImmutableMultimap<EntityColumn, ColumnFilter> disjunctiveFilters = of(
-                column(TestEntity.class, DELETED_GETTER_NAME), ColumnFilters.eq(deleted.name(), deletedValue),
-                column(TestEntity.class, ARCHIVED_GETTER_NAME), ColumnFilters.eq(archived.name(), archivedValue)
+        ImmutableMultimap<EntityColumn, Filter> disjunctiveFilters = ImmutableMultimap.of(
+                column(Entity.class, DELETED_GETTER_NAME),
+                Filters.eq(deleted.name(), deletedValue),
+
+                column(Entity.class, ARCHIVED_GETTER_NAME),
+                Filters.eq(archived.name(), archivedValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(conjunctiveFilters, ALL),
                 createParams(disjunctiveFilters, EITHER)
         );
 
-        ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
-        Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
+        FilterAdapter columnFilterAdapter = FilterAdapter.of(defaultInstance());
+        Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
 
         IterableSubject assertFilters = assertThat(filters);
         assertFilters.contains(and(gt(ID_STRING_COLUMN_NAME, idStringValue),
@@ -111,16 +111,16 @@ class DsFiltersTest {
     @DisplayName("generate filters from single parameter")
     void testSingleParameter() {
         String versionValue = "314";
-        ImmutableMultimap<EntityColumn, ColumnFilter> singleFilter = of(
-                column(TestEntity.class, ID_STRING_GETTER_NAME),
-                ColumnFilters.le(ID_STRING_COLUMN_NAME, versionValue)
+        ImmutableMultimap<EntityColumn, Filter> singleFilter = ImmutableMultimap.of(
+                column(TestEntityWithStringColumn.class, ID_STRING_GETTER_NAME),
+                Filters.le(ID_STRING_COLUMN_NAME, versionValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(singleFilter, ALL)
         );
 
-        ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
-        Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
+        FilterAdapter columnFilterAdapter = FilterAdapter.of(defaultInstance());
+        Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
         IterableSubject assertFilters = assertThat(filters);
         assertFilters.contains(and(le(ID_STRING_COLUMN_NAME, versionValue)));
     }
@@ -133,24 +133,26 @@ class DsFiltersTest {
         String lessBoundDefiner = "42";
         boolean archivedValue = true;
         boolean deletedValue = true;
-        EntityColumn idStringColumn = column(TestEntity.class, ID_STRING_GETTER_NAME);
-        ImmutableMultimap<EntityColumn, ColumnFilter> versionFilters = of(
-                idStringColumn, ColumnFilters.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
-                idStringColumn, ColumnFilters.eq(ID_STRING_COLUMN_NAME, standaloneValue),
+        EntityColumn idStringColumn = column(TestEntityWithStringColumn.class,
+                                             ID_STRING_GETTER_NAME);
+        ImmutableMultimap<EntityColumn, Filter> versionFilters = ImmutableMultimap.of(
+                idStringColumn, Filters.ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
+                idStringColumn, Filters.eq(ID_STRING_COLUMN_NAME, standaloneValue),
                 idStringColumn, lt(ID_STRING_COLUMN_NAME, lessBoundDefiner)
         );
-        ImmutableMultimap<EntityColumn, ColumnFilter> lifecycleFilters = of(
-                column(TestEntity.class, DELETED_GETTER_NAME), ColumnFilters.eq(deleted.name(),
-                                                                                deletedValue),
-                column(TestEntity.class, ARCHIVED_GETTER_NAME), ColumnFilters.eq(archived.name(),
-                                                                                 archivedValue)
+        ImmutableMultimap<EntityColumn, Filter> lifecycleFilters = ImmutableMultimap.of(
+                column(Entity.class, DELETED_GETTER_NAME),
+                Filters.eq(deleted.name(), deletedValue),
+
+                column(Entity.class, ARCHIVED_GETTER_NAME),
+                Filters.eq(archived.name(), archivedValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(versionFilters, EITHER),
                 createParams(lifecycleFilters, EITHER)
         );
-        ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
-        Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
+        FilterAdapter columnFilterAdapter = FilterAdapter.of(defaultInstance());
+        Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
         assertThat(filters).containsExactly(
                 and(ge(ID_STRING_COLUMN_NAME, greaterBoundDefiner),
                     eq(archived.name(), archivedValue)),
@@ -171,8 +173,8 @@ class DsFiltersTest {
     @DisplayName("generate filters from empty params")
     void testEmptyParameters() {
         Collection<CompositeQueryParameter> parameters = Collections.emptySet();
-        Collection<Filter> filters = fromParams(parameters,
-                                                ColumnFilterAdapter.of(defaultInstance()));
+        Collection<StructuredQuery.Filter> filters =
+                fromParams(parameters, FilterAdapter.of(defaultInstance()));
         IterableSubject assertFilters = assertThat(filters);
         assertFilters.isNotNull();
         assertFilters.isEmpty();
@@ -189,16 +191,16 @@ class DsFiltersTest {
         when(column.getPersistedType()).thenReturn(String.class);
         when(column.toPersistedValue(any())).thenReturn(null);
 
-        ColumnFilter filterWithStubValue = ColumnFilters.eq(ID_STRING_COLUMN_NAME, "");
-        ImmutableMultimap<EntityColumn, ColumnFilter> filter = of(
+        Filter filterWithStubValue = Filters.eq(ID_STRING_COLUMN_NAME, "");
+        ImmutableMultimap<EntityColumn, Filter> filter = ImmutableMultimap.of(
                 column, filterWithStubValue
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(filter, ALL)
         );
 
-        ColumnFilterAdapter columnFilterAdapter = ColumnFilterAdapter.of(defaultInstance());
-        Collection<Filter> filters = fromParams(parameters, columnFilterAdapter);
+        FilterAdapter columnFilterAdapter = FilterAdapter.of(defaultInstance());
+        Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
         assertThat(filters).contains(and(eq(ID_STRING_COLUMN_NAME, NullValue.of())));
     }
 
@@ -211,19 +213,5 @@ class DsFiltersTest {
         }
         EntityColumn column = EntityColumn.from(method);
         return column;
-    }
-
-    private static class TestEntity
-            extends AbstractVersionableEntity<String, Project>
-            implements TestEntityWithStringColumn {
-
-        protected TestEntity(String id) {
-            super(id);
-        }
-
-        @Override
-        public String getIdString() {
-            return getId();
-        }
     }
 }

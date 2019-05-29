@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,7 +33,8 @@ final class RecordId extends DsIdentifier {
     /**
      * Creates a new {@code RecordId} for the given {@code value}.
      *
-     * @param value the identity as {@code String} to wrap into an identifier
+     * @param value
+     *         the identity as {@code String} to wrap into an identifier
      */
     RecordId(String value) {
         super(value);
@@ -48,7 +49,8 @@ final class RecordId extends DsIdentifier {
      * Creates an instance of {@code RecordId} for a
      * given {@link io.spine.server.entity.Entity} identifier.
      *
-     * @param id an identifier of an {@code Entity}
+     * @param id
+     *         an identifier of an {@code Entity}
      * @return the Datastore record identifier
      */
     static RecordId ofEntityId(Object id) {

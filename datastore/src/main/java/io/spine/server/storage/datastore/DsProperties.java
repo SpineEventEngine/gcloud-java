@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -100,7 +100,7 @@ final class DsProperties {
 
     private static boolean hasFlag(Entity entity, String flagName) {
         boolean result = entity.contains(flagName)
-                            && entity.getBoolean(flagName);
+                && entity.getBoolean(flagName);
         return result;
     }
 
@@ -144,7 +144,8 @@ final class DsProperties {
 
         @Override
         public String toString() {
-            return super.toString().toLowerCase();
+            return super.toString()
+                        .toLowerCase();
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
+buildscript { final scriptHandler ->
 
     // Define the versions of the library and its dependencies.
     // As long as `buildscript` section is always evaluated first, we need to apply
@@ -26,13 +26,7 @@ buildscript {
     apply from: "version.gradle"
     apply from: "$rootDir/config/gradle/dependencies.gradle"
 
-    repositories {
-        google()
-        maven { url = repos.gradlePlugins }
-        maven { url = repos.spine }
-        maven { url = repos.spineSnapshots }
-        mavenLocal()
-    }
+    defaultRepositories(scriptHandler)
 
     dependencies {
         classpath deps.build.guava
@@ -48,7 +42,6 @@ apply from: 'version.gradle'
 
 ext {
     credentialsPropertyFile = 'credentials.properties'
-    runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
     spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
 
     projectsToPublish = ['datastore']
@@ -66,6 +59,7 @@ subprojects {
 
     apply plugin: 'java-library'
     apply plugin: 'net.ltgt.errorprone'
+    apply plugin: 'pmd'
     apply plugin: 'maven-publish'
     apply plugin: 'idea'
     
@@ -104,14 +98,8 @@ subprojects {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    
-    repositories {
-        google()
-        maven { url = repos.gradlePlugins }
-        maven { url = repos.spine }
-        maven { url = repos.spineSnapshots }
-        mavenLocal()
-    }
+
+    defaultRepositories(project)
 
     dependencies {
         errorprone deps.build.errorProneCore
@@ -160,9 +148,9 @@ subprojects {
         }
     }
 
-    apply from: "$rootDir/config/gradle/test-output.gradle"
     apply plugin: 'com.google.protobuf'
     apply plugin: spineProtobufPluginId
+    apply from: deps.scripts.modelCompiler
 
     sourceSets {
         main {
@@ -186,6 +174,7 @@ subprojects {
     apply from: deps.scripts.testOutput
     apply from: deps.scripts.javadocOptions
     apply from: deps.scripts.javacArgs
+    apply from: deps.scripts.projectLicenseReport
 
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
@@ -201,19 +190,9 @@ subprojects {
         from("$projectDir/build/docs/javadoc")
         classifier = "javadoc"
     }
+
+    apply from: deps.scripts.pmd
 }
-
-task startDatastore {
-    description = "Starts local in-memory datastore using scripts from ./scripts folder."
-    group = "Build Setup"
-
-    doLast {
-        // Start Datastore emulator with the CLI command.
-        ".${File.separatorChar}scripts${File.separatorChar}start-datastore.${runsOnWindows ? 'bat' : 'sh'}".execute()
-    }
-}
-
-tasks["check"].dependsOn startDatastore
 
 apply from: deps.scripts.jacoco
 apply from: deps.scripts.publish

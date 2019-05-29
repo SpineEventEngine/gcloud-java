@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,10 +21,9 @@
 package io.spine.server.storage.datastore.tenant;
 
 import com.google.common.base.Converter;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.SPI;
 import io.spine.core.TenantId;
-
-import javax.annotation.concurrent.Immutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

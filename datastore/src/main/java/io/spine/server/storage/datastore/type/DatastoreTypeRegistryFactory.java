@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -86,7 +86,8 @@ public final class DatastoreTypeRegistryFactory {
     /**
      * Retrieves a builder with all the {@linkplain #defaultInstance() predefined values} set.
      */
-    public static ColumnTypeRegistry.Builder<? extends DatastoreColumnType<?, ?>> predefinedValuesAnd() {
+    public static ColumnTypeRegistry.Builder<? extends DatastoreColumnType<?, ?>>
+    predefinedValuesAnd() {
         return ColumnTypeRegistry.newBuilder(DEFAULT_REGISTRY);
     }
 }

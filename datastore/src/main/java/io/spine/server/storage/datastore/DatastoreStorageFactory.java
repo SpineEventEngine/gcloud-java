@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,6 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.annotation.Internal;
+import io.spine.core.BoundedContextName;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.Aggregate;
@@ -61,7 +62,6 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final DatastoreWrapper datastore;
     private final boolean multitenant;
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
-    private final NamespaceSupplier namespaceSupplier;
     private final @MonotonicNonNull NamespaceConverter namespaceConverter;
 
     @SuppressWarnings({
@@ -70,7 +70,6 @@ public class DatastoreStorageFactory implements StorageFactory {
             "OverriddenMethodCallDuringObjectConstruction"
     })
     DatastoreStorageFactory(Builder builder) {
-        this.namespaceSupplier = builder.namespaceSupplier;
         this.multitenant = builder.multitenant;
         this.typeRegistry = builder.typeRegistry;
         this.namespaceConverter = builder.namespaceConverter;
@@ -78,21 +77,21 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     /**
-     * Creates new instance of the {@link io.spine.server.BoundedContextBuilder}.
+     * Creates new instance of the {@link BoundedContextBuilder}.
      *
      * <p>The returned instance has the following attributes pre-configured:
      * <ul>
-     *     <li>{@link io.spine.server.BoundedContextBuilder#setStorageFactorySupplier(java.util.function.Supplier) Supplier}
+     *     <li>{@link BoundedContextBuilder#setStorageFactorySupplier(Supplier) Supplier}
      *     of {@code StorageFactory};
-     *     <li>{@link io.spine.server.BoundedContextBuilder#setTenantIndex(io.spine.server.tenant.TenantIndex) TenantIndex};
-     *     <li>{@linkplain io.spine.server.BoundedContextBuilder#setMultitenant(boolean) multitenancy flag}.
+     *     <li>{@link BoundedContextBuilder#setTenantIndex(TenantIndex) TenantIndex};
+     *     <li>{@linkplain BoundedContextBuilder#setMultitenant(boolean) multitenancy flag}.
      * </ul>
      *
      * <p>In a majority of use cases the configuration of the produced
-     * {@link io.spine.server.BoundedContextBuilder builder} is enough for operation.
-     * However, it is still possible to use the returned instance for further customization.
+     * {@link BoundedContextBuilder builder} is enough for operation. However, it is still possible
+     * to use the returned instance for further customization.
      *
-     * @return new instance of {@link io.spine.server.BoundedContextBuilder BoundedContextBuilder}
+     * @return new instance of {@link BoundedContextBuilder BoundedContextBuilder}
      *         with the specified parameters
      */
     public BoundedContextBuilder newBoundedContextBuilder() {
@@ -112,9 +111,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     private Builder toBuilder() {
         Builder result = newBuilder()
                 .setDatastore(datastore.getDatastore())
-                .setMultitenant(multitenant)
-                .setNamespaceSupplier(namespaceSupplier);
-
+                .setMultitenant(multitenant);
         if (!multitenant) {
             result.setNamespaceConverter(namespaceConverter);
         }
@@ -132,22 +129,8 @@ public class DatastoreStorageFactory implements StorageFactory {
         return multitenant;
     }
 
-    @Override
     public ColumnTypeRegistry getTypeRegistry() {
         return typeRegistry;
-    }
-
-    @Override
-    public StorageFactory toSingleTenant() {
-        return isMultitenant()
-               ? newSingleTenant()
-               : this;
-    }
-
-    private DatastoreStorageFactory newSingleTenant() {
-        Builder builder = toBuilder().setMultitenant(false)
-                                     .setNamespaceSupplier(NamespaceSupplier.singleTenant());
-        return new DatastoreStorageFactory(builder);
     }
 
     @Override
@@ -186,6 +169,19 @@ public class DatastoreStorageFactory implements StorageFactory {
         DsAggregateStorage<I> result =
                 new DsAggregateStorage<>(cls, getDatastore(), propertyStorage, multitenant);
         return result;
+    }
+
+    @Override
+    public StorageFactory toSingleTenant() {
+        return isMultitenant()
+               ? copyFor(BoundedContextName.getDefaultInstance(), false)
+               : this;
+    }
+
+    @Override
+    public StorageFactory copyFor(BoundedContextName name, boolean multitenant) {
+        return toBuilder().setMultitenant(multitenant)
+                          .build();
     }
 
     protected DsPropertyStorage createPropertyStorage() {
@@ -258,8 +254,9 @@ public class DatastoreStorageFactory implements StorageFactory {
          * <p>If the multitenancy is enabled, the passed {@link Datastore} should not have
          * a {@code namespace} set explicitly.
          *
-         * @param multitenant {@code true} if the {@code DatastoreStorageFactory} should
-         *                    be multitenant or not
+         * @param multitenant
+         *         {@code true} if the {@code DatastoreStorageFactory} should
+         *         be multitenant or not
          * @return self for method chaining
          * @see io.spine.server.storage.datastore.tenant.DatastoreTenants
          */
@@ -273,33 +270,27 @@ public class DatastoreStorageFactory implements StorageFactory {
          *
          * <p>Default value is {@link DatastoreTypeRegistryFactory#defaultInstance()}.
          *
-         * @param typeRegistry the type registry containing all the required
-         *                     {@linkplain io.spine.server.entity.storage.ColumnType column types}
-         *                     to handle the existing Entity Columns
+         * @param typeRegistry
+         *         the type registry containing all the required
+         *         {@linkplain io.spine.server.entity.storage.ColumnType column types}
+         *         to handle the existing Entity Columns
          * @return self for method chaining
          */
-        public Builder setTypeRegistry(
-                ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
+        public Builder
+        setTypeRegistry(ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
             this.typeRegistry = checkNotNull(typeRegistry);
             return this;
         }
 
         /**
-         * Sets the namespace supplier.
-         */
-        public Builder setNamespaceSupplier(NamespaceSupplier namespaceSupplier) {
-            this.namespaceSupplier = checkNotNull(namespaceSupplier);
-            return this;
-        }
-
-        /**
-         * Sets a {@link io.spine.server.storage.datastore.tenant.NamespaceConverter} for converting the Datastore namespaces and
+         * Sets a {@link NamespaceConverter} for converting the Datastore namespaces and
          * the {@link io.spine.core.TenantId Tenant IDs} back and forth.
          *
          * <p>Setting this parameter is reasonable (but not required) only if the storage is
          * multitenant. Otherwise, an exception will be thrown on {@linkplain #build() build}.
          *
-         * @param converter a custom converter for the Tenant IDs
+         * @param converter
+         *         a custom converter for the Tenant IDs
          * @return self for method chaining
          */
         public Builder setNamespaceConverter(NamespaceConverter converter) {

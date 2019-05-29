@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,12 +20,12 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
-import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.cloud.datastore.Value;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
-import io.spine.client.ColumnFilter;
+import io.spine.client.Filter;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityColumn;
 
@@ -51,11 +51,10 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -67,8 +66,7 @@ final class DsFilters {
 
     /**
      * Matches the {@link CompositeQueryParameter} instances joined by
-     * the {@linkplain io.spine.client.CompositeColumnFilter.CompositeOperator#ALL conjunctive}
-     * operator.
+     * the {@linkplain io.spine.client.CompositeFilter.CompositeOperator#ALL conjunctive} operator.
      */
     private static final Predicate<CompositeQueryParameter> isConjunctive =
             input -> {
@@ -78,7 +76,7 @@ final class DsFilters {
 
     /**
      * Matches the {@link CompositeQueryParameter} instances joined by
-     * the {@linkplain io.spine.client.CompositeColumnFilter.CompositeOperator#EITHER disjunctive}
+     * the {@linkplain io.spine.client.CompositeFilter.CompositeOperator#EITHER disjunctive}
      * operator.
      */
     private static final Predicate<CompositeQueryParameter> isDisjunctive =
@@ -124,17 +122,20 @@ final class DsFilters {
      * <p>If the given parameter {@code Collection} is empty, and empty {@code Collection}
      * is returned.
      *
-     * @param parameters          the {@linkplain CompositeQueryParameter query parameters} to convert
-     * @param columnFilterAdapter an instance of {@linkplain ColumnFilterAdapter} performing
-     *                            the required type conversions
+     * @param parameters
+     *         the {@linkplain CompositeQueryParameter query parameters} to convert
+     * @param columnFilterAdapter
+     *         an instance of {@linkplain FilterAdapter} performing
+     *         the required type conversions
      * @return the equivalent expression of in Datastore {@link Filter} instances
      */
-    static Collection<Filter> fromParams(Collection<CompositeQueryParameter> parameters,
-                                         ColumnFilterAdapter columnFilterAdapter) {
+    static Collection<StructuredQuery.Filter>
+    fromParams(Collection<CompositeQueryParameter> parameters,
+               FilterAdapter columnFilterAdapter) {
         checkNotNull(parameters);
         checkNotNull(columnFilterAdapter);
 
-        Collection<Filter> results;
+        Collection<StructuredQuery.Filter> results;
         if (parameters.isEmpty()) {
             results = emptySet();
         } else {
@@ -150,8 +151,9 @@ final class DsFilters {
      * parameters are then merged into a single {@link Filter}. After that, the disjunction
      * parentheses are opened and the {@linkplain #multiply logical multiplication} is performed.
      */
-    private static Collection<Filter> toFilters(Collection<CompositeQueryParameter> parameters,
-                                                ColumnFilterAdapter columnFilterAdapter) {
+    private static Collection<StructuredQuery.Filter>
+    toFilters(Collection<CompositeQueryParameter> parameters,
+              FilterAdapter columnFilterAdapter) {
         List<CompositeQueryParameter> conjunctionParams = parameters.stream()
                                                                     .filter(isConjunctive)
                                                                     .collect(toList());
@@ -161,8 +163,8 @@ final class DsFilters {
         Optional<CompositeQueryParameter> mergedConjunctiveParams =
                 mergeConjunctiveParameters(conjunctionParams);
 
-        Collection<Filter> filters = newLinkedList();
-        TreePathWalker processor = new ColumnFilterReducer(columnFilterAdapter, filters);
+        Collection<StructuredQuery.Filter> filters = newLinkedList();
+        TreePathWalker processor = new FilterReducer(columnFilterAdapter, filters);
         multiply(mergedConjunctiveParams.orElse(null), disjunctionParams, processor);
         return filters;
     }
@@ -170,9 +172,10 @@ final class DsFilters {
     /**
      * Merges conjunctive parameters into a single {@link Filter}.
      *
-     * @param conjunctiveParams list of parameters
+     * @param conjunctiveParams
+     *         list of parameters
      * @return resulting filter or {@code Optional.empty()} if there {@code conjunctiveParams} is
-     * empty
+     *         empty
      */
     private static Optional<CompositeQueryParameter> mergeConjunctiveParameters(
             List<CompositeQueryParameter> conjunctiveParams) {
@@ -182,7 +185,7 @@ final class DsFilters {
                     conjunctiveParams.subList(1, conjunctiveParams.size());
             CompositeQueryParameter mergedConjunctiveParams =
                     new ParameterReducer(tailParams).apply(firstParam);
-            return of(mergedConjunctiveParams);
+            return Optional.of(mergedConjunctiveParams);
         } else {
             return empty();
         }
@@ -191,14 +194,17 @@ final class DsFilters {
     /**
      * Performs the logical multiplication of the given query predicates.
      *
-     * @param constant   the single non-disjunctive query parameter
-     * @param parameters the disjunctive query parameters
-     * @param processor  the result processor
+     * @param constant
+     *         the single non-disjunctive query parameter
+     * @param parameters
+     *         the disjunctive query parameters
+     * @param processor
+     *         the result processor
      */
     private static void multiply(@Nullable CompositeQueryParameter constant,
                                  Iterable<CompositeQueryParameter> parameters,
                                  TreePathWalker processor) {
-        ColumnFilterNode expressionTree = buildConjunctionTree(constant, parameters);
+        FilterNode expressionTree = buildConjunctionTree(constant, parameters);
         expressionTree.traverse(processor);
     }
 
@@ -206,7 +212,7 @@ final class DsFilters {
      * Builds a tree from the given query parameter expression.
      *
      * <p>The resulting tree will start with a predefined
-     * {@linkplain ColumnFilterTreeHead stub node}. The subtrees of each node contains the possible
+     * {@linkplain FilterTreeHead stub node}. The subtrees of each node contains the possible
      * multipliers of the filter represented by this node.
      *
      * <p>The tree structure is so, that each path from the top to each leaf is a disjunctive group
@@ -228,45 +234,47 @@ final class DsFilters {
      * </pre>
      *
      * <p>Despite the severe data duplication, which can be noticed on the schema, the tree gives
-     * a handy way to {@linkplain ColumnFilterNode#traverse traverse} over.
+     * a handy way to {@linkplain FilterNode#traverse traverse} over.
      *
-     * @param constant   the single non-disjunctive query parameter
-     * @param parameters the disjunctive query parameters
+     * @param constant
+     *         the single non-disjunctive query parameter
+     * @param parameters
+     *         the disjunctive query parameters
      * @return the top node of the build tree
      * @see #fromParams for the expression explanation
      */
     @SuppressWarnings("MethodWithMultipleLoops")
         // Complex but highly tied logic that can't be split.
-    private static ColumnFilterNode buildConjunctionTree(
+    private static FilterNode buildConjunctionTree(
             @Nullable CompositeQueryParameter constant,
             Iterable<CompositeQueryParameter> parameters) {
 
-        ColumnFilterNode lastSequentialNode;
-        ColumnFilterNode head;
+        FilterNode lastSequentialNode;
+        FilterNode head;
         if (constant != null) {
-            Collection<ColumnFilterNode> filters = toFilters(constant);
+            Collection<FilterNode> filters = toFilters(constant);
             if (!filters.isEmpty()) {
-                ColumnFilterNode prev = ColumnFilterTreeHead.instance();
+                FilterNode prev = FilterTreeHead.instance();
                 head = prev;
-                for (ColumnFilterNode filter : filters) {
+                for (FilterNode filter : filters) {
                     prev.subtrees.add(filter);
                     prev = filter;
                 }
                 lastSequentialNode = prev;
             } else {
-                lastSequentialNode = ColumnFilterTreeHead.instance();
+                lastSequentialNode = FilterTreeHead.instance();
                 head = lastSequentialNode;
             }
         } else {
-            lastSequentialNode = ColumnFilterTreeHead.instance();
+            lastSequentialNode = FilterTreeHead.instance();
             head = lastSequentialNode;
         }
 
-        Collection<ColumnFilterNode> lastLayer = singleton(lastSequentialNode);
+        Collection<FilterNode> lastLayer = singleton(lastSequentialNode);
         for (CompositeQueryParameter parameter : parameters) {
-            Collection<ColumnFilterNode> currentLayer = toFilters(parameter);
-            for (ColumnFilterNode thisLayerItem : currentLayer) {
-                for (ColumnFilterNode prevLayerItem : lastLayer) {
+            Collection<FilterNode> currentLayer = toFilters(parameter);
+            for (FilterNode thisLayerItem : currentLayer) {
+                for (FilterNode prevLayerItem : lastLayer) {
                     prevLayerItem.subtrees.add(thisLayerItem);
                 }
             }
@@ -276,13 +284,13 @@ final class DsFilters {
     }
 
     /**
-     * Converts the given parameter to a {@code Collection} of {@link ColumnFilterNode}s.
+     * Converts the given parameter to a {@code Collection} of {@link FilterNode}s.
      */
-    private static Collection<ColumnFilterNode> toFilters(CompositeQueryParameter param) {
-        ImmutableMultimap<EntityColumn, ColumnFilter> srcFilters = param.getFilters();
-        Set<ColumnFilterNode> filters = new HashSet<>(srcFilters.size());
-        for (Map.Entry<EntityColumn, ColumnFilter> entry : srcFilters.entries()) {
-            filters.add(new ColumnFilterNode(entry.getKey(), entry.getValue()));
+    private static Collection<FilterNode> toFilters(CompositeQueryParameter param) {
+        ImmutableMultimap<EntityColumn, Filter> srcFilters = param.getFilters();
+        Set<FilterNode> filters = new HashSet<>(srcFilters.size());
+        for (Map.Entry<EntityColumn, Filter> entry : srcFilters.entries()) {
+            filters.add(new FilterNode(entry.getKey(), entry.getValue()));
         }
         return filters;
     }
@@ -311,19 +319,19 @@ final class DsFilters {
     /**
      * Performs sequential {@link Filter} conjunction.
      *
-     * <p>The walker transforms all the {@link ColumnFilterNode} instances into {@link Filter}
+     * <p>The walker transforms all the {@link FilterNode} instances into {@link Filter}
      * instances and merges them using
      * the {@link CompositeFilter#and
      * StructuredQuery.CompositeFilter.and()} operation. The result is then collected into
      * {@code Collection} passed on the instance creation.
      */
-    private static class ColumnFilterReducer implements TreePathWalker {
+    private static class FilterReducer implements TreePathWalker {
 
-        private final ColumnFilterAdapter columnFilterAdapter;
-        private final Collection<Filter> destination;
+        private final FilterAdapter columnFilterAdapter;
+        private final Collection<StructuredQuery.Filter> destination;
 
-        private ColumnFilterReducer(ColumnFilterAdapter columnFilterAdapter,
-                                    Collection<Filter> destination) {
+        private FilterReducer(FilterAdapter columnFilterAdapter,
+                              Collection<StructuredQuery.Filter> destination) {
             this.columnFilterAdapter = columnFilterAdapter;
             this.destination = destination;
         }
@@ -331,44 +339,44 @@ final class DsFilters {
         @SuppressWarnings("ZeroLengthArrayAllocation")
             // It is used to create a typed array from the collection.
         @Override
-        public void walk(Collection<ColumnFilterNode> conjunctionGroup) {
+        public void walk(Collection<FilterNode> conjunctionGroup) {
             if (conjunctionGroup.isEmpty()) {
                 return;
             }
-            Function<ColumnFilterNode, Filter> mapper =
-                    ColumnFilterNode.toFilterFunction(columnFilterAdapter);
-            List<Filter> filters = conjunctionGroup.stream()
-                                                   .map(mapper)
-                                                   .collect(toList());
+            Function<FilterNode, StructuredQuery.Filter> mapper =
+                    FilterNode.toFilterFunction(columnFilterAdapter);
+            List<StructuredQuery.Filter> filters = conjunctionGroup.stream()
+                                                                   .map(mapper)
+                                                                   .collect(toList());
             checkState(!filters.isEmpty());
-            Filter first = filters.get(0);
-            Filter[] other = filters.subList(1, filters.size())
-                                    .toArray(new Filter[0]);
-            Filter group = and(first, other);
+            StructuredQuery.Filter first = filters.get(0);
+            StructuredQuery.Filter[] other = filters.subList(1, filters.size())
+                                                    .toArray(new StructuredQuery.Filter[0]);
+            StructuredQuery.Filter group = and(first, other);
             destination.add(group);
         }
     }
 
     /**
-     * A tree-structure specific representation of the {@link ColumnFilter}.
+     * A tree-structure specific representation of the {@link Filter}.
      *
-     * <p>The type holds the information about the {@link ColumnFilter} and a {@code Collection} of
+     * <p>The type holds the information about the {@link Filter} and a {@code Collection} of
      * references on the subtrees of given node.
      */
-    private static class ColumnFilterNode {
+    private static class FilterNode {
 
         private final EntityColumn column;
-        private final ColumnFilter columnFilter;
+        private final Filter columnFilter;
 
-        private final Collection<ColumnFilterNode> subtrees;
+        private final Collection<FilterNode> subtrees;
 
-        private ColumnFilterNode(@Nullable EntityColumn column, @Nullable ColumnFilter filter) {
+        private FilterNode(@Nullable EntityColumn column, @Nullable Filter filter) {
             this.column = column;
             this.columnFilter = filter;
             this.subtrees = newLinkedList();
         }
 
-        private ColumnFilterNode() {
+        private FilterNode() {
             this(null, null);
         }
 
@@ -376,13 +384,13 @@ final class DsFilters {
             return column;
         }
 
-        private ColumnFilter getColumnFilter() {
+        private Filter getFilter() {
             return columnFilter;
         }
 
         @SuppressWarnings({"EnumSwitchStatementWhichMissesCases", "MethodOnlyUsedFromInnerClass"})
             // Only non-faulty values are used.
-        private Filter toFilter(ColumnFilterAdapter adapter) {
+        private StructuredQuery.Filter toFilter(FilterAdapter adapter) {
             Value<?> value = adapter.toValue(column, columnFilter);
             String columnIdentifier = column.getStoredName();
             switch (columnFilter.getOperator()) {
@@ -403,31 +411,32 @@ final class DsFilters {
         }
 
         /**
-         * Traverses the tree of the {@code ColumnFilterNode column filters} starting from
+         * Traverses the tree of the {@code FilterNode column filters} starting from
          * the current node, passing all the found paths from the tree top to a leaf to the given
          * result processor.
          *
-         * @param processor the result processor
+         * @param processor
+         *         the result processor
          */
         @SuppressWarnings("MethodWithMultipleLoops")
             // To make the traversal algorithm more obvious.
         private void traverse(TreePathWalker processor) {
-            Queue<ColumnFilterNode> nodes = new ArrayDeque<>();
-            Queue<Collection<ColumnFilterNode>> paths = new ArrayDeque<>();
+            Queue<FilterNode> nodes = new ArrayDeque<>();
+            Queue<Collection<FilterNode>> paths = new ArrayDeque<>();
             nodes.offer(this);
             // Initial path is intentionally left empty.
             paths.offer(new ArrayList<>());
 
             while (!nodes.isEmpty()) {
-                ColumnFilterNode node = nodes.poll();
-                Collection<ColumnFilterNode> path = paths.poll();
+                FilterNode node = nodes.poll();
+                Collection<FilterNode> path = paths.poll();
 
                 checkNotNull(path);
                 if (node.isLeaf()) {
                     processor.walk(path);
                 } else {
-                    for (ColumnFilterNode child : node.subtrees) {
-                        Collection<ColumnFilterNode> childPath = newPath(path);
+                    for (FilterNode child : node.subtrees) {
+                        Collection<FilterNode> childPath = newPath(path);
                         childPath.add(child);
                         nodes.offer(child);
                         paths.offer(childPath);
@@ -444,6 +453,14 @@ final class DsFilters {
             return subtrees.isEmpty();
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>An arbitrary node is never equal to the tree head. The tree head is only equal to
+         * itself.
+         */
+        @SuppressWarnings("EqualsGetClass")
+            // This is a private class as well as the descendant overriding equals().
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -452,47 +469,54 @@ final class DsFilters {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            ColumnFilterNode that = (ColumnFilterNode) o;
+            FilterNode that = (FilterNode) o;
             return Objects.equal(getColumn(), that.getColumn()) &&
-                    Objects.equal(getColumnFilter(), that.getColumnFilter());
+                    Objects.equal(getFilter(), that.getFilter());
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(getColumn(), getColumnFilter());
+            return Objects.hashCode(getColumn(), getFilter());
         }
 
-        private static Function<ColumnFilterNode, Filter> toFilterFunction(
-                ColumnFilterAdapter adapter) {
+        private static Function<FilterNode, StructuredQuery.Filter>
+        toFilterFunction(FilterAdapter adapter) {
             return new ToFilter(adapter);
         }
 
-        private static class ToFilter implements Function<ColumnFilterNode, Filter> {
+        private static class ToFilter implements Function<FilterNode, StructuredQuery.Filter> {
 
-            private final ColumnFilterAdapter adapter;
+            private final FilterAdapter adapter;
 
-            private ToFilter(ColumnFilterAdapter adapter) {
+            private ToFilter(FilterAdapter adapter) {
                 this.adapter = adapter;
             }
 
             @Override
-            public Filter apply(@Nullable ColumnFilterNode input) {
+            public StructuredQuery.Filter apply(@Nullable FilterNode input) {
                 checkNotNull(input);
-                Filter result = input.toFilter(adapter);
+                StructuredQuery.Filter result = input.toFilter(adapter);
                 return result;
             }
         }
     }
 
     /**
-     * A specific type of a {@code ColumnFilterNode} tree node representing the tree head.
+     * A specific type of a {@code FilterNode} tree node representing the tree head.
      */
-    private static final class ColumnFilterTreeHead extends ColumnFilterNode {
+    private static final class FilterTreeHead extends FilterNode {
 
-        private static ColumnFilterNode instance() {
-            return new ColumnFilterTreeHead();
+        private static FilterNode instance() {
+            return new FilterTreeHead();
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>A tree head is only equal to itself.
+         *
+         * @implNote Uses reference equality.
+         */
         @Override
         public boolean equals(Object o) {
             return o == this;
@@ -508,10 +532,10 @@ final class DsFilters {
      * A functional interface defining the operation of precessing a conjunction group found by
      * the {@linkplain #fromParams parenthesis simplifying algorithm}.
      *
-     * <p>Receives a {@code Collection} of {@linkplain ColumnFilterNode ColumnFilterNodes}
+     * <p>Receives a {@code Collection} of {@linkplain FilterNode FilterNodes}
      * representing a single generated conjunction group.
      *
-     * @see ColumnFilterReducer for the implementation
+     * @see FilterReducer for the implementation
      */
     @FunctionalInterface
     private interface TreePathWalker {
@@ -522,10 +546,11 @@ final class DsFilters {
          *
          * <p>The given path represents a single conjunction group.
          *
-         * @param conjunctionGroup the path in
-         *                         the {@linkplain #buildConjunctionTree conjunction tree}
-         *                         representing a single conjunction group
+         * @param conjunctionGroup
+         *         the path in
+         *         the {@linkplain #buildConjunctionTree conjunction tree}
+         *         representing a single conjunction group
          */
-        void walk(Collection<ColumnFilterNode> conjunctionGroup);
+        void walk(Collection<FilterNode> conjunctionGroup);
     }
 }

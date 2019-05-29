@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -34,7 +34,6 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Streams;
 import io.spine.logging.Logging;
@@ -111,8 +110,10 @@ public class DatastoreWrapper implements Logging {
      * Creates an instance of {@link com.google.cloud.datastore.Key} basing on the Datastore
      * entity {@code kind} and {@code recordId}.
      *
-     * @param kind      the kind of the Datastore entity
-     * @param recordId  the ID of the record
+     * @param kind
+     *         the kind of the Datastore entity
+     * @param recordId
+     *         the ID of the record
      * @return the Datastore {@code Key} instance
      */
     Key keyFor(Kind kind, RecordId recordId) {
@@ -125,8 +126,10 @@ public class DatastoreWrapper implements Logging {
     /**
      * Writes new {@link Entity} into the Datastore.
      *
-     * @param entity new {@link Entity} to put into the Datastore
-     * @throws DatastoreException upon failure
+     * @param entity
+     *         new {@link Entity} to put into the Datastore
+     * @throws DatastoreException
+     *         upon failure
      * @see DatastoreWriter#put(FullEntity)
      */
     public void create(Entity entity) throws DatastoreException {
@@ -136,8 +139,10 @@ public class DatastoreWrapper implements Logging {
     /**
      * Modifies an {@link Entity} in the Datastore.
      *
-     * @param entity the {@link Entity} to update
-     * @throws DatastoreException if the {@link Entity} with such {@link Key} does not exist
+     * @param entity
+     *         the {@link Entity} to update
+     * @throws DatastoreException
+     *         if the {@link Entity} with such {@link Key} does not exist
      * @see DatastoreWriter#update(Entity...)
      */
     public void update(Entity entity) throws DatastoreException {
@@ -147,7 +152,8 @@ public class DatastoreWrapper implements Logging {
     /**
      * Writes an {@link Entity} to the Datastore or modifies an existing one.
      *
-     * @param entity the {@link Entity} to write or update
+     * @param entity
+     *         the {@link Entity} to write or update
      * @see DatastoreWrapper#create(Entity)
      * @see DatastoreWrapper#update(Entity)
      */
@@ -158,7 +164,8 @@ public class DatastoreWrapper implements Logging {
     /**
      * Writes the {@link Entity entities} to the Datastore or modifies the existing ones.
      *
-     * @param entities the {@link Entity Entities} to write or update
+     * @param entities
+     *         the {@link Entity Entities} to write or update
      * @see DatastoreWrapper#createOrUpdate(Entity)
      */
     public void createOrUpdate(Entity... entities) {
@@ -172,7 +179,8 @@ public class DatastoreWrapper implements Logging {
     /**
      * Writes the {@link Entity entities} to the Datastore or modifies the existing ones.
      *
-     * @param entities a {@link Collection} of {@link Entity Entities} to write or update
+     * @param entities
+     *         a {@link Collection} of {@link Entity Entities} to write or update
      * @see DatastoreWrapper#createOrUpdate(Entity)
      */
     public void createOrUpdate(Collection<Entity> entities) {
@@ -184,7 +192,8 @@ public class DatastoreWrapper implements Logging {
     /**
      * Retrieves an {@link Entity} with the given key from the Datastore.
      *
-     * @param key {@link Key} to search for
+     * @param key
+     *         {@link Key} to search for
      * @return the {@link Entity} or {@code null} in case of no results for the key given
      * @see DatastoreReader#get(Key)
      */
@@ -198,7 +207,7 @@ public class DatastoreWrapper implements Logging {
      * <p>The resulting {@code Iterator} is evaluated lazily. A call to
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
-     * <p>The results are returned in an order matching that of the provided keys 
+     * <p>The results are returned in an order matching that of the provided keys
      * with {@code null}s in place of missing and inactive entities.
      *
      * @param keys
@@ -327,7 +336,7 @@ public class DatastoreWrapper implements Logging {
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit} or
-     *         the provided {@code batchSize} is 0 
+     *         the provided {@code batchSize} is 0
      */
     private Iterator<Entity> readAllPageByPage(StructuredQuery<Entity> query,
                                                @Nullable Integer pageSize) {
@@ -354,7 +363,8 @@ public class DatastoreWrapper implements Logging {
     /**
      * Deletes all existing {@link Entity Entities} with the given keys.
      *
-     * @param keys {@link Key Keys} of the {@link Entity Entities} to delete. May be nonexistent
+     * @param keys
+     *         {@link Key Keys} of the {@link Entity Entities} to delete. May be nonexistent
      */
     public void delete(Key... keys) {
         actor.delete(keys);
@@ -363,7 +373,8 @@ public class DatastoreWrapper implements Logging {
     /**
      * Deletes all existing {@link Entities} of a kind given.
      *
-     * @param table kind (a.k.a. type, table, etc.) of the records to delete
+     * @param table
+     *         kind (a.k.a. type, table, etc.) of the records to delete
      */
     void dropTable(String table) {
         Namespace namespace = getNamespace();
@@ -415,8 +426,9 @@ public class DatastoreWrapper implements Logging {
      * instance of {@code DatastoreWrapper} become transactional. This behaviour lasts until either
      * {@link #commitTransaction()} or {@link #rollbackTransaction()} is called.
      *
-     * @throws IllegalStateException if a transaction is already started on this instance of
-     * {@code DatastoreWrapper}
+     * @throws IllegalStateException
+     *         if a transaction is already started on this instance of
+     *         {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
     public void startTransaction() throws IllegalStateException {
@@ -432,8 +444,9 @@ public class DatastoreWrapper implements Logging {
      *
      * <p>All next operations become non-transactional until {@link #startTransaction()} is called.
      *
-     * @throws IllegalStateException if no transaction is started on this instance of
-     * {@code DatastoreWrapper}
+     * @throws IllegalStateException
+     *         if no transaction is started on this instance of
+     *         {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
     public void commitTransaction() throws IllegalStateException {
@@ -451,8 +464,9 @@ public class DatastoreWrapper implements Logging {
      * <p>After this method execution is over, all the further modifications made through
      * the current instance of {@code DatastoreWrapper} become non-transactional.
      *
-     * @throws IllegalStateException if no transaction is active for the current
-     * instance of {@code DatastoreWrapper}
+     * @throws IllegalStateException
+     *         if no transaction is active for the current
+     *         instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
      */
     public void rollbackTransaction() throws IllegalStateException {
@@ -474,7 +488,8 @@ public class DatastoreWrapper implements Logging {
      * Retrieves an instance of {@link KeyFactory} unique for given Kind of data
      * regarding the current namespace.
      *
-     * @param kind kind of {@link Entity} to generate keys for
+     * @param kind
+     *         kind of {@link Entity} to generate keys for
      * @return an instance of {@link KeyFactory} for given kind
      */
     public KeyFactory getKeyFactory(Kind kind) {
@@ -496,7 +511,6 @@ public class DatastoreWrapper implements Logging {
         return options;
     }
 
-    @VisibleForTesting
     Datastore getDatastore() {
         return datastore;
     }

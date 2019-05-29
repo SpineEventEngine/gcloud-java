@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -47,23 +47,23 @@ class NewBoundedContextBuilderTest {
     void testProduceBCBuilder() {
         DatastoreStorageFactory factory = givenFactory();
         BoundedContextBuilder builder = factory.newBoundedContextBuilder();
-        Optional<Supplier<StorageFactory>> supplierOptional =
-                builder.getStorageFactorySupplier();
+        Optional<Supplier<StorageFactory>> supplierOptional = builder.storageFactorySupplier();
         assertTrue(supplierOptional.isPresent());
-        assertSame(factory, supplierOptional.get().get());
+        assertSame(factory, supplierOptional.get()
+                                            .get());
         assertEquals(builder.isMultitenant(), factory.isMultitenant());
-        Optional<? extends TenantIndex> tenantIndexOptional = builder.getTenantIndex();
+        Optional<? extends TenantIndex> tenantIndexOptional = builder.tenantIndex();
         assertTrue(tenantIndexOptional.isPresent());
         assertThat(tenantIndexOptional.get(), instanceOf(TestNamespaceIndex.getType()));
     }
 
     private static DatastoreStorageFactory givenFactory() {
-        DatastoreStorageFactory result =
-                DatastoreStorageFactory.newBuilder()
-                                       .setDatastore(givenDatastore())
-                                       .setMultitenant(true)
-                                       .setTypeRegistry(defaultInstance())
-                                       .build();
+        DatastoreStorageFactory result = DatastoreStorageFactory
+                .newBuilder()
+                .setDatastore(givenDatastore())
+                .setMultitenant(true)
+                .setTypeRegistry(defaultInstance())
+                .build();
         return result;
     }
 

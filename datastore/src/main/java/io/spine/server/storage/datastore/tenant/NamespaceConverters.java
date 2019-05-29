@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -125,8 +125,7 @@ final class NamespaceConverters {
 
         @Override
         protected final TenantId toTenantId(String namespace) {
-            String significantNamespacePart =
-                    namespace.substring(SIGNIFICANT_PART_START_INDEX);
+            String significantNamespacePart = namespace.substring(SIGNIFICANT_PART_START_INDEX);
             return significantStringToTenantId(significantNamespacePart);
         }
 
@@ -151,12 +150,14 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            InternetDomain domain = InternetDomain.newBuilder()
-                                                  .setValue(namespace)
-                                                  .build();
-            TenantId tenantId = TenantId.newBuilder()
-                                        .setDomain(domain)
-                                        .build();
+            InternetDomain domain = InternetDomain
+                    .newBuilder()
+                    .setValue(namespace)
+                    .vBuild();
+            TenantId tenantId = TenantId
+                    .newBuilder()
+                    .setDomain(domain)
+                    .vBuild();
             return tenantId;
         }
     }
@@ -177,12 +178,14 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            EmailAddress email = EmailAddress.newBuilder()
-                                             .setValue(namespace)
-                                             .build();
-            TenantId tenantId = TenantId.newBuilder()
-                                        .setEmail(email)
-                                        .build();
+            EmailAddress email = EmailAddress
+                    .newBuilder()
+                    .setValue(namespace)
+                    .vBuild();
+            TenantId tenantId = TenantId
+                    .newBuilder()
+                    .setEmail(email)
+                    .vBuild();
             return tenantId;
         }
     }
@@ -202,9 +205,10 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            TenantId tenantId = TenantId.newBuilder()
-                                        .setValue(namespace)
-                                        .build();
+            TenantId tenantId = TenantId
+                    .newBuilder()
+                    .setValue(namespace)
+                    .vBuild();
             return tenantId;
         }
     }
@@ -236,9 +240,10 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId toTenantId(String namespace) {
-            TenantId tenantId = TenantId.newBuilder()
-                                        .setValue(namespace)
-                                        .build();
+            TenantId tenantId = TenantId
+                    .newBuilder()
+                    .setValue(namespace)
+                    .vBuild();
             return tenantId;
         }
     }

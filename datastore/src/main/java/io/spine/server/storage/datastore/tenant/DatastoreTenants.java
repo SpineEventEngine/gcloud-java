@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -80,7 +80,8 @@ public final class DatastoreTenants {
      * require a {@code TenantIndex} to be set explicitly, so this method assumes that it is an a
      * single tenant context.
      *
-     * @param datastore the {@link Datastore} to get the {@link TenantIndex} for
+     * @param datastore
+     *         the {@link Datastore} to get the {@link TenantIndex} for
      * @return a new instance of the {@link TenantIndex}
      * @see io.spine.server.storage.datastore.DatastoreStorageFactory#newBoundedContextBuilder()
      */

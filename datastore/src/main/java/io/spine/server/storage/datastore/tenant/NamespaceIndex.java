@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -77,7 +77,8 @@ class NamespaceIndex implements TenantIndex {
      *
      * <p>If the ID is not found, writes the ID into the in-mem cache.
      *
-     * @param id the ID to ensure
+     * @param id
+     *         the ID to ensure
      */
     @Override
     public void keep(TenantId id) {
@@ -87,9 +88,6 @@ class NamespaceIndex implements TenantIndex {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<TenantId> getAll() {
         synchronized (lock) {
@@ -117,11 +115,12 @@ class NamespaceIndex implements TenantIndex {
      * Checks if the Datastore has the given {@linkplain Namespace}, i.e. there is at least one
      * {@linkplain Entity Entity} in this {@linkplain Namespace}.
      *
-     * @param namespace the {@linkplain Namespace} to look for
+     * @param namespace
+     *         the {@linkplain Namespace} to look for
      * @return {@code true} if there is at least one
-     * {@linkplain Entity Entity} in this {@linkplain Namespace} or the corresponding
-     * {@link TenantId} has been put into the index by a call to {@link #keep(TenantId)},
-     * {@code false} otherwise
+     *         {@linkplain Entity Entity} in this {@linkplain Namespace} or the corresponding
+     *         {@link TenantId} has been put into the index by a call to {@link #keep(TenantId)},
+     *         {@code false} otherwise
      */
     boolean contains(Namespace namespace) {
         checkNotNull(namespace);
@@ -169,7 +168,7 @@ class NamespaceIndex implements TenantIndex {
          * Runs the Datastore query.
          *
          * @return an {@link Iterator} of the Datastore {@link Key keys} representing
-         * the namespaces.
+         *         the namespaces.
          */
         Iterator<Key> run();
     }
@@ -190,8 +189,8 @@ class NamespaceIndex implements TenantIndex {
         @Override
         public Iterator<Key> run() {
             Query<Key> query = Query.newKeyQueryBuilder()
-                                          .setKind(NAMESPACE_KIND.getValue())
-                                          .build();
+                                    .setKind(NAMESPACE_KIND.getValue())
+                                    .build();
             Iterator<Key> result = datastore.run(query);
             return result;
         }
@@ -211,9 +210,10 @@ class NamespaceIndex implements TenantIndex {
         /**
          * Retrieves a {@link Namespace} from a given {@link Key}.
          *
-         * @param key a Datastore {@link Key} representing a Datastore namespace
+         * @param key
+         *         a Datastore {@link Key} representing a Datastore namespace
          * @return the result of call to {@link Key#getName()} or {@code null} if the
-         * {@link Key} has no name (i.e. the namespace is default)
+         *         {@link Key} has no name (i.e. the namespace is default)
          */
         @Nullable
         @Override

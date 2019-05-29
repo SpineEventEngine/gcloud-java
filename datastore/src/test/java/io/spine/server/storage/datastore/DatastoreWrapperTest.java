@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,16 +30,13 @@ import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.given.TestDatastores;
-import io.spine.server.storage.datastore.given.TestEnvironment;
 import io.spine.server.tenant.TenantAwareFunction0;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIf;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -210,7 +207,7 @@ class DatastoreWrapperTest {
 
         @Test
         @DisplayName("read and write entities in the remote datastore")
-        void testBulkRead() throws InterruptedException {
+        void testBulkRead() {
             assumeTrue(runsOnCi());
 
             int entityCount = 5;
@@ -355,18 +352,23 @@ class DatastoreWrapperTest {
         ensureNamespace(tenantId1Prefixed, datastore);
         ensureNamespace(tenantId2Prefixed, datastore);
         ensureNamespace(tenantId3Prefixed, datastore);
+        EmailAddress emailAddress2 = EmailAddress
+                .newBuilder()
+                .setValue(tenantId2)
+                .vBuild();
+        InternetDomain internetDomain3 = InternetDomain
+                .newBuilder()
+                .setValue(tenantId3)
+                .vBuild();
         TenantId id1 = TenantId.newBuilder()
                                .setValue(tenantId1)
-                               .build();
+                               .vBuild();
         TenantId id2 = TenantId.newBuilder()
-                               .setEmail(EmailAddress.newBuilder()
-                                                     .setValue(tenantId2))
-                               .build();
+                               .setEmail(emailAddress2)
+                               .vBuild();
         TenantId id3 = TenantId.newBuilder()
-                               .setDomain(InternetDomain.newBuilder()
-                                                        .setValue(tenantId3))
-                               .build();
-
+                               .setDomain(internetDomain3)
+                               .vBuild();
         checkTenantIdInKey(tenantId1Prefixed, id1, wrapper);
         checkTenantIdInKey(tenantId2Prefixed, id2, wrapper);
         checkTenantIdInKey(tenantId3Prefixed, id3, wrapper);
@@ -409,9 +411,10 @@ class DatastoreWrapperTest {
     @DisplayName("allow to add new namespaces 'on the go'")
     void testNewNamespaces() {
         DatastoreWrapper wrapper = wrap(localDatastore(), multitenant(projectId()));
-        TenantId tenantId = TenantId.newBuilder()
-                                    .setValue("Luke_I_am_your_tenant.")
-                                    .build();
+        TenantId tenantId = TenantId
+                .newBuilder()
+                .setValue("Luke_I_am_your_tenant.")
+                .vBuild();
         String key = "noooooo";
         Key entityKey = new TenantAwareFunction0<Key>(tenantId) {
             @Override

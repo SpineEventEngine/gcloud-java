@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -80,9 +80,10 @@ class DatastoreStorageFactoryBuilderTest {
     @Test
     @DisplayName("construct factories with default type registry")
     void testDefaultTypeRegistry() {
-        StorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                        .setDatastore(mockDatastore())
-                                                        .build();
+        DatastoreStorageFactory factory = DatastoreStorageFactory
+                .newBuilder()
+                .setDatastore(mockDatastore())
+                .build();
         ColumnTypeRegistry registry = factory.getTypeRegistry();
         assertNotNull(registry);
     }
@@ -99,7 +100,7 @@ class DatastoreStorageFactoryBuilderTest {
     @Test
     @DisplayName("construct factories with extended type registry")
     void testExtendedTypeRegistry() {
-        StorageFactory factory =
+        DatastoreStorageFactory factory =
                 DatastoreStorageFactory.newBuilder()
                                        .setDatastore(mockDatastore())
                                        .setTypeRegistry(predefinedValuesAnd()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,7 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
-import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -30,13 +30,12 @@ import io.spine.server.projection.ProjectionStorageTest;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -52,10 +51,11 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
 
     @Override
     protected EntityRecord newStorageRecord() {
-        return EntityRecord.newBuilder()
+        return EntityRecord
+                .newBuilder()
                 .setState(AnyPacker.pack(Sample.messageOfType(Project.class)))
-                .setVersion(Version.newBuilder().setNumber(42).setTimestamp(getCurrentTime()))
-                .build();
+                .setVersion(Versions.newVersion(42, currentTime()))
+                .vBuild();
     }
 
     @AfterEach
@@ -65,7 +65,7 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
 
     @SuppressWarnings("unchecked") // Required for test purposes.
     @Override
-    protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
+    protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
         Class<? extends Projection<ProjectId, ?, ?>> projectionClass =
                 (Class<? extends Projection<ProjectId, ?, ?>>) cls;
         ProjectionStorage<ProjectId> result =
@@ -85,7 +85,8 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
 
     private static class TestProjection extends Projection<ProjectId,
                                                            Project,
-                                                           ProjectVBuilder> {
+                                                           Project.Builder> {
+
         private TestProjection(ProjectId id) {
             super(id);
         }

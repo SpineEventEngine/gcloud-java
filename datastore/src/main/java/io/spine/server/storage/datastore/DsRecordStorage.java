@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -55,7 +55,6 @@ import static io.spine.server.storage.datastore.Entities.fromMessage;
 import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.server.storage.datastore.RecordId.ofEntityId;
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 /**
  * {@link RecordStorage} implementation based on Google App Engine Datastore.
@@ -72,7 +71,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final DsLookupByQueries queryLookup;
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
-    private final ColumnFilterAdapter columnFilterAdapter;
+    private final FilterAdapter columnFilterAdapter;
 
     /**
      * Creates new {@link Builder} instance.
@@ -94,7 +93,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.idClass = checkNotNull(builder.getIdClass());
         this.datastore = builder.getDatastore();
         this.columnTypeRegistry = checkNotNull(builder.getColumnTypeRegistry());
-        this.columnFilterAdapter = ColumnFilterAdapter.of(this.columnTypeRegistry);
+        this.columnFilterAdapter = FilterAdapter.of(this.columnTypeRegistry);
         this.idLookup = new DsLookupByIds<>(this.datastore, this.typeUrl);
         this.queryLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
                                                  this.columnFilterAdapter);
@@ -115,8 +114,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected @Nullable
-    Optional<EntityRecord> readRecord(I id) {
+    protected Optional<EntityRecord> readRecord(I id) {
         Key key = keyOf(id);
         Entity response = datastore.read(key);
 
@@ -125,7 +123,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         EntityRecord result = toMessage(response, RECORD_TYPE_URL);
-        return of(result);
+        return Optional.of(result);
     }
 
     @Override
@@ -206,7 +204,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     private EntityQuery<I> includeLifecycle(EntityQuery<I> entityQuery) {
-        return isLifecycleSupported() && !entityQuery.isLifecycleAttributesSet()
+        return !entityQuery.isLifecycleAttributesSet()
                ? entityQuery.withActiveLifecycle(this)
                : entityQuery;
     }

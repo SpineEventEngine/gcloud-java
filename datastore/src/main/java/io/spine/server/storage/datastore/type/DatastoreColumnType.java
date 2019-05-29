@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,7 +37,7 @@ import io.spine.server.entity.storage.ColumnType;
  */
 @SPI
 public interface DatastoreColumnType<J, C>
-       extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
+        extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
 
     Value<?> toValue(C data);
 }

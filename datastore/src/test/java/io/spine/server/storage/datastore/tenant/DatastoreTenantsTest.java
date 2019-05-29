@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -64,7 +64,7 @@ class DatastoreTenantsTest {
         TenantId customId = TenantId
                 .newBuilder()
                 .setValue(customNamespace)
-                .build();
+                .vBuild();
         index.keep(customId);
         Set<TenantId> ids = index.getAll();
         assertThat(ids).contains(customId);
@@ -79,7 +79,6 @@ class DatastoreTenantsTest {
         when(datastore.run(any(Query.class))).thenReturn(new MockKeyQueryResults());
         return datastore;
     }
-
 
     @SuppressWarnings("NewExceptionWithoutArguments")
     private static class MockKeyQueryResults implements QueryResults<Key> {
@@ -102,6 +101,11 @@ class DatastoreTenantsTest {
 
         @Override
         public Cursor getCursorAfter() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int getSkippedResults() {
             throw new UnsupportedOperationException();
         }
 

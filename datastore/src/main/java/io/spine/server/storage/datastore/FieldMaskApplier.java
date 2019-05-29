@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -36,7 +36,8 @@ import static io.spine.validate.Validate.isDefault;
 /**
  * Applies the provided mask to nullable or non-nullable records.
  *
- * <p>Instantiated using one of {@link #nullableRecordMasker(FieldMask) nullableRecordMasker(mask)} or
+ * <p>Instantiated using one of {@link #nullableRecordMasker(FieldMask) nullableRecordMasker(mask)}
+ * or
  * {@link #recordMasker(FieldMask) recordMasker(mask)}.
  */
 final class FieldMaskApplier {
@@ -87,8 +88,9 @@ final class FieldMaskApplier {
     private EntityRecord recordMasker(EntityRecord record) {
         Message state = unpack(record.getState());
         Message maskedState = applyMask(fieldMask, state);
-        return EntityRecord.newBuilder(record)
-                           .setState(pack(maskedState))
-                           .build();
+        return record
+                .toBuilder()
+                .setState(pack(maskedState))
+                .vBuild();
     }
 }

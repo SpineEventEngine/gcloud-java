@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,7 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.NullValue;
 import com.google.cloud.datastore.Value;
 import com.google.protobuf.Any;
-import io.spine.client.ColumnFilter;
+import io.spine.client.Filter;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityColumn;
@@ -33,35 +33,35 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A {@link ColumnTypeRegistry} based {@link ColumnFilter} to {@link Value} adapter.
- *
- * @author Dmytro Dashenkov
+ * A {@link ColumnTypeRegistry} based {@link Filter} to {@link Value} adapter.
  */
-final class ColumnFilterAdapter {
+final class FilterAdapter {
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType> registry;
 
     /**
-     * Creates a new instance of {@code ColumnFilterAdapter} on top of the given
+     * Creates a new instance of {@code FilterAdapter} on top of the given
      * {@link ColumnTypeRegistry}.
      */
-    static ColumnFilterAdapter of(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
-        return new ColumnFilterAdapter(registry);
+    static FilterAdapter of(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
+        return new FilterAdapter(registry);
     }
 
-    private ColumnFilterAdapter(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
+    private FilterAdapter(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
         this.registry = registry;
     }
 
     /**
-     * Extracts the filter parameter from the given {@link ColumnFilter} and converts it into
+     * Extracts the filter parameter from the given {@link Filter} and converts it into
      * the Datastore {@link Value}.
      *
-     * @param column       the {@link EntityColumn} targeted by the given filter
-     * @param columnFilter the filter
+     * @param column
+     *         the {@link EntityColumn} targeted by the given filter
+     * @param columnFilter
+     *         the filter
      * @return new instance of {@link Value} representing the value of the given filter
      */
-    Value<?> toValue(EntityColumn column, ColumnFilter columnFilter) {
+    Value<?> toValue(EntityColumn column, Filter columnFilter) {
         checkNotNull(column);
         checkNotNull(columnFilter);
 
@@ -69,7 +69,8 @@ final class ColumnFilterAdapter {
         checkArgument(type != null, "Column of unknown type: %s.", column);
 
         Any filterValue = columnFilter.getValue();
-        Object filterValueUnpacked = TypeConverter.toObject(filterValue, column.getType());
+        Class<?> columnClass = column.getType();
+        Object filterValueUnpacked = TypeConverter.toObject(filterValue, columnClass);
         Object columnValue = column.toPersistedValue(filterValueUnpacked);
 
         if (columnValue == null) {

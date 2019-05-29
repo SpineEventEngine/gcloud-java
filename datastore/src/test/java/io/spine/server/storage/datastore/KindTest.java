@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -35,9 +35,6 @@ import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("Kind should")
 class KindTest {
 
@@ -91,7 +88,8 @@ class KindTest {
         TypeUrl type = TypeUrl.from(descriptor);
         Kind kind = Kind.of(type);
         assertEquals(descriptor.getFullName(), kind.getValue());
-        assertEquals(type.getTypeName(), kind.getValue());
+        assertEquals(type.toTypeName()
+                         .value(), kind.getValue());
     }
 
     @Test
@@ -107,7 +105,8 @@ class KindTest {
     void testFromMessage() {
         Message message = Any.getDefaultInstance();
         Kind kind = Kind.of(message);
-        assertEquals(message.getDescriptorForType().getFullName(), kind.getValue());
+        assertEquals(message.getDescriptorForType()
+                            .getFullName(), kind.getValue());
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,8 +22,8 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.common.collect.Multimap;
-import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter.CompositeOperator;
+import io.spine.client.CompositeFilter.CompositeOperator;
+import io.spine.client.Filter;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,11 +39,11 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 final class EntityColumnPredicate implements Predicate<Entity> {
 
-    private final ColumnFilterAdapter adapter;
+    private final FilterAdapter adapter;
     private final Iterable<CompositeQueryParameter> queryParams;
 
     EntityColumnPredicate(Iterable<CompositeQueryParameter> queryParams,
-                          ColumnFilterAdapter adapter) {
+                          FilterAdapter adapter) {
         this.adapter = adapter;
         this.queryParams = queryParams;
     }
@@ -80,8 +80,8 @@ final class EntityColumnPredicate implements Predicate<Entity> {
         return true;
     }
 
-    private boolean checkAll(Multimap<EntityColumn, ColumnFilter> filters, Entity entity) {
-        for (Map.Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
+    private boolean checkAll(Multimap<EntityColumn, Filter> filters, Entity entity) {
+        for (Map.Entry<EntityColumn, Filter> filter : filters.entries()) {
             EntityColumn column = filter.getKey();
             boolean matches = checkSingleParam(filter.getValue(), entity, column);
             if (!matches) {
@@ -91,8 +91,8 @@ final class EntityColumnPredicate implements Predicate<Entity> {
         return true;
     }
 
-    private boolean checkEither(Multimap<EntityColumn, ColumnFilter> filters, Entity entity) {
-        for (Map.Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
+    private boolean checkEither(Multimap<EntityColumn, Filter> filters, Entity entity) {
+        for (Map.Entry<EntityColumn, Filter> filter : filters.entries()) {
             EntityColumn column = filter.getKey();
             boolean matches = checkSingleParam(filter.getValue(), entity, column);
             if (matches) {
@@ -102,7 +102,7 @@ final class EntityColumnPredicate implements Predicate<Entity> {
         return filters.isEmpty();
     }
 
-    private boolean checkSingleParam(ColumnFilter filter, Entity entity, EntityColumn column) {
+    private boolean checkSingleParam(Filter filter, Entity entity, EntityColumn column) {
         String columnName = column.getName();
         if (!entity.contains(columnName)) {
             return false;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -65,7 +65,6 @@ import static io.spine.server.storage.datastore.DsProperties.markAsDeleted;
 import static io.spine.server.storage.datastore.DsProperties.markAsSnapshot;
 import static io.spine.server.storage.datastore.Entities.fromMessage;
 import static io.spine.server.storage.datastore.Entities.toMessage;
-import static io.spine.server.storage.datastore.RecordId.of;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
@@ -107,10 +106,10 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         EntityClass<? extends Aggregate<I, ?, ?>> modelClass = asEntityClass(cls);
         @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
-                Class<I> idClass = (Class<I>) modelClass.getIdClass();
+                Class<I> idClass = (Class<I>) modelClass.idClass();
         this.idClass = idClass;
-        this.stateTypeName = modelClass.getStateType()
-                                       .toName();
+        this.stateTypeName = modelClass.stateType()
+                                       .toTypeName();
     }
 
     @Override
@@ -134,9 +133,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         checkNotNull(id);
 
         RecordId datastoreId = toEventCountId(id);
-        propertyStorage.write(datastoreId, Int32Value.newBuilder()
-                                                     .setValue(eventCount)
-                                                     .build());
+        propertyStorage.write(datastoreId, Int32Value.of(eventCount));
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases.
@@ -151,7 +148,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             case EVENT:
                 String eventIdString = Stringifiers.toString(record.getEvent()
                                                                    .getId());
-                recordId = of(eventIdString);
+                recordId = RecordId.of(eventIdString);
                 version = record.getEvent()
                                 .getContext()
                                 .getVersion();
@@ -223,7 +220,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected RecordId toRecordId(I id) {
         String stringId = Stringifiers.toString(id);
         String datastoreId = format("%s_%s", EVENTS_AFTER_LAST_SNAPSHOT_PREFIX, stringId);
-        return of(datastoreId);
+        return RecordId.of(datastoreId);
     }
 
     /**
@@ -237,7 +234,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         String stringId = Stringifiers.toString(id);
         String snapshotTimeStamp = Timestamps.toString(snapshot.getTimestamp());
         String snapshotId = format("%s_%s_%s", SNAPSHOT, stringId, snapshotTimeStamp);
-        return of(snapshotId);
+        return RecordId.of(snapshotId);
     }
 
     /**
@@ -252,7 +249,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         String stringId = Stringifiers.toString(id);
         String datastoreId =
                 format("%s_%s_%s", EVENTS_AFTER_LAST_SNAPSHOT_PREFIX, stateTypeName, stringId);
-        return of(datastoreId);
+        return RecordId.of(datastoreId);
     }
 
     /**
@@ -293,10 +290,11 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         if (!archived && !deleted) {
             return Optional.empty();
         }
-        LifecycleFlags flags = LifecycleFlags.newBuilder()
-                                             .setArchived(archived)
-                                             .setDeleted(deleted)
-                                             .build();
+        LifecycleFlags flags = LifecycleFlags
+                .newBuilder()
+                .setArchived(archived)
+                .setDeleted(deleted)
+                .vBuild();
         return Optional.of(flags);
     }
 
