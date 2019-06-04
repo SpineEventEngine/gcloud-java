@@ -10,7 +10,8 @@ all modules and does not describe the project structure per-subproject.
  
  -->
 
-<artifactId>gcloud-java</artifactId>
+<groupId>io.spine.gcloud</groupId>
+<artifactId>spine-gcloud-java</artifactId>
 <version>1.0.0-SNAPSHOT</version>
 
 <inceptionYear>2015</inceptionYear>
@@ -122,3 +123,5 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
 </dependencies>
 </project>
+
+
