@@ -99,7 +99,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     @Test
     @DisplayName("provide access to DatastoreWrapper for extensibility")
     void testAccessDatastoreWrapper() {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         DatastoreWrapper datastore = storage.getDatastore();
         assertNotNull(datastore);
     }
@@ -108,7 +108,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     @Test
     @DisplayName("provide access to PropertyStorage for extensibility")
     void testAccessPropertyStorage() {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         DsPropertyStorage propertyStorage = storage.getPropertyStorage();
         assertNotNull(propertyStorage);
     }
@@ -116,7 +116,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     @Test
     @DisplayName("fail to write invalid record")
     void testFailOnInvalidRecord() {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         assertThrows(IllegalArgumentException.class,
                      () -> storage.writeRecord(Sample.messageOfType(ProjectId.class),
                                                AggregateEventRecord.getDefaultInstance()));
@@ -125,7 +125,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     @Test
     @DisplayName("not set limit for history backward query")
     void testHistoryQueryLimit() {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         int batchSize = 10;
         AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(newId(),
                                                                              batchSize);
@@ -138,7 +138,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     @Test
     @DisplayName("read the event count stored in the old format")
     void readEventCountOldFormat() {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         ProjectId id = newId();
         RecordId oldFormatId = storage.toRecordId(id);
         int eventCount = 15;
@@ -153,7 +153,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     @Test
     @DisplayName("not overwrite the event count when saving other aggregate type")
     void notOverwriteEventCount() {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         DsAggregateStorage<ProjectId> secondStorage = (DsAggregateStorage<ProjectId>)
                 newStorage(ProjectId.class, NonProjectStateAggregate.class);
 
@@ -172,7 +172,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     @Test
     @DisplayName("not overwrite the snapshot when saving a new one")
     void notOverwriteSnapshot() {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         ProjectId id = newId();
 
         writeSnapshotWithTimestamp(id, Timestamps.fromMillis(15));
@@ -234,7 +234,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     }
 
     private void writeSnapshotWithTimestamp(ProjectId id, Timestamp timestamp) {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) getStorage();
+        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         Snapshot snapshot = Snapshot
                 .newBuilder()
                 .setTimestamp(timestamp)

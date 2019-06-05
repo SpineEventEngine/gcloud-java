@@ -97,8 +97,8 @@ class DatastoreTypeRegistryFactoryTest {
 
     private static EntityColumn mockColumn(Class type) {
         EntityColumn column = mock(EntityColumn.class);
-        when(column.getType()).thenReturn(type);
-        when(column.getPersistedType()).thenReturn(type);
+        when(column.type()).thenReturn(type);
+        when(column.persistedType()).thenReturn(type);
         return column;
     }
 

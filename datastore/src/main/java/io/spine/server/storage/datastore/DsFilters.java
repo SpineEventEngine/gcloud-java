@@ -392,7 +392,7 @@ final class DsFilters {
             // Only non-faulty values are used.
         private StructuredQuery.Filter toFilter(FilterAdapter adapter) {
             Value<?> value = adapter.toValue(column, columnFilter);
-            String columnIdentifier = column.getStoredName();
+            String columnIdentifier = column.storedName();
             switch (columnFilter.getOperator()) {
                 case EQUAL:
                     return eq(columnIdentifier, value);

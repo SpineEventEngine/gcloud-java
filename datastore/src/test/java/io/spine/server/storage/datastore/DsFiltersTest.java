@@ -186,9 +186,9 @@ class DsFiltersTest {
     @DisplayName("generate filters for null column value")
     void testNullFilters() {
         EntityColumn column = mock(EntityColumn.class);
-        when(column.getStoredName()).thenReturn(ID_STRING_COLUMN_NAME);
-        when(column.getType()).thenReturn(String.class);
-        when(column.getPersistedType()).thenReturn(String.class);
+        when(column.storedName()).thenReturn(ID_STRING_COLUMN_NAME);
+        when(column.type()).thenReturn(String.class);
+        when(column.persistedType()).thenReturn(String.class);
         when(column.toPersistedValue(any())).thenReturn(null);
 
         Filter filterWithStubValue = Filters.eq(ID_STRING_COLUMN_NAME, "");
