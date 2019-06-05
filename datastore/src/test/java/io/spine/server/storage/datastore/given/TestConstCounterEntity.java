@@ -97,8 +97,8 @@ public class TestConstCounterEntity
     }
 
     @Override
-    public LifecycleFlags getLifecycleFlags() {
-        return lifecycleFlags == null ? super.getLifecycleFlags() : lifecycleFlags;
+    public LifecycleFlags lifecycleFlags() {
+        return lifecycleFlags == null ? super.lifecycleFlags() : lifecycleFlags;
     }
 
     public void injectLifecycle(LifecycleFlags flags) {

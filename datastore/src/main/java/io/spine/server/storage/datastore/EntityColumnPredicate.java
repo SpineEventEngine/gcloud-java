@@ -103,7 +103,7 @@ final class EntityColumnPredicate implements Predicate<Entity> {
     }
 
     private boolean checkSingleParam(Filter filter, Entity entity, EntityColumn column) {
-        String columnName = column.getName();
+        String columnName = column.name();
         if (!entity.contains(columnName)) {
             return false;
         }

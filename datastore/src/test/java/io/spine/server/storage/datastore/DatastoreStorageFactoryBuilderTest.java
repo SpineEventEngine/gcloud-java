@@ -200,8 +200,8 @@ class DatastoreStorageFactoryBuilderTest {
 
     private static <T> EntityColumn mockColumn(Class<T> type) {
         EntityColumn mock = mock(EntityColumn.class);
-        when(mock.getType()).thenReturn(type);
-        when(mock.getPersistedType()).thenReturn(type);
+        when(mock.type()).thenReturn(type);
+        when(mock.persistedType()).thenReturn(type);
         return mock;
     }
 

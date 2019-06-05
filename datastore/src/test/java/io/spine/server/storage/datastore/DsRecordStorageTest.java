@@ -177,7 +177,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     @Test
     @DisplayName("provide access to DatastoreWrapper for extensibility")
     void testAccessDatastoreWrapper() {
-        DsRecordStorage<ProjectId> storage = getStorage();
+        DsRecordStorage<ProjectId> storage = storage();
         DatastoreWrapper datastore = storage.getDatastore();
         assertNotNull(datastore);
     }
@@ -185,7 +185,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     @Test
     @DisplayName("provide access to TypeUrl for extensibility")
     void testAccessTypeUrl() {
-        DsRecordStorage<ProjectId> storage = getStorage();
+        DsRecordStorage<ProjectId> storage = storage();
         TypeUrl typeUrl = storage.getTypeUrl();
         assertNotNull(typeUrl);
 

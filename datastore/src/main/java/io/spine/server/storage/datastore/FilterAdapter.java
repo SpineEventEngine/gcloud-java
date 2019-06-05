@@ -69,7 +69,7 @@ final class FilterAdapter {
         checkArgument(type != null, "Column of unknown type: %s.", column);
 
         Any filterValue = columnFilter.getValue();
-        Class<?> columnClass = column.getType();
+        Class<?> columnClass = column.type();
         Object filterValueUnpacked = TypeConverter.toObject(filterValue, columnClass);
         Object columnValue = column.toPersistedValue(filterValueUnpacked);
 
