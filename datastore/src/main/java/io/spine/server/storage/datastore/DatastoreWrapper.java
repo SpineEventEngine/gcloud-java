@@ -388,7 +388,7 @@ public class DatastoreWrapper implements Logging {
         deleteEntities(entities);
     }
 
-    void deleteEntities(List<Entity> entities) {
+    void deleteEntities(Collection<Entity> entities) {
         List<Key> keyList =
                 entities.stream()
                         .map(BaseEntity::getKey)

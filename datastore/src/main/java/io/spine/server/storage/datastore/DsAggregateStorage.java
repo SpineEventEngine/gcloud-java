@@ -28,6 +28,7 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.Version;
 import io.spine.server.aggregate.Aggregate;
@@ -43,12 +44,18 @@ import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.aggregate.AggregateField.aggregate_id;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
@@ -60,9 +67,11 @@ import static io.spine.server.storage.datastore.DsProperties.byRecordType;
 import static io.spine.server.storage.datastore.DsProperties.byVersion;
 import static io.spine.server.storage.datastore.DsProperties.isArchived;
 import static io.spine.server.storage.datastore.DsProperties.isDeleted;
+import static io.spine.server.storage.datastore.DsProperties.isSnapshot;
 import static io.spine.server.storage.datastore.DsProperties.markAsArchived;
 import static io.spine.server.storage.datastore.DsProperties.markAsDeleted;
 import static io.spine.server.storage.datastore.DsProperties.markAsSnapshot;
+import static io.spine.server.storage.datastore.DsProperties.whenCreated;
 import static io.spine.server.storage.datastore.Entities.fromMessage;
 import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -195,18 +204,71 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         return result;
     }
 
+    @Override
+    protected void clipRecords(int snapshotNumber) {
+        clipRecords(snapshotNumber, entity -> true);
+    }
+
+    @Override
+    protected void clipRecords(Timestamp date, int snapshotNumber) {
+        Predicate<Entity> predicate = entity -> Timestamps.compare(date, whenCreated(entity)) > 0;
+        clipRecords(snapshotNumber, predicate);
+    }
+
+    /**
+     * Clips aggregate event records that are older than the Nth snapshot and match the specified
+     * predicate.
+     */
+    private void clipRecords(int snapshotNumber, Predicate<Entity> predicate) {
+        EntityQuery query = historyBackwardQuery().build();
+        Iterator<Entity> records = datastore.readAll(query);
+        Collection<Entity> entitiesForDeletion =
+                gatherEntitiesForDeletion(records, snapshotNumber, predicate);
+        datastore.deleteEntities(entitiesForDeletion);
+    }
+
+    /**
+     * Among the sorted set of records, selects those that precede the specified aggregate snapshot
+     * and match the specified predicate.
+     *
+     * @return the aggregate records that should be deleted
+     */
+    private static Collection<Entity> gatherEntitiesForDeletion(Iterator<Entity> records,
+                                                                int snapshotNumber,
+                                                                Predicate<Entity> predicate) {
+        List<Entity> result = newLinkedList();
+        Map<String, Integer> snapshotsHit = newHashMap();
+        while (records.hasNext()) {
+            Entity record = records.next();
+            String id = record.getString(aggregate_id.toString());
+            int snapshotsHitForId = snapshotsHit.get(id) != null
+                                    ? snapshotsHit.get(id)
+                                    : 0;
+            if (snapshotsHitForId >= snapshotNumber && predicate.test(record)) {
+                result.add(record);
+            }
+            if (isSnapshot(record)) {
+                snapshotsHit.put(id, snapshotsHitForId + 1);
+            }
+        }
+        return result;
+    }
+
     @VisibleForTesting
     EntityQuery historyBackwardQuery(AggregateReadRequest<I> request) {
         checkNotNull(request);
         String idString = Stringifiers.toString(request.getRecordId());
+        return historyBackwardQuery()
+                .setFilter(eq(aggregate_id.toString(), idString))
+                .build();
+    }
+
+    private EntityQuery.Builder historyBackwardQuery() {
         return Query.newEntityQueryBuilder()
                     .setKind(stateTypeName.value())
-                    .setFilter(eq(aggregate_id.toString(),
-                                  idString))
                     .setOrderBy(byVersion(),
                                 byCreatedTime(),
-                                byRecordType())
-                    .build();
+                                byRecordType());
     }
 
     /**

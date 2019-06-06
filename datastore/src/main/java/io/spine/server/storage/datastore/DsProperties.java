@@ -35,7 +35,7 @@ import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
- * Utility class, which simplifies creation of the Datastore properties.
+ * Utility class, which simplifies read/write operations on the Datastore properties.
  */
 final class DsProperties {
 
@@ -55,8 +55,18 @@ final class DsProperties {
         AggregateEventRecordProperty.created.setProperty(entity, toCloudTimestamp(when));
     }
 
+    static Timestamp whenCreated(Entity entity) {
+        com.google.cloud.Timestamp timestamp =
+                entity.getTimestamp(AggregateEventRecordProperty.created.toString());
+        return fromCloudTimestamp(timestamp);
+    }
+
     private static com.google.cloud.Timestamp toCloudTimestamp(Timestamp when) {
         return ofTimeSecondsAndNanos(when.getSeconds(), when.getNanos());
+    }
+
+    private static Timestamp fromCloudTimestamp(com.google.cloud.Timestamp when) {
+        return when.toProto();
     }
 
     static void addVersion(Entity.Builder entity, Version version) {
@@ -84,6 +94,11 @@ final class DsProperties {
     static boolean isDeleted(Entity entity) {
         checkNotNull(entity);
         return hasFlag(entity, deleted.toString());
+    }
+
+    static boolean isSnapshot(Entity entity) {
+        checkNotNull(entity);
+        return hasFlag(entity, AggregateEventRecordProperty.snapshot.toString());
     }
 
     static OrderBy byCreatedTime() {
