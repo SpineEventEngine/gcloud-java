@@ -35,7 +35,7 @@ import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
- * Utility class, which simplifies read/write operations on the Datastore properties.
+ * Utility class, which simplifies the read/write operations on the Datastore properties.
  */
 final class DsProperties {
 

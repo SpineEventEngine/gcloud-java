@@ -220,22 +220,18 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      * predicate.
      */
     private void clipRecords(int snapshotNumber, Predicate<Entity> predicate) {
-        EntityQuery query = historyBackwardQuery().build();
-        Iterator<Entity> records = datastore.readAll(query);
-        Collection<Entity> entitiesForDeletion =
-                gatherEntitiesForDeletion(records, snapshotNumber, predicate);
-        datastore.deleteEntities(entitiesForDeletion);
+        Collection<Entity> records = recordsBeforeSnapshot(snapshotNumber, predicate);
+        datastore.deleteEntities(records);
     }
 
     /**
-     * Among the sorted set of records, selects those that precede the specified aggregate snapshot
-     * and match the specified predicate.
-     *
-     * @return the aggregate records that should be deleted
+     * Selects the records that precede the specified aggregate snapshot and match the specified
+     * predicate.
      */
-    private static Collection<Entity> gatherEntitiesForDeletion(Iterator<Entity> records,
-                                                                int snapshotNumber,
-                                                                Predicate<Entity> predicate) {
+    private Collection<Entity>
+    recordsBeforeSnapshot(int snapshotNumber, Predicate<Entity> predicate) {
+        Iterator<Entity> records = readAll();
+
         List<Entity> result = newLinkedList();
         Map<String, Integer> snapshotsHitByAggregateId = newHashMap();
         while (records.hasNext()) {
@@ -251,6 +247,12 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                 snapshotsHitByAggregateId.put(id, snapshotsHitForId + 1);
             }
         }
+        return result;
+    }
+
+    private Iterator<Entity> readAll() {
+        EntityQuery query = historyBackwardQuery().build();
+        Iterator<Entity> result = datastore.readAll(query);
         return result;
     }
 
