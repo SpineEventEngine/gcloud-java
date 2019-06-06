@@ -231,7 +231,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     private Collection<Entity>
     recordsBeforeSnapshot(int snapshotNumber, Predicate<Entity> predicate) {
         Iterator<Entity> records = readAll();
-
         List<Entity> result = newLinkedList();
         Map<String, Integer> snapshotsHitByAggregateId = newHashMap();
         while (records.hasNext()) {
