@@ -237,18 +237,18 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                                                                 int snapshotNumber,
                                                                 Predicate<Entity> predicate) {
         List<Entity> result = newLinkedList();
-        Map<String, Integer> snapshotsHit = newHashMap();
+        Map<String, Integer> snapshotsHitByAggregateId = newHashMap();
         while (records.hasNext()) {
             Entity record = records.next();
             String id = record.getString(aggregate_id.toString());
-            int snapshotsHitForId = snapshotsHit.get(id) != null
-                                    ? snapshotsHit.get(id)
+            int snapshotsHitForId = snapshotsHitByAggregateId.get(id) != null
+                                    ? snapshotsHitByAggregateId.get(id)
                                     : 0;
             if (snapshotsHitForId >= snapshotNumber && predicate.test(record)) {
                 result.add(record);
             }
             if (isSnapshot(record)) {
-                snapshotsHit.put(id, snapshotsHitForId + 1);
+                snapshotsHitByAggregateId.put(id, snapshotsHitForId + 1);
             }
         }
         return result;
