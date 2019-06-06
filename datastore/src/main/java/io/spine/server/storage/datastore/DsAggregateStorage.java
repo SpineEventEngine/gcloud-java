@@ -204,23 +204,23 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void clipRecords(int snapshotNumber) {
-        clipRecords(snapshotNumber, entity -> true);
+    protected void truncate(int snapshotIndex) {
+        truncate(snapshotIndex, entity -> true);
     }
 
     @Override
-    protected void clipRecords(Timestamp date, int snapshotNumber) {
+    protected void truncate(int snapshotIndex, Timestamp date) {
         Predicate<Entity> predicate = entity -> Timestamps.compare(date, whenCreated(entity)) > 0;
-        clipRecords(snapshotNumber, predicate);
+        truncate(snapshotIndex, predicate);
     }
 
     /**
-     * Clips aggregate event records that are older than the Nth snapshot and match the specified
-     * predicate.
+     * Drops the aggregate event records that are older than the Nth snapshot and match the
+     * specified predicate.
      */
-    private void clipRecords(int snapshotNumber, Predicate<Entity> predicate) {
+    private void truncate(int snapshotIndex, Predicate<Entity> predicate) {
         Collection<Entity> records = EntityRecords.of(readAll())
-                                                  .beforeSnapshot(snapshotNumber, predicate);
+                                                  .beforeSnapshot(snapshotIndex, predicate);
         datastore.deleteEntities(records);
     }
 
@@ -415,20 +415,20 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
          * specified predicate.
          */
         private Collection<Entity>
-        beforeSnapshot(int snapshotNumber, Predicate<Entity> predicate) {
+        beforeSnapshot(int snapshotIndex, Predicate<Entity> predicate) {
             List<Entity> result = newLinkedList();
-            Map<String, Integer> snapshotsHitByAggregateId = newHashMap();
+            Map<String, Integer> snapshotHitsByAggregateId = newHashMap();
             while (records.hasNext()) {
                 Entity record = records.next();
                 String id = record.getString(aggregate_id.toString());
-                int snapshotsHitForId = snapshotsHitByAggregateId.get(id) != null
-                                        ? snapshotsHitByAggregateId.get(id)
-                                        : 0;
-                if (snapshotsHitForId >= snapshotNumber && predicate.test(record)) {
+                int snapshotsHit = snapshotHitsByAggregateId.get(id) != null
+                                   ? snapshotHitsByAggregateId.get(id)
+                                   : 0;
+                if (snapshotsHit > snapshotIndex && predicate.test(record)) {
                     result.add(record);
                 }
                 if (isSnapshot(record)) {
-                    snapshotsHitByAggregateId.put(id, snapshotsHitForId + 1);
+                    snapshotHitsByAggregateId.put(id, snapshotsHit + 1);
                 }
             }
             return result;
