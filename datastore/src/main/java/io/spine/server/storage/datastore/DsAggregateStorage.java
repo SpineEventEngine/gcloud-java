@@ -198,9 +198,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         Function<Entity, AggregateEventRecord> toRecords = toMessage(AGGREGATE_RECORD_TYPE_URL);
         int batchSize = request.getBatchSize();
         Iterator<AggregateEventRecord> result =
-                stream(datastore.readAll(query, batchSize))
-                        .map(toRecords)
-                        .iterator();
+                EntityRecords.of(datastore.readAll(query, batchSize))
+                             .map(toRecords);
         return result;
     }
 
@@ -220,39 +219,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      * predicate.
      */
     private void clipRecords(int snapshotNumber, Predicate<Entity> predicate) {
-        Collection<Entity> records = recordsBeforeSnapshot(snapshotNumber, predicate);
+        Collection<Entity> records = EntityRecords.of(readAll())
+                                                  .beforeSnapshot(snapshotNumber, predicate);
         datastore.deleteEntities(records);
-    }
-
-    /**
-     * Selects the records that precede the specified aggregate snapshot and match the specified
-     * predicate.
-     */
-    private Collection<Entity>
-    recordsBeforeSnapshot(int snapshotNumber, Predicate<Entity> predicate) {
-        Iterator<Entity> records = readAll();
-        List<Entity> result = newLinkedList();
-        Map<String, Integer> snapshotsHitByAggregateId = newHashMap();
-        while (records.hasNext()) {
-            Entity record = records.next();
-            String id = record.getString(aggregate_id.toString());
-            int snapshotsHitForId = snapshotsHitByAggregateId.get(id) != null
-                                    ? snapshotsHitByAggregateId.get(id)
-                                    : 0;
-            if (snapshotsHitForId >= snapshotNumber && predicate.test(record)) {
-                result.add(record);
-            }
-            if (isSnapshot(record)) {
-                snapshotsHitByAggregateId.put(id, snapshotsHitForId + 1);
-            }
-        }
-        return result;
-    }
-
-    private Iterator<Entity> readAll() {
-        EntityQuery query = historyBackwardQuery().build();
-        Iterator<Entity> result = datastore.readAll(query);
-        return result;
     }
 
     @VisibleForTesting
@@ -380,10 +349,16 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         StructuredQuery<Entity> allQuery = Query.newEntityQueryBuilder()
                                                 .setKind(stateTypeName.value())
                                                 .build();
-        Iterator<I> index = stream(datastore.readAll(allQuery))
-                .map(new IndexTransformer<>(idClass))
-                .iterator();
+        Iterator<Entity> records = datastore.readAll(allQuery);
+        Iterator<I> index = EntityRecords.of(records)
+                                         .map(new IndexTransformer<>(idClass));
         return index;
+    }
+
+    private Iterator<Entity> readAll() {
+        EntityQuery query = historyBackwardQuery().build();
+        Iterator<Entity> result = datastore.readAll(query);
+        return result;
     }
 
     private Key toKey(I id) {
@@ -416,6 +391,48 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         }
         Int32Value count = (Int32Value) eventCount.get();
         return Optional.of(count);
+    }
+
+    private static class EntityRecords {
+        private final Iterator<Entity> records;
+
+        private EntityRecords(Iterator<Entity> records) {
+            this.records = records;
+        }
+
+        private static EntityRecords of(Iterator<Entity> records) {
+            return new EntityRecords(records);
+        }
+
+        private <I> Iterator<I> map(Function<Entity, I> transformer) {
+            return stream(records)
+                    .map(transformer)
+                    .iterator();
+        }
+
+        /**
+         * Collects the records that precede the specified aggregate snapshot and match the
+         * specified predicate.
+         */
+        private Collection<Entity>
+        beforeSnapshot(int snapshotNumber, Predicate<Entity> predicate) {
+            List<Entity> result = newLinkedList();
+            Map<String, Integer> snapshotsHitByAggregateId = newHashMap();
+            while (records.hasNext()) {
+                Entity record = records.next();
+                String id = record.getString(aggregate_id.toString());
+                int snapshotsHitForId = snapshotsHitByAggregateId.get(id) != null
+                                        ? snapshotsHitByAggregateId.get(id)
+                                        : 0;
+                if (snapshotsHitForId >= snapshotNumber && predicate.test(record)) {
+                    result.add(record);
+                }
+                if (isSnapshot(record)) {
+                    snapshotsHitByAggregateId.put(id, snapshotsHitForId + 1);
+                }
+            }
+            return result;
+        }
     }
 
     /**
