@@ -219,7 +219,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      * specified predicate.
      */
     private void truncate(int snapshotIndex, Predicate<Entity> predicate) {
-        Collection<Entity> records = EntityRecords.of(readAll())
+        Collection<Entity> records = EntityRecords.of(readAllForTenant())
                                                   .beforeSnapshot(snapshotIndex, predicate);
         datastore.deleteEntities(records);
     }
@@ -355,9 +355,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         return index;
     }
 
-    private Iterator<Entity> readAll() {
+    private Iterator<Entity> readAllForTenant() {
         EntityQuery query = historyBackwardQuery().build();
-        Iterator<Entity> result = datastore.readAll(query);
+        Iterator<Entity> result = datastore.read(query);
         return result;
     }
 
