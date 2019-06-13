@@ -44,7 +44,6 @@ import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +58,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.aggregate.AggregateField.aggregate_id;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
+import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
 import static io.spine.server.storage.datastore.DsProperties.addAggregateId;
 import static io.spine.server.storage.datastore.DsProperties.addVersion;
 import static io.spine.server.storage.datastore.DsProperties.addWhenCreated;
@@ -198,8 +198,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         Function<Entity, AggregateEventRecord> toRecords = toMessage(AGGREGATE_RECORD_TYPE_URL);
         int batchSize = request.getBatchSize();
         Iterator<AggregateEventRecord> result =
-                EntityRecords.of(datastore.readAll(query, batchSize))
-                             .map(toRecords);
+                stream(datastore.readAll(query, batchSize))
+                        .map(toRecords)
+                        .iterator();
         return result;
     }
 
@@ -217,11 +218,33 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     /**
      * Drops the aggregate event records that are older than the Nth snapshot and match the
      * specified predicate.
+     *
+     * <p>The record deletion happens batch-by-batch where the batch size is the
+     * {@link DatastoreWrapper#MAX_ENTITIES_PER_WRITE_REQUEST maximum number} of entities for the
+     * Datastore write request.
      */
     private void truncate(int snapshotIndex, Predicate<Entity> predicate) {
-        Collection<Entity> records = EntityRecords.of(readAllForTenant())
-                                                  .beforeSnapshot(snapshotIndex, predicate);
-        datastore.deleteEntities(records);
+        Iterator<Entity> records = readAllForTenant();
+        List<Entity> currentBatch = newLinkedList();
+        Map<String, Integer> snapshotHitsByAggregateId = newHashMap();
+        while (records.hasNext()) {
+            Entity record = records.next();
+            String id = record.getString(aggregate_id.toString());
+            int snapshotsHit = snapshotHitsByAggregateId.get(id) != null
+                               ? snapshotHitsByAggregateId.get(id)
+                               : 0;
+            if (snapshotsHit > snapshotIndex && predicate.test(record)) {
+                currentBatch.add(record);
+                if (currentBatch.size() == MAX_ENTITIES_PER_WRITE_REQUEST) {
+                    datastore.deleteEntities(currentBatch);
+                    currentBatch.clear();
+                }
+            }
+            if (isSnapshot(record)) {
+                snapshotHitsByAggregateId.put(id, snapshotsHit + 1);
+            }
+        }
+        datastore.deleteEntities(currentBatch);
     }
 
     @VisibleForTesting
@@ -349,9 +372,9 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         StructuredQuery<Entity> allQuery = Query.newEntityQueryBuilder()
                                                 .setKind(stateTypeName.value())
                                                 .build();
-        Iterator<Entity> records = datastore.readAll(allQuery);
-        Iterator<I> index = EntityRecords.of(records)
-                                         .map(new IndexTransformer<>(idClass));
+        Iterator<I> index = stream(datastore.readAll(allQuery))
+                .map(new IndexTransformer<>(idClass))
+                .iterator();
         return index;
     }
 
@@ -391,48 +414,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         }
         Int32Value count = (Int32Value) eventCount.get();
         return Optional.of(count);
-    }
-
-    private static class EntityRecords {
-        private final Iterator<Entity> records;
-
-        private EntityRecords(Iterator<Entity> records) {
-            this.records = records;
-        }
-
-        private static EntityRecords of(Iterator<Entity> records) {
-            return new EntityRecords(records);
-        }
-
-        private <I> Iterator<I> map(Function<Entity, I> transformer) {
-            return stream(records)
-                    .map(transformer)
-                    .iterator();
-        }
-
-        /**
-         * Collects the records that precede the specified aggregate snapshot and match the
-         * specified predicate.
-         */
-        private Collection<Entity>
-        beforeSnapshot(int snapshotIndex, Predicate<Entity> predicate) {
-            List<Entity> result = newLinkedList();
-            Map<String, Integer> snapshotHitsByAggregateId = newHashMap();
-            while (records.hasNext()) {
-                Entity record = records.next();
-                String id = record.getString(aggregate_id.toString());
-                int snapshotsHit = snapshotHitsByAggregateId.get(id) != null
-                                   ? snapshotHitsByAggregateId.get(id)
-                                   : 0;
-                if (snapshotsHit > snapshotIndex && predicate.test(record)) {
-                    result.add(record);
-                }
-                if (isSnapshot(record)) {
-                    snapshotHitsByAggregateId.put(id, snapshotsHit + 1);
-                }
-            }
-            return result;
-        }
     }
 
     /**

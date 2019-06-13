@@ -73,7 +73,7 @@ public class DatastoreWrapper implements Logging {
             "Transaction should NOT be active.";
 
     private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
-    private static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
+    static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
     private static final Map<Kind, KeyFactory> keyFactories = new HashMap<>();
 
