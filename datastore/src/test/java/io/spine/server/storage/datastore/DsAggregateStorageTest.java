@@ -203,8 +203,8 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     }
 
     @Nested
-    @DisplayName("truncate itself")
-    class Truncate {
+    @DisplayName("truncate efficiently")
+    class TruncateEfficiently {
 
         private DsAggregateStorage<ProjectId> storage;
 
@@ -217,8 +217,8 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         }
 
         @Test
-        @DisplayName("with minimum operations when having bulk of records stored")
-        void efficiently() {
+        @DisplayName("when having bulk of records stored")
+        void withBulkOfRecords() {
             ProjectId id = newId();
             AggregateHistory.Builder history = AggregateHistory.newBuilder();
             Version version = zero();
