@@ -69,9 +69,9 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
     }
 
     @Override
-    public KeyFactory getKeyFactory(Kind kind) {
+    public KeyFactory keyFactory(Kind kind) {
         kindsCache.add(kind.getValue());
-        return super.getKeyFactory(kind);
+        return super.keyFactory(kind);
     }
 
     @Override

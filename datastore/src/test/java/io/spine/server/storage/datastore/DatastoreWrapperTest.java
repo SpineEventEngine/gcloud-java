@@ -348,7 +348,7 @@ class DatastoreWrapperTest {
         String tenantId2Prefixed = "Esecond-at-tenant.id";
         String tenantId3 = "third.id";
         String tenantId3Prefixed = "Dthird.id";
-        Datastore datastore = wrapper.getDatastore();
+        Datastore datastore = wrapper.datastore();
         ensureNamespace(tenantId1Prefixed, datastore);
         ensureNamespace(tenantId2Prefixed, datastore);
         ensureNamespace(tenantId3Prefixed, datastore);
@@ -419,7 +419,7 @@ class DatastoreWrapperTest {
         Key entityKey = new TenantAwareFunction0<Key>(tenantId) {
             @Override
             public Key apply() {
-                Key entityKey = wrapper.getKeyFactory(Kind.of(NAMESPACE_HOLDER_KIND))
+                Key entityKey = wrapper.keyFactory(Kind.of(NAMESPACE_HOLDER_KIND))
                                        .newKey(key);
                 Entity entity = Entity.newBuilder(entityKey)
                                       .build();

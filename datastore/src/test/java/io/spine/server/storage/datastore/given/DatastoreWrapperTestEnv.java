@@ -49,7 +49,7 @@ public class DatastoreWrapperTestEnv {
         new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
-                Key key = wrapper.getKeyFactory(GENERIC_ENTITY_KIND)
+                Key key = wrapper.keyFactory(GENERIC_ENTITY_KIND)
                                  .newKey(42L);
                 assertEquals(id, key.getNamespace());
             }

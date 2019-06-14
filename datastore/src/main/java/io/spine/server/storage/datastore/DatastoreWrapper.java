@@ -117,7 +117,7 @@ public class DatastoreWrapper implements Logging {
      * @return the Datastore {@code Key} instance
      */
     Key keyFor(Kind kind, RecordId recordId) {
-        KeyFactory keyFactory = getKeyFactory(kind);
+        KeyFactory keyFactory = keyFactory(kind);
         Key key = keyFactory.newKey(recordId.getValue());
 
         return key;
@@ -492,7 +492,7 @@ public class DatastoreWrapper implements Logging {
      *         kind of {@link Entity} to generate keys for
      * @return an instance of {@link KeyFactory} for given kind
      */
-    public KeyFactory getKeyFactory(Kind kind) {
+    public KeyFactory keyFactory(Kind kind) {
         KeyFactory keyFactory = keyFactories.get(kind);
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
@@ -503,7 +503,7 @@ public class DatastoreWrapper implements Logging {
         return keyFactory;
     }
 
-    public DatastoreOptions getDatastoreOptions() {
+    public DatastoreOptions datastoreOptions() {
         DatastoreOptions options =
                 datastore.getOptions()
                          .toBuilder()
@@ -511,7 +511,7 @@ public class DatastoreWrapper implements Logging {
         return options;
     }
 
-    Datastore getDatastore() {
+    Datastore datastore() {
         return datastore;
     }
 

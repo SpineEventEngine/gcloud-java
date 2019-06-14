@@ -23,12 +23,17 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Streams;
+import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.core.Event;
+import io.spine.core.Version;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
+import io.spine.server.aggregate.AggregateHistory;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageTest;
@@ -38,10 +43,13 @@ import io.spine.server.entity.Entity;
 import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.NonProjectStateAggregate;
 import io.spine.server.storage.datastore.given.aggregate.ProjectAggregateRepository;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.storage.StateImported;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -53,13 +61,21 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.Optional;
 
+import static io.spine.base.Time.currentTime;
+import static io.spine.core.Versions.increment;
+import static io.spine.core.Versions.zero;
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
+import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
+import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @DisplayName("DsAggregateStorage should")
 class DsAggregateStorageTest extends AggregateStorageTest {
@@ -100,7 +116,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     @DisplayName("provide access to DatastoreWrapper for extensibility")
     void testAccessDatastoreWrapper() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
-        DatastoreWrapper datastore = storage.getDatastore();
+        DatastoreWrapper datastore = storage.datastore();
         assertNotNull(datastore);
     }
 
@@ -184,6 +200,67 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         long snapshotCount = Streams.stream(records)
                                     .count();
         assertEquals(2, snapshotCount);
+    }
+
+    @Nested
+    @DisplayName("truncate itself")
+    class Truncate {
+
+        private DsAggregateStorage<ProjectId> storage;
+
+        @BeforeEach
+        void setUp() {
+            SpyStorageFactory.injectWrapper(datastoreFactory().datastore());
+            SpyStorageFactory storageFactory = new SpyStorageFactory();
+            storage = (DsAggregateStorage<ProjectId>)
+                    storageFactory.createAggregateStorage(ProjectAggregate.class);
+        }
+
+        @Test
+        @DisplayName("with minimum operations when having bulk of records stored")
+        void efficiently() {
+            ProjectId id = newId();
+            AggregateHistory.Builder history = AggregateHistory.newBuilder();
+            Version version = zero();
+            Any state = AnyPacker.pack(Project.getDefaultInstance());
+
+            // Store *max entities per delete request* + 1 events.
+            TestEventFactory factory = TestEventFactory.newInstance(DsAggregateStorageTest.class);
+            int eventCount = MAX_ENTITIES_PER_WRITE_REQUEST + 1;
+            StateImported eventMessage = StateImported
+                    .newBuilder()
+                    .setState(state)
+                    .vBuild();
+            for (int i = 0; i < eventCount; i++) {
+                version = increment(version);
+                Event event = factory.createEvent(eventMessage, version, currentTime());
+                history.addEvent(event);
+            }
+            storage.write(id, history.build());
+
+            // Store the snapshot after events.
+            version = increment(version);
+            Snapshot latestSnapshot = Snapshot
+                    .newBuilder()
+                    .setState(state)
+                    .setVersion(version)
+                    .setTimestamp(currentTime())
+                    .vBuild();
+            Event latestEvent = factory.createEvent(eventMessage, increment(version), currentTime());
+            AggregateHistory historyAfterSnapshot = AggregateHistory
+                    .newBuilder()
+                    .setSnapshot(latestSnapshot)
+                    .addEvent(latestEvent)
+                    .vBuild();
+            storage.write(id, historyAfterSnapshot);
+
+            // Order removal of all records before the snapshot.
+            storage.truncateOlderThan(0);
+
+            // Check that the number of operations is minimum possible.
+            int expectedOperationCount = eventCount / MAX_ENTITIES_PER_WRITE_REQUEST + 1;
+            verify(storage.datastore(), times(expectedOperationCount)).deleteEntities(any());
+        }
     }
 
     @Nested

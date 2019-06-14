@@ -314,7 +314,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      *
      * @return the wrapped instance of Datastore
      */
-    protected DatastoreWrapper getDatastore() {
+    protected DatastoreWrapper datastore() {
         return datastore;
     }
 

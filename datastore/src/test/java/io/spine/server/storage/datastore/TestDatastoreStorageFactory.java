@@ -103,7 +103,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      * @see #tearDown()
      */
     public void clear() {
-        TestDatastoreWrapper datastore = (TestDatastoreWrapper) getDatastore();
+        TestDatastoreWrapper datastore = (TestDatastoreWrapper) datastore();
         try {
             datastore.dropAllTables();
         } catch (Throwable e) {
