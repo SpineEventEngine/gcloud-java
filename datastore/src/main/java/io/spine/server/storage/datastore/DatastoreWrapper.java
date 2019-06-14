@@ -73,7 +73,7 @@ public class DatastoreWrapper implements Logging {
             "Transaction should NOT be active.";
 
     private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
-    private static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
+    static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
     private static final Map<Kind, KeyFactory> keyFactories = new HashMap<>();
 
@@ -117,7 +117,7 @@ public class DatastoreWrapper implements Logging {
      * @return the Datastore {@code Key} instance
      */
     Key keyFor(Kind kind, RecordId recordId) {
-        KeyFactory keyFactory = getKeyFactory(kind);
+        KeyFactory keyFactory = keyFactory(kind);
         Key key = keyFactory.newKey(recordId.getValue());
 
         return key;
@@ -388,7 +388,7 @@ public class DatastoreWrapper implements Logging {
         deleteEntities(entities);
     }
 
-    void deleteEntities(List<Entity> entities) {
+    void deleteEntities(Collection<Entity> entities) {
         List<Key> keyList =
                 entities.stream()
                         .map(BaseEntity::getKey)
@@ -492,7 +492,7 @@ public class DatastoreWrapper implements Logging {
      *         kind of {@link Entity} to generate keys for
      * @return an instance of {@link KeyFactory} for given kind
      */
-    public KeyFactory getKeyFactory(Kind kind) {
+    public KeyFactory keyFactory(Kind kind) {
         KeyFactory keyFactory = keyFactories.get(kind);
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
@@ -503,7 +503,7 @@ public class DatastoreWrapper implements Logging {
         return keyFactory;
     }
 
-    public DatastoreOptions getDatastoreOptions() {
+    public DatastoreOptions datastoreOptions() {
         DatastoreOptions options =
                 datastore.getOptions()
                          .toBuilder()
@@ -511,7 +511,7 @@ public class DatastoreWrapper implements Logging {
         return options;
     }
 
-    Datastore getDatastore() {
+    Datastore datastore() {
         return datastore;
     }
 

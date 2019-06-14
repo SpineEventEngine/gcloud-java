@@ -95,8 +95,8 @@ public class DatastoreStorageFactory implements StorageFactory {
      *         with the specified parameters
      */
     public BoundedContextBuilder newBoundedContextBuilder() {
-        Datastore datastore = getDatastore()
-                .getDatastoreOptions()
+        Datastore datastore = datastore()
+                .datastoreOptions()
                 .getService();
         TenantIndex tenantIndex = DatastoreTenants.index(datastore);
         Supplier<StorageFactory> storageFactorySupplier = () -> this;
@@ -110,7 +110,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private Builder toBuilder() {
         Builder result = newBuilder()
-                .setDatastore(datastore.getDatastore())
+                .setDatastore(datastore.datastore())
                 .setMultitenant(multitenant);
         if (!multitenant) {
             result.setNamespaceConverter(namespaceConverter);
@@ -156,7 +156,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     private <I, B extends RecordStorageBuilder<I, B>>
     B configure(B builder, Class<? extends Entity<I, ?>> cls) {
         builder.setModelClass(asEntityClass(cls))
-               .setDatastore(getDatastore())
+               .setDatastore(datastore())
                .setMultitenant(isMultitenant())
                .setColumnTypeRegistry(typeRegistry);
         return builder;
@@ -167,7 +167,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         checkNotNull(cls);
         DsPropertyStorage propertyStorage = createPropertyStorage();
         DsAggregateStorage<I> result =
-                new DsAggregateStorage<>(cls, getDatastore(), propertyStorage, multitenant);
+                new DsAggregateStorage<>(cls, datastore(), propertyStorage, multitenant);
         return result;
     }
 
@@ -185,7 +185,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     protected DsPropertyStorage createPropertyStorage() {
-        DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(getDatastore());
+        DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastore());
         return propertyStorage;
     }
 
@@ -201,7 +201,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      * Obtains an instance of a wrapper of the passed {@link Datastore}.
      */
     @Internal
-    public DatastoreWrapper getDatastore() {
+    public DatastoreWrapper datastore() {
         return datastore;
     }
 

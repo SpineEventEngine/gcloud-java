@@ -28,6 +28,7 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.Version;
 import io.spine.server.aggregate.Aggregate;
@@ -44,14 +45,20 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.aggregate.AggregateField.aggregate_id;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
+import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
 import static io.spine.server.storage.datastore.DsProperties.addAggregateId;
 import static io.spine.server.storage.datastore.DsProperties.addVersion;
 import static io.spine.server.storage.datastore.DsProperties.addWhenCreated;
@@ -60,9 +67,11 @@ import static io.spine.server.storage.datastore.DsProperties.byRecordType;
 import static io.spine.server.storage.datastore.DsProperties.byVersion;
 import static io.spine.server.storage.datastore.DsProperties.isArchived;
 import static io.spine.server.storage.datastore.DsProperties.isDeleted;
+import static io.spine.server.storage.datastore.DsProperties.isSnapshot;
 import static io.spine.server.storage.datastore.DsProperties.markAsArchived;
 import static io.spine.server.storage.datastore.DsProperties.markAsDeleted;
 import static io.spine.server.storage.datastore.DsProperties.markAsSnapshot;
+import static io.spine.server.storage.datastore.DsProperties.whenCreated;
 import static io.spine.server.storage.datastore.Entities.fromMessage;
 import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -195,18 +204,64 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         return result;
     }
 
+    @Override
+    protected void truncate(int snapshotIndex) {
+        truncate(snapshotIndex, entity -> true);
+    }
+
+    @Override
+    protected void truncate(int snapshotIndex, Timestamp date) {
+        Predicate<Entity> predicate = entity -> Timestamps.compare(date, whenCreated(entity)) > 0;
+        truncate(snapshotIndex, predicate);
+    }
+
+    /**
+     * Drops the aggregate event records that are older than the Nth snapshot and match the
+     * specified predicate.
+     *
+     * <p>The record deletion happens batch-by-batch where the batch size is the
+     * {@link DatastoreWrapper#MAX_ENTITIES_PER_WRITE_REQUEST maximum number} of entities for the
+     * Datastore write request.
+     */
+    private void truncate(int snapshotIndex, Predicate<Entity> predicate) {
+        Iterator<Entity> records = readAllForTenant();
+        List<Entity> currentBatch = newLinkedList();
+        Map<String, Integer> snapshotHitsByAggregateId = newHashMap();
+        while (records.hasNext()) {
+            Entity record = records.next();
+            String id = record.getString(aggregate_id.toString());
+            int snapshotsHit = snapshotHitsByAggregateId.get(id) != null
+                               ? snapshotHitsByAggregateId.get(id)
+                               : 0;
+            if (snapshotsHit > snapshotIndex && predicate.test(record)) {
+                currentBatch.add(record);
+                if (currentBatch.size() == MAX_ENTITIES_PER_WRITE_REQUEST) {
+                    datastore.deleteEntities(currentBatch);
+                    currentBatch.clear();
+                }
+            }
+            if (isSnapshot(record)) {
+                snapshotHitsByAggregateId.put(id, snapshotsHit + 1);
+            }
+        }
+        datastore.deleteEntities(currentBatch);
+    }
+
     @VisibleForTesting
     EntityQuery historyBackwardQuery(AggregateReadRequest<I> request) {
         checkNotNull(request);
         String idString = Stringifiers.toString(request.getRecordId());
+        return historyBackwardQuery()
+                .setFilter(eq(aggregate_id.toString(), idString))
+                .build();
+    }
+
+    private EntityQuery.Builder historyBackwardQuery() {
         return Query.newEntityQueryBuilder()
                     .setKind(stateTypeName.value())
-                    .setFilter(eq(aggregate_id.toString(),
-                                  idString))
                     .setOrderBy(byVersion(),
                                 byCreatedTime(),
-                                byRecordType())
-                    .build();
+                                byRecordType());
     }
 
     /**
@@ -259,7 +314,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      *
      * @return the wrapped instance of Datastore
      */
-    protected DatastoreWrapper getDatastore() {
+    protected DatastoreWrapper datastore() {
         return datastore;
     }
 
@@ -321,6 +376,12 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                 .map(new IndexTransformer<>(idClass))
                 .iterator();
         return index;
+    }
+
+    private Iterator<Entity> readAllForTenant() {
+        EntityQuery query = historyBackwardQuery().build();
+        Iterator<Entity> result = datastore.read(query);
+        return result;
     }
 
     private Key toKey(I id) {

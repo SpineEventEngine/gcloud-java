@@ -362,7 +362,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @BeforeEach
         void setUp() {
-            SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
+            SpyStorageFactory.injectWrapper(datastoreFactory().datastore());
             storageFactory = new SpyStorageFactory();
             storage = storageFactory.createRecordStorage(CollegeEntity.class);
         }
@@ -584,7 +584,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertEquals(expectedCounts, actualCounts);
 
             // Check Datastore reads are performed by keys but not using a structured query.
-            DatastoreWrapper spy = storageFactory.getDatastore();
+            DatastoreWrapper spy = storageFactory.datastore();
             verify(spy).read(anyIterable());
             verify(spy, never()).read(any(StructuredQuery.class));
         }
@@ -693,7 +693,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @SuppressWarnings("unchecked") // For the purposes of mocking.
         private void assertDsReadByKeys() {
-            DatastoreWrapper spy = storageFactory.getDatastore();
+            DatastoreWrapper spy = storageFactory.datastore();
             verify(spy).read(anyIterable());
             verify(spy, never()).read(any(StructuredQuery.class));
         }
@@ -717,7 +717,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @BeforeEach
         void setUp() {
-            SpyStorageFactory.injectWrapper(datastoreFactory().getDatastore());
+            SpyStorageFactory.injectWrapper(datastoreFactory().datastore());
             storageFactory = new SpyStorageFactory();
             storage = storageFactory.createRecordStorage(CollegeEntity.class);
         }
@@ -1078,34 +1078,9 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @SuppressWarnings("unchecked") // For the purposes of mocking.
         private void assertDsReadByStructuredQuery(int invocationCount) {
-            DatastoreWrapper spy = storageFactory.getDatastore();
+            DatastoreWrapper spy = storageFactory.datastore();
             verify(spy, never()).read(anyIterable());
             verify(spy, times(invocationCount)).read(any(StructuredQuery.class));
-        }
-    }
-
-    /**
-     * A {@link TestDatastoreStorageFactory} which spies on its {@link DatastoreWrapper}.
-     *
-     * This class is not moved to the
-     * {@linkplain io.spine.server.storage.datastore.given.DsRecordStorageTestEnv test environment}
-     * because it uses package-private method of {@link DatastoreWrapper}.
-     */
-    private static class SpyStorageFactory extends TestDatastoreStorageFactory {
-
-        private static DatastoreWrapper spyWrapper = null;
-
-        private static void injectWrapper(DatastoreWrapper wrapper) {
-            spyWrapper = spy(wrapper);
-        }
-
-        private SpyStorageFactory() {
-            super(spyWrapper.getDatastore());
-        }
-
-        @Override
-        protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
-            return spyWrapper;
         }
     }
 }
