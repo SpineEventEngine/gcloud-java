@@ -88,13 +88,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     private static final String LIFECYCLE_RECORD_ID_PREFIX = "LIFECYCLE_FLAGS";
 
     /**
-     * The old-format prefix of the records which contain the {@link LifecycleFlags} of the entity.
-     *
-     * <p>This field exists to preserve the compatibility with the old Datastore records.
-     */
-    private static final String OLD_LIFECYCLE_RECORD_ID_PREFIX = "EVENTS_AFTER_SNAPSHOT";
-
-    /**
      * Prefix for the string IDs of the {@link AggregateEventRecord records} which represent
      * an aggregate snapshot, not an event.
      *
@@ -253,10 +246,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         return RecordId.withPrefix(id, prefix);
     }
 
-    private RecordId toOldFormatLifecycleId(I id) {
-        return RecordId.withPrefix(id, OLD_LIFECYCLE_RECORD_ID_PREFIX);
-    }
-
     /**
      * Generates an identifier for the Datastore record which represents an Aggregate snapshot.
      *
@@ -297,12 +286,13 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     public Optional<LifecycleFlags> readLifecycleFlags(I id) {
         checkNotNull(id);
 
-        Optional<Entity> entityStateRecord = lookupLifecycleRecord(id);
-        if (!entityStateRecord.isPresent()) {
+        Key key = toLifecycleRecordKey(id);
+        Entity entityStateRecord = datastore.read(key);
+        if (entityStateRecord == null) {
             return Optional.empty();
         }
-        boolean archived = isArchived(entityStateRecord.get());
-        boolean deleted = isDeleted(entityStateRecord.get());
+        boolean archived = isArchived(entityStateRecord);
+        boolean deleted = isDeleted(entityStateRecord);
 
         if (!archived && !deleted) {
             return Optional.empty();
@@ -346,25 +336,8 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         return result;
     }
 
-    private Optional<Entity> lookupLifecycleRecord(I id) {
-        Key key = toLifecycleRecordKey(id);
-        Entity record = datastore.read(key);
-        if (record == null) {
-            Key oldFormatKey = toOldFormatLifecycleKey(id);
-            Entity result = datastore.read(oldFormatKey);
-            return Optional.ofNullable(result);
-        }
-        return Optional.of(record);
-    }
-
     private Key toLifecycleRecordKey(I id) {
         RecordId recordId = toLifecycleRecordId(id);
-        return toLifecycleRecordKey(recordId);
-    }
-
-    @VisibleForTesting
-    Key toOldFormatLifecycleKey(I id) {
-        RecordId recordId = toOldFormatLifecycleId(id);
         return toLifecycleRecordKey(recordId);
     }
 
