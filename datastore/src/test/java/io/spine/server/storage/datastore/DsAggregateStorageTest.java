@@ -20,11 +20,12 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
+import com.google.cloud.datastore.Key;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Streams;
 import com.google.protobuf.Any;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.Event;
@@ -39,8 +40,7 @@ import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageTest;
 import io.spine.server.aggregate.Snapshot;
 import io.spine.server.aggregate.given.repo.ProjectAggregate;
-import io.spine.server.entity.Entity;
-import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.NonProjectStateAggregate;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.storage.datastore.given.aggregate.ProjectAggregateRepository;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.Project;
@@ -61,10 +61,13 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.Optional;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
@@ -98,7 +101,8 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     }
 
     @Override
-    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
+    protected AggregateStorage<ProjectId>
+    newStorage(Class<? extends io.spine.server.entity.Entity<?, ?>> cls) {
         @SuppressWarnings("unchecked") // Logically checked; OK for test purposes.
                 Class<? extends Aggregate<ProjectId, ?, ?>> aggCls =
                 (Class<? extends Aggregate<ProjectId, ?, ?>>) cls;
@@ -151,38 +155,28 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         assertNull(queryLimit);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked logically.
     @Test
-    @DisplayName("read the event count stored in the old format")
-    void readEventCountOldFormat() {
+    @DisplayName("read the lifecycle flags stored in the old format")
+    void readLifecycleFlagsOldFormat() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         ProjectId id = newId();
-        RecordId oldFormatId = storage.toRecordId(id);
-        int eventCount = 15;
-        storage.getPropertyStorage()
-               .write(oldFormatId, Int32Value.newBuilder()
-                                             .setValue(eventCount)
-                                             .build());
-        int actualEventCount = storage.readEventCountAfterLastSnapshot(id);
-        assertEquals(eventCount, actualEventCount);
-    }
+        Key key = storage.toOldFormatLifecycleKey(id);
+        Entity entity = Entity
+                .newBuilder(key)
+                .set(archived.name(), true)
+                .set(deleted.name(), false)
+                .build();
+        storage.datastore()
+               .createOrUpdate(entity);
+        Optional<LifecycleFlags> flagsRead = storage.readLifecycleFlags(id);
 
-    @Test
-    @DisplayName("not overwrite the event count when saving other aggregate type")
-    void notOverwriteEventCount() {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
-        DsAggregateStorage<ProjectId> secondStorage = (DsAggregateStorage<ProjectId>)
-                newStorage(ProjectId.class, NonProjectStateAggregate.class);
-
-        ProjectId id = newId();
-        int firstCount = 15;
-        storage.writeEventCountAfterLastSnapshot(id, firstCount);
-        int secondCount = 17;
-        secondStorage.writeEventCountAfterLastSnapshot(id, secondCount);
-
-        int actualFirstCount = storage.readEventCountAfterLastSnapshot(id);
-        int actualSecondCount = secondStorage.readEventCountAfterLastSnapshot(id);
-        assertEquals(firstCount, actualFirstCount);
-        assertEquals(secondCount, actualSecondCount);
+        assertThat(flagsRead.isPresent())
+                .isTrue();
+        assertThat(flagsRead.get().getArchived())
+                .isEqualTo(true);
+        assertThat(flagsRead.get().getDeleted())
+                .isEqualTo(false);
     }
 
     @Test

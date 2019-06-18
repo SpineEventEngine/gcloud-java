@@ -22,6 +22,7 @@ package io.spine.server.storage.datastore;
 import io.spine.string.Stringifiers;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.String.format;
 
 /**
  * A wrapper type for the {@code String}-based record identifiers in the GAE Datastore.
@@ -56,5 +57,21 @@ final class RecordId extends DsIdentifier {
     static RecordId ofEntityId(Object id) {
         String idAsString = Stringifiers.toString(id);
         return of(idAsString);
+    }
+
+    /**
+     * Creates an instance of {@code RecordId} for a given {@link io.spine.server.entity.Entity}
+     * identifier using the specified prefix.
+     *
+     * @param id
+     *         an identifier of an {@code Entity}
+     * @param prefix
+     *         a prefix for the Datastore record identifier
+     * @return the Datastore record identifier
+     */
+    static RecordId withPrefix(Object id, String prefix) {
+        String idAsString = Stringifiers.toString(id);
+        String datastoreId = format("%s_%s", prefix, idAsString);
+        return of(datastoreId);
     }
 }
