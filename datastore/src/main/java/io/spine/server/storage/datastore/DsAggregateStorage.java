@@ -338,11 +338,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private Key toLifecycleRecordKey(I id) {
         RecordId recordId = toLifecycleRecordId(id);
-        return toLifecycleRecordKey(recordId);
-    }
-
-    private Key toLifecycleRecordKey(RecordId id) {
-        Key key = datastore.keyFor(Kind.of(AGGREGATE_LIFECYCLE_KIND), id);
+        Key key = datastore.keyFor(Kind.of(AGGREGATE_LIFECYCLE_KIND), recordId);
         return key;
     }
 
