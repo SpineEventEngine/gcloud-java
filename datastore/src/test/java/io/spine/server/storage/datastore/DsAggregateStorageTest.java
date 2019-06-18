@@ -96,8 +96,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     }
 
     @Override
-    protected AggregateStorage<ProjectId>
-    newStorage(Class<? extends Entity<?, ?>> cls) {
+    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
         @SuppressWarnings("unchecked") // Logically checked; OK for test purposes.
                 Class<? extends Aggregate<ProjectId, ?, ?>> aggCls =
                 (Class<? extends Aggregate<ProjectId, ?, ?>>) cls;
