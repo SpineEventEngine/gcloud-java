@@ -157,7 +157,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked logically.
     @Test
-    @DisplayName("read the lifecycle flags stored in the old format")
+    @DisplayName("read lifecycle flags stored in the old format")
     void readLifecycleFlagsOldFormat() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         ProjectId id = newId();

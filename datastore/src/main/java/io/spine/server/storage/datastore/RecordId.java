@@ -60,13 +60,13 @@ final class RecordId extends DsIdentifier {
     }
 
     /**
-     * Creates an instance of {@code RecordId} for a given {@link io.spine.server.entity.Entity}
-     * identifier using the specified prefix.
+     * Creates an instance by combining a given {@link io.spine.server.entity.Entity}
+     * identifier along with the specified prefix.
      *
      * @param id
      *         an identifier of an {@code Entity}
      * @param prefix
-     *         a prefix for the Datastore record identifier
+     *         a prefix for the record identifier
      * @return the Datastore record identifier
      */
     static RecordId withPrefix(Object id, String prefix) {
