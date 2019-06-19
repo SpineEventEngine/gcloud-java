@@ -24,7 +24,6 @@ import com.google.cloud.datastore.EntityQuery;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Streams;
 import com.google.protobuf.Any;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.Event;
@@ -40,7 +39,6 @@ import io.spine.server.aggregate.AggregateStorageTest;
 import io.spine.server.aggregate.Snapshot;
 import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.server.entity.Entity;
-import io.spine.server.storage.datastore.given.DsAggregateStorageTestEnv.NonProjectStateAggregate;
 import io.spine.server.storage.datastore.given.aggregate.ProjectAggregateRepository;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.Project;
@@ -149,40 +147,6 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
         Integer queryLimit = historyBackwardQuery.getLimit();
         assertNull(queryLimit);
-    }
-
-    @Test
-    @DisplayName("read the event count stored in the old format")
-    void readEventCountOldFormat() {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
-        ProjectId id = newId();
-        RecordId oldFormatId = storage.toRecordId(id);
-        int eventCount = 15;
-        storage.getPropertyStorage()
-               .write(oldFormatId, Int32Value.newBuilder()
-                                             .setValue(eventCount)
-                                             .build());
-        int actualEventCount = storage.readEventCountAfterLastSnapshot(id);
-        assertEquals(eventCount, actualEventCount);
-    }
-
-    @Test
-    @DisplayName("not overwrite the event count when saving other aggregate type")
-    void notOverwriteEventCount() {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
-        DsAggregateStorage<ProjectId> secondStorage = (DsAggregateStorage<ProjectId>)
-                newStorage(ProjectId.class, NonProjectStateAggregate.class);
-
-        ProjectId id = newId();
-        int firstCount = 15;
-        storage.writeEventCountAfterLastSnapshot(id, firstCount);
-        int secondCount = 17;
-        secondStorage.writeEventCountAfterLastSnapshot(id, secondCount);
-
-        int actualFirstCount = storage.readEventCountAfterLastSnapshot(id);
-        int actualSecondCount = secondStorage.readEventCountAfterLastSnapshot(id);
-        assertEquals(firstCount, actualFirstCount);
-        assertEquals(secondCount, actualSecondCount);
     }
 
     @Test

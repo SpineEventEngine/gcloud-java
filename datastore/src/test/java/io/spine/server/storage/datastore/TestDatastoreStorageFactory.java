@@ -90,7 +90,8 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * <p>May be effectively the same as {@link #clear()}.
      *
-     * <p>NOTE: does not stop the server but just deletes all records.
+     * <p><b>NOTE</b>: does not stop the server but just deletes all records.
+     *
      * <p>Equivalent to dropping all tables in an SQL-base storage.
      */
     public void tearDown() {

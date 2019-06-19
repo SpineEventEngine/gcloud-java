@@ -136,7 +136,7 @@ public class DsRecordStorageTestEnv {
     public static IdFilter newIdFilter(List<Any> targetIds) {
         return IdFilter
                 .newBuilder()
-                .addAllIds(targetIds)
+                .addAllId(targetIds)
                 .vBuild();
     }
 
