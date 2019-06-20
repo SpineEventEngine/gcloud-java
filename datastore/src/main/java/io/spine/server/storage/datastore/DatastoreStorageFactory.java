@@ -126,6 +126,10 @@ public class DatastoreStorageFactory implements StorageFactory {
         return multitenant;
     }
 
+    public ColumnTypeRegistry getTypeRegistry() {
+        return typeRegistry;
+    }
+
     @Override
     public <I>
     ProjectionStorage<I> createProjectionStorage(Class<? extends Projection<I, ?, ?>> cls) {
