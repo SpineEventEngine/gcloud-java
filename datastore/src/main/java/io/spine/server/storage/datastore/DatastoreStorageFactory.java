@@ -64,11 +64,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
     private final @MonotonicNonNull NamespaceConverter namespaceConverter;
 
-    @SuppressWarnings({
-            /* Overridden method required for stub. impl. of test environments.  */
-            "OverridableMethodCallDuringObjectConstruction",
-            "OverriddenMethodCallDuringObjectConstruction"
-    })
+    @SuppressWarnings("OverridableMethodCallDuringObjectConstruction")
+        // Overridden method required for stub. impl. of test environments.
     DatastoreStorageFactory(Builder builder) {
         this.multitenant = builder.multitenant;
         this.typeRegistry = builder.typeRegistry;
@@ -129,10 +126,6 @@ public class DatastoreStorageFactory implements StorageFactory {
         return multitenant;
     }
 
-    public ColumnTypeRegistry getTypeRegistry() {
-        return typeRegistry;
-    }
-
     @Override
     public <I>
     ProjectionStorage<I> createProjectionStorage(Class<? extends Projection<I, ?, ?>> cls) {
@@ -165,9 +158,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> cls) {
         checkNotNull(cls);
-        DsPropertyStorage propertyStorage = createPropertyStorage();
         DsAggregateStorage<I> result =
-                new DsAggregateStorage<>(cls, datastore(), propertyStorage, multitenant);
+                new DsAggregateStorage<>(cls, datastore(), multitenant);
         return result;
     }
 

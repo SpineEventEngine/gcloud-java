@@ -155,11 +155,6 @@ final class StackdriverTracer extends AbstractTracer {
         return shorten(result, resultLength);
     }
 
-    private static String hexOfLength(MessageId id, int resultLength) {
-        String result = toHexString(id.hashCode());
-        return shorten(result, resultLength);
-    }
-
     private static String shorten(String value, int length) {
         return value.length() > length
                ? value.substring(0, length)
