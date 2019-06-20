@@ -118,15 +118,6 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         assertNotNull(datastore);
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
-    @Test
-    @DisplayName("provide access to PropertyStorage for extensibility")
-    void testAccessPropertyStorage() {
-        DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
-        DsPropertyStorage propertyStorage = storage.getPropertyStorage();
-        assertNotNull(propertyStorage);
-    }
-
     @Test
     @DisplayName("fail to write invalid record")
     void testFailOnInvalidRecord() {

@@ -73,25 +73,6 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
         return result;
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
-    @Test
-    @DisplayName("provide access to PropertyStorage for extensibility")
-    void testAccessPropertyStorage() {
-        DsProjectionStorage<ProjectId> storage =
-                (DsProjectionStorage<ProjectId>) newStorage(TestProjection.class);
-        DsPropertyStorage propertyStorage = storage.propertyStorage();
-        assertNotNull(propertyStorage);
-    }
-
-    private static class TestProjection extends Projection<ProjectId,
-                                                           Project,
-                                                           Project.Builder> {
-
-        private TestProjection(ProjectId id) {
-            super(id);
-        }
-    }
-
     public static class TestEntity extends TestCounterEntity {
 
         protected TestEntity(ProjectId id) {
