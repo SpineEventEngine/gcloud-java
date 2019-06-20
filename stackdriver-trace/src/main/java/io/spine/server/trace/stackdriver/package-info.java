@@ -18,8 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'spine-gcloud-java'
+// TODO:2019-06-17:dmytro.dashenkov: Move to another module.
 
-include 'datastore'
-include 'stackdriver-trace'
+/**
+ * This package contains the implementation of Spine Tracing API based on the Stackdriver Trace.
+ *
+ * @see <a href="https://cloud.google.com/trace/docs/">API doc</a>
+ */
 
+
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.trace.stackdriver;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;
