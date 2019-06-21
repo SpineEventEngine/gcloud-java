@@ -36,8 +36,7 @@ import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-@Immutable
-public class StackdriverTracerFactory implements TracerFactory {
+public final class StackdriverTracerFactory implements TracerFactory {
 
     private final @Nullable BoundedContextName context;
     @SuppressWarnings("Immutable") // Not annotated but in fact immutable.
@@ -72,6 +71,11 @@ public class StackdriverTracerFactory implements TracerFactory {
                 .setGcpProjectName(gcpProjectName);
     }
 
+    @Override
+    public void close() {
+        service.close();
+    }
+
     /**
      * Creates a new instance of {@code Builder} for {@code StackdriverTracerFactory} instances.
      *
@@ -79,11 +83,6 @@ public class StackdriverTracerFactory implements TracerFactory {
      */
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    @Override
-    public void close() {
-        service.close();
     }
 
     /**
@@ -108,11 +107,6 @@ public class StackdriverTracerFactory implements TracerFactory {
             return this;
         }
 
-        @Internal
-        public Builder clearContext() {
-            return setContext(null);
-        }
-
         private Builder setService(GrpcTraceServiceStub service) {
             this.service = checkNotNull(service);
             return this;
@@ -134,10 +128,13 @@ public class StackdriverTracerFactory implements TracerFactory {
          * @return new instance of {@code StackdriverTracerFactory}
          */
         public StackdriverTracerFactory build() {
+            checkNotNull(service);
+            checkNotNull(callContext);
+            checkNotNull(gcpProjectName);
             return new StackdriverTracerFactory(this);
         }
 
-        public GrpcTraceServiceStub buildService() {
+        private GrpcTraceServiceStub buildService() {
             ClientContext clientContext = ClientContext
                     .newBuilder()
                     .setDefaultCallContext(callContext)
