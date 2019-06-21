@@ -25,12 +25,14 @@ import com.google.devtools.cloudtrace.v2.AttributeValue;
 import com.google.devtools.cloudtrace.v2.BatchWriteSpansRequest;
 import com.google.devtools.cloudtrace.v2.Span;
 import com.google.devtools.cloudtrace.v2.TruncatableString;
+import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.trace.AbstractTracer;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
@@ -46,6 +48,9 @@ import static java.lang.String.format;
 import static java.util.Collections.synchronizedList;
 
 final class StackdriverTracer extends AbstractTracer {
+
+    private static final int TRACE_ID_LENGTH = 32;
+    private static final int SPAN_ID_LENGTH = 16;
 
     private final @Nullable BoundedContextName context;
     private final List<Span> spans;
@@ -119,18 +124,24 @@ final class StackdriverTracer extends AbstractTracer {
     }
 
     /**
-     * @see <a href="https://cloud.google.com/trace/docs/reference/v2/rpc/google.devtools.cloudtrace.v2#google.devtools.cloudtrace.v2.BatchWriteSpansRequest">API
-     *         doc</a>
+     * Obtains the name of the span for this message.
+     *
+     * <p>The name consist of the Google Cloud Platform project name, the trace ID and the span ID.
+     *
+     * @see <a href="https://cloud.google.com/trace/docs/reference/v2/rpc/google.devtools.cloudtrace.v2#google.devtools.cloudtrace.v2.BatchWriteSpansRequest">API doc</a>
      */
     private String spanName(String spanId) {
-        String traceId = traceId(signal().rootMessage()
-                                         .asSignalId());
+        Any id = signal().rootMessage()
+                         .getId();
+        SignalId signalId = (SignalId) AnyPacker.unpack(id);
+        String traceId = traceId(signalId);
         return format("projects/%s/traces/%s/spans/%s", projectId, traceId, spanId);
     }
 
     /**
-     * @see <a href="https://cloud.google.com/trace/docs/reference/v2/rpc/google.devtools.cloudtrace.v2#google.devtools.cloudtrace.v2.BatchWriteSpansRequest">API
-     *         doc</a>
+     * Obtains the Google Cloud Platform project name.
+     *
+     * @see <a href="https://cloud.google.com/trace/docs/reference/v2/rpc/google.devtools.cloudtrace.v2#google.devtools.cloudtrace.v2.Span">API doc</a>
      */
     private String projectName() {
         return format("projects/%s", projectId);
@@ -139,11 +150,11 @@ final class StackdriverTracer extends AbstractTracer {
     private static String spanId() {
         long bits = UUID.randomUUID()
                         .getLeastSignificantBits();
-        return shorten(toHexString(bits), 16);
+        return shorten(toHexString(bits), SPAN_ID_LENGTH);
     }
 
     private static String traceId(SignalId rootMessage) {
-        return hexOfLength(rootMessage, 32);
+        return hexOfLength(rootMessage, TRACE_ID_LENGTH);
     }
 
     private static String hexOfLength(SignalId id, int resultLength) {

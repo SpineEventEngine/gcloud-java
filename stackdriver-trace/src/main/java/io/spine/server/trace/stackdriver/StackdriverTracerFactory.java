@@ -60,12 +60,6 @@ public class StackdriverTracerFactory implements TracerFactory {
     }
 
     @Override
-    public TracerFactory outOfContext() {
-        return toBuilder().clearContext()
-                          .build();
-    }
-
-    @Override
     public Tracer trace(Signal<?, ?, ?> signalMessage) {
         return new StackdriverTracer(signalMessage, service, gcpProjectName, context);
     }
@@ -88,7 +82,7 @@ public class StackdriverTracerFactory implements TracerFactory {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         service.close();
     }
 
