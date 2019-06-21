@@ -135,7 +135,7 @@ final class StackdriverTracer extends AbstractTracer {
                          .getId();
         SignalId signalId = (SignalId) AnyPacker.unpack(id);
         String traceId = traceId(signalId);
-        return format("projects/%s/traces/%s/spans/%s", projectId, traceId, spanId);
+        return format("%s/traces/%s/spans/%s", projectName(), traceId, spanId);
     }
 
     /**
