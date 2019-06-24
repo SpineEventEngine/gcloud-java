@@ -23,8 +23,6 @@ package io.spine.server.trace.stackdriver;
 import com.google.api.gax.grpc.GrpcCallContext;
 import com.google.api.gax.rpc.ClientContext;
 import com.google.cloud.trace.v2.stub.GrpcTraceServiceStub;
-import com.google.errorprone.annotations.Immutable;
-import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Signal;
 import io.spine.server.trace.Tracer;
@@ -39,23 +37,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class StackdriverTracerFactory implements TracerFactory {
 
     private final @Nullable BoundedContextName context;
-    @SuppressWarnings("Immutable") // Not annotated but in fact immutable.
-    private final GrpcTraceServiceStub service;
-    @SuppressWarnings("Immutable") // Not annotated but in fact immutable.
-    private final GrpcCallContext callContext;
+    private final TraceService service;
     private final String gcpProjectName;
 
     private StackdriverTracerFactory(Builder builder) {
         this.context = builder.context;
         this.service = builder.buildService();
-        this.callContext = builder.callContext;
         this.gcpProjectName = builder.gcpProjectName;
-    }
-
-    @Override
-    public TracerFactory inContext(BoundedContextName context) {
-        return toBuilder().setContext(context)
-                          .build();
     }
 
     @Override
@@ -63,16 +51,8 @@ public final class StackdriverTracerFactory implements TracerFactory {
         return new StackdriverTracer(signalMessage, service, gcpProjectName, context);
     }
 
-    private Builder toBuilder() {
-        return newBuilder()
-                .setContext(context)
-                .setService(service)
-                .setCallContext(callContext)
-                .setGcpProjectName(gcpProjectName);
-    }
-
     @Override
-    public void close() {
+    public void close() throws Exception {
         service.close();
     }
 
@@ -94,6 +74,7 @@ public final class StackdriverTracerFactory implements TracerFactory {
         private GrpcCallContext callContext;
         private String gcpProjectName;
         private @MonotonicNonNull GrpcTraceServiceStub service;
+        private boolean multiThreadingAllowed = true;
 
         /**
          * Prevents direct instantiation.
@@ -101,7 +82,6 @@ public final class StackdriverTracerFactory implements TracerFactory {
         private Builder() {
         }
 
-        @Internal
         public Builder setContext(@Nullable BoundedContextName context) {
             this.context = context;
             return this;
@@ -122,6 +102,11 @@ public final class StackdriverTracerFactory implements TracerFactory {
             return this;
         }
 
+        public Builder forbidMultithreading() {
+            this.multiThreadingAllowed = false;
+            return this;
+        }
+
         /**
          * Creates a new instance of {@code StackdriverTracerFactory}.
          *
@@ -134,17 +119,19 @@ public final class StackdriverTracerFactory implements TracerFactory {
             return new StackdriverTracerFactory(this);
         }
 
-        private GrpcTraceServiceStub buildService() {
+        private TraceService buildService() {
             ClientContext clientContext = ClientContext
                     .newBuilder()
                     .setDefaultCallContext(callContext)
                     .build();
             try {
                 this.service = GrpcTraceServiceStub.create(clientContext);
-                return service;
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
+            return multiThreadingAllowed
+                   ? new AsyncTraceService(service)
+                   : new SyncTraceService(service);
         }
     }
 }

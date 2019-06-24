@@ -21,7 +21,6 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.EntityQuery;
-import com.google.common.base.Suppliers;
 import com.google.common.collect.Streams;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
@@ -228,9 +227,8 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         @BeforeEach
         void setUp() {
             BoundedContext boundedContext =
-                    BoundedContext.newBuilder()
-                                  .setName(DsAggregateStorageTest.class.getName())
-                                  .setStorageFactorySupplier(Suppliers.ofInstance(datastoreFactory))
+                    BoundedContext.singleTenant(DsAggregateStorageTest.class.getName())
+                                  .setStorage(spec -> datastoreFactory)
                                   .build();
             repository = new ProjectAggregateRepository();
             boundedContext.register(repository);

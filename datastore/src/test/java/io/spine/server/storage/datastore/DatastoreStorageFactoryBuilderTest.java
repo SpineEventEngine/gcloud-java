@@ -25,6 +25,7 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.ContextSpec;
 import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityColumn;
@@ -41,6 +42,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static io.spine.server.ContextSpec.multitenant;
+import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
@@ -132,9 +135,11 @@ class DatastoreStorageFactoryBuilderTest {
             DatastoreOptions options =
                     builder.setNamespace("non-null-or-empty-namespace")
                            .build();
+            ContextSpec spec =
+                    multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
             DatastoreStorageFactory.Builder builder = DatastoreStorageFactory
                     .newBuilder()
-                    .setMultitenant(true)
+                    .setContextSpec(spec)
                     .setDatastore(options.getService());
             assertThrows(IllegalArgumentException.class, builder::build);
         }
@@ -146,9 +151,11 @@ class DatastoreStorageFactoryBuilderTest {
             DatastoreOptions options =
                     builder.setNamespace(namespace)
                            .build();
+            ContextSpec spec =
+                    singleTenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
             DatastoreStorageFactory factory = DatastoreStorageFactory
                     .newBuilder()
-                    .setMultitenant(false)
+                    .setContextSpec(spec)
                     .setDatastore(options.getService())
                     .build();
             assertNotNull(factory);
@@ -170,9 +177,11 @@ class DatastoreStorageFactoryBuilderTest {
                                 .setProjectId(withCustomConverter.getValue())
                                 .build();
         NamespaceConverter converter = mock(NamespaceConverter.class);
+        ContextSpec spec =
+                multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
         DatastoreStorageFactory factory =
                 DatastoreStorageFactory.newBuilder()
-                                       .setMultitenant(true)
+                                       .setContextSpec(spec)
                                        .setDatastore(options.getService())
                                        .setNamespaceConverter(converter)
                                        .build();

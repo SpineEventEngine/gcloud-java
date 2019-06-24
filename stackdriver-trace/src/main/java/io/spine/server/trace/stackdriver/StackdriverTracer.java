@@ -20,7 +20,6 @@
 
 package io.spine.server.trace.stackdriver;
 
-import com.google.cloud.trace.v2.stub.GrpcTraceServiceStub;
 import com.google.devtools.cloudtrace.v2.AttributeValue;
 import com.google.devtools.cloudtrace.v2.BatchWriteSpansRequest;
 import com.google.devtools.cloudtrace.v2.Span;
@@ -54,16 +53,16 @@ final class StackdriverTracer extends AbstractTracer {
 
     private final @Nullable BoundedContextName context;
     private final List<Span> spans;
-    private final GrpcTraceServiceStub service;
+    private final TraceService traceService;
     private final String projectId;
 
     StackdriverTracer(Signal<?, ?, ?> signal,
-                      GrpcTraceServiceStub service,
+                      TraceService traceService,
                       String gcpProjectId,
                       @Nullable BoundedContextName context) {
         super(signal);
-        this.service = service;
-        this.projectId = gcpProjectId;
+        this.traceService = checkNotNull(traceService);
+        this.projectId = checkNotNull(gcpProjectId);
         this.context = checkNotNull(context);
         this.spans = synchronizedList(newArrayList());
     }
@@ -105,15 +104,14 @@ final class StackdriverTracer extends AbstractTracer {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         BatchWriteSpansRequest request = BatchWriteSpansRequest
                 .newBuilder()
                 .setName(projectName())
                 .addAllSpans(spans)
                 .build();
-        service.batchWriteSpansCallable()
-               .call(request);
-        service.close();
+        traceService.writeSpans(request);
+        traceService.close();
     }
 
     private static TruncatableString truncatable(String initial) {

@@ -23,11 +23,13 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.logging.Logging;
+import io.spine.server.ContextSpec;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
 
+import static io.spine.server.ContextSpec.singleTenant;
 import static java.lang.String.format;
 
 /**
@@ -65,9 +67,13 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         super(DatastoreStorageFactory
                       .newBuilder()
                       .setDatastore(datastore)
-                      .setMultitenant(false)
+                      .setContextSpec(singleTenantSpec())
                       .setTypeRegistry(DatastoreTypeRegistryFactory.defaultInstance())
         );
+    }
+
+    private static ContextSpec singleTenantSpec() {
+        return singleTenant(TestDatastoreStorageFactory.class.getSimpleName());
     }
 
     @Override
