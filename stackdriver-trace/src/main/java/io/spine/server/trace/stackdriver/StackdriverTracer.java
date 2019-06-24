@@ -33,6 +33,9 @@ import static com.google.api.client.util.Lists.newArrayList;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.synchronizedList;
 
+/**
+ * A {@link io.spine.server.trace.Tracer} which reports to Stackdriver Trace.
+ */
 final class StackdriverTracer extends AbstractTracer {
 
     private final List<Span> spans;

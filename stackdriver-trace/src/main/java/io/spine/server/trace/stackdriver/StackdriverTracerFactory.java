@@ -33,6 +33,14 @@ import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * A {@link TracerFactory} based on the Stackdriver Trace.
+ *
+ * <p>This tracing mechanism requires a Google Cloud Project with enabled Cloud Trace (another name
+ * for Stackdriver Trace).
+ *
+ * @see <a href="https://cloud.google.com/trace/docs/">Stackdriver Trace docs</a>
+ */
 public final class StackdriverTracerFactory implements TracerFactory {
 
     private final BoundedContextName context;
