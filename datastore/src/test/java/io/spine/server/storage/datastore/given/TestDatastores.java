@@ -108,7 +108,7 @@ public class TestDatastores {
     @SuppressWarnings("NewClassNamingConvention")
     private static final class Ci extends Options implements Logging {
 
-        private static final String CREDENTIALS_FILE_PATH = "/spine-dev-62685282c0b9.json";
+        private static final String CREDENTIALS_FILE_PATH = "/spine-dev.json";
         private static final DatastoreOptions INSTANCE = new Ci().create();
 
         private Ci() {

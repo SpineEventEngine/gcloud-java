@@ -19,7 +19,7 @@ before_install:
   - tar xvf credentials.tar
   # Create a target folder for the credentials file of Google Cloud, and copy it.
   - mkdir -p ./datastore/src/test/resources/
-  - cp spine-dev.json ./datastore/src/test/resources/spine-dev-62685282c0b9.json
+  - cp spine-dev.json ./datastore/src/test/resources/spine-dev.json
   - ./scripts/install-gcloud.sh
   # Add the newly installed gcloud SDK to PATH overriding the default Travis version.
   - source $HOME/google-cloud-sdk/path.bash.inc
