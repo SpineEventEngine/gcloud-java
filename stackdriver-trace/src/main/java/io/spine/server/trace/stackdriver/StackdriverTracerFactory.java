@@ -27,7 +27,6 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Signal;
 import io.spine.server.trace.Tracer;
 import io.spine.server.trace.TracerFactory;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
@@ -71,9 +70,9 @@ public final class StackdriverTracerFactory implements TracerFactory {
     public static final class Builder {
 
         private @Nullable BoundedContextName context;
-        private GrpcCallContext callContext;
+        private ClientContext clientContext;
         private String gcpProjectName;
-        private @MonotonicNonNull GrpcTraceServiceStub service;
+        private GrpcTraceServiceStub service;
         private boolean multiThreadingAllowed = true;
 
         /**
@@ -93,7 +92,16 @@ public final class StackdriverTracerFactory implements TracerFactory {
         }
 
         public Builder setCallContext(GrpcCallContext callContext) {
-            this.callContext = checkNotNull(callContext);
+            checkNotNull(callContext);
+            this.clientContext = ClientContext
+                    .newBuilder()
+                    .setDefaultCallContext(callContext)
+                    .build();
+            return this;
+        }
+
+        public Builder setClientContext(ClientContext context) {
+            this.clientContext = checkNotNull(context);
             return this;
         }
 
@@ -113,17 +121,13 @@ public final class StackdriverTracerFactory implements TracerFactory {
          * @return new instance of {@code StackdriverTracerFactory}
          */
         public StackdriverTracerFactory build() {
-            checkNotNull(service);
-            checkNotNull(callContext);
-            checkNotNull(gcpProjectName);
+            checkNotNull(service, "gRPC stub for Trace service is not set.");
+            checkNotNull(clientContext, "Either CallContext or ClientContext must be set.");
+            checkNotNull(gcpProjectName, "GCP project name must be set.");
             return new StackdriverTracerFactory(this);
         }
 
         private TraceService buildService() {
-            ClientContext clientContext = ClientContext
-                    .newBuilder()
-                    .setDefaultCallContext(callContext)
-                    .build();
             try {
                 this.service = GrpcTraceServiceStub.create(clientContext);
             } catch (IOException e) {
