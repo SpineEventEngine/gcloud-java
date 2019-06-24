@@ -58,6 +58,13 @@ final class SignalSpan {
         this.receiver = checkNotNull(receiver);
     }
 
+    /**
+     * Creates a {@link Span Stackdriver Trace Span} from this signal span.
+     *
+     * @param gcpProjectId
+     *         the Google Cloud Platform project ID
+     * @return new span
+     */
     Span asTraceSpan(ProjectId gcpProjectId) {
         Span.Builder span = buildSpan(gcpProjectId);
         buildSpanAttributes(span);
@@ -104,14 +111,23 @@ final class SignalSpan {
         return SpanName.from(projectId, traceId, spanId);
     }
 
+    /**
+     * Obtains the name of the bounded context to which the signal receiver belongs.
+     */
     BoundedContextName contextName() {
         return context;
     }
 
+    /**
+     * Obtains the processed signal.
+     */
     Signal<?, ?, ?> signal() {
         return signal;
     }
 
+    /**
+     * Obtains the signal receiver ID.
+     */
     MessageId receiver() {
         return receiver;
     }
