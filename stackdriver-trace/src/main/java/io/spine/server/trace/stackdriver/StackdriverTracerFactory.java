@@ -137,11 +137,11 @@ public final class StackdriverTracerFactory implements TracerFactory {
          * <p>This field is required.
          */
         public Builder setContext(BoundedContextName context) {
-            this.context = context;
+            this.context = checkNotNull(context);
             return this;
         }
 
-        public Builder forbidMultithreading() {
+        public Builder forbidMultiThreading() {
             this.multiThreadingAllowed = false;
             return this;
         }

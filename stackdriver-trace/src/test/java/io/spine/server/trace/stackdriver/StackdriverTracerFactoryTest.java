@@ -23,6 +23,7 @@ package io.spine.server.trace.stackdriver;
 import com.google.api.gax.grpc.GrpcCallContext;
 import com.google.api.gax.rpc.ClientContext;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.DefaultSubject;
 import com.google.common.truth.Subject;
 import com.google.protobuf.Empty;
@@ -32,7 +33,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.auth.MoreCallCredentials;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.spine.base.Identifier;
-import io.spine.core.BoundedContextNames;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
@@ -53,6 +54,7 @@ import java.io.InputStream;
 import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.core.BoundedContextNames.assumingTests;
 import static io.spine.core.Versions.zero;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -88,6 +90,37 @@ class StackdriverTracerFactoryTest {
     }
 
     @Nested
+    @DisplayName("not tolerate nulls")
+    class NotNull {
+
+        @Test
+        @DisplayName("on construction")
+        void builder() {
+            new NullPointerTester()
+                    .setDefault(GrpcCallContext.class, GrpcCallContext.createDefault())
+                    .setDefault(ClientContext.class, ClientContext
+                            .newBuilder()
+                            .setDefaultCallContext(GrpcCallContext.createDefault())
+                            .build())
+                    .setDefault(BoundedContextName.class, assumingTests())
+                    .testAllPublicInstanceMethods(StackdriverTracerFactory.newBuilder());
+        }
+
+        @Test
+        @DisplayName("when creating tracers")
+        void factory() {
+            StackdriverTracerFactory factory = StackdriverTracerFactory
+                    .newBuilder()
+                    .setContext(assumingTests())
+                    .setGcpProjectId(REAL_GCP_PROJECT)
+                    .setCallContext(realGrpcContext)
+                    .build();
+            new NullPointerTester()
+                    .testAllPublicInstanceMethods(factory);
+        }
+    }
+
+    @Nested
     @DisplayName("not be built without")
     class NotBeBuilt {
 
@@ -97,7 +130,7 @@ class StackdriverTracerFactoryTest {
             StackdriverTracerFactory.Builder builder = StackdriverTracerFactory
                     .newBuilder()
                     .setGcpProjectId("test123")
-                    .setContext(BoundedContextNames.assumingTests());
+                    .setContext(assumingTests());
             assertThrows(NullPointerException.class, builder::build);
         }
 
@@ -121,7 +154,7 @@ class StackdriverTracerFactoryTest {
             StackdriverTracerFactory.Builder builder = StackdriverTracerFactory
                     .newBuilder()
                     .setClientContext(context)
-                    .setContext(BoundedContextNames.assumingTests());
+                    .setContext(assumingTests());
             assertThrows(NullPointerException.class, builder::build);
         }
     }
@@ -141,7 +174,7 @@ class StackdriverTracerFactoryTest {
                     .newBuilder()
                     .setGcpProjectId("test321")
                     .setClientContext(context)
-                    .setContext(BoundedContextNames.assumingTests())
+                    .setContext(assumingTests())
                     .build();
         }
 
@@ -152,7 +185,7 @@ class StackdriverTracerFactoryTest {
                     .newBuilder()
                     .setGcpProjectId("test132")
                     .setCallContext(GrpcCallContext.createDefault())
-                    .setContext(BoundedContextNames.assumingTests())
+                    .setContext(assumingTests())
                     .build();
         }
     }
@@ -168,7 +201,7 @@ class StackdriverTracerFactoryTest {
             factory = StackdriverTracerFactory
                     .newBuilder()
                     .setGcpProjectId(REAL_GCP_PROJECT)
-                    .setContext(BoundedContextNames.assumingTests())
+                    .setContext(assumingTests())
                     .setCallContext(realGrpcContext);
         }
 
@@ -185,7 +218,7 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("which sends requests sequentially")
         void forSyncExecution() throws Exception {
-            StackdriverTracerFactory tracerFactory = factory.forbidMultithreading()
+            StackdriverTracerFactory tracerFactory = factory.forbidMultiThreading()
                                                             .build();
             assertThat(interceptor.callCount()).isEqualTo(0);
             Tracer tracer = tracerFactory.trace(Event.getDefaultInstance());
