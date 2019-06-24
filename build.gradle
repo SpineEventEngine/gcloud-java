@@ -165,6 +165,19 @@ subprojects {
         }
     }
 
+    task copyCredentials(type: Copy) {
+
+        final def resourceDir = "$projectDir/src/test/resources"
+        final def fileName = 'spine-dev.json'
+
+        final def sourceFile = file("$rootDir/$fileName")
+
+        from file(sourceFile)
+        into file(resourceDir)
+    }
+
+    processTestResources.dependsOn copyCredentials
+
     test {
         useJUnitPlatform {
             includeEngines 'junit-jupiter'
