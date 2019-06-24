@@ -27,7 +27,6 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Signal;
 import io.spine.server.trace.Tracer;
 import io.spine.server.trace.TracerFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 
