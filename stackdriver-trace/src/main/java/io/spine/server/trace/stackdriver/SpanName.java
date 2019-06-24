@@ -18,7 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'spine-gcloud-java'
+package io.spine.server.trace.stackdriver;
 
-include 'datastore'
-include 'stackdriver-trace'
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * The formal name of a span.
+ *
+ * <p>The name consist of the Google Cloud Platform project name, the trace ID and the span ID.
+ *
+ * @see <a href="https://cloud.google.com/trace/docs/reference/v2/rpc/google.devtools.cloudtrace.v2#google.devtools.cloudtrace.v2.BatchWriteSpansRequest">API doc</a>
+ */
+final class SpanName extends TraceApiString {
+
+    private static final long serialVersionUID = 0L;
+
+    private SpanName(ProjectName projectName, TraceId traceId, SpanId spanId) {
+        super("%s/traces/%s/spans/%s", projectName, traceId, spanId);
+    }
+
+    static SpanName from(ProjectId projectId, TraceId traceId, SpanId spanId) {
+        checkNotNull(projectId);
+        checkNotNull(traceId);
+        checkNotNull(spanId);
+        return new SpanName(projectId.asName(), traceId, spanId);
+    }
+}

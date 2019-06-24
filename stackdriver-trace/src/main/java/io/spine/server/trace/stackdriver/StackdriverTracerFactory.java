@@ -35,19 +35,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class StackdriverTracerFactory implements TracerFactory {
 
-    private final @Nullable BoundedContextName context;
+    private final BoundedContextName context;
     private final TraceService service;
-    private final String gcpProjectName;
+    private final ProjectId gcpProjectId;
 
     private StackdriverTracerFactory(Builder builder) {
         this.context = builder.context;
         this.service = builder.buildService();
-        this.gcpProjectName = builder.gcpProjectName;
+        this.gcpProjectId = builder.gcpProjectId;
     }
 
     @Override
     public Tracer trace(Signal<?, ?, ?> signalMessage) {
-        return new StackdriverTracer(signalMessage, service, gcpProjectName, context);
+        return new StackdriverTracer(signalMessage, service, gcpProjectId, context);
     }
 
     @Override
@@ -69,10 +69,9 @@ public final class StackdriverTracerFactory implements TracerFactory {
      */
     public static final class Builder {
 
-        private @Nullable BoundedContextName context;
+        private BoundedContextName context;
         private ClientContext clientContext;
-        private String gcpProjectName;
-        private GrpcTraceServiceStub service;
+        private ProjectId gcpProjectId;
         private boolean multiThreadingAllowed = true;
 
         /**
@@ -81,16 +80,30 @@ public final class StackdriverTracerFactory implements TracerFactory {
         private Builder() {
         }
 
-        public Builder setContext(@Nullable BoundedContextName context) {
-            this.context = context;
+        /**
+         * Sets the Google Cloud Platform project ID.
+         *
+         * <p>To find out the ID of a GCP project, go to
+         * the <a href="https://console.cloud.google.com">Google Cloud Console</a> and open
+         * the {@code "Select a project"} dropdown. The table of projects contains projects
+         * available to you. The project ID is the value of the {@code ID} column of the table.
+         *
+         * <p>This field is required.
+         *
+         * @param gcpProjectId the GCP project ID
+         */
+        public Builder setGcpProjectId(String gcpProjectId) {
+            checkNotNull(gcpProjectId);
+            this.gcpProjectId = new ProjectId(gcpProjectId);
             return this;
         }
 
-        private Builder setService(GrpcTraceServiceStub service) {
-            this.service = checkNotNull(service);
-            return this;
-        }
-
+        /**
+         * Sets the gRPC call context to use when submitting collected spans to Trace.
+         *
+         * <p>Either this field or the {@linkplain #setClientContext(ClientContext) client context}
+         * must be set.
+         */
         public Builder setCallContext(GrpcCallContext callContext) {
             checkNotNull(callContext);
             this.clientContext = ClientContext
@@ -100,13 +113,24 @@ public final class StackdriverTracerFactory implements TracerFactory {
             return this;
         }
 
+        /**
+         * Sets the Google API client context to use when submitting collected spans to Trace.
+         *
+         * <p>Either this field or the {@linkplain #setCallContext(GrpcCallContext)} call context}
+         * must be set.
+         */
         public Builder setClientContext(ClientContext context) {
             this.clientContext = checkNotNull(context);
             return this;
         }
 
-        public Builder setGcpProjectName(String gcpProjectName) {
-            this.gcpProjectName = checkNotNull(gcpProjectName);
+        /**
+         * Sets the name of the bounded context in which the tracing is performed.
+         *
+         * <p>This field is required.
+         */
+        public Builder setContext(BoundedContextName context) {
+            this.context = context;
             return this;
         }
 
@@ -121,15 +145,16 @@ public final class StackdriverTracerFactory implements TracerFactory {
          * @return new instance of {@code StackdriverTracerFactory}
          */
         public StackdriverTracerFactory build() {
-            checkNotNull(service, "gRPC stub for Trace service is not set.");
             checkNotNull(clientContext, "Either CallContext or ClientContext must be set.");
-            checkNotNull(gcpProjectName, "GCP project name must be set.");
+            checkNotNull(gcpProjectId, "GCP project name must be set.");
+            checkNotNull(context, "Bounded context name must be set.");
             return new StackdriverTracerFactory(this);
         }
 
         private TraceService buildService() {
+            GrpcTraceServiceStub service;
             try {
-                this.service = GrpcTraceServiceStub.create(clientContext);
+                service = GrpcTraceServiceStub.create(clientContext);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }

@@ -18,7 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'spine-gcloud-java'
+package io.spine.server.trace.stackdriver;
 
-include 'datastore'
-include 'stackdriver-trace'
+import io.spine.core.SignalId;
+
+/**
+ * An identifier of a trace.
+ *
+ * <p>Signals caused by a single (root) signal message are grouped into a single trace.
+ */
+final class TraceId extends ShortTraceApiString {
+
+    private static final long serialVersionUID = 0L;
+
+    private static final int MAX_LENGTH = 32;
+
+    TraceId(SignalId rootSignalId) {
+        super(hexOfLength(rootSignalId, MAX_LENGTH));
+    }
+}

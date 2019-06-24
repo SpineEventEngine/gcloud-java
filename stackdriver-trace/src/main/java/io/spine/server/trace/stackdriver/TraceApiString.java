@@ -18,7 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'spine-gcloud-java'
+package io.spine.server.trace.stackdriver;
 
-include 'datastore'
-include 'stackdriver-trace'
+import com.google.errorprone.annotations.FormatString;
+import io.spine.value.ValueHolder;
+import org.checkerframework.checker.formatter.qual.FormatMethod;
+
+import static java.lang.String.format;
+
+/**
+ * A part of the Stackdriver Trace API represented by a simple string value.
+ */
+abstract class TraceApiString extends ValueHolder<String> {
+
+    private static final long serialVersionUID = 0L;
+
+    @FormatMethod
+    TraceApiString(@FormatString String format, Object... args) {
+        super(format(format, args));
+    }
+
+    @Override
+    public final String toString() {
+        return value();
+    }
+
+    @Override
+    public String value() {
+        return super.value();
+    }
+}

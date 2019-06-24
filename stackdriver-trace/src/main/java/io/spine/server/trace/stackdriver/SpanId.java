@@ -18,7 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'spine-gcloud-java'
+package io.spine.server.trace.stackdriver;
 
-include 'datastore'
-include 'stackdriver-trace'
+import java.util.UUID;
+
+import static java.lang.Long.toHexString;
+
+/**
+ * An identifier of a {@link com.google.devtools.cloudtrace.v2.Span}.
+ */
+final class SpanId extends ShortTraceApiString {
+
+    private static final long serialVersionUID = 0L;
+
+    private static final int MAX_LENGTH = 16;
+
+    private SpanId(String value) {
+        super(value);
+    }
+
+    /**
+     * Creates a random UUID-based span ID.
+     */
+    static SpanId random() {
+        long bits = UUID.randomUUID()
+                        .getLeastSignificantBits();
+        String value = shorten(toHexString(bits), MAX_LENGTH);
+        return new SpanId(value);
+    }
+}

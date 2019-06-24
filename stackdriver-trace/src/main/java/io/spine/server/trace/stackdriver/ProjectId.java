@@ -18,7 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'spine-gcloud-java'
+package io.spine.server.trace.stackdriver;
 
-include 'datastore'
-include 'stackdriver-trace'
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * Google Cloud Platform project ID.
+ */
+final class ProjectId extends TraceApiString {
+
+    private static final long serialVersionUID = 0L;
+
+    ProjectId(String value) {
+        super(checkNotNull(value));
+    }
+
+    /**
+     * Converts this ID into a project name.
+     *
+     * <p>The project name consists of the {@code projects/} prefix and the project ID.
+     */
+    ProjectName asName() {
+        return new ProjectName(this);
+    }
+}
