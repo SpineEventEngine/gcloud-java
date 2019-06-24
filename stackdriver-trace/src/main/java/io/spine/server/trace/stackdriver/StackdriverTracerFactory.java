@@ -98,7 +98,7 @@ public final class StackdriverTracerFactory implements TracerFactory {
          *
          * <p>This field is required.
          *
-         * @param gcpProjectId the GCP project ID
+         * @param gcpProjectId the Google Cloud Platform project ID
          */
         public Builder setGcpProjectId(String gcpProjectId) {
             checkNotNull(gcpProjectId);
