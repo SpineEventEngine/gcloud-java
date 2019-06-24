@@ -104,14 +104,13 @@ final class StackdriverTracer extends AbstractTracer {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         BatchWriteSpansRequest request = BatchWriteSpansRequest
                 .newBuilder()
                 .setName(projectName())
                 .addAllSpans(spans)
                 .build();
         traceService.writeSpans(request);
-        traceService.close();
     }
 
     private static TruncatableString truncatable(String initial) {

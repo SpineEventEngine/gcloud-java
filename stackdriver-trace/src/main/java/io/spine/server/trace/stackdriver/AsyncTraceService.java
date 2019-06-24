@@ -27,6 +27,11 @@ import io.spine.logging.Logging;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
+/**
+ * An async implementation of the {@link TraceService}.
+ *
+ * <p>Logs when the request is executed successfully.
+ */
 final class AsyncTraceService implements TraceService, Logging {
 
     private final GrpcTraceServiceStub client;

@@ -25,6 +25,11 @@ import com.google.devtools.cloudtrace.v2.BatchWriteSpansRequest;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * Sync implementation of the {@link TraceService}.
+ *
+ * <p>Prefer the {@link AsyncTraceService} unless the runtime constraints spawning new thread.
+ */
 final class SyncTraceService implements TraceService {
 
     private final GrpcTraceServiceStub client;

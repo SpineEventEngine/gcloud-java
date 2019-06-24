@@ -22,6 +22,12 @@ package io.spine.server.trace.stackdriver;
 
 import com.google.devtools.cloudtrace.v2.BatchWriteSpansRequest;
 
+/**
+ * The Stackdriver Trace API client.
+ *
+ * <p>Depending on the implementation, the client may send queries in the same thread or
+ * asynchronously.
+ */
 interface TraceService extends AutoCloseable {
 
     void writeSpans(BatchWriteSpansRequest request);
