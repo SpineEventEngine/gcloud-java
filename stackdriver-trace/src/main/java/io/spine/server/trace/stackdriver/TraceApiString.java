@@ -20,9 +20,7 @@
 
 package io.spine.server.trace.stackdriver;
 
-import com.google.errorprone.annotations.FormatString;
 import io.spine.value.ValueHolder;
-import org.checkerframework.checker.formatter.qual.FormatMethod;
 
 import static java.lang.String.format;
 
@@ -33,8 +31,15 @@ abstract class TraceApiString extends ValueHolder<String> {
 
     private static final long serialVersionUID = 0L;
 
-    @FormatMethod
-    TraceApiString(@FormatString String format, Object... args) {
+    /**
+     * Constructs a new Trace API string.
+     *
+     * @param format
+     *         the {@link String#format(String, Object...)} compatible format template
+     * @param args
+     *         the formatting arguments
+     */
+    TraceApiString(String format, Object... args) {
         super(format(format, args));
     }
 
