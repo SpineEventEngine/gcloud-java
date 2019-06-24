@@ -190,6 +190,7 @@ class StackdriverTracerFactoryTest {
             assertThat(interceptor.callCount()).isEqualTo(0);
             Tracer tracer = tracerFactory.trace(Event.getDefaultInstance());
             tracer.close();
+            tracerFactory.close();
             assertThat(interceptor.callCount()).isEqualTo(1);
         }
 
@@ -200,6 +201,7 @@ class StackdriverTracerFactoryTest {
             assertThat(interceptor.callCount()).isEqualTo(0);
             Tracer tracer = tracerFactory.trace(Command.getDefaultInstance());
             tracer.close();
+            tracerFactory.close();
             assertThat(interceptor.callCount()).isEqualTo(1);
         }
 
@@ -226,6 +228,7 @@ class StackdriverTracerFactoryTest {
                     .vBuild();
             tracer.processedBy(receiverId);
             tracer.close();
+            tracerFactory.close();
             assertThat(interceptor.callCount()).isEqualTo(1);
         }
     }
