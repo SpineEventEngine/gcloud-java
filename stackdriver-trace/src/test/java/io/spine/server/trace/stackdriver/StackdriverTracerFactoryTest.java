@@ -25,16 +25,23 @@ import com.google.api.gax.rpc.ClientContext;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.truth.DefaultSubject;
 import com.google.common.truth.Subject;
+import com.google.protobuf.Empty;
 import io.grpc.CallCredentials;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.auth.MoreCallCredentials;
 import io.grpc.inprocess.InProcessChannelBuilder;
+import io.spine.base.Identifier;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.MessageId;
 import io.spine.server.trace.Tracer;
 import io.spine.server.trace.stackdriver.given.CountingInterceptor;
+import io.spine.test.stackdriver.CreateProject;
+import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -45,6 +52,8 @@ import java.io.InputStream;
 
 import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.core.Versions.zero;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -54,11 +63,12 @@ class StackdriverTracerFactoryTest {
     private static final String REAL_GCP_PROJECT = "spine-dev";
     private GrpcCallContext realGrpcContext = null;
     private CountingInterceptor interceptor;
+    private ManagedChannel channel;
 
     @BeforeEach
     void prepareChannel() throws IOException {
         interceptor = new CountingInterceptor();
-        ManagedChannel channel = InProcessChannelBuilder
+        channel = InProcessChannelBuilder
                 .forName("never to be called because of the interceptor")
                 .intercept(interceptor)
                 .build();
@@ -70,6 +80,11 @@ class StackdriverTracerFactoryTest {
         CallCredentials callCredentials = MoreCallCredentials.from(credentials);
         CallOptions options = CallOptions.DEFAULT.withCallCredentials(callCredentials);
         realGrpcContext = GrpcCallContext.of(channel, options);
+    }
+
+    @AfterEach
+    void closeChannel() {
+        channel.shutdownNow();
     }
 
     @Nested
@@ -187,6 +202,31 @@ class StackdriverTracerFactoryTest {
             tracer.close();
             assertThat(interceptor.callCount()).isEqualTo(1);
         }
-    }
 
+        @Test
+        @DisplayName("and post non-empty requests")
+        void nonEmpty() throws Exception {
+            StackdriverTracerFactory tracerFactory = factory.build();
+            assertThat(interceptor.callCount()).isEqualTo(0);
+            TestActorRequestFactory requests =
+                    new TestActorRequestFactory(StackdriverTracerFactoryTest.class);
+            CreateProject command = CreateProject
+                    .newBuilder()
+                    .setUuid(newUuid())
+                    .setName("TestProject")
+                    .vBuild();
+            Command cmd = requests.command()
+                                  .create(command);
+            Tracer tracer = tracerFactory.trace(cmd);
+            MessageId receiverId = MessageId
+                    .newBuilder()
+                    .setId(Identifier.pack("SampleEntityId"))
+                    .setTypeUrl(TypeUrl.of(Empty.class).value())
+                    .setVersion(zero())
+                    .vBuild();
+            tracer.processedBy(receiverId);
+            tracer.close();
+            assertThat(interceptor.callCount()).isEqualTo(1);
+        }
+    }
 }
