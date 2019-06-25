@@ -23,7 +23,7 @@ package io.spine.server.trace.stackdriver;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The formal name of a span.
+ * The formal name of a span as recognized by the Stackdriver Trace API.
  *
  * <p>The name consist of the Google Cloud Platform project name, the trace ID and the span ID.
  *
