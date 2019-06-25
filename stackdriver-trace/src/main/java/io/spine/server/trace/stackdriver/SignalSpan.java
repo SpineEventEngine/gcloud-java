@@ -81,7 +81,7 @@ final class SignalSpan {
                                     .toTypeName();
         TypeName receiverType = TypeUrl.parse(receiver.getTypeUrl())
                                        .toTypeName();
-        return format("%s processes %s", receiverType, signalType);
+        return format("%s processes %s", receiverType.simpleName(), signalType.simpleName());
     }
 
     private Span.Builder buildSpan(ProjectId projectId) {

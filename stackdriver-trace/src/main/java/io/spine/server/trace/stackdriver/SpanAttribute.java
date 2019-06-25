@@ -49,7 +49,7 @@ enum SpanAttribute {
             return SpanAttribute.stringValue(tenantString);
         }
     },
-    ReceiverID {
+    EntityID {
         @Override
         AttributeValue value(SignalSpan signalSpan) {
             Message id = unpack(signalSpan.receiver().getId());
@@ -62,6 +62,23 @@ enum SpanAttribute {
         AttributeValue value(SignalSpan signalSpan) {
             String printedId = signalSpan.signal().id().value();
             return SpanAttribute.stringValue(printedId);
+        }
+    },
+    EntityType {
+        @Override
+        AttributeValue value(SignalSpan signalSpan) {
+            String entityType = signalSpan.receiver()
+                                          .getTypeUrl();
+            return SpanAttribute.stringValue(entityType);
+        }
+    },
+    SignalType {
+        @Override
+        AttributeValue value(SignalSpan signalSpan) {
+            String signalType = signalSpan.signal()
+                                          .typeUrl()
+                                          .value();
+            return SpanAttribute.stringValue(signalType);
         }
     };
 
