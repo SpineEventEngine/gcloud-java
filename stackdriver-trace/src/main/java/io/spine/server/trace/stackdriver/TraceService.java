@@ -30,5 +30,13 @@ import com.google.devtools.cloudtrace.v2.BatchWriteSpansRequest;
  */
 public interface TraceService extends AutoCloseable {
 
+    /**
+     * Performs the given {@code BatchWriteSpansRequest}.
+     *
+     * <p>The result of the RPC call is an {@code Empty} and thus is ignored.
+     *
+     * @param request
+     *         the spans to send to Stackdriver Trace
+     */
     void writeSpans(BatchWriteSpansRequest request);
 }
