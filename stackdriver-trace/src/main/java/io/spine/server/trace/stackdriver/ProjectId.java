@@ -25,7 +25,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Google Cloud Platform project ID.
  */
-final class ProjectId extends TraceApiString {
+public final class ProjectId extends TraceApiString {
 
     private static final long serialVersionUID = 0L;
 

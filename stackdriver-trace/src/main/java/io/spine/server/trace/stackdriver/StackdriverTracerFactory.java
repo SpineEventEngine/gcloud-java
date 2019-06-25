@@ -40,16 +40,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @see <a href="https://cloud.google.com/trace/docs/">Stackdriver Trace docs</a>
  */
-public final class StackdriverTracerFactory implements TracerFactory {
+public class StackdriverTracerFactory implements TracerFactory {
 
     private final BoundedContextName context;
     private final TraceService service;
     private final ProjectId gcpProjectId;
 
     private StackdriverTracerFactory(Builder builder) {
-        this.context = builder.context;
-        this.service = builder.buildService();
-        this.gcpProjectId = builder.gcpProjectId;
+        this(builder.context, builder.buildService(), builder.gcpProjectId);
+    }
+
+    @SuppressWarnings("WeakerAccess") // Allows customization via subclassing.
+    protected StackdriverTracerFactory(BoundedContextName context,
+                                       TraceService service,
+                                       ProjectId gcpProjectId) {
+        this.context = checkNotNull(context);
+        this.service = checkNotNull(service);
+        this.gcpProjectId = checkNotNull(gcpProjectId);
     }
 
     @Override

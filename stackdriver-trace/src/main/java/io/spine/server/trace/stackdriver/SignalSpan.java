@@ -50,14 +50,15 @@ import static java.lang.String.format;
  * an {@linkplain io.spine.server.aggregate.Apply event applier} invocation, which is treated as
  * a part of the respective command handler or event reactor.
  */
-final class SignalSpan {
+@SuppressWarnings("WeakerAccess") // Allows customization via subclassing.
+public class SignalSpan {
 
     private static final int SPAN_DISPLAY_NAME_LENGTH = 128;
     private final BoundedContextName context;
     private final Signal<?, ?, ?> signal;
     private final MessageId receiver;
 
-    SignalSpan(BoundedContextName context, Signal<?, ?, ?> signal, MessageId receiver) {
+    protected SignalSpan(BoundedContextName context, Signal<?, ?, ?> signal, MessageId receiver) {
         this.context = checkNotNull(context);
         this.signal = checkNotNull(signal);
         this.receiver = checkNotNull(receiver);
@@ -70,7 +71,7 @@ final class SignalSpan {
      *         the Google Cloud Platform project ID
      * @return new span
      */
-    Span asTraceSpan(ProjectId gcpProjectId) {
+    protected Span asTraceSpan(ProjectId gcpProjectId) {
         Span.Builder span = buildSpan(gcpProjectId);
         buildSpanAttributes(span);
         return span.build();
@@ -119,21 +120,21 @@ final class SignalSpan {
     /**
      * Obtains the name of the bounded context to which the signal receiver belongs.
      */
-    BoundedContextName contextName() {
+    protected BoundedContextName contextName() {
         return context;
     }
 
     /**
      * Obtains the processed signal.
      */
-    Signal<?, ?, ?> signal() {
+    protected Signal<?, ?, ?> signal() {
         return signal;
     }
 
     /**
      * Obtains the signal receiver ID.
      */
-    MessageId receiver() {
+    protected MessageId receiver() {
         return receiver;
     }
 }

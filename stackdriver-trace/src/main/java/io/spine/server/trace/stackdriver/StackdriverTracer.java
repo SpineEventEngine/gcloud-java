@@ -36,7 +36,8 @@ import static java.util.Collections.synchronizedList;
 /**
  * A {@link io.spine.server.trace.Tracer} which reports to Stackdriver Trace.
  */
-final class StackdriverTracer extends AbstractTracer {
+@SuppressWarnings("WeakerAccess") // Allows customization via subclassing.
+public class StackdriverTracer extends AbstractTracer {
 
     private final List<Span> spans;
     private final TraceService traceService;
@@ -44,10 +45,10 @@ final class StackdriverTracer extends AbstractTracer {
     private final ProjectId projectId;
     private final BoundedContextName context;
 
-    StackdriverTracer(Signal<?, ?, ?> signal,
-                      TraceService traceService,
-                      ProjectId gcpProjectId,
-                      BoundedContextName context) {
+    protected StackdriverTracer(Signal<?, ?, ?> signal,
+                                TraceService traceService,
+                                ProjectId gcpProjectId,
+                                BoundedContextName context) {
         super(signal);
         this.traceService = checkNotNull(traceService);
         this.projectId = checkNotNull(gcpProjectId);
