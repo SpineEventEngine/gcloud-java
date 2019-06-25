@@ -42,8 +42,13 @@ import static java.lang.String.format;
 /**
  * A span based on a signal.
  *
- * <p>Signal messages may be processed once or many times by different entities. Each such
- * processing may be represented as a {@code SignalSpan}.
+ * <p>Signal messages may be processed once or many times by different entities. The processing time
+ * is tracked and represented with a span so that each message handler invocation is converted into
+ * a single span.
+ *
+ * <p>The exception from the span-per-handler rule is
+ * an {@linkplain io.spine.server.aggregate.Apply event applier} invocation, which is treated as
+ * a part of the respective command handler or event reactor.
  */
 final class SignalSpan {
 
