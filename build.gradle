@@ -44,7 +44,7 @@ ext {
     credentialsPropertyFile = 'credentials.properties'
     spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
 
-    projectsToPublish = ['datastore']
+    projectsToPublish = ['datastore', 'stackdriver-trace']
 }
 
 allprojects {
