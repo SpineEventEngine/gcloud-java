@@ -49,7 +49,7 @@ final class Truncate {
     static TruncatableString stringTo(String value, int length) {
         int fullLength = Utf8.encodedLength(value);
         if (fullLength <= length) {
-            return stringOf(value, length);
+            return stringOf(value, 0);
         } else {
             Charset utf8 = Charsets.UTF_8;
             byte[] utf8Bytes = value.getBytes(utf8);
