@@ -32,8 +32,6 @@ import io.spine.server.entity.storage.ColumnType;
  *
  * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
  * the column identifier type.
- *
- * @author Dmytro Dashenkov
  */
 @SPI
 public interface DatastoreColumnType<J, C>
