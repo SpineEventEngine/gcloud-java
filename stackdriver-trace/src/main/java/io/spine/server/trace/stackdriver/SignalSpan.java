@@ -92,7 +92,7 @@ public class SignalSpan {
         TypeName signalType = signal.typeUrl()
                                     .toTypeName();
         ClassName className = ClassName.of(receiverType.getJavaClassName());
-        return format("%s processes %s", className.toSimple(), signalType.simpleName());
+        return format("%s handles %s", className.toSimple(), signalType.simpleName());
     }
 
     private Span.Builder buildSpan(ProjectId projectId) {
