@@ -42,6 +42,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class StackdriverTracerFactory implements TracerFactory {
 
+    private static final String DEFAULT_ENDPOINT = "cloudtrace.googleapis.com";
+
     private final BoundedContextName context;
     private final TraceService service;
     private final ProjectId gcpProjectId;
@@ -57,6 +59,15 @@ public class StackdriverTracerFactory implements TracerFactory {
         this.context = checkNotNull(context);
         this.service = checkNotNull(service);
         this.gcpProjectId = checkNotNull(gcpProjectId);
+    }
+
+    /**
+     * Obtains the Cloud Stackdriver Trace endpoint for the gRPC calls.
+     *
+     * @return the {@code cloudtrace.googleapis.com} endpoint
+     */
+    public static String stackdriverEndpoint() {
+        return DEFAULT_ENDPOINT;
     }
 
     @Override

@@ -25,7 +25,9 @@ import com.google.api.gax.rpc.ClientContext;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.DefaultSubject;
+import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
+import com.google.common.truth.Truth;
 import com.google.protobuf.Empty;
 import io.grpc.CallCredentials;
 import io.grpc.CallOptions;
@@ -88,6 +90,15 @@ class StackdriverTracerFactoryTest {
     @AfterEach
     void closeChannel() {
         channel.shutdownNow();
+    }
+
+    @Test
+    @DisplayName("provide gRPC endpoint")
+    void endpoint() {
+        String endpoint = StackdriverTracerFactory.stackdriverEndpoint();
+        StringSubject assertEndpoint = assertThat(endpoint);
+        assertEndpoint.isNotNull();
+        assertEndpoint.isNotEmpty();
     }
 
     @Nested
