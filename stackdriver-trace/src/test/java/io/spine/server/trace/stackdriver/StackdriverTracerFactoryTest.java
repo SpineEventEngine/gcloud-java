@@ -27,7 +27,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.DefaultSubject;
 import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
-import com.google.common.truth.Truth;
 import com.google.protobuf.Empty;
 import io.grpc.CallCredentials;
 import io.grpc.CallOptions;

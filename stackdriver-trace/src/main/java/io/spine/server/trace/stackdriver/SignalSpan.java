@@ -61,6 +61,18 @@ public class SignalSpan {
     private final MessageId receiver;
     private final EntityTypeName receiverType;
 
+    /**
+     * Creates a new instance of {@code SignalSpan}.
+     *
+     * @param context
+     *         the name of the context in which the signal in handled
+     * @param signal
+     *         the handled signal
+     * @param receiver
+     *         the ID of the handling entity
+     * @param receiverType
+     *         the type of the handling entity
+     */
     protected SignalSpan(BoundedContextName context,
                          Signal<?, ?, ?> signal,
                          MessageId receiver,
