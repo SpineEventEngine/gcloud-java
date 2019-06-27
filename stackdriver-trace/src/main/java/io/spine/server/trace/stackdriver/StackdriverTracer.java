@@ -26,6 +26,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.server.trace.AbstractTracer;
+import io.spine.system.server.EntityTypeName;
 
 import java.util.List;
 
@@ -57,8 +58,14 @@ public class StackdriverTracer extends AbstractTracer {
     }
 
     @Override
-    public void processedBy(MessageId receiver) {
-        SignalSpan signalSpan = new SignalSpan(context, signal(), receiver);
+    public void processedBy(MessageId receiver, EntityTypeName receiverType) {
+        SignalSpan signalSpan = SignalSpan
+                .newBuilder()
+                .setContext(context)
+                .setSignal(signal())
+                .setReceiver(receiver)
+                .setReceiverType(receiverType)
+                .build();
         Span span = signalSpan.asTraceSpan(projectId);
         spans.add(span);
     }

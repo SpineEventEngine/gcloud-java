@@ -26,12 +26,13 @@ import com.google.devtools.cloudtrace.v2.TruncatableString;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
+import io.spine.code.java.ClassName;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
+import io.spine.system.server.EntityTypeName;
 import io.spine.type.TypeName;
-import io.spine.type.TypeUrl;
 
 import java.util.stream.Stream;
 
@@ -54,14 +55,24 @@ import static java.lang.String.format;
 public class SignalSpan {
 
     private static final int SPAN_DISPLAY_NAME_LENGTH = 128;
+
     private final BoundedContextName context;
     private final Signal<?, ?, ?> signal;
     private final MessageId receiver;
+    private final EntityTypeName receiverType;
 
-    protected SignalSpan(BoundedContextName context, Signal<?, ?, ?> signal, MessageId receiver) {
+    protected SignalSpan(BoundedContextName context,
+                         Signal<?, ?, ?> signal,
+                         MessageId receiver,
+                         EntityTypeName receiverType) {
         this.context = checkNotNull(context);
         this.signal = checkNotNull(signal);
         this.receiver = checkNotNull(receiver);
+        this.receiverType = checkNotNull(receiverType);
+    }
+
+    private SignalSpan(Builder builder) {
+        this(builder.context, builder.signal, builder.receiver, builder.receiverType);
     }
 
     /**
@@ -80,9 +91,8 @@ public class SignalSpan {
     private String displayName() {
         TypeName signalType = signal.typeUrl()
                                     .toTypeName();
-        TypeName receiverType = TypeUrl.parse(receiver.getTypeUrl())
-                                       .toTypeName();
-        return format("%s processes %s", receiverType.simpleName(), signalType.simpleName());
+        ClassName className = ClassName.of(receiverType.getJavaClassName());
+        return format("%s processes %s", className.toSimple(), signalType.simpleName());
     }
 
     private Span.Builder buildSpan(ProjectId projectId) {
@@ -136,5 +146,60 @@ public class SignalSpan {
      */
     protected MessageId receiver() {
         return receiver;
+    }
+
+    /**
+     * Creates a new instance of {@code Builder} for {@code SignalSpan} instances.
+     *
+     * @return new instance of {@code Builder}
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    /**
+     * A builder for the {@code SignalSpan} instances.
+     */
+    public static final class Builder {
+
+        private BoundedContextName context;
+        private Signal<?, ?, ?> signal;
+        private MessageId receiver;
+        private EntityTypeName receiverType;
+
+        /**
+         * Prevents direct instantiation.
+         */
+        private Builder() {
+        }
+
+        public Builder setContext(BoundedContextName context) {
+            this.context = checkNotNull(context);
+            return this;
+        }
+
+        public Builder setSignal(Signal<?, ?, ?> signal) {
+            this.signal = checkNotNull(signal);
+            return this;
+        }
+
+        public Builder setReceiver(MessageId receiver) {
+            this.receiver = checkNotNull(receiver);
+            return this;
+        }
+
+        public Builder setReceiverType(EntityTypeName receiverType) {
+            this.receiverType = checkNotNull(receiverType);
+            return this;
+        }
+
+        /**
+         * Creates a new instance of {@code SignalSpan}.
+         *
+         * @return new instance of {@code SignalSpan}
+         */
+        public SignalSpan build() {
+            return new SignalSpan(this);
+        }
     }
 }

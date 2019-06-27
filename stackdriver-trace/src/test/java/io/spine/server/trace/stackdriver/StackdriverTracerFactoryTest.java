@@ -39,6 +39,7 @@ import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.server.trace.Tracer;
 import io.spine.server.trace.stackdriver.given.CountingInterceptor;
+import io.spine.system.server.EntityTypeName;
 import io.spine.test.stackdriver.CreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
@@ -259,7 +260,11 @@ class StackdriverTracerFactoryTest {
                     .setTypeUrl(TypeUrl.of(Empty.class).value())
                     .setVersion(zero())
                     .vBuild();
-            tracer.processedBy(receiverId);
+            EntityTypeName entityType = EntityTypeName
+                    .newBuilder()
+                    .setJavaClassName(StackdriverTracerFactoryTest.class.getCanonicalName())
+                    .vBuild();
+            tracer.processedBy(receiverId, entityType);
             tracer.close();
             tracerFactory.close();
             assertThat(interceptor.callCount()).isEqualTo(1);
