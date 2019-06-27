@@ -18,24 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.trace.stackdriver;
 
-import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Value;
-import io.spine.annotation.SPI;
-import io.spine.server.entity.storage.ColumnType;
+import com.google.devtools.cloudtrace.v2.BatchWriteSpansRequest;
 
 /**
- * The contract of a {@link ColumnType} used by the Datastore storage.
+ * The Stackdriver Trace API client.
  *
- * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
- * the column identifier type.
+ * <p>Depending on the implementation, the client may send queries in the same thread or
+ * asynchronously.
  */
-@SPI
-public interface DatastoreColumnType<J, C>
-        extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
+public interface TraceService extends AutoCloseable {
 
-    Value<?> toValue(C data);
+    /**
+     * Executes the given {@code BatchWriteSpansRequest}.
+     *
+     * <p>The result of the RPC call is an {@code Empty} and thus is ignored.
+     *
+     * @param request
+     *         the spans to send to Stackdriver Trace
+     */
+    void writeSpans(BatchWriteSpansRequest request);
 }

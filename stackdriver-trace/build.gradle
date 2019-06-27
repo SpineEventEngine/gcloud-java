@@ -18,24 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
 
-import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Value;
-import io.spine.annotation.SPI;
-import io.spine.server.entity.storage.ColumnType;
-
-/**
- * The contract of a {@link ColumnType} used by the Datastore storage.
- *
- * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
- * the column identifier type.
- */
-@SPI
-public interface DatastoreColumnType<J, C>
-        extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
-
-    Value<?> toValue(C data);
+dependencies {
+    api "com.google.cloud:google-cloud-trace:0.96.0-beta"
 }

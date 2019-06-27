@@ -18,24 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
-
-import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Value;
-import io.spine.annotation.SPI;
-import io.spine.server.entity.storage.ColumnType;
+// TODO:2019-06-17:dmytro.dashenkov: Move to another module.
 
 /**
- * The contract of a {@link ColumnType} used by the Datastore storage.
+ * This package contains the implementation of Spine Tracing API based on the Stackdriver Trace.
  *
- * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
- * the column identifier type.
+ * @see <a href="https://cloud.google.com/trace/docs/">API doc</a>
  */
-@SPI
-public interface DatastoreColumnType<J, C>
-        extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
 
-    Value<?> toValue(C data);
-}
+
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.trace.stackdriver;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

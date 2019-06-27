@@ -18,24 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.trace.stackdriver;
 
-import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Value;
-import io.spine.annotation.SPI;
-import io.spine.server.entity.storage.ColumnType;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The contract of a {@link ColumnType} used by the Datastore storage.
- *
- * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
- * the column identifier type.
+ * Google Cloud Platform project ID.
  */
-@SPI
-public interface DatastoreColumnType<J, C>
-        extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
+public final class ProjectId extends TraceApiString {
 
-    Value<?> toValue(C data);
+    private static final long serialVersionUID = 0L;
+
+    ProjectId(String value) {
+        super(checkNotNull(value));
+    }
+
+    /**
+     * Converts this ID into a project name.
+     *
+     * <p>The project name consists of the {@code projects/} prefix and the project ID.
+     */
+    ProjectName asName() {
+        return new ProjectName(this);
+    }
 }

@@ -22,6 +22,7 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ContextSpec;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.tenant.TestNamespaceIndex;
@@ -30,8 +31,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
+import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -47,10 +49,9 @@ class NewBoundedContextBuilderTest {
     void testProduceBCBuilder() {
         DatastoreStorageFactory factory = givenFactory();
         BoundedContextBuilder builder = factory.newBoundedContextBuilder();
-        Optional<Supplier<StorageFactory>> supplierOptional = builder.storageFactorySupplier();
+        Optional<Function<ContextSpec, StorageFactory>> supplierOptional = builder.storage();
         assertTrue(supplierOptional.isPresent());
-        assertSame(factory, supplierOptional.get()
-                                            .get());
+        assertSame(factory, supplierOptional.get().apply(ContextSpec.singleTenant("Test")));
         assertEquals(builder.isMultitenant(), factory.isMultitenant());
         Optional<? extends TenantIndex> tenantIndexOptional = builder.tenantIndex();
         assertTrue(tenantIndexOptional.isPresent());
@@ -58,10 +59,11 @@ class NewBoundedContextBuilderTest {
     }
 
     private static DatastoreStorageFactory givenFactory() {
+        ContextSpec multitenant = multitenant(NewBoundedContextBuilderTest.class.getSimpleName());
         DatastoreStorageFactory result = DatastoreStorageFactory
                 .newBuilder()
+                .setContextSpec(multitenant)
                 .setDatastore(givenDatastore())
-                .setMultitenant(true)
                 .setTypeRegistry(defaultInstance())
                 .build();
         return result;

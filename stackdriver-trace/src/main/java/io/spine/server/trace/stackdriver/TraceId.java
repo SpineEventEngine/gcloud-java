@@ -18,24 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.trace.stackdriver;
 
-import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Value;
-import io.spine.annotation.SPI;
-import io.spine.server.entity.storage.ColumnType;
+import io.spine.core.SignalId;
 
 /**
- * The contract of a {@link ColumnType} used by the Datastore storage.
+ * An identifier of a trace.
  *
- * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
- * the column identifier type.
+ * <p>Signals caused by a single (root) signal message are grouped into a single trace.
  */
-@SPI
-public interface DatastoreColumnType<J, C>
-        extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
+final class TraceId extends ShortTraceApiString {
 
-    Value<?> toValue(C data);
+    private static final long serialVersionUID = 0L;
+
+    private static final int MAX_LENGTH = 32;
+
+    TraceId(SignalId rootSignalId) {
+        super(hexOfLength(rootSignalId, MAX_LENGTH));
+    }
 }

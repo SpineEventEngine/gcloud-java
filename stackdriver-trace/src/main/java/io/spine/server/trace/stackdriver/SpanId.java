@@ -18,24 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.trace.stackdriver;
 
-import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Value;
-import io.spine.annotation.SPI;
-import io.spine.server.entity.storage.ColumnType;
+import java.util.UUID;
+
+import static java.lang.Long.toHexString;
 
 /**
- * The contract of a {@link ColumnType} used by the Datastore storage.
- *
- * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
- * the column identifier type.
+ * An identifier of a {@link com.google.devtools.cloudtrace.v2.Span}.
  */
-@SPI
-public interface DatastoreColumnType<J, C>
-        extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
+final class SpanId extends ShortTraceApiString {
 
-    Value<?> toValue(C data);
+    private static final long serialVersionUID = 0L;
+
+    private static final int MAX_LENGTH = 16;
+
+    private SpanId(String value) {
+        super(value);
+    }
+
+    /**
+     * Creates a random UUID-based span ID.
+     */
+    static SpanId random() {
+        long bits = UUID.randomUUID()
+                        .getLeastSignificantBits();
+        String value = shorten(toHexString(bits), MAX_LENGTH);
+        return new SpanId(value);
+    }
 }

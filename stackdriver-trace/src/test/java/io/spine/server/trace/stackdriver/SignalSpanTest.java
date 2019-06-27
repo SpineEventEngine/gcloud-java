@@ -18,24 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.trace.stackdriver;
 
-import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Value;
-import io.spine.annotation.SPI;
-import io.spine.server.entity.storage.ColumnType;
+import com.google.common.testing.NullPointerTester;
+import io.spine.core.BoundedContextName;
+import io.spine.core.MessageId;
+import io.spine.system.server.EntityTypeName;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-/**
- * The contract of a {@link ColumnType} used by the Datastore storage.
- *
- * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
- * the column identifier type.
- */
-@SPI
-public interface DatastoreColumnType<J, C>
-        extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
+import static com.google.common.testing.NullPointerTester.Visibility.PROTECTED;
 
-    Value<?> toValue(C data);
+@DisplayName("SignalSpan should")
+class SignalSpanTest {
+
+    @Test
+    @DisplayName("not accept nulls on construction")
+    void nulls() {
+        NullPointerTester tester = new NullPointerTester();
+        tester.setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
+              .setDefault(MessageId.class, MessageId.getDefaultInstance())
+              .setDefault(EntityTypeName.class, EntityTypeName.getDefaultInstance());
+        tester.testAllPublicInstanceMethods(SignalSpan.newBuilder());
+        tester.testConstructors(SignalSpan.class, PROTECTED);
+    }
 }

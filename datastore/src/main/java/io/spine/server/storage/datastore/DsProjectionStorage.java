@@ -81,10 +81,6 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
         return recordStorage;
     }
 
-    protected DsPropertyStorage propertyStorage() {
-        return propertyStorage;
-    }
-
     @Override
     public boolean delete(I id) {
         return recordStorage.delete(id);

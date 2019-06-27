@@ -18,24 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.trace.stackdriver;
 
-import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Value;
-import io.spine.annotation.SPI;
-import io.spine.server.entity.storage.ColumnType;
+import io.spine.value.ValueHolder;
+
+import static java.lang.String.format;
 
 /**
- * The contract of a {@link ColumnType} used by the Datastore storage.
- *
- * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
- * the column identifier type.
+ * A part of the Stackdriver Trace API represented by a simple string value.
  */
-@SPI
-public interface DatastoreColumnType<J, C>
-        extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
+abstract class TraceApiString extends ValueHolder<String> {
 
-    Value<?> toValue(C data);
+    private static final long serialVersionUID = 0L;
+
+    /**
+     * Constructs a new Trace API string.
+     *
+     * @param format
+     *         the {@link String#format(String, Object...)} compatible format template
+     * @param args
+     *         the formatting arguments
+     */
+    TraceApiString(String format, Object... args) {
+        super(format(format, args));
+    }
+
+    @Override
+    public final String toString() {
+        return value();
+    }
+
+    @Override
+    public String value() {
+        return super.value();
+    }
 }

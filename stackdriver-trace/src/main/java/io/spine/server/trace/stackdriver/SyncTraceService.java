@@ -18,27 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.given;
+package io.spine.server.trace.stackdriver;
 
-import io.spine.server.aggregate.Aggregate;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.Task;
+import com.google.cloud.trace.v2.stub.GrpcTraceServiceStub;
+import com.google.devtools.cloudtrace.v2.BatchWriteSpansRequest;
 
-public final class DsAggregateStorageTestEnv {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    private DsAggregateStorageTestEnv() {
+/**
+ * Sync implementation of the {@link TraceService}.
+ *
+ * <p>Prefer the {@link AsyncTraceService} unless the runtime constraints spawning new thread.
+ */
+final class SyncTraceService implements TraceService {
+
+    private final GrpcTraceServiceStub client;
+
+    SyncTraceService(GrpcTraceServiceStub client) {
+        this.client = checkNotNull(client);
     }
 
-    /**
-     * An aggregate with the ID and state purposefully mismatched.
-     *
-     * <p>Allows to test for the "same-ID-different-state" scenarios in the aggregate storages.
-     */
-    public static class NonProjectStateAggregate
-            extends Aggregate<ProjectId, Task, Task.Builder> {
+    @Override
+    public void writeSpans(BatchWriteSpansRequest request) {
+        client.batchWriteSpansCallable().call(request);
+    }
 
-        private NonProjectStateAggregate(ProjectId id) {
-            super(id);
-        }
+    @Override
+    public void close() {
+        client.close();
     }
 }

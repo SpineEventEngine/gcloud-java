@@ -102,17 +102,14 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
             TypeUrl.from(AggregateEventRecord.getDescriptor());
 
     private final DatastoreWrapper datastore;
-    private final DsPropertyStorage propertyStorage;
     private final Class<I> idClass;
     private final TypeName stateTypeName;
 
     protected DsAggregateStorage(Class<? extends Aggregate<I, ?, ?>> cls,
                                  DatastoreWrapper datastore,
-                                 DsPropertyStorage propertyStorage,
                                  boolean multitenant) {
         super(multitenant);
         this.datastore = datastore;
-        this.propertyStorage = propertyStorage;
 
         EntityClass<? extends Aggregate<I, ?, ?>> modelClass = asEntityClass(cls);
         @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
@@ -269,17 +266,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      */
     protected DatastoreWrapper datastore() {
         return datastore;
-    }
-
-    /**
-     * Provides an access to the {@link DsPropertyStorage}.
-     *
-     * <p>Allows the customization of the storage behavior in descendants.
-     *
-     * @return the wrapped instance of Datastore
-     */
-    protected DsPropertyStorage getPropertyStorage() {
-        return propertyStorage;
     }
 
     @Override

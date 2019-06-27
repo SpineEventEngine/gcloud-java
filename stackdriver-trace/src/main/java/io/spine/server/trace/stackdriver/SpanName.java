@@ -18,24 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.trace.stackdriver;
 
-import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Value;
-import io.spine.annotation.SPI;
-import io.spine.server.entity.storage.ColumnType;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The contract of a {@link ColumnType} used by the Datastore storage.
+ * The formal name of a span as recognized by the Stackdriver Trace API.
  *
- * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
- * the column identifier type.
+ * <p>The name consist of the Google Cloud Platform project name, the trace ID and the span ID.
+ *
+ * @see <a href="https://cloud.google.com/trace/docs/reference/v2/rpc/google.devtools.cloudtrace.v2#google.devtools.cloudtrace.v2.BatchWriteSpansRequest">API doc</a>
  */
-@SPI
-public interface DatastoreColumnType<J, C>
-        extends ColumnType<J, C, BaseEntity.Builder<Key, Entity.Builder>, String> {
+final class SpanName extends TraceApiString {
 
-    Value<?> toValue(C data);
+    private static final long serialVersionUID = 0L;
+
+    private SpanName(ProjectName projectName, TraceId traceId, SpanId spanId) {
+        super("%s/traces/%s/spans/%s", projectName, traceId, spanId);
+    }
+
+    static SpanName from(ProjectId projectId, TraceId traceId, SpanId spanId) {
+        checkNotNull(projectId);
+        checkNotNull(traceId);
+        checkNotNull(spanId);
+        return new SpanName(projectId.asName(), traceId, spanId);
+    }
 }

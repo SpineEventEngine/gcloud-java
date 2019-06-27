@@ -24,6 +24,7 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
+import io.spine.server.ContextSpec;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.storage.RecordStorage;
@@ -33,6 +34,8 @@ import io.spine.test.storage.Project;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.ContextSpec.multitenant;
+import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -64,9 +67,11 @@ class DatastoreStorageFactoryTest {
     @Test
     @DisplayName("create multitenant storages")
     void testCreateMultitenant() {
+        ContextSpec spec =
+                multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
         StorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                         .setDatastore(datastore)
-                                                        .setMultitenant(true)
+                                                        .setContextSpec(spec)
                                                         .build();
         assertTrue(factory.isMultitenant());
         RecordStorage storage = factory.createRecordStorage(TestEntity.class);
@@ -90,9 +95,11 @@ class DatastoreStorageFactoryTest {
     @Test
     @DisplayName("convert itself to single tenant")
     void testToSingleTenant() {
+        ContextSpec spec =
+                multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
         StorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                         .setDatastore(datastore)
-                                                        .setMultitenant(true)
+                                                        .setContextSpec(spec)
                                                         .build();
         assertTrue(factory.isMultitenant());
         StorageFactory singleTenantFactory = factory.toSingleTenant();
@@ -102,9 +109,11 @@ class DatastoreStorageFactoryTest {
     @Test
     @DisplayName("return itself if single tenant")
     void testSingleTenantToSingleTenant() {
+        ContextSpec spec =
+            singleTenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
         StorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                         .setDatastore(datastore)
-                                                        .setMultitenant(false)
+                                                        .setContextSpec(spec)
                                                         .build();
         assertFalse(factory.isMultitenant());
         StorageFactory singleTenantFactory = factory.toSingleTenant();

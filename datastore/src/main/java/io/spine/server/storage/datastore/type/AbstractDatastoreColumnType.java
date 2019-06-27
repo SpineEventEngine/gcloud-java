@@ -32,8 +32,6 @@ import io.spine.annotation.SPI;
  * <p>This class provides the default implementation for the {@link #setNull setNull} method
  * of {@link io.spine.server.entity.storage.ColumnType}. Since this method implementation is the
  * same for all the types within a Storage implementation, it's convenient to declare it once.
- *
- * @author Dmytro Dashenkov
  */
 @SPI
 public abstract class AbstractDatastoreColumnType<J, C> implements DatastoreColumnType<J, C> {
