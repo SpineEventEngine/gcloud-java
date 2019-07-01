@@ -23,8 +23,8 @@ package io.spine.server.trace.stackdriver;
 import com.google.api.gax.grpc.GrpcCallContext;
 import com.google.api.gax.rpc.ClientContext;
 import com.google.cloud.trace.v2.stub.GrpcTraceServiceStub;
-import io.spine.core.BoundedContextName;
 import io.spine.core.Signal;
+import io.spine.server.ContextSpec;
 import io.spine.server.trace.Tracer;
 import io.spine.server.trace.TracerFactory;
 
@@ -44,19 +44,16 @@ public class StackdriverTracerFactory implements TracerFactory {
 
     private static final String DEFAULT_ENDPOINT = "cloudtrace.googleapis.com";
 
-    private final BoundedContextName context;
     private final TraceService service;
     private final ProjectId gcpProjectId;
 
     private StackdriverTracerFactory(Builder builder) {
-        this(builder.context, builder.buildService(), builder.gcpProjectId);
+        this(builder.buildService(), builder.gcpProjectId);
     }
 
     @SuppressWarnings("WeakerAccess") // Allows customization via subclassing.
-    protected StackdriverTracerFactory(BoundedContextName context,
-                                       TraceService service,
+    protected StackdriverTracerFactory(TraceService service,
                                        ProjectId gcpProjectId) {
-        this.context = checkNotNull(context);
         this.service = checkNotNull(service);
         this.gcpProjectId = checkNotNull(gcpProjectId);
     }
@@ -71,8 +68,8 @@ public class StackdriverTracerFactory implements TracerFactory {
     }
 
     @Override
-    public Tracer trace(Signal<?, ?, ?> signalMessage) {
-        return new StackdriverTracer(signalMessage, service, gcpProjectId, context);
+    public Tracer trace(ContextSpec context, Signal<?, ?, ?> signalMessage) {
+        return new StackdriverTracer(signalMessage, service, gcpProjectId, context.name());
     }
 
     @Override
@@ -94,7 +91,6 @@ public class StackdriverTracerFactory implements TracerFactory {
      */
     public static final class Builder {
 
-        private BoundedContextName context;
         private ClientContext clientContext;
         private ProjectId gcpProjectId;
         private boolean multiThreadingAllowed = true;
@@ -149,16 +145,6 @@ public class StackdriverTracerFactory implements TracerFactory {
             return this;
         }
 
-        /**
-         * Sets the name of the bounded context in which the tracing is performed.
-         *
-         * <p>This field is required.
-         */
-        public Builder setContext(BoundedContextName context) {
-            this.context = checkNotNull(context);
-            return this;
-        }
-
         public Builder forbidMultiThreading() {
             this.multiThreadingAllowed = false;
             return this;
@@ -172,7 +158,6 @@ public class StackdriverTracerFactory implements TracerFactory {
         public StackdriverTracerFactory build() {
             checkNotNull(clientContext, "Either CallContext or ClientContext must be set.");
             checkNotNull(gcpProjectId, "GCP project name must be set.");
-            checkNotNull(context, "Bounded context name must be set.");
             return new StackdriverTracerFactory(this);
         }
 

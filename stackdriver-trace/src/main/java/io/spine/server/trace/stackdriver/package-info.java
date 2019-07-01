@@ -18,8 +18,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// TODO:2019-06-17:dmytro.dashenkov: Move to another module.
-
 /**
  * This package contains the implementation of Spine Tracing API based on the Stackdriver Trace.
  *
