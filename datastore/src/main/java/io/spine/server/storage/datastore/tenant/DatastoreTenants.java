@@ -21,7 +21,6 @@
 package io.spine.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Datastore;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.tenant.TenantIndex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -73,7 +72,7 @@ public final class DatastoreTenants {
      * @param datastore
      *         the {@link Datastore} to get the {@link TenantIndex} for
      * @return a new instance of the {@link TenantIndex}
-     * @see io.spine.server.storage.datastore.DatastoreStorageFactory#configureTenantIndex(BoundedContextBuilder)
+     * @see io.spine.server.storage.datastore.DatastoreStorageFactory#configureTenantIndex(io.spine.server.BoundedContextBuilder)
      *         for an alternative method, suitable if you already have an instance of
      *         {@code BoundedContextBuilder}
      */
