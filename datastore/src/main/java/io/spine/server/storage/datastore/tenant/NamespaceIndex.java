@@ -76,7 +76,8 @@ class NamespaceIndex implements TenantIndex {
     @Override
     public void registerWith(BoundedContext context) {
         checkNotNull(context);
-        // Do nothing, as this implementation does not rely on any {@code BoundedContext}
+
+        // Do nothing more, as this implementation does not rely on any {@code BoundedContext}
         // properties.
     }
 
