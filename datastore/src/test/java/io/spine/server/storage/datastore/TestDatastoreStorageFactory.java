@@ -75,7 +75,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     @Internal
     @Override
-    protected final DatastoreWrapper createDatastoreWrapper(ContextSpec spec) {
+    protected DatastoreWrapper createDatastoreWrapper(ContextSpec spec) {
         return TestDatastoreWrapper.wrap(datastore(), false);
     }
 
