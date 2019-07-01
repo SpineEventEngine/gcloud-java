@@ -29,6 +29,8 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.testing.TestValues;
@@ -44,7 +46,7 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,7 +69,7 @@ class NamespaceIndexTest {
     }
 
     @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
         Namespace defaultNamespace = Namespace.of("some-string");
         TenantId tenantId = TenantId.getDefaultInstance();
@@ -75,6 +77,7 @@ class NamespaceIndexTest {
         new NullPointerTester()
                 .setDefault(Namespace.class, defaultNamespace)
                 .setDefault(TenantId.class, tenantId)
+                .setDefault(BoundedContext.class, BoundedContextBuilder.assumingTests().build())
                 .testInstanceMethods(new NamespaceIndex(mockDatastore(), true),
                                      NullPointerTester.Visibility.PACKAGE);
     }
