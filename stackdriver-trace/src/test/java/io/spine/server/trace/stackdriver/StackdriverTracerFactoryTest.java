@@ -131,6 +131,7 @@ class StackdriverTracerFactoryTest {
                     .setCallContext(realGrpcContext)
                     .build();
             new NullPointerTester()
+                    .setDefault(ContextSpec.class, singleTenant(NotNull.class.getName()))
                     .testAllPublicInstanceMethods(factory);
         }
     }
@@ -145,16 +146,6 @@ class StackdriverTracerFactoryTest {
             StackdriverTracerFactory.Builder builder = StackdriverTracerFactory
                     .newBuilder()
                     .setGcpProjectId("test123");
-            assertThrows(NullPointerException.class, builder::build);
-        }
-
-        @Test
-        @DisplayName("a BoundedContext name")
-        void boundedContextName() {
-            StackdriverTracerFactory.Builder builder = StackdriverTracerFactory
-                    .newBuilder()
-                    .setGcpProjectId("test231")
-                    .setCallContext(GrpcCallContext.createDefault());
             assertThrows(NullPointerException.class, builder::build);
         }
 
