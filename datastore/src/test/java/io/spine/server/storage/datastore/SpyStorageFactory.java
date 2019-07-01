@@ -40,9 +40,4 @@ final class SpyStorageFactory extends TestDatastoreStorageFactory {
     SpyStorageFactory() {
         super(spyWrapper.datastore());
     }
-
-    @Override
-    protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
-        return spyWrapper;
-    }
 }

@@ -84,13 +84,13 @@ class NamespaceIndexTest {
     void testStore() {
         NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
-        Set<TenantId> initialEmptySet = namespaceIndex.getAll();
+        Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
 
         TenantId newId = newTenantId();
         namespaceIndex.keep(newId);
 
-        Set<TenantId> ids = namespaceIndex.getAll();
+        Set<TenantId> ids = namespaceIndex.all();
         IterableSubject assertIds = assertThat(ids);
         assertIds.isNotNull();
         assertIds.hasSize(1);
@@ -116,7 +116,7 @@ class NamespaceIndexTest {
         NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
         // Ensure no namespace has been kept
-        Set<TenantId> initialEmptySet = namespaceIndex.getAll();
+        Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
 
         TenantId newId = newTenantId();
@@ -132,7 +132,7 @@ class NamespaceIndexTest {
         NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
         // Ensure no namespace has been kept
-        Set<TenantId> initialEmptySet = namespaceIndex.getAll();
+        Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
 
         TenantId fakeId = newTenantId();
@@ -172,7 +172,7 @@ class NamespaceIndexTest {
         // The test flow
         Runnable flow = () -> {
             // Initial value check
-            Set<TenantId> initialIdsActual = namespaceIndex.getAll(); // sync
+            Set<TenantId> initialIdsActual = namespaceIndex.all(); // sync
             // The keep may already be called
             assertTrue(initialIdsActual.size() >= initialTenantIds.size());
             assertThat(initialIdsActual).containsAtLeastElementsIn(initialTenantIds);
@@ -194,7 +194,7 @@ class NamespaceIndexTest {
             assertTrue(success);
 
             // Check returned set has newly added element
-            Set<TenantId> updatedIds = namespaceIndex.getAll(); // sync
+            Set<TenantId> updatedIds = namespaceIndex.all(); // sync
             assertEquals(updatedIds.size(), initialTenantIds.size() + 1);
             assertThat(updatedIds).contains(newTenantId);
         };
