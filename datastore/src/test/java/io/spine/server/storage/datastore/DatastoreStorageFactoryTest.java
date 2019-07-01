@@ -59,7 +59,8 @@ class DatastoreStorageFactoryTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
-        new NullPointerTester().testAllPublicInstanceMethods(factory);
+        new NullPointerTester().setDefault(ContextSpec.class, TestEnvironment.singletenantSpec())
+                               .testAllPublicInstanceMethods(factory);
     }
 
     @Test

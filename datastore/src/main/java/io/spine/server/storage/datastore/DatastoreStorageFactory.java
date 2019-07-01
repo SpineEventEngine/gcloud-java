@@ -96,6 +96,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      * @return the same instance of the builder, but with the tenant index set
      */
     public BoundedContextBuilder configureTenantIndex(BoundedContextBuilder builder) {
+        checkNotNull(builder);
         TenantIndex index = DatastoreTenants.index(datastore);
         builder.setTenantIndex(index);
         return builder;
@@ -105,6 +106,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I> AggregateStorage<I>
     createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> cls) {
         checkNotNull(cls);
+        checkNotNull(context);
+
         DsAggregateStorage<I> result =
                 new DsAggregateStorage<>(cls, datastoreFor(context), context.isMultitenant());
         return result;
@@ -113,6 +116,9 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public <I> RecordStorage<I>
     createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> cls) {
+        checkNotNull(cls);
+        checkNotNull(context);
+
         DsRecordStorage<I> result = configure(DsRecordStorage.newBuilder(), cls, context).build();
         return result;
     }
@@ -120,6 +126,9 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public <I> ProjectionStorage<I>
     createProjectionStorage(ContextSpec context, Class<? extends Projection<I, ?, ?>> cls) {
+        checkNotNull(cls);
+        checkNotNull(context);
+
         DsProjectionStorageDelegate<I> recordStorage =
                 configure(DsProjectionStorageDelegate.newDelegateBuilder(), cls, context).build();
         DsPropertyStorage propertyStorage = createPropertyStorage(context);
