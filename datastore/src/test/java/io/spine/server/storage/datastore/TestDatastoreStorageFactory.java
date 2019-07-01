@@ -22,11 +22,15 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import io.spine.annotation.Internal;
 import io.spine.logging.Logging;
+import io.spine.server.ContextSpec;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
+
+import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -69,6 +73,12 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         );
     }
 
+    @Internal
+    @Override
+    protected final DatastoreWrapper createDatastoreWrapper(ContextSpec spec) {
+        return TestDatastoreWrapper.wrap(datastore(), false);
+    }
+
     /**
      * Performs operations on setting up the local datastore.
      *
@@ -98,12 +108,15 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      * @see #tearDown()
      */
     public void clear() {
-        TestDatastoreWrapper datastore = (TestDatastoreWrapper) datastore();
-        try {
-            datastore.dropAllTables();
-        } catch (Throwable e) {
-            log().error(format("Unable to drop tables in datastore %s", datastore), e);
-            throw new IllegalStateException(e);
+        Map<ContextSpec, DatastoreWrapper> wrappers = wrappers();
+        for (DatastoreWrapper wrapper : wrappers.values()) {
+            TestDatastoreWrapper datastore = (TestDatastoreWrapper) wrapper;
+            try {
+                datastore.dropAllTables();
+            } catch (Throwable e) {
+                log().error(format("Unable to drop tables in datastore %s", datastore), e);
+                throw new IllegalStateException(e);
+            }
         }
     }
 

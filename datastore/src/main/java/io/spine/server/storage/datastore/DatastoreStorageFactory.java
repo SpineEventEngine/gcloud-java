@@ -23,6 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.spine.annotation.Internal;
 import io.spine.server.BoundedContextBuilder;
@@ -153,7 +154,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     protected DsPropertyStorage createPropertyStorage(ContextSpec spec) {
-        DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastoreFor(spec));
+        DatastoreWrapper datastore = datastoreFor(spec);
+        DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastore);
         return propertyStorage;
     }
 
@@ -189,25 +191,44 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     /**
-     * Obtains an instance of the passed {@link Datastore}.
+     * Returns the currently known initialized {@code DatastoreWrapper}s.
      */
-    @Internal
+    @VisibleForTesting
+    protected Map<ContextSpec, DatastoreWrapper> wrappers() {
+        return ImmutableMap.copyOf(wrappers);
+    }
+
+    /**
+     * Returs the instance of wrapped {@link Datastore}.
+     */
+    @VisibleForTesting
     protected Datastore datastore() {
         return datastore;
     }
 
     /**
-     * Obtains an instance of the passed {@link Datastore}.
+     * Returns the instance of {@link DatastoreWrapper} based on the passed {@code ContextSpec}.
+     *
+     * <p>If there were no {@code DatastoreWrapper} instances created for the given context,
+     * creates it.
      */
-    @Internal
     @VisibleForTesting
-    DatastoreWrapper datastoreFor(ContextSpec spec) {
+    final DatastoreWrapper datastoreFor(ContextSpec spec) {
         if (!wrappers.containsKey(spec)) {
-            NamespaceSupplier supplier = createNamespaceSupplier(spec);
-            DatastoreWrapper wrapper = wrap(datastore, supplier);
+            DatastoreWrapper wrapper = createDatastoreWrapper(spec);
             wrappers.put(spec, wrapper);
         }
         return wrappers.get(spec);
+    }
+
+    /**
+     * Creates an instance of {@link DatastoreWrapper} based on the passed {@code ContextSpec}.
+     */
+    @Internal
+    @VisibleForTesting
+    protected DatastoreWrapper createDatastoreWrapper(ContextSpec spec) {
+        NamespaceSupplier supplier = createNamespaceSupplier(spec);
+        return wrap(datastore, supplier);
     }
 
     /**
