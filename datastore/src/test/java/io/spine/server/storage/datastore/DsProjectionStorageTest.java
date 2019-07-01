@@ -33,11 +33,10 @@ import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static io.spine.server.storage.datastore.given.TestEnvironment.singletenantSpec;
 
 @DisplayName("DsProjectionStorage should")
 class DsProjectionStorageTest extends ProjectionStorageTest {
@@ -69,7 +68,7 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
         Class<? extends Projection<ProjectId, ?, ?>> projectionClass =
                 (Class<? extends Projection<ProjectId, ?, ?>>) cls;
         ProjectionStorage<ProjectId> result =
-                datastoreFactory.createProjectionStorage(projectionClass);
+                datastoreFactory.createProjectionStorage(singletenantSpec(), projectionClass);
         return result;
     }
 

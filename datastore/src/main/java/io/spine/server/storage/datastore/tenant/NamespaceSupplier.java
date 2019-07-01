@@ -43,10 +43,7 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
     }
 
     /**
-     * Obtains an instance of {@code NamespaceSupplier} for the passed
-     * {@linkplain DatastoreStorageFactory storage factory}.
-     *
-     * @see io.spine.server.storage.StorageFactory#isMultitenant
+     * Obtains an instance of {@code NamespaceSupplier} for the passed arguments.
      */
     public static NamespaceSupplier instance(boolean multitenant,
                                              @Nullable String defaultNamespace,
@@ -74,8 +71,7 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
      *
      * @return an instance of {@link Namespace} representing either the current tenant ID or the
      *         default namespace if the {@linkplain DatastoreStorageFactory storage factory} passed
-     *         upon
-     *         the initialization is configured to be single tenant
+     *         upon the initialization is configured to be single tenant
      */
     @Override
     public abstract Namespace get();

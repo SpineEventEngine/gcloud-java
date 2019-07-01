@@ -20,6 +20,10 @@
 
 package io.spine.server.storage.datastore.given;
 
+import io.spine.server.ContextSpec;
+
+import static io.spine.server.ContextSpec.multitenant;
+import static io.spine.server.ContextSpec.singleTenant;
 import static java.lang.System.getenv;
 
 /**
@@ -47,5 +51,13 @@ public final class TestEnvironment {
         String ciEnvValue = getenv("CI");
         boolean onCi = TRUE.equalsIgnoreCase(ciEnvValue);
         return onCi;
+    }
+
+    public static ContextSpec multitenantSpec() {
+        return multitenant(TestEnvironment.class.getSimpleName());
+    }
+
+    public static ContextSpec singletenantSpec() {
+        return singleTenant(TestEnvironment.class.getSimpleName());
     }
 }

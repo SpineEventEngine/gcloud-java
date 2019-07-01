@@ -23,6 +23,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
+import static io.spine.server.storage.datastore.given.TestEnvironment.singletenantSpec;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("DsPropertyStorage should")
@@ -40,7 +41,7 @@ class DsPropertyStorageTest {
     }
 
     private static DsPropertyStorage getStorage() {
-        return datastoreFactory.createPropertyStorage();
+        return datastoreFactory.createPropertyStorage(singletenantSpec());
     }
 
 }

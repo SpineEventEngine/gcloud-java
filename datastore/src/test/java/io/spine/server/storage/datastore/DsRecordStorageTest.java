@@ -33,6 +33,7 @@ import io.spine.client.TargetFilters;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
@@ -80,6 +81,7 @@ import static io.spine.client.Filters.lt;
 import static io.spine.json.Json.toCompactJson;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.ADMISSION_DEADLINE;
@@ -113,6 +115,7 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.pag
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.recordIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedValues;
+import static io.spine.server.storage.datastore.given.TestEnvironment.singletenantSpec;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertFalse;
@@ -123,7 +126,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -137,7 +139,8 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     protected DsRecordStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> entityClass) {
         Class<? extends Entity<ProjectId, ?>> cls =
                 (Class<? extends Entity<ProjectId, ?>>) entityClass;
-        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(cls);
+        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(singletenantSpec(),
+                                                                                 cls);
     }
 
     @Override
@@ -357,14 +360,15 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     @DisplayName("lookup Datastore records by IDs")
     class LookupByIds {
 
+        private final ContextSpec contextSpec = singleTenant(LookupByIds.class.getName());
         private DatastoreStorageFactory storageFactory;
         private RecordStorage<CollegeId> storage;
 
         @BeforeEach
         void setUp() {
-            SpyStorageFactory.injectWrapper(datastoreFactory().datastore());
+            SpyStorageFactory.injectWrapper(datastoreFactory().datastoreFor(contextSpec));
             storageFactory = new SpyStorageFactory();
-            storage = storageFactory.createRecordStorage(CollegeEntity.class);
+            storage = storageFactory.createRecordStorage(contextSpec, CollegeEntity.class);
         }
 
         @Test
@@ -584,7 +588,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertEquals(expectedCounts, actualCounts);
 
             // Check Datastore reads are performed by keys but not using a structured query.
-            DatastoreWrapper spy = storageFactory.datastore();
+            DatastoreWrapper spy = storageFactory.datastoreFor(contextSpec);
             verify(spy).read(anyIterable());
             verify(spy, never()).read(any(StructuredQuery.class));
         }
@@ -693,7 +697,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @SuppressWarnings("unchecked") // For the purposes of mocking.
         private void assertDsReadByKeys() {
-            DatastoreWrapper spy = storageFactory.datastore();
+            DatastoreWrapper spy = storageFactory.datastoreFor(contextSpec);
             verify(spy).read(anyIterable());
             verify(spy, never()).read(any(StructuredQuery.class));
         }
@@ -712,14 +716,15 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     @DisplayName("lookup records in Datastore by columns")
     class LookupByQueries {
 
+        private final ContextSpec contextSpec = singleTenant(LookupByQueries.class.getName());
         private DatastoreStorageFactory storageFactory;
         private RecordStorage<CollegeId> storage;
 
         @BeforeEach
         void setUp() {
-            SpyStorageFactory.injectWrapper(datastoreFactory().datastore());
+            SpyStorageFactory.injectWrapper(datastoreFactory().datastoreFor(contextSpec));
             storageFactory = new SpyStorageFactory();
-            storage = storageFactory.createRecordStorage(CollegeEntity.class);
+            storage = storageFactory.createRecordStorage(contextSpec, CollegeEntity.class);
         }
 
         @Test
@@ -1078,7 +1083,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @SuppressWarnings("unchecked") // For the purposes of mocking.
         private void assertDsReadByStructuredQuery(int invocationCount) {
-            DatastoreWrapper spy = storageFactory.datastore();
+            DatastoreWrapper spy = storageFactory.datastoreFor(contextSpec);
             verify(spy, never()).read(anyIterable());
             verify(spy, times(invocationCount)).read(any(StructuredQuery.class));
         }

@@ -30,6 +30,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
+import static io.spine.server.storage.datastore.given.TestEnvironment.singletenantSpec;
 
 @DisplayName("DsAggregateStorage lifecycle handling should")
 class DsAggregateStorageLifecycleHandlingTest
@@ -55,6 +56,6 @@ class DsAggregateStorageLifecycleHandlingTest
     @Override
     protected AggregateStorage<ProjectId> getAggregateStorage(
             Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
-        return datastoreFactory.createAggregateStorage(aggregateClass);
+        return datastoreFactory.createAggregateStorage(singletenantSpec(), aggregateClass);
     }
 }

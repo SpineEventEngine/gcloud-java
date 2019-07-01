@@ -22,14 +22,14 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
 import io.spine.annotation.Internal;
-import io.spine.core.BoundedContextName;
-import io.spine.core.BoundedContextNames;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
@@ -43,156 +43,141 @@ import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.tenant.TenantIndex;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.function.Function;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static io.spine.core.BoundedContextNames.assumingTestsValue;
-import static io.spine.server.BoundedContext.multitenant;
-import static io.spine.server.BoundedContext.singleTenant;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 
 /**
  * Creates storages based on {@link Datastore}.
  *
- * @see DatastoreStorageFactory#newBoundedContextBuilder for the recommended usage description
+ * <p>As a convenience API, provides an ability to configure the {@link BoundedContextBuilder}s
+ * with the {@link TenantIndex} specific to the instance of {@code Datastore} configured for this
+ * factory
+ *
+ * @see DatastoreStorageFactory#configureTenantIndex(BoundedContextBuilder)
  */
 public class DatastoreStorageFactory implements StorageFactory {
 
-    private final DatastoreWrapper datastore;
-    private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
-    private final @MonotonicNonNull NamespaceConverter namespaceConverter;
-    private final ContextSpec contextSpec;
+    private static final String DEFAULT_NAMESPACE_ERROR_MESSAGE =
+            "Datastore namespace should not be configured explicitly" +
+                    "for a multitenant storage";
 
-    @SuppressWarnings("OverridableMethodCallDuringObjectConstruction")
-        // Overridden method required for stub. impl. of test environments.
+    private final Datastore datastore;
+
+    /**
+     * Cached instances of datastore wrappers per {@code ContextSpec}.
+     *
+     * <p>The repeated calls of the methods of this factory should refer to the same instance of
+     * the wrapped {@code Datastore}. Then the storage configuration for the repositories
+     * of the same {@code BoundedContext} is consistent.
+     *
+     */
+    private final Map<ContextSpec, DatastoreWrapper> wrappers = Maps.newConcurrentMap();
+    private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
+
     DatastoreStorageFactory(Builder builder) {
-        this.contextSpec = builder.contextSpec;
         this.typeRegistry = builder.typeRegistry;
-        this.namespaceConverter = builder.namespaceConverter;
-        this.datastore = createDatastoreWrapper(builder);
+        this.datastore = builder.datastore;
     }
 
     /**
-     * Creates new instance of the {@link BoundedContextBuilder}.
+     * Configures the passed {@link BoundedContextBuilder} with the {@link TenantIndex} built on
+     * top of the {@code Datastore} specific to this factory instance.
      *
-     * <p>The returned instance has the following attributes pre-configured:
-     * <ul>
-     *     <li>the context name;
-     *     <li>{@linkplain BoundedContext#isMultitenant() multitenancy} mode;
-     *     <li>{@link BoundedContextBuilder#setStorage Supplier} of {@code StorageFactory};
-     *     <li>{@link BoundedContextBuilder#setTenantIndex TenantIndex}.
-     * </ul>
-     *
-     * <p>In a majority of use cases the configuration of the produced
-     * {@link BoundedContextBuilder builder} is enough for operation. However, it is still possible
-     * to use the returned instance for further customization.
-     *
-     * @return new instance of {@link BoundedContextBuilder BoundedContextBuilder}
-     *         with the specified parameters
+     * @param builder
+     *         the instance of the builder to configure the tenant index for
+     * @return the same instance of the builder, but with the tenant index set
      */
-    public BoundedContextBuilder newBoundedContextBuilder() {
-        Datastore datastore = datastore()
-                .datastoreOptions()
-                .getService();
-        TenantIndex tenantIndex = DatastoreTenants.index(datastore);
-        Function<ContextSpec, StorageFactory> storageFactorySupplier = spec -> this;
-        String contextName = contextSpec.name()
-                                        .getValue();
-        BoundedContextBuilder resultBuilder = isMultitenant()
-                                              ? multitenant(contextName)
-                                              : singleTenant(contextName);
-        resultBuilder.setStorage(storageFactorySupplier)
-                     .setTenantIndex(tenantIndex);
-        return resultBuilder;
-    }
-
-    private Builder toBuilder() {
-        Builder result = newBuilder()
-                .setDatastore(datastore.datastore())
-                .setContextSpec(contextSpec);
-        if (!isMultitenant()) {
-            result.setNamespaceConverter(namespaceConverter);
-        }
-
-        return result;
-    }
-
-    protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
-        DatastoreWrapper wrapped = wrap(builder.datastore, builder.namespaceSupplier);
-        return wrapped;
+    public BoundedContextBuilder configureTenantIndex(BoundedContextBuilder builder) {
+        TenantIndex index = DatastoreTenants.index(datastore);
+        builder.setTenantIndex(index);
+        return builder;
     }
 
     @Override
-    public boolean isMultitenant() {
-        return contextSpec.isMultitenant();
+    public <I> AggregateStorage<I>
+    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> cls) {
+        checkNotNull(cls);
+        DsAggregateStorage<I> result =
+                new DsAggregateStorage<>(cls, datastoreFor(context), context.isMultitenant());
+        return result;
+    }
+
+    @Override
+    public <I> RecordStorage<I>
+    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> cls) {
+        DsRecordStorage<I> result = configure(DsRecordStorage.newBuilder(), cls, context).build();
+        return result;
+    }
+
+    @Override
+    public <I> ProjectionStorage<I>
+    createProjectionStorage(ContextSpec context, Class<? extends Projection<I, ?, ?>> cls) {
+        DsProjectionStorageDelegate<I> recordStorage =
+                configure(DsProjectionStorageDelegate.newDelegateBuilder(), cls, context).build();
+        DsPropertyStorage propertyStorage = createPropertyStorage(context);
+        DsProjectionStorage<I> result =
+                new DsProjectionStorage<>(cls,
+                                          recordStorage,
+                                          propertyStorage,
+                                          context.isMultitenant());
+        return result;
+    }
+
+    @Override
+    public InboxStorage createInboxStorage(boolean multitenant) {
+        return null;
     }
 
     public ColumnTypeRegistry getTypeRegistry() {
         return typeRegistry;
     }
 
-    @Override
-    public <I>
-    ProjectionStorage<I> createProjectionStorage(Class<? extends Projection<I, ?, ?>> cls) {
-        DsProjectionStorageDelegate<I> recordStorage =
-                configure(DsProjectionStorageDelegate.newDelegateBuilder(), cls).build();
-        DsPropertyStorage propertyStorage = createPropertyStorage();
-        DsProjectionStorage<I> result =
-                new DsProjectionStorage<>(cls,
-                                          recordStorage,
-                                          propertyStorage,
-                                          contextSpec.isMultitenant());
-        return result;
-    }
-
-    @Override
-    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> cls) {
-        DsRecordStorage<I> result = configure(DsRecordStorage.newBuilder(), cls).build();
-        return result;
-    }
-
     /**
      * Configures the passed builder of the storage to serve the passed entity class.
      */
     private <I, B extends RecordStorageBuilder<I, B>>
-    B configure(B builder, Class<? extends Entity<I, ?>> cls) {
+    B configure(B builder, Class<? extends Entity<I, ?>> cls, ContextSpec context) {
+
         builder.setModelClass(asEntityClass(cls))
-               .setDatastore(datastore())
-               .setMultitenant(isMultitenant())
+               .setDatastore(datastoreFor(context))
+               .setMultitenant(context.isMultitenant())
                .setColumnTypeRegistry(typeRegistry);
         return builder;
     }
 
-    @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> cls) {
-        checkNotNull(cls);
-        DsAggregateStorage<I> result =
-                new DsAggregateStorage<>(cls, datastore(), contextSpec.isMultitenant());
+    protected DsPropertyStorage createPropertyStorage(ContextSpec spec) {
+        DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastoreFor(spec));
+        return propertyStorage;
+    }
+
+    private NamespaceSupplier createNamespaceSupplier(ContextSpec contextSpec) {
+        @Nullable String defaultNamespace;
+        boolean multitenant = contextSpec.isMultitenant();
+        if (multitenant) {
+            checkHasNoNamespace(datastore);
+            defaultNamespace = null;
+        } else {
+            defaultNamespace = datastore.getOptions()
+                                        .getNamespace();
+        }
+        ProjectId projectId = ProjectId.of(datastore);
+        NamespaceSupplier result =
+                NamespaceSupplier.instance(multitenant, defaultNamespace, projectId);
         return result;
     }
 
-    @Override
-    public StorageFactory toSingleTenant() {
-        if (isMultitenant()) {
-            BoundedContextName name = contextSpec.name();
-            ContextSpec spec = ContextSpec.singleTenant(name.getValue());
-            return toBuilder()
-                    .setContextSpec(spec)
-                    .build();
-        } else {
-            return this;
-        }
-    }
-
-    protected DsPropertyStorage createPropertyStorage() {
-        DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastore());
-        return propertyStorage;
+    private static void checkHasNoNamespace(Datastore datastore) {
+        checkNotNull(datastore);
+        DatastoreOptions options = datastore.getOptions();
+        String namespace = options.getNamespace();
+        checkArgument(isNullOrEmpty(namespace), DEFAULT_NAMESPACE_ERROR_MESSAGE);
     }
 
     /**
@@ -204,11 +189,25 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     /**
-     * Obtains an instance of a wrapper of the passed {@link Datastore}.
+     * Obtains an instance of the passed {@link Datastore}.
      */
     @Internal
-    public DatastoreWrapper datastore() {
+    protected Datastore datastore() {
         return datastore;
+    }
+
+    /**
+     * Obtains an instance of the passed {@link Datastore}.
+     */
+    @Internal
+    @VisibleForTesting
+    DatastoreWrapper datastoreFor(ContextSpec spec) {
+        if (!wrappers.containsKey(spec)) {
+            NamespaceSupplier supplier = createNamespaceSupplier(spec);
+            DatastoreWrapper wrapper = wrap(datastore, supplier);
+            wrappers.put(spec, wrapper);
+        }
+        return wrappers.get(spec);
     }
 
     /**
@@ -223,17 +222,8 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     public static class Builder {
 
-        private static final String DEFAULT_NAMESPACE_ERROR_MESSAGE =
-                "Datastore namespace should not be configured explicitly" +
-                        "for a multitenant storage";
-        private static final String REDUNDANT_TENANT_ID_CONVERTER_ERROR_MESSAGE =
-                "Setting a custom NamespaceToTenantIdConverter is not allowed" +
-                        " for a single-tenant storage factory.";
-
         private Datastore datastore;
-        private ContextSpec contextSpec = ContextSpec.singleTenant(assumingTestsValue());
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
-        private NamespaceSupplier namespaceSupplier;
         private NamespaceConverter namespaceConverter;
 
         /** Avoid direct initialization. */
@@ -250,17 +240,6 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         public Datastore getDatastore() {
             return this.datastore;
-        }
-
-        /**
-         * Specifies the context to build a storage factory for.
-         *
-         * <p>By default, the storage uses a single tenant
-         * {@linkplain BoundedContextNames#assumingTests() "Assuming tests"} context
-         */
-        public Builder setContextSpec(ContextSpec contextSpec) {
-            this.contextSpec = checkNotNull(contextSpec);
-            return this;
         }
 
         /**
@@ -305,13 +284,8 @@ public class DatastoreStorageFactory implements StorageFactory {
          */
         public DatastoreStorageFactory build() {
             checkNotNull(datastore);
-            this.namespaceSupplier = createNamespaceSupplier();
             if (typeRegistry == null) {
                 typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
-            }
-            if (!contextSpec.isMultitenant()) {
-                checkArgument(namespaceConverter == null,
-                              REDUNDANT_TENANT_ID_CONVERTER_ERROR_MESSAGE);
             }
             if (namespaceConverter != null) {
                 ProjectId projectId = ProjectId.of(datastore);
@@ -319,29 +293,6 @@ public class DatastoreStorageFactory implements StorageFactory {
             }
 
             return new DatastoreStorageFactory(this);
-        }
-
-        private NamespaceSupplier createNamespaceSupplier() {
-            @Nullable String defaultNamespace;
-            boolean multitenant = contextSpec.isMultitenant();
-            if (multitenant) {
-                checkHasNoNamespace(datastore);
-                defaultNamespace = null;
-            } else {
-                defaultNamespace = datastore.getOptions()
-                                            .getNamespace();
-            }
-            ProjectId projectId = ProjectId.of(datastore);
-            NamespaceSupplier result =
-                    NamespaceSupplier.instance(multitenant, defaultNamespace, projectId);
-            return result;
-        }
-
-        private static void checkHasNoNamespace(Datastore datastore) {
-            checkNotNull(datastore);
-            DatastoreOptions options = datastore.getOptions();
-            String namespace = options.getNamespace();
-            checkArgument(isNullOrEmpty(namespace), DEFAULT_NAMESPACE_ERROR_MESSAGE);
         }
     }
 }

@@ -47,9 +47,9 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
     }
 
     /**
-     * {@inheritDoc}
+     * Obtains a namespace for the current tenant {@link TenantId ID}.
      *
-     * @return the {@link Namespace} representing the current tenant {@link TenantId ID}
+     * @return the {@code Namespace} value
      */
     @Override
     public Namespace get() {

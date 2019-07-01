@@ -21,9 +21,8 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.ContextSpec;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.tenant.TestNamespaceIndex;
 import io.spine.server.tenant.TenantIndex;
@@ -31,38 +30,35 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-import java.util.function.Function;
 
-import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("DatastoreStorageFactory should")
 class NewBoundedContextBuilderTest {
 
     @Test
-    @DisplayName("create BoundedContextBuilder")
+    @DisplayName("configure BoundedContextBuilder with the `TenantIndex`")
     void testProduceBCBuilder() {
         DatastoreStorageFactory factory = givenFactory();
-        BoundedContextBuilder builder = factory.newBoundedContextBuilder();
-        Optional<Function<ContextSpec, StorageFactory>> supplierOptional = builder.storage();
-        assertTrue(supplierOptional.isPresent());
-        assertSame(factory, supplierOptional.get().apply(ContextSpec.singleTenant("Test")));
-        assertEquals(builder.isMultitenant(), factory.isMultitenant());
-        Optional<? extends TenantIndex> tenantIndexOptional = builder.tenantIndex();
-        assertTrue(tenantIndexOptional.isPresent());
-        assertThat(tenantIndexOptional.get(), instanceOf(TestNamespaceIndex.getType()));
+        BoundedContextBuilder builder = BoundedContext.multitenant(
+                NewBoundedContextBuilderTest.class.getName());
+        assertFalse(builder.tenantIndex()
+                           .isPresent());
+
+        Optional<? extends TenantIndex> updatedIndex =
+                factory.configureTenantIndex(builder)
+                       .tenantIndex();
+        assertTrue(updatedIndex.isPresent());
+        assertThat(updatedIndex.get(), instanceOf(TestNamespaceIndex.getType()));
     }
 
     private static DatastoreStorageFactory givenFactory() {
-        ContextSpec multitenant = multitenant(NewBoundedContextBuilderTest.class.getSimpleName());
         DatastoreStorageFactory result = DatastoreStorageFactory
                 .newBuilder()
-                .setContextSpec(multitenant)
                 .setDatastore(givenDatastore())
                 .setTypeRegistry(defaultInstance())
                 .build();

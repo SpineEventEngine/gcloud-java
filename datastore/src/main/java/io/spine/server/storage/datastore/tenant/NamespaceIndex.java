@@ -28,6 +28,7 @@ import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import io.spine.core.TenantId;
+import io.spine.server.BoundedContext;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.tenant.TenantIndex;
@@ -72,6 +73,12 @@ class NamespaceIndex implements TenantIndex {
         this.multitenant = multitenant;
     }
 
+    @Override
+    public void registerWith(BoundedContext context) {
+        // Do nothing, as this implementation does not rely on any {@code BoundedContext}
+        // properties.
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -89,7 +96,7 @@ class NamespaceIndex implements TenantIndex {
     }
 
     @Override
-    public Set<TenantId> getAll() {
+    public Set<TenantId> all() {
         synchronized (lock) {
             fetchNamespaces();
 
