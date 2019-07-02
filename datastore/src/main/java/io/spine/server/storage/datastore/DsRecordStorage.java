@@ -57,7 +57,7 @@ import static io.spine.server.storage.datastore.RecordId.ofEntityId;
 import static java.util.Optional.empty;
 
 /**
- * {@link RecordStorage} implementation based on Google App Engine Datastore.
+ * {@link RecordStorage} implementation based on Google Cloud Datastore.
  *
  * @see DatastoreStorageFactory
  */
