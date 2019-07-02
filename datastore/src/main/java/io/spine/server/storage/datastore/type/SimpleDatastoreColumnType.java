@@ -25,8 +25,6 @@ import io.spine.annotation.SPI;
 /**
  * A base for implementing {@link io.spine.server.entity.storage.ColumnType ColumnType} interface
  * for Datastore storage regardless the type conversion.
- *
- * @author Dmytro Dashenkov
  */
 @SPI
 public abstract class SimpleDatastoreColumnType<T> extends AbstractDatastoreColumnType<T, T> {

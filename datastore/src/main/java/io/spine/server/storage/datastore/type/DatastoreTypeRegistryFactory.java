@@ -37,8 +37,6 @@ import static io.spine.server.storage.datastore.type.DsColumnTypes.versionType;
 
 /**
  * A factory of the Datastore-specific {@link ColumnTypeRegistry ColumnTypeRegistries}.
- *
- * @author Dmytro Dashenkov
  */
 public final class DatastoreTypeRegistryFactory {
 

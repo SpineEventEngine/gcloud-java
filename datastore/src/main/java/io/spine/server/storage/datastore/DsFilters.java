@@ -59,8 +59,6 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * A utility for working with the Datastore {@linkplain Filter filters}.
- *
- * @author Dmytro Dashenkov
  */
 final class DsFilters {
 

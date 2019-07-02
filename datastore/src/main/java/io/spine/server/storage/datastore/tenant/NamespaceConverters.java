@@ -30,8 +30,6 @@ import static io.spine.server.storage.datastore.tenant.Namespace.STRING_VALUE_PR
 
 /**
  * A factory of {@link NamespaceConverter} instances for the particular purposes.
- *
- * @author Dmytro Dashenkov
  */
 final class NamespaceConverters {
 

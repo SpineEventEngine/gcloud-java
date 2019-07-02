@@ -27,8 +27,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A factory of the Datastore-specific Tenant related objects.
- *
- * @author Dmytro Dashenkov
  */
 public final class DatastoreTenants {
 

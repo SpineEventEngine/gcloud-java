@@ -37,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A utility for generating the
  * {@linkplain io.spine.server.storage.Storage#index() storage ID indexes}.
  *
- * @author Dmytro Dashenkov.
  * @see io.spine.server.storage.Storage#index()
  */
 final class Indexes {

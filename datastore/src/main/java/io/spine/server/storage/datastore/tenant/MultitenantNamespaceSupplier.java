@@ -30,8 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A {@link NamespaceSupplier} for multitenant storage factories.
- *
- * @author Dmytro Dashenkov
  */
 final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
