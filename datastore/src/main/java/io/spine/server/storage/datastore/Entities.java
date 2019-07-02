@@ -112,6 +112,22 @@ final class Entities {
      * @return new instance of {@link Entity} containing serialized proto message
      */
     static Entity fromMessage(Message message, Key key) {
+        Entity.Builder builder = builderFromMessage(message, key);
+        Entity entity = builder.build();
+        return entity;
+    }
+
+    /**
+     * Creates an incomplete {@link Entity.Builder } with given {@link Key} and from given
+     * proto {@code Message}.
+     *
+     * @param message
+     *         source of data to be put into the {@link Entity}
+     * @param key
+     *         instance of {@link Key} to be assigned to the {@link Entity}
+     * @return new instance of {@code Entity.Builder} containing serialized proto message
+     */
+    static Entity.Builder builderFromMessage(Message message, Key key) {
         checkNotNull(message);
         checkNotNull(key);
 
@@ -121,11 +137,10 @@ final class Entities {
                 .newBuilder(valueBlob)
                 .setExcludeFromIndexes(true)
                 .build();
-        Entity entity = Entity
+        Entity.Builder builder = Entity
                 .newBuilder(key)
-                .set(bytes.toString(), blobValue)
-                .build();
-        return entity;
+                .set(bytes.toString(), blobValue);
+        return builder;
     }
 
     @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"} /* Rely on caller. */)

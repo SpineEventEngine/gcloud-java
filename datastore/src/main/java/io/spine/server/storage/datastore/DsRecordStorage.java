@@ -51,7 +51,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.ColumnRecords.feedColumnsTo;
 import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryParams;
 import static io.spine.server.storage.datastore.Entities.RECORD_TYPE_URL;
-import static io.spine.server.storage.datastore.Entities.fromMessage;
+import static io.spine.server.storage.datastore.Entities.builderFromMessage;
 import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.server.storage.datastore.RecordId.ofEntityId;
 import static java.util.Optional.empty;
@@ -276,8 +276,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
         EntityRecord entityRecord = record.getRecord();
         Key key = datastore.keyFor(kindFrom(entityRecord), ofEntityId(id));
-        Entity incompleteEntity = fromMessage(entityRecord, key);
-        Entity.Builder entity = Entity.newBuilder(incompleteEntity);
+        Entity.Builder entity = builderFromMessage(entityRecord, key);
 
         populateFromStorageFields(entity, record);
 
