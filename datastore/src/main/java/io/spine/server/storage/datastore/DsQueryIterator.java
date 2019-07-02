@@ -67,7 +67,7 @@ final class DsQueryIterator extends UnmodifiableIterator<Entity> {
         if (terminated) {
             return false;
         }
-        if (limitMet()) {
+        if (limitReached()) {
             terminate();
             return false;
         }
@@ -78,7 +78,7 @@ final class DsQueryIterator extends UnmodifiableIterator<Entity> {
         return true;
     }
 
-    private boolean limitMet() {
+    private boolean limitReached() {
         return limit != null && readCount >= limit;
     }
 
