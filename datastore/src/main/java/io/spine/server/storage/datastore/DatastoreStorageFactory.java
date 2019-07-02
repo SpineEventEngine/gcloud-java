@@ -69,6 +69,8 @@ public class DatastoreStorageFactory implements StorageFactory {
             "Datastore namespace should not be configured explicitly" +
                     "for a multitenant storage";
 
+    private static final String INBOX_NAMESPACE = "__Inbox__";
+
     private final Datastore datastore;
 
     /**
@@ -77,7 +79,6 @@ public class DatastoreStorageFactory implements StorageFactory {
      * <p>The repeated calls of the methods of this factory should refer to the same instance of
      * the wrapped {@code Datastore}. Then the storage configuration for the repositories
      * of the same {@code BoundedContext} is consistent.
-     *
      */
     private final Map<ContextSpec, DatastoreWrapper> wrappers = Maps.newConcurrentMap();
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
@@ -142,7 +143,12 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public InboxStorage createInboxStorage(boolean multitenant) {
-        return null;
+        ContextSpec inboxStorageSpec =
+                multitenant
+                ? ContextSpec.multitenant(INBOX_NAMESPACE)
+                : ContextSpec.singleTenant(INBOX_NAMESPACE);
+        DatastoreWrapper wrapper = createDatastoreWrapper(inboxStorageSpec);
+        return new DsInboxStorage(wrapper, multitenant);
     }
 
     public ColumnTypeRegistry getTypeRegistry() {
