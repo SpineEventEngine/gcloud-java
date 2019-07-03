@@ -31,6 +31,7 @@ import com.google.cloud.datastore.StructuredQuery.OrderBy;
 import com.google.cloud.datastore.TimestampValue;
 import com.google.cloud.datastore.Value;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.InboxReadRequest;
@@ -174,6 +175,15 @@ public class DsInboxStorage extends InboxStorage {
     }
 
     /**
+     * A functional interface for functions that obtain values from the {@link InboxMessage} fields
+     * for the respective {@link Entity} columns.
+     */
+    @Immutable
+    @FunctionalInterface
+    private interface ColumnValueGetter extends Function<InboxMessage, Value<?>> {
+    }
+
+    /**
      * The columns of the {@code InboxMessage} kind in Datastore.
      */
     private enum Column {
@@ -228,10 +238,10 @@ public class DsInboxStorage extends InboxStorage {
          * Obtains the value of the column from the given message.
          */
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Function<InboxMessage, Value<?>> getter;
+        private final ColumnValueGetter getter;
 
         Column(String name,
-               Function<InboxMessage, Value<?>> getter) {
+               ColumnValueGetter getter) {
             this.name = name;
             this.getter = getter;
         }
