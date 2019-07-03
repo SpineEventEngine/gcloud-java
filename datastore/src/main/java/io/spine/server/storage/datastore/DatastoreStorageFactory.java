@@ -147,7 +147,7 @@ public class DatastoreStorageFactory implements StorageFactory {
                 multitenant
                 ? ContextSpec.multitenant(INBOX_NAMESPACE)
                 : ContextSpec.singleTenant(INBOX_NAMESPACE);
-        DatastoreWrapper wrapper = createDatastoreWrapper(inboxStorageSpec);
+        DatastoreWrapper wrapper = datastoreFor(inboxStorageSpec);
         return new DsInboxStorage(wrapper, multitenant);
     }
 
