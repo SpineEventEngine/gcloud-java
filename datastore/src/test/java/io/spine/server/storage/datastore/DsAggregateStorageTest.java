@@ -231,7 +231,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
         @BeforeEach
         void setUp() {
-            ServerEnvironment.instance().configureProductionStorage(datastoreFactory);
+            ServerEnvironment.instance().configureStorage(datastoreFactory);
             BoundedContext boundedContext =
                     BoundedContext.singleTenant(DsAggregateStorageTest.class.getName())
                                   .build();
