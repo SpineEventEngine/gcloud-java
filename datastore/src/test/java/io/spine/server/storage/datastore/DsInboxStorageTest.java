@@ -187,7 +187,7 @@ public class DsInboxStorageTest {
         assertEquals(expected.size(), page.size());
 
         ImmutableList<InboxMessage> contents = page.contents();
-        assertEquals(ImmutableSet.of(expected), ImmutableSet.of(contents));
+        assertEquals(ImmutableSet.copyOf(expected), ImmutableSet.copyOf(contents));
         return contents;
     }
 
