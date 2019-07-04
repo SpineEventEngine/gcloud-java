@@ -227,7 +227,6 @@ public class DatastoreStorageFactory implements StorageFactory {
      * <p>If there were no {@code DatastoreWrapper} instances created for the given context,
      * creates it.
      */
-    @VisibleForTesting
     final DatastoreWrapper datastoreFor(ContextSpec spec) {
         if (!wrappers.containsKey(spec)) {
             DatastoreWrapper wrapper = createDatastoreWrapper(spec);
