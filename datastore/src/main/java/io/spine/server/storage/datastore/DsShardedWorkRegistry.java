@@ -62,7 +62,7 @@ public class DsShardedWorkRegistry
      * by tenant.
      */
     public DsShardedWorkRegistry(DatastoreStorageFactory factory) {
-        super(factory.datastoreFor(spec), false);
+        super(factory.datastoreFor(spec), spec.isMultitenant());
     }
 
     @Override
