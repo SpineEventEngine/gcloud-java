@@ -56,15 +56,22 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      */
     private final DatastoreWrapper datastore;
 
+    /**
+     * The type URL of the stored {@code Message}s.
+     */
     private final TypeUrl typeUrl;
+
+    /**
+     * The Datastore {@link Kind} of the records for the stored {@code Messages}.
+     */
     private final Kind kind;
 
     protected DsMessageStorage(DatastoreWrapper datastore, boolean multitenant) {
         super(multitenant);
         this.datastore = datastore;
 
-        @SuppressWarnings("unchecked")      // ensured by the class declaration.
-        Class<M> result = (Class<M>) GenericParameter.MESSAGE.argumentIn(getClass());
+        @SuppressWarnings("unchecked")      // Ensured by the class declaration.
+                Class<M> result = (Class<M>) GenericParameter.MESSAGE.argumentIn(getClass());
         typeUrl = TypeUrl.of(result);
         kind = Kind.of(typeUrl);
     }
@@ -80,7 +87,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     abstract MessageColumn<M>[] columns();
 
     /**
-     * Obtains the Datastore {@code Key} value in its {@code String form} out of the  message
+     * Obtains the Datastore {@code Key} value in its {@code String form} out of the message
      * identifier.
      */
     String keyValue(I id) {
@@ -109,6 +116,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      */
     public void write(M message) {
         checkNotNull(message);
+
         Entity entity = toEntity(message);
         datastore.createOrUpdate(entity);
     }
@@ -123,6 +131,9 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      */
     @Override
     public final void write(I id, M message) {
+        checkNotNull(id);
+        checkNotNull(message);
+
         write(message);
     }
 
@@ -133,6 +144,8 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      * there are records with the same identifiers — or as new records.
      */
     public void writeAll(Iterable<M> messages) {
+        checkNotNull(messages);
+
         List<Entity> entities =
                 stream(messages)
                         .map(this::toEntity)
@@ -146,8 +159,10 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      * <p>Allows to customize the read query with the parameters such as filters and ordering
      * by passing them via {@code queryBuilder}.
      *
-     * @param queryBuilder the partially composed query builder
-     * @param readBatchSize the batch size to use while reading
+     * @param queryBuilder
+     *         the partially composed query builder
+     * @param readBatchSize
+     *         the batch size to use while reading
      * @return an iterator over the result set
      * @see DatastoreWrapper#readAll(StructuredQuery, int)
      */
@@ -168,6 +183,8 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      * is ignored.
      */
     public void removeAll(Iterable<M> messages) {
+        checkNotNull(messages);
+
         Key[] keys = stream(messages)
                 .map(m -> key(idOf(m)))
                 .toArray(Key[]::new);
@@ -176,6 +193,8 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
 
     @Override
     public Optional<M> read(R request) {
+        checkNotNull(request);
+
         I id = request.recordId();
         Key key = key(id);
         @Nullable Entity entity = datastore.read(key);
