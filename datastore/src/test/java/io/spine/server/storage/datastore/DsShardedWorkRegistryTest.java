@@ -20,11 +20,14 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.spine.base.Identifier;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
-import io.spine.server.storage.datastore.given.TestShardIndex;
+import io.spine.server.delivery.ShardSessionRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,18 +35,27 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @DisplayName("DsShardedWorkRegistry should")
 public class DsShardedWorkRegistryTest {
 
+    private static final ShardIndex index = newIndex(1, 15);
+
+    private static final NodeId nodeId = newNode();
+
     private final TestDatastoreStorageFactory factory =
             TestDatastoreStorageFactory.defaultInstance();
+
+    private DsShardedWorkRegistry registry;
 
     @BeforeEach
     void setUp() {
         factory.setUp();
+        registry = new DsShardedWorkRegistry(factory);
     }
 
     @AfterEach
@@ -52,16 +64,77 @@ public class DsShardedWorkRegistryTest {
     }
 
     @Test
-    @DisplayName("pick up the session and write a corresponding record to the storage")
+    @DisplayName("pick up the shard and write a corresponding record to the storage")
     public void pickUp() {
-        DsShardedWorkRegistry registry = new DsShardedWorkRegistry(factory);
-
-        ShardIndex index = TestShardIndex.newIndex(1, 15);
-        NodeId nodeId = NodeId.newBuilder()
-                              .setValue(Identifier.newUuid())
-                              .vBuild();
         Optional<ShardProcessingSession> session = registry.pickUp(index, nodeId);
         assertTrue(session.isPresent());
-        assertEquals(index, session.get().shardIndex());
+        assertThat(session.get()
+                          .shardIndex()).isEqualTo(index);
+
+        ShardSessionRecord record = readSingleRecord(index);
+        assertThat(record.getIndex()).isEqualTo(index);
+        assertThat(record.getPickedBy()).isEqualTo(nodeId);
+    }
+
+    @Test
+    @DisplayName("not be able to pick up the shard if it's already picked up")
+    public void cannotPickUpIfTaken() {
+
+        Optional<ShardProcessingSession> session = registry.pickUp(index, nodeId);
+        assertTrue(session.isPresent());
+
+        Optional<ShardProcessingSession> sameIdxSameNode = registry.pickUp(index, nodeId);
+        assertFalse(sameIdxSameNode.isPresent());
+
+        Optional<ShardProcessingSession> sameIdxAnotherNode = registry.pickUp(index, newNode());
+        assertFalse(sameIdxAnotherNode.isPresent());
+
+        ShardIndex anotherIdx = newIndex(24, 100);
+        Optional<ShardProcessingSession> anotherIdxSameNode = registry.pickUp(anotherIdx, nodeId);
+        assertTrue(anotherIdxSameNode.isPresent());
+
+        Optional<ShardProcessingSession> anotherIdxAnotherNode =
+                registry.pickUp(anotherIdx, newNode());
+        assertFalse(anotherIdxAnotherNode.isPresent());
+
+    }
+
+    @Test
+    @DisplayName("complete the shard session (once picked up) and make it available for picking up")
+    public void completeSessionAndMakeItAvailable() {
+        Optional<ShardProcessingSession> optional = registry.pickUp(index, nodeId);
+        assertTrue(optional.isPresent());
+
+        Timestamp whenPickedFirst = readSingleRecord(index).getWhenLastPicked();
+
+        DsShardProcessingSession session = (DsShardProcessingSession) optional.get();
+        session.complete();
+
+        ShardSessionRecord completedRecord = readSingleRecord(index);
+        assertFalse(completedRecord.hasPickedBy());
+
+        NodeId anotherNode = newNode();
+        Optional<ShardProcessingSession> anotherOptional = registry.pickUp(index, anotherNode);
+        assertTrue(anotherOptional.isPresent());
+
+        ShardSessionRecord secondSessionRecord = readSingleRecord(index);
+        assertThat(secondSessionRecord.getPickedBy()).isEqualTo(anotherNode);
+
+        Timestamp whenPickedSecond = secondSessionRecord.getWhenLastPicked();
+        assertTrue(Timestamps.compare(whenPickedFirst, whenPickedSecond) < 0);
+    }
+
+    private ShardSessionRecord readSingleRecord(ShardIndex index) {
+        ImmutableList<ShardSessionRecord> records = registry.readByIndex(index);
+        assertThat(records.size()).isEqualTo(1);
+
+        return records.iterator()
+                      .next();
+    }
+
+    private static NodeId newNode() {
+        return NodeId.newBuilder()
+                     .setValue(Identifier.newUuid())
+                     .vBuild();
     }
 }

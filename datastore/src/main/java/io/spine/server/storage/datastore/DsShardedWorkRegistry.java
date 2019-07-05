@@ -25,6 +25,7 @@ import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import io.spine.server.ContextSpec;
 import io.spine.server.NodeId;
@@ -119,7 +120,8 @@ public class DsShardedWorkRegistry
                                  .vBuild();
     }
 
-    private ImmutableList<ShardSessionRecord> readByIndex(ShardIndex index) {
+    @VisibleForTesting
+    ImmutableList<ShardSessionRecord> readByIndex(ShardIndex index) {
         EntityQuery.Builder query =
                 Query.newEntityQueryBuilder()
                      .setFilter(eq(shardIndex.columnName(), index.getIndex()));

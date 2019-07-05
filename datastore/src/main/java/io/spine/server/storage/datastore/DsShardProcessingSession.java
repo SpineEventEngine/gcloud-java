@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
 
@@ -37,7 +38,8 @@ class DsShardProcessingSession extends ShardProcessingSession {
     }
 
     @Override
-    protected void complete() {
+    @VisibleForTesting      // Otherwise should stay `protected`.
+    public void complete() {
         completionCallback.run();
     }
 }
