@@ -41,10 +41,13 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
-import static io.spine.server.storage.datastore.DsShardedWorkRegistry.Column.shardIndex;
 
 /**
- * A {@link ShardedWorkRegistry} based on the Google Datastore storage API.
+ * A {@link ShardedWorkRegistry} based on the Google Datastore storage.
+ *
+ * <p>The sharded work is stored as {@link ShardSessionRecord}s in the Datastore. Each time
+ * the session is {@linkplain #pickUp(ShardIndex, NodeId) picked up}, the corresponding
+ * {@code Entity} in the Datastore is updated.
  *
  * <p>It is recommended to use this implementation with Cloud Firestore in Datastore mode,
  * as it provides the strong consistency for queries.
@@ -127,7 +130,7 @@ public class DsShardedWorkRegistry
     ImmutableList<ShardSessionRecord> readByIndex(ShardIndex index) {
         EntityQuery.Builder query =
                 Query.newEntityQueryBuilder()
-                     .setFilter(eq(shardIndex.columnName(), index.getIndex()));
+                     .setFilter(eq(Column.shardIndex.columnName(), index.getIndex()));
         Iterator<ShardSessionRecord> iterator = readAll(query, MAX_ENTITIES_PER_WRITE_REQUEST);
         return ImmutableList.copyOf(iterator);
     }
@@ -135,7 +138,7 @@ public class DsShardedWorkRegistry
     /**
      * The columns of the {@link ShardSessionRecord} message stored in Datastore.
      */
-    enum Column implements MessageColumn<ShardSessionRecord> {
+    private enum Column implements MessageColumn<ShardSessionRecord> {
 
         shardIndex("work_shard", (m) -> {
             return LongValue.of(m.getIndex()

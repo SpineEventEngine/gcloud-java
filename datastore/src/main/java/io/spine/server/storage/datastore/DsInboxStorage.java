@@ -40,8 +40,6 @@ import static com.google.cloud.Timestamp.fromProto;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.storage.datastore.DsInboxStorage.Column.shardIndex;
-import static io.spine.server.storage.datastore.DsInboxStorage.Column.whenReceived;
 
 /**
  * {@link InboxStorage} implementation based on Google Cloud Datastore.
@@ -82,8 +80,8 @@ public class DsInboxStorage
 
         EntityQuery.Builder builder =
                 Query.newEntityQueryBuilder()
-                     .setFilter(eq(shardIndex.columnName(), index.getIndex()))
-                     .setOrderBy(asc(whenReceived.columnName()));
+                     .setFilter(eq(Column.shardIndex.columnName(), index.getIndex()))
+                     .setOrderBy(asc(Column.whenReceived.columnName()));
         Iterator<InboxMessage> iterator = readAll(builder, readBatchSize);
         return new InboxPage(iterator, readBatchSize);
     }
@@ -91,7 +89,7 @@ public class DsInboxStorage
     /**
      * The columns of the {@code InboxMessage} kind in Datastore.
      */
-    enum Column implements MessageColumn<InboxMessage> {
+    private enum Column implements MessageColumn<InboxMessage> {
 
         signalId("signal_id", (m) -> {
             return StringValue.of(m.getSignalId()
