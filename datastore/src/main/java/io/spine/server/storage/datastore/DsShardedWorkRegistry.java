@@ -39,6 +39,7 @@ import java.util.Optional;
 
 import static com.google.cloud.Timestamp.fromProto;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
 import static io.spine.server.storage.datastore.DsShardedWorkRegistry.Column.shardIndex;
@@ -68,6 +69,9 @@ public class DsShardedWorkRegistry
 
     @Override
     public Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
+        checkNotNull(index);
+        checkNotNull(nodeId);
+
         boolean pickedAlready = isPickedAlready(index);
         if (pickedAlready) {
             return Optional.empty();

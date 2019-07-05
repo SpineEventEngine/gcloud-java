@@ -39,6 +39,7 @@ import java.util.Iterator;
 import static com.google.cloud.Timestamp.fromProto;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.storage.datastore.DsInboxStorage.Column.shardIndex;
 import static io.spine.server.storage.datastore.DsInboxStorage.Column.whenReceived;
 
@@ -77,6 +78,8 @@ public class DsInboxStorage
 
     @Override
     public Page<InboxMessage> readAll(ShardIndex index) {
+        checkNotNull(index);
+
         EntityQuery.Builder builder =
                 Query.newEntityQueryBuilder()
                      .setFilter(eq(shardIndex.columnName(), index.getIndex()))
