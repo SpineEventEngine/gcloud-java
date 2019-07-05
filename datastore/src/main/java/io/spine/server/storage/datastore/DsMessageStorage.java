@@ -47,6 +47,13 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>To store {@code Message}s representing {@link io.spine.server.entity.Entity Entity} states
  * refer to {@link DsRecordStorage} and its descendants.
+ *
+ * @param <I>
+ *         the type of the stored message identifiers
+ * @param <M>
+ *         the type of the stored message
+ * @param <R>
+ *         the type of the read request specific to this storage
  */
 public abstract class DsMessageStorage<I, M extends Message, R extends ReadRequest<I>>
         extends AbstractStorage<I, M, R> {
