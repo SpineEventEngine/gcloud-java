@@ -41,7 +41,6 @@ import io.spine.type.TypeUrl;
 
 import java.security.SecureRandom;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
 
@@ -90,7 +89,7 @@ public class DsInboxStorageTestEnv {
                                  .setEntityId(entityId)
                                  .setTypeUrl(typeUrl.value())
                                  .vBuild();
-        ShardIndex index = shardIndex(shardIndex, totalShards);
+        ShardIndex index = TestShardIndex.newIndex(shardIndex, totalShards);
         InboxMessage result =
                 InboxMessage.newBuilder()
                             .setId(InboxMessageId.generate())
@@ -103,20 +102,6 @@ public class DsInboxStorageTestEnv {
                             .setWhenReceived(whenReceived)
                             .vBuild();
         return result;
-    }
-
-    /**
-     * Creates a new {@link ShardIndex}.
-     */
-    public static ShardIndex shardIndex(int shardIndex, int totalShards) {
-        checkArgument(shardIndex > 0,
-                      "Shard index must be positive");
-        checkArgument(shardIndex < totalShards,
-                      "Shard index must be less than the total number of shards");
-        return ShardIndex.newBuilder()
-                         .setIndex(shardIndex)
-                         .setOfTotal(totalShards)
-                         .vBuild();
     }
 
     /**

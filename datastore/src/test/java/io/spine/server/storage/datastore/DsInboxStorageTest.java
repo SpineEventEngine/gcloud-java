@@ -44,7 +44,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 import static io.spine.server.storage.datastore.given.DsInboxStorageTestEnv.generate;
-import static io.spine.server.storage.datastore.given.DsInboxStorageTestEnv.shardIndex;
+import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -86,7 +86,7 @@ public class DsInboxStorageTest {
 
         InboxStorage storage = storage();
         int totalMessages = 10;
-        ShardIndex index = shardIndex(1, 18);
+        ShardIndex index = newIndex(1, 18);
 
         checkEmpty(storage, index);
 
@@ -107,7 +107,7 @@ public class DsInboxStorageTest {
     @Test
     @DisplayName("remove selected `InboxMessage` instances")
     public void removeMessages() {
-        ShardIndex index = shardIndex(6, 7);
+        ShardIndex index = newIndex(6, 7);
         ImmutableList<InboxMessage> messages = generate(20, index);
         InboxStorage storage = storage();
         storage.writeAll(messages);
@@ -134,7 +134,7 @@ public class DsInboxStorageTest {
     public void doNothingIfRemovingInexistentMessages() {
 
         InboxStorage storage = storage();
-        ShardIndex index = shardIndex(6, 7);
+        ShardIndex index = newIndex(6, 7);
         checkEmpty(storage, index);
 
         ImmutableList<InboxMessage> messages = generate(40, index);
@@ -147,7 +147,7 @@ public class DsInboxStorageTest {
     @DisplayName("mark messages delivered")
     public void markMessagedDelivered() {
 
-        ShardIndex index = shardIndex(3, 71);
+        ShardIndex index = newIndex(3, 71);
         ImmutableList<InboxMessage> messages = generate(10, index);
         InboxStorage storage = storage();
         storage.writeAll(messages);
