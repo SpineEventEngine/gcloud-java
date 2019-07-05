@@ -23,9 +23,11 @@ package io.spine.server.storage.datastore;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.UnmodifiableIterator;
+import com.google.common.testing.NullPointerTester;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.util.Timestamps;
 import io.spine.server.delivery.InboxMessage;
+import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxReadRequest;
 import io.spine.server.delivery.InboxStorage;
@@ -174,6 +176,18 @@ public class DsInboxStorageTest {
                                                         .contents();
         assertTrue(readResult.contains(remainingNonDelivered));
         assertTrue(readResult.containsAll(originalMarkedDelivered));
+    }
+
+    @Test
+    @DisplayName("not accept `null` values in public API methods")
+    public void notAcceptNulls() {
+        new NullPointerTester()
+                .setDefault(ShardIndex.class, newIndex(4, 5))
+                .setDefault(InboxMessage.class, InboxMessage.getDefaultInstance())
+                .setDefault(InboxMessageId.class, InboxMessageId.getDefaultInstance())
+                .setDefault(InboxReadRequest.class,
+                            new InboxReadRequest(InboxMessageId.getDefaultInstance()))
+                .testAllPublicInstanceMethods(storage());
     }
 
     private InboxStorage storage() {

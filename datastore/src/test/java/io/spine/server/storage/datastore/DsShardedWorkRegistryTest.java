@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Identifier;
@@ -122,6 +123,18 @@ public class DsShardedWorkRegistryTest {
 
         Timestamp whenPickedSecond = secondSessionRecord.getWhenLastPicked();
         assertTrue(Timestamps.compare(whenPickedFirst, whenPickedSecond) < 0);
+    }
+
+    @Test
+    @DisplayName("not accept `null` values in public API methods")
+    public void notAcceptNulls() {
+        new NullPointerTester()
+                .setDefault(NodeId.class, newNode())
+                .setDefault(ShardIndex.class, newIndex(4, 5))
+                .setDefault(ShardSessionRecord.class, ShardSessionRecord.getDefaultInstance())
+                .setDefault(ShardSessionReadRequest.class,
+                            new ShardSessionReadRequest(newIndex(6, 10)))
+                .testAllPublicInstanceMethods(registry);
     }
 
     private ShardSessionRecord readSingleRecord(ShardIndex index) {
