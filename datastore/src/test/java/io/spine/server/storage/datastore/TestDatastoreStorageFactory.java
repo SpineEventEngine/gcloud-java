@@ -24,13 +24,10 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.annotation.Internal;
 import io.spine.logging.Logging;
-import io.spine.server.ContextSpec;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
-
-import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -75,7 +72,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     @Internal
     @Override
-    protected DatastoreWrapper createDatastoreWrapper(ContextSpec spec) {
+    protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
         return TestDatastoreWrapper.wrap(datastore(), false);
     }
 
@@ -108,8 +105,8 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      * @see #tearDown()
      */
     public void clear() {
-        Map<ContextSpec, DatastoreWrapper> wrappers = wrappers();
-        for (DatastoreWrapper wrapper : wrappers.values()) {
+        Iterable<DatastoreWrapper> wrappers = wrappers();
+        for (DatastoreWrapper wrapper : wrappers) {
             TestDatastoreWrapper datastore = (TestDatastoreWrapper) wrapper;
             try {
                 datastore.dropAllTables();

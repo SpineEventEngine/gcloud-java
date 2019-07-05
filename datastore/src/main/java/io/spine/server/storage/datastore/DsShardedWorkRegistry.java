@@ -27,7 +27,6 @@ import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import io.spine.server.ContextSpec;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
@@ -54,7 +53,7 @@ public class DsShardedWorkRegistry
         extends DsMessageStorage<ShardIndex, ShardSessionRecord, ShardSessionReadRequest>
         implements ShardedWorkRegistry {
 
-    private static final ContextSpec spec = ContextSpec.singleTenant("__DELIVERY__");
+    private static final boolean multitenant = false;
 
     /**
      * Creates an instance of registry using the {@link DatastoreStorageFactory} passed.
@@ -64,7 +63,7 @@ public class DsShardedWorkRegistry
      * by tenant.
      */
     public DsShardedWorkRegistry(DatastoreStorageFactory factory) {
-        super(factory.datastoreFor(spec), spec.isMultitenant());
+        super(factory.systemWrapperFor(DsShardedWorkRegistry.class, multitenant), multitenant);
     }
 
     @Override

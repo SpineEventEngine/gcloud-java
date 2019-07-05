@@ -148,7 +148,7 @@ class DatastoreStorageFactoryBuilderTest {
                     .setDatastore(options.getService())
                     .build();
             assertNotNull(factory);
-            String actualNamespace = factory.datastoreFor(spec)
+            String actualNamespace = factory.wrapperFor(spec)
                                             .datastoreOptions()
                                             .getNamespace();
             assertEquals(namespace, actualNamespace);

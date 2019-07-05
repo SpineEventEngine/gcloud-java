@@ -169,7 +169,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
         @BeforeEach
         void setUp() {
-            SpyStorageFactory.injectWrapper(datastoreFactory().datastoreFor(contextSpec));
+            SpyStorageFactory.injectWrapper(datastoreFactory().wrapperFor(contextSpec));
             SpyStorageFactory storageFactory = new SpyStorageFactory();
             storage = (DsAggregateStorage<ProjectId>)
                     storageFactory.createAggregateStorage(contextSpec, ProjectAggregate.class);

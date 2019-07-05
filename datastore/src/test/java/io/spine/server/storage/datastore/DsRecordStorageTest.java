@@ -366,7 +366,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @BeforeEach
         void setUp() {
-            SpyStorageFactory.injectWrapper(datastoreFactory().datastoreFor(contextSpec));
+            SpyStorageFactory.injectWrapper(datastoreFactory().wrapperFor(contextSpec));
             storageFactory = new SpyStorageFactory();
             storage = storageFactory.createRecordStorage(contextSpec, CollegeEntity.class);
         }
@@ -588,7 +588,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertEquals(expectedCounts, actualCounts);
 
             // Check Datastore reads are performed by keys but not using a structured query.
-            DatastoreWrapper spy = storageFactory.datastoreFor(contextSpec);
+            DatastoreWrapper spy = storageFactory.wrapperFor(contextSpec);
             verify(spy).read(anyIterable());
             verify(spy, never()).read(any(StructuredQuery.class));
         }
@@ -697,7 +697,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @SuppressWarnings("unchecked") // For the purposes of mocking.
         private void assertDsReadByKeys() {
-            DatastoreWrapper spy = storageFactory.datastoreFor(contextSpec);
+            DatastoreWrapper spy = storageFactory.wrapperFor(contextSpec);
             verify(spy).read(anyIterable());
             verify(spy, never()).read(any(StructuredQuery.class));
         }
@@ -722,7 +722,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @BeforeEach
         void setUp() {
-            SpyStorageFactory.injectWrapper(datastoreFactory().datastoreFor(contextSpec));
+            SpyStorageFactory.injectWrapper(datastoreFactory().wrapperFor(contextSpec));
             storageFactory = new SpyStorageFactory();
             storage = storageFactory.createRecordStorage(contextSpec, CollegeEntity.class);
         }
@@ -1083,7 +1083,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @SuppressWarnings("unchecked") // For the purposes of mocking.
         private void assertDsReadByStructuredQuery(int invocationCount) {
-            DatastoreWrapper spy = storageFactory.datastoreFor(contextSpec);
+            DatastoreWrapper spy = storageFactory.wrapperFor(contextSpec);
             verify(spy, never()).read(anyIterable());
             verify(spy, times(invocationCount)).read(any(StructuredQuery.class));
         }

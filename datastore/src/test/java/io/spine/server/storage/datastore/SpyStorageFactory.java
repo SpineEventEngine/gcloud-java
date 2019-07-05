@@ -21,7 +21,6 @@
 package io.spine.server.storage.datastore;
 
 import io.spine.annotation.Internal;
-import io.spine.server.ContextSpec;
 
 import static org.mockito.Mockito.spy;
 
@@ -46,7 +45,7 @@ final class SpyStorageFactory extends TestDatastoreStorageFactory {
 
     @Internal
     @Override
-    protected DatastoreWrapper createDatastoreWrapper(ContextSpec spec) {
+    protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
         return spyWrapper;
     }
 }

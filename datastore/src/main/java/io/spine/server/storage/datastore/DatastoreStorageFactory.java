@@ -23,8 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Iterables;
 import io.spine.annotation.Internal;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
@@ -36,6 +35,7 @@ import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.tenant.DatastoreTenants;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
@@ -51,6 +51,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 
@@ -69,8 +70,6 @@ public class DatastoreStorageFactory implements StorageFactory {
             "Datastore namespace should not be configured explicitly" +
                     "for a multitenant storage";
 
-    private static final String INBOX_NAMESPACE = "__Inbox__";
-
     private final Datastore datastore;
 
     /**
@@ -80,7 +79,18 @@ public class DatastoreStorageFactory implements StorageFactory {
      * the wrapped {@code Datastore}. Then the storage configuration for the repositories
      * of the same {@code BoundedContext} is consistent.
      */
-    private final Map<ContextSpec, DatastoreWrapper> wrappers = Maps.newConcurrentMap();
+    private final Map<ContextSpec, DatastoreWrapper> contextWrappers = newConcurrentMap();
+
+    /**
+     * Cached instances of datastore wrappers initialized for system components, such as
+     * a {@code DatastoreWrapper} used in the {@link io.spine.server.delivery.Delivery
+     * Delivery}-specific {@link InboxStorage}.
+     *
+     * <p>The repeated calls of the methods of this factory should refer to the same instance of
+     * the wrapped {@code Datastore} per class of the target {@code Storage}.
+     */
+    private final Map<Class<? extends Storage>, DatastoreWrapper> sysWrappers = newConcurrentMap();
+
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
 
     DatastoreStorageFactory(Builder builder) {
@@ -110,7 +120,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         checkNotNull(context);
 
         DsAggregateStorage<I> result =
-                new DsAggregateStorage<>(cls, datastoreFor(context), context.isMultitenant());
+                new DsAggregateStorage<>(cls, wrapperFor(context), context.isMultitenant());
         return result;
     }
 
@@ -143,11 +153,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public InboxStorage createInboxStorage(boolean multitenant) {
-        ContextSpec inboxStorageSpec =
-                multitenant
-                ? ContextSpec.multitenant(INBOX_NAMESPACE)
-                : ContextSpec.singleTenant(INBOX_NAMESPACE);
-        DatastoreWrapper wrapper = datastoreFor(inboxStorageSpec);
+        DatastoreWrapper wrapper = systemWrapperFor(InboxStorage.class, multitenant);
         return new DsInboxStorage(wrapper, multitenant);
     }
 
@@ -162,21 +168,20 @@ public class DatastoreStorageFactory implements StorageFactory {
     B configure(B builder, Class<? extends Entity<I, ?>> cls, ContextSpec context) {
 
         builder.setModelClass(asEntityClass(cls))
-               .setDatastore(datastoreFor(context))
+               .setDatastore(wrapperFor(context))
                .setMultitenant(context.isMultitenant())
                .setColumnTypeRegistry(typeRegistry);
         return builder;
     }
 
     protected DsPropertyStorage createPropertyStorage(ContextSpec spec) {
-        DatastoreWrapper datastore = datastoreFor(spec);
+        DatastoreWrapper datastore = wrapperFor(spec);
         DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastore);
         return propertyStorage;
     }
 
-    private NamespaceSupplier createNamespaceSupplier(ContextSpec contextSpec) {
+    private NamespaceSupplier createNamespaceSupplier(boolean multitenant) {
         @Nullable String defaultNamespace;
-        boolean multitenant = contextSpec.isMultitenant();
         if (multitenant) {
             checkHasNoNamespace(datastore);
             defaultNamespace = null;
@@ -209,8 +214,8 @@ public class DatastoreStorageFactory implements StorageFactory {
      * Returns the currently known initialized {@code DatastoreWrapper}s.
      */
     @VisibleForTesting
-    protected Map<ContextSpec, DatastoreWrapper> wrappers() {
-        return ImmutableMap.copyOf(wrappers);
+    protected Iterable<DatastoreWrapper> wrappers() {
+        return Iterables.concat(contextWrappers.values(), sysWrappers.values());
     }
 
     /**
@@ -227,12 +232,21 @@ public class DatastoreStorageFactory implements StorageFactory {
      * <p>If there were no {@code DatastoreWrapper} instances created for the given context,
      * creates it.
      */
-    final DatastoreWrapper datastoreFor(ContextSpec spec) {
-        if (!wrappers.containsKey(spec)) {
-            DatastoreWrapper wrapper = createDatastoreWrapper(spec);
-            wrappers.put(spec, wrapper);
+    final DatastoreWrapper wrapperFor(ContextSpec spec) {
+        if (!contextWrappers.containsKey(spec)) {
+            DatastoreWrapper wrapper = createDatastoreWrapper(spec.isMultitenant());
+            contextWrappers.put(spec, wrapper);
         }
-        return wrappers.get(spec);
+        return contextWrappers.get(spec);
+    }
+
+    final DatastoreWrapper systemWrapperFor(Class<? extends Storage> targetStorage,
+                                            boolean multitenant) {
+        if (!sysWrappers.containsKey(targetStorage)) {
+            DatastoreWrapper wrapper = createDatastoreWrapper(multitenant);
+            sysWrappers.put(targetStorage, wrapper);
+        }
+        return sysWrappers.get(targetStorage);
     }
 
     /**
@@ -240,8 +254,8 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Internal
     @VisibleForTesting
-    protected DatastoreWrapper createDatastoreWrapper(ContextSpec spec) {
-        NamespaceSupplier supplier = createNamespaceSupplier(spec);
+    protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
+        NamespaceSupplier supplier = createNamespaceSupplier(multitenant);
         return wrap(datastore, supplier);
     }
 
