@@ -46,7 +46,7 @@ import static com.google.common.collect.Sets.newHashSet;
  * A DAO for the Datastore {@link Namespace Namespaces}.
  */
 @ThreadSafe
-class NamespaceIndex implements TenantIndex {
+final class NamespaceIndex implements TenantIndex {
 
     private static final Kind NAMESPACE_KIND = Kind.ofNamespace();
 
