@@ -27,7 +27,7 @@ import io.spine.server.delivery.ShardSessionRecord;
 /**
  * An implementation of a {@link ShardProcessingSession} based on Datastore.
  */
-class DsShardProcessingSession extends ShardProcessingSession {
+final class DsShardProcessingSession extends ShardProcessingSession {
 
     private final Runnable completionCallback;
 

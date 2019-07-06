@@ -27,7 +27,7 @@ import io.spine.server.storage.ReadRequest;
 /**
  * A request to read {@link ShardSessionRecord}.
  */
-class ShardSessionReadRequest implements ReadRequest<ShardIndex> {
+final class ShardSessionReadRequest implements ReadRequest<ShardIndex> {
 
     private final ShardIndex index;
 
