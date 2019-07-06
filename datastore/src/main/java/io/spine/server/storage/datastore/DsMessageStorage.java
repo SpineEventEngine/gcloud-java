@@ -94,14 +94,6 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     abstract MessageColumn<M>[] columns();
 
     /**
-     * Obtains the Datastore {@code Key} value in its {@code String form} out of the message
-     * identifier.
-     */
-    private String keyValue(I id) {
-        return Stringifiers.toString(id);
-    }
-
-    /**
      * Converts the given message to {@link Entity}.
      */
     final Entity toEntity(M message) {
@@ -222,8 +214,11 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
                         "due to the enormous number of records stored.");
     }
 
+    /**
+     * Obtains the Datastore {@code Key} value out of the message identifier.
+     */
     private Key key(I id) {
-        String keyValue = keyValue(id);
+        String keyValue = Stringifiers.toString(id);
         return datastore.keyFor(kind, RecordId.of(keyValue));
     }
 
