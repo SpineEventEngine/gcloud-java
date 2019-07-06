@@ -87,12 +87,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * Creates new instance by the passed builder.
      */
-    protected DsRecordStorage(RecordStorageBuilder<I, ? extends RecordStorageBuilder> builder) {
-        super(builder.isMultitenant(), builder.getEntityClass());
-        this.typeUrl = TypeUrl.from(builder.getDescriptor());
-        this.idClass = checkNotNull(builder.getIdClass());
-        this.datastore = builder.getDatastore();
-        this.columnTypeRegistry = checkNotNull(builder.getColumnTypeRegistry());
+    protected DsRecordStorage(
+            RecordStorageBuilder<I, ? extends RecordStorage, ? extends RecordStorageBuilder> b) {
+        super(b.isMultitenant(), b.getEntityClass());
+        this.typeUrl = TypeUrl.from(b.getDescriptor());
+        this.idClass = checkNotNull(b.getIdClass());
+        this.datastore = b.getDatastore();
+        this.columnTypeRegistry = checkNotNull(b.getColumnTypeRegistry());
         this.columnFilterAdapter = FilterAdapter.of(this.columnTypeRegistry);
         this.idLookup = new DsLookupByIds<>(this.datastore, this.typeUrl);
         this.queryLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
@@ -332,7 +333,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * A newBuilder for the {@code DsRecordStorage}.
      */
-    public static final class Builder<I> extends RecordStorageBuilder<I, Builder<I>> {
+    public static final class Builder<I>
+            extends RecordStorageBuilder<I, DsRecordStorage<I>, Builder<I>> {
 
         /**
          * Prevents direct instantiation.
@@ -344,6 +346,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         /**
          * Creates new instance of the {@code DsRecordStorage}.
          */
+        @Override
         public DsRecordStorage<I> build() {
             checkRequiredFields();
             DsRecordStorage<I> storage = new DsRecordStorage<>(this);

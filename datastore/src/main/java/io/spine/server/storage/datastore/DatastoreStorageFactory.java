@@ -130,7 +130,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         checkNotNull(cls);
         checkNotNull(context);
 
-        DsRecordStorage<I> result = configure(DsRecordStorage.newBuilder(), cls, context).build();
+        DsRecordStorage<I> result = configure(DsRecordStorage.newBuilder(), cls, context);
         return result;
     }
 
@@ -141,7 +141,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         checkNotNull(context);
 
         DsProjectionStorageDelegate<I> recordStorage =
-                configure(DsProjectionStorageDelegate.newDelegateBuilder(), cls, context).build();
+                configure(DsProjectionStorageDelegate.newDelegateBuilder(), cls, context);
         DsPropertyStorage propertyStorage = createPropertyStorage(context);
         DsProjectionStorage<I> result =
                 new DsProjectionStorage<>(cls,
@@ -164,14 +164,15 @@ public class DatastoreStorageFactory implements StorageFactory {
     /**
      * Configures the passed builder of the storage to serve the passed entity class.
      */
-    private <I, B extends RecordStorageBuilder<I, B>>
-    B configure(B builder, Class<? extends Entity<I, ?>> cls, ContextSpec context) {
+    private <I, S extends RecordStorage<I>, B extends RecordStorageBuilder<I, S, B>>
+    S configure(B builder, Class<? extends Entity<I, ?>> cls, ContextSpec context) {
 
         builder.setModelClass(asEntityClass(cls))
                .setDatastore(wrapperFor(context))
                .setMultitenant(context.isMultitenant())
                .setColumnTypeRegistry(typeRegistry);
-        return builder;
+        S storage = builder.build();
+        return storage;
     }
 
     protected DsPropertyStorage createPropertyStorage(ContextSpec spec) {
