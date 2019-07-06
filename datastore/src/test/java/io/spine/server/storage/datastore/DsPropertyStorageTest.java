@@ -43,5 +43,4 @@ class DsPropertyStorageTest {
     private static DsPropertyStorage getStorage() {
         return datastoreFactory.createPropertyStorage(singletenantSpec());
     }
-
 }
