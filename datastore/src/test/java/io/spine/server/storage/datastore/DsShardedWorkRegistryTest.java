@@ -97,7 +97,6 @@ public class DsShardedWorkRegistryTest {
         Optional<ShardProcessingSession> anotherIdxAnotherNode =
                 registry.pickUp(anotherIdx, newNode());
         assertFalse(anotherIdxAnotherNode.isPresent());
-
     }
 
     @Test
