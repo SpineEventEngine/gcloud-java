@@ -139,8 +139,8 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     protected DsRecordStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> entityClass) {
         Class<? extends Entity<ProjectId, ?>> cls =
                 (Class<? extends Entity<ProjectId, ?>>) entityClass;
-        return (DsRecordStorage<ProjectId>) datastoreFactory.createRecordStorage(singletenantSpec(),
-                                                                                 cls);
+        return (DsRecordStorage<ProjectId>)
+                datastoreFactory.createRecordStorage(singletenantSpec(),cls);
     }
 
     @Override
