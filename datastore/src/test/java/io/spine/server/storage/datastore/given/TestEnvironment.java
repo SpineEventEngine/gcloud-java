@@ -53,11 +53,11 @@ public final class TestEnvironment {
         return onCi;
     }
 
-    public static ContextSpec multitenantSpec() {
+    public static ContextSpec multiTenantSpec() {
         return multitenant(TestEnvironment.class.getSimpleName());
     }
 
-    public static ContextSpec singletenantSpec() {
+    public static ContextSpec singleTenantSpec() {
         return singleTenant(TestEnvironment.class.getSimpleName());
     }
 }

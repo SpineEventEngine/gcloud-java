@@ -59,7 +59,7 @@ class DatastoreStorageFactoryTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
-        new NullPointerTester().setDefault(ContextSpec.class, TestEnvironment.singletenantSpec())
+        new NullPointerTester().setDefault(ContextSpec.class, TestEnvironment.singleTenantSpec())
                                .testAllPublicInstanceMethods(factory);
     }
 
@@ -69,7 +69,7 @@ class DatastoreStorageFactoryTest {
         StorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                         .setDatastore(datastore)
                                                         .build();
-        RecordStorage storage = factory.createRecordStorage(TestEnvironment.multitenantSpec(), TestEntity.class);
+        RecordStorage storage = factory.createRecordStorage(TestEnvironment.multiTenantSpec(), TestEntity.class);
         assertTrue(storage.isMultitenant());
         storage.close();
     }
@@ -77,7 +77,7 @@ class DatastoreStorageFactoryTest {
     @Test
     @DisplayName("create separate record storage per state type")
     void testDependsOnStateType() {
-        ContextSpec spec = TestEnvironment.singletenantSpec();
+        ContextSpec spec = TestEnvironment.singleTenantSpec();
         DsRecordStorage<?> storage =
                 (DsRecordStorage<?>) factory.createRecordStorage(spec, TestEntity.class);
         assertNotNull(storage);

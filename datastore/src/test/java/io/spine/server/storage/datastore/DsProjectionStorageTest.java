@@ -36,7 +36,7 @@ import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
-import static io.spine.server.storage.datastore.given.TestEnvironment.singletenantSpec;
+import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 
 @DisplayName("DsProjectionStorage should")
 class DsProjectionStorageTest extends ProjectionStorageTest {
@@ -68,7 +68,7 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
         Class<? extends Projection<ProjectId, ?, ?>> projectionClass =
                 (Class<? extends Projection<ProjectId, ?, ?>>) cls;
         ProjectionStorage<ProjectId> result =
-                datastoreFactory.createProjectionStorage(singletenantSpec(), projectionClass);
+                datastoreFactory.createProjectionStorage(singleTenantSpec(), projectionClass);
         return result;
     }
 

@@ -68,7 +68,7 @@ import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
 import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
-import static io.spine.server.storage.datastore.given.TestEnvironment.singletenantSpec;
+import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -103,13 +103,13 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         @SuppressWarnings("unchecked") // Logically checked; OK for test purposes.
                 Class<? extends Aggregate<ProjectId, ?, ?>> aggCls =
                 (Class<? extends Aggregate<ProjectId, ?, ?>>) cls;
-        return datastoreFactory.createAggregateStorage(singletenantSpec(), aggCls);
+        return datastoreFactory.createAggregateStorage(singleTenantSpec(), aggCls);
     }
 
     @Override
     protected <I> AggregateStorage<I> newStorage(Class<? extends I> idClass,
                                                  Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
-        return datastoreFactory.createAggregateStorage(singletenantSpec(), aggregateClass);
+        return datastoreFactory.createAggregateStorage(singleTenantSpec(), aggregateClass);
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
