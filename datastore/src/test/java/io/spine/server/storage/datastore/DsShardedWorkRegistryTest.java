@@ -41,7 +41,7 @@ import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@DisplayName("DsShardedWorkRegistry should")
+@DisplayName("`DsShardedWorkRegistry` should")
 public class DsShardedWorkRegistryTest {
 
     private static final ShardIndex index = newIndex(1, 15);

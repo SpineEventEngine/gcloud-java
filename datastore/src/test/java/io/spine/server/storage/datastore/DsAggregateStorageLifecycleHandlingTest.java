@@ -32,7 +32,7 @@ import org.junit.jupiter.api.DisplayName;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 
-@DisplayName("DsAggregateStorage lifecycle handling should")
+@DisplayName("`DsAggregateStorage` lifecycle handling should")
 class DsAggregateStorageLifecycleHandlingTest
         extends AggregateStorageLifecycleFlagsHandlingTest {
 

@@ -58,7 +58,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@DisplayName("NamespaceIndex should")
+@DisplayName("`NamespaceIndex` should")
 class NamespaceIndexTest {
 
     private static TenantId newTenantId() {
@@ -130,7 +130,7 @@ class NamespaceIndexTest {
     }
 
     @Test
-    @DisplayName("not find non existing namespaces")
+    @DisplayName("not find non-existing namespaces")
     void testNotFindNonExisting() {
         NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 

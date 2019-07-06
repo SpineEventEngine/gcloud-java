@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
-@DisplayName("TenantConverterRegistry should")
+@DisplayName("`TenantConverterRegistry` should")
 class TenantConverterRegistryTest {
 
     @Test

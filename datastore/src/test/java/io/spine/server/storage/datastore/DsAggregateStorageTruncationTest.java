@@ -24,7 +24,7 @@ import io.spine.server.aggregate.AggregateStorageTruncationTest;
 import io.spine.server.storage.StorageFactory;
 import org.junit.jupiter.api.DisplayName;
 
-@DisplayName("DsAggregateStorage after truncation should")
+@DisplayName("`DsAggregateStorage` after truncation should")
 public class DsAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
 
     @Override

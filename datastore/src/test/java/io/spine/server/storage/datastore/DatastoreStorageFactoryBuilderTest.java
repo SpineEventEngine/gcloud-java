@@ -184,7 +184,7 @@ class DatastoreStorageFactoryBuilderTest {
     }
 
     @Test
-    @DisplayName("fail to construct without datastore")
+    @DisplayName("fail to construct without Datastore")
     void testRequireDatastore() {
         assertThrows(NullPointerException.class, DatastoreStorageFactory.newBuilder()::build);
     }

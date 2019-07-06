@@ -33,6 +33,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@DisplayName("`ProjectId` should")
 class ProjectIdTest {
 
     @Test
@@ -59,7 +60,7 @@ class ProjectIdTest {
     }
 
     @Test
-    @DisplayName("support toString()")
+    @DisplayName("support `toString()`")
     void testToString() {
         String value = "my-fancy-project-id";
         ProjectId projectId = ProjectId.of(value);

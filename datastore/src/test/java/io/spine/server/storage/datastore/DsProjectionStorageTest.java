@@ -38,7 +38,7 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 
-@DisplayName("DsProjectionStorage should")
+@DisplayName("`DsProjectionStorage` should")
 class DsProjectionStorageTest extends ProjectionStorageTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();

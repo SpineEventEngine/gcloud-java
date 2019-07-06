@@ -129,7 +129,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@DisplayName("DsRecordStorage should")
+@DisplayName("`DsRecordStorage` should")
 class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> {
 
     private final TestDatastoreStorageFactory datastoreFactory = datastoreFactory();
@@ -178,7 +178,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     }
 
     @Test
-    @DisplayName("provide access to DatastoreWrapper for extensibility")
+    @DisplayName("provide an access to `DatastoreWrapper` for extensibility")
     void testAccessDatastoreWrapper() {
         DsRecordStorage<ProjectId> storage = storage();
         DatastoreWrapper datastore = storage.getDatastore();
@@ -186,7 +186,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     }
 
     @Test
-    @DisplayName("provide access to TypeUrl for extensibility")
+    @DisplayName("provide an access to `TypeUrl` for extensibility")
     void testAccessTypeUrl() {
         DsRecordStorage<ProjectId> storage = storage();
         TypeUrl typeUrl = storage.getTypeUrl();
@@ -357,7 +357,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     }
 
     @Nested
-    @DisplayName("lookup Datastore records by IDs")
+    @DisplayName("lookup `Datastore` records by IDs")
     class LookupByIds {
 
         private final ContextSpec contextSpec = singleTenant(LookupByIds.class.getName());
@@ -445,26 +445,26 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         }
 
         @Test
-        @DisplayName("in an order specified by string field")
+        @DisplayName("in an order set by a `String` field")
         void testQueryByIDsWithOrderByString() {
             testOrdering(NAME, CollegeEntity::getName);
         }
 
         @Test
-        @DisplayName("in order specified by double field")
+        @DisplayName("in order set by `double` field")
         void testQueryByIDsWithOrderByDouble() {
             testOrdering(PASSING_GRADE, CollegeEntity::getPassingGrade);
         }
 
         @Test
-        @DisplayName("in order specified by timestamp field")
+        @DisplayName("in order set by a `Timestamp` field")
         void testQueryByIDsWithOrderByTimestamp() {
             testOrdering(ADMISSION_DEADLINE, entity -> entity.getAdmissionDeadline()
                                                              .getSeconds());
         }
 
         @Test
-        @DisplayName("in an order specified by integer")
+        @DisplayName("in an order set by an `Integer` field")
         void testQueryByIDsWithOrderByInt() {
             testOrdering(STUDENT_COUNT, CollegeEntity::getStudentCount);
         }
@@ -515,7 +515,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         }
 
         @Test
-        @DisplayName("in an order specified by boolean")
+        @DisplayName("in an order set by a `boolean` field")
         void testQueryByIDsWithOrderByBoolean() {
             // Create entities.
             int recordCount = 20;
@@ -550,7 +550,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         @SuppressWarnings("unchecked") // For the purposes of mocking.
         @Test
-        @DisplayName("in specified order with nulls")
+        @DisplayName("in specified order with `null`s")
         void testQueryByIDsWithOrderWithNulls() {
             // Create entities.
             int nullCount = 11;
@@ -866,26 +866,26 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         }
 
         @Test
-        @DisplayName("in an order specified by string field")
+        @DisplayName("in an order set by a `String` field")
         void testQueryWithOrderByString() {
             testOrdering(NAME, CollegeEntity::getName);
         }
 
         @Test
-        @DisplayName("in order specified by double field")
+        @DisplayName("in order set by a `double` field")
         void testQueryWithOrderByDouble() {
             testOrdering(PASSING_GRADE, CollegeEntity::getPassingGrade);
         }
 
         @Test
-        @DisplayName("in order specified by timestamp field")
+        @DisplayName("in order set by a `Timestamp` field")
         void testQueryWithOrderByTimestamp() {
             testOrdering(ADMISSION_DEADLINE, entity -> entity.getAdmissionDeadline()
                                                              .getSeconds());
         }
 
         @Test
-        @DisplayName("in an order specified by integer")
+        @DisplayName("in an order set by an `Integer` field")
         void testQueryWithOrderByInt() {
             testOrdering(STUDENT_COUNT, CollegeEntity::getStudentCount);
         }
@@ -920,7 +920,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         }
 
         @Test
-        @DisplayName("in an order specified by boolean")
+        @DisplayName("in an order set by a `boolean` field")
         void testQueryWithOrderByBoolean() {
             // Create entities.
             int recordCount = 20;

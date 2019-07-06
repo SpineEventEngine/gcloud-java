@@ -26,14 +26,14 @@ import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defa
 import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@DisplayName("DsPropertyStorage should")
+@DisplayName("`DsPropertyStorage` should")
 class DsPropertyStorageTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
     @Test
-    @DisplayName("provide access to DatastoreWrapper for extensibility")
+    @DisplayName("provide access to `DatastoreWrapper` for extensibility")
     void testAccessDatastoreWrapper() {
         DsPropertyStorage storage = getStorage();
         DatastoreWrapper datastore = storage.getDatastore();

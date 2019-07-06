@@ -78,7 +78,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@DisplayName("DsAggregateStorage should")
+@DisplayName("`DsAggregateStorage` should")
 class DsAggregateStorageTest extends AggregateStorageTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
@@ -114,7 +114,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
     @Test
-    @DisplayName("provide access to DatastoreWrapper for extensibility")
+    @DisplayName("provide access to `DatastoreWrapper` for extensibility")
     void testAccessDatastoreWrapper() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         DatastoreWrapper datastore = storage.datastore();

@@ -37,7 +37,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@DisplayName("SingleTenantNamespaceSupplier should")
+@DisplayName("`SingleTenantNamespaceSupplier` should")
 class SingleTenantNamespaceSupplierTest {
 
     @Test

@@ -111,7 +111,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
             try {
                 datastore.dropAllTables();
             } catch (Throwable e) {
-                log().error(format("Unable to drop tables in datastore %s", datastore), e);
+                log().error(format("Unable to drop tables in Datastore %s", datastore), e);
                 throw new IllegalStateException(e);
             }
         }

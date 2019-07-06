@@ -35,7 +35,7 @@ import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Kind should")
+@DisplayName("`Kind` should")
 class KindTest {
 
     @Test
@@ -82,7 +82,7 @@ class KindTest {
     }
 
     @Test
-    @DisplayName("construct from TypeUrl")
+    @DisplayName("construct from `TypeUrl`")
     void testFromTypeUrl() {
         Descriptors.Descriptor descriptor = Any.getDescriptor();
         TypeUrl type = TypeUrl.from(descriptor);
@@ -93,7 +93,7 @@ class KindTest {
     }
 
     @Test
-    @DisplayName("construct from Descriptor")
+    @DisplayName("construct from `Descriptor`")
     void testFromDescriptor() {
         Descriptors.Descriptor descriptor = Any.getDescriptor();
         Kind kind = Kind.of(descriptor);
@@ -101,7 +101,7 @@ class KindTest {
     }
 
     @Test
-    @DisplayName("construct from Message")
+    @DisplayName("construct from `Message`")
     void testFromMessage() {
         Message message = Any.getDefaultInstance();
         Kind kind = Kind.of(message);
@@ -110,7 +110,7 @@ class KindTest {
     }
 
     @Test
-    @DisplayName("construct from TypeName")
+    @DisplayName("construct from `TypeName`")
     void testFromTypeName() {
         Descriptors.Descriptor descriptor = Any.getDescriptor();
         TypeName type = TypeName.from(descriptor);

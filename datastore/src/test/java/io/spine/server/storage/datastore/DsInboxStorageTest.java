@@ -52,7 +52,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@DisplayName("DsInboxStorage should")
+@DisplayName("`DsInboxStorage` should")
 public class DsInboxStorageTest {
 
     private final TestDatastoreStorageFactory factory =

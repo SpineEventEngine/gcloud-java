@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class NewBoundedContextBuilderTest {
 
     @Test
-    @DisplayName("configure BoundedContextBuilder with the `TenantIndex`")
+    @DisplayName("configure `BoundedContextBuilder` with the `TenantIndex`")
     void testProduceBCBuilder() {
         DatastoreStorageFactory factory = givenFactory();
         BoundedContextBuilder builder = BoundedContext.multitenant(

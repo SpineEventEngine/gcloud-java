@@ -61,7 +61,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@DisplayName("DsFilters should")
+@DisplayName("`DsFilters` should")
 class DsFiltersTest {
 
     private static final String ID_STRING_GETTER_NAME = "getIdString";
@@ -183,7 +183,7 @@ class DsFiltersTest {
     //TODO:2018-06-08:dmytro.kuzmin: re-write without mocks when null column filters are available.
     // See https://github.com/SpineEventEngine/core-java/issues/720.
     @Test
-    @DisplayName("generate filters for null column value")
+    @DisplayName("generate filters for `null` column value")
     void testNullFilters() {
         EntityColumn column = mock(EntityColumn.class);
         when(column.storedName()).thenReturn(ID_STRING_COLUMN_NAME);

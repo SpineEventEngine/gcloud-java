@@ -69,7 +69,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@DisplayName("DatastoreWrapper should")
+@DisplayName("`DatastoreWrapper` should")
 class DatastoreWrapperTest {
 
     @AfterAll

@@ -28,17 +28,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("RecordId should")
+@DisplayName("`RecordId` should")
 class RecordIdTest {
 
     @Test
-    @DisplayName("not accept empty String for identifier")
+    @DisplayName("not accept empty `String` for identifier")
     void testEmpty() {
         assertThrows(IllegalArgumentException.class, () -> RecordId.of(""));
     }
 
     @Test
-    @DisplayName("wrap non empty String into record identifier")
+    @DisplayName("wrap non-empty `String` into record identifier")
     void testNonEmpty() {
         String idAsString = newUuid();
         RecordId recordId = RecordId.of(idAsString);

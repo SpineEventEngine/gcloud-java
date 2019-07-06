@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("DatastoreStorageFactory should")
+@DisplayName("`DatastoreStorageFactory` should")
 class DatastoreStorageFactoryTest {
 
     private static final DatastoreOptions DUMMY_OPTIONS =
