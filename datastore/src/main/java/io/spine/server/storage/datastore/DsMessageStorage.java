@@ -97,7 +97,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      * Obtains the Datastore {@code Key} value in its {@code String form} out of the message
      * identifier.
      */
-    String keyValue(I id) {
+    private String keyValue(I id) {
         return Stringifiers.toString(id);
     }
 
