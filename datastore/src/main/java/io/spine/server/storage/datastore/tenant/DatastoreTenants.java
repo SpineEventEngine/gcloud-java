@@ -59,7 +59,7 @@ public final class DatastoreTenants {
      *
      *     BoundedContext context = BoundedContext.multitenant("Code samples")
      *                                            .setTenantIndex(myTenantIndex)
-     *                                             .build();
+     *                                            .build();
      * }
      * </pre>
      *
