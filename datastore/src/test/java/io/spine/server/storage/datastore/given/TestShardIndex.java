@@ -18,19 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.storage.datastore.given;
 
-import io.spine.annotation.SPI;
+import io.spine.server.delivery.ShardIndex;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
- * A base for implementing {@link io.spine.server.entity.storage.ColumnType ColumnType} interface
- * for Datastore storage regardless the type conversion.
+ * A utility for working with {@link io.spine.server.delivery.ShardIndex ShardIndex} instances
+ * in Datastore-related tests.
  */
-@SPI
-public abstract class SimpleDatastoreColumnType<T> extends AbstractDatastoreColumnType<T, T> {
+public class TestShardIndex {
 
-    @Override
-    public T convertColumnValue(T fieldValue) {
-        return fieldValue;
+    private TestShardIndex() {}
+
+    /**
+     * Creates a new {@link ShardIndex}.
+     */
+    public static ShardIndex newIndex(int shardIndex, int totalShards) {
+        checkArgument(shardIndex > 0,
+                      "Shard index must be positive");
+        checkArgument(shardIndex < totalShards,
+                      "Shard index must be less than the total number of shards");
+        return ShardIndex.newBuilder()
+                         .setIndex(shardIndex)
+                         .setOfTotal(totalShards)
+                         .vBuild();
     }
 }

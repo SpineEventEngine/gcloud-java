@@ -29,7 +29,6 @@ import io.spine.server.ContextSpec;
 import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
@@ -92,15 +91,6 @@ class DatastoreStorageFactoryBuilderTest {
     }
 
     @Test
-    @DisplayName("construct single tenant factories by default")
-    void testDefaultTenancy() {
-        StorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                        .setDatastore(mockDatastore())
-                                                        .build();
-        assertFalse(factory.isMultitenant());
-    }
-
-    @Test
     @DisplayName("construct factories with extended type registry")
     void testExtendedTypeRegistry() {
         DatastoreStorageFactory factory =
@@ -139,9 +129,9 @@ class DatastoreStorageFactoryBuilderTest {
                     multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
             DatastoreStorageFactory.Builder builder = DatastoreStorageFactory
                     .newBuilder()
-                    .setContextSpec(spec)
                     .setDatastore(options.getService());
-            assertThrows(IllegalArgumentException.class, builder::build);
+            DatastoreStorageFactory factory = builder.build();
+            assertThrows(IllegalArgumentException.class, () -> factory.createPropertyStorage(spec));
         }
 
         @Test
@@ -155,11 +145,10 @@ class DatastoreStorageFactoryBuilderTest {
                     singleTenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
             DatastoreStorageFactory factory = DatastoreStorageFactory
                     .newBuilder()
-                    .setContextSpec(spec)
                     .setDatastore(options.getService())
                     .build();
             assertNotNull(factory);
-            String actualNamespace = factory.datastore()
+            String actualNamespace = factory.wrapperFor(spec)
                                             .datastoreOptions()
                                             .getNamespace();
             assertEquals(namespace, actualNamespace);
@@ -177,11 +166,8 @@ class DatastoreStorageFactoryBuilderTest {
                                 .setProjectId(withCustomConverter.getValue())
                                 .build();
         NamespaceConverter converter = mock(NamespaceConverter.class);
-        ContextSpec spec =
-                multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
         DatastoreStorageFactory factory =
                 DatastoreStorageFactory.newBuilder()
-                                       .setContextSpec(spec)
                                        .setDatastore(options.getService())
                                        .setNamespaceConverter(converter)
                                        .build();
@@ -198,7 +184,7 @@ class DatastoreStorageFactoryBuilderTest {
     }
 
     @Test
-    @DisplayName("fail to construct without datastore")
+    @DisplayName("fail to construct without Datastore")
     void testRequireDatastore() {
         assertThrows(NullPointerException.class, DatastoreStorageFactory.newBuilder()::build);
     }

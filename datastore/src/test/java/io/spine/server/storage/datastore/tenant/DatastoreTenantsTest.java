@@ -44,7 +44,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@DisplayName("DatastoreTenants should")
+@DisplayName("`DatastoreTenants` should")
 class DatastoreTenantsTest {
 
     @Test
@@ -66,7 +66,7 @@ class DatastoreTenantsTest {
                 .setValue(customNamespace)
                 .vBuild();
         index.keep(customId);
-        Set<TenantId> ids = index.getAll();
+        Set<TenantId> ids = index.all();
         assertThat(ids).contains(customId);
     }
 

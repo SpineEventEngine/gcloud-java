@@ -27,8 +27,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A factory of the Datastore-specific Tenant related objects.
- *
- * @author Dmytro Dashenkov
  */
 public final class DatastoreTenants {
 
@@ -41,38 +39,27 @@ public final class DatastoreTenants {
     /**
      * Creates a {@link TenantIndex} for the given {@link Datastore}.
      *
+     * <p>In a multitenant application it is necessary to pass an instance of
+     * the {@link TenantIndex} to a {@link io.spine.server.BoundedContextBuilder
+     * BoundedContextBuilder} when creating an instance of {@link io.spine.server.BoundedContext
+     * BoundedContext}.
      *
-     * <p>This method is intended for a manual {@code BoundedContext} configuration. To automate
-     * the setup routine please use
-     * {@link io.spine.server.storage.datastore.DatastoreStorageFactory#newBoundedContextBuilder
-     * DatastoreStorageFactory.newBoundedContextBuilder()} method.
-     *
-     * <p>In a multitenant application it's necessary to pass an instance of
-     * the {@link TenantIndex} to a
-     * {@link io.spine.server.BoundedContextBuilder BoundedContextBuilder}
-     * when creating an instance of {@link io.spine.server.BoundedContext BoundedContext}.
-     *
-     * <p>An example of creating a multitenant
-     * {@link io.spine.server.BoundedContext BoundedContext} using the Datastore Storage:
+     * <p>An example of creating a multitenant {@link io.spine.server.BoundedContext BoundedContext}
+     * with the tenant index built on top of Datastore:
      * <pre>
      * {@code
-     *     Datastore myDatastoreConfig = myDatastoreOptions.getService();
+     *     Datastore datastore = myDatastoreOptions.getService();
      *
-     *     // Create DatastoreStorageFactories using this instance of Datastore
-     *     Supplier<StorageFactory> dsStorageFactorySupplier =
-     *                                  getDatastoreStorageFactorySupplier(myDatastoreConfig);
+     *     // Configure the `ServerEnvironment` with the factory on top of the Datastore instance.
+     *     // ...
      *
-     *     // Use the same instance for the TenantIndex
-     *     TenantIndex myTenantIndex = DatastoreTenants.index(myDatastoreConfig);
+     *     // Build the `TenantIndex` on top of the same Datastore instance.
+     *     TenantIndex myTenantIndex = DatastoreTenants.index(datastore);
      *
-     *     // Pass both to the BoundedContext.Builder
-     *     BoundedContext multitenantAppBc =
-     *                          BoundedContext.newBuilder()
-     *                                        .setStorageFactorySupplier(dsStorageFactorySupplier)
-     *                                        .setTenantIndex(myTenantIndex)
-     *                                        .setMultitenant(true)
-     *                                        // set other params
-     *                                        .build();
+     *
+     *     BoundedContext context = BoundedContext.multitenant("Code samples")
+     *                                            .setTenantIndex(myTenantIndex)
+     *                                            .build();
      * }
      * </pre>
      *
@@ -83,11 +70,13 @@ public final class DatastoreTenants {
      * @param datastore
      *         the {@link Datastore} to get the {@link TenantIndex} for
      * @return a new instance of the {@link TenantIndex}
-     * @see io.spine.server.storage.datastore.DatastoreStorageFactory#newBoundedContextBuilder()
+     * @see io.spine.server.storage.datastore.DatastoreStorageFactory#configureTenantIndex(io.spine.server.BoundedContextBuilder)
+     *         for an alternative method, suitable if you already have an instance of
+     *         {@code BoundedContextBuilder}
      */
     public static TenantIndex index(Datastore datastore) {
         checkNotNull(datastore);
-        // We assume we are in a single-tenant execution environment
+        // We assume we are in a multi-tenant execution environment
         TenantIndex index = new NamespaceIndex(datastore, true);
         return index;
     }

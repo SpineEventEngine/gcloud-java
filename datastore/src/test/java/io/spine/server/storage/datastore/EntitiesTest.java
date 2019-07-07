@@ -29,7 +29,7 @@ import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("Entities should")
+@DisplayName("`Entities` should")
 class EntitiesTest {
 
     @Test
@@ -39,7 +39,7 @@ class EntitiesTest {
     }
 
     @Test
-    @DisplayName("retrieve default message instance for null entity")
+    @DisplayName("retrieve default message instance for `null` entity")
     void testNull() {
         TypeUrl typeUrl = TypeUrl.from(Project.getDescriptor());
         Project expected = Project.getDefaultInstance();

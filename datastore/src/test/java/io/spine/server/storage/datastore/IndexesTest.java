@@ -29,7 +29,7 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.mockito.Mockito.mock;
 
-@DisplayName("Indexes should")
+@DisplayName("`Indexes` should")
 class IndexesTest {
 
     @Test

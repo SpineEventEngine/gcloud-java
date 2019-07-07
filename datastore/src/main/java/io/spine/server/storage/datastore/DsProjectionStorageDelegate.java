@@ -50,7 +50,8 @@ public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
     /**
      * A builder for the {@code DsProjectionStorageDelegate}.
      */
-    public static final class Builder<I> extends RecordStorageBuilder<I, Builder<I>> {
+    public static final class Builder<I>
+            extends RecordStorageBuilder<I, DsProjectionStorageDelegate<I>, Builder<I>> {
 
         /**
          * Prevents direct instantiation.
@@ -62,6 +63,7 @@ public class DsProjectionStorageDelegate<I> extends DsRecordStorage<I> {
         /**
          * Creates new instance of the {@code DsProjectionStorageDelegate}.
          */
+        @Override
         public DsProjectionStorageDelegate<I> build() {
             checkRequiredFields();
             DsProjectionStorageDelegate<I> storage =

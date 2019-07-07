@@ -28,6 +28,7 @@ import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import io.spine.core.TenantId;
+import io.spine.server.BoundedContext;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.tenant.TenantIndex;
@@ -43,11 +44,9 @@ import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * A DAO for the Datastore {@link Namespace Namespaces}.
- *
- * @author Dmytro Dashenkov
  */
 @ThreadSafe
-class NamespaceIndex implements TenantIndex {
+final class NamespaceIndex implements TenantIndex {
 
     private static final Kind NAMESPACE_KIND = Kind.ofNamespace();
 
@@ -72,6 +71,14 @@ class NamespaceIndex implements TenantIndex {
         this.multitenant = multitenant;
     }
 
+    @Override
+    public void registerWith(BoundedContext context) {
+        checkNotNull(context);
+
+        // Do nothing more, as this implementation does not rely on any {@code BoundedContext}
+        // properties.
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -89,7 +96,7 @@ class NamespaceIndex implements TenantIndex {
     }
 
     @Override
-    public Set<TenantId> getAll() {
+    public Set<TenantId> all() {
         synchronized (lock) {
             fetchNamespaces();
 

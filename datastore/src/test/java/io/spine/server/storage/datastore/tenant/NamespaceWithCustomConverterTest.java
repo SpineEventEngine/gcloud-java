@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("Namespace with custom converter should")
+@DisplayName("`Namespace` with custom converter should")
 class NamespaceWithCustomConverterTest {
 
     private static final ProjectId PROJECT_ID = ProjectId.of("arbitraryproject");
@@ -48,7 +48,7 @@ class NamespaceWithCustomConverterTest {
     }
 
     @Test
-    @DisplayName("construct from TenantId")
+    @DisplayName("construct from `TenantId`")
     void testFromTenantId() {
         String ns = "my.test.namespace.from.tenant.id";
         TenantId tenantId = TenantId
@@ -65,7 +65,7 @@ class NamespaceWithCustomConverterTest {
     }
 
     @Test
-    @DisplayName("construct from Key")
+    @DisplayName("construct from `Key`")
     void testFromKey() {
         String ns = "my.test.namespace.from.key";
         Key key = Key.newBuilder(PROJECT_ID.getValue(), "some.kind", ns)
@@ -76,7 +76,7 @@ class NamespaceWithCustomConverterTest {
     }
 
     @Test
-    @DisplayName("restore to TenantId")
+    @DisplayName("restore to `TenantId`")
     void testToTenantId() {
         String ns = "my.test.namespace.to.tenant.id";
         TenantId tenantId = TenantId

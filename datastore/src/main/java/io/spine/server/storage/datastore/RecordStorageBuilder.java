@@ -24,6 +24,7 @@ import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.type.TypeUrl;
 
@@ -37,7 +38,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <B>
  *         the builder own type
  */
-abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
+abstract class RecordStorageBuilder<I,
+                                    S extends RecordStorage<I>,
+                                    B extends RecordStorageBuilder<I, S, B>> {
 
     private Descriptor descriptor;
     private DatastoreWrapper datastore;
@@ -180,4 +183,6 @@ abstract class RecordStorageBuilder<I, B extends RecordStorageBuilder<I, B>> {
     }
 
     abstract B self();
+
+    abstract S build();
 }

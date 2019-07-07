@@ -34,17 +34,18 @@ import io.spine.string.Stringifiers;
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 
 /**
- * A utility for creating the basic {@link DatastoreColumnType} implementations of
+ * A utility for creating the {@link DatastoreColumnType} implementations of for the values of
+ * the types as follows:
  * <ul>
- * <li>{@code String};
- * <li>{@code Integer};
- * <li>{@code Long};
- * <li>{@code Double};
- * <li>{@code Float};
- * <li>{@code Boolean};
- * <li>{@link Timestamp};
- * <li>{@link Version};
- * <li>and {@link AbstractMessage} values.
+ *      <li>{@code String};
+ *      <li>{@code Integer};
+ *      <li>{@code Long};
+ *      <li>{@code Double};
+ *      <li>{@code Float};
+ *      <li>{@code Boolean};
+ *      <li>{@link Timestamp};
+ *      <li>{@link Version};
+ *      <li>{@link AbstractMessage}.
  * </ul>
  */
 final class DsColumnTypes {

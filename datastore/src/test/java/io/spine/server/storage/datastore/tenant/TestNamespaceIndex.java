@@ -25,8 +25,6 @@ import io.spine.server.tenant.TenantIndex;
 /**
  * A test utility exposing some of the package-private implementation details of
  * {@link NamespaceIndex} for tests.
- *
- * @author Dmytro Dashenkov
  */
 public final class TestNamespaceIndex {
 

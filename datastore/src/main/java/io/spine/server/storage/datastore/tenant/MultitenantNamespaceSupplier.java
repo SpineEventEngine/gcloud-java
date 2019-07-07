@@ -30,8 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A {@link NamespaceSupplier} for multitenant storage factories.
- *
- * @author Dmytro Dashenkov
  */
 final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
@@ -47,9 +45,9 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
     }
 
     /**
-     * {@inheritDoc}
+     * Obtains a namespace for the current tenant {@link TenantId ID}.
      *
-     * @return the {@link Namespace} representing the current tenant {@link TenantId ID}
+     * @return the {@code Namespace} value
      */
     @Override
     public Namespace get() {

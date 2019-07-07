@@ -51,7 +51,9 @@ To run the task successfully, you must have `gcloud` tool properly installed and
  - skip Google App Engine setup if not required.
 
 
-##### Executing the tests
+##### Running the tests
+
+*Datastore*
 
 To start a local emulator and run test against it, run `./gradlew check`.
 
@@ -64,3 +66,9 @@ To change the configuration see `./scripts/start-datastore.*` scripts.
 
 The datastore is cleaned up after each test.
 See test classes under `./datastore/src/test/java/...` and `io.spine.server.storage.datastore.TestDatastoreStorageFactory#clear`.
+
+*Stackdriver-Trace*
+
+The test are launched in a scope of Gradle `test` phase. However, they rely upon an Google Cloud credentials file located at `<project root>/stackdriver-trace/src/test/resources/spine-dev.json`.
+
+To run the tests, obtain the service account file for your environment and make it available to the test code in the specified location.

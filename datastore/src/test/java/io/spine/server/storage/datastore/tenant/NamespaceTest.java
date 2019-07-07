@@ -38,24 +38,24 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("`Namespace` should")
 class NamespaceTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
+        ProjectId defaultProjectId = TestDatastores.projectId();
+        Key defaultKey = Key.newBuilder(defaultProjectId.getValue(), "kind", "name")
+                            .build();
         new NullPointerTester()
-                .setDefault(ProjectId.class, TestDatastores.projectId())
+                .setDefault(ProjectId.class, defaultProjectId)
                 .setDefault(TenantId.class, TenantId.getDefaultInstance())
-                .setDefault(Key.class, Key.newBuilder(TestDatastores.projectId()
-                                                                    .getValue(),
-                                                      "kind",
-                                                      "name")
-                                          .build())
+                .setDefault(Key.class, defaultKey)
                 .testStaticMethods(Namespace.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
-    @DisplayName("not accept empty TenantIds")
+    @DisplayName("not accept empty `TenantId`s")
     void testEmptyTenantId() {
         TenantId emptyId = TenantId.getDefaultInstance();
         assertThrows(IllegalArgumentException.class,
@@ -100,7 +100,7 @@ class NamespaceTest {
     }
 
     @Test
-    @DisplayName("restore self to TenantId")
+    @DisplayName("restore self to `TenantId`")
     void testToTenantId() {
         String randomTenantIdString = "arbitrary-tenant-id";
         InternetDomain internetDomain = InternetDomain
@@ -145,7 +145,7 @@ class NamespaceTest {
     }
 
     @Test
-    @DisplayName("return null if Key is empty")
+    @DisplayName("return null if `Key` is empty")
     void testEmptyKey() {
         ProjectId projectId = ProjectId.of("project");
         Key emptyKey = Key.newBuilder(projectId.getValue(), "my.type", 42)
@@ -155,19 +155,19 @@ class NamespaceTest {
     }
 
     @Test
-    @DisplayName("construct from Key in single tenant mode")
+    @DisplayName("construct from `Key` in a single-tenant mode")
     void testFromKeySingleTenant() {
         checkConstructFromKey("my.test.single.tenant.namespace.from.key", false);
     }
 
     @Test
-    @DisplayName("construct from Key in multi-tenant mode")
+    @DisplayName("construct from `Key` in a multi-tenant mode")
     void testFromKeySingleMultitenant() {
         checkConstructFromKey("Vmy.test.single.tenant.namespace.from.key", true);
     }
 
     @Test
-    @DisplayName("convert self to value-based TenantId if created from string")
+    @DisplayName("convert self to value-based `TenantId` if created from `String`")
     void testConvertToTenantId() {
         String namespaceString = "my.namespace";
 

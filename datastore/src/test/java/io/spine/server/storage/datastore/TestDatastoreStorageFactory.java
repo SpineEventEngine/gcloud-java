@@ -22,14 +22,13 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import io.spine.annotation.Internal;
 import io.spine.logging.Logging;
-import io.spine.server.ContextSpec;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.Logger;
 
-import static io.spine.server.ContextSpec.singleTenant;
 import static java.lang.String.format;
 
 /**
@@ -67,18 +66,14 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         super(DatastoreStorageFactory
                       .newBuilder()
                       .setDatastore(datastore)
-                      .setContextSpec(singleTenantSpec())
                       .setTypeRegistry(DatastoreTypeRegistryFactory.defaultInstance())
         );
     }
 
-    private static ContextSpec singleTenantSpec() {
-        return singleTenant(TestDatastoreStorageFactory.class.getSimpleName());
-    }
-
+    @Internal
     @Override
-    protected DatastoreWrapper createDatastoreWrapper(Builder builder) {
-        return TestDatastoreWrapper.wrap(builder.getDatastore(), false);
+    protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
+        return TestDatastoreWrapper.wrap(datastore(), false);
     }
 
     /**
@@ -110,12 +105,15 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      * @see #tearDown()
      */
     public void clear() {
-        TestDatastoreWrapper datastore = (TestDatastoreWrapper) datastore();
-        try {
-            datastore.dropAllTables();
-        } catch (Throwable e) {
-            log().error(format("Unable to drop tables in datastore %s", datastore), e);
-            throw new IllegalStateException(e);
+        Iterable<DatastoreWrapper> wrappers = wrappers();
+        for (DatastoreWrapper wrapper : wrappers) {
+            TestDatastoreWrapper datastore = (TestDatastoreWrapper) wrapper;
+            try {
+                datastore.dropAllTables();
+            } catch (Throwable e) {
+                log().error(format("Unable to drop tables in Datastore %s", datastore), e);
+                throw new IllegalStateException(e);
+            }
         }
     }
 

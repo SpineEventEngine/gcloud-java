@@ -29,6 +29,8 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.testing.TestValues;
@@ -44,7 +46,7 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,7 +58,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@DisplayName("NamespaceIndex should")
+@DisplayName("`NamespaceIndex` should")
 class NamespaceIndexTest {
 
     private static TenantId newTenantId() {
@@ -67,7 +69,7 @@ class NamespaceIndexTest {
     }
 
     @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
         Namespace defaultNamespace = Namespace.of("some-string");
         TenantId tenantId = TenantId.getDefaultInstance();
@@ -75,6 +77,7 @@ class NamespaceIndexTest {
         new NullPointerTester()
                 .setDefault(Namespace.class, defaultNamespace)
                 .setDefault(TenantId.class, tenantId)
+                .setDefault(BoundedContext.class, BoundedContextBuilder.assumingTests().build())
                 .testInstanceMethods(new NamespaceIndex(mockDatastore(), true),
                                      NullPointerTester.Visibility.PACKAGE);
     }
@@ -84,13 +87,13 @@ class NamespaceIndexTest {
     void testStore() {
         NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
-        Set<TenantId> initialEmptySet = namespaceIndex.getAll();
+        Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
 
         TenantId newId = newTenantId();
         namespaceIndex.keep(newId);
 
-        Set<TenantId> ids = namespaceIndex.getAll();
+        Set<TenantId> ids = namespaceIndex.all();
         IterableSubject assertIds = assertThat(ids);
         assertIds.isNotNull();
         assertIds.hasSize(1);
@@ -116,7 +119,7 @@ class NamespaceIndexTest {
         NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
         // Ensure no namespace has been kept
-        Set<TenantId> initialEmptySet = namespaceIndex.getAll();
+        Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
 
         TenantId newId = newTenantId();
@@ -127,12 +130,12 @@ class NamespaceIndexTest {
     }
 
     @Test
-    @DisplayName("not find non existing namespaces")
+    @DisplayName("not find non-existing namespaces")
     void testNotFindNonExisting() {
         NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
 
         // Ensure no namespace has been kept
-        Set<TenantId> initialEmptySet = namespaceIndex.getAll();
+        Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
 
         TenantId fakeId = newTenantId();
@@ -172,7 +175,7 @@ class NamespaceIndexTest {
         // The test flow
         Runnable flow = () -> {
             // Initial value check
-            Set<TenantId> initialIdsActual = namespaceIndex.getAll(); // sync
+            Set<TenantId> initialIdsActual = namespaceIndex.all(); // sync
             // The keep may already be called
             assertTrue(initialIdsActual.size() >= initialTenantIds.size());
             assertThat(initialIdsActual).containsAtLeastElementsIn(initialTenantIds);
@@ -194,7 +197,7 @@ class NamespaceIndexTest {
             assertTrue(success);
 
             // Check returned set has newly added element
-            Set<TenantId> updatedIds = namespaceIndex.getAll(); // sync
+            Set<TenantId> updatedIds = namespaceIndex.all(); // sync
             assertEquals(updatedIds.size(), initialTenantIds.size() + 1);
             assertThat(updatedIds).contains(newTenantId);
         };

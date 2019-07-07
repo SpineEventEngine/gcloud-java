@@ -51,13 +51,13 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.ColumnRecords.feedColumnsTo;
 import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryParams;
 import static io.spine.server.storage.datastore.Entities.RECORD_TYPE_URL;
-import static io.spine.server.storage.datastore.Entities.fromMessage;
+import static io.spine.server.storage.datastore.Entities.builderFromMessage;
 import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.server.storage.datastore.RecordId.ofEntityId;
 import static java.util.Optional.empty;
 
 /**
- * {@link RecordStorage} implementation based on Google App Engine Datastore.
+ * {@link RecordStorage} implementation based on Google Cloud Datastore.
  *
  * @see DatastoreStorageFactory
  */
@@ -87,12 +87,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * Creates new instance by the passed builder.
      */
-    protected DsRecordStorage(RecordStorageBuilder<I, ? extends RecordStorageBuilder> builder) {
-        super(builder.isMultitenant(), builder.getEntityClass());
-        this.typeUrl = TypeUrl.from(builder.getDescriptor());
-        this.idClass = checkNotNull(builder.getIdClass());
-        this.datastore = builder.getDatastore();
-        this.columnTypeRegistry = checkNotNull(builder.getColumnTypeRegistry());
+    protected DsRecordStorage(
+            RecordStorageBuilder<I, ? extends RecordStorage, ? extends RecordStorageBuilder> b) {
+        super(b.isMultitenant(), b.getEntityClass());
+        this.typeUrl = TypeUrl.from(b.getDescriptor());
+        this.idClass = checkNotNull(b.getIdClass());
+        this.datastore = b.getDatastore();
+        this.columnTypeRegistry = checkNotNull(b.getColumnTypeRegistry());
         this.columnFilterAdapter = FilterAdapter.of(this.columnTypeRegistry);
         this.idLookup = new DsLookupByIds<>(this.datastore, this.typeUrl);
         this.queryLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
@@ -276,8 +277,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
         EntityRecord entityRecord = record.getRecord();
         Key key = datastore.keyFor(kindFrom(entityRecord), ofEntityId(id));
-        Entity incompleteEntity = fromMessage(entityRecord, key);
-        Entity.Builder entity = Entity.newBuilder(incompleteEntity);
+        Entity.Builder entity = builderFromMessage(entityRecord, key);
 
         populateFromStorageFields(entity, record);
 
@@ -333,7 +333,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * A newBuilder for the {@code DsRecordStorage}.
      */
-    public static final class Builder<I> extends RecordStorageBuilder<I, Builder<I>> {
+    public static final class Builder<I>
+            extends RecordStorageBuilder<I, DsRecordStorage<I>, Builder<I>> {
 
         /**
          * Prevents direct instantiation.
@@ -345,6 +346,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         /**
          * Creates new instance of the {@code DsRecordStorage}.
          */
+        @Override
         public DsRecordStorage<I> build() {
             checkRequiredFields();
             DsRecordStorage<I> storage = new DsRecordStorage<>(this);

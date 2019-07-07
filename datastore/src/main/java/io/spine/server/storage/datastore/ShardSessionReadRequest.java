@@ -18,19 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.storage.datastore;
 
-import io.spine.annotation.SPI;
+import io.spine.server.delivery.ShardIndex;
+import io.spine.server.delivery.ShardSessionRecord;
+import io.spine.server.storage.ReadRequest;
 
 /**
- * A base for implementing {@link io.spine.server.entity.storage.ColumnType ColumnType} interface
- * for Datastore storage regardless the type conversion.
+ * A request to read {@link ShardSessionRecord}.
  */
-@SPI
-public abstract class SimpleDatastoreColumnType<T> extends AbstractDatastoreColumnType<T, T> {
+final class ShardSessionReadRequest implements ReadRequest<ShardIndex> {
+
+    private final ShardIndex index;
+
+    ShardSessionReadRequest(ShardIndex index) {
+        this.index = index;
+    }
 
     @Override
-    public T convertColumnValue(T fieldValue) {
-        return fieldValue;
+    public ShardIndex recordId() {
+        return index;
     }
 }

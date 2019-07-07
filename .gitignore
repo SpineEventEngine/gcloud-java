@@ -31,5 +31,6 @@ gcs-auth-key.json
 # This file extracted form credentials.tar
 spine-dev*.json
 /datastore/src/test/resources/spine-dev.json
+/stackdriver-trace/src/test/resources/spine-dev.json
 
 package-lock.json

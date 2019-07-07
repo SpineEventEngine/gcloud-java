@@ -29,6 +29,8 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
+import io.spine.server.ContextSpec;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateHistory;
@@ -61,10 +63,12 @@ import java.util.Optional;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
+import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
 import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
 import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
+import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -74,7 +78,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@DisplayName("DsAggregateStorage should")
+@DisplayName("`DsAggregateStorage` should")
 class DsAggregateStorageTest extends AggregateStorageTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
@@ -99,18 +103,18 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         @SuppressWarnings("unchecked") // Logically checked; OK for test purposes.
                 Class<? extends Aggregate<ProjectId, ?, ?>> aggCls =
                 (Class<? extends Aggregate<ProjectId, ?, ?>>) cls;
-        return datastoreFactory.createAggregateStorage(aggCls);
+        return datastoreFactory.createAggregateStorage(singleTenantSpec(), aggCls);
     }
 
     @Override
     protected <I> AggregateStorage<I> newStorage(Class<? extends I> idClass,
                                                  Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
-        return datastoreFactory.createAggregateStorage(aggregateClass);
+        return datastoreFactory.createAggregateStorage(singleTenantSpec(), aggregateClass);
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // OK for tests.
     @Test
-    @DisplayName("provide access to DatastoreWrapper for extensibility")
+    @DisplayName("provide access to `DatastoreWrapper` for extensibility")
     void testAccessDatastoreWrapper() {
         DsAggregateStorage<ProjectId> storage = (DsAggregateStorage<ProjectId>) storage();
         DatastoreWrapper datastore = storage.datastore();
@@ -160,14 +164,15 @@ class DsAggregateStorageTest extends AggregateStorageTest {
     @DisplayName("truncate efficiently")
     class TruncateEfficiently {
 
+        private final ContextSpec contextSpec = singleTenant(TruncateEfficiently.class.getName());
         private DsAggregateStorage<ProjectId> storage;
 
         @BeforeEach
         void setUp() {
-            SpyStorageFactory.injectWrapper(datastoreFactory().datastore());
+            SpyStorageFactory.injectWrapper(datastoreFactory().wrapperFor(contextSpec));
             SpyStorageFactory storageFactory = new SpyStorageFactory();
             storage = (DsAggregateStorage<ProjectId>)
-                    storageFactory.createAggregateStorage(ProjectAggregate.class);
+                    storageFactory.createAggregateStorage(contextSpec, ProjectAggregate.class);
         }
 
         @Test
@@ -226,9 +231,9 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
         @BeforeEach
         void setUp() {
+            ServerEnvironment.instance().configureStorage(datastoreFactory);
             BoundedContext boundedContext =
                     BoundedContext.singleTenant(DsAggregateStorageTest.class.getName())
-                                  .setStorage(spec -> datastoreFactory)
                                   .build();
             repository = new ProjectAggregateRepository();
             boundedContext.register(repository);

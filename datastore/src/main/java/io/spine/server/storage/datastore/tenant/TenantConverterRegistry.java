@@ -40,8 +40,6 @@ import static java.util.Optional.ofNullable;
  *
  * <p>The converters are mapped to the {@link ProjectId}s one-to-one, i.e. one GAE project may
  * have only one strategy of converting the {@link TenantId tenant IDs}.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
 public final class TenantConverterRegistry {

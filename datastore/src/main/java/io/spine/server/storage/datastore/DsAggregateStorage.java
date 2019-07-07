@@ -70,7 +70,7 @@ import static io.spine.server.storage.datastore.DsProperties.markAsArchived;
 import static io.spine.server.storage.datastore.DsProperties.markAsDeleted;
 import static io.spine.server.storage.datastore.DsProperties.markAsSnapshot;
 import static io.spine.server.storage.datastore.DsProperties.whenCreated;
-import static io.spine.server.storage.datastore.Entities.fromMessage;
+import static io.spine.server.storage.datastore.Entities.builderFromMessage;
 import static io.spine.server.storage.datastore.Entities.toMessage;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
@@ -146,8 +146,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
                                                   record.getKindCase());
         }
         Key key = datastore.keyFor(Kind.of(stateTypeName), recordId);
-        Entity incompleteEntity = fromMessage(record, key);
-        Entity.Builder builder = Entity.newBuilder(incompleteEntity);
+        Entity.Builder builder = builderFromMessage(record, key);
         addAggregateId(builder, Stringifiers.toString(id));
         addWhenCreated(builder, record.getTimestamp());
         addVersion(builder, version);

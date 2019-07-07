@@ -18,19 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.storage.datastore;
 
-import io.spine.annotation.SPI;
+import com.google.common.annotations.VisibleForTesting;
+import io.spine.server.delivery.ShardProcessingSession;
+import io.spine.server.delivery.ShardSessionRecord;
 
 /**
- * A base for implementing {@link io.spine.server.entity.storage.ColumnType ColumnType} interface
- * for Datastore storage regardless the type conversion.
+ * An implementation of a {@link ShardProcessingSession} based on Datastore.
  */
-@SPI
-public abstract class SimpleDatastoreColumnType<T> extends AbstractDatastoreColumnType<T, T> {
+final class DsShardProcessingSession extends ShardProcessingSession {
+
+    private final Runnable completionCallback;
+
+    DsShardProcessingSession(ShardSessionRecord record,
+                             Runnable completionCallback) {
+        super(record);
+        this.completionCallback = completionCallback;
+    }
 
     @Override
-    public T convertColumnValue(T fieldValue) {
-        return fieldValue;
+    @VisibleForTesting      // Otherwise should stay `protected`.
+    public void complete() {
+        completionCallback.run();
     }
 }
