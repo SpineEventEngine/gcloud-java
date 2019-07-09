@@ -20,8 +20,6 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import io.spine.server.storage.datastore.ProjectId;
-
 public class TestNamespaceSuppliers {
 
     private TestNamespaceSuppliers() {
@@ -31,7 +29,7 @@ public class TestNamespaceSuppliers {
         return NamespaceSupplier.singleTenant();
     }
 
-    public static NamespaceSupplier multitenant(ProjectId projectId) {
-        return NamespaceSupplier.multitenant(projectId);
+    public static NamespaceSupplier multitenant() {
+        return NamespaceSupplier.multitenant(NsConverterFactory.defaults());
     }
 }

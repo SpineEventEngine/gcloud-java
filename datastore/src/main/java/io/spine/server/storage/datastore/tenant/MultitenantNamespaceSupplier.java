@@ -21,7 +21,6 @@
 package io.spine.server.storage.datastore.tenant;
 
 import io.spine.core.TenantId;
-import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.tenant.TenantFunction;
 
 import javax.annotation.Nullable;
@@ -33,15 +32,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
-    private final ProjectId projectId;
+    private final NsConverterFactory converterFactory;
 
-    static NamespaceSupplier forProject(ProjectId projectId) {
-        return new MultitenantNamespaceSupplier(projectId);
+    static NamespaceSupplier withConvertersBy(NsConverterFactory converterFactory) {
+        return new MultitenantNamespaceSupplier(converterFactory);
     }
 
-    private MultitenantNamespaceSupplier(ProjectId projectId) {
+    private MultitenantNamespaceSupplier(NsConverterFactory converterFactory) {
         super();
-        this.projectId = checkNotNull(projectId);
+        this.converterFactory = checkNotNull(converterFactory);
     }
 
     /**
@@ -54,7 +53,7 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
         TenantIdRetriever retriever = new TenantIdRetriever();
         TenantId tenantId = retriever.execute();
         checkNotNull(tenantId);
-        Namespace result = Namespace.of(tenantId, projectId);
+        Namespace result = Namespace.of(tenantId, true, converterFactory);
         return result;
     }
 

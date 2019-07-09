@@ -31,8 +31,6 @@ import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.storage.datastore.ProjectId;
-import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.testing.TestValues;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,6 +59,8 @@ import static org.mockito.Mockito.when;
 @DisplayName("`NamespaceIndex` should")
 class NamespaceIndexTest {
 
+    private static final NsConverterFactory converterFactory = NsConverterFactory.defaults();
+
     private static TenantId newTenantId() {
         return TenantId
                 .newBuilder()
@@ -77,15 +77,16 @@ class NamespaceIndexTest {
         new NullPointerTester()
                 .setDefault(Namespace.class, defaultNamespace)
                 .setDefault(TenantId.class, tenantId)
-                .setDefault(BoundedContext.class, BoundedContextBuilder.assumingTests().build())
-                .testInstanceMethods(new NamespaceIndex(mockDatastore(), true),
+                .setDefault(BoundedContext.class, BoundedContextBuilder.assumingTests()
+                                                                       .build())
+                .testInstanceMethods(nsIndex(),
                                      NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
     @DisplayName("store tenant IDs")
     void testStore() {
-        NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
+        NamespaceIndex namespaceIndex = nsIndex();
 
         Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
@@ -106,7 +107,7 @@ class NamespaceIndexTest {
     @Test
     @DisplayName("do nothing on close")
     void testClose() {
-        NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), false);
+        NamespaceIndex namespaceIndex = nsIndex();
 
         namespaceIndex.close();
         namespaceIndex.close();
@@ -116,14 +117,14 @@ class NamespaceIndexTest {
     @Test
     @DisplayName("find existing namespaces")
     void testFindExisting() {
-        NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
+        NamespaceIndex namespaceIndex = nsIndex();
 
         // Ensure no namespace has been kept
         Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
 
         TenantId newId = newTenantId();
-        Namespace newNamespace = Namespace.of(newId, TestDatastores.projectId());
+        Namespace newNamespace = Namespace.of(newId, true);
 
         namespaceIndex.keep(newId);
         assertTrue(namespaceIndex.contains(newNamespace));
@@ -132,14 +133,14 @@ class NamespaceIndexTest {
     @Test
     @DisplayName("not find non-existing namespaces")
     void testNotFindNonExisting() {
-        NamespaceIndex namespaceIndex = new NamespaceIndex(mockDatastore(), true);
+        NamespaceIndex namespaceIndex = nsIndex();
 
         // Ensure no namespace has been kept
         Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
 
         TenantId fakeId = newTenantId();
-        Namespace fakeNamespace = Namespace.of(fakeId, ProjectId.of("fake-prj"));
+        Namespace fakeNamespace = Namespace.of(fakeId, true);
 
         assertFalse(namespaceIndex.contains(fakeNamespace));
     }
@@ -168,9 +169,7 @@ class NamespaceIndexTest {
 
         NamespaceIndex.NamespaceQuery namespaceQuery = keys::iterator;
         // The tested object
-        NamespaceIndex namespaceIndex = new NamespaceIndex(namespaceQuery,
-                                                           TestDatastores.projectId(),
-                                                           true);
+        NamespaceIndex namespaceIndex = nsIndexFor(namespaceQuery);
 
         // The test flow
         Runnable flow = () -> {
@@ -193,7 +192,7 @@ class NamespaceIndexTest {
 
             // Check new value added
             boolean success = namespaceIndex.contains(Namespace.of(newTenantId,    // sync
-                                                                   TestDatastores.projectId()));
+                                                                   true));
             assertTrue(success);
 
             // Check returned set has newly added element
@@ -227,6 +226,14 @@ class NamespaceIndexTest {
             fail(format("Test thread has thrown a Throwable. %s",
                         getStackTraceAsString(failure)));
         }
+    }
+
+    private static NamespaceIndex nsIndexFor(NamespaceIndex.NamespaceQuery namespaceQuery) {
+        return new NamespaceIndex(namespaceQuery, true, converterFactory);
+    }
+
+    private static NamespaceIndex nsIndex() {
+        return new NamespaceIndex(mockDatastore(), true, converterFactory);
     }
 
     private static Key mockKey(String name) {

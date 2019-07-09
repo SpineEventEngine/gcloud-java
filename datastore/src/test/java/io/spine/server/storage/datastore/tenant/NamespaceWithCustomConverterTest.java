@@ -25,27 +25,18 @@ import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.string.Stringifier;
 import io.spine.string.Stringifiers;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
-import static io.spine.server.storage.datastore.tenant.TenantConverterRegistry.getNamespaceConverter;
-import static io.spine.server.storage.datastore.tenant.TenantConverterRegistry.registerNamespaceConverter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`Namespace` with custom converter should")
 class NamespaceWithCustomConverterTest {
 
     private static final ProjectId PROJECT_ID = ProjectId.of("arbitraryproject");
+    private static final NsConverterFactory factory = multitenant -> new CustomNamespaceConverter();
 
-    @BeforeAll
-    static void setUp() {
-        registerNamespaceConverter(PROJECT_ID, new CustomNamespaceConverter());
-    }
 
     @Test
     @DisplayName("construct from `TenantId`")
@@ -55,12 +46,11 @@ class NamespaceWithCustomConverterTest {
                 .newBuilder()
                 .setValue(ns)
                 .vBuild();
-        Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
-        Optional<NamespaceConverter> converter =
-                getNamespaceConverter(PROJECT_ID);
-        assertTrue(converter.isPresent());
-        assertEquals(converter.get()
-                              .reverse()
+        boolean multitenant = true;
+        Namespace namespace = Namespace.of(tenantId, multitenant, factory);
+        NamespaceConverter converter = factory.get(multitenant);
+        assertNotNull(converter);
+        assertEquals(converter.reverse()
                               .convert(tenantId), namespace.getValue());
     }
 
@@ -70,7 +60,7 @@ class NamespaceWithCustomConverterTest {
         String ns = "my.test.namespace.from.key";
         Key key = Key.newBuilder(PROJECT_ID.getValue(), "some.kind", ns)
                      .build();
-        Namespace namespace = Namespace.fromNameOf(key, true);
+        Namespace namespace = Namespace.fromNameOf(key, true, factory);
         assertNotNull(namespace);
         assertEquals(ns, namespace.getValue());
     }
@@ -83,7 +73,7 @@ class NamespaceWithCustomConverterTest {
                 .newBuilder()
                 .setValue(ns)
                 .vBuild();
-        Namespace namespace = Namespace.of(tenantId, PROJECT_ID);
+        Namespace namespace = Namespace.of(tenantId, true, factory);
         assertEquals(tenantId, namespace.toTenantId());
     }
 

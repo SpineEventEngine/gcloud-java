@@ -30,16 +30,12 @@ import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.storage.datastore.given.TestDatastores;
-import io.spine.server.storage.datastore.tenant.NamespaceConverter;
-import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.storage.datastore.type.SimpleDatastoreColumnType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.ContextSpec.singleTenant;
@@ -50,11 +46,8 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -153,34 +146,6 @@ class DatastoreStorageFactoryBuilderTest {
                                             .getNamespace();
             assertEquals(namespace, actualNamespace);
         }
-    }
-
-    @Test
-    @DisplayName("register custom TenantId converter upon build")
-    void testCustomTenantId() {
-        ProjectId withCustomConverter = ProjectId.of("customized");
-        ProjectId withDefaultConverter = ProjectId.of("defaulted");
-
-        DatastoreOptions options =
-                DatastoreOptions.newBuilder()
-                                .setProjectId(withCustomConverter.getValue())
-                                .build();
-        NamespaceConverter converter = mock(NamespaceConverter.class);
-        DatastoreStorageFactory factory =
-                DatastoreStorageFactory.newBuilder()
-                                       .setDatastore(options.getService())
-                                       .setNamespaceConverter(converter)
-                                       .build();
-        assertNotNull(factory);
-
-        Optional<NamespaceConverter> restoredConverter =
-                TenantConverterRegistry.getNamespaceConverter(withCustomConverter);
-        assertTrue(restoredConverter.isPresent());
-        assertSame(converter, restoredConverter.get());
-
-        Optional<NamespaceConverter> absentConverter =
-                TenantConverterRegistry.getNamespaceConverter(withDefaultConverter);
-        assertFalse(absentConverter.isPresent());
     }
 
     @Test

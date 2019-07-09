@@ -40,7 +40,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.tenant.DatastoreTenants;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
-import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
+import io.spine.server.storage.datastore.tenant.NsConverterFactory;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.tenant.TenantIndex;
@@ -93,9 +93,12 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
 
+    private final NsConverterFactory converterFactory;
+
     DatastoreStorageFactory(Builder builder) {
         this.typeRegistry = builder.typeRegistry;
         this.datastore = builder.datastore;
+        this.converterFactory = builder.converterFactory;
     }
 
     /**
@@ -108,7 +111,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     public BoundedContextBuilder configureTenantIndex(BoundedContextBuilder builder) {
         checkNotNull(builder);
-        TenantIndex index = DatastoreTenants.index(datastore);
+        TenantIndex index = DatastoreTenants.index(datastore, converterFactory);
         builder.setTenantIndex(index);
         return builder;
     }
@@ -192,7 +195,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
         ProjectId projectId = ProjectId.of(datastore);
         NamespaceSupplier result =
-                NamespaceSupplier.instance(multitenant, defaultNamespace, projectId);
+                NamespaceSupplier.instance(multitenant, defaultNamespace, converterFactory);
         return result;
     }
 
@@ -275,6 +278,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         private Datastore datastore;
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
         private NamespaceConverter namespaceConverter;
+        private NsConverterFactory converterFactory;
 
         /** Avoid direct initialization. */
         private Builder() {
@@ -337,9 +341,10 @@ public class DatastoreStorageFactory implements StorageFactory {
             if (typeRegistry == null) {
                 typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
             }
-            if (namespaceConverter != null) {
-                ProjectId projectId = ProjectId.of(datastore);
-                TenantConverterRegistry.registerNamespaceConverter(projectId, namespaceConverter);
+            if (namespaceConverter == null) {
+                converterFactory = NsConverterFactory.defaults();
+            } else {
+                converterFactory = multitenant -> namespaceConverter;
             }
 
             return new DatastoreStorageFactory(this);

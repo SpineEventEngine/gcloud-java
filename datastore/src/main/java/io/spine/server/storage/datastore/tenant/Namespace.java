@@ -24,17 +24,13 @@ import com.google.cloud.datastore.Key;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import io.spine.core.TenantId;
-import io.spine.server.storage.datastore.ProjectId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.concurrent.Immutable;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static io.spine.server.storage.datastore.tenant.TenantConverterRegistry.getNamespaceConverter;
 import static java.util.regex.Matcher.quoteReplacement;
 
 /**
@@ -43,32 +39,32 @@ import static java.util.regex.Matcher.quoteReplacement;
  *
  * <p>The primary usage of the namespaces is multitenancy.
  *
- * <p>A namespace constructed from a {@link TenantId} by default will have a one capital letter type
- * prefix depending on which field of the {@link TenantId} has the actual value. These prefixes are:
+ * <p>By default, a namespace constructed from a {@link TenantId} has a single capital letter
+ * prefix reflecting the type of {@link TenantId}. These prefixes are:
  * <ul>
  * <li>{@code D} - for "Internet Domain";
  * <li>{@code E} - for "Email";
  * <li>{@code V} - for "String Value".
  * </ul>
  *
- * <p>If a {@link NamespaceConverter} is
- * {@linkplain TenantConverterRegistry#registerNamespaceConverter registered}, then the converter
- * is used and the prefixes are absent.
+ * <p>The framework users may override the behavior by
+ * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#setNamespaceConverter(NamespaceConverter)
+ * registering} a custom {@link NamespaceConverter}. If registered, no defaults are applied.
  *
  * <p>One should register a {@link NamespaceConverter} <b>if and only if</b>
- * the used Datastore already contains namespaces to work with.
+ * the target Datastore instance already contains namespaces to work with.
  *
- * <p>Please note, that for working with the Datastore namespaces, Spine requires one of the
- * following conditions to be met:
+ * <p>Basically, one of three scenarios in working with the Datastore namespaces takes place.
  * <ul>
- *     <li>There are no namespaces in the Datastore at all. All the namespace manipulations are
- *     preformed by the means of the framework.
- *     <li>All the present namespaces start with one of the prefixes listed above. In this case
- *     the described {@link TenantId} conversion behavior will be applied.
- *     <li>A custom {@link NamespaceConverter} is registered.
- * </ul>
+ * <li>There are no namespaces in the Datastore at all. All the namespace manipulations are
+ * performed by the means of the framework using the defaults.
  *
- * <p>If none of the above conditions is met, runtime errors may happen.
+ * <li>All the present namespaces start with one of the prefixes listed above. In this case
+ * the described default {@code TenantId} conversion behavior is applied.
+ *
+ * <li>A custom {@link NamespaceConverter} is registered, and its implementation is consistent
+ * with the namespaces (if any) already present in the Datastore instance.
+ * </ul>
  *
  * @see DatastoreTenants
  * @see NamespaceSupplier
@@ -121,18 +117,35 @@ public final class Namespace {
      *
      * @param id
      *         the {@link TenantId} to create the {@code Namespace} from
+     * @param multitenant
+     *         whether the application is multi-tenant
+     * @param converterFactory
+     *         the converter factory to use
      * @return new instance of {@code Namespace}
      */
-    static Namespace of(TenantId id, ProjectId projectId) {
+    static Namespace of(TenantId id, boolean multitenant, NsConverterFactory converterFactory) {
         checkNotNull(id);
-        checkNotNull(projectId);
+        checkNotNull(converterFactory);
 
-        Optional<NamespaceConverter> customConverter = getNamespaceConverter(projectId);
-
-        ConverterType converterType = ConverterType.forTenantId(id, customConverter.orElse(null));
-        NamespaceConverter converter = customConverter.orElse(converterType.namespaceConverter);
+        NamespaceConverter converter = converterFactory.get(multitenant);
         String ns = converter.toString(id);
         return new Namespace(ns, converter);
+    }
+
+    /**
+     * Creates new instance of {@code Namespace} from the given {@link TenantId}.
+     *
+     * <p>Similar to {@link #of(TenantId, boolean, NsConverterFactory)}, but the
+     * {@link NsConverterFactory#defaults() the default} converter factory is used.
+     *
+     * @param id
+     *         the {@link TenantId} to create the {@code Namespace} from
+     * @param multitenant
+     *         whether the application is multi-tenant
+     * @return new instance of {@code Namespace}
+     */
+    static Namespace of(TenantId id, boolean multitenant) {
+        return of(id, multitenant, NsConverterFactory.defaults());
     }
 
     /**
@@ -140,37 +153,46 @@ public final class Namespace {
      *
      * @param key
      *         the {@link Key} to get a {@code Namespace} from
+     * @param multitenant
+     *         whether the storage is multi-tenant
+     * @param converterFactory
+     *         the converter factory to use
      * @return a {@code Namespace} of the given Key name or {@code null} if the name is
      *         {@code null} or empty
      */
-    static @Nullable Namespace fromNameOf(Key key, boolean multitenant) {
+    static @Nullable Namespace fromNameOf(Key key,
+                                          boolean multitenant,
+                                          NsConverterFactory converterFactory) {
         checkNotNull(key);
+        checkNotNull(converterFactory);
 
-        String projectIdString = key.getProjectId();
-        ProjectId projectId = ProjectId.of(projectIdString);
-        Optional<NamespaceConverter> customConverter = getNamespaceConverter(projectId);
         String namespace = key.getName();
         if (isNullOrEmpty(namespace)) {
             return null;
         }
 
-        ConverterType converterType;
-        if (!multitenant) {
-            converterType = ConverterType.SINGLE_CUSTOM;
-        } else if (customConverter.isPresent()) {
-            converterType = ConverterType.PREDEFINED_VALUE;
-        } else {
-            String typePrefix = String.valueOf(namespace.charAt(0));
-            converterType = TYPE_PREFIX_TO_CONVERTER.get(typePrefix);
-            checkState(converterType != null,
-                       "Could not determine a TenantId converter for namespace %s.",
-                       namespace);
-        }
-
-        NamespaceConverter defaultConverter = converterType.namespaceConverter;
-        Namespace result = new Namespace(namespace, customConverter.orElse(defaultConverter));
+        NamespaceConverter converter = converterFactory.get(multitenant);
+        Namespace result = new Namespace(namespace, converter);
         return result;
     }
+
+    /**
+     * Creates new instance of {@code Namespace} from the name of the given {@link Key}.
+     *
+     * <p>Uses the {@link NsConverterFactory#defaults() default} converter factory.
+     *
+     * @param key
+     *         the {@link Key} to get a {@code Namespace} from
+     * @param multitenant
+     *         whether the storage is multi-tenant
+     * @return a {@code Namespace} of the given Key name or {@code null} if the name is
+     *         {@code null} or empty
+     * @see #fromNameOf(Key, boolean, NsConverterFactory)
+     */
+    static @Nullable Namespace fromNameOf(Key key, boolean multitenant) {
+        return fromNameOf(key, multitenant, NsConverterFactory.defaults());
+    }
+
 
     private static String escapeIllegalCharacters(String candidateNamespace) {
         String result = AT_SYMBOL_PATTERN.matcher(candidateNamespace)
@@ -189,7 +211,7 @@ public final class Namespace {
      * Converts this object to a {@link TenantId}.
      *
      * <p>If current instance was created with
-     * {@link Namespace#of(TenantId, ProjectId)}, then the result will be
+     * {@link Namespace#of(TenantId, boolean, NsConverterFactory)}, then the result will be
      * {@code equal} to that {@link TenantId}.
      *
      * <p>If current instance was created with {@link Namespace#of(String)},
@@ -198,7 +220,7 @@ public final class Namespace {
      *     {@code
      *     TenantId.newBuilder()
      *             .setValue(namespace.getValue())
-     *            .vBuild();
+     *             .vBuild();
      *     }
      * </pre>
      *
@@ -235,7 +257,7 @@ public final class Namespace {
      * An enumeration of converters of the {@code Namespace} into a {@link TenantId} of the specific
      * type.
      */
-    private enum ConverterType {
+    enum ConverterType {
 
         /**
          * Converts the given {@code Namespace} into a {@link TenantId} which has a {@code domain}.
@@ -270,10 +292,12 @@ public final class Namespace {
          */
         SINGLE_CUSTOM(NamespaceConverters.forCustomNamespace());
 
+        // This enum isn't intended to be serialized.
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final NamespaceConverter namespaceConverter;
 
-        private static ConverterType forTenantId(TenantId tenantId,
-                                                 @Nullable NamespaceConverter custom) {
+        static ConverterType forTenantId(TenantId tenantId,
+                                         @Nullable NamespaceConverter custom) {
             if (custom != null) {
                 return PREDEFINED_VALUE;
             }
@@ -286,5 +310,8 @@ public final class Namespace {
         ConverterType(NamespaceConverter namespaceConverter) {
             this.namespaceConverter = namespaceConverter;
         }
-    }
+
+        NamespaceConverter converter() {
+            return namespaceConverter;
+        }}
 }

@@ -74,10 +74,10 @@ public final class DatastoreTenants {
      *         for an alternative method, suitable if you already have an instance of
      *         {@code BoundedContextBuilder}
      */
-    public static TenantIndex index(Datastore datastore) {
+    public static TenantIndex index(Datastore datastore, NsConverterFactory converterFactory) {
         checkNotNull(datastore);
         // We assume we are in a multi-tenant execution environment
-        TenantIndex index = new NamespaceIndex(datastore, true);
+        TenantIndex index = new NamespaceIndex(datastore, true, converterFactory);
         return index;
     }
 }

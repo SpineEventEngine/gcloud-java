@@ -25,7 +25,6 @@ import com.google.common.base.Supplier;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
-import io.spine.server.storage.datastore.ProjectId;
 
 import javax.annotation.Nullable;
 
@@ -44,13 +43,27 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
 
     /**
      * Obtains an instance of {@code NamespaceSupplier} for the passed arguments.
+     *
+     * //TODO:2019-07-09:alex.tymchenko: address the ambiguous parameters.
      */
     public static NamespaceSupplier instance(boolean multitenant,
                                              @Nullable String defaultNamespace,
-                                             ProjectId projectId) {
-        checkNotNull(projectId);
+                                             NsConverterFactory converterFactory) {
+        checkNotNull(converterFactory);
         if (multitenant) {
-            return multitenant(projectId);
+            return multitenant(converterFactory);
+        } else {
+            return new SingleTenantNamespaceSupplier(defaultNamespace);
+        }
+    }
+
+    /**
+     * Obtains an instance of {@code NamespaceSupplier} for the passed arguments.
+     */
+    public static NamespaceSupplier instance(boolean multitenant,
+                                             @Nullable String defaultNamespace) {
+        if (multitenant) {
+            return multitenant(NsConverterFactory.defaults());
         } else {
             return new SingleTenantNamespaceSupplier(defaultNamespace);
         }
@@ -62,8 +75,8 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
     }
 
     @VisibleForTesting
-    static NamespaceSupplier multitenant(ProjectId projectId) {
-        return MultitenantNamespaceSupplier.forProject(projectId);
+    static NamespaceSupplier multitenant(NsConverterFactory converterFactory) {
+        return MultitenantNamespaceSupplier.withConvertersBy(converterFactory);
     }
 
     /**

@@ -23,7 +23,6 @@ package io.spine.server.storage.datastore.tenant;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
-import io.spine.server.storage.datastore.ProjectId;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -43,9 +42,7 @@ class SingleTenantNamespaceSupplierTest {
     @Test
     @DisplayName("produce empty namespace")
     void testProduceEmpty() {
-        NamespaceSupplier supplier = NamespaceSupplier.instance(false,
-                                                                null,
-                                                                ProjectId.of("any"));
+        NamespaceSupplier supplier = NamespaceSupplier.instance(false, null);
         Namespace namespace = supplier.get();
         assertNotNull(namespace);
         assertThat(namespace.getValue(), isEmptyString());
@@ -57,9 +54,7 @@ class SingleTenantNamespaceSupplierTest {
     @DisplayName("produce custom namespace")
     void testProduceCustom() {
         String namespaceValue = "my-custom-namespace";
-        NamespaceSupplier supplier = NamespaceSupplier.instance(false,
-                                                                namespaceValue,
-                                                                ProjectId.of("some"));
+        NamespaceSupplier supplier = NamespaceSupplier.instance(false, namespaceValue);
         Namespace namespace = supplier.get();
         assertNotNull(namespace);
         assertEquals(namespaceValue, namespace.getValue());
