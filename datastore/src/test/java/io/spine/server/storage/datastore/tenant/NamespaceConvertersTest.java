@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("`NamespaceConverters` should")
 class NamespaceConvertersTest {
@@ -36,24 +35,6 @@ class NamespaceConvertersTest {
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void have_private_utility_ctor() {
         assertHasPrivateParameterlessCtor(NamespaceConverters.class);
-    }
-
-    @Test
-    @DisplayName("create stub faulty converter")
-    void testFaulty() {
-        NamespaceConverter converter = NamespaceConverters.stub();
-        try {
-            converter.convert("");
-            fail();
-        } catch (UnsupportedOperationException ignored) {
-        }
-
-        try {
-            converter.reverse()
-                     .convert(TenantId.getDefaultInstance());
-            fail();
-        } catch (UnsupportedOperationException ignored) {
-        }
     }
 
     @Test

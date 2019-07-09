@@ -46,8 +46,7 @@ final class DefaultNamespaceConverter extends NamespaceConverter {
     }
 
     private static NamespaceConverter forTenant(TenantId id) {
-        Namespace.ConverterType converterType =
-                Namespace.ConverterType.forTenantId(id, null);
+        Namespace.ConverterType converterType = Namespace.ConverterType.forTenantId(id);
         return converterType.converter();
     }
 

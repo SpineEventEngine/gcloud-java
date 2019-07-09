@@ -288,15 +288,6 @@ public final class Namespace {
         VALUE(NamespaceConverters.forStringValue()),
 
         /**
-         * Flags a custom user-defined converter.
-         *
-         * <p>The {@link #namespaceConverter} field of this object has
-         * {@linkplain NamespaceConverters#stub() stub} value, which thrown
-         * {@link UnsupportedOperationException} on any call.
-         */
-        PREDEFINED_VALUE(NamespaceConverters.stub()),
-
-        /**
          * Represents a custom user-defined namespace for a single-tenant storage.
          *
          * The conversion performed by the converter of this object acts with the string value of
@@ -308,11 +299,7 @@ public final class Namespace {
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final NamespaceConverter namespaceConverter;
 
-        static ConverterType forTenantId(TenantId tenantId,
-                                         @Nullable NamespaceConverter custom) {
-            if (custom != null) {
-                return PREDEFINED_VALUE;
-            }
+        static ConverterType forTenantId(TenantId tenantId) {
             TenantId.KindCase kindCase = tenantId.getKindCase();
             String kindCaseName = kindCase.name();
             ConverterType converter = valueOf(kindCaseName);

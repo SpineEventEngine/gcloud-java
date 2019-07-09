@@ -90,20 +90,6 @@ final class NamespaceConverters {
     }
 
     /**
-     * Creates a stub {@link NamespaceConverter}.
-     *
-     * <p>This implementation throws {@link UnsupportedOperationException} on any operation.
-     *
-     * <p>The result of this method should be used if there is a custom user-defined
-     * {@link NamespaceConverter converter} which should be used instead.
-     *
-     * @return a stub instance of {@link NamespaceConverter}
-     */
-    static NamespaceConverter stub() {
-        return new StubNamespaceConverter();
-    }
-
-    /**
      * A converter for the framework-defined namespaces, which are stored with a type prefix.
      */
     abstract static class PrefixedNamespaceToTenantIdConverter extends NamespaceConverter {
@@ -206,23 +192,6 @@ final class NamespaceConverters {
                     .setValue(namespace)
                     .vBuild();
             return tenantId;
-        }
-    }
-
-    private static class StubNamespaceConverter extends NamespaceConverter {
-
-        @Override
-        protected String toString(TenantId tenantId) {
-            throw stubUsage();
-        }
-
-        @Override
-        protected TenantId toTenantId(String namespace) {
-            throw stubUsage();
-        }
-
-        private static UnsupportedOperationException stubUsage() {
-            throw new UnsupportedOperationException("Use custom converter instead.");
         }
     }
 
