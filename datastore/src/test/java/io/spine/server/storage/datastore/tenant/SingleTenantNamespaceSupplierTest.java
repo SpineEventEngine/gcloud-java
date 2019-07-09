@@ -42,7 +42,7 @@ class SingleTenantNamespaceSupplierTest {
     @Test
     @DisplayName("produce empty namespace")
     void testProduceEmpty() {
-        NamespaceSupplier supplier = NamespaceSupplier.instance(false, null);
+        NamespaceSupplier supplier = NamespaceSupplier.singleTenant();
         Namespace namespace = supplier.get();
         assertNotNull(namespace);
         assertThat(namespace.getValue(), isEmptyString());
@@ -54,7 +54,7 @@ class SingleTenantNamespaceSupplierTest {
     @DisplayName("produce custom namespace")
     void testProduceCustom() {
         String namespaceValue = "my-custom-namespace";
-        NamespaceSupplier supplier = NamespaceSupplier.instance(false, namespaceValue);
+        NamespaceSupplier supplier = NamespaceSupplier.singleTenant(namespaceValue);
         Namespace namespace = supplier.get();
         assertNotNull(namespace);
         assertEquals(namespaceValue, namespace.getValue());

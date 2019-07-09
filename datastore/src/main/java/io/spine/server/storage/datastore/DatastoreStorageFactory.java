@@ -44,7 +44,6 @@ import io.spine.server.storage.datastore.tenant.NsConverterFactory;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.tenant.TenantIndex;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 
@@ -56,7 +55,7 @@ import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 
 /**
- * Creates storages based on {@link Datastore}.
+ * Creates {@link Storage}s based on {@link Datastore}.
  *
  * <p>As a convenience API, provides an ability to configure the {@link BoundedContextBuilder}s
  * with the {@link TenantIndex} specific to the instance of {@code Datastore} configured for this
@@ -185,17 +184,12 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     private NamespaceSupplier createNamespaceSupplier(boolean multitenant) {
-        @Nullable String defaultNamespace;
         if (multitenant) {
             checkHasNoNamespace(datastore);
-            defaultNamespace = null;
+            return NamespaceSupplier.singleTenant();
         } else {
-            defaultNamespace = datastore.getOptions()
-                                        .getNamespace();
+            return NamespaceSupplier.multitenant(converterFactory);
         }
-        NamespaceSupplier result =
-                NamespaceSupplier.instance(multitenant, defaultNamespace, converterFactory);
-        return result;
     }
 
     private static void checkHasNoNamespace(Datastore datastore) {
