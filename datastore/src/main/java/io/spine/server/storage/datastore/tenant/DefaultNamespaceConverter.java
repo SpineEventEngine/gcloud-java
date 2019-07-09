@@ -20,25 +20,16 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.storage.datastore.tenant.Namespace.DOMAIN_PREFIX;
-import static io.spine.server.storage.datastore.tenant.Namespace.EMAIL_PREFIX;
-import static io.spine.server.storage.datastore.tenant.Namespace.STRING_VALUE_PREFIX;
 
 /**
  * A default implementation of {@link NamespaceConverter}.
  */
 @Internal
 final class DefaultNamespaceConverter extends NamespaceConverter {
-
-    private static final ImmutableMap<String, Namespace.ConverterType> TYPE_PREFIX_TO_CONVERTER =
-            ImmutableMap.of(DOMAIN_PREFIX, Namespace.ConverterType.DOMAIN,
-                            EMAIL_PREFIX, Namespace.ConverterType.EMAIL,
-                            STRING_VALUE_PREFIX, Namespace.ConverterType.VALUE);
 
     private final boolean multitenant;
 
@@ -73,7 +64,7 @@ final class DefaultNamespaceConverter extends NamespaceConverter {
             converterType = Namespace.ConverterType.SINGLE_CUSTOM;
         } else {
             String typePrefix = String.valueOf(namespace.charAt(0));
-            converterType = TYPE_PREFIX_TO_CONVERTER.get(typePrefix);
+            converterType = Namespace.typeOfPrefix(typePrefix);
             checkState(converterType != null,
                        "Could not determine a `TenantId` converter for namespace %s.",
                        namespace);

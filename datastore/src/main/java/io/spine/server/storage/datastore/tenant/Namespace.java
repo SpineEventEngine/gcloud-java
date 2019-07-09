@@ -76,10 +76,10 @@ public final class Namespace {
     static final String EMAIL_PREFIX = "E";
     static final String STRING_VALUE_PREFIX = "V";
 
-    private static final ImmutableMap<String, ConverterType> TYPE_PREFIX_TO_CONVERTER =
-            ImmutableMap.of(DOMAIN_PREFIX, ConverterType.DOMAIN,
-                            EMAIL_PREFIX, ConverterType.EMAIL,
-                            STRING_VALUE_PREFIX, ConverterType.VALUE);
+    private static final ImmutableMap<String, Namespace.ConverterType> TYPE_PREFIX_TO_CONVERTER =
+            ImmutableMap.of(DOMAIN_PREFIX, Namespace.ConverterType.DOMAIN,
+                            EMAIL_PREFIX, Namespace.ConverterType.EMAIL,
+                            STRING_VALUE_PREFIX, Namespace.ConverterType.VALUE);
 
     private static final Pattern AT_SYMBOL_PATTERN = Pattern.compile("@", Pattern.LITERAL);
     private static final String AT_SYMBOL_REPLACEMENT = "-at-";
@@ -193,6 +193,18 @@ public final class Namespace {
         return fromNameOf(key, multitenant, NsConverterFactory.defaults());
     }
 
+    /**
+     * Obtains a {@code ConverterType} for the given prefix.
+     *
+     * @param prefix
+     *         the prefix value
+     * @return the {@code ConverterType} instance, or {@code null} if there is no type configured
+     *         for the prefix.
+     */
+    static @Nullable ConverterType typeOfPrefix(String prefix) {
+        checkNotNull(prefix);
+        return TYPE_PREFIX_TO_CONVERTER.get(prefix);
+    }
 
     private static String escapeIllegalCharacters(String candidateNamespace) {
         String result = AT_SYMBOL_PATTERN.matcher(candidateNamespace)

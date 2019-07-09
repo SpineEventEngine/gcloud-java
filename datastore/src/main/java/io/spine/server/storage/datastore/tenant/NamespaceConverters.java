@@ -106,12 +106,11 @@ final class NamespaceConverters {
     /**
      * A converter for the framework-defined namespaces, which are stored with a type prefix.
      */
-    abstract static class PrefixedNamespaceToTenantIddConverter
-            extends NamespaceConverter {
+    abstract static class PrefixedNamespaceToTenantIdConverter extends NamespaceConverter {
 
         private final String prefix;
 
-        PrefixedNamespaceToTenantIddConverter(String prefix) {
+        PrefixedNamespaceToTenantIdConverter(String prefix) {
             super();
             this.prefix = prefix;
         }
@@ -132,8 +131,7 @@ final class NamespaceConverters {
         abstract String toSignificantString(TenantId tenantId);
     }
 
-    private static class DomainNamespaceConverter
-            extends PrefixedNamespaceToTenantIddConverter {
+    private static class DomainNamespaceConverter extends PrefixedNamespaceToTenantIdConverter {
 
         private DomainNamespaceConverter() {
             super(DOMAIN_PREFIX);
@@ -161,7 +159,7 @@ final class NamespaceConverters {
     }
 
     private static class EmailNamespaceConverter
-            extends PrefixedNamespaceToTenantIddConverter {
+            extends PrefixedNamespaceToTenantIdConverter {
 
         private EmailNamespaceConverter() {
             super(EMAIL_PREFIX);
@@ -189,7 +187,7 @@ final class NamespaceConverters {
     }
 
     private static class StringValueNamespaceConverter
-            extends PrefixedNamespaceToTenantIddConverter {
+            extends PrefixedNamespaceToTenantIdConverter {
 
         private StringValueNamespaceConverter() {
             super(STRING_VALUE_PREFIX);
