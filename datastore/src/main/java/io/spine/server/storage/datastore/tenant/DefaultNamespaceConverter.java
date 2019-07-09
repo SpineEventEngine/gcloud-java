@@ -43,13 +43,14 @@ final class DefaultNamespaceConverter extends NamespaceConverter {
     private final boolean multitenant;
 
     /**
-     * Creates an instance of {@code DefaultNamespaceConverter} with a passed multi-tenancy
+     * Creates an instance of {@code DefaultNamespaceConverter} with the passed multi-tenancy
      * setting.
      *
      * @param multitenant
      *         whether this converter is configured to work in multi-tenant environment
      */
-    public DefaultNamespaceConverter(boolean multitenant) {
+    DefaultNamespaceConverter(boolean multitenant) {
+        super();
         this.multitenant = multitenant;
     }
 
@@ -74,7 +75,7 @@ final class DefaultNamespaceConverter extends NamespaceConverter {
             String typePrefix = String.valueOf(namespace.charAt(0));
             converterType = TYPE_PREFIX_TO_CONVERTER.get(typePrefix);
             checkState(converterType != null,
-                       "Could not determine a TenantId converter for namespace %s.",
+                       "Could not determine a `TenantId` converter for namespace %s.",
                        namespace);
         }
         return converterType.converter().toTenantId(namespace);
