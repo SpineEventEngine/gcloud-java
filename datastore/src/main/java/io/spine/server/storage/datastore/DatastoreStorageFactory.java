@@ -186,9 +186,11 @@ public class DatastoreStorageFactory implements StorageFactory {
     private NamespaceSupplier createNamespaceSupplier(boolean multitenant) {
         if (multitenant) {
             checkHasNoNamespace(datastore);
-            return NamespaceSupplier.singleTenant();
-        } else {
             return NamespaceSupplier.multitenant(converterFactory);
+        } else {
+            String defaultNamespace = datastore.getOptions()
+                                               .getNamespace();
+            return NamespaceSupplier.singleTenant(defaultNamespace == null ? "" : defaultNamespace);
         }
     }
 
