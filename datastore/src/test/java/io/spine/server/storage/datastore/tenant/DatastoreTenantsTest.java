@@ -56,7 +56,7 @@ class DatastoreTenantsTest {
     @Test
     @DisplayName("create tenant index")
     void testCreateIndex() {
-        TenantIndex index = DatastoreTenants.index(mockDatastore());
+        TenantIndex index = DatastoreTenants.index(mockDatastore(), NsConverterFactory.defaults());
         assertNotNull(index);
         assertThat(index).isInstanceOf(NamespaceIndex.class);
 

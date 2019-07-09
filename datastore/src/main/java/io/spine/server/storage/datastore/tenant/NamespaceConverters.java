@@ -90,28 +90,13 @@ final class NamespaceConverters {
     }
 
     /**
-     * Creates a stub {@link NamespaceConverter}.
-     *
-     * <p>This implementation throws {@link UnsupportedOperationException} on any operation.
-     *
-     * <p>The result of this method should be used if there is a custom user-defined
-     * {@link NamespaceConverter converter} which should be used instead.
-     *
-     * @return a stub instance of {@link NamespaceConverter}
-     */
-    static NamespaceConverter stub() {
-        return new StubNamespaceConverter();
-    }
-
-    /**
      * A converter for the framework-defined namespaces, which are stored with a type prefix.
      */
-    abstract static class PrefixedNamespaceToTenantIddConverter
-            extends NamespaceConverter {
+    abstract static class PrefixedNamespaceToTenantIdConverter extends NamespaceConverter {
 
         private final String prefix;
 
-        PrefixedNamespaceToTenantIddConverter(String prefix) {
+        PrefixedNamespaceToTenantIdConverter(String prefix) {
             super();
             this.prefix = prefix;
         }
@@ -132,8 +117,7 @@ final class NamespaceConverters {
         abstract String toSignificantString(TenantId tenantId);
     }
 
-    private static class DomainNamespaceConverter
-            extends PrefixedNamespaceToTenantIddConverter {
+    private static class DomainNamespaceConverter extends PrefixedNamespaceToTenantIdConverter {
 
         private DomainNamespaceConverter() {
             super(DOMAIN_PREFIX);
@@ -161,7 +145,7 @@ final class NamespaceConverters {
     }
 
     private static class EmailNamespaceConverter
-            extends PrefixedNamespaceToTenantIddConverter {
+            extends PrefixedNamespaceToTenantIdConverter {
 
         private EmailNamespaceConverter() {
             super(EMAIL_PREFIX);
@@ -189,7 +173,7 @@ final class NamespaceConverters {
     }
 
     private static class StringValueNamespaceConverter
-            extends PrefixedNamespaceToTenantIddConverter {
+            extends PrefixedNamespaceToTenantIdConverter {
 
         private StringValueNamespaceConverter() {
             super(STRING_VALUE_PREFIX);
@@ -208,23 +192,6 @@ final class NamespaceConverters {
                     .setValue(namespace)
                     .vBuild();
             return tenantId;
-        }
-    }
-
-    private static class StubNamespaceConverter extends NamespaceConverter {
-
-        @Override
-        protected String toString(TenantId tenantId) {
-            throw stubUsage();
-        }
-
-        @Override
-        protected TenantId toTenantId(String namespace) {
-            throw stubUsage();
-        }
-
-        private static UnsupportedOperationException stubUsage() {
-            throw new UnsupportedOperationException("Use custom converter instead.");
         }
     }
 

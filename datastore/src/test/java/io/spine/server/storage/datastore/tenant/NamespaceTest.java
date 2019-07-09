@@ -59,7 +59,7 @@ class NamespaceTest {
     void testEmptyTenantId() {
         TenantId emptyId = TenantId.getDefaultInstance();
         assertThrows(IllegalArgumentException.class,
-                     () -> Namespace.of(emptyId, ProjectId.of("no-matter-what")));
+                     () -> Namespace.of(emptyId, true));
     }
 
     @SuppressWarnings("LocalVariableNamingConvention")
@@ -73,7 +73,7 @@ class NamespaceTest {
                 .setValue(aGroupValue)
                 .vBuild();
         Namespace aGroupNamespaceFromTenantId =
-                Namespace.of(aGroupTenantId, TestDatastores.projectId());
+                Namespace.of(aGroupTenantId, true, NsConverterFactory.defaults());
         Namespace aGroupNamespaceFromString = Namespace.of(aGroupValue);
         Namespace duplicateAGroupNamespaceFromString = Namespace.of(aGroupValue);
 
@@ -86,8 +86,7 @@ class NamespaceTest {
                 .newBuilder()
                 .setEmail(bgGroupEmail)
                 .vBuild();
-        Namespace bGroupNamespaceFromTenantId = Namespace.of(bGroupTenantId,
-                                                             TestDatastores.projectId());
+        Namespace bGroupNamespaceFromTenantId = Namespace.of(bGroupTenantId,true);
         // Same string but other type
         Namespace cGroupNamespaceFromString = Namespace.of(bGroupValue);
 
@@ -127,9 +126,9 @@ class NamespaceTest {
         assertNotEquals(domainId, stringId);
         assertNotEquals(emailId, stringId);
 
-        Namespace fromDomainId = Namespace.of(domainId, TestDatastores.projectId());
-        Namespace fromEmailId = Namespace.of(emailId, TestDatastores.projectId());
-        Namespace fromStringId = Namespace.of(stringId, TestDatastores.projectId());
+        Namespace fromDomainId = Namespace.of(domainId, true);
+        Namespace fromEmailId = Namespace.of(emailId, true);
+        Namespace fromStringId = Namespace.of(stringId, true);
 
         assertNotEquals(fromDomainId, fromEmailId);
         assertNotEquals(fromDomainId, fromStringId);

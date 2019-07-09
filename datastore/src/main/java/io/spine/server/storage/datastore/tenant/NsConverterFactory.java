@@ -20,18 +20,35 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.spine.annotation.Internal;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+/**
+ * An interface of the factories of {@link NamespaceConverter}s.
+ */
+@FunctionalInterface
+@Internal
+public interface NsConverterFactory {
 
-@DisplayName("`TenantConverterRegistry` should")
-class TenantConverterRegistryTest {
+    /**
+     * Creates a new instance of {@code NamespaceConverter} taking the passed multi-tenancy setting
+     * into account.
+     *
+     * @param multitenant
+     *         {@code true} if the created converter should be suitable for multi-tenant
+     *         environment,
+     *         {@code false} otherwise
+     * @return new converter instance
+     */
+    NamespaceConverter get(boolean multitenant);
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void have_private_ctor() {
-        assertHasPrivateParameterlessCtor(TenantConverterRegistry.class);
+    /**
+     * Creates an instance of the {@code NsConverterFactory} with the framework default
+     * conversion implementation.
+     *
+     * @return a new instanace of {@code NsConverterFactory} with the default converter
+     *         implementations used
+     */
+    static NsConverterFactory defaults() {
+        return DefaultNamespaceConverter::new;
     }
 }

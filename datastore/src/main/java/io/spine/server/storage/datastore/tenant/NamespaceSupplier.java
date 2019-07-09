@@ -20,14 +20,10 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
-import io.spine.server.storage.datastore.ProjectId;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -43,27 +39,37 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
     }
 
     /**
-     * Obtains an instance of {@code NamespaceSupplier} for the passed arguments.
+     * Creates a new {@code NamespaceSupplier} suitable for the single-tenant environment
+     * with the default namespace value.
+     *
+     * @param defaultNamespace
+     *         the default namespace
+     * @return an instance of {@code NamespaceSupplier} configured for the single-tenant environment
      */
-    public static NamespaceSupplier instance(boolean multitenant,
-                                             @Nullable String defaultNamespace,
-                                             ProjectId projectId) {
-        checkNotNull(projectId);
-        if (multitenant) {
-            return multitenant(projectId);
-        } else {
-            return new SingleTenantNamespaceSupplier(defaultNamespace);
-        }
+    public static NamespaceSupplier singleTenant(String defaultNamespace) {
+        checkNotNull(defaultNamespace);
+        return new SingleTenantNamespaceSupplier(defaultNamespace);
     }
 
-    @VisibleForTesting
-    static NamespaceSupplier singleTenant() {
+    /**
+     * Creates a new {@code NamespaceSupplier} suitable for the single-tenant environment
+     * with an empty namespace value.
+     *
+     * @return an instance of {@code NamespaceSupplier} configured for the single-tenant environment
+     */
+    public static NamespaceSupplier singleTenant() {
         return new SingleTenantNamespaceSupplier(null);
     }
 
-    @VisibleForTesting
-    static NamespaceSupplier multitenant(ProjectId projectId) {
-        return MultitenantNamespaceSupplier.forProject(projectId);
+    /**
+     * Creates a new {@code NamespaceSupplier} suitable for the multi-tenant environment.
+     *
+     * @param converterFactory
+     *         the namespace converter to use
+     * @return an instance of {@code NamespaceSupplier} configured for the multi-tenant environment
+     */
+    public static NamespaceSupplier multitenant(NsConverterFactory converterFactory) {
+        return MultitenantNamespaceSupplier.withConvertersBy(converterFactory);
     }
 
     /**

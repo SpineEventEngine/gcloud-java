@@ -56,7 +56,6 @@ import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.ch
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.ensureNamespace;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.localDatastore;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.remoteDatastore;
-import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
 import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
@@ -341,7 +340,7 @@ class DatastoreWrapperTest {
     @DisplayName("generate key factories aware of tenancy")
     void testGenerateKeyFactory() {
         ProjectId projectId = TestDatastores.projectId();
-        DatastoreWrapper wrapper = wrap(localDatastore(), multitenant(projectId));
+        DatastoreWrapper wrapper = wrap(localDatastore(), multitenant());
         String tenantId1 = "first-tenant-ID";
         String tenantId1Prefixed = "Vfirst-tenant-ID";
         String tenantId2 = "second@tenant.id";
@@ -410,7 +409,7 @@ class DatastoreWrapperTest {
     @Test
     @DisplayName("allow to add new namespaces 'on the go'")
     void testNewNamespaces() {
-        DatastoreWrapper wrapper = wrap(localDatastore(), multitenant(projectId()));
+        DatastoreWrapper wrapper = wrap(localDatastore(), multitenant());
         TenantId tenantId = TenantId
                 .newBuilder()
                 .setValue("Luke_I_am_your_tenant.")

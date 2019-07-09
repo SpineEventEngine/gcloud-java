@@ -40,23 +40,23 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.tenant.DatastoreTenants;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
-import io.spine.server.storage.datastore.tenant.TenantConverterRegistry;
+import io.spine.server.storage.datastore.tenant.NsConverterFactory;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.tenant.TenantIndex;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 
 /**
- * Creates storages based on {@link Datastore}.
+ * Creates {@link Storage}s based on {@link Datastore}.
  *
  * <p>As a convenience API, provides an ability to configure the {@link BoundedContextBuilder}s
  * with the {@link TenantIndex} specific to the instance of {@code Datastore} configured for this
@@ -93,9 +93,12 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
 
+    private final NsConverterFactory converterFactory;
+
     DatastoreStorageFactory(Builder builder) {
         this.typeRegistry = builder.typeRegistry;
         this.datastore = builder.datastore;
+        this.converterFactory = builder.converterFactory;
     }
 
     /**
@@ -108,7 +111,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     public BoundedContextBuilder configureTenantIndex(BoundedContextBuilder builder) {
         checkNotNull(builder);
-        TenantIndex index = DatastoreTenants.index(datastore);
+        TenantIndex index = DatastoreTenants.index(datastore, converterFactory);
         builder.setTenantIndex(index);
         return builder;
     }
@@ -182,18 +185,14 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     private NamespaceSupplier createNamespaceSupplier(boolean multitenant) {
-        @Nullable String defaultNamespace;
         if (multitenant) {
             checkHasNoNamespace(datastore);
-            defaultNamespace = null;
+            return NamespaceSupplier.multitenant(converterFactory);
         } else {
-            defaultNamespace = datastore.getOptions()
-                                        .getNamespace();
+            String defaultNamespace = datastore.getOptions()
+                                               .getNamespace();
+            return NamespaceSupplier.singleTenant(nullToEmpty(defaultNamespace));
         }
-        ProjectId projectId = ProjectId.of(datastore);
-        NamespaceSupplier result =
-                NamespaceSupplier.instance(multitenant, defaultNamespace, projectId);
-        return result;
     }
 
     private static void checkHasNoNamespace(Datastore datastore) {
@@ -275,6 +274,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         private Datastore datastore;
         private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
         private NamespaceConverter namespaceConverter;
+        private NsConverterFactory converterFactory;
 
         /** Avoid direct initialization. */
         private Builder() {
@@ -337,9 +337,10 @@ public class DatastoreStorageFactory implements StorageFactory {
             if (typeRegistry == null) {
                 typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
             }
-            if (namespaceConverter != null) {
-                ProjectId projectId = ProjectId.of(datastore);
-                TenantConverterRegistry.registerNamespaceConverter(projectId, namespaceConverter);
+            if (namespaceConverter == null) {
+                converterFactory = NsConverterFactory.defaults();
+            } else {
+                converterFactory = multitenant -> namespaceConverter;
             }
 
             return new DatastoreStorageFactory(this);

@@ -30,10 +30,9 @@ import com.google.common.collect.Iterators;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.storage.datastore.Kind;
-import io.spine.server.storage.datastore.ProjectId;
 import io.spine.server.tenant.TenantIndex;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,19 +54,21 @@ final class NamespaceIndex implements TenantIndex {
     private final Object lock = new Object();
     private final NamespaceQuery namespaceQuery;
 
-    private final ProjectId projectId;
+    private final NsConverterFactory converterFactory;
 
     private final boolean multitenant;
 
-    NamespaceIndex(Datastore datastore, boolean multitenant) {
+    NamespaceIndex(Datastore datastore, boolean multitenant, NsConverterFactory converterFactory) {
         this(new DefaultNamespaceQuery(datastore),
-             ProjectId.of(datastore),
-             multitenant);
+             multitenant,
+             converterFactory
+        );
     }
 
-    NamespaceIndex(NamespaceQuery namespaceQuery, ProjectId projectId, boolean multitenant) {
+    NamespaceIndex(NamespaceQuery namespaceQuery,
+                   boolean multitenant, NsConverterFactory converterFactory) {
         this.namespaceQuery = checkNotNull(namespaceQuery);
-        this.projectId = projectId;
+        this.converterFactory = converterFactory;
         this.multitenant = multitenant;
     }
 
@@ -91,7 +92,7 @@ final class NamespaceIndex implements TenantIndex {
     public void keep(TenantId id) {
         checkNotNull(id);
         synchronized (lock) {
-            cache.add(Namespace.of(id, projectId));
+            cache.add(Namespace.of(id, multitenant, converterFactory));
         }
     }
 
@@ -155,8 +156,8 @@ final class NamespaceIndex implements TenantIndex {
     private void fetchNamespaces() {
         Iterator<Key> existingNamespaces = namespaceQuery.run();
         Set<Namespace> newNamespaces = newHashSet();
-        Iterator<Namespace> extractedNamespaces =
-                Iterators.transform(existingNamespaces, new NamespaceUnpacker(multitenant));
+        NamespaceUnpacker unpacker = new NamespaceUnpacker(multitenant, converterFactory);
+        Iterator<Namespace> extractedNamespaces = Iterators.transform(existingNamespaces, unpacker);
         Iterators.addAll(newNamespaces, extractedNamespaces);
 
         // Never delete tenants, only add new ones
@@ -209,9 +210,12 @@ final class NamespaceIndex implements TenantIndex {
     private static class NamespaceUnpacker implements Function<Key, Namespace> {
 
         private final boolean multitenant;
+        private final NsConverterFactory converterFactory;
 
-        private NamespaceUnpacker(boolean multitenant) {
+        private NamespaceUnpacker(boolean multitenant,
+                                  NsConverterFactory factory) {
             this.multitenant = multitenant;
+            converterFactory = factory;
         }
 
         /**
@@ -222,11 +226,10 @@ final class NamespaceIndex implements TenantIndex {
          * @return the result of call to {@link Key#getName()} or {@code null} if the
          *         {@link Key} has no name (i.e. the namespace is default)
          */
-        @Nullable
         @Override
-        public Namespace apply(@Nullable Key key) {
+        public @Nullable Namespace apply(@Nullable Key key) {
             checkNotNull(key);
-            return Namespace.fromNameOf(key, multitenant);
+            return Namespace.fromNameOf(key, multitenant, converterFactory);
         }
     }
 }
