@@ -42,9 +42,9 @@ import static java.util.regex.Matcher.quoteReplacement;
  * <p>By default, a namespace constructed from a {@link TenantId} has a single capital letter
  * prefix reflecting the type of {@link TenantId}. These prefixes are:
  * <ul>
- * <li>{@code D} - for "Internet Domain";
- * <li>{@code E} - for "Email";
- * <li>{@code V} - for "String Value".
+ *      <li>{@code D} - for "Internet Domain";
+ *      <li>{@code E} - for "Email";
+ *      <li>{@code V} - for "String Value".
  * </ul>
  *
  * <p>The framework users may override the behavior by
@@ -56,13 +56,13 @@ import static java.util.regex.Matcher.quoteReplacement;
  *
  * <p>Basically, one of three scenarios in working with the Datastore namespaces takes place.
  * <ul>
- * <li>There are no namespaces in the Datastore at all. All the namespace manipulations are
- * performed by the means of the framework using the defaults.
+ *      <li>There are no namespaces in the Datastore at all. All the namespace manipulations are
+ *      performed by the means of the framework using the defaults.
  *
- * <li>All the present namespaces start with one of the prefixes listed above. In this case
- * the described default {@code TenantId} conversion behavior is applied.
+ *      <li>All the present namespaces start with one of the prefixes listed above. In this case
+ *      the described default {@code TenantId} conversion behavior is applied.
  *
- * <li>A custom {@link NamespaceConverter} is registered, and its implementation is consistent
+ *      <li>A custom {@link NamespaceConverter} is registered, and its implementation is consistent
  * with the namespaces (if any) already present in the Datastore instance.
  * </ul>
  *
