@@ -58,7 +58,6 @@ final class DefaultNamespaceConverter extends NamespaceConverter {
 
     @Override
     protected TenantId toTenantId(String namespace) {
-
         Namespace.ConverterType converterType;
         if (!multitenant) {
             converterType = Namespace.ConverterType.SINGLE_CUSTOM;
