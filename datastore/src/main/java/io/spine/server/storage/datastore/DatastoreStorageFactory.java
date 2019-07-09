@@ -193,7 +193,6 @@ public class DatastoreStorageFactory implements StorageFactory {
             defaultNamespace = datastore.getOptions()
                                         .getNamespace();
         }
-        ProjectId projectId = ProjectId.of(datastore);
         NamespaceSupplier result =
                 NamespaceSupplier.instance(multitenant, defaultNamespace, converterFactory);
         return result;
