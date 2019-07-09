@@ -50,6 +50,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
@@ -190,7 +191,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         } else {
             String defaultNamespace = datastore.getOptions()
                                                .getNamespace();
-            return NamespaceSupplier.singleTenant(defaultNamespace == null ? "" : defaultNamespace);
+            return NamespaceSupplier.singleTenant(nullToEmpty(defaultNamespace));
         }
     }
 
