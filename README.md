@@ -2,7 +2,6 @@
 
 [![codecov](https://codecov.io/gh/SpineEventEngine/gcloud-java/branch/master/graph/badge.svg)](https://codecov.io/gh/SpineEventEngine/gcloud-java)
 [![Build Status](https://travis-ci.com/SpineEventEngine/gcloud-java.svg?branch=master)](https://travis-ci.com/SpineEventEngine/gcloud-java)
-[![codacy](https://api.codacy.com/project/badge/Grade/fe24ec78520943afa038336d45db4513)](https://www.codacy.com/app/SpineEventEngine/gcloud-java?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SpineEventEngine/gcloud-java&amp;utm_campaign=Badge_Grade)
 
 Support for Spine-based Java apps running under Google App Engine.
 
