@@ -109,7 +109,7 @@ public class BigDataTester<I> implements Logging {
                         writeTime));
         }
 
-        log().debug("Writing took {} millis.", writeTime);
+        _debug().log("Writing took %d millis.", writeTime);
 
         try {
             Thread.sleep(1000);
