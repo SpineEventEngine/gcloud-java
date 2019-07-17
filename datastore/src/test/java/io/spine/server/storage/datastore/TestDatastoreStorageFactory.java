@@ -22,20 +22,18 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.common.flogger.FluentLogger;
 import io.spine.annotation.Internal;
-import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.slf4j.Logger;
-
-import static java.lang.String.format;
 
 /**
  * Creates storages based on the local Google {@link Datastore}.
  */
 public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
+    private static final FluentLogger logger = FluentLogger.forEnclosingClass();
     private static @MonotonicNonNull TestDatastoreStorageFactory instance = null;
 
     /**
@@ -53,7 +51,9 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
             }
             return instance;
         } catch (Throwable e) {
-            log().error("Failed to initialize local datastore factory", e);
+            logger.atSevere()
+                  .withCause(e)
+                  .log("Failed to initialize local datastore factory.");
             throw new IllegalStateException(e);
         }
     }
@@ -111,13 +111,11 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
             try {
                 datastore.dropAllTables();
             } catch (Throwable e) {
-                log().error(format("Unable to drop tables in Datastore %s", datastore), e);
+                logger.atSevere()
+                      .withCause(e)
+                      .log("Unable to drop tables in Datastore `%s`.", datastore);
                 throw new IllegalStateException(e);
             }
         }
-    }
-
-    private static Logger log() {
-        return Logging.get(TestDatastoreStorageFactory.class);
     }
 }

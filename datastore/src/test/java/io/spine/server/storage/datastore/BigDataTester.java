@@ -109,7 +109,7 @@ public class BigDataTester<I> implements Logging {
                         writeTime));
         }
 
-        log().debug("Writing took {} millis.", writeTime);
+        _debug().log("Writing took %d millis.", writeTime);
 
         try {
             Thread.sleep(1000);
@@ -130,7 +130,7 @@ public class BigDataTester<I> implements Logging {
                         readMillisLimit,
                         readTime));
         }
-        log().debug("Reading took {} millis.", readTime);
+        _debug().log("Reading took %d millis.", readTime);
 
         assertEquals(records.size(), size(readRecords), "Unexpected records count read.");
     }

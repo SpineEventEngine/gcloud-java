@@ -295,8 +295,6 @@ public final class Namespace {
          */
         SINGLE_CUSTOM(NamespaceConverters.forCustomNamespace());
 
-        // This enum isn't intended to be serialized.
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final NamespaceConverter namespaceConverter;
 
         static ConverterType forTenantId(TenantId tenantId) {

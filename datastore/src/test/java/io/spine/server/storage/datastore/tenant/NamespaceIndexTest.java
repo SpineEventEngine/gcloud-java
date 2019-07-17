@@ -32,6 +32,8 @@ import io.spine.net.InternetDomain;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.testing.TestValues;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -61,11 +63,25 @@ class NamespaceIndexTest {
 
     private static final NsConverterFactory converterFactory = NsConverterFactory.defaults();
 
+    private NamespaceIndex namespaceIndex;
+    private BoundedContext context;
+
     private static TenantId newTenantId() {
         return TenantId
                 .newBuilder()
                 .setValue(TestValues.randomString())
                 .vBuild();
+    }
+
+    @BeforeEach
+    void createIndex() {
+        namespaceIndex = nsIndex();
+        context = BoundedContextBuilder.assumingTests().build();
+    }
+
+    @AfterEach
+    void closeContext() throws Exception {
+        context.close();
     }
 
     @Test
@@ -77,17 +93,13 @@ class NamespaceIndexTest {
         new NullPointerTester()
                 .setDefault(Namespace.class, defaultNamespace)
                 .setDefault(TenantId.class, tenantId)
-                .setDefault(BoundedContext.class, BoundedContextBuilder.assumingTests()
-                                                                       .build())
-                .testInstanceMethods(nsIndex(),
-                                     NullPointerTester.Visibility.PACKAGE);
+                .setDefault(BoundedContext.class, context)
+                .testInstanceMethods(namespaceIndex, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
     @DisplayName("store tenant IDs")
     void testStore() {
-        NamespaceIndex namespaceIndex = nsIndex();
-
         Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
 
@@ -107,8 +119,6 @@ class NamespaceIndexTest {
     @Test
     @DisplayName("do nothing on close")
     void testClose() {
-        NamespaceIndex namespaceIndex = nsIndex();
-
         namespaceIndex.close();
         namespaceIndex.close();
         // No exception is thrown on the second call to #close() => no operation is performed
@@ -117,8 +127,6 @@ class NamespaceIndexTest {
     @Test
     @DisplayName("find existing namespaces")
     void testFindExisting() {
-        NamespaceIndex namespaceIndex = nsIndex();
-
         // Ensure no namespace has been kept
         Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
@@ -133,8 +141,6 @@ class NamespaceIndexTest {
     @Test
     @DisplayName("not find non-existing namespaces")
     void testNotFindNonExisting() {
-        NamespaceIndex namespaceIndex = nsIndex();
-
         // Ensure no namespace has been kept
         Set<TenantId> initialEmptySet = namespaceIndex.all();
         assertTrue(initialEmptySet.isEmpty());
@@ -150,6 +156,14 @@ class NamespaceIndexTest {
     void testAsync() {
         assertTimeout(Duration.ofSeconds(5L),
                       NamespaceIndexTest::testSynchronizeAccessMethods);
+    }
+
+    @Test
+    @DisplayName("confirm registration")
+    void registered() {
+        namespaceIndex.registerWith(context);
+        assertThat(namespaceIndex.isRegistered())
+                .isTrue();
     }
 
     @SuppressWarnings("OverlyLongMethod")
