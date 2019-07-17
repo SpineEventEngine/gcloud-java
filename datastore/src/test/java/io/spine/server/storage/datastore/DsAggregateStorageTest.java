@@ -254,8 +254,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
             for (int i = 0; i < tasksCount; i++) {
                 AggAddTask command = addTask(id);
                 CommandEnvelope envelope = CommandEnvelope.of(factory.createCommand(command));
-                ProjectId target = repository.dispatch(envelope);
-                assertEquals(id, target);
+                repository.dispatch(envelope);
             }
 
             int minimalSnapshotTrigger = 1;

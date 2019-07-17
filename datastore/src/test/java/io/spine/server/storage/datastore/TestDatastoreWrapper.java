@@ -141,10 +141,10 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
     @SuppressWarnings("BusyWait")   // allow Datastore to become consistent before reading.
     private void waitForConsistency() {
         if (!waitForConsistency) {
-            log().debug("Wait for consistency is not required.");
+            _debug().log("Wait for consistency is not required.");
             return;
         }
-        log().debug("Waiting for data consistency to establish.");
+        _debug().log("Waiting for data consistency to establish.");
 
         for (int awaitCycle = 0; awaitCycle < CONSISTENCY_AWAIT_ITERATIONS; awaitCycle++) {
             try {
@@ -159,7 +159,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
      * Deletes all records from the datastore.
      */
     public void dropAllTables() {
-        log().debug("Dropping all tables");
+        _debug().log("Dropping all tables...");
         for (String kind : kindsCache) {
             dropTable(kind);
         }

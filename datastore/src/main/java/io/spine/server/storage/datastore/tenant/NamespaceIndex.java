@@ -50,13 +50,12 @@ final class NamespaceIndex implements TenantIndex {
     private static final Kind NAMESPACE_KIND = Kind.ofNamespace();
 
     private final Set<Namespace> cache = new HashSet<>();
-
     private final Object lock = new Object();
     private final NamespaceQuery namespaceQuery;
-
     private final NsConverterFactory converterFactory;
-
     private final boolean multitenant;
+
+    private boolean registered;
 
     NamespaceIndex(Datastore datastore, boolean multitenant, NsConverterFactory converterFactory) {
         this(new DefaultNamespaceQuery(datastore),
@@ -66,7 +65,8 @@ final class NamespaceIndex implements TenantIndex {
     }
 
     NamespaceIndex(NamespaceQuery namespaceQuery,
-                   boolean multitenant, NsConverterFactory converterFactory) {
+                   boolean multitenant,
+                   NsConverterFactory converterFactory) {
         this.namespaceQuery = checkNotNull(namespaceQuery);
         this.converterFactory = converterFactory;
         this.multitenant = multitenant;
@@ -75,9 +75,13 @@ final class NamespaceIndex implements TenantIndex {
     @Override
     public void registerWith(BoundedContext context) {
         checkNotNull(context);
+        registered = true;
+        // Do nothing more, as this implementation does not rely on any `BoundedContext` properties.
+    }
 
-        // Do nothing more, as this implementation does not rely on any {@code BoundedContext}
-        // properties.
+    @Override
+    public boolean isRegistered() {
+        return registered;
     }
 
     /**

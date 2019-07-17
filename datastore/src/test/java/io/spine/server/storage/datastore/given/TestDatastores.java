@@ -118,7 +118,7 @@ public class TestDatastores {
                 ServiceAccountCredentials credentials = fromStream(bufferedStream);
                 builder().setCredentials(credentials);
             } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
-                log().warn("Cannot find the credentials file {}.", CREDENTIALS_FILE_PATH);
+                _warn().log("Cannot find the credentials file `%s`.", CREDENTIALS_FILE_PATH);
             }
         }
     }

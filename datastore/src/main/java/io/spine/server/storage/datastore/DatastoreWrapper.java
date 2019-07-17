@@ -270,7 +270,7 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreReader#run(Query)
      */
     public DsQueryIterator read(StructuredQuery<Entity> query) {
-        Namespace namespace = getNamespace();
+        Namespace namespace = currentNamespace();
         StructuredQuery<Entity> queryWithNamespace =
                 query.toBuilder()
                      .setNamespace(namespace.getValue())
@@ -377,7 +377,7 @@ public class DatastoreWrapper implements Logging {
      *         kind (a.k.a. type, table, etc.) of the records to delete
      */
     void dropTable(String table) {
-        Namespace namespace = getNamespace();
+        Namespace namespace = currentNamespace();
         StructuredQuery<Entity> query =
                 Query.newEntityQueryBuilder()
                      .setNamespace(namespace.getValue())
@@ -497,7 +497,7 @@ public class DatastoreWrapper implements Logging {
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
         }
-        Namespace namespace = getNamespace();
+        Namespace namespace = currentNamespace();
         keyFactory.setNamespace(namespace.getValue());
 
         return keyFactory;
@@ -536,8 +536,8 @@ public class DatastoreWrapper implements Logging {
      */
     private Iterator<Entity> readBulk(List<Key> keys) {
         int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
-        log().debug("Reading a big bulk of entities synchronously. The data is read as {} pages.",
-                    pageCount);
+        _debug().log("Reading a big bulk of entities synchronously." +
+                             " The data is read as %d pages.", pageCount);
         int lowerBound = 0;
         int higherBound = MAX_KEYS_PER_READ_REQUEST;
         int keysLeft = keys.size();
@@ -567,9 +567,9 @@ public class DatastoreWrapper implements Logging {
         }
     }
 
-    private Namespace getNamespace() {
+    private Namespace currentNamespace() {
         Namespace namespace = namespaceSupplier.get();
-        log().debug("Using namespace \"{}\".", namespace.getValue());
+        _debug().log("Using namespace `%s`.", namespace);
         return namespace;
     }
 
