@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore;
 
 import com.google.common.base.Throwables;
+import io.spine.client.ResponseFormat;
 import io.spine.logging.Logging;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -120,7 +121,7 @@ public class BigDataTester<I> implements Logging {
         long readStart = System.currentTimeMillis();
 
         // Do not test data equality here, only the sizes and time
-        Iterator<EntityRecord> readRecords = storage.readAll();
+        Iterator<EntityRecord> readRecords = storage.readAll(ResponseFormat.getDefaultInstance());
 
         long readEnd = System.currentTimeMillis();
         long readTime = readEnd - readStart;

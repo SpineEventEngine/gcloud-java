@@ -30,7 +30,7 @@ import io.spine.client.CompositeFilter;
 import io.spine.client.EntityId;
 import io.spine.client.IdFilter;
 import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
+import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
@@ -92,10 +92,6 @@ public class DsRecordStorageTestEnv {
 
     public static TestDatastoreStorageFactory datastoreFactory() {
         return TestDatastoreStorageFactory.defaultInstance();
-    }
-
-    public static Pagination emptyPagination() {
-        return Pagination.getDefaultInstance();
     }
 
     public static OrderBy emptyOrderBy() {
@@ -164,18 +160,19 @@ public class DsRecordStorageTestEnv {
                 .vBuild();
     }
 
-    public static OrderBy ascendingBy(CollegeEntity.CollegeColumn column) {
-        return orderBy(column.columnName(), ASCENDING);
+    public static ResponseFormat ascendingBy(CollegeEntity.CollegeColumn column) {
+        return responseIn(orderBy(column, ASCENDING));
     }
 
-    public static OrderBy descendingBy(CollegeEntity.CollegeColumn column) {
-        return orderBy(column.columnName(), DESCENDING);
+    public static ResponseFormat descendingBy(CollegeEntity.CollegeColumn column) {
+        return responseIn(orderBy(column, DESCENDING));
     }
 
-    private static OrderBy orderBy(String column, OrderBy.Direction descending) {
+    public static OrderBy orderBy(CollegeEntity.CollegeColumn column,
+                                  OrderBy.Direction descending) {
         return OrderBy
                 .newBuilder()
-                .setColumn(column)
+                .setColumn(column.columnName())
                 .setDirection(descending)
                 .vBuild();
     }
@@ -207,11 +204,24 @@ public class DsRecordStorageTestEnv {
                 .collect(toList());
     }
 
-    public static Pagination pagination(int pageSize) {
-        return Pagination
+    public static ResponseFormat responseIn(OrderBy orderBy) {
+        return ResponseFormat
                 .newBuilder()
-                .setPageSize(pageSize)
+                .setOrderBy(orderBy)
                 .vBuild();
+    }
+
+    public static ResponseFormat masked(FieldMask mask) {
+        return ResponseFormat.newBuilder()
+                             .setFieldMask(mask)
+                             .vBuild();
+    }
+
+    public static ResponseFormat orderedAndLimited(OrderBy orderBy, int limit) {
+        return ResponseFormat.newBuilder()
+                             .setOrderBy(orderBy)
+                             .setLimit(limit)
+                             .vBuild();
     }
 
     @CanIgnoreReturnValue

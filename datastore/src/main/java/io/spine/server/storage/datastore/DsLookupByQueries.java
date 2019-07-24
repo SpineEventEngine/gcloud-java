@@ -25,6 +25,7 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.Streams;
 import com.google.protobuf.FieldMask;
 import io.spine.client.OrderBy;
+import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.QueryParameters;
@@ -47,9 +48,8 @@ import static java.util.stream.Collectors.toList;
 /**
  * An {@code Entity} lookup using {@linkplain QueryParameters Spine query parameters}.
  *
- * @implNote A single {@linkplain #find(QueryParameters, FieldMask) find()} call may turn
- *         into several
- *         Datastore reads. See {@link DsFilters} for details.
+ * @implNote A single {@linkplain #find(QueryParameters, ResponseFormat) find()} call may
+ *         turn into several Datastore reads. See {@link DsFilters} for details.
  */
 final class DsLookupByQueries {
 
@@ -68,30 +68,34 @@ final class DsLookupByQueries {
 
     /**
      * Finds a collection of entities matching provided {@link QueryParameters} in Datastore and
-     * returns them one-by-one applying a {@code fieldMask}.
+     * returns them according to the specified {@code format}.
      *
      * @param params
-     *         parameters specifying the filters, order and limit for records to conform to
-     * @param fieldMask
-     *         a mask to apply to each returned {@linkplain EntityRecord#getState() records state}
+     *         parameters specifying the filters for records to conform to
+     * @param format
+     *         format of the search specifying limits, order and field mask to apply to the results
      * @return an iterator over the entity records from the Datastore
      */
-    Iterator<EntityRecord> find(QueryParameters params, FieldMask fieldMask) {
-        List<StructuredQuery<Entity>> queries = splitToMultipleDsQueries(params);
+    Iterator<EntityRecord> find(QueryParameters params, ResponseFormat format) {
+        List<StructuredQuery<Entity>> queries = splitToMultipleDsQueries(params, format);
+        FieldMask mask = format.getFieldMask();
         if (queries.size() == 1) {
-            Iterator<EntityRecord> results = find(queries.get(0), fieldMask);
+            Iterator<EntityRecord> results = find(queries.get(0), mask);
             return results;
         }
-        Iterator<EntityRecord> results = find(queries, params.orderBy(), params.limit(), fieldMask);
+
+        Iterator<EntityRecord> results =
+                find(queries, format.getOrderBy(), format.getLimit(), mask);
         return results;
     }
 
-    private List<StructuredQuery<Entity>> splitToMultipleDsQueries(QueryParameters params) {
+    private List<StructuredQuery<Entity>>
+    splitToMultipleDsQueries(QueryParameters params, ResponseFormat format) {
         checkNotNull(params);
 
         List<StructuredQuery<Entity>> queries = buildDsFilters(params.iterator())
                 .stream()
-                .map(new QueryWithFilter(params, Kind.of(typeUrl)))
+                .map(new QueryWithFilter(format, Kind.of(typeUrl)))
                 .collect(toList());
         return queries;
     }

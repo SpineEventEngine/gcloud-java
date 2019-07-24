@@ -28,6 +28,8 @@ import com.google.common.base.Functions;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.client.OrderBy;
+import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityQuery;
@@ -128,34 +130,23 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        return idLookup.findActive(ids);
+    protected Iterator<EntityRecord> readAllRecords(ResponseFormat format) {
+        Iterator<EntityRecord> result = queryLookup.find(activeEntityQueryParams(this), format);
+        return result;
+    }
+
+    @Override
+    protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, ResponseFormat format) {
+        if (isQueryForAll(query)) {
+            return readAll(format);
+        }
+        return queryBy(query, format);
     }
 
     @Override
     protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids,
                                                                    FieldMask fieldMask) {
         return idLookup.findActive(ids, fieldMask);
-    }
-
-    @Override
-    protected Iterator<EntityRecord> readAllRecords() {
-        Iterator<EntityRecord> result = readAllRecords(FieldMask.getDefaultInstance());
-        return result;
-    }
-
-    @Override
-    protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        Iterator<EntityRecord> result = queryLookup.find(activeEntityQueryParams(this), fieldMask);
-        return result;
-    }
-
-    @Override
-    protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        if (isQueryForAll(query)) {
-            return readAll(fieldMask);
-        }
-        return queryBy(query, fieldMask);
     }
 
     @SuppressWarnings("PMD.SimplifyBooleanReturns")
@@ -167,19 +158,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         }
 
         QueryParameters params = query.getParameters();
-        if (notEmpty(params)) {
-            return false;
-        }
-
-        if (params.ordered()) {
-            return false;
-        }
-
-        if (params.limited()) {
-            return false;
-        }
-
-        return true;
+        return !notEmpty(params);
     }
 
     /**
@@ -190,17 +169,18 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      *
      * @param entityQuery
      *         the {@link EntityQuery} to query the Datastore by
-     * @param fieldMask
-     *         the {@code FieldMask} to apply to all the retrieved entity states
+     * @param responseFormat
+     *         the {@code ResponseFormat} according to which the result is retrieved
      * @return an iterator over the resulting entity records
      */
-    private Iterator<EntityRecord> queryBy(EntityQuery<I> entityQuery, FieldMask fieldMask) {
+    private Iterator<EntityRecord> queryBy(EntityQuery<I> entityQuery,
+                                           ResponseFormat responseFormat) {
         EntityQuery<I> completeQuery = includeLifecycle(entityQuery);
         Collection<I> idFilter = completeQuery.getIds();
         QueryParameters params = completeQuery.getParameters();
         Iterator<EntityRecord> result = idFilter.isEmpty()
-                                        ? queryLookup.find(params, fieldMask)
-                                        : queryByIdsAndColumns(idFilter, params, fieldMask);
+                                        ? queryLookup.find(params, responseFormat)
+                                        : queryByIdsAndColumns(idFilter, params, responseFormat);
         return result;
     }
 
@@ -220,20 +200,23 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      *         the IDs to search by
      * @param params
      *         the additional query parameters
-     * @param fieldMask
-     *         the {@code FieldMask} to apply to all the retrieved entity states
+     * @param format
+     *         the format of the response including a field mask to apply, response size limit
+     *         and ordering
      * @return an iterator over the resulting entity records
      */
     private Iterator<EntityRecord> queryByIdsAndColumns(Collection<I> acceptableIds,
                                                         QueryParameters params,
-                                                        FieldMask fieldMask) {
+                                                        ResponseFormat format) {
         Predicate<Entity> inMemPredicate = columnPredicate(params);
-        if (params.ordered()) {
-            if (params.limited()) {
-                return idLookup.find(acceptableIds, fieldMask, inMemPredicate,
-                                     params.orderBy(), params.limit());
+        FieldMask fieldMask = format.getFieldMask();
+        if (format.hasOrderBy()) {
+            OrderBy order = format.getOrderBy();
+            int limit = format.getLimit();
+            if (limit > 0) {
+                return idLookup.find(acceptableIds, fieldMask, inMemPredicate, order, limit);
             }
-            return idLookup.find(acceptableIds, fieldMask, inMemPredicate, params.orderBy());
+            return idLookup.find(acceptableIds, fieldMask, inMemPredicate, order);
         }
         return idLookup.find(acceptableIds, fieldMask, inMemPredicate);
     }

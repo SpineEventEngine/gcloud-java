@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore.given;
 
 import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
 import io.spine.test.datastore.College;
@@ -44,6 +45,8 @@ public class CollegeEntity
         return Given.projectionOfClass(CollegeEntity.class)
                     .withId(id)
                     .withState(state)
+                    .withVersion(17)
+                    .modifiedOn(Time.currentTime())
                     .build();
     }
 

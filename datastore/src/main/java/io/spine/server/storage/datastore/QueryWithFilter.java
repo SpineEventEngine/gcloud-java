@@ -24,7 +24,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import io.spine.client.OrderBy;
-import io.spine.server.entity.storage.QueryParameters;
+import io.spine.client.ResponseFormat;
 
 import java.util.function.Function;
 
@@ -41,17 +41,18 @@ final class QueryWithFilter implements Function<StructuredQuery.Filter, Structur
 
     private final StructuredQuery.Builder<Entity> builder;
 
-    QueryWithFilter(QueryParameters params, Kind kind) {
-        checkNotNull(params);
+    QueryWithFilter(ResponseFormat format, Kind kind) {
+        checkNotNull(format);
         checkNotNull(kind);
 
         this.builder = Query.newEntityQueryBuilder()
                             .setKind(kind.getValue());
-        if (params.ordered()) {
-            this.builder.setOrderBy(translateOrderBy(params.orderBy()));
+        if (format.hasOrderBy()) {
+            this.builder.setOrderBy(translateOrderBy(format.getOrderBy()));
         }
-        if (params.limited()) {
-            this.builder.setLimit(params.limit());
+        int limit = format.getLimit();
+        if (limit > 0) {
+            this.builder.setLimit(limit);
         }
     }
 

@@ -48,13 +48,17 @@ public class TestConstCounterEntity
     public static TestConstCounterEntity create(ProjectId id) {
         return Given.projectionOfClass(TestConstCounterEntity.class)
                     .withId(id)
+                    .withVersion(147)
+                    .modifiedOn(Time.currentTime())
                     .build();
     }
 
-    public static TestConstCounterEntity create(ProjectId id, Project state) {
+    public static TestConstCounterEntity create(ProjectId id, Project state, int versionNumber) {
         return Given.projectionOfClass(TestConstCounterEntity.class)
                     .withId(id)
                     .withState(state)
+                    .withVersion(versionNumber)
+                    .modifiedOn(Time.currentTime())
                     .build();
     }
 

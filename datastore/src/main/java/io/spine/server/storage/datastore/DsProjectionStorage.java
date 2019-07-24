@@ -23,6 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
@@ -87,23 +88,13 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        return recordStorage().readMultiple(ids);
+    protected Iterator<EntityRecord> readAllRecords(ResponseFormat format) {
+        return recordStorage.readAllRecords(format);
     }
 
     @Override
     protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
         return recordStorage().readMultiple(ids, fieldMask);
-    }
-
-    @Override
-    protected Iterator<EntityRecord> readAllRecords() {
-        return recordStorage().readAll();
-    }
-
-    @Override
-    protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        return recordStorage().readAll(fieldMask);
     }
 
     @Override
