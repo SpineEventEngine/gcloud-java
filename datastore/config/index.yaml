@@ -10,23 +10,10 @@ indexes:
     - name: type
     - name: created
 
-  - kind: spine.system.server.EntityHistory
+  - kind: spine.server.delivery.InboxMessage
     properties:
-    - name: aggregate_id
-    - name: version
-      direction: desc
-    - name: created
-      direction: desc
-    - name: snapshot
-
-  - kind: spine.system.server.CommandLifecycle
-    properties:
-    - name: aggregate_id
-    - name: version
-      direction: desc
-    - name: created
-      direction: desc
-    - name: snapshot
+      - name: inbox_shard
+      - name: when_received
 
   # Indexes for the Aggregates.
   #
