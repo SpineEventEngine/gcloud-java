@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/SpineEventEngine/gcloud-java/branch/master/graph/badge.svg)](https://codecov.io/gh/SpineEventEngine/gcloud-java)
 [![Build Status](https://travis-ci.com/SpineEventEngine/gcloud-java.svg?branch=master)](https://travis-ci.com/SpineEventEngine/gcloud-java)
 
-Support for Spine-based Java apps running under Google App Engine.
+Support for Spine-based Java apps running at Google Cloud.
 
 ### Configuring Datastore
 
