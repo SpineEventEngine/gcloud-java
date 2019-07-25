@@ -23,7 +23,6 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Functions;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -242,19 +241,6 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      */
     protected DatastoreWrapper getDatastore() {
         return datastore;
-    }
-
-    /**
-     * Obtains the {@link TypeUrl} of the messages to save to this store.
-     *
-     * <p>Allows the customization of the storage behavior in descendants.
-     *
-     * @return the {@link TypeUrl} of the stored messages
-     */
-    @VisibleForTesting
-    // Otherwise this getter is not used
-    TypeUrl getTypeUrl() {
-        return typeUrl;
     }
 
     protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
