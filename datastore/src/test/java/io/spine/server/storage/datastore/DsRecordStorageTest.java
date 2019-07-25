@@ -46,7 +46,6 @@ import io.spine.server.storage.RecordStorageTest;
 import io.spine.server.storage.datastore.given.CollegeEntity;
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv;
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.EntityWithCustomColumnName;
-import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.TestEntity;
 import io.spine.server.storage.datastore.given.TestConstCounterEntity;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.datastore.College;
@@ -144,7 +143,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
     @Override
     protected Class<? extends TestCounterEntity> getTestEntityClass() {
-        return TestEntity.class;
+        return TestCounterEntity.class;
     }
 
     @Override

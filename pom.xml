@@ -70,19 +70,19 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.junit.jupiter</groupId>
     <artifactId>junit-jupiter-api</artifactId>
-    <version>5.5.0</version>
+    <version>5.4.2</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>org.junit.jupiter</groupId>
     <artifactId>junit-jupiter-engine</artifactId>
-    <version>5.5.0</version>
+    <version>5.4.2</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>org.junit.jupiter</groupId>
     <artifactId>junit-jupiter-params</artifactId>
-    <version>5.5.0</version>
+    <version>5.4.2</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -110,12 +110,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.protobuf</groupId>
     <artifactId>protoc</artifactId>
-    <version>3.8.0</version>
+    <version>3.9.0</version>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>protoc-gen-grpc-java</artifactId>
-    <version>1.21.0</version>
+    <version>1.22.0</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
@@ -135,12 +135,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.jacoco</groupId>
     <artifactId>org.jacoco.agent</artifactId>
-    <version>0.8.3</version>
+    <version>0.8.4</version>
   </dependency>
   <dependency>
     <groupId>org.jacoco</groupId>
     <artifactId>org.jacoco.ant</artifactId>
-    <version>0.8.3</version>
+    <version>0.8.4</version>
   </dependency>
 </dependencies>
 </project>

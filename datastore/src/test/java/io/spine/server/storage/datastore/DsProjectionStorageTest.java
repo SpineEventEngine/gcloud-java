@@ -45,7 +45,7 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
 
     @Override
     protected Class<? extends TestCounterEntity> getTestEntityClass() {
-        return TestEntity.class;
+        return TestCounterEntity.class;
     }
 
     @Override
@@ -70,12 +70,5 @@ class DsProjectionStorageTest extends ProjectionStorageTest {
         ProjectionStorage<ProjectId> result =
                 datastoreFactory.createProjectionStorage(singleTenantSpec(), projectionClass);
         return result;
-    }
-
-    public static class TestEntity extends TestCounterEntity {
-
-        protected TestEntity(ProjectId id) {
-            super(id);
-        }
     }
 }

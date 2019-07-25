@@ -390,18 +390,18 @@ final class DsFilters {
             // Only non-faulty values are used.
         private StructuredQuery.Filter toFilter(FilterAdapter adapter) {
             Value<?> value = adapter.toValue(column, columnFilter);
-            String columnIdentifier = column.storedName();
+            String columnName = column.name();
             switch (columnFilter.getOperator()) {
                 case EQUAL:
-                    return eq(columnIdentifier, value);
+                    return eq(columnName, value);
                 case GREATER_THAN:
-                    return gt(columnIdentifier, value);
+                    return gt(columnName, value);
                 case LESS_THAN:
-                    return lt(columnIdentifier, value);
+                    return lt(columnName, value);
                 case GREATER_OR_EQUAL:
-                    return ge(columnIdentifier, value);
+                    return ge(columnName, value);
                 case LESS_OR_EQUAL:
-                    return le(columnIdentifier, value);
+                    return le(columnName, value);
                 default:
                     throw new IllegalStateException(columnFilter.getOperator()
                                                                 .name());
