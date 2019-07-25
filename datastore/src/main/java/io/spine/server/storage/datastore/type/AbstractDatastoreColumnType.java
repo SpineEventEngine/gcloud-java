@@ -39,7 +39,7 @@ public abstract class AbstractDatastoreColumnType<J, C> implements DatastoreColu
     /**
      * {@inheritDoc}
      *
-     * <p>Delegates the call to the Datastore-native {@link BaseEntity.Builder#setNull setNull}.
+     * <p>Delegates the call to the Datastore-native {@code setNull}.
      */
     @Override
     public void setNull(BaseEntity.Builder<Key, Entity.Builder> storageRecord,

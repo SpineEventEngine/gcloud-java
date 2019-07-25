@@ -47,9 +47,8 @@ import static java.lang.String.format;
  * is tracked and represented with a span so that each message handler invocation is converted into
  * a single span.
  *
- * <p>The exception from the span-per-handler rule is
- * an {@linkplain io.spine.server.aggregate.Apply event applier} invocation, which is treated as
- * a part of the respective command handler or event reactor.
+ * <p>The exception from the span-per-handler rule is an event applier invocation, which is treated
+ * as a part of the respective command handler or event reactor.
  */
 @SuppressWarnings("WeakerAccess") // Allows customization via subclassing.
 public class SignalSpan {

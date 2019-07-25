@@ -30,7 +30,7 @@ import io.spine.server.entity.storage.ColumnType;
 /**
  * The contract of a {@link ColumnType} used by the Datastore storage.
  *
- * <p>Uses {@link Entity.Builder} as the record type and {@code String} as
+ * <p>Uses {@code Entity.Builder} as the record type and {@code String} as
  * the column identifier type.
  */
 @SPI
