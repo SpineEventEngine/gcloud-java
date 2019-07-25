@@ -426,13 +426,6 @@ public class DsRecordStorageTestEnv {
      * Test Entity types
      ************************/
 
-    public static class TestEntity extends RecordStorageTestEnv.TestCounterEntity {
-
-        protected TestEntity(ProjectId id) {
-            super(id);
-        }
-    }
-
     public static class EntityWithCustomColumnName extends AbstractEntity<ProjectId, Project> {
 
         public EntityWithCustomColumnName(ProjectId id) {
