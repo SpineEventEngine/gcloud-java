@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.BaseEntity;
+import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StructuredQuery;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -43,7 +44,7 @@ import java.util.NoSuchElementException;
  * @param <E>
  *         the type of queried entities
  */
-final class DsQueryPageIterator<E extends BaseEntity<?>> implements Iterator<DsQueryIterator> {
+final class DsQueryPageIterator<E extends BaseEntity<Key>> implements Iterator<DsQueryIterator> {
 
     private final DatastoreWrapper datastore;
 

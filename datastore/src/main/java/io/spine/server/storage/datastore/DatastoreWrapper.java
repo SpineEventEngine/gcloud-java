@@ -271,7 +271,7 @@ public class DatastoreWrapper implements Logging {
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @see DatastoreReader#run(Query)
      */
-    public <E extends BaseEntity<?>> DsQueryIterator<E> read(StructuredQuery<E> query) {
+    public <E extends BaseEntity<Key>> DsQueryIterator<E> read(StructuredQuery<E> query) {
         Namespace namespace = currentNamespace();
         StructuredQuery<E> queryWithNamespace =
                 query.toBuilder()
@@ -300,7 +300,7 @@ public class DatastoreWrapper implements Logging {
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
-    <E extends BaseEntity<?>> Iterator<E> readAll(StructuredQuery<E> query, int pageSize) {
+    <E extends BaseEntity<Key>> Iterator<E> readAll(StructuredQuery<E> query, int pageSize) {
         return readAllPageByPage(query, pageSize);
     }
 
@@ -321,7 +321,7 @@ public class DatastoreWrapper implements Logging {
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
-    <E extends BaseEntity<?>> Iterator<E> readAll(StructuredQuery<E> query) {
+    <E extends BaseEntity<Key>> Iterator<E> readAll(StructuredQuery<E> query) {
         return readAllPageByPage(query, null);
     }
 
@@ -347,7 +347,7 @@ public class DatastoreWrapper implements Logging {
      *         the provided {@code batchSize} is 0
      */
     @SuppressWarnings("unchecked") // Checked logically.
-    private <E extends BaseEntity<?>> Iterator<E>
+    private <E extends BaseEntity<Key>> Iterator<E>
     readAllPageByPage(StructuredQuery<E> query, @Nullable Integer pageSize) {
         checkArgument(query.getLimit() == null,
                       "Cannot limit a number of entities for \"read all\" operation.");
@@ -360,7 +360,7 @@ public class DatastoreWrapper implements Logging {
                 .iterator();
     }
 
-    private static <E extends BaseEntity<?>> StructuredQuery<E>
+    private static <E extends BaseEntity<Key>> StructuredQuery<E>
     limit(StructuredQuery<E> query, @Nullable Integer batchSize) {
         return batchSize == null
                ? query

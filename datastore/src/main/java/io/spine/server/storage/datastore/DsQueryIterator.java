@@ -23,6 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.DatastoreReaderWriter;
+import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.UnmodifiableIterator;
@@ -48,7 +49,7 @@ import java.util.NoSuchElementException;
  * @param <E>
  *         the type of queried entities
  */
-final class DsQueryIterator<E extends BaseEntity<?>> extends UnmodifiableIterator<E> {
+final class DsQueryIterator<E extends BaseEntity<Key>> extends UnmodifiableIterator<E> {
 
     private final StructuredQuery<E> query;
     private final QueryResults<E> currentPage;
