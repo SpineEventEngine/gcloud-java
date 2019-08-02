@@ -20,10 +20,9 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.Streams;
 import io.spine.string.Stringifiers;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -63,19 +62,20 @@ final class Indexes {
         checkNotNull(kind);
         checkNotNull(idType);
 
-        EntityQuery.Builder query = Query.newEntityQueryBuilder()
-                                         .setKind(kind.getValue());
-        Iterator<Entity> allEntities = datastore.read(query.build());
+        StructuredQuery<Key> query = Query.newKeyQueryBuilder()
+                                          .setKind(kind.getValue())
+                                          .build();
+        Iterator<Key> allEntities = datastore.read(query);
         Iterator<I> idIterator = Streams.stream(allEntities)
                                         .map(idExtractor(idType))
                                         .iterator();
         return idIterator;
     }
 
-    private static <I> Function<Entity, @Nullable I> idExtractor(Class<I> idType) {
-        return input -> {
-            checkNotNull(input);
-            Key key = input.getKey();
+    private static <I> Function<Key, @Nullable I>
+    idExtractor(Class<I> idType) {
+        return key -> {
+            checkNotNull(key);
             String stringId = key.getName();
             I id = Stringifiers.fromString(stringId, idType);
             return id;
