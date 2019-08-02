@@ -72,8 +72,7 @@ final class Indexes {
         return idIterator;
     }
 
-    private static <I> Function<Key, @Nullable I>
-    idExtractor(Class<I> idType) {
+    private static <I> Function<Key, @Nullable I> idExtractor(Class<I> idType) {
         return key -> {
             checkNotNull(key);
             String stringId = key.getName();
