@@ -360,8 +360,8 @@ public class DatastoreWrapper implements Logging {
                 .iterator();
     }
 
-    private static <E> StructuredQuery<E>
-    limit(StructuredQuery<E> query, @Nullable Integer batchSize) {
+    private static <E> StructuredQuery<E> limit(StructuredQuery<E> query,
+                                                @Nullable Integer batchSize) {
         return batchSize == null
                ? query
                : query.toBuilder()
