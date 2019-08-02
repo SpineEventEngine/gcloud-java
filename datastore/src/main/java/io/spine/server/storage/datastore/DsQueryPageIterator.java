@@ -20,7 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.StructuredQuery;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -39,15 +39,18 @@ import java.util.NoSuchElementException;
  *
  * <p>If the limit is not specified, then the page size is determined by the Datastore
  * query restrictions.
+ *
+ * @param <E>
+ *         the type of queried entities
  */
-final class DsQueryPageIterator implements Iterator<DsQueryIterator> {
+final class DsQueryPageIterator<E extends BaseEntity<?>> implements Iterator<DsQueryIterator> {
 
     private final DatastoreWrapper datastore;
 
-    private DsQueryIterator currentPage;
-    private @Nullable DsQueryIterator nextPage;
+    private DsQueryIterator<E> currentPage;
+    private @Nullable DsQueryIterator<E> nextPage;
 
-    DsQueryPageIterator(StructuredQuery<Entity> query, DatastoreWrapper datastore) {
+    DsQueryPageIterator(StructuredQuery<E> query, DatastoreWrapper datastore) {
         this.datastore = datastore;
         this.currentPage = datastore.read(query);
     }
@@ -61,7 +64,7 @@ final class DsQueryPageIterator implements Iterator<DsQueryIterator> {
     }
 
     @Override
-    public DsQueryIterator next() {
+    public DsQueryIterator<E> next() {
         if (nextPage == null) {
             currentPage = loadNextPage();
         } else {
@@ -74,8 +77,8 @@ final class DsQueryPageIterator implements Iterator<DsQueryIterator> {
         return currentPage;
     }
 
-    private DsQueryIterator loadNextPage() {
-        StructuredQuery<Entity> nextPageQuery = currentPage.nextPageQuery();
+    private DsQueryIterator<E> loadNextPage() {
+        StructuredQuery<E> nextPageQuery = currentPage.nextPageQuery();
         return datastore.read(nextPageQuery);
     }
 }
