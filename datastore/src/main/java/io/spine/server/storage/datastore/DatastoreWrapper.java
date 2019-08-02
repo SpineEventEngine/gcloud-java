@@ -255,29 +255,29 @@ public class DatastoreWrapper implements Logging {
      * <p>The Datastore may return a partial result set, so an execution of this method may
      * result in several Datastore queries.
      *
-     * <p>The limit included in the {@link StructuredQuery}, will be a maximum count of entities
+     * <p>The limit included in the {@link StructuredQuery}, will be a maximum count of objects
      * in the returned iterator.
      *
      * <p>The returned {@link DsQueryIterator} allows to {@linkplain DsQueryIterator#nextPageQuery()
-     * create a query} to the next page of entities reusing an existing cursor.
+     * create a query} to the next page of results reusing an existing cursor.
      *
      * <p>The resulting {@code Iterator} is evaluated lazily. A call to
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
      * @param query
      *         {@link Query} to execute upon the Datastore
-     * @param <E>
+     * @param <R>
      *         the type of queried objects
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @see DatastoreReader#run(Query)
      */
-    public <E> DsQueryIterator<E> read(StructuredQuery<E> query) {
+    public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
         Namespace namespace = currentNamespace();
-        StructuredQuery<E> queryWithNamespace =
+        StructuredQuery<R> queryWithNamespace =
                 query.toBuilder()
                      .setNamespace(namespace.getValue())
                      .build();
-        DsQueryIterator<E> result = new DsQueryIterator<>(queryWithNamespace, actor);
+        DsQueryIterator<R> result = new DsQueryIterator<>(queryWithNamespace, actor);
         return result;
     }
 
@@ -294,13 +294,13 @@ public class DatastoreWrapper implements Logging {
      *         {@link Query} to execute upon the Datastore
      * @param pageSize
      *         a non-zero number of elements to be returned per a single read from Datastore
-     * @param <E>
+     * @param <R>
      *         the type of queried objects
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
-    <E> Iterator<E> readAll(StructuredQuery<E> query, int pageSize) {
+    <R> Iterator<R> readAll(StructuredQuery<R> query, int pageSize) {
         return readAllPageByPage(query, pageSize);
     }
 
@@ -315,13 +315,13 @@ public class DatastoreWrapper implements Logging {
      *
      * @param query
      *         {@link Query} to execute upon the Datastore
-     * @param <E>
+     * @param <R>
      *         the type of queried objects
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
-    <E> Iterator<E> readAll(StructuredQuery<E> query) {
+    <R> Iterator<R> readAll(StructuredQuery<R> query) {
         return readAllPageByPage(query, null);
     }
 
@@ -339,7 +339,7 @@ public class DatastoreWrapper implements Logging {
      * @param pageSize
      *         a non-zero number of elements to be returned per a single read from Datastore;
      *         if {@code null} the page size will be dictated by the Datastore
-     * @param <E>
+     * @param <R>
      *         the type of queried objects
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @throws IllegalArgumentException
@@ -347,20 +347,20 @@ public class DatastoreWrapper implements Logging {
      *         the provided {@code batchSize} is 0
      */
     @SuppressWarnings("unchecked") // Checked logically.
-    private <E> Iterator<E>
-    readAllPageByPage(StructuredQuery<E> query, @Nullable Integer pageSize) {
+    private <R> Iterator<R>
+    readAllPageByPage(StructuredQuery<R> query, @Nullable Integer pageSize) {
         checkArgument(query.getLimit() == null,
                       "Cannot limit a number of entities for \"read all\" operation.");
         checkArgument(pageSize == null || pageSize != 0,
                       "The size of a single read operation cannot be 0.");
 
-        StructuredQuery<E> limitedQuery = limit(query, pageSize);
+        StructuredQuery<R> limitedQuery = limit(query, pageSize);
         return stream(new DsQueryPageIterator<>(limitedQuery, this))
                 .flatMap(Streams::stream)
                 .iterator();
     }
 
-    private static <E> StructuredQuery<E> limit(StructuredQuery<E> query,
+    private static <R> StructuredQuery<R> limit(StructuredQuery<R> query,
                                                 @Nullable Integer batchSize) {
         return batchSize == null
                ? query

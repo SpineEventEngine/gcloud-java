@@ -39,17 +39,17 @@ import java.util.NoSuchElementException;
  * <p>If the limit is not specified, then the page size is determined by the Datastore
  * query restrictions.
  *
- * @param <E>
+ * @param <R>
  *         the type of queried objects
  */
-final class DsQueryPageIterator<E> implements Iterator<DsQueryIterator> {
+final class DsQueryPageIterator<R> implements Iterator<DsQueryIterator> {
 
     private final DatastoreWrapper datastore;
 
-    private DsQueryIterator<E> currentPage;
-    private @Nullable DsQueryIterator<E> nextPage;
+    private DsQueryIterator<R> currentPage;
+    private @Nullable DsQueryIterator<R> nextPage;
 
-    DsQueryPageIterator(StructuredQuery<E> query, DatastoreWrapper datastore) {
+    DsQueryPageIterator(StructuredQuery<R> query, DatastoreWrapper datastore) {
         this.datastore = datastore;
         this.currentPage = datastore.read(query);
     }
@@ -63,7 +63,7 @@ final class DsQueryPageIterator<E> implements Iterator<DsQueryIterator> {
     }
 
     @Override
-    public DsQueryIterator<E> next() {
+    public DsQueryIterator<R> next() {
         if (nextPage == null) {
             currentPage = loadNextPage();
         } else {
@@ -76,8 +76,8 @@ final class DsQueryPageIterator<E> implements Iterator<DsQueryIterator> {
         return currentPage;
     }
 
-    private DsQueryIterator<E> loadNextPage() {
-        StructuredQuery<E> nextPageQuery = currentPage.nextPageQuery();
+    private DsQueryIterator<R> loadNextPage() {
+        StructuredQuery<R> nextPageQuery = currentPage.nextPageQuery();
         return datastore.read(nextPageQuery);
     }
 }

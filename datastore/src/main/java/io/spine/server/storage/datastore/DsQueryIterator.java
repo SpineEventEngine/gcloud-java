@@ -44,20 +44,20 @@ import java.util.NoSuchElementException;
  *
  * <p>The {@link #remove() remove()} method throws an {@link UnsupportedOperationException}.
  *
- * @param <E>
+ * @param <R>
  *         the type of queried objects
  */
-final class DsQueryIterator<E> extends UnmodifiableIterator<E> {
+final class DsQueryIterator<R> extends UnmodifiableIterator<R> {
 
-    private final StructuredQuery<E> query;
-    private final QueryResults<E> currentPage;
+    private final StructuredQuery<R> query;
+    private final QueryResults<R> currentPage;
 
     private final Integer limit;
     private int readCount = 0;
 
     private boolean terminated;
 
-    DsQueryIterator(StructuredQuery<E> query, DatastoreReaderWriter datastore) {
+    DsQueryIterator(StructuredQuery<R> query, DatastoreReaderWriter datastore) {
         super();
         this.query = query;
         this.limit = query.getLimit();
@@ -94,9 +94,9 @@ final class DsQueryIterator<E> extends UnmodifiableIterator<E> {
      * <p>The query is built utilizing the {@linkplain Cursor Datastore Cursor} from the current
      * query results.
      */
-    StructuredQuery<E> nextPageQuery() {
+    StructuredQuery<R> nextPageQuery() {
         Cursor cursorAfter = currentPage.getCursorAfter();
-        StructuredQuery<E> queryForMoreResults =
+        StructuredQuery<R> queryForMoreResults =
                 query.toBuilder()
                      .setStartCursor(cursorAfter)
                      .build();
@@ -104,11 +104,11 @@ final class DsQueryIterator<E> extends UnmodifiableIterator<E> {
     }
 
     @Override
-    public E next() {
+    public R next() {
         if (!hasNext()) {
             throw new NoSuchElementException("The query results Iterator is empty.");
         }
-        E result = currentPage.next();
+        R result = currentPage.next();
         readCount++;
         return result;
     }
