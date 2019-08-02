@@ -267,11 +267,11 @@ public class DatastoreWrapper implements Logging {
      * @param query
      *         {@link Query} to execute upon the Datastore
      * @param <E>
-     *         the type of queried entities
+     *         the type of queried objects
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @see DatastoreReader#run(Query)
      */
-    public <E extends BaseEntity<Key>> DsQueryIterator<E> read(StructuredQuery<E> query) {
+    public <E> DsQueryIterator<E> read(StructuredQuery<E> query) {
         Namespace namespace = currentNamespace();
         StructuredQuery<E> queryWithNamespace =
                 query.toBuilder()
@@ -295,12 +295,12 @@ public class DatastoreWrapper implements Logging {
      * @param pageSize
      *         a non-zero number of elements to be returned per a single read from Datastore
      * @param <E>
-     *         the type of queried entities
+     *         the type of queried objects
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
-    <E extends BaseEntity<Key>> Iterator<E> readAll(StructuredQuery<E> query, int pageSize) {
+    <E> Iterator<E> readAll(StructuredQuery<E> query, int pageSize) {
         return readAllPageByPage(query, pageSize);
     }
 
@@ -316,12 +316,12 @@ public class DatastoreWrapper implements Logging {
      * @param query
      *         {@link Query} to execute upon the Datastore
      * @param <E>
-     *         the type of queried entities
+     *         the type of queried objects
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
-    <E extends BaseEntity<Key>> Iterator<E> readAll(StructuredQuery<E> query) {
+    <E> Iterator<E> readAll(StructuredQuery<E> query) {
         return readAllPageByPage(query, null);
     }
 
@@ -340,14 +340,14 @@ public class DatastoreWrapper implements Logging {
      *         a non-zero number of elements to be returned per a single read from Datastore;
      *         if {@code null} the page size will be dictated by the Datastore
      * @param <E>
-     *         the type of queried entities
+     *         the type of queried objects
      * @return results fo the query as a lazily evaluated {@link Iterator}
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit} or
      *         the provided {@code batchSize} is 0
      */
     @SuppressWarnings("unchecked") // Checked logically.
-    private <E extends BaseEntity<Key>> Iterator<E>
+    private <E> Iterator<E>
     readAllPageByPage(StructuredQuery<E> query, @Nullable Integer pageSize) {
         checkArgument(query.getLimit() == null,
                       "Cannot limit a number of entities for \"read all\" operation.");
@@ -360,7 +360,7 @@ public class DatastoreWrapper implements Logging {
                 .iterator();
     }
 
-    private static <E extends BaseEntity<Key>> StructuredQuery<E>
+    private static <E> StructuredQuery<E>
     limit(StructuredQuery<E> query, @Nullable Integer batchSize) {
         return batchSize == null
                ? query
