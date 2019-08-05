@@ -5,6 +5,43 @@
 
 Support for Spine-based Java apps running at Google Cloud.
 
+### Artifacts
+
+Gradle:
+
+```groovy
+dependencies {
+    implementation (
+    
+        // Datastore Storage support library.
+        "io.spine.gcloud:spine-datastore:1.0.0",
+        
+        // Stackdriver Trace support library.
+        "io.spine.gcloud:spine-stackdriver-trace:1.0.0"
+    )
+}
+```
+
+Maven:
+```xml
+
+  <!-- Datastore Storage support library. -->
+  <groupId>io.spine.gcloud</groupId>
+  <artifactId>spine-datastore</artifactId>
+  <version>1.0.0</version>
+  
+   <!-- Stackdriver Trace support library. -->
+   <groupId>io.spine.gcloud</groupId>
+   <artifactId>spine-stackdriver-trace</artifactId>
+   <version>1.0.0</version>
+
+```
+
+These artifacts should be used as a part of the Spine server application.
+ 
+For the details on setting up the server environment please refer to [Spine Bootstrap Gradle plugin](https://github.com/SpineEventEngine/bootstrap/) 
+and [Spine `core` modules](https://github.com/SpineEventEngine/core-java/) documentation. 
+
 ### Configuring Datastore
 
 #### Datastore indexes
