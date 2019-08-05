@@ -23,6 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.ProjectionEntity;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.annotations.VisibleForTesting;
@@ -306,10 +307,12 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
     public Iterator<I> index() {
         checkNotClosed();
 
-        StructuredQuery<Entity> allQuery = Query.newEntityQueryBuilder()
-                                                .setKind(stateTypeName.value())
-                                                .build();
-        Iterator<I> index = stream(datastore.readAll(allQuery))
+        StructuredQuery<ProjectionEntity> query = Query.newProjectionEntityQueryBuilder()
+                                                       .setKind(stateTypeName.value())
+                                                       .setProjection(aggregate_id.name())
+                                                       .setDistinctOn(aggregate_id.name())
+                                                       .build();
+        Iterator<I> index = stream(datastore.readAll(query))
                 .map(new IndexTransformer<>(idClass))
                 .iterator();
         return index;
@@ -333,7 +336,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
      * @param <I>
      *         the generic ID type
      */
-    private static class IndexTransformer<I> implements Function<Entity, I> {
+    private static class IndexTransformer<I> implements Function<ProjectionEntity, I> {
 
         private final Class<I> idClass;
 
@@ -342,7 +345,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         }
 
         @Override
-        public I apply(@Nullable Entity entity) {
+        public I apply(@Nullable ProjectionEntity entity) {
             checkNotNull(entity);
             String stringId = entity.getString(aggregate_id.toString());
             return Stringifiers.fromString(stringId, idClass);

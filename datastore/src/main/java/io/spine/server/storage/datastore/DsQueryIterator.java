@@ -22,7 +22,6 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.DatastoreReaderWriter;
-import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.UnmodifiableIterator;
@@ -44,18 +43,21 @@ import java.util.NoSuchElementException;
  * <p>A call to {@link #next() next()} may not cause a Datastore query.
  *
  * <p>The {@link #remove() remove()} method throws an {@link UnsupportedOperationException}.
+ *
+ * @param <R>
+ *         the type of queried objects
  */
-final class DsQueryIterator extends UnmodifiableIterator<Entity> {
+final class DsQueryIterator<R> extends UnmodifiableIterator<R> {
 
-    private final StructuredQuery<Entity> query;
-    private final QueryResults<Entity> currentPage;
+    private final StructuredQuery<R> query;
+    private final QueryResults<R> currentPage;
 
     private final Integer limit;
     private int readCount = 0;
 
     private boolean terminated;
 
-    DsQueryIterator(StructuredQuery<Entity> query, DatastoreReaderWriter datastore) {
+    DsQueryIterator(StructuredQuery<R> query, DatastoreReaderWriter datastore) {
         super();
         this.query = query;
         this.limit = query.getLimit();
@@ -92,9 +94,9 @@ final class DsQueryIterator extends UnmodifiableIterator<Entity> {
      * <p>The query is built utilizing the {@linkplain Cursor Datastore Cursor} from the current
      * query results.
      */
-    StructuredQuery<Entity> nextPageQuery() {
+    StructuredQuery<R> nextPageQuery() {
         Cursor cursorAfter = currentPage.getCursorAfter();
-        StructuredQuery<Entity> queryForMoreResults =
+        StructuredQuery<R> queryForMoreResults =
                 query.toBuilder()
                      .setStartCursor(cursorAfter)
                      .build();
@@ -102,11 +104,11 @@ final class DsQueryIterator extends UnmodifiableIterator<Entity> {
     }
 
     @Override
-    public Entity next() {
+    public R next() {
         if (!hasNext()) {
             throw new NoSuchElementException("The query results Iterator is empty.");
         }
-        Entity result = currentPage.next();
+        R result = currentPage.next();
         readCount++;
         return result;
     }
