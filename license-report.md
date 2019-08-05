@@ -1,6 +1,6 @@
 
     
-# Dependencies of `io.spine.gcloud:spine-datastore:1.0.0-SNAPSHOT`
+# Dependencies of `io.spine.gcloud:spine-datastore:1.0.0`
 
 ## Runtime
 1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
@@ -578,10 +578,10 @@
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.13.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.16.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.13.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.16.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
 1. **Group:** net.sourceforge.saxon **Name:** saxon **Version:** 9.1.0.8
@@ -698,9 +698,9 @@
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.5.1
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.1
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
@@ -710,9 +710,9 @@
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.1
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -780,12 +780,12 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jul 25 16:54:10 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Thu Aug 01 15:21:10 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.gcloud:spine-stackdriver-trace:1.0.0-SNAPSHOT`
+# Dependencies of `io.spine.gcloud:spine-stackdriver-trace:1.0.0`
 
 ## Runtime
 1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
@@ -1347,10 +1347,10 @@ This report was generated on **Thu Jul 25 16:54:10 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://javacc.dev.java.net/](https://javacc.dev.java.net/)
      * **POM License: Berkeley Software Distribution (BSD) License** - [http://www.opensource.org/licenses/bsd-license.html](http://www.opensource.org/licenses/bsd-license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.13.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.16.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
-1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.13.0
+1. **Group:** net.sourceforge.pmd **Name:** pmd-java **Version:** 6.16.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
 1. **Group:** net.sourceforge.saxon **Name:** saxon **Version:** 9.1.0.8
@@ -1467,9 +1467,9 @@ This report was generated on **Thu Jul 25 16:54:10 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.5.1
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.1
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
@@ -1479,9 +1479,9 @@ This report was generated on **Thu Jul 25 16:54:10 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
      * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.1
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -1549,4 +1549,4 @@ This report was generated on **Thu Jul 25 16:54:10 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jul 25 16:54:11 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Thu Aug 01 15:21:18 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
