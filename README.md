@@ -24,7 +24,6 @@ dependencies {
 
 Maven:
 ```xml
-
   <!-- Datastore Storage support library. -->
   <groupId>io.spine.gcloud</groupId>
   <artifactId>spine-datastore</artifactId>
