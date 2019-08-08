@@ -189,6 +189,21 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         truncate(snapshotIndex, predicate);
     }
 
+    @Override
+    protected Iterator<I> distinctAggregateIds() {
+        checkNotClosed();
+
+        StructuredQuery<ProjectionEntity> query = Query.newProjectionEntityQueryBuilder()
+                                                       .setKind(stateTypeName.value())
+                                                       .setProjection(aggregate_id.name())
+                                                       .setDistinctOn(aggregate_id.name())
+                                                       .build();
+        Iterator<I> index = stream(datastore.readAll(query))
+                .map(new IndexTransformer<>(idClass))
+                .iterator();
+        return index;
+    }
+
     /**
      * Drops the aggregate event records that are older than the Nth snapshot and match the
      * specified predicate.
@@ -301,21 +316,6 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         markAsArchived(entityStateRecord, flags.getArchived());
         markAsDeleted(entityStateRecord, flags.getDeleted());
         datastore.createOrUpdate(entityStateRecord.build());
-    }
-
-    @Override
-    public Iterator<I> index() {
-        checkNotClosed();
-
-        StructuredQuery<ProjectionEntity> query = Query.newProjectionEntityQueryBuilder()
-                                                       .setKind(stateTypeName.value())
-                                                       .setProjection(aggregate_id.name())
-                                                       .setDistinctOn(aggregate_id.name())
-                                                       .build();
-        Iterator<I> index = stream(datastore.readAll(query))
-                .map(new IndexTransformer<>(idClass))
-                .iterator();
-        return index;
     }
 
     private Iterator<Entity> readAllForTenant() {

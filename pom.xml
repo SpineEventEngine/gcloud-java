@@ -12,7 +12,7 @@ all modules and does not describe the project structure per-subproject.
 
 <groupId>io.spine.gcloud</groupId>
 <artifactId>spine-gcloud-java</artifactId>
-<version>1.0.0</version>
+<version>1.0.1</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -40,7 +40,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-server</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -52,7 +52,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-testutil-server</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -120,12 +120,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-errorprone-checks</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-protoc-plugin</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>
