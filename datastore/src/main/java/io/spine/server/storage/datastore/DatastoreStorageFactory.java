@@ -67,7 +67,7 @@ import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 public class DatastoreStorageFactory implements StorageFactory {
 
     private static final String DEFAULT_NAMESPACE_ERROR_MESSAGE =
-            "Datastore namespace should not be configured explicitly" +
+            "Datastore namespace should not be configured explicitly " +
                     "for a multitenant storage.";
 
     private final Datastore datastore;
