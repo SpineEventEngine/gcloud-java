@@ -21,7 +21,6 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import io.spine.annotation.Internal;
@@ -41,15 +40,14 @@ import io.spine.server.storage.datastore.tenant.DatastoreTenants;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.tenant.NsConverterFactory;
+import io.spine.server.storage.datastore.tenant.PrefixedNsConverterFactory;
 import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.tenant.TenantIndex;
 
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
@@ -65,10 +63,6 @@ import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
  * @see DatastoreStorageFactory#configureTenantIndex(BoundedContextBuilder)
  */
 public class DatastoreStorageFactory implements StorageFactory {
-
-    private static final String DEFAULT_NAMESPACE_ERROR_MESSAGE =
-            "Datastore namespace should not be configured explicitly " +
-                    "for a multitenant storage.";
 
     private final Datastore datastore;
 
@@ -185,21 +179,16 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     private NamespaceSupplier createNamespaceSupplier(boolean multitenant) {
+        String defaultNamespace = nullToEmpty(datastore.getOptions().getNamespace());
         if (multitenant) {
-            checkHasNoNamespace(datastore);
-            return NamespaceSupplier.multitenant(converterFactory);
+            NsConverterFactory factory =
+                    defaultNamespace.isEmpty()
+                    ? converterFactory
+                    : new PrefixedNsConverterFactory(defaultNamespace, converterFactory);
+            return NamespaceSupplier.multitenant(factory);
         } else {
-            String defaultNamespace = datastore.getOptions()
-                                               .getNamespace();
-            return NamespaceSupplier.singleTenant(nullToEmpty(defaultNamespace));
+            return NamespaceSupplier.singleTenant(defaultNamespace);
         }
-    }
-
-    private static void checkHasNoNamespace(Datastore datastore) {
-        checkNotNull(datastore);
-        DatastoreOptions options = datastore.getOptions();
-        String namespace = options.getNamespace();
-        checkArgument(isNullOrEmpty(namespace), DEFAULT_NAMESPACE_ERROR_MESSAGE);
     }
 
     /**
