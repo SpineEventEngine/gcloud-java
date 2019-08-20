@@ -42,6 +42,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Immutable
 public abstract class NamespaceConverter extends Converter<String, TenantId> {
 
+    /**
+     * The value returned by a converted when it encounters a Datastore namespace which does not
+     * represent a tenant ID.
+     */
+    public static final TenantId NOT_A_TENANT = TenantId.getDefaultInstance();
+
     @Override
     protected final TenantId doForward(String s) {
         checkNotNull(s);
@@ -61,6 +67,9 @@ public abstract class NamespaceConverter extends Converter<String, TenantId> {
 
     /**
      * Converts the given string representing a Datastore namespace into a {@link TenantId}.
+     *
+     * <p>If the given namespace does not represent a tenant, as defined by the internal rules of
+     * this converter, returns {@link #NOT_A_TENANT}.
      */
     protected abstract TenantId toTenantId(String namespace);
 }

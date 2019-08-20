@@ -23,6 +23,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
@@ -103,6 +104,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      *         the instance of the builder to configure the tenant index for
      * @return the same instance of the builder, but with the tenant index set
      */
+    @CanIgnoreReturnValue
     public BoundedContextBuilder configureTenantIndex(BoundedContextBuilder builder) {
         checkNotNull(builder);
         TenantIndex index = DatastoreTenants.index(datastore, converterFactory());

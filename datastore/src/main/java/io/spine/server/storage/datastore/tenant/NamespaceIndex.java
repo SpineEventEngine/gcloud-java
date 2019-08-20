@@ -40,6 +40,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.server.storage.datastore.tenant.NamespaceConverter.NOT_A_TENANT;
 
 /**
  * A DAO for the Datastore {@link Namespace Namespaces}.
@@ -108,7 +109,10 @@ final class NamespaceIndex implements TenantIndex {
             Set<TenantId> result = new HashSet<>(cache.size());
             for (Namespace namespace : cache) {
                 if (namespace != null) {
-                    result.add(namespace.toTenantId());
+                    TenantId tenantId = namespace.toTenantId();
+                    if (!NOT_A_TENANT.equals(tenantId)) {
+                        result.add(tenantId);
+                    }
                 }
             }
             return result;

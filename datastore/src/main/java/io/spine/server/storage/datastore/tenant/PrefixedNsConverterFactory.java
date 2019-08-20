@@ -22,6 +22,7 @@ package io.spine.server.storage.datastore.tenant;
 
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
+import io.spine.server.storage.datastore.tenant.NamespaceConverters.PrefixedNamespaceToTenantIdConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -44,8 +45,7 @@ public final class PrefixedNsConverterFactory implements NsConverterFactory {
         return new Converter(namespacePrefix, converter);
     }
 
-    private static final class Converter
-            extends NamespaceConverters.PrefixedNamespaceToTenantIdConverter {
+    private static final class Converter extends PrefixedNamespaceToTenantIdConverter {
 
         private final NamespaceConverter delegate;
 

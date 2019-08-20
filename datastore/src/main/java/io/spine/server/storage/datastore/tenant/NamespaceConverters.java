@@ -33,10 +33,10 @@ import static io.spine.server.storage.datastore.tenant.Namespace.STRING_VALUE_PR
  */
 final class NamespaceConverters {
 
-    private static final int SIGNIFICANT_PART_START_INDEX = 1;
-
+    /**
+     * Prevents the utility class instantiation.
+     */
     private NamespaceConverters() {
-        // Prevent static class initialization
     }
 
     /**
@@ -108,8 +108,12 @@ final class NamespaceConverters {
 
         @Override
         protected final TenantId toTenantId(String namespace) {
-            String significantNamespacePart = namespace.substring(SIGNIFICANT_PART_START_INDEX);
-            return significantStringToTenantId(significantNamespacePart);
+            if (namespace.startsWith(prefix) && namespace.length() > prefix.length()) {
+                String significantNamespacePart = namespace.substring(prefix.length());
+                return significantStringToTenantId(significantNamespacePart);
+            } else {
+                return NOT_A_TENANT;
+            }
         }
 
         abstract TenantId significantStringToTenantId(String namespace);

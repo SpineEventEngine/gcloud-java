@@ -27,10 +27,21 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
+import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.datastore.DatastoreStorageFactory;
+import io.spine.server.storage.datastore.TestDatastoreWrapper;
+import io.spine.server.storage.datastore.given.TestDatastores;
+import io.spine.server.storage.datastore.tenant.given.TestProjection;
+import io.spine.server.tenant.TenantAwareRunner;
+import io.spine.server.tenant.TenantIndex;
+import io.spine.test.datastore.College;
 import io.spine.testing.TestValues;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +57,8 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -75,8 +88,15 @@ class NamespaceIndexTest {
 
     @BeforeEach
     void createIndex() {
+        clearDatabase();
         namespaceIndex = nsIndex();
         context = BoundedContextBuilder.assumingTests().build();
+    }
+
+    private static void clearDatabase() {
+        Datastore local = TestDatastores.local();
+        TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(local, false);
+        wrapper.dropAllTables();
     }
 
     @AfterEach
@@ -152,9 +172,47 @@ class NamespaceIndexTest {
     }
 
     @Test
-    @DisplayName("find tenant ")
+    @DisplayName("find tenants by prefixed namespaces")
     void findPrefixedNamespaces() {
-
+        Datastore datastore = TestDatastores
+                .local()
+                .getOptions()
+                .toBuilder()
+                .setNamespace("custom-namespace")
+                .build()
+                .getService();
+        BoundedContextBuilder contextBuilder = BoundedContextBuilder
+                .assumingTests(true);
+        DatastoreStorageFactory storageFactory = DatastoreStorageFactory
+                .newBuilder()
+                .setDatastore(datastore)
+                .build();
+        ServerEnvironment.instance().configureStorage(storageFactory);
+        storageFactory.configureTenantIndex(contextBuilder);
+        BoundedContext context = contextBuilder.build();
+        TenantIndex tenantIndex = context.tenantIndex();
+        for (TenantId tenantId : tenantIndex.all()) {
+            TenantAwareRunner.with(tenantId)
+                             .run(NamespaceIndexTest::clearDatabase);
+        }
+        RecordStorage<String> storage = storageFactory
+                .createRecordStorage(context.spec(), TestProjection.class);
+        String id = "ABC";
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(Identifier.pack(id))
+                .setState(pack(College.newBuilder().setName(id).build()))
+                .build();
+        TenantId tenantId = TenantId
+                .newBuilder()
+                .setValue("XYZ")
+                .build();
+        with(tenantId).run(
+                () -> storage.write(id, record)
+        );
+        Set<TenantId> tenantIds = tenantIndex
+                                         .all();
+        assertThat(tenantIds).containsExactly(tenantId);
     }
 
     @Test
