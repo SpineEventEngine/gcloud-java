@@ -163,7 +163,6 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     private <I, S extends RecordStorage<I>, B extends RecordStorageBuilder<I, S, B>>
     S configure(B builder, Class<? extends Entity<I, ?>> cls, ContextSpec context) {
-
         builder.setModelClass(asEntityClass(cls))
                .setDatastore(wrapperFor(context))
                .setMultitenant(context.isMultitenant())
@@ -338,7 +337,6 @@ public class DatastoreStorageFactory implements StorageFactory {
             } else {
                 converterFactory = multitenant -> namespaceConverter;
             }
-
             return new DatastoreStorageFactory(this);
         }
     }
