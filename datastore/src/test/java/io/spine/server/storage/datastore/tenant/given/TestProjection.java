@@ -24,6 +24,4 @@ import io.spine.server.projection.Projection;
 import io.spine.test.datastore.College;
 
 public final class TestProjection extends Projection<String, College, College.Builder> {
-
-
 }
