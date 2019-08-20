@@ -33,5 +33,5 @@ ext {
     spineBaseVersion = SPINE_VERSION
     spineCoreVersion = SPINE_VERSION
 
-    datastoreVersion = '1.61.0'
+    datastoreVersion = '1.87.0'
 }
