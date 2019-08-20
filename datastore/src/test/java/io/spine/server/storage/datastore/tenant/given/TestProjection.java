@@ -18,20 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries to be used.
- *
- * <p>This file defines versions for the dependencies that are not covered by
- * {@code .config/gradle/dependencies.gradle}.
- */
+package io.spine.server.storage.datastore.tenant.given;
 
-def final SPINE_VERSION = '1.0.1'
+import io.spine.server.projection.Projection;
+import io.spine.test.datastore.College;
 
-ext {
-    versionToPublish = '1.0.2'
-    
-    spineBaseVersion = SPINE_VERSION
-    spineCoreVersion = SPINE_VERSION
-
-    datastoreVersion = '1.87.0'
+public final class TestProjection extends Projection<String, College, College.Builder> {
 }

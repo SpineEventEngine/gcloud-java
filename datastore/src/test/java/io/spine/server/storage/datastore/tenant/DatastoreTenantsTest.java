@@ -27,6 +27,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.common.collect.ImmutableList;
+import com.google.datastore.v1.QueryResultBatch;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantIndex;
 import org.junit.jupiter.api.DisplayName;
@@ -96,17 +97,22 @@ class DatastoreTenantsTest {
 
         @Override
         public Class<?> getResultClass() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("Method getResultClass is not implemented!");
         }
 
         @Override
         public Cursor getCursorAfter() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("Method getCursorAfter is not implemented!");
         }
 
         @Override
         public int getSkippedResults() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("Method getSkippedResults is not implemented!");
+        }
+
+        @Override
+        public QueryResultBatch.MoreResultsType getMoreResults() {
+            throw new UnsupportedOperationException("Method getMoreResults is not implemented!");
         }
 
         @Override
@@ -117,11 +123,6 @@ class DatastoreTenantsTest {
         @Override
         public Key next() {
             return keyIterator.next();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
         }
     }
 }

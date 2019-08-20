@@ -63,7 +63,7 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
     }
 
     /**
-     * A function declosuring the current tenant {@linkplain TenantId ID}.
+     * A function disclosuring the current tenant {@linkplain TenantId ID}.
      */
     private static class TenantIdRetriever extends TenantFunction<TenantId> {
 

@@ -22,8 +22,14 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
+import io.spine.base.Identifier;
+import io.spine.base.Time;
+import io.spine.core.TenantId;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
@@ -32,9 +38,15 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.given.TestEnvironment;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.test.storage.Project;
+import io.spine.type.TypeName;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.ContextSpec.multitenant;
+import static io.spine.server.storage.datastore.given.TestDatastores.local;
+import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -107,6 +119,67 @@ class DatastoreStorageFactoryTest {
         factory.close();
         // Multiple calls are allowed as no action is performed
         factory.close();
+    }
+
+    @Test
+    @DisplayName("allow custom namespaces for multitenant storages")
+    void namespaceForMultitenant() {
+        TenantId tenant = TenantId
+                .newBuilder()
+                .setValue("my-company")
+                .vBuild();
+        String namespace = "non-null-or-empty-namespace";
+        DatastoreOptions options = local().getOptions()
+                                          .toBuilder()
+                                          .setNamespace(namespace)
+                                          .build();
+        ContextSpec spec =
+                multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
+        Datastore datastore = options.getService();
+        DatastoreStorageFactory factory = DatastoreStorageFactory
+                .newBuilder()
+                .setDatastore(datastore)
+                .build();
+        DsPropertyStorage storage = factory.createPropertyStorage(spec);
+        Key key = whiteForTenant(storage, tenant)
+                .setNamespace(namespace + ".V" + tenant.getValue())
+                .build();
+        Entity entity = datastore.get(key);
+        assertThat(entity).isNotNull();
+    }
+
+    @Test
+    @DisplayName("allow no custom namespaces for multitenant storages")
+    void testDatastoreNamespaceInOptions() {
+        TenantId tenant = TenantId
+                .newBuilder()
+                .setValue("your-company")
+                .vBuild();
+        ContextSpec spec =
+                multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
+        Datastore datastore = local();
+        DatastoreStorageFactory factory = DatastoreStorageFactory
+                .newBuilder()
+                .setDatastore(datastore)
+                .build();
+        DsPropertyStorage storage = factory.createPropertyStorage(spec);
+        Key key = whiteForTenant(storage, tenant)
+                .setNamespace('V' + tenant.getValue())
+                .build();
+        Entity entity = datastore.get(key);
+        assertThat(entity).isNotNull();
+    }
+
+    private static Key.Builder whiteForTenant(DsPropertyStorage storage, TenantId tenant) {
+        RecordId recordId = RecordId.of(Identifier.newUuid());
+        Timestamp message = Time.currentTime();
+        with(tenant).run(
+                () -> storage.write(recordId, message)
+        );
+        return Key.newBuilder(projectId().getValue(),
+                              TypeName.of(message)
+                                      .value(),
+                              recordId.getValue());
     }
 
     private static class TestEntity extends AbstractEntity<String, StringValue> {

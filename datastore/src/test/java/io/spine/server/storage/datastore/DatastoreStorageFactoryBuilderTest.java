@@ -23,8 +23,14 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Timestamp;
+import io.spine.base.Identifier;
+import io.spine.base.Time;
+import io.spine.core.TenantId;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
@@ -32,15 +38,19 @@ import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.storage.datastore.type.SimpleDatastoreColumnType;
+import io.spine.server.tenant.TenantAwareRunner;
+import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -110,21 +120,6 @@ class DatastoreStorageFactoryBuilderTest {
             builder = DatastoreOptions
                     .newBuilder()
                     .setProjectId(projectId().getValue());
-        }
-
-        @Test
-        @DisplayName("ensure datastore has no namespace if multitenant")
-        void testDatastoreNamespaceInOptions() {
-            DatastoreOptions options =
-                    builder.setNamespace("non-null-or-empty-namespace")
-                           .build();
-            ContextSpec spec =
-                    multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
-            DatastoreStorageFactory.Builder builder = DatastoreStorageFactory
-                    .newBuilder()
-                    .setDatastore(options.getService());
-            DatastoreStorageFactory factory = builder.build();
-            assertThrows(IllegalArgumentException.class, () -> factory.createPropertyStorage(spec));
         }
 
         @Test
