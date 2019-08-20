@@ -33,7 +33,7 @@ class PrefixedNsConverterFactoryTest {
     @Test
     @DisplayName("ignore namespaces which do not start from the prefix")
     void ignoreNonMatching() {
-        String prefix = "pre";
+        String prefix = "in";
         PrefixedNsConverterFactory factory =
                 new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
         NamespaceConverter converter = factory.get(true);
@@ -52,6 +52,17 @@ class PrefixedNsConverterFactoryTest {
                 new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
         NamespaceConverter converter = factory.get(true);
         TenantId nonMatchingTenant = converter.convert(prefix);
+        assertThat(nonMatchingTenant).isSameInstanceAs(NOT_A_TENANT);
+    }
+
+    @Test
+    @DisplayName("ignore namespaces a longer prefix")
+    void ignoreLongerPrefix() {
+        String prefix = "pre";
+        PrefixedNsConverterFactory factory =
+                new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
+        NamespaceConverter converter = factory.get(true);
+        TenantId nonMatchingTenant = converter.convert("pre-processing");
         assertThat(nonMatchingTenant).isSameInstanceAs(NOT_A_TENANT);
     }
 }
