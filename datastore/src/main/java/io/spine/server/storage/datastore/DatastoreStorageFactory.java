@@ -238,11 +238,9 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     final DatastoreWrapper systemWrapperFor(Class<? extends Storage> targetStorage,
                                             boolean multitenant) {
-        if (!sysWrappers.containsKey(targetStorage)) {
-            DatastoreWrapper wrapper = createDatastoreWrapper(multitenant);
-            sysWrappers.put(targetStorage, wrapper);
-        }
-        return sysWrappers.get(targetStorage);
+        DatastoreWrapper wrapper = sysWrappers
+                .computeIfAbsent(targetStorage, k -> createDatastoreWrapper(multitenant));
+        return wrapper;
     }
 
     /**

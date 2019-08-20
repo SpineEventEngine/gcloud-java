@@ -152,6 +152,12 @@ class NamespaceIndexTest {
     }
 
     @Test
+    @DisplayName("find tenant ")
+    void findPrefixedNamespaces() {
+
+    }
+
+    @Test
     @DisplayName("synchronize access methods")
     void testAsync() {
         assertTimeout(Duration.ofSeconds(5L),
