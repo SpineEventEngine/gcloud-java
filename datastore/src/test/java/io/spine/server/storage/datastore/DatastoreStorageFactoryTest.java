@@ -149,7 +149,7 @@ class DatastoreStorageFactoryTest {
     }
 
     @Test
-    @DisplayName("allow no namespaces for multitenant storages")
+    @DisplayName("allow no custom namespaces for multitenant storages")
     void testDatastoreNamespaceInOptions() {
         TenantId tenant = TenantId
                 .newBuilder()
