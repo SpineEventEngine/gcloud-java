@@ -123,7 +123,7 @@ class DatastoreStorageFactoryTest {
 
     @Test
     @DisplayName("allow custom namespaces for multitenant storages")
-    void testDatastoreNamespaceInOptions() {
+    void namespaceForMultitenant() {
         TenantId tenant = TenantId
                 .newBuilder()
                 .setValue("my-company")
@@ -135,26 +135,51 @@ class DatastoreStorageFactoryTest {
                                           .build();
         ContextSpec spec =
                 multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
+        Datastore datastore = options.getService();
         DatastoreStorageFactory factory = DatastoreStorageFactory
                 .newBuilder()
-                .setDatastore(options.getService())
+                .setDatastore(datastore)
                 .build();
         DsPropertyStorage storage = factory.createPropertyStorage(spec);
+        Key key = whiteForTenant(storage, tenant)
+                .setNamespace(namespace + ".V" + tenant.getValue())
+                .build();
+        Entity entity = datastore.get(key);
+        assertThat(entity).isNotNull();
+    }
+
+    @Test
+    @DisplayName("allow no namespaces for multitenant storages")
+    void testDatastoreNamespaceInOptions() {
+        TenantId tenant = TenantId
+                .newBuilder()
+                .setValue("your-company")
+                .vBuild();
+        ContextSpec spec =
+                multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
+        Datastore datastore = local();
+        DatastoreStorageFactory factory = DatastoreStorageFactory
+                .newBuilder()
+                .setDatastore(datastore)
+                .build();
+        DsPropertyStorage storage = factory.createPropertyStorage(spec);
+        Key key = whiteForTenant(storage, tenant)
+                .setNamespace('V' + tenant.getValue())
+                .build();
+        Entity entity = datastore.get(key);
+        assertThat(entity).isNotNull();
+    }
+
+    private static Key.Builder whiteForTenant(DsPropertyStorage storage, TenantId tenant) {
         RecordId recordId = RecordId.of(Identifier.newUuid());
         Timestamp message = Time.currentTime();
         with(tenant).run(
                 () -> storage.write(recordId, message)
         );
-        Datastore datastore = storage.getDatastore()
-                                     .datastore();
-        Key key = Key.newBuilder(projectId().getValue(),
-                                 TypeName.of(message)
-                                         .value(),
-                                 recordId.getValue())
-                     .setNamespace(namespace + ".V" + tenant.getValue())
-                     .build();
-        Entity entity = datastore.get(key);
-        assertThat(entity).isNotNull();
+        return Key.newBuilder(projectId().getValue(),
+                              TypeName.of(message)
+                                      .value(),
+                              recordId.getValue());
     }
 
     private static class TestEntity extends AbstractEntity<String, StringValue> {

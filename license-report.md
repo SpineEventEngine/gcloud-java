@@ -1,6 +1,6 @@
 
     
-# Dependencies of `io.spine.gcloud:spine-datastore:1.0.1`
+# Dependencies of `io.spine.gcloud:spine-datastore:1.0.2-SNAPSHOT`
 
 ## Runtime
 1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
@@ -780,12 +780,12 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Tue Aug 20 11:52:32 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Aug 20 12:20:30 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.gcloud:spine-stackdriver-trace:1.0.1`
+# Dependencies of `io.spine.gcloud:spine-stackdriver-trace:1.0.2-SNAPSHOT`
 
 ## Runtime
 1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
@@ -1549,4 +1549,4 @@ This report was generated on **Tue Aug 20 11:52:32 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Tue Aug 20 11:52:33 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Aug 20 12:20:31 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
