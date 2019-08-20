@@ -52,6 +52,10 @@ public final class PrefixedNsConverterFactory implements NsConverterFactory {
         return new Converter(namespacePrefix, converter);
     }
 
+    /**
+     * A {@link NamespaceConverter} which processes the namespace prefix and delegates
+     * the significant part of a namespace to another converter.
+     */
     private static final class Converter extends PrefixedNamespaceToTenantIdConverter {
 
         private final NamespaceConverter delegate;
