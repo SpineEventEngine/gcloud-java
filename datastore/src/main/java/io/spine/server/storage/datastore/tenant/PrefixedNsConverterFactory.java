@@ -68,7 +68,7 @@ public final class PrefixedNsConverterFactory implements NsConverterFactory {
         @Override
         TenantId significantStringToTenantId(String namespace) {
             return namespace.startsWith(SEPARATOR)
-                   ? delegate.convert(namespace.substring(1))
+                   ? delegate.convert(namespace.substring(SEPARATOR.length()))
                    : NOT_A_TENANT;
         }
 
