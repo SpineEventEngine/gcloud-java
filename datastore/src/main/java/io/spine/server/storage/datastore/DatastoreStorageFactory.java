@@ -105,7 +105,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     public BoundedContextBuilder configureTenantIndex(BoundedContextBuilder builder) {
         checkNotNull(builder);
-        TenantIndex index = DatastoreTenants.index(datastore, converterFactory);
+        TenantIndex index = DatastoreTenants.index(datastore, converterFactory());
         builder.setTenantIndex(index);
         return builder;
     }
@@ -178,16 +178,24 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     private NamespaceSupplier createNamespaceSupplier(boolean multitenant) {
-        String defaultNamespace = nullToEmpty(datastore.getOptions().getNamespace());
+        String defaultNamespace = namespaceFromOptions();
         if (multitenant) {
-            NsConverterFactory factory =
-                    defaultNamespace.isEmpty()
-                    ? converterFactory
-                    : new PrefixedNsConverterFactory(defaultNamespace, converterFactory);
+            NsConverterFactory factory = converterFactory();
             return NamespaceSupplier.multitenant(factory);
         } else {
             return NamespaceSupplier.singleTenant(defaultNamespace);
         }
+    }
+
+    private NsConverterFactory converterFactory() {
+        String defaultNamespace = namespaceFromOptions();
+        return defaultNamespace.isEmpty()
+               ? converterFactory
+               : new PrefixedNsConverterFactory(defaultNamespace, converterFactory);
+    }
+
+    private String namespaceFromOptions() {
+        return nullToEmpty(datastore.getOptions().getNamespace());
     }
 
     /**
