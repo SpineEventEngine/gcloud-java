@@ -271,6 +271,13 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         /**
          * Assigns the {@link Datastore} to use for the DB interactions.
+         *
+         * <p>If the provided {@code Datastore} is configured with a namespace:
+         * <ul>
+         *     <li>resulting single tenant storages will use the provided namespace;
+         *     <li>resulting multitenant storages will concatenate the provided namespace with
+         *         the tenant identifier. See {@link #setNamespaceConverter} for more configuration.
+         * </ul>
          */
         public Builder setDatastore(Datastore datastore) {
             this.datastore = checkNotNull(datastore);
