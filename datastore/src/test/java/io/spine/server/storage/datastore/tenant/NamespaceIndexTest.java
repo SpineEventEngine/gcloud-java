@@ -88,15 +88,8 @@ class NamespaceIndexTest {
 
     @BeforeEach
     void createIndex() {
-        clearDatabase();
         namespaceIndex = nsIndex();
         context = BoundedContextBuilder.assumingTests().build();
-    }
-
-    private static void clearDatabase() {
-        Datastore local = TestDatastores.local();
-        TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(local, false);
-        wrapper.dropAllTables();
     }
 
     @AfterEach
@@ -190,11 +183,6 @@ class NamespaceIndexTest {
         ServerEnvironment.instance().configureStorage(storageFactory);
         storageFactory.configureTenantIndex(contextBuilder);
         BoundedContext context = contextBuilder.build();
-        TenantIndex tenantIndex = context.tenantIndex();
-        for (TenantId tenantId : tenantIndex.all()) {
-            TenantAwareRunner.with(tenantId)
-                             .run(NamespaceIndexTest::clearDatabase);
-        }
         RecordStorage<String> storage = storageFactory
                 .createRecordStorage(context.spec(), TestProjection.class);
         String id = "ABC";
@@ -210,8 +198,7 @@ class NamespaceIndexTest {
         with(tenantId).run(
                 () -> storage.write(id, record)
         );
-        Set<TenantId> tenantIds = tenantIndex
-                                         .all();
+        Set<TenantId> tenantIds = context.tenantIndex().all();
         assertThat(tenantIds).containsExactly(tenantId);
     }
 
