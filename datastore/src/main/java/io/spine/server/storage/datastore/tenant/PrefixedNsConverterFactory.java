@@ -36,13 +36,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class PrefixedNsConverterFactory implements NsConverterFactory {
 
-    private static final char SEPARATOR = '.';
+    private static final String SEPARATOR = ".";
 
     private final String namespacePrefix;
     private final NsConverterFactory delegate;
 
     public PrefixedNsConverterFactory(String namespacePrefix, NsConverterFactory delegate) {
-        this.namespacePrefix = checkNotNull(namespacePrefix) + SEPARATOR;
+        this.namespacePrefix = checkNotNull(namespacePrefix);
         this.delegate = checkNotNull(delegate);
     }
 
@@ -67,12 +67,14 @@ public final class PrefixedNsConverterFactory implements NsConverterFactory {
 
         @Override
         TenantId significantStringToTenantId(String namespace) {
-            return delegate.convert(namespace);
+            return namespace.startsWith(SEPARATOR)
+                   ? delegate.convert(namespace.substring(1))
+                   : NOT_A_TENANT;
         }
 
         @Override
         String toSignificantString(TenantId tenantId) {
-            return delegate.reverse().convert(tenantId);
+            return SEPARATOR + delegate.reverse().convert(tenantId);
         }
     }
 }
