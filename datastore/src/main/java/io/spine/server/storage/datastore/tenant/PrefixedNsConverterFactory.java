@@ -26,6 +26,13 @@ import io.spine.server.storage.datastore.tenant.NamespaceConverters.PrefixedName
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * A {@link NsConverterFactory} which creates converters which work with prefixed namespaces.
+ *
+ * <p>Users may want to supply custom namespaces for multitenant systems. In such case,
+ * the resulting namespace which contains the data is composed of the given namespace (prefix) and
+ * the tenant ID string representation. The two parts are separated with a {@code .} (dot) symbol.
+ */
 @Internal
 public final class PrefixedNsConverterFactory implements NsConverterFactory {
 
