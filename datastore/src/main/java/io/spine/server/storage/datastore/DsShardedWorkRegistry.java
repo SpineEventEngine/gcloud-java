@@ -26,7 +26,6 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
 import com.google.common.collect.ImmutableList;
-import io.spine.annotation.SPI;
 import io.spine.logging.Logging;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
@@ -143,7 +142,6 @@ public class DsShardedWorkRegistry
                                  .vBuild();
     }
 
-    @SPI
     protected ImmutableList<ShardSessionRecord> readByIndex(ShardIndex index) {
         EntityQuery.Builder query =
                 Query.newEntityQueryBuilder()
