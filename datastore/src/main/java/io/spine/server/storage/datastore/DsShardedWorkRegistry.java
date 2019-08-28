@@ -25,13 +25,14 @@ import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import io.spine.logging.Logging;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.ShardedWorkRegistry;
+import io.spine.string.Stringifiers;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -54,7 +55,7 @@ import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PE
  */
 public class DsShardedWorkRegistry
         extends DsMessageStorage<ShardIndex, ShardSessionRecord, ShardSessionReadRequest>
-        implements ShardedWorkRegistry {
+        implements ShardedWorkRegistry, Logging {
 
     private static final boolean multitenant = false;
 
@@ -70,7 +71,7 @@ public class DsShardedWorkRegistry
     }
 
     @Override
-    public Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
+    public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
         checkNotNull(index);
         checkNotNull(nodeId);
 
@@ -80,9 +81,24 @@ public class DsShardedWorkRegistry
         }
         ShardSessionRecord ssr = newRecord(index, nodeId);
         write(ssr);
+        boolean writeConsistent = checkConsistency(index, ssr);
+        if (writeConsistent) {
+            ShardProcessingSession result = new DsShardProcessingSession(ssr, () -> clearNode(ssr));
+            return Optional.of(result);
+        } else {
+            return Optional.empty();
+        }
+    }
 
-        DsShardProcessingSession result = new DsShardProcessingSession(ssr, () -> clearNode(ssr));
-        return Optional.of(result);
+    private boolean checkConsistency(ShardIndex index, ShardSessionRecord ssr) {
+        ImmutableList<ShardSessionRecord> records = readByIndex(index);
+        if (records.size() > 0) {
+            _warn().log("Several `ShardSessionRecord`s found for index %s.",
+                        Stringifiers.toString(index));
+        }
+        ShardSessionRecord fromStorage = records.iterator()
+                                                .next();
+        return fromStorage.equals(ssr);
     }
 
     /**
@@ -126,8 +142,7 @@ public class DsShardedWorkRegistry
                                  .vBuild();
     }
 
-    @VisibleForTesting
-    ImmutableList<ShardSessionRecord> readByIndex(ShardIndex index) {
+    protected ImmutableList<ShardSessionRecord> readByIndex(ShardIndex index) {
         EntityQuery.Builder query =
                 Query.newEntityQueryBuilder()
                      .setFilter(eq(Column.shardIndex.columnName(), index.getIndex()));

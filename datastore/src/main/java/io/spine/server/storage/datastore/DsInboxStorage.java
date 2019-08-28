@@ -81,6 +81,7 @@ public class DsInboxStorage
         EntityQuery.Builder builder =
                 Query.newEntityQueryBuilder()
                      .setFilter(eq(Column.shardIndex.columnName(), index.getIndex()))
+                     .setFilter(eq(Column.ofTotalShards.columnName(), index.getOfTotal()))
                      .setOrderBy(asc(Column.whenReceived.columnName()));
         Iterator<InboxMessage> iterator = readAll(builder, readBatchSize);
         return new InboxPage(iterator, readBatchSize);
