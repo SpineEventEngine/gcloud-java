@@ -72,7 +72,7 @@ public class DsShardedWorkRegistry
     }
 
     @Override
-    public Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
+    public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
         checkNotNull(index);
         checkNotNull(nodeId);
 
