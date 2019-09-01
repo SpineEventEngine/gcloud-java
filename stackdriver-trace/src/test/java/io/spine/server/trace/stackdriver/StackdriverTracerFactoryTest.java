@@ -24,7 +24,6 @@ import com.google.api.gax.grpc.GrpcCallContext;
 import com.google.api.gax.rpc.ClientContext;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.DefaultSubject;
 import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
 import com.google.protobuf.Empty;
@@ -211,7 +210,7 @@ class StackdriverTracerFactoryTest {
         void type() {
             StackdriverTracerFactory tracerFactory = factory.build();
             Tracer tracer = tracerFactory.trace(SPEC, Event.getDefaultInstance());
-            Subject<DefaultSubject, Object> assertTracer = assertThat(tracer);
+            Subject assertTracer = assertThat(tracer);
             assertTracer.isNotNull();
             assertTracer.isInstanceOf(StackdriverTracer.class);
         }

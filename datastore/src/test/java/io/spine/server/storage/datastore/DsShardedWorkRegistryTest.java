@@ -29,6 +29,8 @@ import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
+import io.spine.server.delivery.ShardedWorkRegistry;
+import io.spine.server.delivery.ShardedWorkRegistryTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,7 +44,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @DisplayName("`DsShardedWorkRegistry` should")
-public class DsShardedWorkRegistryTest {
+class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
 
     private static final ShardIndex index = newIndex(1, 15);
 
@@ -64,9 +66,14 @@ public class DsShardedWorkRegistryTest {
         factory.tearDown();
     }
 
+    @Override
+    protected ShardedWorkRegistry registry() {
+        return registry;
+    }
+
     @Test
     @DisplayName("pick up the shard and write a corresponding record to the storage")
-    public void pickUp() {
+    void pickUp() {
         Optional<ShardProcessingSession> session = registry.pickUp(index, nodeId);
         assertTrue(session.isPresent());
         assertThat(session.get()
@@ -79,7 +86,7 @@ public class DsShardedWorkRegistryTest {
 
     @Test
     @DisplayName("not be able to pick up the shard if it's already picked up")
-    public void cannotPickUpIfTaken() {
+    void cannotPickUpIfTaken() {
 
         Optional<ShardProcessingSession> session = registry.pickUp(index, nodeId);
         assertTrue(session.isPresent());
@@ -101,7 +108,7 @@ public class DsShardedWorkRegistryTest {
 
     @Test
     @DisplayName("complete the shard session (once picked up) and make it available for picking up")
-    public void completeSessionAndMakeItAvailable() {
+    void completeSessionAndMakeItAvailable() {
         Optional<ShardProcessingSession> optional = registry.pickUp(index, nodeId);
         assertTrue(optional.isPresent());
 
@@ -126,7 +133,7 @@ public class DsShardedWorkRegistryTest {
 
     @Test
     @DisplayName("not accept `null` values in public API methods")
-    public void notAcceptNulls() {
+    void notAcceptNulls() {
         new NullPointerTester()
                 .setDefault(NodeId.class, newNode())
                 .setDefault(ShardIndex.class, newIndex(4, 5))

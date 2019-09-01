@@ -22,11 +22,11 @@ package io.spine.server.storage.datastore.given;
 
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
+import io.spine.server.entity.given.Given;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
 import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
-import io.spine.testing.server.entity.given.Given;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.base.Time.currentTime;

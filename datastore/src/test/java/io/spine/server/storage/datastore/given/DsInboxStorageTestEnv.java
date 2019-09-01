@@ -33,7 +33,6 @@ import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxSignalId;
 import io.spine.server.delivery.ShardIndex;
-import io.spine.server.storage.datastore.DsInboxStorageTest;
 import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.server.TestEventFactory;
