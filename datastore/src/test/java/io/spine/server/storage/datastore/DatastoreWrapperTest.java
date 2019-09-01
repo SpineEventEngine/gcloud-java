@@ -48,7 +48,6 @@ import java.util.NoSuchElementException;
 import static com.google.cloud.datastore.Query.newEntityQueryBuilder;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.GENERIC_ENTITY_KIND;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.NAMESPACE_HOLDER_KIND;

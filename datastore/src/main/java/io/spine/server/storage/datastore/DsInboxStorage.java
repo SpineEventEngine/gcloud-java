@@ -37,6 +37,7 @@ import io.spine.string.Stringifiers;
 import java.util.Iterator;
 
 import static com.google.cloud.Timestamp.fromProto;
+import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -48,20 +49,8 @@ public class DsInboxStorage
         extends DsMessageStorage<InboxMessageId, InboxMessage, InboxReadRequest>
         implements InboxStorage {
 
-    /**
-     * Actual value of how many messages are read from the storage per request.
-     *
-     * <p>Defaults to {@link DatastoreWrapper#MAX_ENTITIES_PER_WRITE_REQUEST}.
-     */
-    private final int readBatchSize;
-
-    protected DsInboxStorage(DatastoreWrapper datastore, boolean multitenant, int readBatchSize) {
-        super(datastore, multitenant);
-        this.readBatchSize = readBatchSize;
-    }
-
     protected DsInboxStorage(DatastoreWrapper datastore, boolean multitenant) {
-        this(datastore, multitenant, DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST);
+        super(datastore, multitenant);
     }
 
     @Override
@@ -75,16 +64,20 @@ public class DsInboxStorage
     }
 
     @Override
-    public Page<InboxMessage> readAll(ShardIndex index) {
+    public Page<InboxMessage> readAll(ShardIndex index, int pageSize) {
         checkNotNull(index);
 
+        int indexValue = index.getIndex();
+        int totalValue = index.getOfTotal();
         EntityQuery.Builder builder =
                 Query.newEntityQueryBuilder()
-                     .setFilter(eq(Column.shardIndex.columnName(), index.getIndex()))
-                     .setFilter(eq(Column.ofTotalShards.columnName(), index.getOfTotal()))
+                     .setFilter(and(
+                             eq(Column.shardIndex.columnName(), indexValue),
+                             eq(Column.ofTotalShards.columnName(), totalValue)
+                     ))
                      .setOrderBy(asc(Column.whenReceived.columnName()));
-        Iterator<InboxMessage> iterator = readAll(builder, readBatchSize);
-        return new InboxPage(iterator, readBatchSize);
+        Iterator<InboxMessage> iterator = readAll(builder, pageSize);
+        return new InboxPage(iterator, pageSize);
     }
 
     /**

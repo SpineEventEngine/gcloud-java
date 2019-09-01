@@ -26,6 +26,9 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Durations;
 import io.spine.logging.Logging;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
@@ -40,6 +43,7 @@ import java.util.Optional;
 import static com.google.cloud.Timestamp.fromProto;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Timestamps.between;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
 
@@ -90,9 +94,34 @@ public class DsShardedWorkRegistry
         }
     }
 
+    @Override
+    public Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod) {
+        checkNotNull(inactivityPeriod);
+
+        ImmutableList<ShardSessionRecord> allRecords = readAll();
+        ImmutableList.Builder<ShardIndex> resultBuilder = ImmutableList.builder();
+        for (ShardSessionRecord record : allRecords) {
+            Timestamp whenPicked = record.getWhenLastPicked();
+            Duration elapsed = between(whenPicked, currentTime());
+
+            int comparison = Durations.compare(elapsed, inactivityPeriod);
+            if (comparison >= 0) {
+                clearNode(record);
+                resultBuilder.add(record.getIndex());
+            }
+        }
+        return resultBuilder.build();
+    }
+
+    private ImmutableList<ShardSessionRecord> readAll() {
+        EntityQuery.Builder query = Query.newEntityQueryBuilder();
+        Iterator<ShardSessionRecord> iterator = readAll(query, MAX_ENTITIES_PER_WRITE_REQUEST);
+        return ImmutableList.copyOf(iterator);
+    }
+
     private boolean checkConsistency(ShardIndex index, ShardSessionRecord ssr) {
         ImmutableList<ShardSessionRecord> records = readByIndex(index);
-        if (records.size() > 0) {
+        if (records.size() > 1) {
             _warn().log("Several `ShardSessionRecord`s found for index %s.",
                         Stringifiers.toString(index));
         }

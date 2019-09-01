@@ -31,6 +31,7 @@ import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxReadRequest;
 import io.spine.server.delivery.InboxStorage;
+import io.spine.server.delivery.InboxStorageTest;
 import io.spine.server.delivery.Page;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.storage.datastore.given.DsInboxStorageTestEnv;
@@ -53,24 +54,34 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @DisplayName("`DsInboxStorage` should")
-public class DsInboxStorageTest {
+class DsInboxStorageTest extends InboxStorageTest {
 
     private final TestDatastoreStorageFactory factory =
             TestDatastoreStorageFactory.defaultInstance();
 
+    @Override
     @BeforeEach
-    void setUp() {
+    protected void setUp() {
         factory.setUp();
+        super.setUp();
     }
 
+    @Override
     @AfterEach
-    void tearDown() {
+    protected  void tearDown() {
         factory.tearDown();
+        super.tearDown();
+    }
+
+
+    @Override
+    protected InboxStorage storage() {
+        return factory.createInboxStorage(false);
     }
 
     @Test
     @DisplayName("read and write an `InboxMessage` instance")
-    public void readAndWriteSingleMessage() {
+    void readAndWriteSingleMessage() {
         InboxStorage storage = storage();
 
         InboxMessage msg = DsInboxStorageTestEnv.generate(3, 24, currentTime());
@@ -84,7 +95,7 @@ public class DsInboxStorageTest {
 
     @Test
     @DisplayName("read and write multiple `InboxMessage` instances")
-    public void readAndWriteMultipleMessages() {
+    void readAndWriteMultipleMessages() {
 
         InboxStorage storage = storage();
         int totalMessages = 10;
@@ -108,7 +119,7 @@ public class DsInboxStorageTest {
 
     @Test
     @DisplayName("remove selected `InboxMessage` instances")
-    public void removeMessages() {
+    void removeMessages() {
         ShardIndex index = newIndex(6, 7);
         ImmutableList<InboxMessage> messages = generate(20, index);
         InboxStorage storage = storage();
@@ -133,7 +144,7 @@ public class DsInboxStorageTest {
 
     @Test
     @DisplayName("do nothing if removing inexistent `InboxMessage` instances")
-    public void doNothingIfRemovingInexistentMessages() {
+    void doNothingIfRemovingInexistentMessages() {
 
         InboxStorage storage = storage();
         ShardIndex index = newIndex(6, 7);
@@ -147,7 +158,7 @@ public class DsInboxStorageTest {
 
     @Test
     @DisplayName("mark messages delivered")
-    public void markMessagedDelivered() {
+    void markMessagedDelivered() {
 
         ShardIndex index = newIndex(3, 71);
         ImmutableList<InboxMessage> messages = generate(10, index);
@@ -172,7 +183,7 @@ public class DsInboxStorageTest {
                                .collect(toImmutableList());
 
         // Check that both `TO_DELIVER` message and those marked `DELIVERED` are stored as expected.
-        ImmutableList<InboxMessage> readResult = storage.readAll(index)
+        ImmutableList<InboxMessage> readResult = storage.readAll(index, Integer.MAX_VALUE)
                                                         .contents();
         assertTrue(readResult.contains(remainingNonDelivered));
         assertTrue(readResult.containsAll(originalMarkedDelivered));
@@ -180,7 +191,7 @@ public class DsInboxStorageTest {
 
     @Test
     @DisplayName("not accept `null` values in public API methods")
-    public void notAcceptNulls() {
+    void notAcceptNulls() {
         new NullPointerTester()
                 .setDefault(ShardIndex.class, newIndex(4, 5))
                 .setDefault(InboxMessage.class, InboxMessage.getDefaultInstance())
@@ -190,14 +201,10 @@ public class DsInboxStorageTest {
                 .testAllPublicInstanceMethods(storage());
     }
 
-    private InboxStorage storage() {
-        return factory.createInboxStorage(false);
-    }
-
     @CanIgnoreReturnValue
     private static ImmutableList<InboxMessage>
     readAllAndCompare(InboxStorage storage, ShardIndex idx, ImmutableList<InboxMessage> expected) {
-        Page<InboxMessage> page = storage.readAll(idx);
+        Page<InboxMessage> page = storage.readAll(idx, Integer.MAX_VALUE);
         assertEquals(expected.size(), page.size());
 
         ImmutableList<InboxMessage> contents = page.contents();
@@ -206,7 +213,7 @@ public class DsInboxStorageTest {
     }
 
     private static void checkEmpty(InboxStorage storage, ShardIndex index) {
-        Page<InboxMessage> emptyPage = storage.readAll(index);
+        Page<InboxMessage> emptyPage = storage.readAll(index, 10);
         assertEquals(0, emptyPage.size());
         assertTrue(emptyPage.contents()
                             .isEmpty());

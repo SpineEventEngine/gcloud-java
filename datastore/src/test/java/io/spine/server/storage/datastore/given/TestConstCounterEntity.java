@@ -24,11 +24,11 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.core.Version;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.given.Given;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
-import io.spine.testing.server.entity.given.Given;
 
 import static io.spine.base.Time.currentTime;
 
