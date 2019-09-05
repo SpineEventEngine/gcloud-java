@@ -74,45 +74,37 @@ public final class DsSessionStorage
      */
     private enum Column implements MessageColumn<ShardSessionRecord> {
 
-        shardIndex("work_shard", (m) -> {
+        shard((m) -> {
             return LongValue.of(m.getIndex()
                                  .getIndex());
         }),
 
-        ofTotalShards("of_total_work_shards", (m) -> {
+        total_shards((m) -> {
             return LongValue.of(m.getIndex()
                                  .getOfTotal());
         }),
 
-        nodeId("nodeId", (m) -> {
+        node((m) -> {
             return StringValue.of(m.getPickedBy()
                                    .getValue());
         }),
 
-        whenLastPicked("when_last_picked", (m) -> {
+        when_last_picked((m) -> {
             return TimestampValue.of(fromProto(m.getWhenLastPicked()));
         });
 
         /**
-         * The column name.
-         */
-        private final String name;
-
-        /**
          * Obtains the value of the column from the given message.
          */
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")  // This enum isn't serialized.
         private final Getter<ShardSessionRecord> getter;
 
-        Column(String name,
-               Getter<ShardSessionRecord> getter) {
-            this.name = name;
+        Column(Getter<ShardSessionRecord> getter) {
             this.getter = getter;
         }
 
         @Override
         public String columnName() {
-            return name;
+            return name();
         }
 
         @Override
