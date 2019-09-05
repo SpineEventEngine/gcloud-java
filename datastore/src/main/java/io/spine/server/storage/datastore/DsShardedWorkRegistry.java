@@ -62,6 +62,13 @@ public class DsShardedWorkRegistry
         this.storage = new DsSessionStorage(factory);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>When picking up a shard, performs a double check to ensure that the write into database
+     * was not overridden by another node. If the write was overridden, gives up the shard to
+     * the other node and returns {@code Optional.empty()}.
+     */
     @Override
     public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
         Optional<ShardProcessingSession> picked = super.pickUp(index, nodeId);
