@@ -64,7 +64,14 @@ public class DsShardedWorkRegistry
 
     @Override
     public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
-        return super.pickUp(index, nodeId);
+        Optional<ShardProcessingSession> picked = super.pickUp(index, nodeId);
+        return picked.filter(session -> pickedBy(index, nodeId));
+    }
+
+    private boolean pickedBy(ShardIndex index, NodeId nodeId) {
+        Optional<ShardSessionRecord> stored = find(index);
+        return stored.map(record -> record.getPickedBy().equals(nodeId))
+                     .orElse(false);
     }
 
     @Override
