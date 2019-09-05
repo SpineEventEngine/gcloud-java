@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -39,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -144,11 +144,9 @@ class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
     }
 
     private ShardSessionRecord readSingleRecord(ShardIndex index) {
-        ImmutableList<ShardSessionRecord> records = registry.readByIndex(index);
-        assertThat(records.size()).isEqualTo(1);
-
-        return records.iterator()
-                      .next();
+        Optional<ShardSessionRecord> record = registry.storage().read(index);
+        assertThat(record).isPresent();
+        return record.get();
     }
 
     private static NodeId newNode() {
