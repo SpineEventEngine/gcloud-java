@@ -112,6 +112,9 @@ public class DsShardedWorkRegistry
         return new DsShardProcessingSession(record, () -> clearNode(record));
     }
 
+    /**
+     * Obtains the session storage which persists the session records.
+     */
     protected DsSessionStorage storage() {
         return storage;
     }
