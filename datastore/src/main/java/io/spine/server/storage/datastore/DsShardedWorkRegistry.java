@@ -20,35 +20,21 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.EntityQuery;
-import com.google.cloud.datastore.LongValue;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.StringValue;
-import com.google.cloud.datastore.TimestampValue;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Durations;
 import io.spine.logging.Logging;
 import io.spine.server.NodeId;
+import io.spine.server.delivery.AbstractWorkRegistry;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
-import io.spine.server.delivery.ShardedWorkRegistry;
-import io.spine.string.Stringifiers;
 
 import java.util.Iterator;
 import java.util.Optional;
 
-import static com.google.cloud.Timestamp.fromProto;
-import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.Timestamps.between;
-import static io.spine.base.Time.currentTime;
-import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
 
 /**
- * A {@link ShardedWorkRegistry} based on the Google Datastore storage.
+ * A {@link io.spine.server.delivery.ShardedWorkRegistry} based on the Google Datastore storage.
  *
  * <p>The sharded work is stored as {@link ShardSessionRecord}s in the Datastore. Each time
  * the session is {@linkplain #pickUp(ShardIndex, NodeId) picked up}, the corresponding
@@ -58,10 +44,10 @@ import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PE
  * as it provides the strong consistency for queries.
  */
 public class DsShardedWorkRegistry
-        extends DsMessageStorage<ShardIndex, ShardSessionRecord, ShardSessionReadRequest>
-        implements ShardedWorkRegistry, Logging {
+        extends AbstractWorkRegistry
+        implements Logging {
 
-    private static final boolean multitenant = false;
+    private final DsSessionStorage storage;
 
     /**
      * Creates an instance of registry using the {@link DatastoreStorageFactory} passed.
@@ -71,163 +57,65 @@ public class DsShardedWorkRegistry
      * by tenant.
      */
     public DsShardedWorkRegistry(DatastoreStorageFactory factory) {
-        super(factory.systemWrapperFor(DsShardedWorkRegistry.class, multitenant), multitenant);
+        super();
+        checkNotNull(factory);
+        this.storage = new DsSessionStorage(factory);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>When picking up a shard, performs a double check to ensure that the write into database
+     * was not overridden by another node. If the write was overridden, gives up the shard to
+     * the other node and returns {@code Optional.empty()}.
+     */
     @Override
     public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
-        checkNotNull(index);
-        checkNotNull(nodeId);
+        Optional<ShardProcessingSession> picked = super.pickUp(index, nodeId);
+        return picked.filter(session -> pickedBy(index, nodeId));
+    }
 
-        boolean pickedAlready = isPickedAlready(index);
-        if (pickedAlready) {
-            return Optional.empty();
-        }
-        ShardSessionRecord ssr = newRecord(index, nodeId);
-        write(ssr);
-        boolean writeConsistent = checkConsistency(index, ssr);
-        if (writeConsistent) {
-            ShardProcessingSession result = new DsShardProcessingSession(ssr, () -> clearNode(ssr));
-            return Optional.of(result);
-        } else {
-            return Optional.empty();
-        }
+    private boolean pickedBy(ShardIndex index, NodeId nodeId) {
+        Optional<ShardSessionRecord> stored = find(index);
+        return stored.map(record -> record.getPickedBy().equals(nodeId))
+                     .orElse(false);
     }
 
     @Override
-    public Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod) {
-        checkNotNull(inactivityPeriod);
-
-        ImmutableList<ShardSessionRecord> allRecords = readAll();
-        ImmutableList.Builder<ShardIndex> resultBuilder = ImmutableList.builder();
-        for (ShardSessionRecord record : allRecords) {
-            Timestamp whenPicked = record.getWhenLastPicked();
-            Duration elapsed = between(whenPicked, currentTime());
-
-            int comparison = Durations.compare(elapsed, inactivityPeriod);
-            if (comparison >= 0) {
-                clearNode(record);
-                resultBuilder.add(record.getIndex());
-            }
-        }
-        return resultBuilder.build();
-    }
-
-    private ImmutableList<ShardSessionRecord> readAll() {
-        EntityQuery.Builder query = Query.newEntityQueryBuilder();
-        Iterator<ShardSessionRecord> iterator = readAll(query, MAX_ENTITIES_PER_WRITE_REQUEST);
-        return ImmutableList.copyOf(iterator);
-    }
-
-    private boolean checkConsistency(ShardIndex index, ShardSessionRecord ssr) {
-        ImmutableList<ShardSessionRecord> records = readByIndex(index);
-        if (records.size() > 1) {
-            _warn().log("Several `ShardSessionRecord`s found for index %s.",
-                        Stringifiers.toString(index));
-        }
-        ShardSessionRecord fromStorage = records.iterator()
-                                                .next();
-        return fromStorage.equals(ssr);
-    }
-
-    /**
-     * Clears the {@linkplain ShardSessionRecord#getPickedBy() node} of the passed session and
-     * updates the record in the storage.
-     */
-    private void clearNode(ShardSessionRecord record) {
-        ShardSessionRecord updated = record.toBuilder()
-                                           .clearPickedBy()
-                                           .vBuild();
-        write(updated);
-    }
-
-    /**
-     * Tells if the session with the passed index is currently picked by any node.
-     */
-    private boolean isPickedAlready(ShardIndex index) {
-        ImmutableList<ShardSessionRecord> records = readByIndex(index);
-        long nodesWithShard = records
-                .stream()
-                .filter(ShardSessionRecord::hasPickedBy)
-                .count();
-        return nodesWithShard > 0;
+    public synchronized Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod) {
+        return super.releaseExpiredSessions(inactivityPeriod);
     }
 
     @Override
-    ShardIndex idOf(ShardSessionRecord message) {
-        return message.getIndex();
+    protected synchronized void clearNode(ShardSessionRecord session) {
+        super.clearNode(session);
     }
 
     @Override
-    MessageColumn<ShardSessionRecord>[] columns() {
-        return Column.values();
+    protected Iterator<ShardSessionRecord> allRecords() {
+        return storage().readAll();
     }
 
-    private static ShardSessionRecord newRecord(ShardIndex index, NodeId nodeId) {
-        return ShardSessionRecord.newBuilder()
-                                 .setIndex(index)
-                                 .setPickedBy(nodeId)
-                                 .setWhenLastPicked(currentTime())
-                                 .vBuild();
+    @Override
+    protected void write(ShardSessionRecord session) {
+        storage().write(session);
     }
 
-    protected ImmutableList<ShardSessionRecord> readByIndex(ShardIndex index) {
-        EntityQuery.Builder query =
-                Query.newEntityQueryBuilder()
-                     .setFilter(eq(Column.shardIndex.columnName(), index.getIndex()));
-        Iterator<ShardSessionRecord> iterator = readAll(query, MAX_ENTITIES_PER_WRITE_REQUEST);
-        return ImmutableList.copyOf(iterator);
+    @Override
+    protected Optional<ShardSessionRecord> find(ShardIndex index) {
+        Optional<ShardSessionRecord> read = storage().read(index);
+        return read;
+    }
+
+    @Override
+    protected ShardProcessingSession asSession(ShardSessionRecord record) {
+        return new DsShardProcessingSession(record, () -> clearNode(record));
     }
 
     /**
-     * The columns of the {@link ShardSessionRecord} message stored in Datastore.
+     * Obtains the session storage which persists the session records.
      */
-    private enum Column implements MessageColumn<ShardSessionRecord> {
-
-        shardIndex("work_shard", (m) -> {
-            return LongValue.of(m.getIndex()
-                                 .getIndex());
-        }),
-
-        ofTotalShards("of_total_work_shards", (m) -> {
-            return LongValue.of(m.getIndex()
-                                 .getOfTotal());
-        }),
-
-        nodeId("nodeId", (m) -> {
-            return StringValue.of(m.getPickedBy()
-                                   .getValue());
-        }),
-
-        whenLastPicked("when_last_picked", (m) -> {
-            return TimestampValue.of(fromProto(m.getWhenLastPicked()));
-        });
-
-        /**
-         * The column name.
-         */
-        private final String name;
-
-        /**
-         * Obtains the value of the column from the given message.
-         */
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")  // This enum isn't serialized.
-        private final Getter<ShardSessionRecord> getter;
-
-        Column(String name,
-               Getter<ShardSessionRecord> getter) {
-            this.name = name;
-            this.getter = getter;
-        }
-
-        @Override
-        public String columnName() {
-            return name;
-        }
-
-        @Override
-        public Getter<ShardSessionRecord> getter() {
-            return getter;
-        }
+    protected DsSessionStorage storage() {
+        return storage;
     }
 }
