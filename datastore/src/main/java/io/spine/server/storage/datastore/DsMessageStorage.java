@@ -145,23 +145,24 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      * and committed. In case there is already an active transaction, the write operation
      * is performed in its scope.
      *
-     * @param message the message to write
+     * @param message
+     *         the message to write
      */
     @SuppressWarnings("OverlyBroadCatchBlock")  // handling all possible transaction-related issues.
     final void writeTransactionally(M message) {
         checkNotNull(message);
 
         boolean txRequired = !datastore.isTransactionActive();
-        if(txRequired) {
+        if (txRequired) {
             datastore.startTransaction();
         }
         try {
             write(message);
-            if(txRequired) {
+            if (txRequired) {
                 datastore.commitTransaction();
             }
         } catch (Exception e) {
-            if(txRequired && datastore.isTransactionActive()) {
+            if (txRequired && datastore.isTransactionActive()) {
                 datastore.rollbackTransaction();
             }
             throw newIllegalStateException("Error committing the transaction.", e);
