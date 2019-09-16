@@ -28,7 +28,7 @@
 def final SPINE_VERSION = '1.1.0'
 
 ext {
-    versionToPublish = SPINE_VERSION
+    versionToPublish = '1.1.1-SNAPSHOT+1'
     
     spineBaseVersion = SPINE_VERSION
     spineCoreVersion = SPINE_VERSION
