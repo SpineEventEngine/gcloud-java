@@ -43,9 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>It is recommended to use this implementation with Cloud Firestore in Datastore mode,
  * as it provides the strong consistency for queries.
  */
-public class DsShardedWorkRegistry
-        extends AbstractWorkRegistry
-        implements Logging {
+public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Logging {
 
     private final DsSessionStorage storage;
 
@@ -98,7 +96,7 @@ public class DsShardedWorkRegistry
 
     @Override
     protected void write(ShardSessionRecord session) {
-        storage().write(session);
+        storage().writeTransactionally(session);
     }
 
     @Override

@@ -39,6 +39,7 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Streams.stream;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.unsupported;
 import static java.util.stream.Collectors.toList;
 
@@ -134,6 +135,37 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
         checkNotNull(message);
 
         write(message);
+    }
+
+    /**
+     * Behaves similarly to {@link #write(Message)}, but performs the operation
+     * in scope of a Datastore transaction.
+     *
+     * <p>If there is no active transaction at the moment, the new transaction is started
+     * and committed. In case there is already an active transaction, the write operation
+     * is performed in its scope.
+     *
+     * @param message the message to write
+     */
+    @SuppressWarnings("OverlyBroadCatchBlock")  // handling all possible transaction-related issues.
+    final void writeTransactionally(M message) {
+        checkNotNull(message);
+
+        boolean txRequired = !datastore.isTransactionActive();
+        if(txRequired) {
+            datastore.startTransaction();
+        }
+        try {
+            write(message);
+            if(txRequired) {
+                datastore.commitTransaction();
+            }
+        } catch (Exception e) {
+            if(txRequired && datastore.isTransactionActive()) {
+                datastore.rollbackTransaction();
+            }
+            throw newIllegalStateException("Error committing the transaction.", e);
+        }
     }
 
     /**
