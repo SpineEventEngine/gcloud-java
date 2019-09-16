@@ -12,7 +12,7 @@ all modules and does not describe the project structure per-subproject.
 
 <groupId>io.spine.gcloud</groupId>
 <artifactId>spine-gcloud-java</artifactId>
-<version>1.1.0</version>
+<version>1.1.1-SNAPSHOT+1</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -28,7 +28,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.cloud</groupId>
     <artifactId>google-cloud-datastore</artifactId>
-    <version>1.90.0</version>
+    <version>1.91.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
