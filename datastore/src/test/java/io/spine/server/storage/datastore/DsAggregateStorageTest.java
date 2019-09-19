@@ -40,6 +40,7 @@ import io.spine.server.aggregate.AggregateStorageTest;
 import io.spine.server.aggregate.Snapshot;
 import io.spine.server.aggregate.given.repo.ProjectAggregate;
 import io.spine.server.entity.Entity;
+import io.spine.server.storage.datastore.given.CountingDatastoreWrapper;
 import io.spine.server.storage.datastore.given.aggregate.ProjectAggregateRepository;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.Project;
@@ -60,6 +61,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.Optional;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
@@ -74,9 +76,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("`DsAggregateStorage` should")
 class DsAggregateStorageTest extends AggregateStorageTest {
@@ -166,10 +165,13 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
         private final ContextSpec contextSpec = singleTenant(TruncateEfficiently.class.getName());
         private DsAggregateStorage<ProjectId> storage;
+        private CountingDatastoreWrapper datastoreWrapper;
+
 
         @BeforeEach
         void setUp() {
-            SpyStorageFactory.injectWrapper(datastoreFactory().wrapperFor(contextSpec));
+            datastoreWrapper = new CountingDatastoreWrapper(datastoreFactory().datastore(), false);
+            SpyStorageFactory.injectWrapper(datastoreWrapper);
             SpyStorageFactory storageFactory = new SpyStorageFactory();
             storage = (DsAggregateStorage<ProjectId>)
                     storageFactory.createAggregateStorage(contextSpec, ProjectAggregate.class);
@@ -218,7 +220,8 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
             // Check that the number of operations is minimum possible.
             int expectedOperationCount = eventCount / MAX_ENTITIES_PER_WRITE_REQUEST + 1;
-            verify(storage.datastore(), times(expectedOperationCount)).deleteEntities(any());
+            assertThat(datastoreWrapper.deleteCount())
+                    .isEqualTo(expectedOperationCount);
         }
     }
 

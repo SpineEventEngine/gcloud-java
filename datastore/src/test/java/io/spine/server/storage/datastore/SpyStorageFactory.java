@@ -22,30 +22,27 @@ package io.spine.server.storage.datastore;
 
 import io.spine.annotation.Internal;
 
-import static org.mockito.Mockito.spy;
-
 /**
- * A {@link TestDatastoreStorageFactory} which spies on its {@link DatastoreWrapper}.
+ * A {@link TestDatastoreStorageFactory} which allows to inject a custom {@link DatastoreWrapper}.
  *
- * This class is not moved to the
- * {@linkplain io.spine.server.storage.datastore.given.DsRecordStorageTestEnv test environment}
- * because it uses the package-private method of {@link DatastoreWrapper}.
+ * <p>This class is not moved to the test environment because it uses the package-private method of
+ * {@link DatastoreWrapper}.
  */
 final class SpyStorageFactory extends TestDatastoreStorageFactory {
 
-    private static DatastoreWrapper spyWrapper = null;
+    private static DatastoreWrapper injectedWrapper = null;
 
     static void injectWrapper(DatastoreWrapper wrapper) {
-        spyWrapper = spy(wrapper);
+        injectedWrapper = wrapper;
     }
 
     SpyStorageFactory() {
-        super(spyWrapper.datastore());
+        super(injectedWrapper.datastore());
     }
 
     @Internal
     @Override
     protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
-        return spyWrapper;
+        return injectedWrapper;
     }
 }

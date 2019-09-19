@@ -34,6 +34,7 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Streams;
 import io.spine.logging.Logging;
@@ -397,7 +398,8 @@ public class DatastoreWrapper implements Logging {
         deleteEntities(entities);
     }
 
-    void deleteEntities(Collection<Entity> entities) {
+    @VisibleForTesting
+    protected void deleteEntities(Collection<Entity> entities) {
         List<Key> keyList =
                 entities.stream()
                         .map(BaseEntity::getKey)

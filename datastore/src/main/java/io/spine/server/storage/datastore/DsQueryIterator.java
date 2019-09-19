@@ -25,6 +25,7 @@ import com.google.cloud.datastore.DatastoreReaderWriter;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.UnmodifiableIterator;
+import io.spine.annotation.Internal;
 
 import java.util.NoSuchElementException;
 
@@ -47,7 +48,8 @@ import java.util.NoSuchElementException;
  * @param <R>
  *         the type of queried objects
  */
-final class DsQueryIterator<R> extends UnmodifiableIterator<R> {
+@Internal
+public final class DsQueryIterator<R> extends UnmodifiableIterator<R> {
 
     private final StructuredQuery<R> query;
     private final QueryResults<R> currentPage;

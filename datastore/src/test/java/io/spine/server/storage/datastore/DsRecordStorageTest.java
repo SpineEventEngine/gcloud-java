@@ -21,7 +21,6 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -43,7 +42,9 @@ import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageTest;
+import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.given.CollegeEntity;
+import io.spine.server.storage.datastore.given.CountingDatastoreWrapper;
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv;
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.EntityWithCustomColumnName;
 import io.spine.server.storage.datastore.given.TestConstCounterEntity;
@@ -121,11 +122,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyIterable;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("`DsRecordStorage` should")
 class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> {
@@ -359,13 +355,14 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     class LookupByIds {
 
         private final ContextSpec contextSpec = singleTenant(LookupByIds.class.getName());
-        private DatastoreStorageFactory storageFactory;
         private RecordStorage<CollegeId> storage;
+        private CountingDatastoreWrapper datastoreWrapper;
 
         @BeforeEach
         void setUp() {
-            SpyStorageFactory.injectWrapper(datastoreFactory().wrapperFor(contextSpec));
-            storageFactory = new SpyStorageFactory();
+            datastoreWrapper = new CountingDatastoreWrapper(datastoreFactory().datastore(), false);
+            SpyStorageFactory.injectWrapper(datastoreWrapper);
+            StorageFactory storageFactory = new SpyStorageFactory();
             storage = storageFactory.createRecordStorage(contextSpec, CollegeEntity.class);
         }
 
@@ -541,7 +538,6 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertDsReadByKeys();
         }
 
-        @SuppressWarnings("unchecked") // For the purposes of mocking.
         @Test
         @DisplayName("in specified order with `null`s")
         void testQueryByIDsWithOrderWithNulls() {
@@ -579,9 +575,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertEquals(expectedCounts, actualCounts);
 
             // Check Datastore reads are performed by keys but not using a structured query.
-            DatastoreWrapper spy = storageFactory.wrapperFor(contextSpec);
-            verify(spy).read(anyIterable());
-            verify(spy, never()).read(any(StructuredQuery.class));
+            assertDsReadByKeys();
         }
 
         @Test
@@ -681,11 +675,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertFalse(readResult.hasNext());
         }
 
-        @SuppressWarnings("unchecked") // For the purposes of mocking.
         private void assertDsReadByKeys() {
-            DatastoreWrapper spy = storageFactory.wrapperFor(contextSpec);
-            verify(spy).read(anyIterable());
-            verify(spy, never()).read(any(StructuredQuery.class));
+            assertThat(datastoreWrapper.readByKeysCount())
+                    .isEqualTo(1);
+            assertThat(datastoreWrapper.readByQueryCount())
+                    .isEqualTo(0);
         }
     }
 
@@ -695,7 +689,6 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     @Test
     @DisplayName("given bulk of records, write them re-writing existing ones")
     void rewritingExisting() {
-
     }
 
     @Nested
@@ -703,13 +696,14 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     class LookupByQueries {
 
         private final ContextSpec contextSpec = singleTenant(LookupByQueries.class.getName());
-        private DatastoreStorageFactory storageFactory;
         private RecordStorage<CollegeId> storage;
+        private CountingDatastoreWrapper datastoreWrapper;
 
         @BeforeEach
         void setUp() {
-            SpyStorageFactory.injectWrapper(datastoreFactory().wrapperFor(contextSpec));
-            storageFactory = new SpyStorageFactory();
+            datastoreWrapper = new CountingDatastoreWrapper(datastoreFactory().datastore(), false);
+            SpyStorageFactory.injectWrapper(datastoreWrapper);
+            StorageFactory storageFactory = new SpyStorageFactory();
             storage = storageFactory.createRecordStorage(contextSpec, CollegeEntity.class);
         }
 
@@ -1049,11 +1043,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertDsReadByStructuredQuery(1);
         }
 
-        @SuppressWarnings("unchecked") // For the purposes of mocking.
         private void assertDsReadByStructuredQuery(int invocationCount) {
-            DatastoreWrapper spy = storageFactory.wrapperFor(contextSpec);
-            verify(spy, never()).read(anyIterable());
-            verify(spy, times(invocationCount)).read(any(StructuredQuery.class));
+            assertThat(datastoreWrapper.readByKeysCount())
+                    .isEqualTo(0);
+            assertThat(datastoreWrapper.readByQueryCount())
+                    .isEqualTo(invocationCount);
         }
     }
 }
