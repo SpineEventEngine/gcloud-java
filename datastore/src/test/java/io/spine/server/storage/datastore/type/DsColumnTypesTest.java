@@ -69,8 +69,8 @@ class DsColumnTypesTest {
 
         BaseEntity<Key> entity = entityBuilder.build();
         String entityField = entity.getString(COLUMN_LABEL);
-        assertThat(entityField)
-                .isEqualTo(value);
+
+        assertThat(entityField).isEqualTo(value);
     }
 
     @Test
@@ -83,8 +83,8 @@ class DsColumnTypesTest {
 
         BaseEntity<Key> entity = entityBuilder.build();
         long entityField = entity.getLong(COLUMN_LABEL);
-        assertThat(entityField)
-                .isEqualTo(value);
+
+        assertThat(entityField).isEqualTo(value);
     }
 
     @Test
@@ -97,6 +97,7 @@ class DsColumnTypesTest {
 
         BaseEntity<Key> entity = entityBuilder.build();
         double entityField = entity.getDouble(COLUMN_LABEL);
+
         assertThat(entityField)
                 .isWithin(0.01)
                 .of(value);
@@ -112,6 +113,7 @@ class DsColumnTypesTest {
 
         BaseEntity<Key> entity = entityBuilder.build();
         double entityField = entity.getDouble(COLUMN_LABEL);
+
         assertThat(entityField)
                 .isWithin(0.01)
                 .of(value);
@@ -127,8 +129,8 @@ class DsColumnTypesTest {
 
         BaseEntity<Key> entity = entityBuilder.build();
         long entityField = entity.getLong(COLUMN_LABEL);
-        assertThat(entityField)
-                .isEqualTo(value);
+
+        assertThat(entityField).isEqualTo(value);
     }
 
     @Test
@@ -141,8 +143,8 @@ class DsColumnTypesTest {
 
         BaseEntity<Key> entity = entityBuilder.build();
         boolean entityField = entity.getBoolean(COLUMN_LABEL);
-        assertThat(entityField)
-                .isEqualTo(value);
+
+        assertThat(entityField).isEqualTo(value);
     }
 
     @Test
@@ -158,8 +160,8 @@ class DsColumnTypesTest {
 
         BaseEntity<Key> entity = entityBuilder.build();
         com.google.cloud.Timestamp entityField = entity.getTimestamp(COLUMN_LABEL);
-        assertThat(entityField)
-                .isEqualTo(timestamp);
+
+        assertThat(entityField).isEqualTo(timestamp);
     }
 
     @Test
@@ -174,8 +176,8 @@ class DsColumnTypesTest {
 
         BaseEntity<Key> entity = entityBuilder.build();
         long entityField = entity.getLong(COLUMN_LABEL);
-        assertThat(entityField)
-                .isEqualTo(number);
+
+        assertThat(entityField).isEqualTo(number);
     }
 
     @Test
@@ -190,8 +192,8 @@ class DsColumnTypesTest {
 
         BaseEntity<Key> entity = entityBuilder.build();
         String entityField = entity.getString(COLUMN_LABEL);
-        assertThat(entityField)
-                .isEqualTo(stringMessage);
+
+        assertThat(entityField).isEqualTo(stringMessage);
     }
 
     @Test
@@ -202,14 +204,13 @@ class DsColumnTypesTest {
 
         BaseEntity<Key> entity = entityBuilder.build();
         String entityField = entity.getString(COLUMN_LABEL);
-        assertThat(entityField)
-                .isNull();
+
+        assertThat(entityField).isNull();
     }
 
     private <T> void setSimpleType(SimpleDatastoreColumnType<T> type, T value) {
         T storedValue = type.convertColumnValue(value);
-        assertThat(storedValue)
-                .isEqualTo(value);
+        assertThat(storedValue).isEqualTo(value);
 
         type.setColumnValue(entityBuilder, storedValue, COLUMN_LABEL);
     }
@@ -218,8 +219,7 @@ class DsColumnTypesTest {
                                          J value,
                                          S expectedStoredValue) {
         S storedValue = type.convertColumnValue(value);
-        assertThat(storedValue)
-                .isEqualTo(expectedStoredValue);
+        assertThat(storedValue).isEqualTo(expectedStoredValue);
 
         type.setColumnValue(entityBuilder, storedValue, COLUMN_LABEL);
     }

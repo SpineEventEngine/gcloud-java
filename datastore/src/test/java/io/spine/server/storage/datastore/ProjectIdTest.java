@@ -65,8 +65,7 @@ class ProjectIdTest {
         ProjectId projectId = ProjectId.of(value);
         String idAsString = projectId.toString();
 
-        assertThat(idAsString)
-                .contains(value);
+        assertThat(idAsString).contains(value);
     }
 
     private static Datastore datastore(String projectId) {

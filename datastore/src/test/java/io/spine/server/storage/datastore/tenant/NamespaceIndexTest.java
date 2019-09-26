@@ -118,8 +118,7 @@ class NamespaceIndexTest {
         assertIds.isNotNull();
         assertIds.hasSize(idCount + 1);
 
-        assertThat(ids)
-                .contains(newId);
+        assertThat(ids).contains(newId);
     }
 
     @Test
