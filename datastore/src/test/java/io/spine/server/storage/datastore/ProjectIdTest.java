@@ -63,9 +63,9 @@ class ProjectIdTest {
     void testToString() {
         String value = "my-fancy-project-id";
         ProjectId projectId = ProjectId.of(value);
-        String stringRepr = projectId.toString();
+        String idAsString = projectId.toString();
 
-        assertThat(stringRepr)
+        assertThat(idAsString)
                 .contains(value);
     }
 
