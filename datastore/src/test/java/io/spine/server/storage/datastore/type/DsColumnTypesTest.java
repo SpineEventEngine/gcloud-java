@@ -21,18 +21,14 @@
 package io.spine.server.storage.datastore.type;
 
 import com.google.cloud.datastore.BaseEntity;
-import com.google.cloud.datastore.BooleanValue;
-import com.google.cloud.datastore.DoubleValue;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.LongValue;
-import com.google.cloud.datastore.StringValue;
-import com.google.cloud.datastore.TimestampValue;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.json.Json;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,24 +36,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.timestampType;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("DsColumnTypes should")
 class DsColumnTypesTest {
 
-    private static final String RANDOM_COLUMN_LABEL = "some-column";
-    private BaseEntity.Builder<Key, Entity.Builder> entity;
+    private static final String COLUMN_LABEL = "some-column";
+    private BaseEntity.Builder<Key, Entity.Builder> entityBuilder;
 
     @BeforeEach
     void setUp() {
-        entity = mockEntity();
+        entityBuilder = entityBuilder();
     }
 
     @Test
@@ -74,7 +67,10 @@ class DsColumnTypesTest {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(StringValue.of(value)));
+        BaseEntity<Key> entity = entityBuilder.build();
+        String entityField = entity.getString(COLUMN_LABEL);
+        assertThat(entityField)
+                .isEqualTo(value);
     }
 
     @Test
@@ -85,7 +81,10 @@ class DsColumnTypesTest {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(LongValue.of(value)));
+        BaseEntity<Key> entity = entityBuilder.build();
+        long entityField = entity.getLong(COLUMN_LABEL);
+        assertThat(entityField)
+                .isEqualTo(value);
     }
 
     @Test
@@ -96,7 +95,11 @@ class DsColumnTypesTest {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(DoubleValue.of(value)));
+        BaseEntity<Key> entity = entityBuilder.build();
+        double entityField = entity.getDouble(COLUMN_LABEL);
+        assertThat(entityField)
+                .isWithin(0.01)
+                .of(value);
     }
 
     @Test
@@ -107,7 +110,11 @@ class DsColumnTypesTest {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(DoubleValue.of(value)));
+        BaseEntity<Key> entity = entityBuilder.build();
+        double entityField = entity.getDouble(COLUMN_LABEL);
+        assertThat(entityField)
+                .isWithin(0.01)
+                .of(value);
     }
 
     @Test
@@ -118,7 +125,10 @@ class DsColumnTypesTest {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(LongValue.of(value)));
+        BaseEntity<Key> entity = entityBuilder.build();
+        long entityField = entity.getLong(COLUMN_LABEL);
+        assertThat(entityField)
+                .isEqualTo(value);
     }
 
     @Test
@@ -129,7 +139,10 @@ class DsColumnTypesTest {
 
         setSimpleType(type, value);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(BooleanValue.of(value)));
+        BaseEntity<Key> entity = entityBuilder.build();
+        boolean entityField = entity.getBoolean(COLUMN_LABEL);
+        assertThat(entityField)
+                .isEqualTo(value);
     }
 
     @Test
@@ -143,7 +156,10 @@ class DsColumnTypesTest {
 
         setDatastoreType(type, value, timestamp);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(TimestampValue.of(timestamp)));
+        BaseEntity<Key> entity = entityBuilder.build();
+        com.google.cloud.Timestamp entityField = entity.getTimestamp(COLUMN_LABEL);
+        assertThat(entityField)
+                .isEqualTo(timestamp);
     }
 
     @Test
@@ -156,7 +172,10 @@ class DsColumnTypesTest {
 
         setDatastoreType(type, value, number);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(LongValue.of(number)));
+        BaseEntity<Key> entity = entityBuilder.build();
+        long entityField = entity.getLong(COLUMN_LABEL);
+        assertThat(entityField)
+                .isEqualTo(number);
     }
 
     @Test
@@ -169,35 +188,47 @@ class DsColumnTypesTest {
 
         setDatastoreType(type, value, stringMessage);
 
-        verify(entity).set(eq(RANDOM_COLUMN_LABEL), eq(StringValue.of(stringMessage)));
+        BaseEntity<Key> entity = entityBuilder.build();
+        String entityField = entity.getString(COLUMN_LABEL);
+        assertThat(entityField)
+                .isEqualTo(stringMessage);
     }
 
     @Test
-    @DisplayName("sut null value")
+    @DisplayName("set null value")
     void testNull() {
         SimpleDatastoreColumnType<Boolean> type = DsColumnTypes.booleanType();
-        type.setNull(entity, RANDOM_COLUMN_LABEL);
-        verify(entity).setNull(eq(RANDOM_COLUMN_LABEL));
+        type.setNull(entityBuilder, COLUMN_LABEL);
+
+        BaseEntity<Key> entity = entityBuilder.build();
+        String entityField = entity.getString(COLUMN_LABEL);
+        assertThat(entityField)
+                .isNull();
     }
 
     private <T> void setSimpleType(SimpleDatastoreColumnType<T> type, T value) {
         T storedValue = type.convertColumnValue(value);
-        assertEquals(value, storedValue);
+        assertThat(storedValue)
+                .isEqualTo(value);
 
-        type.setColumnValue(entity, storedValue, RANDOM_COLUMN_LABEL);
+        type.setColumnValue(entityBuilder, storedValue, COLUMN_LABEL);
     }
 
     private <J, S> void setDatastoreType(DatastoreColumnType<J, S> type,
                                          J value,
                                          S expectedStoredValue) {
         S storedValue = type.convertColumnValue(value);
-        assertEquals(expectedStoredValue, storedValue);
+        assertThat(storedValue)
+                .isEqualTo(expectedStoredValue);
 
-        type.setColumnValue(entity, storedValue, RANDOM_COLUMN_LABEL);
+        type.setColumnValue(entityBuilder, storedValue, COLUMN_LABEL);
     }
 
-    @SuppressWarnings("unchecked") // Because of mocking
-    private static BaseEntity.Builder<Key, Entity.Builder> mockEntity() {
-        return mock(BaseEntity.Builder.class);
+    private static BaseEntity.Builder<Key, Entity.Builder> entityBuilder() {
+        Key key = Key.newBuilder(TestDatastores.projectId()
+                                               .value(), "some-entity-kind", "some-name")
+                     .build();
+        Entity.Builder builder = Entity.newBuilder(key);
+        return builder;
     }
 }

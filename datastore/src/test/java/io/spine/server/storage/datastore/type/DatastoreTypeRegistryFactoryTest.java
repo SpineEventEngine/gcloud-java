@@ -22,20 +22,26 @@ package io.spine.server.storage.datastore.type;
 
 import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.Value;
-import com.google.protobuf.Timestamp;
-import io.spine.core.Version;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
-import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.storage.datastore.given.Columns;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.storage.datastore.given.Columns.booleanColumn;
+import static io.spine.server.storage.datastore.given.Columns.byteColumn;
+import static io.spine.server.storage.datastore.given.Columns.doubleColumn;
+import static io.spine.server.storage.datastore.given.Columns.floatColumn;
+import static io.spine.server.storage.datastore.given.Columns.intColumn;
+import static io.spine.server.storage.datastore.given.Columns.longColumn;
+import static io.spine.server.storage.datastore.given.Columns.messageColumn;
+import static io.spine.server.storage.datastore.given.Columns.stringColumn;
+import static io.spine.server.storage.datastore.given.Columns.timestampColumn;
+import static io.spine.server.storage.datastore.given.Columns.versionColumn;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("DatastoreTypeRegistryFactory should")
 class DatastoreTypeRegistryFactoryTest {
@@ -51,23 +57,23 @@ class DatastoreTypeRegistryFactoryTest {
     void testDefaults() {
         ColumnTypeRegistry<? extends DatastoreColumnType> registry =
                 DatastoreTypeRegistryFactory.defaultInstance();
-        DatastoreColumnType<?, ?> stringType = registry.get(mockColumn(String.class));
+        DatastoreColumnType<?, ?> stringType = registry.get(stringColumn());
         assertNotNull(stringType);
-        DatastoreColumnType<?, ?> intType = registry.get(mockColumn(int.class));
+        DatastoreColumnType<?, ?> intType = registry.get(intColumn());
         assertNotNull(intType);
-        DatastoreColumnType<?, ?> longType = registry.get(mockColumn(long.class));
+        DatastoreColumnType<?, ?> longType = registry.get(longColumn());
         assertNotNull(longType);
-        DatastoreColumnType<?, ?> floatType = registry.get(mockColumn(float.class));
+        DatastoreColumnType<?, ?> floatType = registry.get(floatColumn());
         assertNotNull(floatType);
-        DatastoreColumnType<?, ?> doubleType = registry.get(mockColumn(double.class));
+        DatastoreColumnType<?, ?> doubleType = registry.get(doubleColumn());
         assertNotNull(doubleType);
-        DatastoreColumnType<?, ?> booleanType = registry.get(mockColumn(boolean.class));
+        DatastoreColumnType<?, ?> booleanType = registry.get(booleanColumn());
         assertNotNull(booleanType);
-        DatastoreColumnType<?, ?> messageType = registry.get(mockColumn(String.class));
+        DatastoreColumnType<?, ?> messageType = registry.get(messageColumn());
         assertNotNull(messageType);
-        DatastoreColumnType<?, ?> timestampType = registry.get(mockColumn(Timestamp.class));
+        DatastoreColumnType<?, ?> timestampType = registry.get(timestampColumn());
         assertNotNull(timestampType);
-        DatastoreColumnType<?, ?> versionType = registry.get(mockColumn(Version.class));
+        DatastoreColumnType<?, ?> versionType = registry.get(versionColumn());
         assertNotNull(versionType);
     }
 
@@ -76,11 +82,11 @@ class DatastoreTypeRegistryFactoryTest {
     void testCustomize() {
         ColumnTypeRegistry<? extends DatastoreColumnType> registry =
                 DatastoreTypeRegistryFactory.predefinedValuesAnd()
-                                            .put(byte.class, new ByteColumnType())
+                                            .put(byte.class, new Columns.ByteColumnType())
                                             .build();
-        DatastoreColumnType byteColumnType = registry.get(mockColumn(Byte.class));
+        DatastoreColumnType byteColumnType = registry.get(byteColumn());
         assertNotNull(byteColumnType);
-        assertThat(byteColumnType, instanceOf(ByteColumnType.class));
+        assertThat(byteColumnType, instanceOf(Columns.ByteColumnType.class));
     }
 
     @Test
@@ -90,24 +96,9 @@ class DatastoreTypeRegistryFactoryTest {
                 DatastoreTypeRegistryFactory.predefinedValuesAnd()
                                             .put(String.class, new CustomStringType())
                                             .build();
-        DatastoreColumnType byteColumnType = registry.get(mockColumn(String.class));
-        assertNotNull(byteColumnType);
-        assertThat(byteColumnType, instanceOf(CustomStringType.class));
-    }
-
-    private static EntityColumn mockColumn(Class type) {
-        EntityColumn column = mock(EntityColumn.class);
-        when(column.type()).thenReturn(type);
-        when(column.persistedType()).thenReturn(type);
-        return column;
-    }
-
-    private static class ByteColumnType extends SimpleDatastoreColumnType<Byte> {
-
-        @Override
-        public Value<?> toValue(Byte data) {
-            return LongValue.of(data);
-        }
+        DatastoreColumnType columnType = registry.get(stringColumn());
+        assertNotNull(columnType);
+        assertThat(columnType, instanceOf(CustomStringType.class));
     }
 
     private static class CustomStringType extends AbstractDatastoreColumnType<String, Integer> {

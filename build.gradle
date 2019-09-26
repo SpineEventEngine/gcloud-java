@@ -116,7 +116,6 @@ subprojects {
         testImplementation deps.test.junit5Runner
 
         testImplementation deps.test.hamcrest
-        testImplementation deps.test.mockito
         testImplementation deps.test.guavaTestlib
 
         testRuntime deps.test.slf4j

@@ -24,14 +24,13 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.storage.datastore.given.TestDatastores.local;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("`ProjectId` should")
 class ProjectIdTest {
@@ -40,7 +39,7 @@ class ProjectIdTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
         new NullPointerTester()
-                .setDefault(Datastore.class, mockDatastore())
+                .setDefault(Datastore.class, TestDatastores.local())
                 .testStaticMethods(ProjectId.class, NullPointerTester.Visibility.PACKAGE);
     }
 
@@ -48,10 +47,10 @@ class ProjectIdTest {
     @DisplayName("support equality")
     void testEquals() {
         ProjectId a1 = ProjectId.of("a");
-        ProjectId a2 = ProjectId.of(mockDatastore("a"));
+        ProjectId a2 = ProjectId.of(datastore("a"));
 
         ProjectId b1 = ProjectId.of("b");
-        ProjectId b2 = ProjectId.of(mockDatastore("b"));
+        ProjectId b2 = ProjectId.of(datastore("b"));
 
         new EqualsTester()
                 .addEqualityGroup(a1, a2)
@@ -65,18 +64,17 @@ class ProjectIdTest {
         String value = "my-fancy-project-id";
         ProjectId projectId = ProjectId.of(value);
         String stringRepr = projectId.toString();
-        assertThat(stringRepr, containsString(value));
+
+        assertThat(stringRepr)
+                .contains(value);
     }
 
-    private static Datastore mockDatastore() {
-        return mockDatastore("some-project-id-ProjectIdTest");
-    }
-
-    private static Datastore mockDatastore(String value) {
-        Datastore datastore = mock(Datastore.class);
-        DatastoreOptions options = mock(DatastoreOptions.class);
-        when(datastore.getOptions()).thenReturn(options);
-        when(options.getProjectId()).thenReturn(value);
+    private static Datastore datastore(String projectId) {
+        DatastoreOptions options = local().getOptions()
+                                          .toBuilder()
+                                          .setProjectId(projectId)
+                                          .build();
+        Datastore datastore = options.getService();
         return datastore;
     }
 }

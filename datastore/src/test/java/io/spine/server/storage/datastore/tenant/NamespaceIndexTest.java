@@ -23,8 +23,6 @@ package io.spine.server.storage.datastore.tenant;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.QueryResults;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
 import io.spine.base.Identifier;
@@ -55,6 +53,7 @@ import java.util.Set;
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.storage.datastore.given.TestDatastores.local;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.lang.String.format;
@@ -64,9 +63,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("`NamespaceIndex` should")
 class NamespaceIndexTest {
@@ -86,7 +82,8 @@ class NamespaceIndexTest {
     @BeforeEach
     void createIndex() {
         namespaceIndex = nsIndex();
-        context = BoundedContextBuilder.assumingTests().build();
+        context = BoundedContextBuilder.assumingTests()
+                                       .build();
     }
 
     @AfterEach
@@ -110,8 +107,8 @@ class NamespaceIndexTest {
     @Test
     @DisplayName("store tenant IDs")
     void testStore() {
-        Set<TenantId> initialEmptySet = namespaceIndex.all();
-        assertTrue(initialEmptySet.isEmpty());
+        Set<TenantId> existingIds = namespaceIndex.all();
+        int idCount = existingIds.size();
 
         TenantId newId = newTenantId();
         namespaceIndex.keep(newId);
@@ -119,11 +116,10 @@ class NamespaceIndexTest {
         Set<TenantId> ids = namespaceIndex.all();
         IterableSubject assertIds = assertThat(ids);
         assertIds.isNotNull();
-        assertIds.hasSize(1);
+        assertIds.hasSize(idCount + 1);
 
-        TenantId actual = ids.iterator()
-                             .next();
-        assertEquals(newId, actual);
+        assertThat(ids)
+                .contains(newId);
     }
 
     @Test
@@ -137,10 +133,6 @@ class NamespaceIndexTest {
     @Test
     @DisplayName("find existing namespaces")
     void testFindExisting() {
-        // Ensure no namespace has been kept
-        Set<TenantId> initialEmptySet = namespaceIndex.all();
-        assertTrue(initialEmptySet.isEmpty());
-
         TenantId newId = newTenantId();
         Namespace newNamespace = Namespace.of(newId, true);
 
@@ -151,10 +143,6 @@ class NamespaceIndexTest {
     @Test
     @DisplayName("not find non-existing namespaces")
     void testNotFindNonExisting() {
-        // Ensure no namespace has been kept
-        Set<TenantId> initialEmptySet = namespaceIndex.all();
-        assertTrue(initialEmptySet.isEmpty());
-
         TenantId fakeId = newTenantId();
         Namespace fakeNamespace = Namespace.of(fakeId, true);
 
@@ -168,7 +156,7 @@ class NamespaceIndexTest {
                 .local()
                 .getOptions()
                 .toBuilder()
-                .setNamespace("custom-namespace")
+                .setNamespace("Vcustom-namespace")
                 .build()
                 .getService();
         BoundedContextBuilder contextBuilder = BoundedContextBuilder
@@ -177,7 +165,8 @@ class NamespaceIndexTest {
                 .newBuilder()
                 .setDatastore(datastore)
                 .build();
-        ServerEnvironment.instance().configureStorage(storageFactory);
+        ServerEnvironment.instance()
+                         .configureStorage(storageFactory);
         storageFactory.configureTenantIndex(contextBuilder);
         BoundedContext context = contextBuilder.build();
         RecordStorage<String> storage = storageFactory
@@ -186,7 +175,9 @@ class NamespaceIndexTest {
         EntityRecord record = EntityRecord
                 .newBuilder()
                 .setEntityId(Identifier.pack(id))
-                .setState(pack(College.newBuilder().setName(id).build()))
+                .setState(pack(College.newBuilder()
+                                      .setName(id)
+                                      .build()))
                 .build();
         TenantId tenantId = TenantId
                 .newBuilder()
@@ -195,7 +186,8 @@ class NamespaceIndexTest {
         with(tenantId).run(
                 () -> storage.write(id, record)
         );
-        Set<TenantId> tenantIds = context.tenantIndex().all();
+        Set<TenantId> tenantIds = context.tenantIndex()
+                                         .all();
         assertThat(tenantIds).containsExactly(tenantId);
     }
 
@@ -218,9 +210,9 @@ class NamespaceIndexTest {
     private static void testSynchronizeAccessMethods() throws InterruptedException {
         // Initial data
         Collection<Key> keys = new ArrayList<>();
-        keys.add(mockKey("Vtenant1"));
-        keys.add(mockKey("Vtenant2"));
-        keys.add(mockKey("Vtenant3"));
+        keys.add(key("Vtenant1"));
+        keys.add(key("Vtenant2"));
+        keys.add(key("Vtenant3"));
         Collection<TenantId> initialTenantIds =
                 keys.stream()
                     .map(key -> TenantId.newBuilder()
@@ -295,23 +287,22 @@ class NamespaceIndexTest {
     }
 
     private static NamespaceIndex nsIndex() {
-        return new NamespaceIndex(mockDatastore(), true, converterFactory);
+        return new NamespaceIndex(datastore(), true, converterFactory);
     }
 
-    private static Key mockKey(String name) {
+    private static Key key(String name) {
         Key key = Key.newBuilder("some-proj", "some-kind", name)
                      .build();
         return key;
     }
 
-    @SuppressWarnings("unchecked") // OK for mocking in this method.
-    private static Datastore mockDatastore() {
-        Datastore datastore = mock(Datastore.class);
-        DatastoreOptions options = mock(DatastoreOptions.class);
-        when(datastore.getOptions()).thenReturn(options);
-        when(options.getProjectId()).thenReturn("some-project-id-NamespaceIndexTest");
-        QueryResults results = mock(QueryResults.class);
-        when(datastore.run(any(Query.class))).thenReturn(results);
+    private static Datastore datastore() {
+        String namespace = "Vsome-namespace";
+        DatastoreOptions options = local().getOptions()
+                                          .toBuilder()
+                                          .setNamespace(namespace)
+                                          .build();
+        Datastore datastore = options.getService();
         return datastore;
     }
 }

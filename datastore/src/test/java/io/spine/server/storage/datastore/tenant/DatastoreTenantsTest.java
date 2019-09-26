@@ -20,109 +20,44 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import com.google.cloud.datastore.Cursor;
-import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
-import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Query;
-import com.google.cloud.datastore.QueryResults;
-import com.google.common.collect.ImmutableList;
-import com.google.datastore.v1.QueryResultBatch;
 import io.spine.core.TenantId;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.tenant.TenantIndex;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("`DatastoreTenants` should")
 class DatastoreTenantsTest {
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void have_private_utility_ctor() {
+    void havePrivateUtilityCtor() {
         assertHasPrivateParameterlessCtor(DatastoreTenants.class);
     }
 
     @Test
     @DisplayName("create tenant index")
     void testCreateIndex() {
-        TenantIndex index = DatastoreTenants.index(mockDatastore(), NsConverterFactory.defaults());
+        TenantIndex index =
+                DatastoreTenants.index(TestDatastores.local(), NsConverterFactory.defaults());
         assertNotNull(index);
         assertThat(index).isInstanceOf(NamespaceIndex.class);
 
-        String customNamespace = "my-namespace";
+        String customNamespace = "Vmy-namespace";
         TenantId customId = TenantId
                 .newBuilder()
                 .setValue(customNamespace)
                 .vBuild();
         index.keep(customId);
         Set<TenantId> ids = index.all();
-        assertThat(ids).contains(customId);
-    }
-
-    @SuppressWarnings("unchecked") // Mocking.
-    private static Datastore mockDatastore() {
-        Datastore datastore = mock(Datastore.class);
-        DatastoreOptions options = mock(DatastoreOptions.class);
-        when(datastore.getOptions()).thenReturn(options);
-        when(options.getProjectId()).thenReturn("some-project-id-DatastoreTenantsTest");
-        when(datastore.run(any(Query.class))).thenReturn(new MockKeyQueryResults());
-        return datastore;
-    }
-
-    @SuppressWarnings("NewExceptionWithoutArguments")
-    private static class MockKeyQueryResults implements QueryResults<Key> {
-
-        private static final List<Key> keys =
-                ImmutableList.of(mockKey("Vfoo"), mockKey("Vbar"), mockKey("Vbaz"));
-
-        private final Iterator<Key> keyIterator = keys.iterator();
-
-        private static Key mockKey(String name) {
-            Key key = Key.newBuilder("my-proj", "my-kind", name)
-                         .build();
-            return key;
-        }
-
-        @Override
-        public Class<?> getResultClass() {
-            throw new UnsupportedOperationException("Method getResultClass is not implemented!");
-        }
-
-        @Override
-        public Cursor getCursorAfter() {
-            throw new UnsupportedOperationException("Method getCursorAfter is not implemented!");
-        }
-
-        @Override
-        public int getSkippedResults() {
-            throw new UnsupportedOperationException("Method getSkippedResults is not implemented!");
-        }
-
-        @Override
-        public QueryResultBatch.MoreResultsType getMoreResults() {
-            throw new UnsupportedOperationException("Method getMoreResults is not implemented!");
-        }
-
-        @Override
-        public boolean hasNext() {
-            return keyIterator.hasNext();
-        }
-
-        @Override
-        public Key next() {
-            return keyIterator.next();
-        }
+        assertThat(ids)
+                .contains(customId);
     }
 }

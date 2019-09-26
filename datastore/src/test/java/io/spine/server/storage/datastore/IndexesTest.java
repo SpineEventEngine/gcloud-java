@@ -21,13 +21,13 @@
 package io.spine.server.storage.datastore;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.storage.datastore.given.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static org.mockito.Mockito.mock;
 
 @DisplayName("`Indexes` should")
 class IndexesTest {
@@ -43,7 +43,8 @@ class IndexesTest {
     void testNulls() {
         new NullPointerTester()
                 .setDefault(Kind.class, Kind.of("arbitrary-kind"))
-                .setDefault(DatastoreWrapper.class, mock(DatastoreWrapper.class))
+                .setDefault(DatastoreWrapper.class,
+                            TestDatastoreWrapper.wrap(TestDatastores.local(), false))
                 .testStaticMethods(Indexes.class, NullPointerTester.Visibility.PACKAGE);
     }
 }

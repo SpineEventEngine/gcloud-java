@@ -20,35 +20,30 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
-import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
-import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.storage.datastore.given.Columns.ByteColumnType;
 import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
-import io.spine.server.storage.datastore.type.SimpleDatastoreColumnType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.ContextSpec.singleTenant;
+import static io.spine.server.storage.datastore.given.Columns.byteColumn;
 import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
 import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("DatastoreStorageFactory.Builder should")
 class DatastoreStorageFactoryBuilderTest {
@@ -64,7 +59,7 @@ class DatastoreStorageFactoryBuilderTest {
     void testNulls() {
         new NullPointerTester()
                 .setDefault(Datastore.class,
-                            mockDatastore())
+                            datastore())
                 .setDefault(ColumnTypeRegistry.class,
                             DatastoreTypeRegistryFactory.defaultInstance())
                 .testInstanceMethods(DatastoreStorageFactory.newBuilder(),
@@ -76,7 +71,7 @@ class DatastoreStorageFactoryBuilderTest {
     void testDefaultTypeRegistry() {
         DatastoreStorageFactory factory = DatastoreStorageFactory
                 .newBuilder()
-                .setDatastore(mockDatastore())
+                .setDatastore(datastore())
                 .build();
         ColumnTypeRegistry registry = factory.getTypeRegistry();
         assertNotNull(registry);
@@ -85,17 +80,16 @@ class DatastoreStorageFactoryBuilderTest {
     @Test
     @DisplayName("construct factories with extended type registry")
     void testExtendedTypeRegistry() {
-        DatastoreStorageFactory factory =
-                DatastoreStorageFactory.newBuilder()
-                                       .setDatastore(mockDatastore())
-                                       .setTypeRegistry(predefinedValuesAnd()
-                                                                .put(Byte.class,
-                                                                     new MockByteColumnType())
-                                                                .build())
-                                       .build();
+        DatastoreStorageFactory factory = DatastoreStorageFactory
+                .newBuilder()
+                .setDatastore(datastore())
+                .setTypeRegistry(predefinedValuesAnd()
+                                         .put(Byte.class, new ByteColumnType())
+                                         .build())
+                .build();
         ColumnTypeRegistry<?> registry = factory.getTypeRegistry();
         assertNotNull(registry);
-        ColumnType type = registry.get(mockColumn(Byte.class));
+        ColumnType type = registry.get(byteColumn());
         assertNotNull(type);
     }
 
@@ -138,29 +132,7 @@ class DatastoreStorageFactoryBuilderTest {
         assertThrows(NullPointerException.class, DatastoreStorageFactory.newBuilder()::build);
     }
 
-    private static Datastore mockDatastore() {
+    private static Datastore datastore() {
         return TestDatastores.local();
-    }
-
-    private static <T> EntityColumn mockColumn(Class<T> type) {
-        EntityColumn mock = mock(EntityColumn.class);
-        when(mock.type()).thenReturn(type);
-        when(mock.persistedType()).thenReturn(type);
-        return mock;
-    }
-
-    private static class MockByteColumnType extends SimpleDatastoreColumnType<Byte> {
-
-        @Override
-        public void setColumnValue(BaseEntity.Builder storageRecord, Byte value,
-                                   String columnIdentifier) {
-            // NOP
-        }
-
-        @Override
-        public Value<?> toValue(Byte data) {
-            // NOP
-            return nullRef();
-        }
     }
 }

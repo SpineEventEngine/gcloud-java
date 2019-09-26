@@ -139,11 +139,11 @@ final class NamespaceConverters {
             InternetDomain domain = InternetDomain
                     .newBuilder()
                     .setValue(namespace)
-                    .build();
+                    .vBuild();
             TenantId tenantId = TenantId
                     .newBuilder()
                     .setDomain(domain)
-                    .build();
+                    .vBuild();
             return tenantId;
         }
     }
@@ -167,11 +167,11 @@ final class NamespaceConverters {
             EmailAddress email = EmailAddress
                     .newBuilder()
                     .setValue(namespace)
-                    .build();
+                    .vBuild();
             TenantId tenantId = TenantId
                     .newBuilder()
                     .setEmail(email)
-                    .build();
+                    .vBuild();
             return tenantId;
         }
     }
