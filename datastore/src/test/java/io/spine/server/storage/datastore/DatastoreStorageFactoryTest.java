@@ -128,7 +128,7 @@ class DatastoreStorageFactoryTest {
                 .newBuilder()
                 .setValue("my-company")
                 .vBuild();
-        String namespace = "non-null-or-empty-namespace";
+        String namespace = "Vnon-null-or-empty-namespace";
         DatastoreOptions options = local().getOptions()
                                           .toBuilder()
                                           .setNamespace(namespace)

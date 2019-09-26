@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.NullValue;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.collect.ImmutableMultimap;
@@ -57,9 +56,6 @@ import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactor
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("`DsFilters` should")
 class DsFiltersTest {
@@ -178,30 +174,6 @@ class DsFiltersTest {
         IterableSubject assertFilters = assertThat(filters);
         assertFilters.isNotNull();
         assertFilters.isEmpty();
-    }
-
-    //TODO:2018-06-08:dmytro.kuzmin: re-write without mocks when null column filters are available.
-    // See https://github.com/SpineEventEngine/core-java/issues/720.
-    @Test
-    @DisplayName("generate filters for `null` column value")
-    void testNullFilters() {
-        EntityColumn column = mock(EntityColumn.class);
-        when(column.name()).thenReturn(ID_STRING_COLUMN_NAME);
-        when(column.type()).thenReturn(String.class);
-        when(column.persistedType()).thenReturn(String.class);
-        when(column.toPersistedValue(any())).thenReturn(null);
-
-        Filter filterWithStubValue = Filters.eq(ID_STRING_COLUMN_NAME, "");
-        ImmutableMultimap<EntityColumn, Filter> filter = ImmutableMultimap.of(
-                column, filterWithStubValue
-        );
-        Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
-                createParams(filter, ALL)
-        );
-
-        FilterAdapter columnFilterAdapter = FilterAdapter.of(defaultInstance());
-        Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
-        assertThat(filters).contains(and(eq(ID_STRING_COLUMN_NAME, NullValue.of())));
     }
 
     private static EntityColumn column(Class<? extends Entity> cls, String methodName) {

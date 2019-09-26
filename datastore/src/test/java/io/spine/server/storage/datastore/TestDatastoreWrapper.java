@@ -59,7 +59,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
 
     private final boolean waitForConsistency;
 
-    private TestDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
+    protected TestDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
         super(datastore, TestNamespaceSuppliers.singleTenant());
         this.waitForConsistency = waitForConsistency;
     }
