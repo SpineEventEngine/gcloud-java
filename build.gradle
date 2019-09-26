@@ -117,8 +117,6 @@ subprojects {
 
         testImplementation deps.test.hamcrest
         testImplementation deps.test.guavaTestlib
-
-        testRuntime deps.test.slf4j
     }
 
     // Apply the same IDEA module configuration for each of sub-projects.
