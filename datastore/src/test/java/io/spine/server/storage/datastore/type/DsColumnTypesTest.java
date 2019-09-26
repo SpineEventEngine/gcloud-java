@@ -225,8 +225,9 @@ class DsColumnTypesTest {
     }
 
     private static BaseEntity.Builder<Key, Entity.Builder> entityBuilder() {
-        Key key = Key.newBuilder(TestDatastores.projectId()
-                                               .value(), "some-entity-kind", "some-name")
+        String projectId = TestDatastores.projectId()
+                                         .value();
+        Key key = Key.newBuilder(projectId, "some-entity-kind", "some-name")
                      .build();
         Entity.Builder builder = Entity.newBuilder(key);
         return builder;
