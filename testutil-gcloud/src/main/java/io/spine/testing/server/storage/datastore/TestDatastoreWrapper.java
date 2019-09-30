@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore;
+package io.spine.testing.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
@@ -26,13 +26,15 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
-import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
+import io.spine.server.storage.datastore.DatastoreWrapper;
+import io.spine.server.storage.datastore.Kind;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Custom extension of the {@link DatastoreWrapper} for the integration testing.
@@ -93,7 +95,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
     }
 
     @Override
-    void dropTable(String table) {
+    protected void dropTable(String table) {
         if (!waitForConsistency) {
             super.dropTable(table);
         } else {
@@ -115,7 +117,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
                 try {
                     Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException(e);
                 }
             }
 
@@ -132,9 +134,9 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
         }
 
         if (cleanupAttempts >= MAX_CLEANUP_ATTEMPTS && remainingEntityCount > 0) {
-            throw new RuntimeException("Cannot cleanup the table: " + table +
-                                               ". Remaining entity count is " +
-                                               remainingEntityCount);
+            throw newIllegalStateException(
+                    "Cannot cleanup the table: %s. Remaining entity count is %d",
+                    table, remainingEntityCount);
         }
     }
 
@@ -150,7 +152,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
             try {
                 Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
         }
     }

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.given;
+package io.spine.testing.server.storage.datastore;
 
 import io.spine.server.ContextSpec;
 

@@ -18,7 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    implementation project(path: ':datastore')
-    implementation deps.test.junit5Api
-}
+/**
+ * This package contains the testing utils for the Google Cloud Datastore storage implementation.
+ */
+
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.server.storage.datastore;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

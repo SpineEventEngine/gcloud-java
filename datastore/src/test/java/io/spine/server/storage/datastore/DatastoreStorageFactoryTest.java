@@ -35,19 +35,19 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.datastore.given.TestEnvironment;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.test.storage.Project;
+import io.spine.testing.server.storage.datastore.TestEnvironment;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.ContextSpec.multitenant;
-import static io.spine.server.storage.datastore.given.TestDatastores.local;
-import static io.spine.server.storage.datastore.given.TestDatastores.projectId;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.server.storage.datastore.TestDatastores.local;
+import static io.spine.testing.server.storage.datastore.TestDatastores.projectId;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -81,7 +81,8 @@ class DatastoreStorageFactoryTest {
         StorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                         .setDatastore(datastore)
                                                         .build();
-        RecordStorage storage = factory.createRecordStorage(TestEnvironment.multiTenantSpec(), TestEntity.class);
+        RecordStorage storage =
+                factory.createRecordStorage(TestEnvironment.multiTenantSpec(), TestEntity.class);
         assertTrue(storage.isMultitenant());
         storage.close();
     }

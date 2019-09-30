@@ -28,6 +28,7 @@ import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.testing.server.storage.datastore.TestDatastores;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

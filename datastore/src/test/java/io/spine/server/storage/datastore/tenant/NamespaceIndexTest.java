@@ -34,10 +34,10 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
-import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.storage.datastore.tenant.given.TestProjection;
 import io.spine.test.datastore.College;
 import io.spine.testing.TestValues;
+import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,7 +53,6 @@ import java.util.Set;
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.storage.datastore.given.TestDatastores.local;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.lang.String.format;
@@ -297,10 +296,12 @@ class NamespaceIndexTest {
 
     private static Datastore datastore() {
         String namespace = "Vsome-namespace";
-        DatastoreOptions options = local().getOptions()
-                                          .toBuilder()
-                                          .setNamespace(namespace)
-                                          .build();
+        DatastoreOptions options = TestDatastores
+                .local()
+                .getOptions()
+                .toBuilder()
+                .setNamespace(namespace)
+                .build();
         Datastore datastore = options.getService();
         return datastore;
     }

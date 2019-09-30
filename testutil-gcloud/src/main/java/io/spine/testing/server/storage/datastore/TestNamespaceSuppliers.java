@@ -18,31 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore;
+package io.spine.testing.server.storage.datastore;
 
-import io.spine.annotation.Internal;
+import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
+import io.spine.server.storage.datastore.tenant.NsConverterFactory;
 
-/**
- * A {@link TestDatastoreStorageFactory} which allows to inject a custom {@link DatastoreWrapper}.
- *
- * <p>This class is not moved to the test environment because it uses the package-private method of
- * {@link DatastoreWrapper}.
- */
-final class SpyStorageFactory extends TestDatastoreStorageFactory {
+final class TestNamespaceSuppliers {
 
-    private static DatastoreWrapper injectedWrapper = null;
-
-    static void injectWrapper(DatastoreWrapper wrapper) {
-        injectedWrapper = wrapper;
+    private TestNamespaceSuppliers() {
     }
 
-    SpyStorageFactory() {
-        super(injectedWrapper.datastore());
+    static NamespaceSupplier singleTenant() {
+        return NamespaceSupplier.singleTenant();
     }
 
-    @Internal
-    @Override
-    protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
-        return injectedWrapper;
+    static NamespaceSupplier multitenant() {
+        return NamespaceSupplier.multitenant(NsConverterFactory.defaults());
     }
 }

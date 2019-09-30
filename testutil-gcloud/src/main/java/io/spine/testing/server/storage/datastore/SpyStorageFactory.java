@@ -18,7 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    implementation project(path: ':datastore')
-    implementation deps.test.junit5Api
+package io.spine.testing.server.storage.datastore;
+
+import io.spine.server.storage.datastore.DatastoreWrapper;
+
+/**
+ * A {@link TestDatastoreStorageFactory} which allows to inject a custom {@link DatastoreWrapper}.
+ */
+public final class SpyStorageFactory extends TestDatastoreStorageFactory {
+
+    private static DatastoreWrapper injectedWrapper = null;
+
+    public static void injectWrapper(DatastoreWrapper wrapper) {
+        injectedWrapper = wrapper;
+    }
+
+    public SpyStorageFactory() {
+        super(injectedWrapper.datastore());
+    }
+
+    @Override
+    protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
+        return injectedWrapper;
+    }
 }

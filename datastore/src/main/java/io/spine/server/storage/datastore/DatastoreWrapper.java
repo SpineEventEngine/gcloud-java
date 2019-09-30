@@ -301,7 +301,7 @@ public class DatastoreWrapper implements Logging {
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
-    <R> Iterator<R> readAll(StructuredQuery<R> query, int pageSize) {
+    public <R> Iterator<R> readAll(StructuredQuery<R> query, int pageSize) {
         return readAllPageByPage(query, pageSize);
     }
 
@@ -322,7 +322,7 @@ public class DatastoreWrapper implements Logging {
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
-    <R> Iterator<R> readAll(StructuredQuery<R> query) {
+    public <R> Iterator<R> readAll(StructuredQuery<R> query) {
         return readAllPageByPage(query, null);
     }
 
@@ -386,7 +386,8 @@ public class DatastoreWrapper implements Logging {
      * @param table
      *         kind (a.k.a. type, table, etc.) of the records to delete
      */
-    void dropTable(String table) {
+    @VisibleForTesting
+    protected void dropTable(String table) {
         Namespace namespace = currentNamespace();
         StructuredQuery<Entity> query =
                 Query.newEntityQueryBuilder()
@@ -522,7 +523,8 @@ public class DatastoreWrapper implements Logging {
         return options;
     }
 
-    Datastore datastore() {
+    @VisibleForTesting
+    public Datastore datastore() {
         return datastore;
     }
 

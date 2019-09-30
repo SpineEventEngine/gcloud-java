@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.given;
+package io.spine.testing.server.storage.datastore;
 
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.NoCredentials;
@@ -36,7 +36,7 @@ import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
 /**
  * Provides test {@link Datastore} instances.
  */
-public class TestDatastores {
+public final class TestDatastores {
 
     private static final ProjectId TEST_PROJECT_ID = ProjectId.of("spine-dev");
 
@@ -112,6 +112,7 @@ public class TestDatastores {
         private static final DatastoreOptions INSTANCE = new Ci().create();
 
         private Ci() {
+            super();
             try {
                 InputStream is = TestDatastores.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
                 BufferedInputStream bufferedStream = new BufferedInputStream(is);

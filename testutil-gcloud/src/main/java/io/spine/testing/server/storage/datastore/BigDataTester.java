@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore;
+package io.spine.testing.server.storage.datastore;
 
 import com.google.common.base.Throwables;
 import io.spine.client.ResponseFormat;
@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @param <I>
  *         the type of the ID in the tested {@linkplain RecordStorage}
  */
-public class BigDataTester<I> implements Logging {
+public final class BigDataTester<I> implements Logging {
 
     private static final int DEFAULT_BULK_SIZE = 500;
 
@@ -80,13 +80,14 @@ public class BigDataTester<I> implements Logging {
      *
      * <p>The execution flow is as follows:
      * <ol>
-     * <li>1. Produce the records with the given {@link EntryFactory}
-     * <li>2. Measure the time of the {@linkplain RecordStorage#write(Map) bulk write}
-     * <li>3. Fail if the time is over the specified limit
-     * <li>4. Wait 1 second to ensure the Datastore has established the data consistency
-     * <li>5. Measure the time of the {@linkplain RecordStorage#readAll() bulk read}
-     * <li>6. Fail if the time is over the specified limit
-     * <li>7. Check the count of the records written and read is equal
+     *     <li>Produce the records with the given {@link EntryFactory}.
+     *     <li>Measure the time of the {@linkplain RecordStorage#write(Map) bulk write}.
+     *     <li>Fail if the time is over the specified limit.
+     *     <li>Wait 1 second to ensure the Datastore has established the data consistency.
+     *     <li>Measure the time of the
+     *         {@linkplain RecordStorage#readAll(ResponseFormat) bulk read}.
+     *     <li>Fail if the time is over the specified limit.
+     *     <li>Check the count of the records written and read is equal.
      * </ol>
      *
      * <p>This method performs {@code debug} logging of the measure results. To see the log, run

@@ -29,6 +29,7 @@ dependencies {
         exclude group: 'com.google.guava'
     }
 
+    testImplementation project(path: ":testutil-gcloud")
     testImplementation "io.spine:spine-server:"
 }
 

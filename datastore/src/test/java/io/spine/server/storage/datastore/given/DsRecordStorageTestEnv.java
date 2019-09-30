@@ -38,11 +38,11 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
+import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;

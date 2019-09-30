@@ -33,7 +33,7 @@ class NamespaceConvertersTest {
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void have_private_utility_ctor() {
+    void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(NamespaceConverters.class);
     }
 

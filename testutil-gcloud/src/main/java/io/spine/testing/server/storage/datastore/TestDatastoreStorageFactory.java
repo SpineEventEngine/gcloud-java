@@ -18,13 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore;
+package io.spine.testing.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.flogger.FluentLogger;
 import io.spine.annotation.Internal;
-import io.spine.server.storage.datastore.given.TestDatastores;
+import io.spine.server.storage.datastore.DatastoreStorageFactory;
+import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -79,11 +80,10 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     /**
      * Performs operations on setting up the local datastore.
      *
-     * <p>General usage is testing.
      * <p>By default is a NoOp, but can be overridden.
      */
-    @SuppressWarnings("EmptyMethod")
     public void setUp() {
+        // NO-OP. See doc.
     }
 
     /**
@@ -100,7 +100,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     /**
-     * Clears all data in the local Datastore.
+     * Clears all data in the Datastore.
      *
      * @see #tearDown()
      */

@@ -21,8 +21,8 @@
 package io.spine.server.storage.datastore.tenant;
 
 import io.spine.core.TenantId;
-import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

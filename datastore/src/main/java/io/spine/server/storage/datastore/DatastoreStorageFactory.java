@@ -90,7 +90,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private final NsConverterFactory converterFactory;
 
-    DatastoreStorageFactory(Builder builder) {
+    protected DatastoreStorageFactory(Builder builder) {
         this.typeRegistry = builder.typeRegistry;
         this.datastore = builder.datastore;
         this.converterFactory = builder.converterFactory;

@@ -24,13 +24,12 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.storage.datastore.given.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.storage.datastore.given.TestDatastores.local;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.server.storage.datastore.TestDatastores.local;
 
 @DisplayName("`ProjectId` should")
 class ProjectIdTest {
@@ -39,7 +38,7 @@ class ProjectIdTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
         new NullPointerTester()
-                .setDefault(Datastore.class, TestDatastores.local())
+                .setDefault(Datastore.class, local())
                 .testStaticMethods(ProjectId.class, NullPointerTester.Visibility.PACKAGE);
     }
 
