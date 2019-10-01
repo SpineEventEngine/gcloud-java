@@ -19,7 +19,8 @@
  */
 
 /**
- * This package contains the testing utils for the Google Cloud Datastore storage implementation.
+ * This package contains the testing utils for the Google Cloud Datastore-based storage
+ * implementation.
  */
 
 @CheckReturnValue
