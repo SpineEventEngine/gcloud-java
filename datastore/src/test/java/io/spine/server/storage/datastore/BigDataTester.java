@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.storage.datastore;
+package io.spine.server.storage.datastore;
 
 import com.google.common.base.Throwables;
 import io.spine.client.ResponseFormat;

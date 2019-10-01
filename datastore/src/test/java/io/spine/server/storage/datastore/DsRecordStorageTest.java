@@ -53,7 +53,6 @@ import io.spine.test.datastore.CollegeId;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
-import io.spine.testing.server.storage.datastore.BigDataTester;
 import io.spine.testing.server.storage.datastore.CountingDatastoreWrapper;
 import io.spine.testing.server.storage.datastore.SpyStorageFactory;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
