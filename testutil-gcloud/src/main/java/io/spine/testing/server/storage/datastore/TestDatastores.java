@@ -128,7 +128,7 @@ public final class TestDatastores implements Logging {
             return datastore;
         } catch (IOException e) {
             throw newIllegalStateException(
-                    e, "Cannot find the credentials file `%s`.", serviceAccount);
+                    e, "Problems parsing the credentials file `%s`.", serviceAccount);
         }
     }
 

@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.server.storage.datastore.TestDatastores.DEFAULT_EMULATOR_PORT;
 import static java.lang.String.format;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`TestDatastores` utility should")
 class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
@@ -116,5 +117,12 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
             assertThat(projectId)
                     .isEqualTo(PROJECT_ID);
         }
+    }
+
+    @Test
+    @DisplayName("throw an `ISE` when can't properly parse account credentials from resource")
+    void throwOnInvalidResource() {
+        Resource resource = Resource.file("random.json");
+        assertThrows(IllegalStateException.class, () -> TestDatastores.remote(resource));
     }
 }
