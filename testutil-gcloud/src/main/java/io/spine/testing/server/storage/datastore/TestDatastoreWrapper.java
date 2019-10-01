@@ -119,7 +119,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
         }
     }
 
-    @SuppressWarnings("BusyWait")   // allow Datastore some time between cleanup attempts.
+    @SuppressWarnings("BusyWait")   // allows Datastore some time between cleanup attempts.
     private void dropTableConsistently(String table) {
         Integer remainingEntityCount = null;
         int cleanupAttempts = 0;
