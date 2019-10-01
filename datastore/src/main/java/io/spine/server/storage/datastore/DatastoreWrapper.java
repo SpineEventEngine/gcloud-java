@@ -387,6 +387,7 @@ public class DatastoreWrapper implements Logging {
      * @param table
      *         kind (a.k.a. type, table, etc.) of the records to delete
      */
+    @VisibleForTesting
     protected void dropTable(String table) {
         Namespace namespace = currentNamespace();
         StructuredQuery<Entity> query =
@@ -399,6 +400,7 @@ public class DatastoreWrapper implements Logging {
         deleteEntities(entities);
     }
 
+    @VisibleForTesting
     protected void deleteEntities(Collection<Entity> entities) {
         List<Key> keyList =
                 entities.stream()
