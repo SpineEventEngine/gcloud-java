@@ -40,7 +40,7 @@ import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactor
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.server.storage.datastore.TestDatastores.testProjectId;
+import static io.spine.testing.server.storage.datastore.TestDatastores.localProjectId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -102,7 +102,7 @@ class DatastoreStorageFactoryBuilderTest {
         void setUp() {
             builder = DatastoreOptions
                     .newBuilder()
-                    .setProjectId(testProjectId().getValue());
+                    .setProjectId(localProjectId().getValue());
         }
 
         @Test

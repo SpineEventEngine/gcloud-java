@@ -22,6 +22,8 @@ package io.spine.testing.server.storage.datastore;
 
 import io.spine.server.storage.datastore.DatastoreWrapper;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A {@link TestDatastoreStorageFactory} which allows to inject a custom {@link DatastoreWrapper}.
  */
@@ -29,12 +31,19 @@ public final class SpyStorageFactory extends TestDatastoreStorageFactory {
 
     private static DatastoreWrapper injectedWrapper = null;
 
+    /**
+     * Injects a given {@code DatastoreWrapper} into the storage factory.
+     *
+     * <p>All storages created by this factory will operate based on the given wrapper.
+     *
+     * <p>Should be called before the {@code SpyStorageFactory} instance is created.
+     */
     public static void injectWrapper(DatastoreWrapper wrapper) {
         injectedWrapper = wrapper;
     }
 
     public SpyStorageFactory() {
-        super(injectedWrapper.datastore());
+        super(checkNotNull(injectedWrapper).datastore());
     }
 
     @Override

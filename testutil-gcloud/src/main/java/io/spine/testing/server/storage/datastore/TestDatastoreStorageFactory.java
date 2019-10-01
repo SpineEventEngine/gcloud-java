@@ -31,7 +31,7 @@ import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
  * A test implementation of the {@link DatastoreStorageFactory}.
  *
  * <p>Wraps the datastore with an instance of {@link TestDatastoreWrapper} and provides additional
- * clean up {@link #tearDown() methods}.
+ * clean up {@linkplain #tearDown() methods}.
  */
 public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
@@ -45,10 +45,18 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         );
     }
 
+    /**
+     * Creates a new instance which works with a local Datastore emulator.
+     *
+     * <p>A shortcut for {@code basedOn(TestDatastores.local())}.
+     */
     public static TestDatastoreStorageFactory local() {
         return basedOn(TestDatastores.local());
     }
 
+    /**
+     * Creates a new factory instance which wraps the given Datastore.
+     */
     public static TestDatastoreStorageFactory basedOn(Datastore datastore) {
         return new TestDatastoreStorageFactory(datastore);
     }
@@ -71,11 +79,11 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     /**
      * Clears all data in the local Datastore.
      *
-     * <p>May be effectively the same as {@link #clear()}.
+     * <p>Is effectively the same as {@link #clear()}.
      *
      * <p><b>NOTE</b>: does not stop the server but just deletes all records.
      *
-     * <p>Equivalent to dropping all tables in an SQL-base storage.
+     * <p>Equivalent to dropping all tables in an SQL-based storage.
      */
     public void tearDown() {
         clear();

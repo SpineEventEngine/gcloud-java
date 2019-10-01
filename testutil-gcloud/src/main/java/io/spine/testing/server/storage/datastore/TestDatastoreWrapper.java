@@ -28,6 +28,7 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.Kind;
+import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,17 +44,20 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public class TestDatastoreWrapper extends DatastoreWrapper {
 
-    // Default time to wait before each read operation to ensure the data is consistent.
-    // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
+    /**
+     * Default time to wait before each read operation to ensure the data is consistent.
+     *
+     * <p>NOTE: enabled only if {@link #waitForConsistency} is {@code true}.
+     */
     private static final int CONSISTENCY_AWAIT_TIME_MS = 10;
     private static final int CONSISTENCY_AWAIT_ITERATIONS = 20;
 
     /**
-     * Due to eventual consistency, {@link #dropTable(String) is performed iteratively until
+     * Due to eventual consistency, {@linkplain #dropTable(String) is performed iteratively until
      * the table has no records}.
      *
-     * This constant represents the maximum number of cleanup attempts before the execution
-     * is continued
+     * <p>This constant represents the maximum number of cleanup attempts before the execution
+     * is continued.
      */
     private static final int MAX_CLEANUP_ATTEMPTS = 5;
 
@@ -62,10 +66,19 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
     private final boolean waitForConsistency;
 
     protected TestDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
-        super(datastore, TestNamespaceSuppliers.singleTenant());
+        super(datastore, NamespaceSupplier.singleTenant());
         this.waitForConsistency = waitForConsistency;
     }
 
+    /**
+     * Wraps a given Datastore.
+     *
+     * <p>The {@code waitForConsistency} parameter allows to add a delay to each write operation to
+     * compensate for the eventual consistency of the storage.
+     *
+     * <p>The {@code waitForConsistency} parameter should be set to {@code false} when wrapping a
+     * local Datastore emulator.
+     */
     public static TestDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
         return new TestDatastoreWrapper(datastore, waitForConsistency);
     }

@@ -47,7 +47,7 @@ import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.server.storage.datastore.TestDatastores.local;
-import static io.spine.testing.server.storage.datastore.TestDatastores.testProjectId;
+import static io.spine.testing.server.storage.datastore.TestDatastores.localProjectId;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -177,7 +177,7 @@ class DatastoreStorageFactoryTest {
         with(tenant).run(
                 () -> storage.write(recordId, message)
         );
-        return Key.newBuilder(testProjectId().getValue(),
+        return Key.newBuilder(localProjectId().getValue(),
                               TypeName.of(message)
                                       .value(),
                               recordId.getValue());

@@ -37,6 +37,9 @@ import static io.spine.io.Resource.file;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
+/**
+ * A factory of test {@link Datastore} instances.
+ */
 public final class TestDatastores implements Logging {
 
     /**
@@ -48,25 +51,39 @@ public final class TestDatastores implements Logging {
     private static final int DEFAULT_EMULATOR_PORT = 8081;
     private static final String LOCALHOST = "localhost";
 
-    private static final ProjectId TEST_PROJECT_ID = ProjectId.of("test-project");
+    /**
+     * The project ID which is used when running on local Datastore emulator.
+     */
+    private static final ProjectId LOCAL_PROJECT_ID = ProjectId.of("test-project");
 
     /** Prevents instantiation of this utility class. */
     private TestDatastores() {
     }
 
+    /**
+     * Creates a {@link Datastore} connected to the local Datastore emulator at
+     * {@link #DEFAULT_EMULATOR_PORT}.
+     */
     public static Datastore local() {
         return local(DEFAULT_EMULATOR_PORT);
     }
 
+    /**
+     * Creates a {@link Datastore} connected to the local Datastore emulator at the specified port.
+     */
     public static Datastore local(int port) {
         String address = format("%s:%s", LOCALHOST, port);
         return local(address);
     }
 
+    /**
+     * Creates a {@link Datastore} connected to the local Datastore emulator at the specified
+     * address.
+     */
     public static Datastore local(String address) {
         DatastoreOptions options = DatastoreOptions
                 .newBuilder()
-                .setProjectId(TEST_PROJECT_ID.value())
+                .setProjectId(LOCAL_PROJECT_ID.value())
                 .setHost(address)
                 .setCredentials(NoCredentials.getInstance())
                 .build();
@@ -74,10 +91,21 @@ public final class TestDatastores implements Logging {
         return datastore;
     }
 
+    /**
+     * Creates a {@link Datastore} connected to the remote Google Cloud Datastore described by the
+     * given service account resource.
+     *
+     * <p>The {@code serviceAccountPath} is a path to the resource file, specified relative to the
+     * classpath.
+     */
     public static Datastore remote(String serviceAccountPath) {
         return remote(file(serviceAccountPath));
     }
 
+    /**
+     * Creates a {@link Datastore} connected to the remote Google Cloud Datastore described by the
+     * given service account resource.
+     */
     public static Datastore remote(Resource serviceAccount) {
         try {
             Credentials credentials = credentialsFrom(serviceAccount);
@@ -99,7 +127,7 @@ public final class TestDatastores implements Logging {
         return credentials;
     }
 
-    public static ProjectId testProjectId() {
-        return TEST_PROJECT_ID;
+    public static ProjectId localProjectId() {
+        return LOCAL_PROJECT_ID;
     }
 }
