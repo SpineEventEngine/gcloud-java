@@ -36,7 +36,7 @@ import java.io.InputStream;
 import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.io.Resource.file;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
@@ -127,7 +127,7 @@ public final class TestDatastores implements Logging {
             Datastore datastore = options.getService();
             return datastore;
         } catch (IOException e) {
-            throw newIllegalArgumentException(
+            throw newIllegalStateException(
                     e, "Cannot find the credentials file `%s`.", serviceAccount);
         }
     }
