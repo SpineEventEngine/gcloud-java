@@ -38,6 +38,7 @@ import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
  */
 public final class TestDatastores {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Project name duplication.
     private static final ProjectId TEST_PROJECT_ID = ProjectId.of("spine-dev");
 
     /** Prevent this test utility class from being instantiated. */
@@ -118,7 +119,7 @@ public final class TestDatastores {
                 BufferedInputStream bufferedStream = new BufferedInputStream(is);
                 ServiceAccountCredentials credentials = fromStream(bufferedStream);
                 builder().setCredentials(credentials);
-            } catch (@SuppressWarnings("OverlyBroadCatchBlock") IOException e) {
+            } catch (IOException e) {
                 _warn().log("Cannot find the credentials file `%s`.", CREDENTIALS_FILE_PATH);
             }
         }

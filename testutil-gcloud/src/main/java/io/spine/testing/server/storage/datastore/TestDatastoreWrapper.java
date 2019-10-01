@@ -133,7 +133,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
             }
         }
 
-        if (cleanupAttempts >= MAX_CLEANUP_ATTEMPTS && remainingEntityCount > 0) {
+        if (cleanupAttempts >= MAX_CLEANUP_ATTEMPTS) {
             throw newIllegalStateException(
                     "Cannot cleanup the table: %s. Remaining entity count is %d",
                     table, remainingEntityCount);

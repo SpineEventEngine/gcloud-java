@@ -80,7 +80,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     /**
      * Performs operations on setting up the local datastore.
      *
-     * <p>By default is a NoOp, but can be overridden.
+     * <p>By default is a NO-OP, but can be overridden.
      */
     public void setUp() {
         // NO-OP. See doc.
