@@ -20,108 +20,86 @@
 
 package io.spine.testing.server.storage.datastore;
 
+import com.google.auth.Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.NoCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import io.spine.io.Resource;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.ProjectId;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
+import static io.spine.io.Resource.file;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.lang.String.format;
 
-/**
- * Provides test {@link Datastore} instances.
- */
-public final class TestDatastores {
+public final class TestDatastores implements Logging {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Project name duplication.
-    private static final ProjectId TEST_PROJECT_ID = ProjectId.of("spine-dev");
+    /**
+     * The default port to which the local Datastore emulator is bound.
+     *
+     * <p>See<a href="https://cloud.google.com/sdk/gcloud/reference/beta/emulators/datastore/start">
+     * {@code gcloud} docs</a>.
+     */
+    private static final int DEFAULT_EMULATOR_PORT = 8081;
+    private static final String LOCALHOST = "localhost";
 
-    /** Prevent this test utility class from being instantiated. */
+    private static final ProjectId TEST_PROJECT_ID = ProjectId.of("test-project");
+
+    /** Prevents instantiation of this utility class. */
     private TestDatastores() {
     }
 
-    /**
-     * Obtains Datastore instance used for testing on a developer's workstation.
-     */
     public static Datastore local() {
-        return Local.INSTANCE.getService();
+        return local(DEFAULT_EMULATOR_PORT);
     }
 
-    /**
-     * Obtains Datastore instance used for testing in a CI environment.
-     */
-    public static Datastore remote() {
-        return Ci.INSTANCE.getService();
+    public static Datastore local(int port) {
+        String address = format("%s:%s", LOCALHOST, port);
+        return local(address);
     }
 
-    /**
-     * Obtains ProjectId of the test environment.
-     */
-    public static ProjectId projectId() {
+    public static Datastore local(String address) {
+        DatastoreOptions options = DatastoreOptions
+                .newBuilder()
+                .setProjectId(TEST_PROJECT_ID.value())
+                .setHost(address)
+                .setCredentials(NoCredentials.getInstance())
+                .build();
+        Datastore datastore = options.getService();
+        return datastore;
+    }
+
+    public static Datastore remote(String serviceAccountPath) {
+        return remote(file(serviceAccountPath));
+    }
+
+    public static Datastore remote(Resource serviceAccount) {
+        try {
+            Credentials credentials = credentialsFrom(serviceAccount);
+            DatastoreOptions options = DatastoreOptions
+                    .newBuilder()
+                    .setCredentials(credentials)
+                    .build();
+            Datastore datastore = options.getService();
+            return datastore;
+        } catch (IOException e) {
+            throw newIllegalArgumentException(
+                    e, "Cannot find the credentials file `%s`.", serviceAccount);
+        }
+    }
+
+    private static Credentials credentialsFrom(Resource serviceAccount) throws IOException {
+        InputStream is = serviceAccount.open();
+        ServiceAccountCredentials credentials = fromStream(is);
+        return credentials;
+    }
+
+    public static ProjectId testProjectId() {
         return TEST_PROJECT_ID;
-    }
-
-    /**
-     * Abstract base for options factories.
-     */
-    private abstract static class Options {
-
-        private final DatastoreOptions.Builder builder;
-
-        private Options() {
-            builder = DatastoreOptions.newBuilder()
-                                      .setProjectId(projectId().getValue());
-        }
-
-        final DatastoreOptions.Builder builder() {
-            return builder;
-        }
-
-        final DatastoreOptions create() {
-            return builder.build();
-        }
-    }
-
-    /**
-     * Local Datastore options used on developers' machines.
-     */
-    private static final class Local extends Options {
-
-        private static final String DEFAULT_HOST = "localhost:8080";
-        private static final DatastoreOptions INSTANCE = new Local().create();
-
-        private Local() {
-            super();
-            builder().setHost(DEFAULT_HOST);
-            builder().setCredentials(NoCredentials.getInstance());
-        }
-    }
-
-    /**
-     * Options used to run tests in CI environment, which uses connection to
-     * a real Datastore instance in the testing Google Cloud environment.
-     */
-    @SuppressWarnings("NewClassNamingConvention")
-    private static final class Ci extends Options implements Logging {
-
-        private static final String CREDENTIALS_FILE_PATH = "/spine-dev.json";
-        private static final DatastoreOptions INSTANCE = new Ci().create();
-
-        private Ci() {
-            super();
-            try {
-                InputStream is = TestDatastores.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-                BufferedInputStream bufferedStream = new BufferedInputStream(is);
-                ServiceAccountCredentials credentials = fromStream(bufferedStream);
-                builder().setCredentials(credentials);
-            } catch (IOException e) {
-                _warn().log("Cannot find the credentials file `%s`.", CREDENTIALS_FILE_PATH);
-            }
-        }
     }
 }

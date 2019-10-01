@@ -58,7 +58,7 @@ import static org.junit.Assert.assertTrue;
 class DsInboxStorageTest extends InboxStorageTest {
 
     private final TestDatastoreStorageFactory factory =
-            TestDatastoreStorageFactory.defaultInstance();
+            TestDatastoreStorageFactory.local();
 
     @Override
     @BeforeEach

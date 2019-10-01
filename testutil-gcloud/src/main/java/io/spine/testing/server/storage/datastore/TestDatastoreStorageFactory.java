@@ -21,47 +21,21 @@
 package io.spine.testing.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.flogger.FluentLogger;
 import io.spine.annotation.Internal;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
- * Creates storages based on the local Google {@link Datastore}.
+ * A test implementation of the {@link DatastoreStorageFactory}.
+ *
+ * <p>Wraps the datastore with an instance of {@link TestDatastoreWrapper} and provides additional
+ * clean up {@link #tearDown() methods}.
  */
 public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-    private static @MonotonicNonNull TestDatastoreStorageFactory instance = null;
-
-    /**
-     * Returns a default factory instance. A {@link Datastore} is created with
-     * default {@link DatastoreOptions}:
-     *
-     * <p>Dataset name: {@code spine-dev}
-     *
-     * <p>Connects to a localhost Datastore emulator.
-     */
-    public static synchronized TestDatastoreStorageFactory defaultInstance() {
-        try {
-            if (instance == null) {
-                instance = createInstance();
-            }
-            return instance;
-        } catch (Throwable e) {
-            logger.atSevere()
-                  .withCause(e)
-                  .log("Failed to initialize local datastore factory.");
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private static TestDatastoreStorageFactory createInstance() {
-        return new TestDatastoreStorageFactory(TestDatastores.local());
-    }
 
     protected TestDatastoreStorageFactory(Datastore datastore) {
         super(DatastoreStorageFactory
@@ -69,6 +43,14 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
                       .setDatastore(datastore)
                       .setTypeRegistry(DatastoreTypeRegistryFactory.defaultInstance())
         );
+    }
+
+    public static TestDatastoreStorageFactory local() {
+        return basedOn(TestDatastores.local());
+    }
+
+    public static TestDatastoreStorageFactory basedOn(Datastore datastore) {
+        return new TestDatastoreStorageFactory(datastore);
     }
 
     @Internal

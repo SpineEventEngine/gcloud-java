@@ -90,7 +90,7 @@ public class DsRecordStorageTestEnv {
     }
 
     public static TestDatastoreStorageFactory datastoreFactory() {
-        return TestDatastoreStorageFactory.defaultInstance();
+        return TestDatastoreStorageFactory.local();
     }
 
     public static OrderBy emptyOrderBy() {

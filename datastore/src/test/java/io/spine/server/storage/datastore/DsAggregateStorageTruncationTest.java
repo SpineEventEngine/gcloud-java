@@ -30,6 +30,6 @@ public class DsAggregateStorageTruncationTest extends AggregateStorageTruncation
 
     @Override
     protected StorageFactory storageFactory() {
-        return TestDatastoreStorageFactory.defaultInstance();
+        return TestDatastoreStorageFactory.local();
     }
 }

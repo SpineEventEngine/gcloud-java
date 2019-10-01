@@ -71,7 +71,7 @@ import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
 import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
-import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
+import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
 import static io.spine.testing.server.storage.datastore.TestEnvironment.singleTenantSpec;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -82,7 +82,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("`DsAggregateStorage` should")
 class DsAggregateStorageTest extends AggregateStorageTest {
 
-    private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
+    private static final TestDatastoreStorageFactory datastoreFactory = local();
 
     @BeforeAll
     static void setUpClass() {

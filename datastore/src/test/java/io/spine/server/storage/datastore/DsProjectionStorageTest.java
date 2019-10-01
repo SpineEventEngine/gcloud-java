@@ -36,13 +36,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.base.Time.currentTime;
-import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
+import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
 import static io.spine.testing.server.storage.datastore.TestEnvironment.singleTenantSpec;
 
 @DisplayName("`DsProjectionStorage` should")
 class DsProjectionStorageTest extends ProjectionStorageTest {
 
-    private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
+    private static final TestDatastoreStorageFactory datastoreFactory = local();
 
     @Override
     protected Class<? extends TestCounterEntity> getTestEntityClass() {

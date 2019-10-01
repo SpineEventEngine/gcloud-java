@@ -30,14 +30,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 
-import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
+import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
 import static io.spine.testing.server.storage.datastore.TestEnvironment.singleTenantSpec;
 
 @DisplayName("`DsAggregateStorage` lifecycle handling should")
 class DsAggregateStorageLifecycleHandlingTest
         extends AggregateStorageLifecycleFlagsHandlingTest {
 
-    private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
+    private static final TestDatastoreStorageFactory datastoreFactory = local();
 
     @BeforeAll
     static void setUpClass() {
