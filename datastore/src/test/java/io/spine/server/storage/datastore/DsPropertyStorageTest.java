@@ -23,8 +23,8 @@ import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
-import static io.spine.testing.server.storage.datastore.TestEnvironment.singleTenantSpec;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("`DsPropertyStorage` should")

@@ -36,8 +36,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.base.Time.currentTime;
+import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
-import static io.spine.testing.server.storage.datastore.TestEnvironment.singleTenantSpec;
 
 @DisplayName("`DsProjectionStorage` should")
 class DsProjectionStorageTest extends ProjectionStorageTest {

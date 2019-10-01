@@ -116,7 +116,7 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ord
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.recordIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedValues;
-import static io.spine.testing.server.storage.datastore.TestEnvironment.singleTenantSpec;
+import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertFalse;

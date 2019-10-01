@@ -55,10 +55,10 @@ import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.ch
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.ensureNamespace;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.localDatastore;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.remoteDatastore;
+import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
 import static io.spine.testing.server.storage.datastore.TestDatastoreWrapper.wrap;
-import static io.spine.testing.server.storage.datastore.TestEnvironment.runsOnCi;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
