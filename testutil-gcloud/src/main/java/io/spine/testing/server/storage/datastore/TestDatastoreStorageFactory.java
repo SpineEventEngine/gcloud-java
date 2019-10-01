@@ -95,7 +95,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     /**
      * Clears all data in the local Datastore.
      *
-     * <p>Is effectively the same as {@link #clear()}.
+     * <p>May be effectively the same as {@link #clear()}.
      *
      * <p><b>NOTE</b>: does not stop the server but just deletes all records.
      *

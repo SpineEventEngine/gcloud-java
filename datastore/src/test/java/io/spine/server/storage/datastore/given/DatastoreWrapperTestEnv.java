@@ -40,7 +40,7 @@ public class DatastoreWrapperTestEnv {
     public static final String NAMESPACE_HOLDER_KIND = "spine.test.NAMESPACE_HOLDER_KIND";
     public static final Kind GENERIC_ENTITY_KIND = Kind.of("my.entity");
 
-    private static final String SERVICE_ACCOUNT_FILE_PATH = "spine-dev.json";
+    private static final String SERVICE_ACCOUNT_RESOURCE_PATH = "spine-dev.json";
 
     /**
      * Prevents instantiation of this test environment.
@@ -73,6 +73,6 @@ public class DatastoreWrapperTestEnv {
     }
 
     public static Datastore remoteDatastore() {
-        return TestDatastores.remote(SERVICE_ACCOUNT_FILE_PATH);
+        return TestDatastores.remote(SERVICE_ACCOUNT_RESOURCE_PATH);
     }
 }

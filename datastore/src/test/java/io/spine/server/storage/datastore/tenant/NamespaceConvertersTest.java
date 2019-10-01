@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore.tenant;
 
 import io.spine.core.TenantId;
+import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,11 @@ import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("`NamespaceConverters` should")
-class NamespaceConvertersTest {
+class NamespaceConvertersTest extends UtilityClassTest<NamespaceConverters> {
+
+    NamespaceConvertersTest() {
+        super(NamespaceConverters.class);
+    }
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
