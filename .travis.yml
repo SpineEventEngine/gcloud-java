@@ -19,6 +19,8 @@ before_install:
   - tar xvf credentials.tar
   - mkdir ./testutil-gcloud/src/test/resources
   - mv ./spine-dev.json ./testutil-gcloud/src/test/resources
+  - mkdir ./datastore/src/test/resources
+  - mv ./spine-dev.json ./datastore/src/test/resources
   # Install the complete gcloud SDK to access the Datastore emulator.
   - ./scripts/install-gcloud.sh
   # Add the newly installed gcloud SDK to PATH overriding the default Travis version.
