@@ -24,6 +24,7 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +39,7 @@ class ProjectIdTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
         new NullPointerTester()
-                .setDefault(Datastore.class, local())
+                .setDefault(Datastore.class, TestDatastores.local())
                 .testStaticMethods(ProjectId.class, NullPointerTester.Visibility.PACKAGE);
     }
 
