@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.storage.datastore;
 
+import com.google.cloud.datastore.Datastore;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -57,5 +58,11 @@ public final class SpyStorageFactory extends TestDatastoreStorageFactory {
     @VisibleForTesting
     static void clearInjectedWrapper() {
         injectedWrapper = null;
+    }
+
+    @VisibleForTesting
+    @Override
+    protected Datastore datastore() {
+        return super.datastore();
     }
 }

@@ -220,7 +220,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      * Returns the instance of wrapped {@link Datastore}.
      */
     @VisibleForTesting
-    public Datastore datastore() {
+    protected Datastore datastore() {
         return datastore;
     }
 
