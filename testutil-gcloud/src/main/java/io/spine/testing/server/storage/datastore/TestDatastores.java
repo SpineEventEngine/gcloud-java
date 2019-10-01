@@ -55,7 +55,13 @@ public final class TestDatastores implements Logging {
     private static final String LOCALHOST = "localhost";
 
     /**
-     * The project ID which is used when running on local Datastore emulator.
+     * The default project ID to use when running on a local Datastore emulator.
+     *
+     * <p>For most tests, it's okay to use this ID even if some other project ID was passed to the
+     * emulator via the {@code --project} switch.
+     *
+     * <p>If, for some reason, you need to specify a custom project ID, please use
+     * {@link #local(ProjectId, int)}.
      */
     private static final ProjectId DEFAULT_LOCAL_PROJECT_ID = ProjectId.of("test-project");
 
