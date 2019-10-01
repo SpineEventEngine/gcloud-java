@@ -199,7 +199,7 @@ public class DatastoreWrapper implements Logging {
      * @return the {@link Entity} or {@code null} in case of no results for the key given
      * @see DatastoreReader#get(Key)
      */
-    public Entity read(Key key) {
+    public @Nullable Entity read(Key key) {
         return actor.get(key);
     }
 

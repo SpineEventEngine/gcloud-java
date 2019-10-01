@@ -25,6 +25,7 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.NoCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.io.Resource;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.ProjectId;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.io.Resource.file;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
@@ -48,7 +50,8 @@ public final class TestDatastores implements Logging {
      * <p>See<a href="https://cloud.google.com/sdk/gcloud/reference/beta/emulators/datastore/start">
      * {@code gcloud} docs</a>.
      */
-    private static final int DEFAULT_EMULATOR_PORT = 8081;
+    @VisibleForTesting
+    static final int DEFAULT_EMULATOR_PORT = 8081;
     private static final String LOCALHOST = "localhost";
 
     /**
@@ -72,15 +75,8 @@ public final class TestDatastores implements Logging {
      * Creates a {@link Datastore} connected to the local Datastore emulator at the specified port.
      */
     public static Datastore local(int port) {
-        String address = format("%s:%s", LOCALHOST, port);
-        return local(address);
-    }
+        String address = format("%s:%d", LOCALHOST, port);
 
-    /**
-     * Creates a {@link Datastore} connected to the local Datastore emulator at the specified
-     * address.
-     */
-    public static Datastore local(String address) {
         DatastoreOptions options = DatastoreOptions
                 .newBuilder()
                 .setProjectId(LOCAL_PROJECT_ID.value())
@@ -99,6 +95,7 @@ public final class TestDatastores implements Logging {
      * classpath.
      */
     public static Datastore remote(String serviceAccountPath) {
+        checkNotNull(serviceAccountPath);
         return remote(file(serviceAccountPath));
     }
 
@@ -107,6 +104,7 @@ public final class TestDatastores implements Logging {
      * given service account resource.
      */
     public static Datastore remote(Resource serviceAccount) {
+        checkNotNull(serviceAccount);
         try {
             Credentials credentials = credentialsFrom(serviceAccount);
             DatastoreOptions options = DatastoreOptions

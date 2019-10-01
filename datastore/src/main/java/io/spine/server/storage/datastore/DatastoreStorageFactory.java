@@ -217,10 +217,10 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     /**
-     * Returs the instance of wrapped {@link Datastore}.
+     * Returns the instance of wrapped {@link Datastore}.
      */
     @VisibleForTesting
-    protected Datastore datastore() {
+    public Datastore datastore() {
         return datastore;
     }
 

@@ -21,11 +21,17 @@
 package io.spine.testing.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import io.spine.annotation.Internal;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
+
+import java.util.Collection;
+import java.util.HashSet;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A test implementation of the {@link DatastoreStorageFactory}.
@@ -36,6 +42,8 @@ import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+    private final Collection<DatastoreWrapper> allCreatedWrappers = new HashSet<>();
 
     protected TestDatastoreStorageFactory(Datastore datastore) {
         super(DatastoreStorageFactory
@@ -58,13 +66,21 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      * Creates a new factory instance which wraps the given Datastore.
      */
     public static TestDatastoreStorageFactory basedOn(Datastore datastore) {
+        checkNotNull(datastore);
         return new TestDatastoreStorageFactory(datastore);
     }
 
     @Internal
     @Override
     protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
-        return TestDatastoreWrapper.wrap(datastore(), false);
+        TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(datastore(), false);
+        allCreatedWrappers.add(wrapper);
+        return wrapper;
+    }
+
+    @Override
+    protected Iterable<DatastoreWrapper> wrappers() {
+        return ImmutableSet.copyOf(allCreatedWrappers);
     }
 
     /**

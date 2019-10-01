@@ -26,6 +26,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -76,10 +78,11 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
      * <p>The {@code waitForConsistency} parameter allows to add a delay to each write operation to
      * compensate for the eventual consistency of the storage.
      *
-     * <p>The {@code waitForConsistency} parameter should be set to {@code false} when wrapping a
-     * local Datastore emulator.
+     * <p>The {@code waitForConsistency} parameter should usually be set to {@code false} when
+     * working with a local Datastore emulator.
      */
     public static TestDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
+        checkNotNull(datastore);
         return new TestDatastoreWrapper(datastore, waitForConsistency);
     }
 
@@ -153,7 +156,6 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
         }
     }
 
-    @SuppressWarnings("BusyWait")   // allow Datastore to become consistent before reading.
     private void waitForConsistency() {
         if (!waitForConsistency) {
             _debug().log("Wait for consistency is not required.");
@@ -161,6 +163,12 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
         }
         _debug().log("Waiting for data consistency to establish.");
 
+        doWaitForConsistency();
+    }
+
+    @SuppressWarnings("BusyWait")   // allow Datastore to become consistent before reading.
+    @VisibleForTesting
+    protected void doWaitForConsistency() {
         for (int awaitCycle = 0; awaitCycle < CONSISTENCY_AWAIT_ITERATIONS; awaitCycle++) {
             try {
                 Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);

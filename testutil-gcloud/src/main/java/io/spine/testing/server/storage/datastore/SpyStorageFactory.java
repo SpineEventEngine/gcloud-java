@@ -20,7 +20,9 @@
 
 package io.spine.testing.server.storage.datastore;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.server.storage.datastore.DatastoreWrapper;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -29,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class SpyStorageFactory extends TestDatastoreStorageFactory {
 
-    private static DatastoreWrapper injectedWrapper = null;
+    private static @Nullable DatastoreWrapper injectedWrapper = null;
 
     /**
      * Injects a given {@code DatastoreWrapper} into the storage factory.
@@ -39,6 +41,7 @@ public final class SpyStorageFactory extends TestDatastoreStorageFactory {
      * <p>Should be called before the {@code SpyStorageFactory} instance is created.
      */
     public static void injectWrapper(DatastoreWrapper wrapper) {
+        checkNotNull(wrapper);
         injectedWrapper = wrapper;
     }
 
@@ -49,5 +52,10 @@ public final class SpyStorageFactory extends TestDatastoreStorageFactory {
     @Override
     protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
         return injectedWrapper;
+    }
+
+    @VisibleForTesting
+    static void clearInjectedWrapper() {
+        injectedWrapper = null;
     }
 }
