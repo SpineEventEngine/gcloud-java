@@ -46,7 +46,7 @@ final class QueryWithFilter implements Function<StructuredQuery.Filter, Structur
         checkNotNull(kind);
 
         this.builder = Query.newEntityQueryBuilder()
-                            .setKind(kind.getValue());
+                            .setKind(kind.value());
         if (format.hasOrderBy()) {
             this.builder.setOrderBy(translateOrderBy(format.getOrderBy()));
         }

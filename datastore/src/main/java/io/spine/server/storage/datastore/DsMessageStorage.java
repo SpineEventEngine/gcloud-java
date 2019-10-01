@@ -200,7 +200,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      */
     Iterator<M> readAll(EntityQuery.Builder queryBuilder, int readBatchSize) {
         StructuredQuery<Entity> query =
-                queryBuilder.setKind(kind.getValue())
+                queryBuilder.setKind(kind.value())
                             .build();
         Iterator<Entity> iterator = datastore.readAll(query, readBatchSize);
         Iterator<M> transformed =

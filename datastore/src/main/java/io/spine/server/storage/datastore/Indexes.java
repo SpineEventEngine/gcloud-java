@@ -63,7 +63,7 @@ final class Indexes {
         checkNotNull(idType);
 
         StructuredQuery<Key> query = Query.newKeyQueryBuilder()
-                                          .setKind(kind.getValue())
+                                          .setKind(kind.value())
                                           .build();
         Iterator<Key> allEntities = datastore.read(query);
         Iterator<I> idIterator = Streams.stream(allEntities)

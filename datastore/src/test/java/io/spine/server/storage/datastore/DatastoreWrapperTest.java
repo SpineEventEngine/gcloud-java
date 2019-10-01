@@ -172,7 +172,7 @@ class DatastoreWrapperTest {
             Thread.sleep(bulkSize * 3L);
 
             StructuredQuery<Entity> query = newEntityQueryBuilder()
-                    .setKind(GENERIC_ENTITY_KIND.getValue())
+                    .setKind(GENERIC_ENTITY_KIND.value())
                     .build();
             Collection<Entity> readEntities = newArrayList(wrapper.read(query));
             assertEquals(entities.size(), readEntities.size());
@@ -386,7 +386,7 @@ class DatastoreWrapperTest {
         wrapper.createOrUpdate(expctedEntities);
 
         StructuredQuery<Entity> query = newEntityQueryBuilder()
-                .setKind(GENERIC_ENTITY_KIND.getValue())
+                .setKind(GENERIC_ENTITY_KIND.value())
                 .build();
         Iterator<Entity> result = wrapper.read(query);
 

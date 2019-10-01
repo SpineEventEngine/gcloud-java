@@ -78,7 +78,7 @@ class KindTest {
     void testFromString() {
         String type = "my.custom.type";
         Kind kind = Kind.of(type);
-        assertEquals(type, kind.getValue());
+        assertEquals(type, kind.value());
     }
 
     @Test
@@ -87,9 +87,9 @@ class KindTest {
         Descriptors.Descriptor descriptor = Any.getDescriptor();
         TypeUrl type = TypeUrl.from(descriptor);
         Kind kind = Kind.of(type);
-        assertEquals(descriptor.getFullName(), kind.getValue());
+        assertEquals(descriptor.getFullName(), kind.value());
         assertEquals(type.toTypeName()
-                         .value(), kind.getValue());
+                         .value(), kind.value());
     }
 
     @Test
@@ -97,7 +97,7 @@ class KindTest {
     void testFromDescriptor() {
         Descriptors.Descriptor descriptor = Any.getDescriptor();
         Kind kind = Kind.of(descriptor);
-        assertEquals(descriptor.getFullName(), kind.getValue());
+        assertEquals(descriptor.getFullName(), kind.value());
     }
 
     @Test
@@ -106,7 +106,7 @@ class KindTest {
         Message message = Any.getDefaultInstance();
         Kind kind = Kind.of(message);
         assertEquals(message.getDescriptorForType()
-                            .getFullName(), kind.getValue());
+                            .getFullName(), kind.value());
     }
 
     @Test
@@ -115,7 +115,7 @@ class KindTest {
         Descriptors.Descriptor descriptor = Any.getDescriptor();
         TypeName type = TypeName.from(descriptor);
         Kind kind = Kind.of(type);
-        assertEquals(descriptor.getFullName(), kind.getValue());
-        assertEquals(type.value(), kind.getValue());
+        assertEquals(descriptor.getFullName(), kind.value());
+        assertEquals(type.value(), kind.value());
     }
 }
