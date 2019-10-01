@@ -1,1 +1,1 @@
-gcloud beta emulators datastore start --project=spine-dev --consistency 1.0 --no-store-on-disk
+gcloud beta emulators datastore start --project=test-project --consistency 1.0 --no-store-on-disk

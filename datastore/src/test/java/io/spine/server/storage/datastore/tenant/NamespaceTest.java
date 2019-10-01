@@ -31,7 +31,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.server.storage.datastore.TestDatastores.localProjectId;
+import static io.spine.testing.server.storage.datastore.TestDatastores.defaultLocalProjectId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -44,7 +44,7 @@ class NamespaceTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
-        ProjectId defaultProjectId = localProjectId();
+        ProjectId defaultProjectId = defaultLocalProjectId();
         Key defaultKey = Key.newBuilder(defaultProjectId.getValue(), "kind", "name")
                             .build();
         new NullPointerTester()

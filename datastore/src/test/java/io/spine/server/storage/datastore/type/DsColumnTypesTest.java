@@ -40,7 +40,7 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.timestampType;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.server.storage.datastore.TestDatastores.localProjectId;
+import static io.spine.testing.server.storage.datastore.TestDatastores.defaultLocalProjectId;
 
 @DisplayName("DsColumnTypes should")
 class DsColumnTypesTest {
@@ -225,7 +225,7 @@ class DsColumnTypesTest {
     }
 
     private static BaseEntity.Builder<Key, Entity.Builder> entityBuilder() {
-        String projectId = localProjectId().value();
+        String projectId = defaultLocalProjectId().value();
         Key key = Key.newBuilder(projectId, "some-entity-kind", "some-name")
                      .build();
         Entity.Builder builder = Entity.newBuilder(key);

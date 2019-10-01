@@ -57,7 +57,7 @@ public final class TestDatastores implements Logging {
     /**
      * The project ID which is used when running on local Datastore emulator.
      */
-    private static final ProjectId LOCAL_PROJECT_ID = ProjectId.of("test-project");
+    private static final ProjectId DEFAULT_LOCAL_PROJECT_ID = ProjectId.of("test-project");
 
     /** Prevents instantiation of this utility class. */
     private TestDatastores() {
@@ -75,11 +75,18 @@ public final class TestDatastores implements Logging {
      * Creates a {@link Datastore} connected to the local Datastore emulator at the specified port.
      */
     public static Datastore local(int port) {
-        String address = format("%s:%d", LOCALHOST, port);
+        return local(DEFAULT_LOCAL_PROJECT_ID, port);
+    }
 
+    /**
+     * Creates a {@link Datastore} connected to the local Datastore emulator at the specified port
+     * which runs with the specified project ID.
+     */
+    public static Datastore local(ProjectId projectId, int port) {
+        String address = format("%s:%d", LOCALHOST, port);
         DatastoreOptions options = DatastoreOptions
                 .newBuilder()
-                .setProjectId(LOCAL_PROJECT_ID.value())
+                .setProjectId(projectId.value())
                 .setHost(address)
                 .setCredentials(NoCredentials.getInstance())
                 .build();
@@ -125,7 +132,7 @@ public final class TestDatastores implements Logging {
         return credentials;
     }
 
-    public static ProjectId localProjectId() {
-        return LOCAL_PROJECT_ID;
+    public static ProjectId defaultLocalProjectId() {
+        return DEFAULT_LOCAL_PROJECT_ID;
     }
 }

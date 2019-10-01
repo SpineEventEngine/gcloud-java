@@ -21,7 +21,9 @@
 package io.spine.testing.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.io.Resource;
+import io.spine.server.storage.datastore.ProjectId;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -65,6 +67,25 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
             String expectedHost = format(ADDRESS_FORMAT, port);
             assertThat(host)
                     .isEqualTo(expectedHost);
+        }
+
+        @Test
+        @DisplayName("a custom port with a custom project ID")
+        void atCustomPortWithCustomId() {
+            int port = 8080;
+            String id = "the-test-project";
+            ProjectId projectId = ProjectId.of(id);
+            Datastore datastore = TestDatastores.local(projectId, port);
+
+            DatastoreOptions options = datastore.getOptions();
+            String host = options.getHost();
+            String expectedHost = format(ADDRESS_FORMAT, port);
+            assertThat(host)
+                    .isEqualTo(expectedHost);
+
+            String actualProjectId = options.getProjectId();
+            assertThat(actualProjectId)
+                    .isEqualTo(id);
         }
     }
 
