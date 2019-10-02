@@ -205,7 +205,7 @@ final class NamespaceIndex implements TenantIndex {
         @Override
         public Iterator<Key> run() {
             Query<Key> query = Query.newKeyQueryBuilder()
-                                    .setKind(NAMESPACE_KIND.getValue())
+                                    .setKind(NAMESPACE_KIND.value())
                                     .build();
             Iterator<Key> result = datastore.run(query);
             return result;

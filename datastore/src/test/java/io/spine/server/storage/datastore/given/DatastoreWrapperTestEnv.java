@@ -28,6 +28,7 @@ import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.testing.server.storage.datastore.TestDatastores;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -38,6 +39,8 @@ public class DatastoreWrapperTestEnv {
 
     public static final String NAMESPACE_HOLDER_KIND = "spine.test.NAMESPACE_HOLDER_KIND";
     public static final Kind GENERIC_ENTITY_KIND = Kind.of("my.entity");
+
+    private static final String SERVICE_ACCOUNT_RESOURCE_PATH = "spine-dev.json";
 
     /**
      * Prevents instantiation of this test environment.
@@ -70,6 +73,6 @@ public class DatastoreWrapperTestEnv {
     }
 
     public static Datastore remoteDatastore() {
-        return TestDatastores.remote();
+        return TestDatastores.remote(SERVICE_ACCOUNT_RESOURCE_PATH);
     }
 }

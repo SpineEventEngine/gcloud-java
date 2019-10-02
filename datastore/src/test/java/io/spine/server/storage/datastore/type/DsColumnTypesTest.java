@@ -28,7 +28,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.json.Json;
-import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +40,7 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.datastore.type.DsColumnTypes.timestampType;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.server.storage.datastore.TestDatastores.defaultLocalProjectId;
 
 @DisplayName("DsColumnTypes should")
 class DsColumnTypesTest {
@@ -225,8 +225,7 @@ class DsColumnTypesTest {
     }
 
     private static BaseEntity.Builder<Key, Entity.Builder> entityBuilder() {
-        String projectId = TestDatastores.projectId()
-                                         .value();
+        String projectId = defaultLocalProjectId().value();
         Key key = Key.newBuilder(projectId, "some-entity-kind", "some-name")
                      .build();
         Entity.Builder builder = Entity.newBuilder(key);

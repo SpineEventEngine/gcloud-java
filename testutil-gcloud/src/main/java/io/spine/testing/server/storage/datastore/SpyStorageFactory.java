@@ -18,31 +18,51 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore;
+package io.spine.testing.server.storage.datastore;
 
-import io.spine.annotation.Internal;
+import com.google.cloud.datastore.Datastore;
+import com.google.common.annotations.VisibleForTesting;
+import io.spine.server.storage.datastore.DatastoreWrapper;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A {@link TestDatastoreStorageFactory} which allows to inject a custom {@link DatastoreWrapper}.
- *
- * <p>This class is not moved to the test environment because it uses the package-private method of
- * {@link DatastoreWrapper}.
  */
-final class SpyStorageFactory extends TestDatastoreStorageFactory {
+public final class SpyStorageFactory extends TestDatastoreStorageFactory {
 
-    private static DatastoreWrapper injectedWrapper = null;
+    private static @Nullable DatastoreWrapper injectedWrapper = null;
 
-    static void injectWrapper(DatastoreWrapper wrapper) {
+    /**
+     * Injects a given {@code DatastoreWrapper} into the storage factory.
+     *
+     * <p>All storages created by this factory will operate based on the given wrapper.
+     *
+     * <p>Should be called before the {@code SpyStorageFactory} instance is created.
+     */
+    public static void injectWrapper(DatastoreWrapper wrapper) {
+        checkNotNull(wrapper);
         injectedWrapper = wrapper;
     }
 
-    SpyStorageFactory() {
-        super(injectedWrapper.datastore());
+    public SpyStorageFactory() {
+        super(checkNotNull(injectedWrapper).datastore());
     }
 
-    @Internal
     @Override
     protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
         return injectedWrapper;
+    }
+
+    @VisibleForTesting
+    static void clearInjectedWrapper() {
+        injectedWrapper = null;
+    }
+
+    @VisibleForTesting
+    @Override
+    protected Datastore datastore() {
+        return super.datastore();
     }
 }

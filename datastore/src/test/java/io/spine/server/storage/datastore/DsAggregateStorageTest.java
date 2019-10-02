@@ -50,6 +50,8 @@ import io.spine.test.storage.StateImported;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.storage.datastore.SpyStorageFactory;
+import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -68,9 +70,9 @@ import static io.spine.core.Versions.zero;
 import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.aggregate.given.Given.CommandMessage.addTask;
 import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
-import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
 import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
+import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -80,7 +82,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("`DsAggregateStorage` should")
 class DsAggregateStorageTest extends AggregateStorageTest {
 
-    private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
+    private static final TestDatastoreStorageFactory datastoreFactory = local();
 
     @BeforeAll
     static void setUpClass() {

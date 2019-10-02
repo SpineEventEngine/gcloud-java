@@ -25,7 +25,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StructuredQuery;
 import io.spine.server.storage.datastore.DsQueryIterator;
-import io.spine.server.storage.datastore.TestDatastoreWrapper;
+import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;

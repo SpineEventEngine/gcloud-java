@@ -29,8 +29,8 @@ import com.google.protobuf.Any;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
-import io.spine.server.storage.datastore.given.TestDatastores;
 import io.spine.server.tenant.TenantAwareFunction0;
+import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +48,7 @@ import java.util.NoSuchElementException;
 import static com.google.cloud.datastore.Query.newEntityQueryBuilder;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.storage.datastore.TestDatastoreWrapper.wrap;
+import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.GENERIC_ENTITY_KIND;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.NAMESPACE_HOLDER_KIND;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.checkTenantIdInKey;
@@ -58,6 +58,7 @@ import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.re
 import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
 import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
+import static io.spine.testing.server.storage.datastore.TestDatastoreWrapper.wrap;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -171,7 +172,7 @@ class DatastoreWrapperTest {
             Thread.sleep(bulkSize * 3L);
 
             StructuredQuery<Entity> query = newEntityQueryBuilder()
-                    .setKind(GENERIC_ENTITY_KIND.getValue())
+                    .setKind(GENERIC_ENTITY_KIND.value())
                     .build();
             Collection<Entity> readEntities = newArrayList(wrapper.read(query));
             assertEquals(entities.size(), readEntities.size());
@@ -318,6 +319,8 @@ class DatastoreWrapperTest {
             wrapper.dropAllTables();
         }
 
+        @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+        // Called to throw exception.
         @Test
         @DisplayName("throws IAE during batch read with limit")
         void testIaeOnBatchReadWithLimit() {
@@ -327,6 +330,8 @@ class DatastoreWrapperTest {
                                                        .build(), 1));
         }
 
+        @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+        // Called to throw exception.
         @Test
         @DisplayName("throws IAE during batch read of 0 size")
         void testIaeOnBatchReadWithZeroSize() {
@@ -338,7 +343,6 @@ class DatastoreWrapperTest {
     @Test
     @DisplayName("generate key factories aware of tenancy")
     void testGenerateKeyFactory() {
-        ProjectId projectId = TestDatastores.projectId();
         DatastoreWrapper wrapper = wrap(localDatastore(), multitenant());
         String tenantId1 = "first-tenant-ID";
         String tenantId1Prefixed = "Vfirst-tenant-ID";
@@ -382,7 +386,7 @@ class DatastoreWrapperTest {
         wrapper.createOrUpdate(expctedEntities);
 
         StructuredQuery<Entity> query = newEntityQueryBuilder()
-                .setKind(GENERIC_ENTITY_KIND.getValue())
+                .setKind(GENERIC_ENTITY_KIND.value())
                 .build();
         Iterator<Entity> result = wrapper.read(query);
 

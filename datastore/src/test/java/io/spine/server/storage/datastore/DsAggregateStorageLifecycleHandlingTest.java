@@ -24,19 +24,20 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageLifecycleFlagsHandlingTest;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 
-import static io.spine.server.storage.datastore.TestDatastoreStorageFactory.defaultInstance;
 import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
+import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
 
 @DisplayName("`DsAggregateStorage` lifecycle handling should")
 class DsAggregateStorageLifecycleHandlingTest
         extends AggregateStorageLifecycleFlagsHandlingTest {
 
-    private static final TestDatastoreStorageFactory datastoreFactory = defaultInstance();
+    private static final TestDatastoreStorageFactory datastoreFactory = local();
 
     @BeforeAll
     static void setUpClass() {

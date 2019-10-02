@@ -20,12 +20,12 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.common.base.Objects;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import io.spine.value.StringTypeValue;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -34,7 +34,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A data transfer object representing a Datastore
  * <a href="https://cloud.google.com/datastore/docs/concepts/entities#kinds_and_identifiers">kind</a>.
  */
-public final class Kind {
+public final class Kind extends StringTypeValue {
+
+    private static final long serialVersionUID = 0L;
 
     private static final String INVALID_KIND_ERROR_MESSAGE =
             "Datastore kind cannot start with \"__\". See " +
@@ -44,10 +46,8 @@ public final class Kind {
 
     private static final String NAMESPACE_KIND = "__namespace__";
 
-    private final String value;
-
     private Kind(String value) {
-        this.value = checkValidKind(value);
+        super(checkValidKind(value));
     }
 
     /**
@@ -59,8 +59,8 @@ public final class Kind {
      *         the flag showing that the {@code Kind} is ancillary; must be set to {@code true}
      */
     private Kind(String value, boolean ancillary) {
+        super(value);
         checkArgument(ancillary);
-        this.value = value;
     }
 
     public static Kind of(String value) {
@@ -92,30 +92,9 @@ public final class Kind {
         return new Kind(NAMESPACE_KIND, true);
     }
 
-    public String getValue() {
-        return value;
-    }
-
     private static String checkValidKind(String kind) {
         checkNotNull(kind);
         checkArgument(!kind.startsWith(FORBIDDEN_PREFIX), INVALID_KIND_ERROR_MESSAGE);
         return kind;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Kind kind = (Kind) o;
-        return Objects.equal(getValue(), kind.getValue());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getValue());
     }
 }

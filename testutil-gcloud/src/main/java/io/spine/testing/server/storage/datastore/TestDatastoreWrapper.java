@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore;
+package io.spine.testing.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
@@ -26,13 +26,18 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
-import io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers;
+import com.google.common.annotations.VisibleForTesting;
+import io.spine.server.storage.datastore.DatastoreWrapper;
+import io.spine.server.storage.datastore.Kind;
+import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Custom extension of the {@link DatastoreWrapper} for the integration testing.
@@ -41,17 +46,20 @@ import static com.google.common.collect.Lists.newArrayList;
  */
 public class TestDatastoreWrapper extends DatastoreWrapper {
 
-    // Default time to wait before each read operation to ensure the data is consistent.
-    // NOTE: enabled only if {@link #shouldWaitForConsistency} is {@code true}.
+    /**
+     * Default time to wait before each read operation to ensure the data is consistent.
+     *
+     * <p>NOTE: enabled only if {@link #waitForConsistency} is {@code true}.
+     */
     private static final int CONSISTENCY_AWAIT_TIME_MS = 10;
     private static final int CONSISTENCY_AWAIT_ITERATIONS = 20;
 
     /**
-     * Due to eventual consistency, {@link #dropTable(String) is performed iteratively until
+     * Due to eventual consistency, {@linkplain #dropTable(String) is performed iteratively until
      * the table has no records}.
      *
-     * This constant represents the maximum number of cleanup attempts before the execution
-     * is continued
+     * <p>This constant represents the maximum number of cleanup attempts before the execution
+     * is continued.
      */
     private static final int MAX_CLEANUP_ATTEMPTS = 5;
 
@@ -60,17 +68,27 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
     private final boolean waitForConsistency;
 
     protected TestDatastoreWrapper(Datastore datastore, boolean waitForConsistency) {
-        super(datastore, TestNamespaceSuppliers.singleTenant());
+        super(datastore, NamespaceSupplier.singleTenant());
         this.waitForConsistency = waitForConsistency;
     }
 
+    /**
+     * Wraps a given Datastore.
+     *
+     * <p>The {@code waitForConsistency} parameter allows to add a delay to each write operation to
+     * compensate for the eventual consistency of the storage.
+     *
+     * <p>The {@code waitForConsistency} parameter should usually be set to {@code false} when
+     * working with a local Datastore emulator.
+     */
     public static TestDatastoreWrapper wrap(Datastore datastore, boolean waitForConsistency) {
+        checkNotNull(datastore);
         return new TestDatastoreWrapper(datastore, waitForConsistency);
     }
 
     @Override
     public KeyFactory keyFactory(Kind kind) {
-        kindsCache.add(kind.getValue());
+        kindsCache.add(kind.value());
         return super.keyFactory(kind);
     }
 
@@ -93,7 +111,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
     }
 
     @Override
-    void dropTable(String table) {
+    protected void dropTable(String table) {
         if (!waitForConsistency) {
             super.dropTable(table);
         } else {
@@ -101,7 +119,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
         }
     }
 
-    @SuppressWarnings("BusyWait")   // allow Datastore some time between cleanup attempts.
+    @SuppressWarnings("BusyWait")   // allows Datastore some time between cleanup attempts.
     private void dropTableConsistently(String table) {
         Integer remainingEntityCount = null;
         int cleanupAttempts = 0;
@@ -115,7 +133,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
                 try {
                     Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException(e);
                 }
             }
 
@@ -131,14 +149,13 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
             }
         }
 
-        if (cleanupAttempts >= MAX_CLEANUP_ATTEMPTS && remainingEntityCount > 0) {
-            throw new RuntimeException("Cannot cleanup the table: " + table +
-                                               ". Remaining entity count is " +
-                                               remainingEntityCount);
+        if (cleanupAttempts >= MAX_CLEANUP_ATTEMPTS) {
+            throw newIllegalStateException(
+                    "Cannot cleanup the table: %s. Remaining entity count is %d",
+                    table, remainingEntityCount);
         }
     }
 
-    @SuppressWarnings("BusyWait")   // allow Datastore to become consistent before reading.
     private void waitForConsistency() {
         if (!waitForConsistency) {
             _debug().log("Wait for consistency is not required.");
@@ -146,11 +163,17 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
         }
         _debug().log("Waiting for data consistency to establish.");
 
+        doWaitForConsistency();
+    }
+
+    @SuppressWarnings("BusyWait")   // allow Datastore to become consistent before reading.
+    @VisibleForTesting
+    protected void doWaitForConsistency() {
         for (int awaitCycle = 0; awaitCycle < CONSISTENCY_AWAIT_ITERATIONS; awaitCycle++) {
             try {
                 Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
         }
     }

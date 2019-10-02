@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -76,7 +77,7 @@ public class DatastoreWrapper implements Logging {
     private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
     static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
-    private static final Map<Kind, KeyFactory> keyFactories = new HashMap<>();
+    private static final Map<DatastoreKind, KeyFactory> keyFactories = new HashMap<>();
 
     private static final Key[] EMPTY_KEY_ARRAY = new Key[0];
 
@@ -198,7 +199,7 @@ public class DatastoreWrapper implements Logging {
      * @return the {@link Entity} or {@code null} in case of no results for the key given
      * @see DatastoreReader#get(Key)
      */
-    public Entity read(Key key) {
+    public @Nullable Entity read(Key key) {
         return actor.get(key);
     }
 
@@ -301,7 +302,7 @@ public class DatastoreWrapper implements Logging {
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
-    <R> Iterator<R> readAll(StructuredQuery<R> query, int pageSize) {
+    public <R> Iterator<R> readAll(StructuredQuery<R> query, int pageSize) {
         return readAllPageByPage(query, pageSize);
     }
 
@@ -322,7 +323,7 @@ public class DatastoreWrapper implements Logging {
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
-    <R> Iterator<R> readAll(StructuredQuery<R> query) {
+    public <R> Iterator<R> readAll(StructuredQuery<R> query) {
         return readAllPageByPage(query, null);
     }
 
@@ -386,7 +387,8 @@ public class DatastoreWrapper implements Logging {
      * @param table
      *         kind (a.k.a. type, table, etc.) of the records to delete
      */
-    void dropTable(String table) {
+    @VisibleForTesting
+    protected void dropTable(String table) {
         Namespace namespace = currentNamespace();
         StructuredQuery<Entity> query =
                 Query.newEntityQueryBuilder()
@@ -504,7 +506,8 @@ public class DatastoreWrapper implements Logging {
      * @return an instance of {@link KeyFactory} for given kind
      */
     public KeyFactory keyFactory(Kind kind) {
-        KeyFactory keyFactory = keyFactories.get(kind);
+        DatastoreKind datastoreKind = new DatastoreKind(projectId(), kind);
+        KeyFactory keyFactory = keyFactories.get(datastoreKind);
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
         }
@@ -522,15 +525,24 @@ public class DatastoreWrapper implements Logging {
         return options;
     }
 
-    Datastore datastore() {
+    @VisibleForTesting
+    public Datastore datastore() {
         return datastore;
     }
 
     private KeyFactory initKeyFactory(Kind kind) {
         KeyFactory keyFactory = datastore.newKeyFactory()
-                                         .setKind(kind.getValue());
-        keyFactories.put(kind, keyFactory);
+                                         .setKind(kind.value());
+        DatastoreKind datastoreKind = new DatastoreKind(projectId(), kind);
+        keyFactories.put(datastoreKind, keyFactory);
         return keyFactory;
+    }
+
+    private ProjectId projectId() {
+        String projectId = datastore.getOptions()
+                                    .getProjectId();
+        ProjectId result = ProjectId.of(projectId);
+        return result;
     }
 
     /**
@@ -586,5 +598,38 @@ public class DatastoreWrapper implements Logging {
 
     private void writeSmallBulk(Entity[] entities) {
         actor.put(entities);
+    }
+
+    /**
+     * A Datastore {@link Kind} by project ID.
+     */
+    private static class DatastoreKind {
+
+        private final ProjectId projectId;
+        private final Kind kind;
+
+        private DatastoreKind(ProjectId projectId, Kind kind) {
+            this.projectId = projectId;
+            this.kind = kind;
+        }
+
+        @SuppressWarnings("EqualsGetClass") // The class is effectively final.
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            DatastoreKind kind1 = (DatastoreKind) o;
+            return Objects.equals(projectId, kind1.projectId) &&
+                    Objects.equals(kind, kind1.kind);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(projectId, kind);
+        }
     }
 }
