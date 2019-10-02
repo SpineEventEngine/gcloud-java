@@ -48,8 +48,7 @@ class SpyStorageFactoryTest {
         SpyStorageFactory factory = new SpyStorageFactory();
         Datastore datastoreFromFactory = factory.datastore();
 
-        assertThat(datastoreFromFactory)
-                .isSameInstanceAs(datastore);
+        assertThat(datastoreFromFactory).isSameInstanceAs(datastore);
     }
 
     @Test

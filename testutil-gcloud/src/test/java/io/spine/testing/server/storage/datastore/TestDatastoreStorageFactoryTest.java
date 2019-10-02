@@ -46,8 +46,7 @@ class TestDatastoreStorageFactoryTest {
     void wrapDatastore() {
         TestDatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
         DatastoreWrapper wrapper = factory.createDatastoreWrapper(false);
-        assertThat(wrapper)
-                .isInstanceOf(TestDatastoreWrapper.class);
+        assertThat(wrapper).isInstanceOf(TestDatastoreWrapper.class);
     }
 
     @Test
@@ -64,15 +63,13 @@ class TestDatastoreStorageFactoryTest {
 
         // Make sure the entity is read from the Datastore by key.
         Entity entityReadBeforeClear = wrapper.read(key);
-        assertThat(entityReadBeforeClear)
-                .isNotNull();
+        assertThat(entityReadBeforeClear).isNotNull();
 
         // Clear the Datastore.
         factory.clear();
 
         // Make sure entity is no longer present.
         Entity entityReadAfterClear = wrapper.read(key);
-        assertThat(entityReadAfterClear)
-                .isNull();
+        assertThat(entityReadAfterClear).isNull();
     }
 }

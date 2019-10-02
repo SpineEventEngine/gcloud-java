@@ -54,8 +54,7 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
             String host = datastore.getOptions()
                                    .getHost();
             String expectedHost = format(ADDRESS_FORMAT, DEFAULT_EMULATOR_PORT);
-            assertThat(host)
-                    .isEqualTo(expectedHost);
+            assertThat(host).isEqualTo(expectedHost);
         }
 
         @Test
@@ -66,8 +65,7 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
             String host = datastore.getOptions()
                                    .getHost();
             String expectedHost = format(ADDRESS_FORMAT, port);
-            assertThat(host)
-                    .isEqualTo(expectedHost);
+            assertThat(host).isEqualTo(expectedHost);
         }
 
         @Test
@@ -81,12 +79,10 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
             DatastoreOptions options = datastore.getOptions();
             String host = options.getHost();
             String expectedHost = format(ADDRESS_FORMAT, port);
-            assertThat(host)
-                    .isEqualTo(expectedHost);
+            assertThat(host).isEqualTo(expectedHost);
 
             String actualProjectId = options.getProjectId();
-            assertThat(actualProjectId)
-                    .isEqualTo(id);
+            assertThat(actualProjectId).isEqualTo(id);
         }
     }
 
@@ -103,8 +99,7 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
             Datastore datastore = TestDatastores.remote(SPINE_DEV_JSON);
             String projectId = datastore.getOptions()
                                         .getProjectId();
-            assertThat(projectId)
-                    .isEqualTo(PROJECT_ID);
+            assertThat(projectId).isEqualTo(PROJECT_ID);
         }
 
         @Test
@@ -114,8 +109,7 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
             Datastore datastore = TestDatastores.remote(serviceAccount);
             String projectId = datastore.getOptions()
                                         .getProjectId();
-            assertThat(projectId)
-                    .isEqualTo(PROJECT_ID);
+            assertThat(projectId).isEqualTo(PROJECT_ID);
         }
     }
 

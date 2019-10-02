@@ -49,8 +49,7 @@ class TestDatastoreWrapperTest {
         Entity entity = withKeyCreatedBy(wrapper);
         wrapper.createOrUpdate(entity);
 
-        assertThat(wrapper.waitedForConsistency())
-                .isTrue();
+        assertThat(wrapper.waitedForConsistency()).isTrue();
     }
 
     @Test
@@ -60,8 +59,7 @@ class TestDatastoreWrapperTest {
         Entity entity = withKeyCreatedBy(wrapper);
         wrapper.createOrUpdate(entity);
 
-        assertThat(wrapper.waitedForConsistency())
-                .isFalse();
+        assertThat(wrapper.waitedForConsistency()).isFalse();
     }
 
     @Test
@@ -77,15 +75,13 @@ class TestDatastoreWrapperTest {
 
         // Make sure the entity is read from the Datastore by key.
         Entity entityReadBeforeClear = wrapper.read(key);
-        assertThat(entityReadBeforeClear)
-                .isNotNull();
+        assertThat(entityReadBeforeClear).isNotNull();
 
         // Drop all data.
         wrapper.dropAllTables();
 
         // Make sure the entity is no longer present in the Datastore.
         Entity entityReadAfterClear = wrapper.read(key);
-        assertThat(entityReadAfterClear)
-                .isNull();
+        assertThat(entityReadAfterClear).isNull();
     }
 }
