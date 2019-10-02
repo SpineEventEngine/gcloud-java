@@ -17,9 +17,6 @@ before_install:
   # Decrypt the credentials file and copy it over to the destination.
   - openssl aes-256-cbc -K $encrypted_ebb86cbccb5d_key -iv $encrypted_ebb86cbccb5d_iv -in credentials.tar.enc -out credentials.tar -d
   - tar xvf credentials.tar
-  - mkdir ./datastore/src/test/resources
-  - cp ./spine-dev.json ./datastore/src/test/resources/spine-dev.json
-  - cp ./spine-dev.json ./testutil-gcloud/src/test/resources/spine-dev.json
   # Install the complete gcloud SDK to access the Datastore emulator.
   - ./scripts/install-gcloud.sh
   # Add the newly installed gcloud SDK to PATH overriding the default Travis version.
