@@ -56,12 +56,6 @@ public final class TestDatastores implements Logging {
 
     /**
      * The default project ID to use when running on a local Datastore emulator.
-     *
-     * <p>For most tests, it's okay to use this ID even if some other project ID was passed to the
-     * emulator via the {@code --project} switch.
-     *
-     * <p>If, for some reason, you need to specify a custom project ID, please use
-     * {@link #local(ProjectId, int)}.
      */
     private static final ProjectId DEFAULT_LOCAL_PROJECT_ID = ProjectId.of("test-project");
 
@@ -72,6 +66,13 @@ public final class TestDatastores implements Logging {
     /**
      * Creates a {@link Datastore} connected to the local Datastore emulator at
      * {@link #DEFAULT_EMULATOR_PORT}.
+     *
+     * <p>The {@linkplain #DEFAULT_LOCAL_PROJECT_ID default project ID} will be used. For most
+     * tests, it's okay to use this ID even if some other project ID was passed to the emulator via
+     * the {@code --project} switch.
+     *
+     * <p>If, for some reason, you need to specify a custom project ID, please use
+     * {@link #local(ProjectId, int)}.
      */
     public static Datastore local() {
         return local(DEFAULT_EMULATOR_PORT);
@@ -79,6 +80,13 @@ public final class TestDatastores implements Logging {
 
     /**
      * Creates a {@link Datastore} connected to the local Datastore emulator at the specified port.
+     *
+     * <p>The {@linkplain #DEFAULT_LOCAL_PROJECT_ID default project ID} will be used. For most
+     * tests, it's okay to use this ID even if some other project ID was passed to the emulator via
+     * the {@code --project} switch.
+     *
+     * <p>If, for some reason, you need to specify a custom project ID, please use
+     * {@link #local(ProjectId, int)}.
      */
     public static Datastore local(int port) {
         return local(DEFAULT_LOCAL_PROJECT_ID, port);
