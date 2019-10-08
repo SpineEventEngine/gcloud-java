@@ -432,6 +432,11 @@ public class DatastoreWrapper implements Logging {
         }
     }
 
+    public TransactionWrapper newTransaction() {
+        Transaction tx = datastore.newTransaction();
+        return new TransactionWrapper(tx);
+    }
+
     /**
      * Starts a transaction.
      *
