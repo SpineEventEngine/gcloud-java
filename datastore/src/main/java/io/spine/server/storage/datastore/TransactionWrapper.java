@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Transaction;
@@ -28,6 +29,9 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * A Cloud Datastore transaction wrapper.
+ */
 public final class TransactionWrapper implements AutoCloseable {
 
     private final Transaction tx;
@@ -36,23 +40,45 @@ public final class TransactionWrapper implements AutoCloseable {
         this.tx = checkNotNull(tx);
     }
 
+    /**
+     * Puts the given entity into the Datastore in the transaction.
+     */
     public void createOrUpdate(Entity entity) {
         tx.put(entity);
     }
 
+    /**
+     * Reads an entity from the Datastore in the transaction.
+     *
+     * @return the entity with the given key or {@code Optional.empty()} if such an entity does not
+     *         exist
+     */
     public Optional<Entity> read(Key key) {
         Entity entity = tx.get(key);
         return Optional.ofNullable(entity);
     }
 
+    /**
+     * Commits this transaction.
+     *
+     * @throws DatastoreException if the transaction is no longer active
+     */
     public void commit() {
         tx.commit();
     }
 
+    /**
+     * Rolls back this transaction.
+     *
+     * @throws DatastoreException if the transaction is no longer active
+     */
     public void rollback() {
         tx.rollback();
     }
 
+    /**
+     * Rolls back this transaction if it's still active.
+     */
     @Override
     public void close() {
         if (tx.isActive()) {
