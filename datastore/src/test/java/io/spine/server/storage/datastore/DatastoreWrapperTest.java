@@ -77,6 +77,7 @@ class DatastoreWrapperTest {
         wrapper.dropTable(NAMESPACE_HOLDER_KIND);
     }
 
+    @SuppressWarnings("deprecation") // To be deleted alongside with the tested API.
     @Nested
     class SingleTenant {
 

@@ -433,6 +433,17 @@ public class DatastoreWrapper implements Logging {
     }
 
     /**
+     * Starts a new database transaction.
+     *
+     * @return the new transaction
+     * @see TransactionWrapper
+     */
+    public final TransactionWrapper newTransaction() {
+        Transaction tx = datastore.newTransaction();
+        return new TransactionWrapper(tx);
+    }
+
+    /**
      * Starts a transaction.
      *
      * <p>After this method is called, all {@code Entity} modifications performed through this
@@ -443,7 +454,9 @@ public class DatastoreWrapper implements Logging {
      *         if a transaction is already started on this instance of
      *         {@code DatastoreWrapper}
      * @see #isTransactionActive()
+     * @deprecated Use {@link #newTransaction()} instead.
      */
+    @Deprecated
     public void startTransaction() throws IllegalStateException {
         checkState(!isTransactionActive(), NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction = datastore.newTransaction();
@@ -461,7 +474,9 @@ public class DatastoreWrapper implements Logging {
      *         if no transaction is started on this instance of
      *         {@code DatastoreWrapper}
      * @see #isTransactionActive()
+     * @deprecated Use {@link #newTransaction()} instead.
      */
+    @Deprecated
     public void commitTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.commit();
@@ -481,7 +496,9 @@ public class DatastoreWrapper implements Logging {
      *         if no transaction is active for the current
      *         instance of {@code DatastoreWrapper}
      * @see #isTransactionActive()
+     * @deprecated Use {@link #newTransaction()} instead.
      */
+    @Deprecated
     public void rollbackTransaction() throws IllegalStateException {
         checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
         activeTransaction.rollback();
@@ -492,7 +509,9 @@ public class DatastoreWrapper implements Logging {
      * Checks whether there is an active transaction on this instance of {@code DatastoreWrapper}.
      *
      * @return {@code true} if there is an active transaction, {@code false} otherwise
+     * @deprecated Use {@link #newTransaction()} instead.
      */
+    @Deprecated
     public boolean isTransactionActive() {
         return activeTransaction != null && activeTransaction.isActive();
     }

@@ -22,6 +22,7 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Value;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 
@@ -55,6 +56,7 @@ interface MessageColumn<M extends Message> {
      *         the message which field value is going to be set
      * @return the same instance of {@code builder} with the property filled
      */
+    @CanIgnoreReturnValue
     default Entity.Builder fill(Entity.Builder builder, M message) {
         Value<?> value = getter().apply(message);
         builder.set(columnName(), value);

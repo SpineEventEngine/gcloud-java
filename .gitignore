@@ -29,8 +29,6 @@ gcs-auth-key.json
 # They are stored in the encrypted file and are decrypted on the CI server only.
 
 # This file extracted form credentials.tar
-spine-dev*.json
-/datastore/src/test/resources/spine-dev.json
-/stackdriver-trace/src/test/resources/spine-dev.json
+**/spine-dev*.json
 
 package-lock.json
