@@ -17,12 +17,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 /**
  * This package contains Google Cloud Datastore implementation of the storages.
  *
  * @see io.spine.server.storage.AbstractStorage
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.storage.datastore;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;
