@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
@@ -58,6 +59,7 @@ abstract class RecordStorageBuilder<I,
     /**
      * Sets the type URL of the entity state, which is stored in the resulting storage.
      */
+    @CanIgnoreReturnValue
     public B setStateType(TypeUrl stateTypeUrl) {
         checkNotNull(stateTypeUrl);
         Descriptor descriptor = stateTypeUrl.toTypeName()
@@ -69,6 +71,7 @@ abstract class RecordStorageBuilder<I,
     /**
      * Assignts the ID class of the stored entities.
      */
+    @CanIgnoreReturnValue
     public B setIdClass(Class<I> idClass) {
         this.idClass = checkNotNull(idClass);
         return self();
@@ -77,6 +80,7 @@ abstract class RecordStorageBuilder<I,
     /**
      * Assigns the class of the stored entity.
      */
+    @CanIgnoreReturnValue
     public B setEntityClass(Class<? extends Entity<?, ?>> entityClass) {
         this.entityClass = checkNotNull(entityClass);
         return self();
@@ -90,6 +94,7 @@ abstract class RecordStorageBuilder<I,
      * {@linkplain #setEntityClass(Class) entity class} separately.
      */
     @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
+    @CanIgnoreReturnValue
     public B setModelClass(EntityClass<? extends Entity<I, ?>> modelClass) {
         TypeUrl stateType = modelClass.stateType();
         Class<I> idClass = (Class<I>) modelClass.idClass();
@@ -104,6 +109,7 @@ abstract class RecordStorageBuilder<I,
     /**
      * Sets the {@link io.spine.server.storage.datastore.DatastoreWrapper} to use in this storage.
      */
+    @CanIgnoreReturnValue
     public B setDatastore(DatastoreWrapper datastore) {
         this.datastore = checkNotNull(datastore);
         return self();
@@ -117,6 +123,7 @@ abstract class RecordStorageBuilder<I,
      *         {@link io.spine.server.storage.Storage#isMultitenant multitenant},
      *         {@code false} otherwise
      */
+    @CanIgnoreReturnValue
     public B setMultitenant(boolean multitenant) {
         this.multitenant = multitenant;
         return self();
@@ -126,6 +133,7 @@ abstract class RecordStorageBuilder<I,
      * Assigns the type registry of
      * the {@linkplain io.spine.server.entity.storage.EntityColumn entity columns}.
      */
+    @CanIgnoreReturnValue
     public B setColumnTypeRegistry(
             ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
