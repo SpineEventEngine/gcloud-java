@@ -32,12 +32,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.localDatastore;
-import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.stream.Collectors.toList;
 
 @DisplayName("`TransactionWrapper` should")
 class TransactionWrapperTest {
@@ -48,7 +53,8 @@ class TransactionWrapperTest {
     @BeforeEach
     void setUp() {
         datastore = TestDatastoreWrapper.wrap(localDatastore(), false);
-        keyFactory = datastore.keyFactory(Kind.of(TypeUrl.of(Empty.class).value()));
+        keyFactory = datastore.keyFactory(Kind.of(TypeUrl.of(Empty.class)
+                                                         .value()));
     }
 
     @AfterEach
@@ -165,5 +171,31 @@ class TransactionWrapperTest {
         Entity readEntity = datastore.read(key);
         assertThat(readEntity)
                 .isNotNull();
+    }
+
+    @Test
+    @DisplayName("run many transactions at a time")
+    void runManyAtATime() throws InterruptedException {
+        int workerCount = 1117;
+        ExecutorService service = newFixedThreadPool(workerCount);
+        List<Key> keys = Stream.generate(() -> keyFactory.newKey(newUuid()))
+                               .limit(workerCount)
+                               .collect(toList());
+        keys.stream()
+            .map(key -> Entity
+                    .newBuilder(key)
+                    .set("a", newUuid())
+                    .build())
+            .forEach(entity -> service.execute(() -> {
+                TransactionWrapper tx = datastore.newTransaction();
+                tx.createOrUpdate(entity);
+                tx.commit();
+            }));
+        service.awaitTermination(5, SECONDS);
+        for (Key key : keys) {
+            Entity read = datastore.read(key);
+            assertThat(read)
+                    .isNotNull();
+        }
     }
 }
