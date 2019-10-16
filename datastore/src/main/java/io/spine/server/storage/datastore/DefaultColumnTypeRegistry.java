@@ -20,6 +20,8 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.Blob;
+import com.google.cloud.datastore.BlobValue;
 import com.google.cloud.datastore.BooleanValue;
 import com.google.cloud.datastore.DoubleValue;
 import com.google.cloud.datastore.LongValue;
@@ -27,6 +29,7 @@ import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
 import com.google.cloud.datastore.Value;
 import com.google.common.collect.ImmutableSortedMap;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
@@ -80,6 +83,7 @@ final class DefaultColumnTypeRegistry implements ColumnTypeRegistry {
         policies.put(Double.class, new DefaultDoublePersistenceStrategy());
         policies.put(Float.class, new DefaultFloatPersistenceStrategy());
         policies.put(Boolean.class, new DefaultBooleanPersistenceStrategy());
+        policies.put(ByteString.class, new DefaultByteStringPersistenceStrategy());
         policies.put(Timestamp.class, new DefaultTimestampPersistenceStrategy());
         policies.put(Version.class, new DefaultVersionPersistenceStrategy());
         policies.put(Enum.class, new DefaultEnumPersistenceStrategy());
@@ -158,6 +162,16 @@ final class DefaultColumnTypeRegistry implements ColumnTypeRegistry {
         @Override
         public Value<?> apply(Boolean aBoolean) {
             return BooleanValue.of(aBoolean);
+        }
+    }
+
+    private static class DefaultByteStringPersistenceStrategy
+            implements PersistenceStrategy<ByteString> {
+
+        @Override
+        public Value<?> apply(ByteString bytes) {
+            Blob blob = Blob.copyFrom(bytes.asReadOnlyByteBuffer());
+            return BlobValue.of(blob);
         }
     }
 
