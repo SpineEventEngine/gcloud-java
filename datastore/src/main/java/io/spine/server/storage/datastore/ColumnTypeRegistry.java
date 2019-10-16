@@ -18,19 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.storage.datastore;
 
-import io.spine.annotation.SPI;
+public interface ColumnTypeRegistry {
 
-/**
- * A base for implementing {@link io.spine.server.entity.storage.ColumnType ColumnType} interface
- * for Datastore storage regardless the type conversion.
- */
-@SPI
-public abstract class SimpleDatastoreColumnType<T> extends AbstractDatastoreColumnType<T, T> {
-
-    @Override
-    public T convertColumnValue(T fieldValue) {
-        return fieldValue;
-    }
+    <T> PersistenceStrategy<T> persistenceStrategyOf(Class<T> clazz);
 }

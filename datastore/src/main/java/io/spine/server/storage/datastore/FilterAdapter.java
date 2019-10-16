@@ -20,14 +20,11 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.NullValue;
 import com.google.cloud.datastore.Value;
 import com.google.protobuf.Any;
 import io.spine.client.Filter;
 import io.spine.protobuf.TypeConverter;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
-import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.storage.datastore.type.DatastoreColumnType;
+import io.spine.server.entity.storage.Column;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -37,17 +34,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class FilterAdapter {
 
-    private final ColumnTypeRegistry<? extends DatastoreColumnType> registry;
+    private final ColumnTypeRegistry registry;
 
     /**
      * Creates a new instance of {@code FilterAdapter} on top of the given
      * {@link ColumnTypeRegistry}.
      */
-    static FilterAdapter of(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
+    static FilterAdapter of(ColumnTypeRegistry registry) {
         return new FilterAdapter(registry);
     }
 
-    private FilterAdapter(ColumnTypeRegistry<? extends DatastoreColumnType> registry) {
+    private FilterAdapter(ColumnTypeRegistry registry) {
         this.registry = registry;
     }
 
@@ -56,29 +53,24 @@ final class FilterAdapter {
      * the Datastore {@link Value}.
      *
      * @param column
-     *         the {@link EntityColumn} targeted by the given filter
+     *         the {@link Column} targeted by the given filter
      * @param columnFilter
      *         the filter
      * @return new instance of {@link Value} representing the value of the given filter
      */
-    Value<?> toValue(EntityColumn column, Filter columnFilter) {
+    Value<?> toValue(Column column, Filter columnFilter) {
         checkNotNull(column);
         checkNotNull(columnFilter);
-
-        DatastoreColumnType type = registry.get(column);
-        checkArgument(type != null, "Column of unknown type: %s.", column);
 
         Any filterValue = columnFilter.getValue();
         Class<?> columnClass = column.type();
         Object filterValueUnpacked = TypeConverter.toObject(filterValue, columnClass);
-        Object columnValue = column.toPersistedValue(filterValueUnpacked);
 
-        if (columnValue == null) {
-            return NullValue.of();
-        }
+        PersistenceStrategy<?> strategy =
+                registry.persistenceStrategyOf(filterValueUnpacked.getClass());
+        checkArgument(strategy != null, "Column of unknown type: %s.", column);
 
-        @SuppressWarnings("unchecked") // Concrete type is unknown on compile time.
-        Value<?> result = type.toValue(type.convertColumnValue(columnValue));
+        Value<?> result = strategy.applyTo(filterValueUnpacked);
         return result;
     }
 }

@@ -31,7 +31,6 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
@@ -42,8 +41,6 @@ import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.tenant.NsConverterFactory;
 import io.spine.server.storage.datastore.tenant.PrefixedNsConverterFactory;
-import io.spine.server.storage.datastore.type.DatastoreColumnType;
-import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.tenant.TenantIndex;
 
 import java.util.Map;
@@ -86,7 +83,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     private final Map<Class<? extends Storage>, DatastoreWrapper> sysWrappers = newConcurrentMap();
 
-    private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
+    private final ColumnTypeRegistry typeRegistry;
 
     private final NsConverterFactory converterFactory;
 
@@ -268,7 +265,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     public static class Builder {
 
         private Datastore datastore;
-        private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
+        private ColumnTypeRegistry typeRegistry;
         private NamespaceConverter namespaceConverter;
         private NsConverterFactory converterFactory;
 
@@ -298,16 +295,14 @@ public class DatastoreStorageFactory implements StorageFactory {
         /**
          * Sets a {@link ColumnTypeRegistry} for handling the Entity Columns.
          *
-         * <p>Default value is {@link DatastoreTypeRegistryFactory#defaultInstance()}.
+         * <p>Default value is {@link DefaultColumnTypeRegistry}.
          *
          * @param typeRegistry
-         *         the type registry containing all the required
-         *         {@linkplain io.spine.server.entity.storage.ColumnType column types}
-         *         to handle the existing Entity Columns
+         *         the type registry containing all the supported
+         *         {@linkplain io.spine.server.entity.storage.Column column} types
          * @return self for method chaining
          */
-        public Builder
-        setTypeRegistry(ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
+        public Builder setTypeRegistry(ColumnTypeRegistry typeRegistry) {
             this.typeRegistry = checkNotNull(typeRegistry);
             return this;
         }
@@ -338,7 +333,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         public DatastoreStorageFactory build() {
             checkNotNull(datastore);
             if (typeRegistry == null) {
-                typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
+                typeRegistry = new DefaultColumnTypeRegistry();
             }
             if (namespaceConverter == null) {
                 converterFactory = NsConverterFactory.defaults();

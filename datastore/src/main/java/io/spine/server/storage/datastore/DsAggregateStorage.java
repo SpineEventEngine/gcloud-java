@@ -116,7 +116,7 @@ public class DsAggregateStorage<I> extends AggregateStorage<I> {
         @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
                 Class<I> idClass = (Class<I>) modelClass.idClass();
         this.idClass = idClass;
-        this.stateTypeName = modelClass.stateType()
+        this.stateTypeName = modelClass.stateTypeUrl()
                                        .toTypeName();
     }
 

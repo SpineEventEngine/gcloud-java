@@ -23,20 +23,18 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Value;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Functions;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -50,7 +48,6 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.storage.ColumnRecords.feedColumnsTo;
 import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryParams;
 import static io.spine.server.storage.datastore.Entities.RECORD_TYPE_URL;
 import static io.spine.server.storage.datastore.Entities.builderFromMessage;
@@ -72,7 +69,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final DsLookupByIds<I> idLookup;
     private final DsLookupByQueries queryLookup;
 
-    private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
+    private final ColumnTypeRegistry columnTypeRegistry;
     private final FilterAdapter columnFilterAdapter;
 
     /**
@@ -91,7 +88,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      */
     protected DsRecordStorage(
             RecordStorageBuilder<I, ? extends RecordStorage, ? extends RecordStorageBuilder> b) {
-        super(b.isMultitenant(), b.getEntityClass());
+        super(b.getEntityClass(), b.isMultitenant());
         this.typeUrl = TypeUrl.from(b.getDescriptor());
         this.idClass = checkNotNull(b.getIdClass());
         this.datastore = b.getDatastore();
@@ -258,7 +255,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     }
 
     protected Entity entityRecordToEntity(I id, EntityRecordWithColumns record) {
-        EntityRecord entityRecord = record.getRecord();
+        EntityRecord entityRecord = record.record();
         Key key = datastore.keyFor(kindFrom(entityRecord), ofEntityId(id));
         Entity.Builder entity = builderFromMessage(entityRecord, key);
 
@@ -270,9 +267,13 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
 
     private void populateFromStorageFields(BaseEntity.Builder<Key, Entity.Builder> entity,
                                            EntityRecordWithColumns record) {
-        if (record.hasColumns()) {
-            feedColumnsTo(entity, record, columnTypeRegistry, Functions.identity());
-        }
+        record.columnNames().forEach(columnName -> {
+            Object columnValue = record.columnValue(columnName);
+            PersistenceStrategy<?> strategy =
+                    columnTypeRegistry.persistenceStrategyOf(columnValue.getClass());
+            Value<?> value = strategy.applyTo(columnValue);
+            entity.set(columnName.value(), value);
+        });
     }
 
     @Override

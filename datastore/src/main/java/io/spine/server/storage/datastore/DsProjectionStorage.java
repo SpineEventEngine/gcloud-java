@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Iterator;
 import java.util.Optional;
 
+import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static io.spine.validate.Validate.isDefault;
 
 /**
@@ -51,7 +52,7 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
                                   DsRecordStorage<I> recordStorage,
                                   DsPropertyStorage propertyStorage,
                                   boolean multitenant) {
-        super(multitenant);
+        super(asProjectionClass(projectionClass), multitenant);
         this.recordStorage = recordStorage;
         this.propertyStorage = propertyStorage;
         this.lastTimestampId =
