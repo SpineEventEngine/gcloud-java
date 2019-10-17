@@ -20,10 +20,12 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.Value;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.entity.storage.TypeRegistry;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 
@@ -45,7 +47,7 @@ abstract class RecordStorageBuilder<I,
     private Descriptor descriptor;
     private DatastoreWrapper datastore;
     private boolean multitenant;
-    private ColumnTypeRegistry columnTypeRegistry;
+    private TypeRegistry<Value<?>> columnTypeRegistry;
     private Class<I> idClass;
     private EntityClass<?> entityClass;
 
@@ -134,7 +136,7 @@ abstract class RecordStorageBuilder<I,
      * the {@linkplain io.spine.server.entity.storage.Column entity columns}.
      */
     @CanIgnoreReturnValue
-    public B setColumnTypeRegistry(ColumnTypeRegistry columnTypeRegistry) {
+    public B setColumnTypeRegistry(TypeRegistry<Value<?>> columnTypeRegistry) {
         this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
         return self();
     }
@@ -165,7 +167,7 @@ abstract class RecordStorageBuilder<I,
      * Obtains the type registry of
      * the {@linkplain io.spine.server.entity.storage.Column entity columns}.
      */
-    public ColumnTypeRegistry getColumnTypeRegistry() {
+    public TypeRegistry<Value<?>> getColumnTypeRegistry() {
         return columnTypeRegistry;
     }
 

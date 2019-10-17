@@ -25,26 +25,28 @@ import com.google.protobuf.Any;
 import io.spine.client.Filter;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.PersistenceStrategy;
+import io.spine.server.entity.storage.TypeRegistry;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A {@link ColumnTypeRegistry} based {@link Filter} to {@link Value} adapter.
+ * A {@link TypeRegistry} based {@link Filter} to {@link Value} adapter.
  */
 final class FilterAdapter {
 
-    private final ColumnTypeRegistry registry;
+    private final TypeRegistry<Value<?>> registry;
 
     /**
      * Creates a new instance of {@code FilterAdapter} on top of the given
-     * {@link ColumnTypeRegistry}.
+     * {@link TypeRegistry}.
      */
-    static FilterAdapter of(ColumnTypeRegistry registry) {
+    static FilterAdapter of(TypeRegistry<Value<?>> registry) {
         return new FilterAdapter(registry);
     }
 
-    private FilterAdapter(ColumnTypeRegistry registry) {
+    private FilterAdapter(TypeRegistry<Value<?>> registry) {
         this.registry = registry;
     }
 
@@ -66,7 +68,7 @@ final class FilterAdapter {
         Class<?> columnClass = column.type();
         Object filterValueUnpacked = TypeConverter.toObject(filterValue, columnClass);
 
-        PersistenceStrategy<?> strategy =
+        PersistenceStrategy<?, ? extends Value<?>> strategy =
                 registry.persistenceStrategyOf(filterValueUnpacked.getClass());
         checkArgument(strategy != null, "Column of unknown type: %s.", column);
 

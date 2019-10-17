@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Key;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -36,6 +37,7 @@ import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -63,13 +65,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.common.truth.Truth.assertThat;
@@ -226,7 +228,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
                 .vBuild();
         DsRecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
-        Collection<String> columns = recordWithColumns.getColumnNames();
+        ImmutableSet<String> columns = recordWithColumns.columnNames()
+                                                        .stream()
+                                                        .map(ColumnName::value)
+                                                        .collect(toImmutableSet());
         assertNotNull(columns);
 
         IterableSubject assertColumns = assertThat(columns);

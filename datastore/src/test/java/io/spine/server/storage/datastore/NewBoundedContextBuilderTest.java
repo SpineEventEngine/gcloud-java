@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.defaultInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -60,7 +59,6 @@ class NewBoundedContextBuilderTest {
         DatastoreStorageFactory result = DatastoreStorageFactory
                 .newBuilder()
                 .setDatastore(givenDatastore())
-                .setTypeRegistry(defaultInstance())
                 .build();
         return result;
     }

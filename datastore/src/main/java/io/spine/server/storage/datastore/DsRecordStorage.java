@@ -34,6 +34,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
+import io.spine.server.entity.storage.TypeRegistry;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -69,7 +70,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final DsLookupByIds<I> idLookup;
     private final DsLookupByQueries queryLookup;
 
-    private final ColumnTypeRegistry columnTypeRegistry;
+    private final TypeRegistry<Value<?>> typeRegistry;
     private final FilterAdapter columnFilterAdapter;
 
     /**
@@ -92,8 +93,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.typeUrl = TypeUrl.from(b.getDescriptor());
         this.idClass = checkNotNull(b.getIdClass());
         this.datastore = b.getDatastore();
-        this.columnTypeRegistry = checkNotNull(b.getColumnTypeRegistry());
-        this.columnFilterAdapter = FilterAdapter.of(this.columnTypeRegistry);
+        this.typeRegistry = checkNotNull(b.getColumnTypeRegistry());
+        this.columnFilterAdapter = FilterAdapter.of(this.typeRegistry);
         this.idLookup = new DsLookupByIds<>(this.datastore, this.typeUrl);
         this.queryLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
                                                  this.columnFilterAdapter);
@@ -268,11 +269,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private void populateFromStorageFields(BaseEntity.Builder<Key, Entity.Builder> entity,
                                            EntityRecordWithColumns record) {
         record.columnNames().forEach(columnName -> {
-            Object columnValue = record.columnValue(columnName);
-            PersistenceStrategy<?> strategy =
-                    columnTypeRegistry.persistenceStrategyOf(columnValue.getClass());
-            Value<?> value = strategy.applyTo(columnValue);
-            entity.set(columnName.value(), value);
+            Value<?> columnValue = record.columnValue(columnName, typeRegistry);
+            entity.set(columnName.value(), columnValue);
         });
     }
 
