@@ -46,8 +46,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.server.storage.datastore.TestDatastores.local;
 import static io.spine.testing.server.storage.datastore.TestDatastores.defaultLocalProjectId;
+import static io.spine.testing.server.storage.datastore.TestDatastores.local;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -106,7 +106,7 @@ class DatastoreStorageFactoryTest {
         DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                                  .setDatastore(datastore)
                                                                  .build();
-        ColumnTypeRegistry defaultRegistry = factory.getTypeRegistry();
+        ColumnTypeRegistry defaultRegistry = factory.columnConversionRules();
         assertNotNull(defaultRegistry);
         assertSame(DatastoreTypeRegistryFactory.defaultInstance(), defaultRegistry);
     }

@@ -34,60 +34,57 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
-import io.spine.server.entity.storage.AbstractTypeRegistry;
-import io.spine.server.entity.storage.PersistenceStrategy;
-import io.spine.server.entity.storage.PersistenceStrategyOfNull;
+import io.spine.server.entity.storage.AbstractColumnConversionRules;
+import io.spine.server.entity.storage.ConversionRule;
 import io.spine.string.Stringifiers;
-
-import java.util.function.Supplier;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 
 /**
  * Non-{@code final}, implement to ..., maybe {@link io.spine.annotation.SPI}.
  */
-public class DsTypeRegistry extends AbstractTypeRegistry<Value<?>> {
+public class DsColumnConversionRules extends AbstractColumnConversionRules<Value<?>> {
 
     @Override
     protected void
-    setupCustomStrategies(
-            ImmutableMap.Builder<Class<?>, Supplier<PersistenceStrategy<?, ? extends Value<?>>>> builder) {
-        builder.put(Timestamp.class, DsTypeRegistry::timestampPersistenceStrategy);
-        builder.put(Version.class, DsTypeRegistry::versionPersistenceStrategy);
+    setupCustomRules(
+            ImmutableMap.Builder<Class<?>, ConversionRule<?, ? extends Value<?>>> builder) {
+        builder.put(Timestamp.class, ofTimestamp());
+        builder.put(Version.class, ofVersion());
     }
 
     @Override
-    protected PersistenceStrategy<String, StringValue> stringPersistenceStrategy() {
+    protected ConversionRule<String, StringValue> ofString() {
         return StringValue::of;
     }
 
     @Override
-    protected PersistenceStrategy<Integer, LongValue> integerPersistenceStrategy() {
+    protected ConversionRule<Integer, LongValue> ofInteger() {
         return LongValue::of;
     }
 
     @Override
-    protected PersistenceStrategy<Long, LongValue> longPersistenceStrategy() {
+    protected ConversionRule<Long, LongValue> ofLong() {
         return LongValue::of;
     }
 
     @Override
-    protected PersistenceStrategy<Float, DoubleValue> floatPersistenceStrategy() {
+    protected ConversionRule<Float, DoubleValue> ofFloat() {
         return DoubleValue::of;
     }
 
     @Override
-    protected PersistenceStrategy<Double, DoubleValue> doublePersistenceStrategy() {
+    protected ConversionRule<Double, DoubleValue> ofDouble() {
         return DoubleValue::of;
     }
 
     @Override
-    protected PersistenceStrategy<Boolean, BooleanValue> booleanPersistenceStrategy() {
+    protected ConversionRule<Boolean, BooleanValue> ofBoolean() {
         return BooleanValue::of;
     }
 
     @Override
-    protected PersistenceStrategy<ByteString, BlobValue> byteStringPersistenceStrategy() {
+    protected ConversionRule<ByteString, BlobValue> ofByteString() {
         return bytes -> {
             Blob blob = Blob.copyFrom(bytes.asReadOnlyByteBuffer());
             return BlobValue.of(blob);
@@ -95,12 +92,12 @@ public class DsTypeRegistry extends AbstractTypeRegistry<Value<?>> {
     }
 
     @Override
-    protected PersistenceStrategy<Enum<?>, LongValue> enumPersistenceStrategy() {
+    protected ConversionRule<Enum<?>, LongValue> ofEnum() {
         return anEnum -> LongValue.of(anEnum.ordinal());
     }
 
     @Override
-    protected PersistenceStrategy<Message, StringValue> messagePersistenceStrategy() {
+    protected ConversionRule<Message, StringValue> ofMessage() {
         return msg -> {
             String str = Stringifiers.toString(msg);
             return StringValue.of(str);
@@ -108,17 +105,17 @@ public class DsTypeRegistry extends AbstractTypeRegistry<Value<?>> {
     }
 
     @Override
-    public PersistenceStrategyOfNull<NullValue> persistenceStrategyOfNull() {
-        return NullValue::of;
+    public ConversionRule<?, ? extends Value<?>> ofNull() {
+        return o -> NullValue.of();
     }
 
-    private static PersistenceStrategy<Timestamp, TimestampValue> timestampPersistenceStrategy() {
+    private static ConversionRule<Timestamp, TimestampValue> ofTimestamp() {
         return timestamp -> TimestampValue.of(
                 ofTimeSecondsAndNanos(timestamp.getSeconds(), timestamp.getNanos())
         );
     }
 
-    private static PersistenceStrategy<Version, LongValue> versionPersistenceStrategy() {
+    private static ConversionRule<Version, LongValue> ofVersion() {
         return version -> LongValue.of(version.getNumber());
     }
 }

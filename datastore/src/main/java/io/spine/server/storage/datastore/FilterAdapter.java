@@ -25,29 +25,25 @@ import com.google.protobuf.Any;
 import io.spine.client.Filter;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.PersistenceStrategy;
-import io.spine.server.entity.storage.TypeRegistry;
+import io.spine.server.entity.storage.ColumnConversionRules;
+import io.spine.server.entity.storage.ConversionRule;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A {@link TypeRegistry} based {@link Filter} to {@link Value} adapter.
+ * A {@link Filter} to {@link Value} adapter based on {@link ColumnConversionRules}.
  */
 final class FilterAdapter {
 
-    private final TypeRegistry<Value<?>> registry;
+    private final ColumnConversionRules<Value<?>> conversionRules;
 
-    /**
-     * Creates a new instance of {@code FilterAdapter} on top of the given
-     * {@link TypeRegistry}.
-     */
-    static FilterAdapter of(TypeRegistry<Value<?>> registry) {
-        return new FilterAdapter(registry);
+    static FilterAdapter of(ColumnConversionRules<Value<?>> conversionRules) {
+        return new FilterAdapter(conversionRules);
     }
 
-    private FilterAdapter(TypeRegistry<Value<?>> registry) {
-        this.registry = registry;
+    private FilterAdapter(ColumnConversionRules<Value<?>> conversionRules) {
+        this.conversionRules = conversionRules;
     }
 
     /**
@@ -68,8 +64,8 @@ final class FilterAdapter {
         Class<?> columnClass = column.type();
         Object filterValueUnpacked = TypeConverter.toObject(filterValue, columnClass);
 
-        PersistenceStrategy<?, ? extends Value<?>> strategy =
-                registry.persistenceStrategyOf(filterValueUnpacked.getClass());
+        ConversionRule<?, ? extends Value<?>> strategy =
+                conversionRules.of(filterValueUnpacked.getClass());
         checkArgument(strategy != null, "Column of unknown type: %s.", column);
 
         Value<?> result = strategy.applyTo(filterValueUnpacked);

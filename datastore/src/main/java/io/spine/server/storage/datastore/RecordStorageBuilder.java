@@ -25,7 +25,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.TypeRegistry;
+import io.spine.server.entity.storage.ColumnConversionRules;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 
@@ -47,7 +47,7 @@ abstract class RecordStorageBuilder<I,
     private Descriptor descriptor;
     private DatastoreWrapper datastore;
     private boolean multitenant;
-    private TypeRegistry<Value<?>> columnTypeRegistry;
+    private ColumnConversionRules<Value<?>> columnConversionRules;
     private Class<I> idClass;
     private EntityClass<?> entityClass;
 
@@ -132,12 +132,12 @@ abstract class RecordStorageBuilder<I,
     }
 
     /**
-     * Assigns the type registry of
+     * Assigns the column conversion rules of
      * the {@linkplain io.spine.server.entity.storage.Column entity columns}.
      */
     @CanIgnoreReturnValue
-    public B setColumnTypeRegistry(TypeRegistry<Value<?>> columnTypeRegistry) {
-        this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
+    public B setColumnConversionRules(ColumnConversionRules<Value<?>> columnConversionRules) {
+        this.columnConversionRules = checkNotNull(columnConversionRules);
         return self();
     }
 
@@ -164,11 +164,10 @@ abstract class RecordStorageBuilder<I,
     }
 
     /**
-     * Obtains the type registry of
-     * the {@linkplain io.spine.server.entity.storage.Column entity columns}.
+     * Obtains the column conversion rules of the storage.
      */
-    public TypeRegistry<Value<?>> getColumnTypeRegistry() {
-        return columnTypeRegistry;
+    public ColumnConversionRules<Value<?>> getColumnConversionRules() {
+        return columnConversionRules;
     }
 
     /**
@@ -188,7 +187,7 @@ abstract class RecordStorageBuilder<I,
     final void checkRequiredFields() {
         checkNotNull(descriptor, "State descriptor is not set.");
         checkNotNull(datastore, "Datastore is not set.");
-        checkNotNull(columnTypeRegistry, "Column type registry is not set.");
+        checkNotNull(columnConversionRules, "Column conversion rules are not set.");
     }
 
     abstract B self();

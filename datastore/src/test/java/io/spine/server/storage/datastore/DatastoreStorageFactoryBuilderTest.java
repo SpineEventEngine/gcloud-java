@@ -73,7 +73,7 @@ class DatastoreStorageFactoryBuilderTest {
                 .newBuilder()
                 .setDatastore(datastore())
                 .build();
-        ColumnTypeRegistry registry = factory.getTypeRegistry();
+        ColumnTypeRegistry registry = factory.columnConversionRules();
         assertNotNull(registry);
     }
 
@@ -83,11 +83,11 @@ class DatastoreStorageFactoryBuilderTest {
         DatastoreStorageFactory factory = DatastoreStorageFactory
                 .newBuilder()
                 .setDatastore(datastore())
-                .setTypeRegistry(predefinedValuesAnd()
+                .setColumnConversionRules(predefinedValuesAnd()
                                          .put(Byte.class, new ByteColumnType())
                                          .build())
                 .build();
-        ColumnTypeRegistry<?> registry = factory.getTypeRegistry();
+        ColumnTypeRegistry<?> registry = factory.columnConversionRules();
         assertNotNull(registry);
         ColumnType type = registry.get(byteColumn());
         assertNotNull(type);

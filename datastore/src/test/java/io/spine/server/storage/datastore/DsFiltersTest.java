@@ -35,6 +35,7 @@ import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.CompositeQueryParameter;
+import io.spine.server.storage.datastore.type.DsColumnConversionRules;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -146,7 +147,7 @@ class DsFiltersTest {
                 createParams(versionFilters, EITHER),
                 createParams(lifecycleFilters, EITHER)
         );
-        FilterAdapter columnFilterAdapter = FilterAdapter.of(new DefaultColumnTypeRegistry());
+        FilterAdapter columnFilterAdapter = FilterAdapter.of(new DsColumnConversionRules());
         Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
         assertThat(filters).containsExactly(
                 and(ge(ID_STRING_COLUMN_NAME.value(), greaterBoundDefiner),
@@ -169,7 +170,7 @@ class DsFiltersTest {
     void testEmptyParameters() {
         Collection<CompositeQueryParameter> parameters = Collections.emptySet();
         Collection<StructuredQuery.Filter> filters =
-                fromParams(parameters, FilterAdapter.of(new DefaultColumnTypeRegistry()));
+                fromParams(parameters, FilterAdapter.of(new DsColumnConversionRules()));
         IterableSubject assertFilters = assertThat(filters);
         assertFilters.isNotNull();
         assertFilters.isEmpty();

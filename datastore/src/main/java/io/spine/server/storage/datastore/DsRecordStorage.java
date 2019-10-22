@@ -31,10 +31,10 @@ import com.google.protobuf.Message;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.ColumnConversionRules;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
-import io.spine.server.entity.storage.TypeRegistry;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -70,7 +70,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final DsLookupByIds<I> idLookup;
     private final DsLookupByQueries queryLookup;
 
-    private final TypeRegistry<Value<?>> typeRegistry;
+    private final ColumnConversionRules<Value<?>> columnConversionRules;
     private final FilterAdapter columnFilterAdapter;
 
     /**
@@ -93,8 +93,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.typeUrl = TypeUrl.from(b.getDescriptor());
         this.idClass = checkNotNull(b.getIdClass());
         this.datastore = b.getDatastore();
-        this.typeRegistry = checkNotNull(b.getColumnTypeRegistry());
-        this.columnFilterAdapter = FilterAdapter.of(this.typeRegistry);
+        this.columnConversionRules = checkNotNull(b.getColumnConversionRules());
+        this.columnFilterAdapter = FilterAdapter.of(this.columnConversionRules);
         this.idLookup = new DsLookupByIds<>(this.datastore, this.typeUrl);
         this.queryLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
                                                  this.columnFilterAdapter);
@@ -269,7 +269,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private void populateFromStorageFields(BaseEntity.Builder<Key, Entity.Builder> entity,
                                            EntityRecordWithColumns record) {
         record.columnNames().forEach(columnName -> {
-            Value<?> columnValue = record.columnValue(columnName, typeRegistry);
+            Value<?> columnValue = record.columnValue(columnName, columnConversionRules);
             entity.set(columnName.value(), columnValue);
         });
     }
