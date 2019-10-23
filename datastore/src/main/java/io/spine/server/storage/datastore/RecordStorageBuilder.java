@@ -25,7 +25,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.ColumnConversionRules;
+import io.spine.server.entity.storage.ColumnStorageRules;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 
@@ -47,7 +47,7 @@ abstract class RecordStorageBuilder<I,
     private Descriptor descriptor;
     private DatastoreWrapper datastore;
     private boolean multitenant;
-    private ColumnConversionRules<Value<?>> columnConversionRules;
+    private ColumnStorageRules<Value<?>> columnStorageRules;
     private Class<I> idClass;
     private EntityClass<?> entityClass;
 
@@ -132,12 +132,12 @@ abstract class RecordStorageBuilder<I,
     }
 
     /**
-     * Assigns the column conversion rules of
+     * Assigns the column storage rules of
      * the {@linkplain io.spine.server.entity.storage.Column entity columns}.
      */
     @CanIgnoreReturnValue
-    public B setColumnConversionRules(ColumnConversionRules<Value<?>> columnConversionRules) {
-        this.columnConversionRules = checkNotNull(columnConversionRules);
+    public B setColumnStorageRules(ColumnStorageRules<Value<?>> columnStorageRules) {
+        this.columnStorageRules = checkNotNull(columnStorageRules);
         return self();
     }
 
@@ -164,10 +164,10 @@ abstract class RecordStorageBuilder<I,
     }
 
     /**
-     * Obtains the column conversion rules of the storage.
+     * Obtains the column storage rules of the storage.
      */
-    public ColumnConversionRules<Value<?>> getColumnConversionRules() {
-        return columnConversionRules;
+    public ColumnStorageRules<Value<?>> getColumnStorageRules() {
+        return columnStorageRules;
     }
 
     /**
@@ -187,7 +187,7 @@ abstract class RecordStorageBuilder<I,
     final void checkRequiredFields() {
         checkNotNull(descriptor, "State descriptor is not set.");
         checkNotNull(datastore, "Datastore is not set.");
-        checkNotNull(columnConversionRules, "Column conversion rules are not set.");
+        checkNotNull(columnStorageRules, "Column storage rules are not set.");
     }
 
     abstract B self();

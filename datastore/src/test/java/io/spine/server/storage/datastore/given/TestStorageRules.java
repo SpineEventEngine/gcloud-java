@@ -18,39 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-syntax = "proto3";
+package io.spine.server.storage.datastore.given;
 
-package spine.test.datastore;
+import com.google.cloud.datastore.NullValue;
+import com.google.cloud.datastore.StringValue;
+import com.google.cloud.datastore.Value;
+import io.spine.server.entity.storage.ColumnStorageRule;
+import io.spine.server.entity.storage.ColumnStorageRules;
+import io.spine.string.Stringifiers;
 
-import "spine/options.proto";
+public final class TestStorageRules implements ColumnStorageRules<Value<?>> {
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.datastore";
-option java_outer_classname = "TestDatastoreEntityProto";
-option java_multiple_files = true;
+    @Override
+    public ColumnStorageRule<?, ? extends Value<?>> of(Class<?> type) {
+        return o -> StringValue.of(Stringifiers.toString(o));
+    }
 
-import "google/protobuf/timestamp.proto";
-
-message CollegeId {
-    string value = 1 [(required) = true];
-}
-
-message College {
-    option (entity).kind = PROJECTION;
-
-    CollegeId id = 1 [(required) = true];
-
-    string name = 2 [(column) = true];
-
-    int32 student_count = 3 [(column) = true];
-
-    google.protobuf.Timestamp admission_deadline = 4 [(column) = true];
-
-    double passing_grade = 5 [(column) = true];
-
-    bool state_sponsored = 6 [(column) = true];
-
-    google.protobuf.Timestamp created = 7 [(column) = true];
-
-    repeated string subjects = 8;
+    @Override
+    public ColumnStorageRule<?, ? extends Value<?>> ofNull() {
+        return o -> NullValue.of();
+    }
 }

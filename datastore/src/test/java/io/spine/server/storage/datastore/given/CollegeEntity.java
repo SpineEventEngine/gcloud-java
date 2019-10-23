@@ -23,16 +23,16 @@ package io.spine.server.storage.datastore.given;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.entity.given.Given;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
 import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import io.spine.test.datastore.CollegeWithColumns;
 
 import static io.spine.base.Time.currentTime;
 
 public class CollegeEntity
-        extends Projection<CollegeId, College, College.Builder> {
+        extends Projection<CollegeId, College, College.Builder>
+        implements CollegeWithColumns {
 
     private final Timestamp creationTime;
 
@@ -50,44 +50,43 @@ public class CollegeEntity
                     .build();
     }
 
-    @Column
+    @Override
     public String getName() {
         return state().getName();
     }
 
-    @Column
-    public @Nullable Integer getStudentCount() {
-        int count = state().getStudentCount();
-        return count == 0 ? null : count;
+    @Override
+    public int getStudentCount() {
+        return state().getStudentCount();
     }
 
-    @Column
+    @Override
     public Timestamp getAdmissionDeadline() {
         return state().getAdmissionDeadline();
     }
 
-    @Column
+    @Override
     public double getPassingGrade() {
         return state().getPassingGrade();
     }
 
-    @Column
+    @Override
     public boolean getStateSponsored() {
         return state().getStateSponsored();
     }
 
-    @Column
-    public Timestamp getCreationTime() {
+    @Override
+    public Timestamp getCreated() {
         return creationTime;
     }
 
     public enum CollegeColumn {
-        CREATED("creationTime"),
         NAME("name"),
-        STUDENT_COUNT("studentCount"),
-        PASSING_GRADE("passingGrade"),
-        ADMISSION_DEADLINE("admissionDeadline"),
-        STATE_SPONSORED("stateSponsored");
+        STUDENT_COUNT("student_count"),
+        PASSING_GRADE("passing_grade"),
+        ADMISSION_DEADLINE("admission_deadline"),
+        STATE_SPONSORED("state_sponsored"),
+        CREATED("created");
 
         private final String name;
 

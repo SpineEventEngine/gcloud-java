@@ -27,7 +27,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.CompositeFilter;
-import io.spine.client.EntityId;
 import io.spine.client.IdFilter;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
@@ -35,7 +34,6 @@ import io.spine.client.TargetFilters;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.datastore.College;
@@ -73,8 +71,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class DsRecordStorageTestEnv {
 
-    public static final String COLUMN_NAME_FOR_STORING = "columnName";
-
     public static final ImmutableList<String> UNORDERED_COLLEGE_NAMES = ImmutableList.of(
             "Ivy University", "Doonesbury", "Winston University", "Springfield A&M",
             "Greendale Community College", "Monsters University"
@@ -91,14 +87,6 @@ public class DsRecordStorageTestEnv {
 
     public static TestDatastoreStorageFactory datastoreFactory() {
         return TestDatastoreStorageFactory.local();
-    }
-
-    public static OrderBy emptyOrderBy() {
-        return OrderBy.getDefaultInstance();
-    }
-
-    public static FieldMask emptyFieldMask() {
-        return FieldMask.getDefaultInstance();
     }
 
     public static IdFilter emptyIdFilter() {
@@ -133,22 +121,6 @@ public class DsRecordStorageTestEnv {
                 .newBuilder()
                 .addAllId(targetIds)
                 .vBuild();
-    }
-
-    public static EntityId
-    extractEntityId(AbstractEntity<? extends Message, ? extends Message> targetEntity) {
-        return EntityId
-                .newBuilder()
-                .setId(pack(targetEntity.id()))
-                .vBuild();
-    }
-
-    public static List<EntityId>
-    extractEntityIds(Collection<CollegeEntity> targetEntities) {
-        return targetEntities
-                .stream()
-                .map(DsRecordStorageTestEnv::extractEntityId)
-                .collect(toList());
     }
 
     public static EntityRecord newEntityRecord(Message id, Message state) {
@@ -236,17 +208,6 @@ public class DsRecordStorageTestEnv {
 
     @CanIgnoreReturnValue
     public static List<CollegeEntity>
-    createAndStoreEntitiesWithNullStudentCount(RecordStorage<CollegeId> storage, int recordCount) {
-        List<CollegeEntity> entities = new ArrayList<>(recordCount);
-        for (int i = 0; i < recordCount; i++) {
-            CollegeEntity entity = createAndStoreEntityWithNullStudentCount(storage);
-            entities.add(entity);
-        }
-        return entities;
-    }
-
-    @CanIgnoreReturnValue
-    public static List<CollegeEntity>
     createAndStoreEntities(RecordStorage<CollegeId> storage, Collection<String> names) {
         return names
                 .stream()
@@ -284,15 +245,6 @@ public class DsRecordStorageTestEnv {
         return entity;
     }
 
-    private static CollegeEntity
-    createAndStoreEntityWithNullStudentCount(RecordStorage<CollegeId> storage) {
-        CollegeId id = newCollegeId();
-        College state = newCollege(id, 0);
-        CollegeEntity entity = CollegeEntity.create(id, state);
-        storeEntity(storage, entity);
-        return entity;
-    }
-
     private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage,
                                                       String name) {
         CollegeId id = newCollegeId();
@@ -321,10 +273,6 @@ public class DsRecordStorageTestEnv {
 
     private static College newCollege(CollegeId id, String name) {
         return newCollege(id, name, randomStudentCount());
-    }
-
-    private static College newCollege(CollegeId id, int studentCount) {
-        return newCollege(id, id.getValue(), studentCount);
     }
 
     private static College newCollege(CollegeId id, String name, int studentCount) {
@@ -396,16 +344,6 @@ public class DsRecordStorageTestEnv {
                 .collect(toList());
     }
 
-    public static List<Integer> nullableStudentCount(Collection<EntityRecord> resultList) {
-        return resultList
-                .stream()
-                .map(EntityRecord::getState)
-                .map(state -> (College) unpack(state))
-                .map(College::getStudentCount)
-                .map(count -> count == 0 ? null : count)
-                .collect(toList());
-    }
-
     public static List<CollegeEntity> combine(Collection<CollegeEntity> nullEntities,
                                               Collection<CollegeEntity> regularEntities) {
         List<CollegeEntity> combination =
@@ -414,27 +352,10 @@ public class DsRecordStorageTestEnv {
         return unmodifiableList(combination);
     }
 
-    public static EntityId newEntityId(Message message) {
-        return EntityId
-                .newBuilder()
-                .setId(pack(message))
-                .vBuild();
-    }
+    public static class EntityWithoutLifecycle extends AbstractEntity<ProjectId, Project> {
 
-    /*
-     * Test Entity types
-     ************************/
-
-    public static class EntityWithCustomColumnName extends AbstractEntity<ProjectId, Project> {
-
-        public EntityWithCustomColumnName(ProjectId id) {
+        public EntityWithoutLifecycle(ProjectId id) {
             super(id);
         }
-
-        @Column(name = COLUMN_NAME_FOR_STORING)
-        public int getValue() {
-            return 0;
-        }
     }
-
 }

@@ -26,6 +26,7 @@ import com.google.common.flogger.FluentLogger;
 import io.spine.annotation.Internal;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.DatastoreWrapper;
+import io.spine.server.storage.datastore.type.DsStorageRules;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -48,6 +49,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         super(DatastoreStorageFactory
                       .newBuilder()
                       .setDatastore(datastore)
+                      .setColumnStorageRules(new DsStorageRules())
         );
     }
 

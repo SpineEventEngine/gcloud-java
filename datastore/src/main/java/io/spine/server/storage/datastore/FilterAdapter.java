@@ -25,25 +25,25 @@ import com.google.protobuf.Any;
 import io.spine.client.Filter;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.ColumnConversionRules;
-import io.spine.server.entity.storage.ConversionRule;
+import io.spine.server.entity.storage.ColumnStorageRule;
+import io.spine.server.entity.storage.ColumnStorageRules;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A {@link Filter} to {@link Value} adapter based on {@link ColumnConversionRules}.
+ * A {@link Filter} to {@link Value} adapter based on {@link ColumnStorageRules}.
  */
 final class FilterAdapter {
 
-    private final ColumnConversionRules<Value<?>> conversionRules;
+    private final ColumnStorageRules<Value<?>> columnStorageRules;
 
-    static FilterAdapter of(ColumnConversionRules<Value<?>> conversionRules) {
-        return new FilterAdapter(conversionRules);
+    static FilterAdapter of(ColumnStorageRules<Value<?>> columnStorageRules) {
+        return new FilterAdapter(columnStorageRules);
     }
 
-    private FilterAdapter(ColumnConversionRules<Value<?>> conversionRules) {
-        this.conversionRules = conversionRules;
+    private FilterAdapter(ColumnStorageRules<Value<?>> columnStorageRules) {
+        this.columnStorageRules = columnStorageRules;
     }
 
     /**
@@ -64,11 +64,11 @@ final class FilterAdapter {
         Class<?> columnClass = column.type();
         Object filterValueUnpacked = TypeConverter.toObject(filterValue, columnClass);
 
-        ConversionRule<?, ? extends Value<?>> strategy =
-                conversionRules.of(filterValueUnpacked.getClass());
-        checkArgument(strategy != null, "Column of unknown type: %s.", column);
+        ColumnStorageRule<?, ? extends Value<?>> storageRule =
+                columnStorageRules.of(filterValueUnpacked.getClass());
+        checkArgument(storageRule != null, "Column of unknown type: %s.", column);
 
-        Value<?> result = strategy.applyTo(filterValueUnpacked);
+        Value<?> result = storageRule.applyTo(filterValueUnpacked);
         return result;
     }
 }

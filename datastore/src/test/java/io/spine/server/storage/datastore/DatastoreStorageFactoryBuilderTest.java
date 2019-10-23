@@ -22,12 +22,14 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.ByteString;
 import io.spine.server.ContextSpec;
-import io.spine.server.entity.storage.ColumnType;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
-import io.spine.server.storage.datastore.given.Columns.ByteColumnType;
-import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
+import io.spine.server.entity.storage.ColumnStorageRule;
+import io.spine.server.entity.storage.ColumnStorageRules;
+import io.spine.server.storage.datastore.given.TestStorageRules;
+import io.spine.server.storage.datastore.type.DsStorageRules;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,8 +37,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.ContextSpec.singleTenant;
-import static io.spine.server.storage.datastore.given.Columns.byteColumn;
-import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -60,37 +60,35 @@ class DatastoreStorageFactoryBuilderTest {
         new NullPointerTester()
                 .setDefault(Datastore.class,
                             datastore())
-                .setDefault(ColumnTypeRegistry.class,
-                            DatastoreTypeRegistryFactory.defaultInstance())
+                .setDefault(ColumnStorageRules.class, new DsStorageRules())
                 .testInstanceMethods(DatastoreStorageFactory.newBuilder(),
                                      NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
-    @DisplayName("construct factories with default type registry")
+    @DisplayName("construct factories with default column storage rules")
     void testDefaultTypeRegistry() {
         DatastoreStorageFactory factory = DatastoreStorageFactory
                 .newBuilder()
                 .setDatastore(datastore())
                 .build();
-        ColumnTypeRegistry registry = factory.columnConversionRules();
-        assertNotNull(registry);
+        ColumnStorageRules<Value<?>> rules = factory.columnStorageRules();
+        assertNotNull(rules);
     }
 
     @Test
-    @DisplayName("construct factories with extended type registry")
+    @DisplayName("construct factories with custom storage rules")
     void testExtendedTypeRegistry() {
+        ColumnStorageRules<Value<?>> rules = new TestStorageRules();
         DatastoreStorageFactory factory = DatastoreStorageFactory
                 .newBuilder()
                 .setDatastore(datastore())
-                .setColumnConversionRules(predefinedValuesAnd()
-                                         .put(Byte.class, new ByteColumnType())
-                                         .build())
+                .setColumnStorageRules(rules)
                 .build();
-        ColumnTypeRegistry<?> registry = factory.columnConversionRules();
-        assertNotNull(registry);
-        ColumnType type = registry.get(byteColumn());
-        assertNotNull(type);
+        ColumnStorageRules<Value<?>> rulesUsedByFactory = factory.columnStorageRules();
+        assertNotNull(rulesUsedByFactory);
+        ColumnStorageRule<?, ? extends Value<?>> rule = rulesUsedByFactory.of(ByteString.class);
+        assertNotNull(rule);
     }
 
     @Nested

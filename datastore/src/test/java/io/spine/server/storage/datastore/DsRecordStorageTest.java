@@ -41,6 +41,7 @@ import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageTest;
@@ -48,8 +49,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.given.CollegeEntity;
 import io.spine.server.storage.datastore.given.CountingDatastoreWrapper;
 import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv;
-import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.EntityWithCustomColumnName;
-import io.spine.server.storage.datastore.given.TestConstCounterEntity;
+import io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.EntityWithoutLifecycle;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
@@ -68,7 +68,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -94,13 +93,10 @@ import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColum
 import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.PASSING_GRADE;
 import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.STATE_SPONSORED;
 import static io.spine.server.storage.datastore.given.CollegeEntity.CollegeColumn.STUDENT_COUNT;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.COLUMN_NAME_FOR_STORING;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.UNORDERED_COLLEGE_NAMES;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ascendingBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.assertSortedBooleans;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.combine;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.createAndStoreEntities;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.createAndStoreEntitiesWithNullStudentCount;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.createAndStoreEntity;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.datastoreFactory;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.descendingBy;
@@ -112,12 +108,10 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.new
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newEntityRecord;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newIdFilter;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.newTargetFilters;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.nullableStudentCount;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.orderBy;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.orderedAndLimited;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.recordIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedIds;
-import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedValues;
 import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -142,7 +136,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     }
 
     @Override
-    protected Class<? extends TestCounterEntity> getTestEntityClass() {
+    protected Class<TestCounterEntity> getTestEntityClass() {
         return TestCounterEntity.class;
     }
 
@@ -160,7 +154,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
     private EntityRecordWithColumns newRecordWithColumns(RecordStorage<ProjectId> storage) {
         EntityRecord record = newStorageRecord();
-        Entity<ProjectId, Project> entity = TestConstCounterEntity.create(newId());
+        Entity<ProjectId, Project> entity = new TestCounterEntity(newId());
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
         return recordWithColumns;
     }
@@ -205,28 +199,25 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     @Test
     @DisplayName("persist entity columns beside the corresponding record")
     void testPersistColumns() {
-        String counter = "counter";
-        String bigCounter = "bigCounter";
-        String counterEven = "counterEven";
-        String counterVersion = "counterVersion";
-        @SuppressWarnings("DuplicateStringLiteralInspection") // common column name
-                String creationTime = "creationTime";
-        String counterState = "counterState";
-        String version = "version";
-        String archived = "archived";
-        String deleted = "deleted";
+        String projectStatusValue = "project_status_value";
+        String internal = "internal";
+        String projectVersion = "project_version";
+        String dueDate = "due_date";
+        String wrappedState = "wrapped_state";
+        String archived = LifecycleFlagField.archived.name();
+        String deleted = LifecycleFlagField.deleted.name();
 
         ProjectId id = newId();
-        Project state = (Project) newState(id);
-        TestConstCounterEntity entity = TestConstCounterEntity.create(id, state, 5);
-        Version versionValue = entity.getVersion();
+        TestCounterEntity entity = new TestCounterEntity(id);
+        Project state = entity.state();
+        Version versionValue = entity.version();
         EntityRecord record = EntityRecord
                 .newBuilder()
                 .setState(pack(state))
                 .setEntityId(pack(id))
                 .setVersion(versionValue)
                 .vBuild();
-        DsRecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
+        DsRecordStorage<ProjectId> storage = newStorage(TestCounterEntity.class);
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
         ImmutableSet<String> columns = recordWithColumns.columnNames()
                                                         .stream()
@@ -237,14 +228,13 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         IterableSubject assertColumns = assertThat(columns);
 
         // Custom Columns
-        assertColumns.containsAtLeast(counter,
-                                      bigCounter,
-                                      counterEven,
-                                      counterVersion,
-                                      creationTime,
-                                      counterState);
+        assertColumns.containsAtLeast(projectStatusValue,
+                                      internal,
+                                      projectVersion,
+                                      dueDate,
+                                      wrappedState);
         // Columns defined in superclasses
-        assertColumns.containsAtLeast(version, archived, deleted);
+        assertColumns.containsAtLeast(archived, deleted);
 
         // High level write operation
         storage.write(id, recordWithColumns);
@@ -262,25 +252,22 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         assertEquals(record, readRecord);
 
         // Check custom Columns
-        assertEquals(entity.getCounter(), datastoreEntity.getLong(counter));
-        assertEquals(entity.getBigCounter(), datastoreEntity.getLong(bigCounter));
-        assertEquals(entity.getCounterVersion()
-                           .getNumber(), datastoreEntity.getLong(counterVersion));
+        assertEquals(entity.getProjectStatusValue(), datastoreEntity.getLong(projectStatusValue));
+        assertEquals(entity.getProjectVersion()
+                           .getNumber(), datastoreEntity.getLong(projectVersion));
 
-        com.google.cloud.Timestamp actualCreationTime =
-                datastoreEntity.getTimestamp(creationTime);
-        assertEquals(toSeconds(entity.getCreationTime()),
-                     actualCreationTime.getSeconds());
-        assertEquals(entity.getCreationTime()
+        com.google.cloud.Timestamp actualDueDate =
+                datastoreEntity.getTimestamp(dueDate);
+        assertEquals(toSeconds(entity.getDueDate()),
+                     actualDueDate.getSeconds());
+        assertEquals(entity.getDueDate()
                            .getNanos(),
-                     actualCreationTime.getNanos());
-        assertEquals(entity.isCounterEven(), datastoreEntity.getBoolean(counterEven));
-        assertEquals(toCompactJson(entity.getCounterState()),
-                     datastoreEntity.getString(counterState));
+                     actualDueDate.getNanos());
+        assertEquals(entity.getInternal(), datastoreEntity.getBoolean(internal));
+        assertEquals(toCompactJson(entity.getWrappedState()),
+                     datastoreEntity.getString(wrappedState));
 
         // Check standard Columns
-        assertEquals(entity.getVersion()
-                           .getNumber(), datastoreEntity.getLong(version));
         assertEquals(entity.isArchived(), datastoreEntity.getBoolean(archived));
         assertEquals(entity.isDeleted(), datastoreEntity.getBoolean(deleted));
     }
@@ -293,7 +280,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         long maxReadTime = 1000;
         long maxWriteTime = 9500;
 
-        DsRecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
+        DsRecordStorage<ProjectId> storage = newStorage(TestCounterEntity.class);
 
         BigDataTester.<ProjectId>newBuilder()
                 .setEntryFactory(new BigDataTester.EntryFactory<ProjectId>() {
@@ -327,9 +314,8 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
                 .setLifecycleFlags(lifecycle)
                 .setEntityId(pack(id))
                 .vBuild();
-        TestConstCounterEntity entity = TestConstCounterEntity.create(id);
-        entity.injectLifecycle(lifecycle);
-        RecordStorage<ProjectId> storage = newStorage(TestConstCounterEntity.class);
+        TestCounterEntity entity = new TestCounterEntity(id);
+        RecordStorage<ProjectId> storage = newStorage(TestCounterEntity.class);
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
         storage.write(id, recordWithColumns);
 
@@ -341,20 +327,6 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         // Includes Lifecycle flags comparison
         EntityRecord restoredRecord = restoredRecordOptional.get();
         assertEquals(record, restoredRecord);
-    }
-
-    @Test
-    @DisplayName("convert entity record to entity using column name for storing")
-    void testUseColumnStoreName() {
-        DsRecordStorage<ProjectId> storage = newStorage(EntityWithCustomColumnName.class);
-        ProjectId id = newId();
-        EntityRecord record = newEntityRecord(id, newState(id));
-        Entity entity = new EntityWithCustomColumnName(id);
-        EntityRecordWithColumns entityRecordWithColumns = create(record, entity, storage);
-        com.google.cloud.datastore.Entity datastoreEntity =
-                storage.entityRecordToEntity(id, entityRecordWithColumns);
-        Set<String> propertiesName = datastoreEntity.getNames();
-        assertTrue(propertiesName.contains(COLUMN_NAME_FOR_STORING));
     }
 
     @Nested
@@ -387,7 +359,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             IdFilter idFilter = newIdFilter(targetId);
 
             // Create column filter.
-            Timestamp targetColumnValue = targetEntity.getCreationTime();
+            Timestamp targetColumnValue = targetEntity.getCreated();
             CompositeFilter columnFilter = all(eq(CREATED.columnName(), targetColumnValue));
 
             // Compose Query filters.
@@ -546,46 +518,6 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         }
 
         @Test
-        @DisplayName("in specified order with `null`s")
-        void testQueryByIDsWithOrderWithNulls() {
-            // Create entities.
-            int nullCount = 11;
-            int regularCount = 37;
-            int recordCount = regularCount + nullCount;
-            List<CollegeEntity> nullEntities =
-                    createAndStoreEntitiesWithNullStudentCount(storage, nullCount);
-            List<CollegeEntity> regularEntities = createAndStoreEntities(storage, regularCount);
-
-            List<CollegeEntity> entities = combine(nullEntities, regularEntities);
-
-            // Create ID filter.
-            List<Any> targetIds = idsAsAny(entities);
-            IdFilter idFilter = newIdFilter(targetIds);
-
-            // Compose Query filters.
-            TargetFilters entityFilters = newTargetFilters(idFilter);
-
-            // Compose Query.
-            EntityQuery<CollegeId> entityQuery = EntityQueries.from(entityFilters, storage);
-
-            // Execute Query.k
-            Iterator<EntityRecord> readResult = storage.readAll(entityQuery,
-                                                                ascendingBy(STUDENT_COUNT));
-
-            // Check the query results.
-            List<EntityRecord> resultList = newArrayList(readResult);
-            assertEquals(recordCount, resultList.size());
-
-            // Check the entities were ordered.
-            List<Integer> expectedCounts = sortedValues(entities, CollegeEntity::getStudentCount);
-            List<Integer> actualCounts = nullableStudentCount(resultList);
-            assertEquals(expectedCounts, actualCounts);
-
-            // Check Datastore reads are performed by keys but not using a structured query.
-            assertDsReadByKeys();
-        }
-
-        @Test
         @DisplayName("in specified order with missing entities")
         void testQueryByIDsWithOrderWithMissingEntities() {
             // Create entities.
@@ -659,10 +591,10 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         @Test
         @DisplayName("for entities without lifecycle")
         void testQueryEntityWithoutLifecycleById() {
-            DsRecordStorage<ProjectId> storage = newStorage(EntityWithCustomColumnName.class);
+            DsRecordStorage<ProjectId> storage = newStorage(EntityWithoutLifecycle.class);
             ProjectId id = newId();
             EntityRecord record = newEntityRecord(id, newState(id));
-            EntityWithCustomColumnName entity = new EntityWithCustomColumnName(id);
+            EntityWithoutLifecycle entity = new EntityWithoutLifecycle(id);
             storage.writeRecord(entity.id(), create(record, entity, storage));
 
             // Create ID filter.
@@ -760,7 +692,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             // Create column filter.
             CompositeFilter columnFilter = all(
                     eq(NAME.columnName(), targetEntity.getName()),
-                    eq(CREATED.columnName(), targetEntity.getCreationTime())
+                    eq(CREATED.columnName(), targetEntity.getCreated())
             );
             TargetFilters entityFilters = newTargetFilters(emptyIdFilter(),
                                                            columnFilter);
@@ -794,7 +726,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             // Create column filter.
             CompositeFilter columnFilter = all(
                     eq(NAME.columnName(), targetEntity.getName()),
-                    eq(CREATED.columnName(), targetEntity.getCreationTime())
+                    eq(CREATED.columnName(), targetEntity.getCreated())
             );
             TargetFilters entityFilters = newTargetFilters(emptyIdFilter(),
                                                            columnFilter);
@@ -916,38 +848,6 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             // Check the entities were ordered.
             List<Boolean> actualResults = getStateSponsoredValues(resultList);
             assertSortedBooleans(actualResults);
-
-            assertDsReadByStructuredQuery();
-        }
-
-        @Test
-        @DisplayName("in specified order with nulls")
-        void testQueryWithOrderWithNulls() {
-            // Create entities.
-            int nullCount = 5;
-            int regularCount = 12;
-            int recordCount = regularCount + nullCount;
-            List<CollegeEntity> nullEntities =
-                    createAndStoreEntitiesWithNullStudentCount(storage, nullCount);
-            List<CollegeEntity> regularEntities = createAndStoreEntities(storage, regularCount);
-
-            List<CollegeEntity> entities = combine(nullEntities, regularEntities);
-
-            // Compose Query.
-            EntityQuery<CollegeId> entityQuery = EntityQueries.from(emptyFilters(), storage);
-
-            // Execute Query.k
-            Iterator<EntityRecord> readResult =
-                    storage.readAll(entityQuery, ascendingBy(STUDENT_COUNT));
-
-            // Check the query results.
-            List<EntityRecord> resultList = newArrayList(readResult);
-            assertEquals(recordCount, resultList.size());
-
-            // Check the entities were ordered.
-            List<Integer> expectedCounts = sortedValues(entities, CollegeEntity::getStudentCount);
-            List<Integer> actualCounts = nullableStudentCount(resultList);
-            assertEquals(expectedCounts, actualCounts);
 
             assertDsReadByStructuredQuery();
         }

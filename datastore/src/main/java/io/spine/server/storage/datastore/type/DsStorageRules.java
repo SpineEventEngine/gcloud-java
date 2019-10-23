@@ -34,8 +34,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
-import io.spine.server.entity.storage.AbstractColumnConversionRules;
-import io.spine.server.entity.storage.ConversionRule;
+import io.spine.server.entity.storage.AbstractStorageRules;
+import io.spine.server.entity.storage.ColumnStorageRule;
 import io.spine.string.Stringifiers;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
@@ -43,48 +43,48 @@ import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 /**
  * Non-{@code final}, implement to ..., maybe {@link io.spine.annotation.SPI}.
  */
-public class DsColumnConversionRules extends AbstractColumnConversionRules<Value<?>> {
+public class DsStorageRules extends AbstractStorageRules<Value<?>> {
 
     @Override
     protected void
     setupCustomRules(
-            ImmutableMap.Builder<Class<?>, ConversionRule<?, ? extends Value<?>>> builder) {
+            ImmutableMap.Builder<Class<?>, ColumnStorageRule<?, ? extends Value<?>>> builder) {
         builder.put(Timestamp.class, ofTimestamp());
         builder.put(Version.class, ofVersion());
     }
 
     @Override
-    protected ConversionRule<String, StringValue> ofString() {
+    protected ColumnStorageRule<String, StringValue> ofString() {
         return StringValue::of;
     }
 
     @Override
-    protected ConversionRule<Integer, LongValue> ofInteger() {
+    protected ColumnStorageRule<Integer, LongValue> ofInteger() {
         return LongValue::of;
     }
 
     @Override
-    protected ConversionRule<Long, LongValue> ofLong() {
+    protected ColumnStorageRule<Long, LongValue> ofLong() {
         return LongValue::of;
     }
 
     @Override
-    protected ConversionRule<Float, DoubleValue> ofFloat() {
+    protected ColumnStorageRule<Float, DoubleValue> ofFloat() {
         return DoubleValue::of;
     }
 
     @Override
-    protected ConversionRule<Double, DoubleValue> ofDouble() {
+    protected ColumnStorageRule<Double, DoubleValue> ofDouble() {
         return DoubleValue::of;
     }
 
     @Override
-    protected ConversionRule<Boolean, BooleanValue> ofBoolean() {
+    protected ColumnStorageRule<Boolean, BooleanValue> ofBoolean() {
         return BooleanValue::of;
     }
 
     @Override
-    protected ConversionRule<ByteString, BlobValue> ofByteString() {
+    protected ColumnStorageRule<ByteString, BlobValue> ofByteString() {
         return bytes -> {
             Blob blob = Blob.copyFrom(bytes.asReadOnlyByteBuffer());
             return BlobValue.of(blob);
@@ -92,12 +92,12 @@ public class DsColumnConversionRules extends AbstractColumnConversionRules<Value
     }
 
     @Override
-    protected ConversionRule<Enum<?>, LongValue> ofEnum() {
+    protected ColumnStorageRule<Enum<?>, LongValue> ofEnum() {
         return anEnum -> LongValue.of(anEnum.ordinal());
     }
 
     @Override
-    protected ConversionRule<Message, StringValue> ofMessage() {
+    protected ColumnStorageRule<Message, StringValue> ofMessage() {
         return msg -> {
             String str = Stringifiers.toString(msg);
             return StringValue.of(str);
@@ -105,17 +105,18 @@ public class DsColumnConversionRules extends AbstractColumnConversionRules<Value
     }
 
     @Override
-    public ConversionRule<?, ? extends Value<?>> ofNull() {
+    public ColumnStorageRule<?, ? extends Value<?>> ofNull() {
         return o -> NullValue.of();
     }
 
-    private static ConversionRule<Timestamp, TimestampValue> ofTimestamp() {
+    @SuppressWarnings("ProtoTimestampGetSecondsGetNano") // This behavior is intended.
+    private static ColumnStorageRule<Timestamp, TimestampValue> ofTimestamp() {
         return timestamp -> TimestampValue.of(
                 ofTimeSecondsAndNanos(timestamp.getSeconds(), timestamp.getNanos())
         );
     }
 
-    private static ConversionRule<Version, LongValue> ofVersion() {
+    private static ColumnStorageRule<Version, LongValue> ofVersion() {
         return version -> LongValue.of(version.getNumber());
     }
 }
