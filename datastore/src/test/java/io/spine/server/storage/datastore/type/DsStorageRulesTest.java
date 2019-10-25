@@ -111,7 +111,7 @@ class DsStorageRulesTest {
         @DisplayName("`Enum` as `LongValue`")
         void enumAsLongValue() {
             Status value = Status.CREATED;
-            assertConverts(value, LongValue.of(value.ordinal()));
+            assertConverts(value, LongValue.of(value.getNumber()));
         }
 
         @Test

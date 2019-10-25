@@ -113,6 +113,7 @@ import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.ord
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.recordIds;
 import static io.spine.server.storage.datastore.given.DsRecordStorageTestEnv.sortedIds;
 import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
+import static io.spine.test.storage.Project.Status.STARTED;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertFalse;
@@ -155,7 +156,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     private EntityRecordWithColumns newRecordWithColumns(RecordStorage<ProjectId> storage) {
         EntityRecord record = newStorageRecord();
         Entity<ProjectId, Project> entity = new TestCounterEntity(newId());
-        EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
+        EntityRecordWithColumns recordWithColumns = create(record, entity, storage.entityClass());
         return recordWithColumns;
     }
 
@@ -209,6 +210,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
         ProjectId id = newId();
         TestCounterEntity entity = new TestCounterEntity(id);
+        entity.assignStatus(STARTED);
         Project state = entity.state();
         Version versionValue = entity.version();
         EntityRecord record = EntityRecord
@@ -218,7 +220,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
                 .setVersion(versionValue)
                 .vBuild();
         DsRecordStorage<ProjectId> storage = newStorage(TestCounterEntity.class);
-        EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
+        EntityRecordWithColumns recordWithColumns = create(record, entity, storage.entityClass());
         ImmutableSet<String> columns = recordWithColumns.columnNames()
                                                         .stream()
                                                         .map(ColumnName::value)
@@ -316,7 +318,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
                 .vBuild();
         TestCounterEntity entity = new TestCounterEntity(id);
         RecordStorage<ProjectId> storage = newStorage(TestCounterEntity.class);
-        EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
+        EntityRecordWithColumns recordWithColumns = create(record, entity, storage.entityClass());
         storage.write(id, recordWithColumns);
 
         RecordReadRequest<ProjectId> request = new RecordReadRequest<>(id);
@@ -595,7 +597,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             ProjectId id = newId();
             EntityRecord record = newEntityRecord(id, newState(id));
             EntityWithoutLifecycle entity = new EntityWithoutLifecycle(id);
-            storage.writeRecord(entity.id(), create(record, entity, storage));
+            storage.writeRecord(entity.id(), create(record, entity, storage.entityClass()));
 
             // Create ID filter.
             List<Any> targetIds = singletonList(pack(entity.id()));
