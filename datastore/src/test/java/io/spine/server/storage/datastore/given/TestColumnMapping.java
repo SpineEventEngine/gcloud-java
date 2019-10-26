@@ -20,22 +20,16 @@
 
 package io.spine.server.storage.datastore.given;
 
-import com.google.cloud.datastore.NullValue;
 import com.google.cloud.datastore.StringValue;
-import com.google.cloud.datastore.Value;
-import io.spine.server.entity.storage.ColumnStorageRule;
-import io.spine.server.entity.storage.ColumnStorageRules;
-import io.spine.string.Stringifiers;
+import io.spine.server.entity.storage.ColumnTypeMapping;
+import io.spine.server.storage.datastore.type.DsColumnMapping;
 
-public final class TestStorageRules implements ColumnStorageRules<Value<?>> {
+public final class TestColumnMapping extends DsColumnMapping {
 
-    @Override
-    public ColumnStorageRule<?, ? extends Value<?>> of(Class<?> type) {
-        return o -> StringValue.of(Stringifiers.toString(o));
-    }
+    public static final StringValue STRING_MAPPING_RESULT = StringValue.of("test-string");
 
     @Override
-    public ColumnStorageRule<?, ? extends Value<?>> ofNull() {
-        return o -> NullValue.of();
+    protected ColumnTypeMapping<String, StringValue> ofString() {
+        return s -> STRING_MAPPING_RESULT;
     }
 }

@@ -24,18 +24,17 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.ByteString;
 import io.spine.server.ContextSpec;
-import io.spine.server.entity.storage.ColumnStorageRule;
-import io.spine.server.entity.storage.ColumnStorageRules;
-import io.spine.server.storage.datastore.given.TestStorageRules;
-import io.spine.server.storage.datastore.type.DsStorageRules;
+import io.spine.server.entity.storage.ColumnMapping;
+import io.spine.server.storage.datastore.given.TestColumnMapping;
+import io.spine.server.storage.datastore.type.DsColumnMapping;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -60,35 +59,38 @@ class DatastoreStorageFactoryBuilderTest {
         new NullPointerTester()
                 .setDefault(Datastore.class,
                             datastore())
-                .setDefault(ColumnStorageRules.class, new DsStorageRules())
+                .setDefault(ColumnMapping.class, new DsColumnMapping())
                 .testInstanceMethods(DatastoreStorageFactory.newBuilder(),
                                      NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
-    @DisplayName("construct factories with default column storage rules")
-    void testDefaultTypeRegistry() {
+    @DisplayName("construct factories with default column mapping")
+    void testDefaultColumnMapping() {
         DatastoreStorageFactory factory = DatastoreStorageFactory
                 .newBuilder()
                 .setDatastore(datastore())
                 .build();
-        ColumnStorageRules<Value<?>> rules = factory.columnStorageRules();
-        assertNotNull(rules);
+        ColumnMapping<Value<?>> mapping = factory.columnMapping();
+        assertNotNull(mapping);
     }
 
     @Test
-    @DisplayName("construct factories with custom storage rules")
-    void testExtendedTypeRegistry() {
-        ColumnStorageRules<Value<?>> rules = new TestStorageRules();
+    @DisplayName("construct factories with custom column mapping")
+    void testCustomColumnMapping() {
+        ColumnMapping<Value<?>> mapping = new TestColumnMapping();
         DatastoreStorageFactory factory = DatastoreStorageFactory
                 .newBuilder()
                 .setDatastore(datastore())
-                .setColumnStorageRules(rules)
+                .setColumnMapping(mapping)
                 .build();
-        ColumnStorageRules<Value<?>> rulesUsedByFactory = factory.columnStorageRules();
-        assertNotNull(rulesUsedByFactory);
-        ColumnStorageRule<?, ? extends Value<?>> rule = rulesUsedByFactory.of(ByteString.class);
-        assertNotNull(rule);
+        ColumnMapping<Value<?>> mappingUsedByFactory = factory.columnMapping();
+        assertNotNull(mappingUsedByFactory);
+
+        String someString = "some-test-string";
+        Value<?> value = mappingUsedByFactory.of(String.class)
+                                             .applyTo(someString);
+        assertThat(value).isEqualTo(TestColumnMapping.STRING_MAPPING_RESULT);
     }
 
     @Nested

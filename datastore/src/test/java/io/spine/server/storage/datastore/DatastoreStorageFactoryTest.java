@@ -32,7 +32,7 @@ import io.spine.base.Time;
 import io.spine.core.TenantId;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.storage.ColumnStorageRules;
+import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.given.TestEnvironment;
@@ -102,13 +102,13 @@ class DatastoreStorageFactoryTest {
     }
 
     @Test
-    @DisplayName("have default column storage rules")
-    void testDefaultColumnTypeRegistry() {
+    @DisplayName("have default column mapping")
+    void testDefaultColumnMapping() {
         DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                                  .setDatastore(datastore)
                                                                  .build();
-        ColumnStorageRules<Value<?>> storageRules = factory.columnStorageRules();
-        assertNotNull(storageRules);
+        ColumnMapping<Value<?>> mapping = factory.columnMapping();
+        assertNotNull(mapping);
     }
 
     @Test

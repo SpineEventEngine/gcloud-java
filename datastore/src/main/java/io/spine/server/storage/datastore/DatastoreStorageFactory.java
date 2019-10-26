@@ -32,7 +32,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.ColumnStorageRules;
+import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
@@ -43,7 +43,7 @@ import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.tenant.NsConverterFactory;
 import io.spine.server.storage.datastore.tenant.PrefixedNsConverterFactory;
-import io.spine.server.storage.datastore.type.DsStorageRules;
+import io.spine.server.storage.datastore.type.DsColumnMapping;
 import io.spine.server.tenant.TenantIndex;
 
 import java.util.Map;
@@ -86,12 +86,12 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     private final Map<Class<? extends Storage>, DatastoreWrapper> sysWrappers = newConcurrentMap();
 
-    private final ColumnStorageRules<Value<?>> columnStorageRules;
+    private final ColumnMapping<Value<?>> columnMapping;
 
     private final NsConverterFactory converterFactory;
 
     protected DatastoreStorageFactory(Builder builder) {
-        this.columnStorageRules = builder.columnStorageRules;
+        this.columnMapping = builder.columnMapping;
         this.datastore = builder.datastore;
         this.converterFactory = builder.converterFactory;
     }
@@ -156,8 +156,8 @@ public class DatastoreStorageFactory implements StorageFactory {
         return new DsInboxStorage(wrapper, multitenant);
     }
 
-    public ColumnStorageRules<Value<?>> columnStorageRules() {
-        return columnStorageRules;
+    public ColumnMapping<Value<?>> columnMapping() {
+        return columnMapping;
     }
 
     /**
@@ -168,7 +168,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         builder.setModelClass(asEntityClass(cls))
                .setDatastore(wrapperFor(context))
                .setMultitenant(context.isMultitenant())
-               .setColumnStorageRules(columnStorageRules);
+               .setColumnMapping(columnMapping);
         S storage = builder.build();
         return storage;
     }
@@ -268,7 +268,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     public static class Builder {
 
         private Datastore datastore;
-        private ColumnStorageRules<Value<?>> columnStorageRules;
+        private ColumnMapping<Value<?>> columnMapping;
         private NamespaceConverter namespaceConverter;
         private NsConverterFactory converterFactory;
 
@@ -296,17 +296,17 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
 
         /**
-         * Sets the {@link ColumnStorageRules}.
+         * Sets the {@link ColumnMapping}.
          *
-         * <p>Default value is {@link DsStorageRules}.
+         * <p>Default value is {@link DsColumnMapping}.
          *
-         * @param columnStorageRules
+         * @param columnMapping
          *         the storage rules for entity columns
          * @return self for method chaining
          */
         public Builder
-        setColumnStorageRules(ColumnStorageRules<Value<?>> columnStorageRules) {
-            this.columnStorageRules = checkNotNull(columnStorageRules);
+        setColumnMapping(ColumnMapping<Value<?>> columnMapping) {
+            this.columnMapping = checkNotNull(columnMapping);
             return this;
         }
 
@@ -335,8 +335,8 @@ public class DatastoreStorageFactory implements StorageFactory {
          */
         public DatastoreStorageFactory build() {
             checkNotNull(datastore);
-            if (columnStorageRules == null) {
-                columnStorageRules = new DsStorageRules();
+            if (columnMapping == null) {
+                columnMapping = new DsColumnMapping();
             }
             if (namespaceConverter == null) {
                 converterFactory = NsConverterFactory.defaults();

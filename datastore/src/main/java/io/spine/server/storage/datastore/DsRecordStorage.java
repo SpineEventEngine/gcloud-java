@@ -31,7 +31,7 @@ import com.google.protobuf.Message;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.ColumnStorageRules;
+import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
@@ -70,7 +70,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private final DsLookupByIds<I> idLookup;
     private final DsLookupByQueries queryLookup;
 
-    private final ColumnStorageRules<Value<?>> columnStorageRules;
+    private final ColumnMapping<Value<?>> columnMapping;
     private final FilterAdapter columnFilterAdapter;
 
     /**
@@ -93,8 +93,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.typeUrl = TypeUrl.from(b.getDescriptor());
         this.idClass = checkNotNull(b.getIdClass());
         this.datastore = b.getDatastore();
-        this.columnStorageRules = checkNotNull(b.getColumnStorageRules());
-        this.columnFilterAdapter = FilterAdapter.of(this.columnStorageRules);
+        this.columnMapping = checkNotNull(b.getColumnMapping());
+        this.columnFilterAdapter = FilterAdapter.of(this.columnMapping);
         this.idLookup = new DsLookupByIds<>(this.datastore, this.typeUrl);
         this.queryLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
                                                  this.columnFilterAdapter);
@@ -269,7 +269,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     private void populateFromStorageFields(BaseEntity.Builder<Key, Entity.Builder> entity,
                                            EntityRecordWithColumns record) {
         record.columnNames().forEach(columnName -> {
-            Value<?> columnValue = record.columnValue(columnName, columnStorageRules);
+            Value<?> columnValue = record.columnValue(columnName, columnMapping);
             entity.set(columnName.value(), columnValue);
         });
     }

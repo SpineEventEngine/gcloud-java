@@ -33,8 +33,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.core.Version;
-import io.spine.server.entity.storage.ColumnStorageRule;
-import io.spine.server.entity.storage.ColumnStorageRules;
+import io.spine.server.entity.storage.ColumnTypeMapping;
 import io.spine.string.Stringifiers;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.Project.Status;
@@ -46,10 +45,10 @@ import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@DisplayName("`DsStorageRules` should")
-class DsStorageRulesTest {
+@DisplayName("`DsColumnMapping` should")
+class DsColumnMappingTest {
 
-    private final ColumnStorageRules<Value<?>> storageRules = new DsStorageRules();
+    private final DsColumnMapping mapping = new DsColumnMapping();
 
     @Nested
     @DisplayName("persist")
@@ -148,13 +147,13 @@ class DsStorageRulesTest {
         @Test
         @DisplayName("`null` as `NullValue`")
         void nullAsNullValue() {
-            Value<?> persistedNull = storageRules.ofNull()
-                                                 .applyTo(null);
+            Value<?> persistedNull = mapping.ofNull()
+                                            .applyTo(null);
             assertThat(persistedNull).isEqualTo(NullValue.of());
         }
 
         private void assertConverts(Object original, Value<?> expected) {
-            ColumnStorageRule<?, ? extends Value<?>> rule = storageRules.of(original.getClass());
+            ColumnTypeMapping<?, ? extends Value<?>> rule = mapping.of(original.getClass());
             Value<?> result = rule.applyTo(original);
             assertThat(result).isEqualTo(expected);
         }

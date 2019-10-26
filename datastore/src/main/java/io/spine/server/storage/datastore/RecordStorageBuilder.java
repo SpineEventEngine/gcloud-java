@@ -25,7 +25,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.ColumnStorageRules;
+import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 
@@ -47,7 +47,7 @@ abstract class RecordStorageBuilder<I,
     private Descriptor descriptor;
     private DatastoreWrapper datastore;
     private boolean multitenant;
-    private ColumnStorageRules<Value<?>> columnStorageRules;
+    private ColumnMapping<Value<?>> columnMapping;
     private Class<I> idClass;
     private EntityClass<?> entityClass;
 
@@ -132,12 +132,12 @@ abstract class RecordStorageBuilder<I,
     }
 
     /**
-     * Assigns the column storage rules of
+     * Sets the mapping rules of
      * the {@linkplain io.spine.server.entity.storage.Column entity columns}.
      */
     @CanIgnoreReturnValue
-    public B setColumnStorageRules(ColumnStorageRules<Value<?>> columnStorageRules) {
-        this.columnStorageRules = checkNotNull(columnStorageRules);
+    public B setColumnMapping(ColumnMapping<Value<?>> columnMapping) {
+        this.columnMapping = checkNotNull(columnMapping);
         return self();
     }
 
@@ -164,10 +164,10 @@ abstract class RecordStorageBuilder<I,
     }
 
     /**
-     * Obtains the column storage rules of the storage.
+     * Obtains the column mapping used in the storage.
      */
-    public ColumnStorageRules<Value<?>> getColumnStorageRules() {
-        return columnStorageRules;
+    public ColumnMapping<Value<?>> getColumnMapping() {
+        return columnMapping;
     }
 
     /**
@@ -187,7 +187,7 @@ abstract class RecordStorageBuilder<I,
     final void checkRequiredFields() {
         checkNotNull(descriptor, "State descriptor is not set.");
         checkNotNull(datastore, "Datastore is not set.");
-        checkNotNull(columnStorageRules, "Column storage rules are not set.");
+        checkNotNull(columnMapping, "Column mapping is not set.");
     }
 
     abstract B self();

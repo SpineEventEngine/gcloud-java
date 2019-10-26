@@ -34,7 +34,7 @@ import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnName;
 import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.CompositeQueryParameter;
-import io.spine.server.storage.datastore.type.DsStorageRules;
+import io.spine.server.storage.datastore.type.DsColumnMapping;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -94,7 +94,7 @@ class DsFiltersTest {
                 createParams(disjunctiveFilters, EITHER)
         );
 
-        FilterAdapter columnFilterAdapter = FilterAdapter.of(new DsStorageRules());
+        FilterAdapter columnFilterAdapter = FilterAdapter.of(new DsColumnMapping());
         Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
 
         IterableSubject assertFilters = assertThat(filters);
@@ -116,7 +116,7 @@ class DsFiltersTest {
                 createParams(singleFilter, ALL)
         );
 
-        FilterAdapter columnFilterAdapter = FilterAdapter.of(new DsStorageRules());
+        FilterAdapter columnFilterAdapter = FilterAdapter.of(new DsColumnMapping());
         Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
         IterableSubject assertFilters = assertThat(filters);
         assertFilters.contains(and(le(ID_STRING_COLUMN_NAME.value(), versionValue)));
@@ -147,7 +147,7 @@ class DsFiltersTest {
                 createParams(versionFilters, EITHER),
                 createParams(lifecycleFilters, EITHER)
         );
-        FilterAdapter columnFilterAdapter = FilterAdapter.of(new DsStorageRules());
+        FilterAdapter columnFilterAdapter = FilterAdapter.of(new DsColumnMapping());
         Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
         assertThat(filters).containsExactly(
                 and(ge(ID_STRING_COLUMN_NAME.value(), greaterBoundDefiner),
@@ -170,7 +170,7 @@ class DsFiltersTest {
     void testEmptyParameters() {
         Collection<CompositeQueryParameter> parameters = Collections.emptySet();
         Collection<StructuredQuery.Filter> filters =
-                fromParams(parameters, FilterAdapter.of(new DsStorageRules()));
+                fromParams(parameters, FilterAdapter.of(new DsColumnMapping()));
         IterableSubject assertFilters = assertThat(filters);
         assertFilters.isNotNull();
         assertFilters.isEmpty();

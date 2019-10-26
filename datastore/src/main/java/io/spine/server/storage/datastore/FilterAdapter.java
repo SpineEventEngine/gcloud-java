@@ -25,25 +25,25 @@ import com.google.protobuf.Any;
 import io.spine.client.Filter;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.ColumnStorageRule;
-import io.spine.server.entity.storage.ColumnStorageRules;
+import io.spine.server.entity.storage.ColumnMapping;
+import io.spine.server.entity.storage.ColumnTypeMapping;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A {@link Filter} to {@link Value} adapter based on {@link ColumnStorageRules}.
+ * A {@link Filter} to {@link Value} adapter based on {@link ColumnMapping}.
  */
 final class FilterAdapter {
 
-    private final ColumnStorageRules<Value<?>> columnStorageRules;
+    private final ColumnMapping<Value<?>> columnMapping;
 
-    static FilterAdapter of(ColumnStorageRules<Value<?>> columnStorageRules) {
-        return new FilterAdapter(columnStorageRules);
+    static FilterAdapter of(ColumnMapping<Value<?>> columnMapping) {
+        return new FilterAdapter(columnMapping);
     }
 
-    private FilterAdapter(ColumnStorageRules<Value<?>> columnStorageRules) {
-        this.columnStorageRules = columnStorageRules;
+    private FilterAdapter(ColumnMapping<Value<?>> columnMapping) {
+        this.columnMapping = columnMapping;
     }
 
     /**
@@ -64,8 +64,8 @@ final class FilterAdapter {
         Class<?> columnClass = column.type();
         Object filterValueUnpacked = TypeConverter.toObject(filterValue, columnClass);
 
-        ColumnStorageRule<?, ? extends Value<?>> storageRule =
-                columnStorageRules.of(filterValueUnpacked.getClass());
+        ColumnTypeMapping<?, ? extends Value<?>> storageRule =
+                columnMapping.of(filterValueUnpacked.getClass());
         checkArgument(storageRule != null, "Column of unknown type: %s.", column);
 
         Value<?> result = storageRule.applyTo(filterValueUnpacked);

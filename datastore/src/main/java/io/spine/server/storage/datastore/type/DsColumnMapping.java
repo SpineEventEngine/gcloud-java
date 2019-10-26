@@ -34,8 +34,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
-import io.spine.server.entity.storage.AbstractStorageRules;
-import io.spine.server.entity.storage.ColumnStorageRule;
+import io.spine.server.entity.storage.AbstractColumnMapping;
+import io.spine.server.entity.storage.ColumnTypeMapping;
 import io.spine.string.Stringifiers;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
@@ -43,48 +43,48 @@ import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 /**
  * Non-{@code final}, implement to ..., maybe {@link io.spine.annotation.SPI}.
  */
-public class DsStorageRules extends AbstractStorageRules<Value<?>> {
+public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
 
     @Override
     protected void
-    setupCustomRules(
-            ImmutableMap.Builder<Class<?>, ColumnStorageRule<?, ? extends Value<?>>> builder) {
+    setupCustomMapping(
+            ImmutableMap.Builder<Class<?>, ColumnTypeMapping<?, ? extends Value<?>>> builder) {
         builder.put(Timestamp.class, ofTimestamp());
         builder.put(Version.class, ofVersion());
     }
 
     @Override
-    protected ColumnStorageRule<String, StringValue> ofString() {
+    protected ColumnTypeMapping<String, StringValue> ofString() {
         return StringValue::of;
     }
 
     @Override
-    protected ColumnStorageRule<Integer, LongValue> ofInteger() {
+    protected ColumnTypeMapping<Integer, LongValue> ofInteger() {
         return LongValue::of;
     }
 
     @Override
-    protected ColumnStorageRule<Long, LongValue> ofLong() {
+    protected ColumnTypeMapping<Long, LongValue> ofLong() {
         return LongValue::of;
     }
 
     @Override
-    protected ColumnStorageRule<Float, DoubleValue> ofFloat() {
+    protected ColumnTypeMapping<Float, DoubleValue> ofFloat() {
         return DoubleValue::of;
     }
 
     @Override
-    protected ColumnStorageRule<Double, DoubleValue> ofDouble() {
+    protected ColumnTypeMapping<Double, DoubleValue> ofDouble() {
         return DoubleValue::of;
     }
 
     @Override
-    protected ColumnStorageRule<Boolean, BooleanValue> ofBoolean() {
+    protected ColumnTypeMapping<Boolean, BooleanValue> ofBoolean() {
         return BooleanValue::of;
     }
 
     @Override
-    protected ColumnStorageRule<ByteString, BlobValue> ofByteString() {
+    protected ColumnTypeMapping<ByteString, BlobValue> ofByteString() {
         return bytes -> {
             Blob blob = Blob.copyFrom(bytes.asReadOnlyByteBuffer());
             return BlobValue.of(blob);
@@ -92,12 +92,12 @@ public class DsStorageRules extends AbstractStorageRules<Value<?>> {
     }
 
     @Override
-    protected ColumnStorageRule<Enum<?>, LongValue> ofEnum() {
+    protected ColumnTypeMapping<Enum<?>, LongValue> ofEnum() {
         return anEnum -> LongValue.of(anEnum.ordinal());
     }
 
     @Override
-    protected ColumnStorageRule<Message, StringValue> ofMessage() {
+    protected ColumnTypeMapping<Message, StringValue> ofMessage() {
         return msg -> {
             String str = Stringifiers.toString(msg);
             return StringValue.of(str);
@@ -105,18 +105,18 @@ public class DsStorageRules extends AbstractStorageRules<Value<?>> {
     }
 
     @Override
-    public ColumnStorageRule<?, ? extends Value<?>> ofNull() {
+    public ColumnTypeMapping<?, ? extends Value<?>> ofNull() {
         return o -> NullValue.of();
     }
 
     @SuppressWarnings("ProtoTimestampGetSecondsGetNano") // This behavior is intended.
-    private static ColumnStorageRule<Timestamp, TimestampValue> ofTimestamp() {
+    private static ColumnTypeMapping<Timestamp, TimestampValue> ofTimestamp() {
         return timestamp -> TimestampValue.of(
                 ofTimeSecondsAndNanos(timestamp.getSeconds(), timestamp.getNanos())
         );
     }
 
-    private static ColumnStorageRule<Version, LongValue> ofVersion() {
+    private static ColumnTypeMapping<Version, LongValue> ofVersion() {
         return version -> LongValue.of(version.getNumber());
     }
 }
