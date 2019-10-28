@@ -30,7 +30,6 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 
 /**
  * An implementation base for {@code DsRecordStorage} builders.
@@ -49,7 +48,7 @@ abstract class RecordStorageBuilder<I,
     private boolean multitenant;
     private ColumnMapping<Value<?>> columnMapping;
     private Class<I> idClass;
-    private EntityClass<?> entityClass;
+    private Class<? extends Entity<?, ?>> entityClass;
 
     /**
      * Prevents direct instantiation.
@@ -84,7 +83,7 @@ abstract class RecordStorageBuilder<I,
     @CanIgnoreReturnValue
     public B setEntityClass(Class<? extends Entity<?, ?>> entityClass) {
         checkNotNull(entityClass);
-        this.entityClass = asEntityClass(entityClass);
+        this.entityClass = entityClass;
         return self();
     }
 
@@ -164,7 +163,7 @@ abstract class RecordStorageBuilder<I,
     }
 
     /**
-     * Obtains the column mapping used in the storage.
+     * Obtains the column mapping rules used in the storage.
      */
     public ColumnMapping<Value<?>> getColumnMapping() {
         return columnMapping;
@@ -180,7 +179,7 @@ abstract class RecordStorageBuilder<I,
     /**
      * Obtains the class of the stored entity.
      */
-    public EntityClass<?> getEntityClass() {
+    public Class<? extends Entity<?, ?>> getEntityClass() {
         return entityClass;
     }
 

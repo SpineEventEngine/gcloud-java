@@ -39,9 +39,9 @@ import java.util.stream.Stream;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.storage.datastore.DsEntityComparator.implementing;
 import static io.spine.server.storage.datastore.FieldMaskApplier.recordMasker;
-import static io.spine.validate.Validate.isDefault;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 

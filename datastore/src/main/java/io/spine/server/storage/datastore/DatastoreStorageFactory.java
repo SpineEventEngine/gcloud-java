@@ -43,7 +43,6 @@ import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.tenant.NsConverterFactory;
 import io.spine.server.storage.datastore.tenant.PrefixedNsConverterFactory;
-import io.spine.server.storage.datastore.type.DsColumnMapping;
 import io.spine.server.tenant.TenantIndex;
 
 import java.util.Map;
@@ -296,7 +295,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
 
         /**
-         * Sets the {@link ColumnMapping}.
+         * Sets the {@link ColumnMapping} to use.
          *
          * <p>Default value is {@link DsColumnMapping}.
          *

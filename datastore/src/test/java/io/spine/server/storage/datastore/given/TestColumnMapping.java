@@ -22,8 +22,11 @@ package io.spine.server.storage.datastore.given;
 
 import com.google.cloud.datastore.StringValue;
 import io.spine.server.entity.storage.ColumnTypeMapping;
-import io.spine.server.storage.datastore.type.DsColumnMapping;
+import io.spine.server.storage.datastore.DsColumnMapping;
 
+/**
+ * A test column mapping which alters the mapping rules for {@code String} columns.
+ */
 public final class TestColumnMapping extends DsColumnMapping {
 
     public static final StringValue STRING_MAPPING_RESULT = StringValue.of("test-string");

@@ -28,7 +28,6 @@ import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.entity.storage.ColumnTypeMapping;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -64,11 +63,10 @@ final class FilterAdapter {
         Class<?> columnClass = column.type();
         Object filterValueUnpacked = TypeConverter.toObject(filterValue, columnClass);
 
-        ColumnTypeMapping<?, ? extends Value<?>> storageRule =
+        ColumnTypeMapping<?, ? extends Value<?>> typeMapping =
                 columnMapping.of(filterValueUnpacked.getClass());
-        checkArgument(storageRule != null, "Column of unknown type: %s.", column);
 
-        Value<?> result = storageRule.applyTo(filterValueUnpacked);
+        Value<?> result = typeMapping.applyTo(filterValueUnpacked);
         return result;
     }
 }

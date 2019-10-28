@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.BlobValue;
@@ -41,7 +41,12 @@ import io.spine.string.Stringifiers;
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 
 /**
- * Non-{@code final}, implement to ..., maybe {@link io.spine.annotation.SPI}.
+ * A standard Datastore column mapping.
+ *
+ * <p>All column values are stored as Datastore {@link Value}-s.
+ *
+ * <p>Users of the storage can extend this class to specify their own column mapping for the
+ * selected types.
  */
 public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
 

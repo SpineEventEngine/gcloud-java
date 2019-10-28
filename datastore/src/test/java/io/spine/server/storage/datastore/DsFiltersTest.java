@@ -28,14 +28,11 @@ import com.google.common.collect.Multimap;
 import com.google.common.truth.IterableSubject;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.ColumnName;
-import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.CompositeQueryParameter;
-import io.spine.server.storage.datastore.type.DsColumnMapping;
-import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
+import io.spine.server.storage.datastore.given.DsFiltersTestEnv.ArchivedColumn;
+import io.spine.server.storage.datastore.given.DsFiltersTestEnv.DeletedColumn;
+import io.spine.server.storage.datastore.given.DsFiltersTestEnv.IdStringColumn;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +48,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.client.Filters.lt;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.entity.storage.TestCompositeQueryParameterFactory.createParams;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
@@ -61,10 +57,6 @@ import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 
 @DisplayName("`DsFilters` should")
 class DsFiltersTest {
-
-    private static final ColumnName ID_STRING_COLUMN_NAME = ColumnName.of("id_string");
-    private static final ColumnName ARCHIVED_COLUMN_NAME = ColumnName.of(archived);
-    private static final ColumnName DELETED_COLUMN_NAME = ColumnName.of(deleted);
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
@@ -79,15 +71,15 @@ class DsFiltersTest {
         boolean archivedValue = true;
         boolean deletedValue = true;
         Multimap<Column, Filter> conjunctiveFilters = ImmutableMultimap.of(
-                column(TestCounterEntity.class, ID_STRING_COLUMN_NAME),
-                Filters.gt(ID_STRING_COLUMN_NAME.value(), idStringValue)
+                new IdStringColumn(),
+                Filters.gt(IdStringColumn.NAME.value(), idStringValue)
         );
         ImmutableMultimap<Column, Filter> disjunctiveFilters = ImmutableMultimap.of(
-                column(TestCounterEntity.class, DELETED_COLUMN_NAME),
-                Filters.eq(deleted.name(), deletedValue),
+                new DeletedColumn(),
+                Filters.eq(DeletedColumn.NAME.value(), deletedValue),
 
-                column(TestCounterEntity.class, ARCHIVED_COLUMN_NAME),
-                Filters.eq(archived.name(), archivedValue)
+                new ArchivedColumn(),
+                Filters.eq(ArchivedColumn.NAME.value(), archivedValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(conjunctiveFilters, ALL),
@@ -98,9 +90,9 @@ class DsFiltersTest {
         Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
 
         IterableSubject assertFilters = assertThat(filters);
-        assertFilters.contains(and(gt(ID_STRING_COLUMN_NAME.value(), idStringValue),
+        assertFilters.contains(and(gt(IdStringColumn.NAME.value(), idStringValue),
                                    eq(archived.name(), archivedValue)));
-        assertFilters.contains(and(gt(ID_STRING_COLUMN_NAME.value(), idStringValue),
+        assertFilters.contains(and(gt(IdStringColumn.NAME.value(), idStringValue),
                                    eq(deleted.name(), deletedValue)));
     }
 
@@ -109,8 +101,8 @@ class DsFiltersTest {
     void testSingleParameter() {
         String versionValue = "314";
         ImmutableMultimap<Column, Filter> singleFilter = ImmutableMultimap.of(
-                column(TestCounterEntity.class, ID_STRING_COLUMN_NAME),
-                Filters.le(ID_STRING_COLUMN_NAME.value(), versionValue)
+                new IdStringColumn(),
+                Filters.le(IdStringColumn.NAME.value(), versionValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(singleFilter, ALL)
@@ -119,7 +111,7 @@ class DsFiltersTest {
         FilterAdapter columnFilterAdapter = FilterAdapter.of(new DsColumnMapping());
         Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
         IterableSubject assertFilters = assertThat(filters);
-        assertFilters.contains(and(le(ID_STRING_COLUMN_NAME.value(), versionValue)));
+        assertFilters.contains(and(le(IdStringColumn.NAME.value(), versionValue)));
     }
 
     @Test
@@ -130,18 +122,18 @@ class DsFiltersTest {
         String lessBoundDefiner = "42";
         boolean archivedValue = true;
         boolean deletedValue = true;
-        Column idStringColumn = column(TestCounterEntity.class, ID_STRING_COLUMN_NAME);
+        Column idStringColumn = new IdStringColumn();
         ImmutableMultimap<Column, Filter> versionFilters = ImmutableMultimap.of(
-                idStringColumn, Filters.ge(ID_STRING_COLUMN_NAME.value(), greaterBoundDefiner),
-                idStringColumn, Filters.eq(ID_STRING_COLUMN_NAME.value(), standaloneValue),
-                idStringColumn, lt(ID_STRING_COLUMN_NAME.value(), lessBoundDefiner)
+                idStringColumn, Filters.ge(IdStringColumn.NAME.value(), greaterBoundDefiner),
+                idStringColumn, Filters.eq(IdStringColumn.NAME.value(), standaloneValue),
+                idStringColumn, lt(IdStringColumn.NAME.value(), lessBoundDefiner)
         );
         ImmutableMultimap<Column, Filter> lifecycleFilters = ImmutableMultimap.of(
-                column(TestCounterEntity.class, DELETED_COLUMN_NAME),
-                Filters.eq(deleted.name(), deletedValue),
+                new DeletedColumn(),
+                Filters.eq(DeletedColumn.NAME.value(), deletedValue),
 
-                column(TestCounterEntity.class, ARCHIVED_COLUMN_NAME),
-                Filters.eq(archived.name(), archivedValue)
+                new ArchivedColumn(),
+                Filters.eq(DeletedColumn.NAME.value(), archivedValue)
         );
         Collection<CompositeQueryParameter> parameters = ImmutableSet.of(
                 createParams(versionFilters, EITHER),
@@ -150,18 +142,18 @@ class DsFiltersTest {
         FilterAdapter columnFilterAdapter = FilterAdapter.of(new DsColumnMapping());
         Collection<StructuredQuery.Filter> filters = fromParams(parameters, columnFilterAdapter);
         assertThat(filters).containsExactly(
-                and(ge(ID_STRING_COLUMN_NAME.value(), greaterBoundDefiner),
-                    eq(archived.name(), archivedValue)),
-                and(ge(ID_STRING_COLUMN_NAME.value(), greaterBoundDefiner),
-                    eq(deleted.name(), deletedValue)),
-                and(eq(ID_STRING_COLUMN_NAME.value(), standaloneValue),
-                    eq(archived.name(), archivedValue)),
-                and(eq(ID_STRING_COLUMN_NAME.value(), standaloneValue),
-                    eq(deleted.name(), deletedValue)),
-                and(PropertyFilter.lt(ID_STRING_COLUMN_NAME.value(), lessBoundDefiner),
-                    eq(archived.name(), archivedValue)),
-                and(PropertyFilter.lt(ID_STRING_COLUMN_NAME.value(), lessBoundDefiner),
-                    eq(deleted.name(), deletedValue))
+                and(ge(IdStringColumn.NAME.value(), greaterBoundDefiner),
+                    eq(ArchivedColumn.NAME.value(), archivedValue)),
+                and(ge(IdStringColumn.NAME.value(), greaterBoundDefiner),
+                    eq(DeletedColumn.NAME.value(), deletedValue)),
+                and(eq(IdStringColumn.NAME.value(), standaloneValue),
+                    eq(ArchivedColumn.NAME.value(), archivedValue)),
+                and(eq(IdStringColumn.NAME.value(), standaloneValue),
+                    eq(DeletedColumn.NAME.value(), deletedValue)),
+                and(PropertyFilter.lt(IdStringColumn.NAME.value(), lessBoundDefiner),
+                    eq(ArchivedColumn.NAME.value(), archivedValue)),
+                and(PropertyFilter.lt(IdStringColumn.NAME.value(), lessBoundDefiner),
+                    eq(DeletedColumn.NAME.value(), deletedValue))
         );
     }
 
@@ -174,13 +166,5 @@ class DsFiltersTest {
         IterableSubject assertFilters = assertThat(filters);
         assertFilters.isNotNull();
         assertFilters.isEmpty();
-    }
-
-    @SuppressWarnings("rawtypes") // For convenience.
-    private static Column column(Class<? extends Entity> cls, ColumnName columnName) {
-        EntityClass<? extends Entity> entityClass = asEntityClass(cls);
-        Columns columns = Columns.of(entityClass);
-        Column column = columns.get(columnName);
-        return column;
     }
 }
