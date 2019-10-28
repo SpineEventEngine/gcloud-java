@@ -256,7 +256,7 @@ public class DsRecordStorageTestEnv {
 
     public static void storeEntity(RecordStorage<CollegeId> storage, CollegeEntity entity) {
         EntityRecord record = newEntityRecord(entity.id(), entity.state());
-        EntityRecordWithColumns withColumns = create(record, entity, storage.entityClass());
+        EntityRecordWithColumns withColumns = create(record, entity, storage);
         storage.write(entity.id(), withColumns);
     }
 
