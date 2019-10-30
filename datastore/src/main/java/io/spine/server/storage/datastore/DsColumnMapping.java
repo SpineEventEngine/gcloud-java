@@ -41,7 +41,7 @@ import io.spine.string.Stringifiers;
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 
 /**
- * A standard Datastore column mapping.
+ * The default Datastore column mapping.
  *
  * <p>All column values are stored as Datastore {@link Value}-s.
  *
