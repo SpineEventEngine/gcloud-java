@@ -12,7 +12,7 @@ all modules and does not describe the project structure per-subproject.
 
 <groupId>io.spine.gcloud</groupId>
 <artifactId>spine-gcloud-java</artifactId>
-<version>1.1.12</version>
+<version>1.1.13</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -40,7 +40,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-server</artifactId>
-    <version>1.1.12</version>
+    <version>1.1.13</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -58,7 +58,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-testutil-server</artifactId>
-    <version>1.1.12</version>
+    <version>1.1.13</version>
     <scope>test</scope>
   </dependency>
   <dependency>
