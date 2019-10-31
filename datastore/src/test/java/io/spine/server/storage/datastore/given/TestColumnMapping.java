@@ -18,19 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.type;
+package io.spine.server.storage.datastore.given;
 
-import io.spine.annotation.SPI;
+import com.google.cloud.datastore.StringValue;
+import io.spine.server.entity.storage.ColumnTypeMapping;
+import io.spine.server.storage.datastore.DsColumnMapping;
 
 /**
- * A base for implementing {@link io.spine.server.entity.storage.ColumnType ColumnType} interface
- * for Datastore storage regardless the type conversion.
+ * A test column mapping which alters the mapping rules for {@code String} columns.
  */
-@SPI
-public abstract class SimpleDatastoreColumnType<T> extends AbstractDatastoreColumnType<T, T> {
+public final class TestColumnMapping extends DsColumnMapping {
+
+    public static final StringValue STRING_MAPPING_RESULT = StringValue.of("test-string");
 
     @Override
-    public T convertColumnValue(T fieldValue) {
-        return fieldValue;
+    protected ColumnTypeMapping<String, StringValue> ofString() {
+        return s -> STRING_MAPPING_RESULT;
     }
 }

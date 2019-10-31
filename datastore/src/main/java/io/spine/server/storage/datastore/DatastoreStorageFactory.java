@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Value;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -31,7 +32,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
@@ -42,8 +43,6 @@ import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.tenant.NsConverterFactory;
 import io.spine.server.storage.datastore.tenant.PrefixedNsConverterFactory;
-import io.spine.server.storage.datastore.type.DatastoreColumnType;
-import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
 import io.spine.server.tenant.TenantIndex;
 
 import java.util.Map;
@@ -86,12 +85,12 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     private final Map<Class<? extends Storage>, DatastoreWrapper> sysWrappers = newConcurrentMap();
 
-    private final ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
+    private final ColumnMapping<Value<?>> columnMapping;
 
     private final NsConverterFactory converterFactory;
 
     protected DatastoreStorageFactory(Builder builder) {
-        this.typeRegistry = builder.typeRegistry;
+        this.columnMapping = builder.columnMapping;
         this.datastore = builder.datastore;
         this.converterFactory = builder.converterFactory;
     }
@@ -156,8 +155,8 @@ public class DatastoreStorageFactory implements StorageFactory {
         return new DsInboxStorage(wrapper, multitenant);
     }
 
-    public ColumnTypeRegistry getTypeRegistry() {
-        return typeRegistry;
+    public ColumnMapping<Value<?>> columnMapping() {
+        return columnMapping;
     }
 
     /**
@@ -168,7 +167,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         builder.setModelClass(asEntityClass(cls))
                .setDatastore(wrapperFor(context))
                .setMultitenant(context.isMultitenant())
-               .setColumnTypeRegistry(typeRegistry);
+               .setColumnMapping(columnMapping);
         S storage = builder.build();
         return storage;
     }
@@ -268,7 +267,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     public static class Builder {
 
         private Datastore datastore;
-        private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry;
+        private ColumnMapping<Value<?>> columnMapping;
         private NamespaceConverter namespaceConverter;
         private NsConverterFactory converterFactory;
 
@@ -296,19 +295,17 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
 
         /**
-         * Sets a {@link ColumnTypeRegistry} for handling the Entity Columns.
+         * Sets the {@link ColumnMapping} to use.
          *
-         * <p>Default value is {@link DatastoreTypeRegistryFactory#defaultInstance()}.
+         * <p>Default value is {@link DsColumnMapping}.
          *
-         * @param typeRegistry
-         *         the type registry containing all the required
-         *         {@linkplain io.spine.server.entity.storage.ColumnType column types}
-         *         to handle the existing Entity Columns
+         * @param columnMapping
+         *         the storage rules for entity columns
          * @return self for method chaining
          */
         public Builder
-        setTypeRegistry(ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> typeRegistry) {
-            this.typeRegistry = checkNotNull(typeRegistry);
+        setColumnMapping(ColumnMapping<Value<?>> columnMapping) {
+            this.columnMapping = checkNotNull(columnMapping);
             return this;
         }
 
@@ -337,8 +334,8 @@ public class DatastoreStorageFactory implements StorageFactory {
          */
         public DatastoreStorageFactory build() {
             checkNotNull(datastore);
-            if (typeRegistry == null) {
-                typeRegistry = DatastoreTypeRegistryFactory.defaultInstance();
+            if (columnMapping == null) {
+                columnMapping = new DsColumnMapping();
             }
             if (namespaceConverter == null) {
                 converterFactory = NsConverterFactory.defaults();

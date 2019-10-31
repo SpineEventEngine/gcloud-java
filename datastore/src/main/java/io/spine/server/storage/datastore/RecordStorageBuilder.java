@@ -20,13 +20,13 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.Value;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.datastore.type.DatastoreColumnType;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,7 +46,7 @@ abstract class RecordStorageBuilder<I,
     private Descriptor descriptor;
     private DatastoreWrapper datastore;
     private boolean multitenant;
-    private ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry;
+    private ColumnMapping<Value<?>> columnMapping;
     private Class<I> idClass;
     private Class<? extends Entity<?, ?>> entityClass;
 
@@ -82,7 +82,8 @@ abstract class RecordStorageBuilder<I,
      */
     @CanIgnoreReturnValue
     public B setEntityClass(Class<? extends Entity<?, ?>> entityClass) {
-        this.entityClass = checkNotNull(entityClass);
+        checkNotNull(entityClass);
+        this.entityClass = entityClass;
         return self();
     }
 
@@ -96,7 +97,7 @@ abstract class RecordStorageBuilder<I,
     @SuppressWarnings("unchecked") // The ID class is ensured by the parameter type.
     @CanIgnoreReturnValue
     public B setModelClass(EntityClass<? extends Entity<I, ?>> modelClass) {
-        TypeUrl stateType = modelClass.stateType();
+        TypeUrl stateType = modelClass.stateTypeUrl();
         Class<I> idClass = (Class<I>) modelClass.idClass();
 
         setStateType(stateType);
@@ -130,13 +131,12 @@ abstract class RecordStorageBuilder<I,
     }
 
     /**
-     * Assigns the type registry of
-     * the {@linkplain io.spine.server.entity.storage.EntityColumn entity columns}.
+     * Sets the mapping rules of
+     * the {@linkplain io.spine.server.entity.storage.Column entity columns}.
      */
     @CanIgnoreReturnValue
-    public B setColumnTypeRegistry(
-            ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> columnTypeRegistry) {
-        this.columnTypeRegistry = checkNotNull(columnTypeRegistry);
+    public B setColumnMapping(ColumnMapping<Value<?>> columnMapping) {
+        this.columnMapping = checkNotNull(columnMapping);
         return self();
     }
 
@@ -163,11 +163,10 @@ abstract class RecordStorageBuilder<I,
     }
 
     /**
-     * Obtains the type registry of
-     * the {@linkplain io.spine.server.entity.storage.EntityColumn entity columns}.
+     * Obtains the column mapping rules used in the storage.
      */
-    public ColumnTypeRegistry<? extends DatastoreColumnType<?, ?>> getColumnTypeRegistry() {
-        return columnTypeRegistry;
+    public ColumnMapping<Value<?>> getColumnMapping() {
+        return columnMapping;
     }
 
     /**
@@ -187,7 +186,7 @@ abstract class RecordStorageBuilder<I,
     final void checkRequiredFields() {
         checkNotNull(descriptor, "State descriptor is not set.");
         checkNotNull(datastore, "Datastore is not set.");
-        checkNotNull(columnTypeRegistry, "Column type registry is not set.");
+        checkNotNull(columnMapping, "Column mapping is not set.");
     }
 
     abstract B self();

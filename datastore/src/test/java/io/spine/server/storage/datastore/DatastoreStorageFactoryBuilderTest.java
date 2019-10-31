@@ -22,21 +22,19 @@ package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
+import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.ContextSpec;
-import io.spine.server.entity.storage.ColumnType;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
-import io.spine.server.storage.datastore.given.Columns.ByteColumnType;
-import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
+import io.spine.server.entity.storage.ColumnMapping;
+import io.spine.server.storage.datastore.given.TestColumnMapping;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.ContextSpec.singleTenant;
-import static io.spine.server.storage.datastore.given.Columns.byteColumn;
-import static io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory.predefinedValuesAnd;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -60,37 +58,38 @@ class DatastoreStorageFactoryBuilderTest {
         new NullPointerTester()
                 .setDefault(Datastore.class,
                             datastore())
-                .setDefault(ColumnTypeRegistry.class,
-                            DatastoreTypeRegistryFactory.defaultInstance())
+                .setDefault(ColumnMapping.class, new DsColumnMapping())
                 .testInstanceMethods(DatastoreStorageFactory.newBuilder(),
                                      NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
-    @DisplayName("construct factories with default type registry")
-    void testDefaultTypeRegistry() {
+    @DisplayName("construct factories with default column mapping")
+    void testDefaultColumnMapping() {
         DatastoreStorageFactory factory = DatastoreStorageFactory
                 .newBuilder()
                 .setDatastore(datastore())
                 .build();
-        ColumnTypeRegistry registry = factory.getTypeRegistry();
-        assertNotNull(registry);
+        ColumnMapping<Value<?>> mapping = factory.columnMapping();
+        assertNotNull(mapping);
     }
 
     @Test
-    @DisplayName("construct factories with extended type registry")
-    void testExtendedTypeRegistry() {
+    @DisplayName("construct factories with custom column mapping")
+    void testCustomColumnMapping() {
+        ColumnMapping<Value<?>> mapping = new TestColumnMapping();
         DatastoreStorageFactory factory = DatastoreStorageFactory
                 .newBuilder()
                 .setDatastore(datastore())
-                .setTypeRegistry(predefinedValuesAnd()
-                                         .put(Byte.class, new ByteColumnType())
-                                         .build())
+                .setColumnMapping(mapping)
                 .build();
-        ColumnTypeRegistry<?> registry = factory.getTypeRegistry();
-        assertNotNull(registry);
-        ColumnType type = registry.get(byteColumn());
-        assertNotNull(type);
+        ColumnMapping<Value<?>> mappingUsedByFactory = factory.columnMapping();
+        assertNotNull(mappingUsedByFactory);
+
+        String someString = "some-test-string";
+        Value<?> value = mappingUsedByFactory.of(String.class)
+                                             .applyTo(someString);
+        assertThat(value).isEqualTo(TestColumnMapping.STRING_MAPPING_RESULT);
     }
 
     @Nested

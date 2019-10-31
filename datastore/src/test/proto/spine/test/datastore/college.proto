@@ -36,18 +36,21 @@ message CollegeId {
 }
 
 message College {
+    option (entity).kind = PROJECTION;
 
     CollegeId id = 1 [(required) = true];
 
-    string name = 2 [(required) = true];
+    string name = 2 [(column) = true];
 
-    int32 student_count = 3;
+    int32 student_count = 3 [(column) = true];
 
-    google.protobuf.Timestamp admission_deadline = 4 [(required) = true];
+    google.protobuf.Timestamp admission_deadline = 4 [(column) = true];
 
-    double passing_grade = 5;
+    double passing_grade = 5 [(column) = true];
 
-    bool stateSponsored = 6;
+    bool state_sponsored = 6 [(column) = true];
 
-    repeated string subjects = 7;
+    google.protobuf.Timestamp created = 7 [(column) = true];
+
+    repeated string subjects = 8;
 }

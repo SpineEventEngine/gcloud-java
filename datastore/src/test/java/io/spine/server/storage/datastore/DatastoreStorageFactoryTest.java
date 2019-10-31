@@ -24,20 +24,22 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.TenantId;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.given.TestEnvironment;
-import io.spine.server.storage.datastore.type.DatastoreTypeRegistryFactory;
+import io.spine.test.datastore.College;
+import io.spine.test.datastore.CollegeId;
 import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectId;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,11 +48,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.server.storage.datastore.TestDatastores.local;
 import static io.spine.testing.server.storage.datastore.TestDatastores.defaultLocalProjectId;
+import static io.spine.testing.server.storage.datastore.TestDatastores.local;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`DatastoreStorageFactory` should")
@@ -101,14 +102,13 @@ class DatastoreStorageFactoryTest {
     }
 
     @Test
-    @DisplayName("have default column type registry")
-    void testDefaultColumnTypeRegistry() {
+    @DisplayName("have default column mapping")
+    void testDefaultColumnMapping() {
         DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
                                                                  .setDatastore(datastore)
                                                                  .build();
-        ColumnTypeRegistry defaultRegistry = factory.getTypeRegistry();
-        assertNotNull(defaultRegistry);
-        assertSame(DatastoreTypeRegistryFactory.defaultInstance(), defaultRegistry);
+        ColumnMapping<Value<?>> mapping = factory.columnMapping();
+        assertNotNull(mapping);
     }
 
     @Test
@@ -183,16 +183,16 @@ class DatastoreStorageFactoryTest {
                               recordId.getValue());
     }
 
-    private static class TestEntity extends AbstractEntity<String, StringValue> {
+    private static class TestEntity extends AbstractEntity<ProjectId, Project> {
 
-        private TestEntity(String id) {
+        private TestEntity(ProjectId id) {
             super(id);
         }
     }
 
-    private static class DifferentTestEntity extends AbstractEntity<String, Project> {
+    private static class DifferentTestEntity extends AbstractEntity<CollegeId, College> {
 
-        protected DifferentTestEntity(String id) {
+        protected DifferentTestEntity(CollegeId id) {
             super(id);
         }
     }

@@ -34,7 +34,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static io.spine.validate.Validate.checkNotDefault;
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 import static java.util.Arrays.stream;
 
 /**
@@ -76,7 +76,7 @@ class DsEntityComparator implements Comparator<Entity>, Serializable {
      */
     static Comparator<Entity> implementing(OrderBy orderBy) {
         checkNotNull(orderBy);
-        checkNotDefault(orderBy);
+        checkNotDefaultArg(orderBy);
         Comparator<Entity> comparator = new DsEntityComparator(orderBy.getColumn());
         return orderBy.getDirection() == ASCENDING ? comparator : comparator.reversed();
     }

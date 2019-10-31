@@ -33,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Iterator;
 import java.util.Optional;
 
-import static io.spine.validate.Validate.isDefault;
+import static io.spine.protobuf.Messages.isDefault;
 
 /**
  * Datastore implementation of the {@link ProjectionStorage}.
@@ -51,7 +51,7 @@ public class DsProjectionStorage<I> extends ProjectionStorage<I> {
                                   DsRecordStorage<I> recordStorage,
                                   DsPropertyStorage propertyStorage,
                                   boolean multitenant) {
-        super(multitenant);
+        super(projectionClass, multitenant);
         this.recordStorage = recordStorage;
         this.propertyStorage = propertyStorage;
         this.lastTimestampId =

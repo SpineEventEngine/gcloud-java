@@ -26,8 +26,8 @@ import com.google.cloud.datastore.Value;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import io.spine.client.Filter;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.CompositeQueryParameter;
-import io.spine.server.entity.storage.EntityColumn;
 
 import javax.annotation.Nullable;
 import java.util.ArrayDeque;
@@ -69,7 +69,7 @@ final class DsFilters {
     private static final Predicate<CompositeQueryParameter> isConjunctive =
             input -> {
                 checkNotNull(input);
-                return input.getOperator() == ALL;
+                return input.operator() == ALL;
             };
 
     /**
@@ -285,9 +285,9 @@ final class DsFilters {
      * Converts the given parameter to a {@code Collection} of {@link FilterNode}s.
      */
     private static Collection<FilterNode> toFilters(CompositeQueryParameter param) {
-        ImmutableMultimap<EntityColumn, Filter> srcFilters = param.getFilters();
+        ImmutableMultimap<Column, Filter> srcFilters = param.filters();
         Set<FilterNode> filters = new HashSet<>(srcFilters.size());
-        for (Map.Entry<EntityColumn, Filter> entry : srcFilters.entries()) {
+        for (Map.Entry<Column, Filter> entry : srcFilters.entries()) {
             filters.add(new FilterNode(entry.getKey(), entry.getValue()));
         }
         return filters;
@@ -363,12 +363,12 @@ final class DsFilters {
      */
     private static class FilterNode {
 
-        private final EntityColumn column;
+        private final Column column;
         private final Filter columnFilter;
 
         private final Collection<FilterNode> subtrees;
 
-        private FilterNode(@Nullable EntityColumn column, @Nullable Filter filter) {
+        private FilterNode(@Nullable Column column, @Nullable Filter filter) {
             this.column = column;
             this.columnFilter = filter;
             this.subtrees = newLinkedList();
@@ -378,11 +378,11 @@ final class DsFilters {
             this(null, null);
         }
 
-        private EntityColumn getColumn() {
+        private Column column() {
             return column;
         }
 
-        private Filter getFilter() {
+        private Filter filter() {
             return columnFilter;
         }
 
@@ -390,7 +390,8 @@ final class DsFilters {
             // Only non-faulty values are used.
         private StructuredQuery.Filter toFilter(FilterAdapter adapter) {
             Value<?> value = adapter.toValue(column, columnFilter);
-            String columnName = column.name();
+            String columnName = column.name()
+                                      .value();
             switch (columnFilter.getOperator()) {
                 case EQUAL:
                     return eq(columnName, value);
@@ -468,13 +469,13 @@ final class DsFilters {
                 return false;
             }
             FilterNode that = (FilterNode) o;
-            return Objects.equal(getColumn(), that.getColumn()) &&
-                    Objects.equal(getFilter(), that.getFilter());
+            return Objects.equal(column(), that.column()) &&
+                    Objects.equal(filter(), that.filter());
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(getColumn(), getFilter());
+            return Objects.hashCode(column(), filter());
         }
 
         private static Function<FilterNode, StructuredQuery.Filter>

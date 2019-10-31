@@ -30,8 +30,8 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.entity.FieldMasks.applyMask;
-import static io.spine.validate.Validate.isDefault;
 
 /**
  * Applies the provided mask to nullable or non-nullable records.
