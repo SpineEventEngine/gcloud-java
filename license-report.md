@@ -1,6 +1,6 @@
 
     
-# Dependencies of `io.spine.gcloud:spine-datastore:1.1.13`
+# Dependencies of `io.spine.gcloud:spine-datastore:1.2.0`
 
 ## Runtime
 1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.9
@@ -136,12 +136,6 @@
      * **Manifest license URL:** [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.squareup.okhttp **Name:** okhttp **Version:** 2.5.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
      * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -161,10 +155,6 @@
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
 1. **Group:** io.grpc **Name:** grpc-core **Version:** 1.24.1
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-okhttp **Version:** 1.24.1
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -443,12 +433,6 @@
      * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.squareup.okhttp **Name:** okhttp **Version:** 2.5.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
      * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -482,10 +466,6 @@
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
 1. **Group:** io.grpc **Name:** grpc-core **Version:** 1.24.1
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-okhttp **Version:** 1.24.1
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -735,12 +715,12 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Oct 31 19:50:36 EET 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Nov 08 15:58:08 EET 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.gcloud:spine-stackdriver-trace:1.1.13`
+# Dependencies of `io.spine.gcloud:spine-stackdriver-trace:1.2.0`
 
 ## Runtime
 1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
@@ -853,12 +833,6 @@ This report was generated on **Thu Oct 31 19:50:36 EET 2019** using [Gradle-Lice
      * **Manifest license URL:** [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.squareup.okhttp **Name:** okhttp **Version:** 2.5.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
      * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -894,10 +868,6 @@ This report was generated on **Thu Oct 31 19:50:36 EET 2019** using [Gradle-Lice
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
 1. **Group:** io.grpc **Name:** grpc-netty-shaded **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-okhttp **Version:** 1.24.1
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -1156,12 +1126,6 @@ This report was generated on **Thu Oct 31 19:50:36 EET 2019** using [Gradle-Lice
      * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.squareup.okhttp **Name:** okhttp **Version:** 2.5.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
      * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1211,10 +1175,6 @@ This report was generated on **Thu Oct 31 19:50:36 EET 2019** using [Gradle-Lice
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
 1. **Group:** io.grpc **Name:** grpc-netty-shaded **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-okhttp **Version:** 1.24.1
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -1472,12 +1432,12 @@ This report was generated on **Thu Oct 31 19:50:36 EET 2019** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Oct 31 19:50:49 EET 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Nov 08 15:58:21 EET 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.gcloud:spine-testutil-gcloud:1.1.13`
+# Dependencies of `io.spine.gcloud:spine-testutil-gcloud:1.2.0`
 
 ## Runtime
 1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.9
@@ -1613,12 +1573,6 @@ This report was generated on **Thu Oct 31 19:50:49 EET 2019** using [Gradle-Lice
      * **Manifest license URL:** [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.squareup.okhttp **Name:** okhttp **Version:** 2.5.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
      * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1638,10 +1592,6 @@ This report was generated on **Thu Oct 31 19:50:49 EET 2019** using [Gradle-Lice
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
 1. **Group:** io.grpc **Name:** grpc-core **Version:** 1.24.1
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-okhttp **Version:** 1.24.1
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -1941,12 +1891,6 @@ This report was generated on **Thu Oct 31 19:50:49 EET 2019** using [Gradle-Lice
      * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.squareup.okhttp **Name:** okhttp **Version:** 2.5.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
-     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
      * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1980,10 +1924,6 @@ This report was generated on **Thu Oct 31 19:50:49 EET 2019** using [Gradle-Lice
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
 1. **Group:** io.grpc **Name:** grpc-core **Version:** 1.24.1
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-okhttp **Version:** 1.24.1
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -2233,4 +2173,4 @@ This report was generated on **Thu Oct 31 19:50:49 EET 2019** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Oct 31 19:51:02 EET 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Nov 08 15:58:34 EET 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
