@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.EntityState;
 import io.spine.client.CompositeFilter;
 import io.spine.client.IdFilter;
 import io.spine.client.ResponseFormat;
@@ -142,7 +142,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
     }
 
     @Override
-    protected Message newState(ProjectId projectId) {
+    protected EntityState newState(ProjectId projectId) {
         Project project = Project
                 .newBuilder()
                 .setId(projectId)
