@@ -12,7 +12,7 @@ all modules and does not describe the project structure per-subproject.
 
 <groupId>io.spine.gcloud</groupId>
 <artifactId>spine-gcloud-java</artifactId>
-<version>1.2.0</version>
+<version>1.2.1</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -28,7 +28,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.cloud</groupId>
     <artifactId>google-cloud-datastore</artifactId>
-    <version>1.96.0</version>
+    <version>1.100.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -40,7 +40,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-server</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -58,7 +58,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-testutil-server</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -76,19 +76,19 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.junit.jupiter</groupId>
     <artifactId>junit-jupiter-api</artifactId>
-    <version>5.5.1</version>
+    <version>5.5.2</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>org.junit.jupiter</groupId>
     <artifactId>junit-jupiter-engine</artifactId>
-    <version>5.5.1</version>
+    <version>5.5.2</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>org.junit.jupiter</groupId>
     <artifactId>junit-jupiter-params</artifactId>
-    <version>5.5.1</version>
+    <version>5.5.2</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -109,32 +109,32 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>protoc-gen-grpc-java</artifactId>
-    <version>1.24.1</version>
+    <version>1.25.0</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-errorprone-checks</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-protoc-plugin</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>
     <artifactId>pmd-java</artifactId>
-    <version>6.16.0</version>
+    <version>6.19.0</version>
   </dependency>
   <dependency>
     <groupId>org.jacoco</groupId>
     <artifactId>org.jacoco.agent</artifactId>
-    <version>0.8.4</version>
+    <version>0.8.5</version>
   </dependency>
   <dependency>
     <groupId>org.jacoco</groupId>
     <artifactId>org.jacoco.ant</artifactId>
-    <version>0.8.4</version>
+    <version>0.8.5</version>
   </dependency>
 </dependencies>
 </project>
