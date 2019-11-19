@@ -76,7 +76,7 @@ enum SpanAttribute {
         @Override
         AttributeValue value(SignalSpan signalSpan) {
             String signalType = signalSpan.signal()
-                                          .typeUrl()
+                                          .enclosedTypeUrl()
                                           .value();
             return SpanAttribute.stringValue(signalType);
         }
