@@ -188,13 +188,30 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      * @see DatastoreWrapper#readAll(StructuredQuery, int)
      */
     Iterator<M> readAll(EntityQuery.Builder queryBuilder, int readBatchSize) {
-        StructuredQuery<Entity> query =
-                queryBuilder.setKind(kind.value())
-                            .build();
+        StructuredQuery<Entity> query = queryBuilder.setKind(kind.value())
+                                                    .build();
         Iterator<Entity> iterator = datastore.readAll(query, readBatchSize);
-        Iterator<M> transformed =
-                Iterators.transform(iterator, (e) -> Entities.toMessage(e, typeUrl));
+        Iterator<M> transformed = Iterators.transform(iterator,
+                                                      (e) -> Entities.toMessage(e, typeUrl));
         return transformed;
+    }
+
+    /**
+     * Reads the messages from the storage.
+     *
+     * <p>The caller is responsible for setting the query limits and interpreting the results.
+     * This call does not trigger reading of the entire dataset page-by-page.
+     *
+     * @param queryBuilder the partially composed query builder
+     * @see DatastoreWrapper#read(StructuredQuery)
+     * @see #readAll(EntityQuery.Builder, int)
+     */
+    Iterator<M> read(EntityQuery.Builder queryBuilder) {
+        StructuredQuery<Entity> query = queryBuilder.setKind(kind.value())
+                                                    .build();
+        DsQueryIterator<Entity> iterator = datastore.read(query);
+        Iterator<M> result = Iterators.transform(iterator, (e) -> Entities.toMessage(e, typeUrl));
+        return result;
     }
 
     /**

@@ -57,8 +57,7 @@ import static org.junit.Assert.assertTrue;
 @DisplayName("`DsInboxStorage` should")
 class DsInboxStorageTest extends InboxStorageTest {
 
-    private final TestDatastoreStorageFactory factory =
-            TestDatastoreStorageFactory.local();
+    private final TestDatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
 
     @Override
     @BeforeEach

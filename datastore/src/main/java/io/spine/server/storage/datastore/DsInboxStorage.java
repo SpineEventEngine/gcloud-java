@@ -35,12 +35,14 @@ import io.spine.server.delivery.ShardIndex;
 import io.spine.string.Stringifiers;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.cloud.Timestamp.fromProto;
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 
 /**
  * {@link InboxStorage} implementation based on Google Cloud Datastore.
@@ -67,17 +69,40 @@ public class DsInboxStorage
     public Page<InboxMessage> readAll(ShardIndex index, int pageSize) {
         checkNotNull(index);
 
+        EntityQuery.Builder builder = queryInShard(index);
+        builder.setOrderBy(asc(Column.whenReceived.columnName()),
+                           asc(Column.version.columnName()));
+        Iterator<InboxMessage> iterator = readAll(builder, pageSize);
+        return new InboxPage(iterator, pageSize);
+    }
+
+    @Override
+    public Optional<InboxMessage> oldestMessageToDeliver(ShardIndex index) {
         int indexValue = index.getIndex();
         int totalValue = index.getOfTotal();
         EntityQuery.Builder builder =
                 Query.newEntityQueryBuilder()
                      .setFilter(and(
                              eq(Column.shardIndex.columnName(), indexValue),
-                             eq(Column.ofTotalShards.columnName(), totalValue)
+                             eq(Column.ofTotalShards.columnName(),totalValue),
+                             eq(Column.status.columnName(), TO_DELIVER.toString())
                      ))
-                     .setOrderBy(asc(Column.whenReceived.columnName()));
-        Iterator<InboxMessage> iterator = readAll(builder, pageSize);
-        return new InboxPage(iterator, pageSize);
+                     .setLimit(1);
+        Iterator<InboxMessage> iterator = read(builder);
+        if(iterator.hasNext()) {
+            return Optional.of(iterator.next());
+        }
+        return Optional.empty();
+    }
+
+    private static EntityQuery.Builder queryInShard(ShardIndex index) {
+        int indexValue = index.getIndex();
+        int totalValue = index.getOfTotal();
+        return Query.newEntityQueryBuilder()
+                    .setFilter(and(
+                            eq(Column.shardIndex.columnName(), indexValue),
+                            eq(Column.ofTotalShards.columnName(), totalValue)
+                    ));
     }
 
     /**
@@ -124,6 +149,10 @@ public class DsInboxStorage
 
         whenReceived("when_received", (m) -> {
             return TimestampValue.of(fromProto(m.getWhenReceived()));
+        }),
+
+        version("version", (m) -> {
+            return LongValue.of(m.getVersion());
         });
 
         /**

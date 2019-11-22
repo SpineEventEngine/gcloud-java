@@ -14,6 +14,7 @@ indexes:
     properties:
       - name: inbox_shard
       - name: when_received
+      - name: version
 
   # Indexes for the Aggregates.
   #
