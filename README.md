@@ -14,13 +14,13 @@ dependencies {
     implementation (
     
         // Datastore Storage support library.
-        "io.spine.gcloud:spine-datastore:1.2.5",
+        "io.spine.gcloud:spine-datastore:1.3.0",
         
         // Stackdriver Trace support library.
-        "io.spine.gcloud:spine-stackdriver-trace:1.2.5",
+        "io.spine.gcloud:spine-stackdriver-trace:1.3.0",
 
         // Datastore-related test utilities (if needed).
-        "io.spine.gcloud:testutil-gcloud:1.2.5"
+        "io.spine.gcloud:testutil-gcloud:1.3.0"
     )
 }
 ```
