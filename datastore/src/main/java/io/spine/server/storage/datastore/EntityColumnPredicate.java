@@ -31,7 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import static io.spine.server.storage.OperatorEvaluator.eval;
+import static io.spine.client.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
