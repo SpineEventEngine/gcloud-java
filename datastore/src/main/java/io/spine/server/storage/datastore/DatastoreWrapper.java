@@ -23,7 +23,6 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
-import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.DatastoreReaderWriter;
 import com.google.cloud.datastore.DatastoreWriter;
@@ -534,14 +533,6 @@ public class DatastoreWrapper implements Logging {
         keyFactory.setNamespace(namespace.getValue());
 
         return keyFactory;
-    }
-
-    public DatastoreOptions datastoreOptions() {
-        DatastoreOptions options =
-                datastore.getOptions()
-                         .toBuilder()
-                         .build();
-        return options;
     }
 
     @VisibleForTesting

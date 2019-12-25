@@ -119,7 +119,8 @@ class DatastoreStorageFactoryBuilderTest {
                     .build();
             assertNotNull(factory);
             String actualNamespace = factory.wrapperFor(spec)
-                                            .datastoreOptions()
+                                            .datastore()
+                                            .getOptions()
                                             .getNamespace();
             assertEquals(namespace, actualNamespace);
         }
