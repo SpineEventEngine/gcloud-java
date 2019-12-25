@@ -574,7 +574,7 @@ public class DatastoreWrapper implements Logging {
      */
     private Iterator<Entity> readBulk(List<Key> keys) {
         int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
-        _debug().log("Reading a big bulk of entities synchronously. The data is read as %d pages.",
+        _trace().log("Reading a big bulk of entities synchronously. The data is read as %d pages.",
                      pageCount);
         int lowerBound = 0;
         int higherBound = MAX_KEYS_PER_READ_REQUEST;
