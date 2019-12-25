@@ -279,7 +279,7 @@ public class DatastoreWrapper implements Logging {
                      .setNamespace(namespace.getValue())
                      .build();
         _trace().log("Reading entities of `%s` kind in `%s` namespace.",
-                     query.getKind(), query.getFilter(), namespace.getValue());
+                     query.getKind(), namespace.getValue());
         DsQueryIterator<R> result = new DsQueryIterator<>(queryWithNamespace, actor);
         return result;
     }
