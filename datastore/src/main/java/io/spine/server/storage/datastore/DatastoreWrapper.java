@@ -23,7 +23,6 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
-import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.DatastoreReaderWriter;
 import com.google.cloud.datastore.DatastoreWriter;
@@ -274,11 +273,13 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreReader#run(Query)
      */
     public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
-        Namespace namespace = currentNamespace();
+        Namespace namespace = namespaceSupplier.get();
         StructuredQuery<R> queryWithNamespace =
                 query.toBuilder()
                      .setNamespace(namespace.getValue())
                      .build();
+        _trace().log("Reading entities of `%s` kind in `%s` namespace.",
+                     query.getKind(), namespace.getValue());
         DsQueryIterator<R> result = new DsQueryIterator<>(queryWithNamespace, actor);
         return result;
     }
@@ -389,12 +390,14 @@ public class DatastoreWrapper implements Logging {
      */
     @VisibleForTesting
     protected void dropTable(String table) {
-        Namespace namespace = currentNamespace();
+        Namespace namespace = namespaceSupplier.get();
         StructuredQuery<Entity> query =
                 Query.newEntityQueryBuilder()
                      .setNamespace(namespace.getValue())
                      .setKind(table)
                      .build();
+        _trace().log("Deleting all entities of `%s` kind in `%s` namespace.",
+                     table, namespace.getValue());
         Iterator<Entity> queryResult = read(query);
         List<Entity> entities = newArrayList(queryResult);
         deleteEntities(entities);
@@ -530,18 +533,11 @@ public class DatastoreWrapper implements Logging {
         if (keyFactory == null) {
             keyFactory = initKeyFactory(kind);
         }
-        Namespace namespace = currentNamespace();
+        Namespace namespace = namespaceSupplier.get();
+        _trace().log("Retrieving KeyFactory for kind `%s` in `%s` namespace.",
+                     kind, namespace.getValue());
         keyFactory.setNamespace(namespace.getValue());
-
         return keyFactory;
-    }
-
-    public DatastoreOptions datastoreOptions() {
-        DatastoreOptions options =
-                datastore.getOptions()
-                         .toBuilder()
-                         .build();
-        return options;
     }
 
     @VisibleForTesting
@@ -578,8 +574,8 @@ public class DatastoreWrapper implements Logging {
      */
     private Iterator<Entity> readBulk(List<Key> keys) {
         int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
-        _debug().log("Reading a big bulk of entities synchronously." +
-                             " The data is read as %d pages.", pageCount);
+        _trace().log("Reading a big bulk of entities synchronously. The data is read as %d pages.",
+                     pageCount);
         int lowerBound = 0;
         int higherBound = MAX_KEYS_PER_READ_REQUEST;
         int keysLeft = keys.size();
@@ -607,12 +603,6 @@ public class DatastoreWrapper implements Logging {
             Entity[] part = Arrays.copyOfRange(entities, partHead, partTail);
             writeSmallBulk(part);
         }
-    }
-
-    private Namespace currentNamespace() {
-        Namespace namespace = namespaceSupplier.get();
-        _debug().log("Using namespace `%s`.", namespace);
-        return namespace;
     }
 
     private void writeSmallBulk(Entity[] entities) {
