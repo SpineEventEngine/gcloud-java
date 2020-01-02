@@ -10,11 +10,22 @@ indexes:
     - name: type
     - name: created
 
+  # Index required for `DsInboxStorage.readAll` query.
+
   - kind: spine.server.delivery.InboxMessage
     properties:
       - name: inbox_shard
+      - name: of_total_inbox_shards
       - name: when_received
       - name: version
+
+  # Index required for `DsInboxStorage.oldestMessageToDeliver` query.
+
+  - kind: spine.server.delivery.InboxMessage
+    properties:
+      - name: inbox_shard
+      - name: of_total_inbox_shards
+      - name: status
 
   # Indexes for the Aggregates.
   #
