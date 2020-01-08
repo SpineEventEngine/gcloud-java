@@ -48,6 +48,9 @@ task startDatastore(type: com.github.psxpaul.task.ExecFork) {
     // See: https://cloud.google.com/sdk/gcloud/reference/beta/emulators/datastore/start
     //
     waitForPort = 8081
+
+    // Suppress a console warning for JRE < 9
+    killDescendants = false
 }
 
 test.dependsOn startDatastore
