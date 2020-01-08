@@ -40,7 +40,6 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
@@ -55,30 +54,13 @@ import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Optional.empty;
+import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 
 /**
  * A utility for working with the Datastore {@linkplain Filter filters}.
  */
 final class DsFilters {
-
-    /**
-     * Matches the {@link CompositeQueryParameter} instances joined by
-     * the {@linkplain io.spine.client.CompositeFilter.CompositeOperator#ALL conjunctive} operator.
-     */
-    private static final Predicate<CompositeQueryParameter> isConjunctive =
-            input -> {
-                checkNotNull(input);
-                return input.operator() == ALL;
-            };
-
-    /**
-     * Matches the {@link CompositeQueryParameter} instances joined by
-     * the {@linkplain io.spine.client.CompositeFilter.CompositeOperator#EITHER disjunctive}
-     * operator.
-     */
-    private static final Predicate<CompositeQueryParameter> isDisjunctive =
-            input -> !isConjunctive.test(input);
 
     /**
      * Prevents the utility class instantiation.
@@ -152,12 +134,12 @@ final class DsFilters {
     private static Collection<StructuredQuery.Filter>
     toFilters(Collection<CompositeQueryParameter> parameters,
               FilterAdapter columnFilterAdapter) {
-        List<CompositeQueryParameter> conjunctionParams = parameters.stream()
-                                                                    .filter(isConjunctive)
-                                                                    .collect(toList());
-        List<CompositeQueryParameter> disjunctionParams = parameters.stream()
-                                                                    .filter(isDisjunctive)
-                                                                    .collect(toList());
+
+        Map<Boolean, List<CompositeQueryParameter>> partitions =
+                parameters.stream()
+                          .collect(partitioningBy(DsFilters::isConjunctive));
+        List<CompositeQueryParameter> conjunctionParams = partitions.get(true);
+        List<CompositeQueryParameter> disjunctionParams = partitions.get(false);
         Optional<CompositeQueryParameter> mergedConjunctiveParams =
                 mergeConjunctiveParameters(conjunctionParams);
 
@@ -165,6 +147,15 @@ final class DsFilters {
         TreePathWalker processor = new FilterReducer(columnFilterAdapter, filters);
         multiply(mergedConjunctiveParams.orElse(null), disjunctionParams, processor);
         return filters;
+    }
+
+    /**
+     * Matches the {@link CompositeQueryParameter} instances joined by
+     * the {@linkplain io.spine.client.CompositeFilter.CompositeOperator#ALL conjunctive} operator.
+     */
+    private static boolean isConjunctive(CompositeQueryParameter param) {
+        checkNotNull(param);
+        return param.operator() == ALL;
     }
 
     /**

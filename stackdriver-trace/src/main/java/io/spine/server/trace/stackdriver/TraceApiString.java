@@ -20,6 +20,8 @@
 
 package io.spine.server.trace.stackdriver;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import io.spine.value.ValueHolder;
 
 import static java.lang.String.format;
@@ -39,7 +41,8 @@ abstract class TraceApiString extends ValueHolder<String> {
      * @param args
      *         the formatting arguments
      */
-    TraceApiString(String format, Object... args) {
+    @FormatMethod
+    TraceApiString(@FormatString String format, Object... args) {
         super(format(format, args));
     }
 
