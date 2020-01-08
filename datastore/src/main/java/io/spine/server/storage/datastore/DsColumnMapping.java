@@ -114,13 +114,15 @@ public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
         return o -> NullValue.of();
     }
 
-    @SuppressWarnings("ProtoTimestampGetSecondsGetNano") // This behavior is intended.
+    @SuppressWarnings({"ProtoTimestampGetSecondsGetNano", "UnnecessaryLambda"})
+    // This behavior is intended.
     private static ColumnTypeMapping<Timestamp, TimestampValue> ofTimestamp() {
         return timestamp -> TimestampValue.of(
                 ofTimeSecondsAndNanos(timestamp.getSeconds(), timestamp.getNanos())
         );
     }
 
+    @SuppressWarnings("UnnecessaryLambda")
     private static ColumnTypeMapping<Version, LongValue> ofVersion() {
         return version -> LongValue.of(version.getNumber());
     }

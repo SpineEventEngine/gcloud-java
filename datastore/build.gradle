@@ -18,6 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+plugins {
+    id "com.github.psxpaul.execfork" version '0.1.13'
+}
+
 ext {
     runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
 }
@@ -33,14 +37,21 @@ dependencies {
     testImplementation "io.spine:spine-server:"
 }
 
-task startDatastore {
+task startDatastore(type: com.github.psxpaul.task.ExecFork) {
     description = "Starts local in-memory datastore using scripts from ./scripts folder."
     group = "Build Setup"
 
-    doLast {
-        // Start Datastore emulator with the CLI command.
-        "$rootDir/scripts/start-datastore.${runsOnWindows ? 'bat' : 'sh'}".execute()
-    }
+    executable = "$rootDir/scripts/start-datastore.${runsOnWindows ? 'bat' : 'sh'}"
+
+    // Default port for the emulator is 8081.
+    //
+    // See: https://cloud.google.com/sdk/gcloud/reference/beta/emulators/datastore/start
+    //
+    waitForPort = 8081
+
+    // Suppress a console warning for JRE < 9
+    killDescendants = false
 }
 
-check.dependsOn startDatastore
+test.dependsOn startDatastore
+startDatastore.shouldRunAfter assemble

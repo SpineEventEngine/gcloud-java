@@ -33,8 +33,9 @@ abstract class ShortTraceApiString extends TraceApiString {
 
     private static final long serialVersionUID = 0L;
 
-    ShortTraceApiString(String format, Object... args) {
-        super(format, args);
+    @SuppressWarnings("FormatStringAnnotation")
+    ShortTraceApiString(String value) {
+        super(value);
     }
 
     /**

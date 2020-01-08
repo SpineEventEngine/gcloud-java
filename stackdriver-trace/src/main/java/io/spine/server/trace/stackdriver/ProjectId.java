@@ -29,6 +29,7 @@ public final class ProjectId extends TraceApiString {
 
     private static final long serialVersionUID = 0L;
 
+    @SuppressWarnings("FormatStringAnnotation")
     ProjectId(String value) {
         super(checkNotNull(value));
     }
