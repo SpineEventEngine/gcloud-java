@@ -47,7 +47,6 @@ ext {
 }
 
 allprojects {
-    apply plugin: 'maven'
     apply plugin: 'jacoco'
 
     group = 'io.spine.gcloud'
