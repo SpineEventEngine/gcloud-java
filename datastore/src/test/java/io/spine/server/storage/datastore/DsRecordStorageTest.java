@@ -376,11 +376,13 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Check the query results.
             List<EntityRecord> resultList = newArrayList(readResult);
-            assertEquals(1, resultList.size());
+            assertThat(resultList)
+                    .hasSize(1);
 
             // Check the record state.
             EntityRecord record = resultList.get(0);
-            assertEquals(targetEntity.state(), unpack(record.getState()));
+            assertThat(unpack(record.getState()))
+                    .isEqualTo(targetEntity.state());
 
             assertDsReadByKeys();
         }
