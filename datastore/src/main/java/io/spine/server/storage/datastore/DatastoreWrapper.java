@@ -349,12 +349,12 @@ public class DatastoreWrapper implements Logging {
      *         kind (a.k.a. type, table, etc.) of the records to delete
      */
     @VisibleForTesting
-    protected void dropTable(String table) {
+    protected void dropTable(Kind table) {
         Namespace namespace = namespaceSupplier.get();
         StructuredQuery<Entity> query =
                 Query.newEntityQueryBuilder()
                      .setNamespace(namespace.value())
-                     .setKind(table)
+                     .setKind(table.value())
                      .build();
         _trace().log("Deleting all entities of `%s` kind in `%s` namespace.",
                      table, namespace.value());
@@ -415,6 +415,7 @@ public class DatastoreWrapper implements Logging {
      * @return an instance of {@link KeyFactory} for given kind
      */
     public KeyFactory keyFactory(Kind kind) {
+        checkNotNull(kind);
         DatastoreKind datastoreKind = new DatastoreKind(projectId(), kind);
         KeyFactory keyFactory = keyFactories.get(datastoreKind);
         if (keyFactory == null) {

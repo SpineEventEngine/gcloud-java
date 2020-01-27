@@ -26,7 +26,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Query;
-import com.google.common.truth.IntegerSubject;
 import com.google.protobuf.Empty;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
@@ -230,29 +229,45 @@ class TransactionWrapperTest {
                                                                 .setFilter(hasAncestor(ancestorKey))
                                                                 .build());
             List<Entity> allEntities = newArrayList(readEntities);
-            IntegerSubject assertSize = assertThat(allEntities.size());
-            assertSize.isAtLeast(10);
-            assertSize.isAtMost(count);
+            assertThat(allEntities.size()).isEqualTo(count);
             tx.commit();
         }
     }
 
     @Test
-    @DisplayName("fail on `create` if entity already exists")
+    @DisplayName("fail early on `create` if entity already exists")
     void insert() {
         Key key = keyFactory.newKey(newUuid());
-        Entity entity = Entity
-                .newBuilder(key)
-                .build();
-        datastore.createOrUpdate(entity);
+        Entity entity = Entity.newBuilder(key).build();
         try (TransactionWrapper tx = datastore.newTransaction()) {
+            tx.createOrUpdate(entity);
             DatastoreException exception = assertThrows(DatastoreException.class,
                                                         () -> tx.create(entity));
             assertThat(exception)
                     .hasMessageThat()
                     .ignoringCase()
-                    .contains("duplicate");
+                    .contains("already added");
             tx.commit();
+        }
+    }
+
+    @Test
+    @DisplayName("fail on `create` if entity existed before transaction")
+    void allowDuplicateIfOutOfTx() {
+        Key key = keyFactory.newKey(newUuid());
+        String propertyName = "randomValue";
+        Entity oldEntity = Entity.newBuilder(key).build();
+        Entity newEntity = Entity.newBuilder(key)
+                                 .set(propertyName, 42L)
+                                 .build();
+        datastore.createOrUpdate(oldEntity);
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            tx.create(newEntity);
+            DatastoreException exception = assertThrows(DatastoreException.class, tx::commit);
+            assertThat(exception)
+                    .hasMessageThat()
+                    .ignoringCase()
+                    .contains("already exists");
         }
     }
 }

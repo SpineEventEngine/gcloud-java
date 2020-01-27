@@ -379,7 +379,7 @@ class DatastoreWrapperTest {
         Key entityKey = new TenantAwareFunction0<Key>(tenantId) {
             @Override
             public Key apply() {
-                Key entityKey = wrapper.keyFactory(Kind.of(NAMESPACE_HOLDER_KIND))
+                Key entityKey = wrapper.keyFactory(NAMESPACE_HOLDER_KIND)
                                        .newKey(key);
                 Entity entity = Entity.newBuilder(entityKey)
                                       .build();

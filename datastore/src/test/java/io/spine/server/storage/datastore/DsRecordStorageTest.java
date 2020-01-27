@@ -56,6 +56,7 @@ import io.spine.test.datastore.CollegeId;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
+import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.SpyStorageFactory;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.type.TypeUrl;
@@ -275,6 +276,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         assertEquals(entity.isDeleted(), datastoreEntity.getBoolean(deleted));
     }
 
+    @SlowTest
     @Test
     @DisplayName("pass big data speed test")
     void testBigData() {
@@ -885,6 +887,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertDsReadByStructuredQuery();
         }
 
+        @SlowTest
         @Test
         @DisplayName("with multiple Datastore reads")
         void performsMultipleReads() {
