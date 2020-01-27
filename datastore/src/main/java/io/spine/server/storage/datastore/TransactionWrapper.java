@@ -117,11 +117,14 @@ public final class TransactionWrapper implements AutoCloseable {
     /**
      * Queries the Datastore with the given arguments within the transaction.
      *
-     * <p>The Datastore may return a partial result set, so an execution of this method may
-     * result in several Datastore queries.
+     * <p>Datastore only supports ancestor queries within a transaction.
+     * A {@link DatastoreException} is thrown if the given query is not an ancestor query.
      *
-     * <p>The limit included in the {@link StructuredQuery}, will be a maximum count of objects
-     * in the returned iterator.
+     * <p>The Datastore may return a partial result set, so an execution of this method may result
+     * in several Datastore queries.
+     *
+     * <p>The limit included in the {@link StructuredQuery}, will be a maximum count of objects in
+     * the returned iterator.
      *
      * <p>The returned {@link DsQueryIterator} allows to {@linkplain DsQueryIterator#nextPageQuery()
      * create a query} to the next page of results reusing an existing cursor.
@@ -129,14 +132,14 @@ public final class TransactionWrapper implements AutoCloseable {
      * <p>The resulting {@code Iterator} is evaluated lazily. A call to
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
-     * @param query
+     * @param ancestorQuery
      *         {@link Query} to execute upon the Datastore
      * @param <R>
      *         the type of queried objects
      * @return results fo the query as a lazily evaluated {@link Iterator}
      */
-    public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
-        return DsQueryIterator.compose(tx, query, namespaceSupplier);
+    public <R> DsQueryIterator<R> read(StructuredQuery<R> ancestorQuery) throws DatastoreException {
+        return DsQueryIterator.compose(tx, ancestorQuery, namespaceSupplier);
     }
 
     /**
