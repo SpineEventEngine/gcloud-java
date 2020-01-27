@@ -28,6 +28,7 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -51,6 +52,8 @@ public final class TransactionWrapper implements AutoCloseable {
     /**
      * Creates a new entity in the Datastore in the transaction.
      *
+     * <p>Throws a {@link DatastoreException} if an entity with such a key already exists.
+     *
      * @param entity
      *         new {@link Entity} to put into the Datastore
      * @throws DatastoreException
@@ -62,10 +65,37 @@ public final class TransactionWrapper implements AutoCloseable {
     }
 
     /**
+     * Creates multiple new entities in the Datastore in the transaction.
+     *
+     * <p>Throws a {@link DatastoreException} if at least one entity key clashes with an existing
+     * one.
+     *
+     * @param entities
+     *         new entities to put into the Datastore
+     * @throws DatastoreException
+     *         upon failure
+     * @see Transaction#add(com.google.cloud.datastore.FullEntity...)
+     */
+    public void create(Collection<Entity> entities) throws DatastoreException {
+        Entity[] array = new Entity[entities.size()];
+        entities.toArray(array);
+        tx.add(array);
+    }
+
+    /**
      * Puts the given entity into the Datastore in the transaction.
      */
     public void createOrUpdate(Entity entity) throws DatastoreException {
         tx.put(entity);
+    }
+
+    /**
+     * Puts the given entity into the Datastore in the transaction.
+     */
+    public void createOrUpdate(Collection<Entity> entities) throws DatastoreException {
+        Entity[] array = new Entity[entities.size()];
+        entities.toArray(array);
+        tx.put(array);
     }
 
     /**
