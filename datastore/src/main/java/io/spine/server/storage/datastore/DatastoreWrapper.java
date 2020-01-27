@@ -40,6 +40,7 @@ import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,13 +52,11 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.toArray;
-import static com.google.common.collect.Iterators.concat;
 import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Streams.stream;
 import static java.lang.Math.min;
-import static java.util.Collections.emptyIterator;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -208,36 +207,15 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreReader#get(Key...)
      */
     public Iterator<@Nullable Entity> read(Iterable<Key> keys) {
-        Iterator<@Nullable Entity> dsIterator = readByKeys(keys);
-        Iterator<@Nullable Entity> result = orderByKeys(keys, dsIterator);
-        return unmodifiableIterator(result);
+        List<@Nullable Entity> results = readByKeys(keys);
+        return unmodifiableIterator(results.iterator());
     }
 
-    private Iterator<@Nullable Entity> readByKeys(Iterable<Key> keys) {
+    private List<@Nullable Entity> readByKeys(Iterable<Key> keys) {
         List<Key> keysList = newLinkedList(keys);
         return keysList.size() <= MAX_KEYS_PER_READ_REQUEST
-               ? datastore.get(toArray(keys, Key.class))
+               ? datastore.fetch(toArray(keys, Key.class))
                : readBulk(keysList);
-    }
-
-    private static Iterator<@Nullable Entity> orderByKeys(Iterable<Key> keys,
-                                                          Iterator<Entity> items) {
-        List<Entity> entities = newLinkedList(() -> items);
-        Iterator<Entity> entitiesIterator = stream(keys)
-                .map(key -> getEntityOrNull(key, entities.iterator()))
-                .iterator();
-        return entitiesIterator;
-    }
-
-    private static @Nullable Entity getEntityOrNull(Key key, Iterator<Entity> entities) {
-        while (entities.hasNext()) {
-            Entity entity = entities.next();
-            if (key.equals(entity.getKey())) {
-                entities.remove();
-                return entity;
-            }
-        }
-        return null;
     }
 
     /**
@@ -481,19 +459,19 @@ public class DatastoreWrapper implements Logging {
      * @return ordered sequence of {@link Entity entities}
      * @see #read(Iterable)
      */
-    private Iterator<Entity> readBulk(List<Key> keys) {
+    private List<Entity> readBulk(List<Key> keys) {
         int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
         _trace().log("Reading a big bulk of entities synchronously. The data is read as %d pages.",
                      pageCount);
         int lowerBound = 0;
         int higherBound = MAX_KEYS_PER_READ_REQUEST;
         int keysLeft = keys.size();
-        Iterator<Entity> result = emptyIterator();
+        List<Entity> result = new ArrayList<>(keys.size());
         for (int i = 0; i < pageCount; i++) {
             List<Key> keysPage = keys.subList(lowerBound, higherBound);
 
-            Iterator<Entity> page = datastore.get(keysPage.toArray(EMPTY_KEY_ARRAY));
-            result = concat(result, page);
+            List<Entity> page = datastore.fetch(keysPage.toArray(EMPTY_KEY_ARRAY));
+            result.addAll(page);
 
             keysLeft -= keysPage.size();
             lowerBound = higherBound;

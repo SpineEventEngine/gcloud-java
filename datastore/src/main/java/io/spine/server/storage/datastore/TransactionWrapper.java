@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Optional.ofNullable;
 
 /**
  * A Cloud Datastore transaction wrapper.
@@ -75,7 +76,7 @@ public final class TransactionWrapper implements AutoCloseable {
      */
     public Optional<Entity> read(Key key) {
         Entity entity = tx.get(key);
-        return Optional.ofNullable(entity);
+        return ofNullable(entity);
     }
 
     /**
