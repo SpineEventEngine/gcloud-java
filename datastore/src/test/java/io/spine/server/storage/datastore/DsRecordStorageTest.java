@@ -24,6 +24,7 @@ import com.google.cloud.datastore.Key;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
+import com.google.protobuf.Duration;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EntityState;
@@ -62,7 +63,6 @@ import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -76,6 +76,9 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.protobuf.util.Durations.fromSeconds;
+import static com.google.protobuf.util.Timestamps.add;
+import static com.google.protobuf.util.Timestamps.subtract;
 import static com.google.protobuf.util.Timestamps.toSeconds;
 import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.either;
@@ -350,7 +353,6 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             storage = storageFactory.createRecordStorage(contextSpec, CollegeEntity.class);
         }
 
-        @Disabled
         @Test
         @DisplayName("returning proper entity")
         void testQueryByIDs() {
@@ -366,7 +368,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Create column filter.
             Timestamp targetColumnValue = targetEntity.getCreated();
-            CompositeFilter columnFilter = all(eq(CREATED.columnName(), targetColumnValue));
+            Duration oneSecond = fromSeconds(1);
+            CompositeFilter columnFilter = all(
+                    gt(CREATED.columnName(), subtract(targetColumnValue, oneSecond)),
+                    lt(CREATED.columnName(), add(targetColumnValue, oneSecond))
+            );
 
             // Compose Query filters.
             TargetFilters entityFilters = newTargetFilters(idFilter, columnFilter);
