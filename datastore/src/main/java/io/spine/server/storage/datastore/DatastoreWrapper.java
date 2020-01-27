@@ -131,7 +131,7 @@ public class DatastoreWrapper implements Logging {
      *         new {@link Entity} to put into the Datastore
      * @throws DatastoreException
      *         upon failure
-     * @see DatastoreWriter#put(FullEntity)
+     * @see DatastoreWriter#add(FullEntity)
      */
     public void create(Entity entity) throws DatastoreException {
         actor.add(entity);
