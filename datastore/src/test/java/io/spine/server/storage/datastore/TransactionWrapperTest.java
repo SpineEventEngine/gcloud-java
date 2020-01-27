@@ -236,7 +236,7 @@ class TransactionWrapperTest {
 
     @Test
     @DisplayName("fail early on `create` if entity already exists")
-    void insert() {
+    void insertTwice() {
         Key key = keyFactory.newKey(newUuid());
         Entity entity = Entity.newBuilder(key).build();
         try (TransactionWrapper tx = datastore.newTransaction()) {
@@ -253,7 +253,7 @@ class TransactionWrapperTest {
 
     @Test
     @DisplayName("fail on `create` if entity existed before transaction")
-    void allowDuplicateIfOutOfTx() {
+    void insert() {
         Key key = keyFactory.newKey(newUuid());
         String propertyName = "randomValue";
         Entity oldEntity = Entity.newBuilder(key).build();
