@@ -24,7 +24,6 @@ import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.DatastoreReader;
-import com.google.cloud.datastore.DatastoreReaderWriter;
 import com.google.cloud.datastore.DatastoreWriter;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.FullEntity;
@@ -51,7 +50,6 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Iterators.concat;
 import static com.google.common.collect.Iterators.unmodifiableIterator;
@@ -68,11 +66,6 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("ClassWithTooManyMethods")
 public class DatastoreWrapper implements Logging {
 
-    private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE =
-            "Transaction should be active.";
-    private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE =
-            "Transaction should NOT be active.";
-
     private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
     static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
@@ -82,8 +75,6 @@ public class DatastoreWrapper implements Logging {
 
     private final NamespaceSupplier namespaceSupplier;
     private final Datastore datastore;
-    private Transaction activeTransaction;
-    private DatastoreReaderWriter actor;
 
     /**
      * Creates a new instance of {@code DatastoreWrapper}.
@@ -97,7 +88,6 @@ public class DatastoreWrapper implements Logging {
     protected DatastoreWrapper(Datastore datastore, NamespaceSupplier supplier) {
         this.namespaceSupplier = checkNotNull(supplier);
         this.datastore = checkNotNull(datastore);
-        this.actor = datastore;
     }
 
     /**
@@ -134,7 +124,7 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreWriter#add(FullEntity)
      */
     public void create(Entity entity) throws DatastoreException {
-        actor.add(entity);
+        datastore.add(entity);
     }
 
     /**
@@ -147,7 +137,7 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreWriter#update(Entity...)
      */
     public void update(Entity entity) throws DatastoreException {
-        actor.update(entity);
+        datastore.update(entity);
     }
 
     /**
@@ -159,7 +149,7 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreWrapper#update(Entity)
      */
     public void createOrUpdate(Entity entity) {
-        actor.put(entity);
+        datastore.put(entity);
     }
 
     /**
@@ -199,7 +189,7 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreReader#get(Key)
      */
     public @Nullable Entity read(Key key) {
-        return actor.get(key);
+        return datastore.get(key);
     }
 
     /**
@@ -226,7 +216,7 @@ public class DatastoreWrapper implements Logging {
     private Iterator<@Nullable Entity> readByKeys(Iterable<Key> keys) {
         List<Key> keysList = newLinkedList(keys);
         return keysList.size() <= MAX_KEYS_PER_READ_REQUEST
-               ? actor.get(toArray(keys, Key.class))
+               ? datastore.get(toArray(keys, Key.class))
                : readBulk(keysList);
     }
 
@@ -273,7 +263,7 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreReader#run(Query)
      */
     public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
-        return DsQueryIterator.compose(actor, query, namespaceSupplier);
+        return DsQueryIterator.compose(datastore, query, namespaceSupplier);
     }
 
     /**
@@ -371,7 +361,7 @@ public class DatastoreWrapper implements Logging {
      *         {@link Key Keys} of the {@link Entity Entities} to delete. May be nonexistent
      */
     public void delete(Key... keys) {
-        actor.delete(keys);
+        datastore.delete(keys);
     }
 
     /**
@@ -439,79 +429,6 @@ public class DatastoreWrapper implements Logging {
     }
 
     /**
-     * Starts a transaction.
-     *
-     * <p>After this method is called, all {@code Entity} modifications performed through this
-     * instance of {@code DatastoreWrapper} become transactional. This behaviour lasts until either
-     * {@link #commitTransaction()} or {@link #rollbackTransaction()} is called.
-     *
-     * @throws IllegalStateException
-     *         if a transaction is already started on this instance of
-     *         {@code DatastoreWrapper}
-     * @see #isTransactionActive()
-     * @deprecated Use {@link #newTransaction()} instead.
-     */
-    @Deprecated
-    public void startTransaction() throws IllegalStateException {
-        checkState(!isTransactionActive(), NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE);
-        activeTransaction = datastore.newTransaction();
-        actor = activeTransaction;
-    }
-
-    /**
-     * Commits a transaction.
-     *
-     * <p>Upon the method call, all the modifications within the active transaction are applied.
-     *
-     * <p>All next operations become non-transactional until {@link #startTransaction()} is called.
-     *
-     * @throws IllegalStateException
-     *         if no transaction is started on this instance of
-     *         {@code DatastoreWrapper}
-     * @see #isTransactionActive()
-     * @deprecated Use {@link #newTransaction()} instead.
-     */
-    @Deprecated
-    public void commitTransaction() throws IllegalStateException {
-        checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
-        activeTransaction.commit();
-        this.actor = datastore;
-    }
-
-    /**
-     * Rollbacks a transaction.
-     *
-     * <p>Upon the method call, all the modifications within the active transaction
-     * canceled permanently.
-     *
-     * <p>After this method execution is over, all the further modifications made through
-     * the current instance of {@code DatastoreWrapper} become non-transactional.
-     *
-     * @throws IllegalStateException
-     *         if no transaction is active for the current
-     *         instance of {@code DatastoreWrapper}
-     * @see #isTransactionActive()
-     * @deprecated Use {@link #newTransaction()} instead.
-     */
-    @Deprecated
-    public void rollbackTransaction() throws IllegalStateException {
-        checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
-        activeTransaction.rollback();
-        this.actor = datastore;
-    }
-
-    /**
-     * Checks whether there is an active transaction on this instance of {@code DatastoreWrapper}.
-     *
-     * @return {@code true} if there is an active transaction, {@code false} otherwise
-     * @deprecated Use {@link #newTransaction()} instead.
-     */
-    @Deprecated
-    public boolean isTransactionActive() {
-        return activeTransaction != null && activeTransaction.isActive();
-    }
-
-    /**
      * Retrieves an instance of {@link KeyFactory} unique for given Kind of data
      * regarding the current namespace.
      *
@@ -575,7 +492,7 @@ public class DatastoreWrapper implements Logging {
         for (int i = 0; i < pageCount; i++) {
             List<Key> keysPage = keys.subList(lowerBound, higherBound);
 
-            Iterator<Entity> page = actor.get(keysPage.toArray(EMPTY_KEY_ARRAY));
+            Iterator<Entity> page = datastore.get(keysPage.toArray(EMPTY_KEY_ARRAY));
             result = concat(result, page);
 
             keysLeft -= keysPage.size();
@@ -598,7 +515,7 @@ public class DatastoreWrapper implements Logging {
     }
 
     private void writeSmallBulk(Entity[] entities) {
-        actor.put(entities);
+        datastore.put(entities);
     }
 
     /**
