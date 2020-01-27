@@ -217,7 +217,6 @@ class TransactionWrapperTest {
         int count = 100;
         KeyFactory ancestorFactory = keyFactory
                 .addAncestor(PathElement.of(TEST_KIND.value(), newUuid()));
-        String propertyName = "random_number";
         Entity[] entities = generate(() -> ancestorFactory.newKey(newUuid()))
                 .limit(count)
                 .map(key -> Entity.newBuilder(key).build())
