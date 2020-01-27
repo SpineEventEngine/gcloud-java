@@ -214,15 +214,13 @@ class TransactionWrapperTest {
     @Test
     @DisplayName("run a single read operation for many entities")
     void bulkRead() {
-        int count = 10_000;
+        int count = 100;
         KeyFactory ancestorFactory = keyFactory
                 .addAncestor(PathElement.of(TEST_KIND.value(), newUuid()));
         String propertyName = "random_number";
-        Entity[] entities = generate(() -> keyFactory.newKey(newUuid()))
+        Entity[] entities = generate(() -> ancestorFactory.newKey(newUuid()))
                 .limit(count)
-                .map(key -> Entity.newBuilder(key)
-                                  .set(propertyName, random(1, 3))
-                                  .build())
+                .map(key -> Entity.newBuilder(key).build())
                 .toArray(Entity[]::new);
         datastore.createOrUpdate(entities);
 
@@ -234,7 +232,7 @@ class TransactionWrapperTest {
                                                                 .build());
             List<Entity> allEntities = newArrayList(readEntities);
             IntegerSubject assertSize = assertThat(allEntities.size());
-            assertSize.isAtLeast(1000);
+            assertSize.isAtLeast(10);
             assertSize.isAtMost(count);
             tx.commit();
         }
