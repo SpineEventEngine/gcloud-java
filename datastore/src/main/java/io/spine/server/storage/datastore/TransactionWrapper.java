@@ -64,7 +64,7 @@ public final class TransactionWrapper implements AutoCloseable {
     /**
      * Puts the given entity into the Datastore in the transaction.
      */
-    public void createOrUpdate(Entity entity) {
+    public void createOrUpdate(Entity entity) throws DatastoreException {
         tx.put(entity);
     }
 
