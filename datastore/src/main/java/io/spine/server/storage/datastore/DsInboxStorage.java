@@ -25,7 +25,6 @@ import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StringValue;
-import com.google.cloud.datastore.TimestampValue;
 import com.google.protobuf.Timestamp;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
@@ -38,7 +37,6 @@ import io.spine.string.Stringifiers;
 import java.util.Iterator;
 import java.util.Optional;
 
-import static com.google.cloud.Timestamp.fromProto;
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
@@ -148,14 +146,6 @@ public class DsInboxStorage
         status("status", (m) -> {
             return StringValue.of(m.getStatus()
                                    .toString());
-        }),
-
-        /**
-         * @deprecated Use {@link #receivedAt} instead.
-         */
-        @Deprecated
-        whenReceived("when_received", (m) -> {
-            return TimestampValue.of(fromProto(m.getWhenReceived()));
         }),
 
         receivedAt("received_at", (m) -> {
