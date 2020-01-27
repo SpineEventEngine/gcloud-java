@@ -77,55 +77,6 @@ class DatastoreWrapperTest {
         wrapper.dropTable(NAMESPACE_HOLDER_KIND);
     }
 
-    @SuppressWarnings("deprecation") // To be deleted alongside with the tested API.
-    @Nested
-    class SingleTenant {
-
-        private DatastoreWrapper wrapper;
-
-        @BeforeEach
-        void setUp() {
-            wrapper = wrap(localDatastore(), singleTenant());
-            wrapper.startTransaction();
-        }
-
-        @Test
-        @DisplayName("work with transactions if necessary")
-        void testExecuteTransactions() {
-            assertTrue(wrapper.isTransactionActive());
-            wrapper.commitTransaction();
-            assertFalse(wrapper.isTransactionActive());
-        }
-
-        @Test
-        @DisplayName("rollback transactions")
-        void testRollback() {
-            assertTrue(wrapper.isTransactionActive());
-            wrapper.rollbackTransaction();
-            assertFalse(wrapper.isTransactionActive());
-        }
-
-        @Test
-        @DisplayName("fail to start transaction if one is active")
-        void testFailToRestartTransactions() {
-            try {
-                assertTrue(wrapper.isTransactionActive());
-                assertThrows(IllegalStateException.class, wrapper::startTransaction);
-            } finally {
-                wrapper.rollbackTransaction();
-            }
-        }
-
-        @Test
-        @DisplayName("fail to finish non active transaction")
-        void testFailToFinishNonActiveTransaction() {
-            assertTrue(wrapper.isTransactionActive());
-            wrapper.commitTransaction();
-            assertFalse(wrapper.isTransactionActive());
-            assertThrows(IllegalStateException.class, wrapper::rollbackTransaction);
-        }
-    }
-
     @Nested
     class NotWaiting {
 
