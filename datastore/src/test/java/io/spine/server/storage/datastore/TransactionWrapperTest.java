@@ -26,6 +26,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Query;
+import com.google.common.base.Preconditions;
 import com.google.protobuf.Empty;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
@@ -68,6 +69,7 @@ class TransactionWrapperTest {
     @AfterEach
     void cleanUpDatastore() {
         datastore.dropAllTables();
+        keyFactory.reset();
     }
 
     @Test
