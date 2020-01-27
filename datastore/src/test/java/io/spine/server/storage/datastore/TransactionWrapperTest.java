@@ -20,10 +20,15 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.PathElement;
+import com.google.cloud.datastore.Query;
+import com.google.common.truth.IntegerSubject;
 import com.google.protobuf.Empty;
+import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
@@ -35,17 +40,23 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Stream;
 
+import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.hasAncestor;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.localDatastore;
+import static io.spine.testing.TestValues.random;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.generate;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`TransactionWrapper` should")
 class TransactionWrapperTest {
+
+    private static final Kind TEST_KIND = Kind.of(TypeUrl.of(Empty.class));
 
     private TestDatastoreWrapper datastore;
     private KeyFactory keyFactory;
@@ -53,8 +64,7 @@ class TransactionWrapperTest {
     @BeforeEach
     void setUp() {
         datastore = TestDatastoreWrapper.wrap(localDatastore(), false);
-        keyFactory = datastore.keyFactory(Kind.of(TypeUrl.of(Empty.class)
-                                                         .value()));
+        keyFactory = datastore.keyFactory(TEST_KIND);
     }
 
     @AfterEach
@@ -178,9 +188,9 @@ class TransactionWrapperTest {
     void runManyAtATime() throws InterruptedException {
         int workerCount = 1117;
         ExecutorService service = newFixedThreadPool(workerCount);
-        List<Key> keys = Stream.generate(() -> keyFactory.newKey(newUuid()))
-                               .limit(workerCount)
-                               .collect(toList());
+        List<Key> keys = generate(() -> keyFactory.newKey(newUuid()))
+                .limit(workerCount)
+                .collect(toList());
         keys.stream()
             .map(key -> Entity
                     .newBuilder(key)
@@ -196,6 +206,55 @@ class TransactionWrapperTest {
             Entity read = datastore.read(key);
             assertThat(read)
                     .isNotNull();
+        }
+    }
+
+    @SlowTest
+    @Test
+    @DisplayName("run a single read operation for many entities")
+    void bulkRead() {
+        int count = 10_000;
+        KeyFactory ancestorFactory = keyFactory
+                .addAncestor(PathElement.of(TEST_KIND.value(), newUuid()));
+        String propertyName = "random_number";
+        Entity[] entities = generate(() -> keyFactory.newKey(newUuid()))
+                .limit(count)
+                .map(key -> Entity.newBuilder(key)
+                                  .set(propertyName, random(1, 3))
+                                  .build())
+                .toArray(Entity[]::new);
+        datastore.createOrUpdate(entities);
+
+        Key ancestorKey = ancestorFactory.newKey().getParent();
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            DsQueryIterator<Entity> readEntities = tx.read(Query.newEntityQueryBuilder()
+                                                                .setKind(TEST_KIND.value())
+                                                                .setFilter(hasAncestor(ancestorKey))
+                                                                .build());
+            List<Entity> allEntities = newArrayList(readEntities);
+            IntegerSubject assertSize = assertThat(allEntities.size());
+            assertSize.isAtLeast(1000);
+            assertSize.isAtMost(count);
+            tx.commit();
+        }
+    }
+
+    @Test
+    @DisplayName("fail on `create` if entity already exists")
+    void insert() {
+        Key key = keyFactory.newKey(newUuid());
+        Entity entity = Entity
+                .newBuilder(key)
+                .build();
+        datastore.createOrUpdate(entity);
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            DatastoreException exception = assertThrows(DatastoreException.class,
+                                                        () -> tx.create(entity));
+            assertThat(exception)
+                    .hasMessageThat()
+                    .ignoringCase()
+                    .contains("duplicate");
+            tx.commit();
         }
     }
 }
