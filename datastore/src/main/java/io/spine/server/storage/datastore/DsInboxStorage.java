@@ -26,6 +26,7 @@ import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
+import com.google.protobuf.Timestamp;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.InboxReadRequest;
@@ -51,6 +52,8 @@ public class DsInboxStorage
         extends DsMessageStorage<InboxMessageId, InboxMessage, InboxReadRequest>
         implements InboxStorage {
 
+    private static final int NANOS_PER_SECOND = 1_000_000;
+
     protected DsInboxStorage(DatastoreWrapper datastore, boolean multitenant) {
         super(datastore, multitenant);
     }
@@ -70,7 +73,7 @@ public class DsInboxStorage
         checkNotNull(index);
 
         EntityQuery.Builder builder = queryInShard(index);
-        builder.setOrderBy(asc(Column.whenReceived.columnName()),
+        builder.setOrderBy(asc(Column.receivedAt.columnName()),
                            asc(Column.version.columnName()));
         Iterator<InboxMessage> iterator = readAll(builder, pageSize);
         return new InboxPage(iterator, pageSize);
@@ -147,8 +150,18 @@ public class DsInboxStorage
                                    .toString());
         }),
 
+        /**
+         * @deprecated Use {@link #receivedAt} instead.
+         */
+        @Deprecated
         whenReceived("when_received", (m) -> {
             return TimestampValue.of(fromProto(m.getWhenReceived()));
+        }),
+
+        receivedAt("received_at", (m) -> {
+            Timestamp timestamp = m.getWhenReceived();
+            long epochNanos = timestamp.getSeconds() * NANOS_PER_SECOND + timestamp.getNanos();
+            return LongValue.of(epochNanos);
         }),
 
         version("version", (m) -> {
@@ -163,7 +176,6 @@ public class DsInboxStorage
         /**
          * Obtains the value of the column from the given message.
          */
-        @SuppressWarnings("NonSerializableFieldInSerializableClass") // This enum isn't serialized.
         private final Getter<InboxMessage> getter;
 
         Column(String name, Getter<InboxMessage> getter) {

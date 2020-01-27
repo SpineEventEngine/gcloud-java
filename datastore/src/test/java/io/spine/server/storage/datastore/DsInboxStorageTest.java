@@ -38,7 +38,6 @@ import io.spine.server.storage.datastore.given.DsInboxStorageTestEnv;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -94,7 +93,6 @@ class DsInboxStorageTest extends InboxStorageTest {
         readAndCompare(storage, anotherMsg);
     }
 
-    @Disabled
     @Test
     @DisplayName("read and write multiple `InboxMessage` instances")
     void readAndWriteMultipleMessages() {
