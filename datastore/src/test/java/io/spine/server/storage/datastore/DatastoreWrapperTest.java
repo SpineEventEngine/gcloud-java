@@ -30,6 +30,7 @@ import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.tenant.TenantAwareFunction0;
+import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -92,6 +93,7 @@ class DatastoreWrapperTest {
             wrapper.dropAllTables();
         }
 
+        @SlowTest
         @Test
         @DisplayName("support bulk reads")
         void testBulkRead() throws InterruptedException {
@@ -110,6 +112,7 @@ class DatastoreWrapperTest {
             assertTrue(expectedEntities.containsAll(readEntities));
         }
 
+        @SlowTest
         @Test
         @DisplayName("support big bulk reads")
         void testBigBulkRead() throws InterruptedException {
@@ -156,6 +159,7 @@ class DatastoreWrapperTest {
             wrapper.dropAllTables();
         }
 
+        @SlowTest
         @Test
         @DisplayName("read and write entities in the remote datastore")
         void testBulkRead() {
@@ -189,6 +193,7 @@ class DatastoreWrapperTest {
             wrapper.dropAllTables();
         }
 
+        @SlowTest
         @Test
         @DisplayName("replacing missing entities with null")
         void testMissingAreNull() throws InterruptedException {
@@ -220,6 +225,7 @@ class DatastoreWrapperTest {
             assertFalse(actualEntities.hasNext());
         }
 
+        @SlowTest
         @Test
         @DisplayName("preserving order")
         void test() throws InterruptedException {

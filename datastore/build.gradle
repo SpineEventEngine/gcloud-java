@@ -56,5 +56,5 @@ task startDatastore(type: com.github.psxpaul.task.ExecFork) {
     killDescendants = false
 }
 
-test.dependsOn startDatastore
+tasks.withType(Test) { it.dependsOn startDatastore }
 startDatastore.shouldRunAfter assemble

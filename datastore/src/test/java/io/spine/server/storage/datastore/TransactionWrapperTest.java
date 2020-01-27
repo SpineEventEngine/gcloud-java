@@ -46,7 +46,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.localDatastore;
-import static io.spine.testing.TestValues.random;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
@@ -183,6 +182,7 @@ class TransactionWrapperTest {
                 .isNotNull();
     }
 
+    @SlowTest
     @Test
     @DisplayName("run many transactions at a time")
     void runManyAtATime() throws InterruptedException {
@@ -197,9 +197,10 @@ class TransactionWrapperTest {
                     .set("a", newUuid())
                     .build())
             .forEach(entity -> service.execute(() -> {
-                TransactionWrapper tx = datastore.newTransaction();
-                tx.createOrUpdate(entity);
-                tx.commit();
+                try (TransactionWrapper tx = datastore.newTransaction()) {
+                    tx.createOrUpdate(entity);
+                    tx.commit();
+                }
             }));
         service.awaitTermination(5, SECONDS);
         for (Key key : keys) {
