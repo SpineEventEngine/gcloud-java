@@ -48,12 +48,12 @@ class NamespaceConvertersTest extends UtilityClassTest<NamespaceConverters> {
         NamespaceConverter converter = NamespaceConverters.forCustomNamespace();
         Namespace namespace = Namespace.of("namespace");
         TenantId fromInternalConverter = namespace.toTenantId();
-        TenantId fromExternalConverter = converter.convert(namespace.getValue());
+        TenantId fromExternalConverter = converter.convert(namespace.value());
 
         assertEquals(fromInternalConverter, fromExternalConverter);
 
         String restored = converter.reverse()
                                    .convert(fromExternalConverter);
-        assertEquals(namespace.getValue(), restored);
+        assertEquals(namespace.value(), restored);
     }
 }

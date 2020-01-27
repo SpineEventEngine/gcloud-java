@@ -28,7 +28,6 @@ import com.google.common.collect.UnmodifiableIterator;
 import io.spine.annotation.Internal;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.tenant.Namespace;
-import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 
 import java.util.NoSuchElementException;
 
@@ -64,30 +63,43 @@ public final class DsQueryIterator<R> extends UnmodifiableIterator<R> implements
 
     private boolean terminated;
 
-    DsQueryIterator(StructuredQuery<R> query, DatastoreReader datastore) {
+    private DsQueryIterator(StructuredQuery<R> query, DatastoreReader datastore) {
         super();
         this.query = query;
         this.limit = query.getLimit();
         this.currentPage = datastore.run(query);
     }
 
-    public static <R> DsQueryIterator<R>
+    /**
+     * Executes the given query in the given {@link DatastoreReader} and wraps the results into
+     * an instance of {@code DsQueryIterator}.
+     *
+     * @param datastore
+     *         the Datastore API accessor
+     * @param query
+     *         the query to execute
+     * @param namespace
+     *         the {@link Namespace} in which the query operates
+     * @param <R>
+     *         the type of the returned result
+     * @return an iterator of Datastore database objects, e.g. entities, keys
+     */
+    static <R> DsQueryIterator<R>
     compose(DatastoreReader datastore,
             StructuredQuery<R> query,
-            NamespaceSupplier namespaceSupplier) {
+            Namespace namespace) {
         checkNotNull(datastore);
         checkNotNull(query);
-        checkNotNull(namespaceSupplier);
+        checkNotNull(namespace);
 
-        Namespace namespace = namespaceSupplier.get();
         StructuredQuery<R> queryWithNamespace =
                 query.toBuilder()
-                     .setNamespace(namespace.getValue())
+                     .setNamespace(namespace.value())
                      .build();
         DsQueryIterator<R> iterator = new DsQueryIterator<>(queryWithNamespace, datastore);
         iterator._trace()
-              .log("Reading entities of `%s` kind in `%s` namespace.",
-                   query.getKind(), namespace.getValue());
+                .log("Reading entities of `%s` kind in `%s` namespace.",
+                     query.getKind(), namespace.value());
         return iterator;
     }
 

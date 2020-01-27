@@ -241,7 +241,7 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreReader#run(Query)
      */
     public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
-        return DsQueryIterator.compose(datastore, query, namespaceSupplier);
+        return DsQueryIterator.compose(datastore, query, namespaceSupplier.get());
     }
 
     /**
@@ -353,11 +353,11 @@ public class DatastoreWrapper implements Logging {
         Namespace namespace = namespaceSupplier.get();
         StructuredQuery<Entity> query =
                 Query.newEntityQueryBuilder()
-                     .setNamespace(namespace.getValue())
+                     .setNamespace(namespace.value())
                      .setKind(table)
                      .build();
         _trace().log("Deleting all entities of `%s` kind in `%s` namespace.",
-                     table, namespace.getValue());
+                     table, namespace.value());
         Iterator<Entity> queryResult = read(query);
         List<Entity> entities = newArrayList(queryResult);
         deleteEntities(entities);
@@ -422,8 +422,8 @@ public class DatastoreWrapper implements Logging {
         }
         Namespace namespace = namespaceSupplier.get();
         _trace().log("Retrieving KeyFactory for kind `%s` in `%s` namespace.",
-                     kind, namespace.getValue());
-        keyFactory.setNamespace(namespace.getValue());
+                     kind, namespace.value());
+        keyFactory.setNamespace(namespace.value());
         return keyFactory;
     }
 

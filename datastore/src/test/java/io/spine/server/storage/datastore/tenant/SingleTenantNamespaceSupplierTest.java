@@ -45,7 +45,7 @@ class SingleTenantNamespaceSupplierTest {
         NamespaceSupplier supplier = NamespaceSupplier.singleTenant();
         Namespace namespace = supplier.get();
         assertNotNull(namespace);
-        assertThat(namespace.getValue(), isEmptyString());
+        assertThat(namespace.value(), isEmptyString());
         TenantId tenantId = namespace.toTenantId();
         assertThat(tenantId, isEffectivelyDefault());
     }
@@ -57,7 +57,7 @@ class SingleTenantNamespaceSupplierTest {
         NamespaceSupplier supplier = NamespaceSupplier.singleTenant(namespaceValue);
         Namespace namespace = supplier.get();
         assertNotNull(namespace);
-        assertEquals(namespaceValue, namespace.getValue());
+        assertEquals(namespaceValue, namespace.value());
 
         TenantId tenantId = namespace.toTenantId();
         assertThat(tenantId, not(isEffectivelyDefault()));

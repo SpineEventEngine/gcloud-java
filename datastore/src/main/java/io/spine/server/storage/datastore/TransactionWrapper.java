@@ -139,7 +139,7 @@ public final class TransactionWrapper implements AutoCloseable {
      * @return results fo the query as a lazily evaluated {@link Iterator}
      */
     public <R> DsQueryIterator<R> read(StructuredQuery<R> ancestorQuery) throws DatastoreException {
-        return DsQueryIterator.compose(tx, ancestorQuery, namespaceSupplier);
+        return DsQueryIterator.compose(tx, ancestorQuery, namespaceSupplier.get());
     }
 
     /**

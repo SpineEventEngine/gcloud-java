@@ -184,6 +184,6 @@ class NamespaceTest {
                      .build();
         Namespace namespace = Namespace.fromNameOf(key, multitenant);
         assertNotNull(namespace);
-        assertEquals(ns, namespace.getValue());
+        assertEquals(ns, namespace.value());
     }
 }
