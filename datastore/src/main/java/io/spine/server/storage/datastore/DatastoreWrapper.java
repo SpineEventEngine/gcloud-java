@@ -273,15 +273,7 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreReader#run(Query)
      */
     public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
-        Namespace namespace = namespaceSupplier.get();
-        StructuredQuery<R> queryWithNamespace =
-                query.toBuilder()
-                     .setNamespace(namespace.getValue())
-                     .build();
-        _trace().log("Reading entities of `%s` kind in `%s` namespace.",
-                     query.getKind(), namespace.getValue());
-        DsQueryIterator<R> result = new DsQueryIterator<>(queryWithNamespace, actor);
-        return result;
+        return DsQueryIterator.compose(actor, query, namespaceSupplier);
     }
 
     /**
@@ -443,7 +435,7 @@ public class DatastoreWrapper implements Logging {
      */
     public final TransactionWrapper newTransaction() {
         Transaction tx = datastore.newTransaction();
-        return new TransactionWrapper(tx);
+        return new TransactionWrapper(tx, namespaceSupplier);
     }
 
     /**

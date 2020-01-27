@@ -23,8 +23,12 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
+import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -35,9 +39,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class TransactionWrapper implements AutoCloseable {
 
     private final Transaction tx;
+    private final NamespaceSupplier namespaceSupplier;
 
-    TransactionWrapper(Transaction tx) {
+    TransactionWrapper(Transaction tx,
+                       NamespaceSupplier namespaceSupplier) {
         this.tx = checkNotNull(tx);
+        this.namespaceSupplier = checkNotNull(namespaceSupplier);
+    }
+
+    /**
+     * Creates a new entity in the Datastore in the transaction.
+     *
+     * @param entity
+     *         new {@link Entity} to put into the Datastore
+     * @throws DatastoreException
+     *         upon failure
+     * @see Transaction#add(com.google.cloud.datastore.FullEntity)
+     */
+    public void create(Entity entity) throws DatastoreException {
+        tx.add(entity);
     }
 
     /**
@@ -56,6 +76,31 @@ public final class TransactionWrapper implements AutoCloseable {
     public Optional<Entity> read(Key key) {
         Entity entity = tx.get(key);
         return Optional.ofNullable(entity);
+    }
+
+    /**
+     * Queries the Datastore with the given arguments within the transaction.
+     *
+     * <p>The Datastore may return a partial result set, so an execution of this method may
+     * result in several Datastore queries.
+     *
+     * <p>The limit included in the {@link StructuredQuery}, will be a maximum count of objects
+     * in the returned iterator.
+     *
+     * <p>The returned {@link DsQueryIterator} allows to {@linkplain DsQueryIterator#nextPageQuery()
+     * create a query} to the next page of results reusing an existing cursor.
+     *
+     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
+     *
+     * @param query
+     *         {@link Query} to execute upon the Datastore
+     * @param <R>
+     *         the type of queried objects
+     * @return results fo the query as a lazily evaluated {@link Iterator}
+     */
+    public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
+        return DsQueryIterator.compose(tx, query, namespaceSupplier);
     }
 
     /**
