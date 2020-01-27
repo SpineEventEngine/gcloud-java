@@ -43,11 +43,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -67,8 +64,6 @@ public class DatastoreWrapper implements Logging {
 
     private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
     static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
-
-    private static final Map<DatastoreKind, KeyFactory> keyFactories = new HashMap<>();
 
     private static final Key[] EMPTY_KEY_ARRAY = new Key[0];
 
@@ -416,11 +411,8 @@ public class DatastoreWrapper implements Logging {
      */
     public KeyFactory keyFactory(Kind kind) {
         checkNotNull(kind);
-        DatastoreKind datastoreKind = new DatastoreKind(projectId(), kind);
-        KeyFactory keyFactory = keyFactories.get(datastoreKind);
-        if (keyFactory == null) {
-            keyFactory = initKeyFactory(kind);
-        }
+        KeyFactory keyFactory = datastore.newKeyFactory()
+                                        .setKind(kind.value());
         Namespace namespace = namespaceSupplier.get();
         _trace().log("Retrieving KeyFactory for kind `%s` in `%s` namespace.",
                      kind, namespace.value());
@@ -431,21 +423,6 @@ public class DatastoreWrapper implements Logging {
     @VisibleForTesting
     public Datastore datastore() {
         return datastore;
-    }
-
-    private KeyFactory initKeyFactory(Kind kind) {
-        KeyFactory keyFactory = datastore.newKeyFactory()
-                                         .setKind(kind.value());
-        DatastoreKind datastoreKind = new DatastoreKind(projectId(), kind);
-        keyFactories.put(datastoreKind, keyFactory);
-        return keyFactory;
-    }
-
-    private ProjectId projectId() {
-        String projectId = datastore.getOptions()
-                                    .getProjectId();
-        ProjectId result = ProjectId.of(projectId);
-        return result;
     }
 
     /**
@@ -495,38 +472,5 @@ public class DatastoreWrapper implements Logging {
 
     private void writeSmallBulk(Entity[] entities) {
         datastore.put(entities);
-    }
-
-    /**
-     * A Datastore {@link Kind} by project ID.
-     */
-    private static class DatastoreKind {
-
-        private final ProjectId projectId;
-        private final Kind kind;
-
-        private DatastoreKind(ProjectId projectId, Kind kind) {
-            this.projectId = projectId;
-            this.kind = kind;
-        }
-
-        @SuppressWarnings("EqualsGetClass") // The class is effectively final.
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            DatastoreKind kind1 = (DatastoreKind) o;
-            return Objects.equals(projectId, kind1.projectId) &&
-                    Objects.equals(kind, kind1.kind);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(projectId, kind);
-        }
     }
 }
