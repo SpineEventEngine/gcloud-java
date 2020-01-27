@@ -61,6 +61,7 @@ import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -347,6 +348,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             storage = storageFactory.createRecordStorage(contextSpec, CollegeEntity.class);
         }
 
+        @Disabled
         @Test
         @DisplayName("returning proper entity")
         void testQueryByIDs() {
