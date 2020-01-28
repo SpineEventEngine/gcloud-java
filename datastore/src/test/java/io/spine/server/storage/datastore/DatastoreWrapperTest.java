@@ -63,10 +63,8 @@ import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.si
 import static io.spine.testing.server.storage.datastore.TestDatastoreWrapper.wrap;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @DisplayName("`DatastoreWrapper` should")
@@ -351,18 +349,9 @@ class DatastoreWrapperTest {
         assertTrue(result.hasNext());
         Entity second = result.next();
 
-        assertThat(expctedEntities).contains(first);
-        assertThat(expctedEntities).contains(second);
-
-        assertFalse(result.hasNext());
-        assertFalse(result.hasNext());
-        assertFalse(result.hasNext());
-
-        try {
-            result.next();
-            fail();
-        } catch (NoSuchElementException ignored) {
-        }
+        assertThat(expctedEntities)
+                .containsExactly(first, second);
+        assertThrows(NoSuchElementException.class, result::next);
     }
 
     @Test

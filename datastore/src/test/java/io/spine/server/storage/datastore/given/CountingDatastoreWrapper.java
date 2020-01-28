@@ -29,7 +29,6 @@ import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -51,11 +50,6 @@ public final class CountingDatastoreWrapper extends TestDatastoreWrapper {
         Entity result = super.read(key);
         readByKeysCount++;
         return result;
-    }
-
-    @Override
-    public Iterator<@Nullable Entity> read(Iterable<Key> keys) {
-        return lookup(keys).iterator();
     }
 
     @Override
