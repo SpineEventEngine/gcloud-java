@@ -26,6 +26,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Empty;
 import io.spine.testing.SlowTest;
@@ -365,6 +366,25 @@ class TransactionWrapperTest {
             tx.commit();
             assertThat(readEntities)
                     .containsExactlyElementsIn(entities);
+        }
+    }
+
+    @Test
+    @DisplayName("NOT execute a key query")
+    void keyQuery() {
+        int count = 2;
+        List<Entity> entities = generate(() -> keyFactory.newKey(newUuid()))
+                .limit(count)
+                .map(key -> Entity.newBuilder(key).build())
+                .collect(toList());
+        datastore.createOrUpdate(entities);
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            StructuredQuery<Key> query = Query
+                    .newKeyQueryBuilder()
+                    .setKind(TEST_KIND.value())
+                    .build();
+            assertThrows(DatastoreException.class, () -> tx.read(query));
+            tx.commit();
         }
     }
 }
