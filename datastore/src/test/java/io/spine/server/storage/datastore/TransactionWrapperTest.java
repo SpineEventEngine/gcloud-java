@@ -294,7 +294,7 @@ class TransactionWrapperTest {
         );
         try (TransactionWrapper tx = datastore.newTransaction()) {
             List<Entity> readEntities = tx.lookup(keys);
-            tx.close();
+            tx.commit();
             assertThat(readEntities)
                     .containsExactly(firstEntity, null, secondEntity);
         }
@@ -318,7 +318,7 @@ class TransactionWrapperTest {
                                .collect(toList());
         try (TransactionWrapper tx = datastore.newTransaction()) {
             List<Entity> readEntities = tx.lookup(keys);
-            tx.close();
+            tx.commit();
             assertThat(readEntities)
                     .containsExactlyElementsIn(entities);
         }
