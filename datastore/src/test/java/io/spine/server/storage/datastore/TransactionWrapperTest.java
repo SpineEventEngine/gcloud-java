@@ -275,6 +275,50 @@ class TransactionWrapperTest {
     }
 
     @Test
+    @DisplayName("fail on `create` if one of entities existed before transaction")
+    void insertMany() {
+        Key key = keyFactory.newKey(newUuid());
+        String propertyName = "some_property";
+        Entity oldEntity = Entity.newBuilder(key).build();
+        Entity newEntity = Entity.newBuilder(key)
+                                 .set(propertyName, 42L)
+                                 .build();
+        datastore.createOrUpdate(oldEntity);
+        Key freshNewKey = keyFactory.newKey(newUuid());
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            Entity freshNewEntity = Entity.newBuilder(freshNewKey).build();
+            tx.create(ImmutableList.of(freshNewEntity, newEntity));
+            assertThrows(DatastoreException.class, tx::commit);
+        }
+        assertThat(datastore.read(freshNewKey))
+                .isNull();
+        assertThat(datastore.read(oldEntity.getKey()))
+                .isEqualTo(oldEntity);
+    }
+
+    @Test
+    @DisplayName("put many entities into database")
+    void putMany() {
+        String propertyName = "foo";
+        Key key = keyFactory.newKey(newUuid());
+        Entity oldEntity = Entity.newBuilder(key).build();
+        Entity newEntity = Entity.newBuilder(key)
+                                 .set(propertyName, 42L)
+                                 .build();
+        datastore.createOrUpdate(oldEntity);
+        Key freshNewKey = keyFactory.newKey(newUuid());
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            Entity freshNewEntity = Entity.newBuilder(freshNewKey).build();
+            tx.createOrUpdate(ImmutableList.of(freshNewEntity, newEntity));
+            tx.commit();
+        }
+        assertThat(datastore.read(freshNewKey))
+                .isNotNull();
+        assertThat(datastore.read(oldEntity.getKey()))
+                .isEqualTo(newEntity);
+    }
+
+    @Test
     @DisplayName("read multiple entities by IDs")
     void lookup() {
         int count = 10;
