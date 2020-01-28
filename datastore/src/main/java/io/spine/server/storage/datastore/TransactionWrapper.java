@@ -30,6 +30,7 @@ import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -112,6 +113,25 @@ public final class TransactionWrapper implements AutoCloseable {
     public Optional<Entity> read(Key key) {
         Entity entity = tx.get(key);
         return ofNullable(entity);
+    }
+
+    /**
+     * Retrieves an {@link Entity} for each of the given keys.
+     *
+     * <p>The results are returned in an order matching that of the provided keys
+     * with {@code null}s in place of missing and inactive entities.
+     *
+     * @param keys
+     *         {@link Key Keys} to search for
+     * @return an {@code List} of the found entities in the order of keys (including {@code null}
+     *         values for nonexistent keys)
+     * @see com.google.cloud.datastore.DatastoreReader#fetch(Key...)
+     */
+    public List<Entity> lookup(List<Key> keys) {
+        checkNotNull(keys);
+        Key[] array = new Key[keys.size()];
+        keys.toArray(array);
+        return tx.fetch(array);
     }
 
     /**
