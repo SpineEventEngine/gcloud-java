@@ -121,10 +121,10 @@ public final class TransactionWrapper implements AutoCloseable {
      * <p>The results are returned in an order matching that of the provided keys
      * with {@code null}s in place of missing and inactive entities.
      *
-     * <p>A Datastore transaction can only access 25 entity groups over its entire lifespan. If
-     * the entities do not have ancestors, this translates to 25 entities per transaction.
-     * See the <a href="https://cloud.google.com/datastore/docs/concepts/limits">Datastore
-     * limits</a> for more info.
+     * <p>In Datastore native mode, a transaction can only access 25 entity groups over its entire
+     * lifespan. If the entities do not have ancestors, this translates to 25 entities per
+     * transaction. See the <a href="https://cloud.google.com/datastore/docs/concepts/limits">
+     * Datastore limits</a> for more info.
      *
      * @param keys
      *         {@link Key Keys} to search for
