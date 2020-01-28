@@ -38,7 +38,7 @@ dependencies {
 }
 
 task startDatastore(type: com.github.psxpaul.task.ExecFork) {
-    description = "Starts local in-memory datastore using scripts from ./scripts folder."
+    description = "Starts local in-memory datastore."
     group = "Build Setup"
 
     executable = "$rootDir/scripts/start-datastore.${runsOnWindows ? 'bat' : 'sh'}"
