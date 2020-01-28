@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A {@link TestDatastoreWrapper} which counts the number of calls for certain types of Datastore
@@ -54,7 +55,12 @@ public final class CountingDatastoreWrapper extends TestDatastoreWrapper {
 
     @Override
     public Iterator<@Nullable Entity> read(Iterable<Key> keys) {
-        Iterator<@Nullable Entity> result = super.read(keys);
+        return lookup(keys).iterator();
+    }
+
+    @Override
+    public List<@Nullable Entity> lookup(Iterable<Key> keys) {
+        List<@Nullable Entity> result = super.lookup(keys);
         readByKeysCount++;
         return result;
     }

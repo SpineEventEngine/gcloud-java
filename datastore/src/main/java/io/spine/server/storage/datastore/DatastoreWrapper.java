@@ -49,11 +49,11 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.toArray;
-import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Streams.stream;
 import static java.lang.Math.min;
+import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -189,7 +189,7 @@ public class DatastoreWrapper implements Logging {
     /**
      * Retrieves an {@link Entity} for each of the given keys.
      *
-     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * <p>The resulting {@code Iterator} is evaluated eagerly. A call to
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
      * <p>The results are returned in an order matching that of the provided keys
@@ -199,11 +199,32 @@ public class DatastoreWrapper implements Logging {
      *         {@link Key Keys} to search for
      * @return an {@code Iterator} over the found entities in the order of keys
      *         (including {@code null} values for nonexistent keys)
-     * @see DatastoreReader#get(Key...)
+     * @see DatastoreReader#fetch(Key...)
+     * @deprecated Use {@link #lookup(Iterable)} instead.
      */
+    @Deprecated
     public Iterator<@Nullable Entity> read(Iterable<Key> keys) {
-        List<@Nullable Entity> results = readByKeys(keys);
-        return unmodifiableIterator(results.iterator());
+        return lookup(keys).iterator();
+    }
+
+    /**
+     * Retrieves an {@link Entity} for each of the given keys.
+     *
+     * <p>A call to {@link Iterator#remove() Iterator.remove()} causes
+     * an {@link UnsupportedOperationException}.
+     *
+     * <p>The results are returned in an order matching that of the provided keys
+     * with {@code null}s in place of missing and inactive entities.
+     *
+     * @param keys
+     *         {@link Key Keys} to search for
+     * @return an {@code List} of the found entities in the order of keys (including {@code null}
+     *         values for nonexistent keys)
+     * @see DatastoreReader#fetch(Key...)
+     */
+    public List<@Nullable Entity> lookup(Iterable<Key> keys) {
+        checkNotNull(keys);
+        return unmodifiableList(readByKeys(keys));
     }
 
     private List<@Nullable Entity> readByKeys(Iterable<Key> keys) {
@@ -434,7 +455,7 @@ public class DatastoreWrapper implements Logging {
      * @param keys
      *         {@link Key keys} to find the entities for
      * @return ordered sequence of {@link Entity entities}
-     * @see #read(Iterable)
+     * @see #lookup(Iterable)
      */
     private List<Entity> readBulk(List<Key> keys) {
         int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
