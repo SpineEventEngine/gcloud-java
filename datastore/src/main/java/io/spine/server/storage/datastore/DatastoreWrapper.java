@@ -304,7 +304,6 @@ public class DatastoreWrapper implements Logging {
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit} or
      *         the provided {@code batchSize} is 0
      */
-    @SuppressWarnings("unchecked") // Checked logically.
     private <R> Iterator<R>
     readAllPageByPage(StructuredQuery<R> query, @Nullable Integer pageSize) {
         checkArgument(query.getLimit() == null,

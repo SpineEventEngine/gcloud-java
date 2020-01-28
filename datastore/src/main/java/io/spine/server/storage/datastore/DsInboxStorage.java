@@ -70,9 +70,9 @@ public class DsInboxStorage
     public Page<InboxMessage> readAll(ShardIndex index, int pageSize) {
         checkNotNull(index);
 
-        EntityQuery.Builder builder = queryInShard(index);
-        builder.setOrderBy(asc(Column.receivedAt.columnName()),
-                           asc(Column.version.columnName()));
+        EntityQuery.Builder builder = queryInShard(index)
+                .setOrderBy(asc(Column.receivedAt.columnName()),
+                            asc(Column.version.columnName()));
         Iterator<InboxMessage> iterator = readAll(builder, pageSize);
         return new InboxPage(iterator, pageSize);
     }
