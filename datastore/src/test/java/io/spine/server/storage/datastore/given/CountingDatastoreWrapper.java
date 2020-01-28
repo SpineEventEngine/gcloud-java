@@ -53,7 +53,7 @@ public final class CountingDatastoreWrapper extends TestDatastoreWrapper {
     }
 
     @Override
-    public List<@Nullable Entity> lookup(Iterable<Key> keys) {
+    public List<@Nullable Entity> lookup(Collection<Key> keys) {
         List<@Nullable Entity> result = super.lookup(keys);
         readByKeysCount++;
         return result;

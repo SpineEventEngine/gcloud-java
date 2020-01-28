@@ -305,6 +305,7 @@ class TransactionWrapperTest {
     @DisplayName("read many entities by IDs")
     void lookupBulk() {
         int count = 2020;
+        keyFactory.addAncestor(PathElement.of(TEST_KIND.value(), newUuid()));
         Entity[] entities = generate(() -> keyFactory.newKey(newUuid()))
                 .limit(count)
                 .map(key -> Entity.newBuilder(key)
