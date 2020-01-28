@@ -34,13 +34,13 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -48,12 +48,9 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Streams.stream;
 import static java.lang.Math.min;
-import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -62,10 +59,7 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("ClassWithTooManyMethods")
 public class DatastoreWrapper implements Logging {
 
-    private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
     static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
-
-    private static final Key[] EMPTY_KEY_ARRAY = new Key[0];
 
     private final NamespaceSupplier namespaceSupplier;
     private final Datastore datastore;
@@ -200,11 +194,11 @@ public class DatastoreWrapper implements Logging {
      * @return an {@code Iterator} over the found entities in the order of keys
      *         (including {@code null} values for nonexistent keys)
      * @see DatastoreReader#fetch(Key...)
-     * @deprecated Use {@link #lookup(Iterable)} instead.
+     * @deprecated Use {@link #lookup(Collection)} instead.
      */
     @Deprecated
     public Iterator<@Nullable Entity> read(Iterable<Key> keys) {
-        return lookup(keys).iterator();
+        return lookup(ImmutableList.copyOf(keys)).iterator();
     }
 
     /**
@@ -219,16 +213,10 @@ public class DatastoreWrapper implements Logging {
      *         values for nonexistent keys)
      * @see DatastoreReader#fetch(Key...)
      */
-    public List<@Nullable Entity> lookup(Iterable<Key> keys) {
+    public List<@Nullable Entity> lookup(Collection<Key> keys) {
         checkNotNull(keys);
-        return unmodifiableList(readByKeys(keys));
-    }
-
-    private List<@Nullable Entity> readByKeys(Iterable<Key> keys) {
-        List<Key> keysList = newLinkedList(keys);
-        return keysList.size() <= MAX_KEYS_PER_READ_REQUEST
-               ? datastore.fetch(toArray(keys, Key.class))
-               : readBulk(keysList);
+        DsReaderLookup lookup = new DsReaderLookup(datastore);
+        return lookup.find(keys);
     }
 
     /**
@@ -254,7 +242,8 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreReader#run(Query)
      */
     public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
-        return DsQueryIterator.compose(datastore, query, namespaceSupplier.get());
+        DsReaderLookup lookup = new DsReaderLookup(datastore);
+        return lookup.execute(query, namespaceSupplier.get());
     }
 
     /**
@@ -440,40 +429,6 @@ public class DatastoreWrapper implements Logging {
     @VisibleForTesting
     public Datastore datastore() {
         return datastore;
-    }
-
-    /**
-     * Reads big number of records.
-     *
-     * <p>Google App Engine Datastore has a limitation on the amount of entities queried with a
-     * single call — 1000 entities per query. To deal with this limitation we read the entities in
-     * pagination fashion 1000 entity per page.
-     *
-     * @param keys
-     *         {@link Key keys} to find the entities for
-     * @return ordered sequence of {@link Entity entities}
-     * @see #lookup(Iterable)
-     */
-    private List<Entity> readBulk(List<Key> keys) {
-        int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
-        _trace().log("Reading a big bulk of entities synchronously. The data is read as %d pages.",
-                     pageCount);
-        int lowerBound = 0;
-        int higherBound = MAX_KEYS_PER_READ_REQUEST;
-        int keysLeft = keys.size();
-        List<Entity> result = new ArrayList<>(keys.size());
-        for (int i = 0; i < pageCount; i++) {
-            List<Key> keysPage = keys.subList(lowerBound, higherBound);
-
-            List<Entity> page = datastore.fetch(keysPage.toArray(EMPTY_KEY_ARRAY));
-            result.addAll(page);
-
-            keysLeft -= keysPage.size();
-            lowerBound = higherBound;
-            higherBound += min(keysLeft, MAX_KEYS_PER_READ_REQUEST);
-        }
-
-        return result;
     }
 
     private void writeBulk(Entity[] entities) {

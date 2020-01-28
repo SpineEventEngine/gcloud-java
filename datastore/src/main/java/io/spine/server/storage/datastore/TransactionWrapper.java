@@ -121,17 +121,21 @@ public final class TransactionWrapper implements AutoCloseable {
      * <p>The results are returned in an order matching that of the provided keys
      * with {@code null}s in place of missing and inactive entities.
      *
+     * <p>A Datastore transaction can only access 25 entity groups over its entire lifespan. If
+     * the entities do not have ancestors, this translates to 25 entities per transaction.
+     * See the <a href="https://cloud.google.com/datastore/docs/concepts/limits">Datastore
+     * limits</a> for more info.
+     *
      * @param keys
      *         {@link Key Keys} to search for
      * @return an {@code List} of the found entities in the order of keys (including {@code null}
      *         values for nonexistent keys)
      * @see com.google.cloud.datastore.DatastoreReader#fetch(Key...)
      */
-    public List<Entity> lookup(List<Key> keys) {
+    public List<Entity> lookup(Collection<Key> keys) {
         checkNotNull(keys);
-        Key[] array = new Key[keys.size()];
-        keys.toArray(array);
-        return tx.fetch(array);
+        DsReaderLookup lookup = new DsReaderLookup(tx);
+        return lookup.find(keys);
     }
 
     /**
@@ -159,7 +163,8 @@ public final class TransactionWrapper implements AutoCloseable {
      * @return results fo the query as a lazily evaluated {@link Iterator}
      */
     public <R> DsQueryIterator<R> read(StructuredQuery<R> ancestorQuery) throws DatastoreException {
-        return DsQueryIterator.compose(tx, ancestorQuery, namespaceSupplier.get());
+        DsReaderLookup lookup = new DsReaderLookup(tx);
+        return lookup.execute(ancestorQuery, namespaceSupplier.get());
     }
 
     /**
