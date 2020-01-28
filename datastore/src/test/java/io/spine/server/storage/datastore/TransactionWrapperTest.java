@@ -26,6 +26,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Query;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Empty;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.hasAncestor;
 import static com.google.common.collect.Lists.newArrayList;
@@ -269,6 +271,55 @@ class TransactionWrapperTest {
                     .hasMessageThat()
                     .ignoringCase()
                     .contains("already exists");
+        }
+    }
+
+    @Test
+    @DisplayName("read multiple entities by IDs")
+    void lookup() {
+        int count = 10;
+        Entity[] entities = generate(() -> keyFactory.newKey(newUuid()))
+                .limit(count)
+                .map(key -> Entity.newBuilder(key)
+                                  .build())
+                .toArray(Entity[]::new);
+        datastore.createOrUpdate(entities);
+
+        Entity firstEntity = entities[2];
+        Entity secondEntity = entities[5];
+        List<Key> keys = ImmutableList.of(
+                firstEntity.getKey(),
+                keyFactory.newKey(newUuid()),
+                secondEntity.getKey()
+        );
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            List<Entity> readEntities = tx.lookup(keys);
+            tx.close();
+            assertThat(readEntities)
+                    .containsExactly(firstEntity, null, secondEntity);
+        }
+    }
+
+    @SlowTest
+    @Test
+    @DisplayName("read many entities by IDs")
+    void lookupBulk() {
+        int count = 2020;
+        Entity[] entities = generate(() -> keyFactory.newKey(newUuid()))
+                .limit(count)
+                .map(key -> Entity.newBuilder(key)
+                                  .build())
+                .toArray(Entity[]::new);
+        datastore.createOrUpdate(entities);
+
+        List<Key> keys = Stream.of(entities)
+                               .map(Entity::getKey)
+                               .collect(toList());
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            List<Entity> readEntities = tx.lookup(keys);
+            tx.close();
+            assertThat(readEntities)
+                    .containsExactlyElementsIn(entities);
         }
     }
 }
