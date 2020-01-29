@@ -51,7 +51,7 @@ class NamespaceWithCustomConverterTest {
         NamespaceConverter converter = factory.get(multitenant);
         assertNotNull(converter);
         assertEquals(converter.reverse()
-                              .convert(tenantId), namespace.getValue());
+                              .convert(tenantId), namespace.value());
     }
 
     @Test
@@ -62,7 +62,7 @@ class NamespaceWithCustomConverterTest {
                      .build();
         Namespace namespace = Namespace.fromNameOf(key, true, factory);
         assertNotNull(namespace);
-        assertEquals(ns, namespace.getValue());
+        assertEquals(ns, namespace.value());
     }
 
     @Test

@@ -55,7 +55,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
     private static final int CONSISTENCY_AWAIT_ITERATIONS = 20;
 
     /**
-     * Due to eventual consistency, {@linkplain #dropTable(String) is performed iteratively until
+     * Due to eventual consistency, {@linkplain #dropTable(Kind) is performed iteratively until
      * the table has no records}.
      *
      * <p>This constant represents the maximum number of cleanup attempts before the execution
@@ -63,7 +63,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
      */
     private static final int MAX_CLEANUP_ATTEMPTS = 5;
 
-    private static final Collection<String> kindsCache = new ArrayList<>();
+    private static final Collection<Kind> kindsCache = new ArrayList<>();
 
     private final boolean waitForConsistency;
 
@@ -88,7 +88,8 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
 
     @Override
     public KeyFactory keyFactory(Kind kind) {
-        kindsCache.add(kind.value());
+        checkNotNull(kind);
+        kindsCache.add(kind);
         return super.keyFactory(kind);
     }
 
@@ -111,7 +112,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
     }
 
     @Override
-    protected void dropTable(String table) {
+    protected void dropTable(Kind table) {
         if (!waitForConsistency) {
             super.dropTable(table);
         } else {
@@ -120,7 +121,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
     }
 
     @SuppressWarnings("BusyWait")   // allows Datastore some time between cleanup attempts.
-    private void dropTableConsistently(String table) {
+    private void dropTableConsistently(Kind table) {
         Integer remainingEntityCount = null;
         int cleanupAttempts = 0;
 
@@ -138,7 +139,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
             }
 
             StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
-                                                 .setKind(table)
+                                                 .setKind(table.value())
                                                  .build();
             List<Entity> entities = newArrayList(read(query));
             remainingEntityCount = entities.size();
@@ -183,7 +184,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
      */
     public void dropAllTables() {
         _debug().log("Dropping all tables...");
-        for (String kind : kindsCache) {
+        for (Kind kind : kindsCache) {
             dropTable(kind);
         }
 

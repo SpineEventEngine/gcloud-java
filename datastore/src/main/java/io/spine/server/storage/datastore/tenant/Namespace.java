@@ -213,9 +213,17 @@ public final class Namespace {
     }
 
     /**
+     * @deprecated Use {@link #value()} instead.
+     */
+    @Deprecated
+    public String getValue() {
+        return value;
+    }
+
+    /**
      * Obtains a string value of this {@code Namespace}.
      */
-    public String getValue() {
+    public String value() {
         return value;
     }
 
@@ -231,7 +239,7 @@ public final class Namespace {
      * <pre>
      *     {@code
      *     TenantId.newBuilder()
-     *             .setValue(namespace.getValue())
+     *             .setValue(namespace.value())
      *             .vBuild();
      *     }
      * </pre>
@@ -239,13 +247,13 @@ public final class Namespace {
      * @return a {@link TenantId} represented by this {@code Namespace}
      */
     TenantId toTenantId() {
-        TenantId tenantId = converter.convert(getValue());
+        TenantId tenantId = converter.convert(value());
         return tenantId;
     }
 
     @Override
     public String toString() {
-        return getValue();
+        return value();
     }
 
     @Override
@@ -257,12 +265,12 @@ public final class Namespace {
             return false;
         }
         Namespace namespace = (Namespace) o;
-        return Objects.equal(getValue(), namespace.getValue());
+        return Objects.equal(value(), namespace.value());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getValue());
+        return Objects.hashCode(value());
     }
 
     /**

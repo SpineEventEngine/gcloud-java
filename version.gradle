@@ -25,13 +25,11 @@
  * {@code .config/gradle/dependencies.gradle}.
  */
 
-def final SPINE_VERSION = '1.4.0'
-
 ext {
-    versionToPublish = SPINE_VERSION
+    versionToPublish = '1.4.1'
     
-    spineBaseVersion = SPINE_VERSION
-    spineCoreVersion = SPINE_VERSION
+    spineBaseVersion = '1.4.3'
+    spineCoreVersion = '1.4.4'
 
     datastoreVersion = '1.102.0'
 }

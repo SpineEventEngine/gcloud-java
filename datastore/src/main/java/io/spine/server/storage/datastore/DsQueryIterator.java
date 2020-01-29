@@ -21,13 +21,16 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Cursor;
-import com.google.cloud.datastore.DatastoreReaderWriter;
+import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.UnmodifiableIterator;
 import io.spine.annotation.Internal;
+import io.spine.logging.Logging;
 
 import java.util.NoSuchElementException;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An {@code Iterator} over the {@link com.google.cloud.datastore.StructuredQuery} results.
@@ -49,7 +52,7 @@ import java.util.NoSuchElementException;
  *         the type of queried objects
  */
 @Internal
-public final class DsQueryIterator<R> extends UnmodifiableIterator<R> {
+public final class DsQueryIterator<R> extends UnmodifiableIterator<R> implements Logging {
 
     private final StructuredQuery<R> query;
     private final QueryResults<R> currentPage;
@@ -59,11 +62,11 @@ public final class DsQueryIterator<R> extends UnmodifiableIterator<R> {
 
     private boolean terminated;
 
-    DsQueryIterator(StructuredQuery<R> query, DatastoreReaderWriter datastore) {
+    DsQueryIterator(StructuredQuery<R> query, DatastoreReader datastore) {
         super();
-        this.query = query;
+        this.query = checkNotNull(query);
         this.limit = query.getLimit();
-        this.currentPage = datastore.run(query);
+        this.currentPage = checkNotNull(datastore).run(query);
     }
 
     @Override

@@ -24,7 +24,6 @@ import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.DatastoreReader;
-import com.google.cloud.datastore.DatastoreReaderWriter;
 import com.google.cloud.datastore.DatastoreWriter;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.FullEntity;
@@ -35,6 +34,7 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.tenant.Namespace;
@@ -43,23 +43,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Iterables.toArray;
-import static com.google.common.collect.Iterators.concat;
-import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Streams.stream;
 import static java.lang.Math.min;
-import static java.util.Collections.emptyIterator;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -68,22 +59,10 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("ClassWithTooManyMethods")
 public class DatastoreWrapper implements Logging {
 
-    private static final String ACTIVE_TRANSACTION_CONDITION_MESSAGE =
-            "Transaction should be active.";
-    private static final String NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE =
-            "Transaction should NOT be active.";
-
-    private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
     static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
-
-    private static final Map<DatastoreKind, KeyFactory> keyFactories = new HashMap<>();
-
-    private static final Key[] EMPTY_KEY_ARRAY = new Key[0];
 
     private final NamespaceSupplier namespaceSupplier;
     private final Datastore datastore;
-    private Transaction activeTransaction;
-    private DatastoreReaderWriter actor;
 
     /**
      * Creates a new instance of {@code DatastoreWrapper}.
@@ -97,7 +76,6 @@ public class DatastoreWrapper implements Logging {
     protected DatastoreWrapper(Datastore datastore, NamespaceSupplier supplier) {
         this.namespaceSupplier = checkNotNull(supplier);
         this.datastore = checkNotNull(datastore);
-        this.actor = datastore;
     }
 
     /**
@@ -131,10 +109,10 @@ public class DatastoreWrapper implements Logging {
      *         new {@link Entity} to put into the Datastore
      * @throws DatastoreException
      *         upon failure
-     * @see DatastoreWriter#put(FullEntity)
+     * @see DatastoreWriter#add(FullEntity)
      */
     public void create(Entity entity) throws DatastoreException {
-        actor.add(entity);
+        datastore.add(entity);
     }
 
     /**
@@ -147,7 +125,7 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreWriter#update(Entity...)
      */
     public void update(Entity entity) throws DatastoreException {
-        actor.update(entity);
+        datastore.update(entity);
     }
 
     /**
@@ -159,7 +137,7 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreWrapper#update(Entity)
      */
     public void createOrUpdate(Entity entity) {
-        actor.put(entity);
+        datastore.put(entity);
     }
 
     /**
@@ -199,13 +177,13 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreReader#get(Key)
      */
     public @Nullable Entity read(Key key) {
-        return actor.get(key);
+        return datastore.get(key);
     }
 
     /**
      * Retrieves an {@link Entity} for each of the given keys.
      *
-     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
+     * <p>The resulting {@code Iterator} is evaluated eagerly. A call to
      * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
      *
      * <p>The results are returned in an order matching that of the provided keys
@@ -215,39 +193,30 @@ public class DatastoreWrapper implements Logging {
      *         {@link Key Keys} to search for
      * @return an {@code Iterator} over the found entities in the order of keys
      *         (including {@code null} values for nonexistent keys)
-     * @see DatastoreReader#get(Key...)
+     * @see DatastoreReader#fetch(Key...)
+     * @deprecated Use {@link #lookup(Collection)} instead.
      */
+    @Deprecated
     public Iterator<@Nullable Entity> read(Iterable<Key> keys) {
-        Iterator<@Nullable Entity> dsIterator = readByKeys(keys);
-        Iterator<@Nullable Entity> result = orderByKeys(keys, dsIterator);
-        return unmodifiableIterator(result);
+        return lookup(ImmutableList.copyOf(keys)).iterator();
     }
 
-    private Iterator<@Nullable Entity> readByKeys(Iterable<Key> keys) {
-        List<Key> keysList = newLinkedList(keys);
-        return keysList.size() <= MAX_KEYS_PER_READ_REQUEST
-               ? actor.get(toArray(keys, Key.class))
-               : readBulk(keysList);
-    }
-
-    private static Iterator<@Nullable Entity> orderByKeys(Iterable<Key> keys,
-                                                          Iterator<Entity> items) {
-        List<Entity> entities = newLinkedList(() -> items);
-        Iterator<Entity> entitiesIterator = stream(keys)
-                .map(key -> getEntityOrNull(key, entities.iterator()))
-                .iterator();
-        return entitiesIterator;
-    }
-
-    private static @Nullable Entity getEntityOrNull(Key key, Iterator<Entity> entities) {
-        while (entities.hasNext()) {
-            Entity entity = entities.next();
-            if (key.equals(entity.getKey())) {
-                entities.remove();
-                return entity;
-            }
-        }
-        return null;
+    /**
+     * Retrieves an {@link Entity} for each of the given keys.
+     *
+     * <p>The results are returned in an order matching that of the provided keys
+     * with {@code null}s in place of missing and inactive entities.
+     *
+     * @param keys
+     *         {@link Key Keys} to search for
+     * @return an {@code List} of the found entities in the order of keys (including {@code null}
+     *         values for nonexistent keys)
+     * @see DatastoreReader#fetch(Key...)
+     */
+    public List<@Nullable Entity> lookup(Collection<Key> keys) {
+        checkNotNull(keys);
+        DsReaderLookup lookup = new DsReaderLookup(datastore);
+        return lookup.find(keys);
     }
 
     /**
@@ -273,15 +242,8 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreReader#run(Query)
      */
     public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
-        Namespace namespace = namespaceSupplier.get();
-        StructuredQuery<R> queryWithNamespace =
-                query.toBuilder()
-                     .setNamespace(namespace.getValue())
-                     .build();
-        _trace().log("Reading entities of `%s` kind in `%s` namespace.",
-                     query.getKind(), namespace.getValue());
-        DsQueryIterator<R> result = new DsQueryIterator<>(queryWithNamespace, actor);
-        return result;
+        DsReaderLookup lookup = new DsReaderLookup(datastore);
+        return lookup.execute(query, namespaceSupplier.get());
     }
 
     /**
@@ -349,7 +311,6 @@ public class DatastoreWrapper implements Logging {
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit} or
      *         the provided {@code batchSize} is 0
      */
-    @SuppressWarnings("unchecked") // Checked logically.
     private <R> Iterator<R>
     readAllPageByPage(StructuredQuery<R> query, @Nullable Integer pageSize) {
         checkArgument(query.getLimit() == null,
@@ -379,7 +340,7 @@ public class DatastoreWrapper implements Logging {
      *         {@link Key Keys} of the {@link Entity Entities} to delete. May be nonexistent
      */
     public void delete(Key... keys) {
-        actor.delete(keys);
+        datastore.delete(keys);
     }
 
     /**
@@ -389,15 +350,15 @@ public class DatastoreWrapper implements Logging {
      *         kind (a.k.a. type, table, etc.) of the records to delete
      */
     @VisibleForTesting
-    protected void dropTable(String table) {
+    protected void dropTable(Kind table) {
         Namespace namespace = namespaceSupplier.get();
         StructuredQuery<Entity> query =
                 Query.newEntityQueryBuilder()
-                     .setNamespace(namespace.getValue())
-                     .setKind(table)
+                     .setNamespace(namespace.value())
+                     .setKind(table.value())
                      .build();
         _trace().log("Deleting all entities of `%s` kind in `%s` namespace.",
-                     table, namespace.getValue());
+                     table, namespace.value());
         Iterator<Entity> queryResult = read(query);
         List<Entity> entities = newArrayList(queryResult);
         deleteEntities(entities);
@@ -443,80 +404,7 @@ public class DatastoreWrapper implements Logging {
      */
     public final TransactionWrapper newTransaction() {
         Transaction tx = datastore.newTransaction();
-        return new TransactionWrapper(tx);
-    }
-
-    /**
-     * Starts a transaction.
-     *
-     * <p>After this method is called, all {@code Entity} modifications performed through this
-     * instance of {@code DatastoreWrapper} become transactional. This behaviour lasts until either
-     * {@link #commitTransaction()} or {@link #rollbackTransaction()} is called.
-     *
-     * @throws IllegalStateException
-     *         if a transaction is already started on this instance of
-     *         {@code DatastoreWrapper}
-     * @see #isTransactionActive()
-     * @deprecated Use {@link #newTransaction()} instead.
-     */
-    @Deprecated
-    public void startTransaction() throws IllegalStateException {
-        checkState(!isTransactionActive(), NOT_ACTIVE_TRANSACTION_CONDITION_MESSAGE);
-        activeTransaction = datastore.newTransaction();
-        actor = activeTransaction;
-    }
-
-    /**
-     * Commits a transaction.
-     *
-     * <p>Upon the method call, all the modifications within the active transaction are applied.
-     *
-     * <p>All next operations become non-transactional until {@link #startTransaction()} is called.
-     *
-     * @throws IllegalStateException
-     *         if no transaction is started on this instance of
-     *         {@code DatastoreWrapper}
-     * @see #isTransactionActive()
-     * @deprecated Use {@link #newTransaction()} instead.
-     */
-    @Deprecated
-    public void commitTransaction() throws IllegalStateException {
-        checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
-        activeTransaction.commit();
-        this.actor = datastore;
-    }
-
-    /**
-     * Rollbacks a transaction.
-     *
-     * <p>Upon the method call, all the modifications within the active transaction
-     * canceled permanently.
-     *
-     * <p>After this method execution is over, all the further modifications made through
-     * the current instance of {@code DatastoreWrapper} become non-transactional.
-     *
-     * @throws IllegalStateException
-     *         if no transaction is active for the current
-     *         instance of {@code DatastoreWrapper}
-     * @see #isTransactionActive()
-     * @deprecated Use {@link #newTransaction()} instead.
-     */
-    @Deprecated
-    public void rollbackTransaction() throws IllegalStateException {
-        checkState(isTransactionActive(), ACTIVE_TRANSACTION_CONDITION_MESSAGE);
-        activeTransaction.rollback();
-        this.actor = datastore;
-    }
-
-    /**
-     * Checks whether there is an active transaction on this instance of {@code DatastoreWrapper}.
-     *
-     * @return {@code true} if there is an active transaction, {@code false} otherwise
-     * @deprecated Use {@link #newTransaction()} instead.
-     */
-    @Deprecated
-    public boolean isTransactionActive() {
-        return activeTransaction != null && activeTransaction.isActive();
+        return new TransactionWrapper(tx, namespaceSupplier);
     }
 
     /**
@@ -528,70 +416,19 @@ public class DatastoreWrapper implements Logging {
      * @return an instance of {@link KeyFactory} for given kind
      */
     public KeyFactory keyFactory(Kind kind) {
-        DatastoreKind datastoreKind = new DatastoreKind(projectId(), kind);
-        KeyFactory keyFactory = keyFactories.get(datastoreKind);
-        if (keyFactory == null) {
-            keyFactory = initKeyFactory(kind);
-        }
+        checkNotNull(kind);
+        KeyFactory keyFactory = datastore.newKeyFactory()
+                                        .setKind(kind.value());
         Namespace namespace = namespaceSupplier.get();
         _trace().log("Retrieving KeyFactory for kind `%s` in `%s` namespace.",
-                     kind, namespace.getValue());
-        keyFactory.setNamespace(namespace.getValue());
+                     kind, namespace.value());
+        keyFactory.setNamespace(namespace.value());
         return keyFactory;
     }
 
     @VisibleForTesting
     public Datastore datastore() {
         return datastore;
-    }
-
-    private KeyFactory initKeyFactory(Kind kind) {
-        KeyFactory keyFactory = datastore.newKeyFactory()
-                                         .setKind(kind.value());
-        DatastoreKind datastoreKind = new DatastoreKind(projectId(), kind);
-        keyFactories.put(datastoreKind, keyFactory);
-        return keyFactory;
-    }
-
-    private ProjectId projectId() {
-        String projectId = datastore.getOptions()
-                                    .getProjectId();
-        ProjectId result = ProjectId.of(projectId);
-        return result;
-    }
-
-    /**
-     * Reads big number of records.
-     *
-     * <p>Google App Engine Datastore has a limitation on the amount of entities queried with a
-     * single call — 1000 entities per query. To deal with this limitation we read the entities in
-     * pagination fashion 1000 entity per page.
-     *
-     * @param keys
-     *         {@link Key keys} to find the entities for
-     * @return ordered sequence of {@link Entity entities}
-     * @see #read(Iterable)
-     */
-    private Iterator<Entity> readBulk(List<Key> keys) {
-        int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
-        _trace().log("Reading a big bulk of entities synchronously. The data is read as %d pages.",
-                     pageCount);
-        int lowerBound = 0;
-        int higherBound = MAX_KEYS_PER_READ_REQUEST;
-        int keysLeft = keys.size();
-        Iterator<Entity> result = emptyIterator();
-        for (int i = 0; i < pageCount; i++) {
-            List<Key> keysPage = keys.subList(lowerBound, higherBound);
-
-            Iterator<Entity> page = actor.get(keysPage.toArray(EMPTY_KEY_ARRAY));
-            result = concat(result, page);
-
-            keysLeft -= keysPage.size();
-            lowerBound = higherBound;
-            higherBound += min(keysLeft, MAX_KEYS_PER_READ_REQUEST);
-        }
-
-        return result;
     }
 
     private void writeBulk(Entity[] entities) {
@@ -606,39 +443,6 @@ public class DatastoreWrapper implements Logging {
     }
 
     private void writeSmallBulk(Entity[] entities) {
-        actor.put(entities);
-    }
-
-    /**
-     * A Datastore {@link Kind} by project ID.
-     */
-    private static class DatastoreKind {
-
-        private final ProjectId projectId;
-        private final Kind kind;
-
-        private DatastoreKind(ProjectId projectId, Kind kind) {
-            this.projectId = projectId;
-            this.kind = kind;
-        }
-
-        @SuppressWarnings("EqualsGetClass") // The class is effectively final.
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            DatastoreKind kind1 = (DatastoreKind) o;
-            return Objects.equals(projectId, kind1.projectId) &&
-                    Objects.equals(kind, kind1.kind);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(projectId, kind);
-        }
+        datastore.put(entities);
     }
 }

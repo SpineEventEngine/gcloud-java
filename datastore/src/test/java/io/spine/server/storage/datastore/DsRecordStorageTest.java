@@ -24,6 +24,7 @@ import com.google.cloud.datastore.Key;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
+import com.google.protobuf.Duration;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EntityState;
@@ -56,6 +57,7 @@ import io.spine.test.datastore.CollegeId;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
+import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.SpyStorageFactory;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.type.TypeUrl;
@@ -74,6 +76,9 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.protobuf.util.Durations.fromSeconds;
+import static com.google.protobuf.util.Timestamps.add;
+import static com.google.protobuf.util.Timestamps.subtract;
 import static com.google.protobuf.util.Timestamps.toSeconds;
 import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.either;
@@ -274,6 +279,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
         assertEquals(entity.isDeleted(), datastoreEntity.getBoolean(deleted));
     }
 
+    @SlowTest
     @Test
     @DisplayName("pass big data speed test")
     void testBigData() {
@@ -362,7 +368,11 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Create column filter.
             Timestamp targetColumnValue = targetEntity.getCreated();
-            CompositeFilter columnFilter = all(eq(CREATED.columnName(), targetColumnValue));
+            Duration oneSecond = fromSeconds(1);
+            CompositeFilter columnFilter = all(
+                    gt(CREATED.columnName(), subtract(targetColumnValue, oneSecond)),
+                    lt(CREATED.columnName(), add(targetColumnValue, oneSecond))
+            );
 
             // Compose Query filters.
             TargetFilters entityFilters = newTargetFilters(idFilter, columnFilter);
@@ -376,11 +386,13 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
 
             // Check the query results.
             List<EntityRecord> resultList = newArrayList(readResult);
-            assertEquals(1, resultList.size());
+            assertThat(resultList)
+                    .hasSize(1);
 
             // Check the record state.
             EntityRecord record = resultList.get(0);
-            assertEquals(targetEntity.state(), unpack(record.getState()));
+            assertThat(unpack(record.getState()))
+                    .isEqualTo(targetEntity.state());
 
             assertDsReadByKeys();
         }
@@ -881,6 +893,7 @@ class DsRecordStorageTest extends RecordStorageTest<DsRecordStorage<ProjectId>> 
             assertDsReadByStructuredQuery();
         }
 
+        @SlowTest
         @Test
         @DisplayName("with multiple Datastore reads")
         void performsMultipleReads() {

@@ -30,7 +30,9 @@ import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.tenant.TenantAwareFunction0;
+import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,11 +63,8 @@ import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.si
 import static io.spine.testing.server.storage.datastore.TestDatastoreWrapper.wrap;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @DisplayName("`DatastoreWrapper` should")
@@ -75,55 +74,6 @@ class DatastoreWrapperTest {
     static void tearDown() {
         DatastoreWrapper wrapper = wrap(localDatastore(), singleTenant());
         wrapper.dropTable(NAMESPACE_HOLDER_KIND);
-    }
-
-    @SuppressWarnings("deprecation") // To be deleted alongside with the tested API.
-    @Nested
-    class SingleTenant {
-
-        private DatastoreWrapper wrapper;
-
-        @BeforeEach
-        void setUp() {
-            wrapper = wrap(localDatastore(), singleTenant());
-            wrapper.startTransaction();
-        }
-
-        @Test
-        @DisplayName("work with transactions if necessary")
-        void testExecuteTransactions() {
-            assertTrue(wrapper.isTransactionActive());
-            wrapper.commitTransaction();
-            assertFalse(wrapper.isTransactionActive());
-        }
-
-        @Test
-        @DisplayName("rollback transactions")
-        void testRollback() {
-            assertTrue(wrapper.isTransactionActive());
-            wrapper.rollbackTransaction();
-            assertFalse(wrapper.isTransactionActive());
-        }
-
-        @Test
-        @DisplayName("fail to start transaction if one is active")
-        void testFailToRestartTransactions() {
-            try {
-                assertTrue(wrapper.isTransactionActive());
-                assertThrows(IllegalStateException.class, wrapper::startTransaction);
-            } finally {
-                wrapper.rollbackTransaction();
-            }
-        }
-
-        @Test
-        @DisplayName("fail to finish non active transaction")
-        void testFailToFinishNonActiveTransaction() {
-            assertTrue(wrapper.isTransactionActive());
-            wrapper.commitTransaction();
-            assertFalse(wrapper.isTransactionActive());
-            assertThrows(IllegalStateException.class, wrapper::rollbackTransaction);
-        }
     }
 
     @Nested
@@ -141,6 +91,7 @@ class DatastoreWrapperTest {
             wrapper.dropAllTables();
         }
 
+        @SlowTest
         @Test
         @DisplayName("support bulk reads")
         void testBulkRead() throws InterruptedException {
@@ -154,11 +105,12 @@ class DatastoreWrapperTest {
             // Wait for some time to make sure the writing is complete
             Thread.sleep(bulkSize * 5L);
 
-            Collection<Entity> readEntities = newArrayList(wrapper.read(entities.keySet()));
+            Collection<Entity> readEntities = newArrayList(wrapper.lookup(entities.keySet()));
             assertEquals(entities.size(), readEntities.size());
             assertTrue(expectedEntities.containsAll(readEntities));
         }
 
+        @SlowTest
         @Test
         @DisplayName("support big bulk reads")
         void testBigBulkRead() throws InterruptedException {
@@ -205,6 +157,7 @@ class DatastoreWrapperTest {
             wrapper.dropAllTables();
         }
 
+        @SlowTest
         @Test
         @DisplayName("read and write entities in the remote datastore")
         void testBulkRead() {
@@ -216,7 +169,7 @@ class DatastoreWrapperTest {
 
             wrapper.createOrUpdate(expectedEntities);
 
-            Collection<Entity> readEntities = newArrayList(wrapper.read(entities.keySet()));
+            Collection<Entity> readEntities = newArrayList(wrapper.lookup(entities.keySet()));
             assertEquals(entities.size(), readEntities.size());
             assertTrue(expectedEntities.containsAll(readEntities));
         }
@@ -238,6 +191,7 @@ class DatastoreWrapperTest {
             wrapper.dropAllTables();
         }
 
+        @SlowTest
         @Test
         @DisplayName("replacing missing entities with null")
         void testMissingAreNull() throws InterruptedException {
@@ -258,17 +212,19 @@ class DatastoreWrapperTest {
                     .add(presentKeys.get(2))
                     .build();
 
-            Iterator<Entity> actualEntities = wrapper.read(queryKeys);
+            List<@Nullable Entity> actualEntities = wrapper.lookup(queryKeys);
 
-            assertNull(actualEntities.next());
-            assertEquals(entities.get(presentKeys.get(0)), actualEntities.next());
-            assertEquals(entities.get(presentKeys.get(1)), actualEntities.next());
-            assertNull(actualEntities.next());
-            assertEquals(entities.get(presentKeys.get(2)), actualEntities.next());
-
-            assertFalse(actualEntities.hasNext());
+            assertThat(actualEntities)
+                    .containsExactly(
+                            null,
+                            entities.get(presentKeys.get(0)),
+                            entities.get(presentKeys.get(1)),
+                            null,
+                            entities.get(presentKeys.get(2))
+                    );
         }
 
+        @SlowTest
         @Test
         @DisplayName("preserving order")
         void test() throws InterruptedException {
@@ -287,13 +243,10 @@ class DatastoreWrapperTest {
                     .add(presentKeys.get(1))
                     .build();
 
-            Iterator<Entity> actualEntities = wrapper.read(queryKeys);
+            List<Entity> actualEntities = wrapper.lookup(queryKeys);
 
-            assertEquals(entities.get(queryKeys.get(0)), actualEntities.next());
-            assertEquals(entities.get(queryKeys.get(1)), actualEntities.next());
-            assertEquals(entities.get(queryKeys.get(2)), actualEntities.next());
-
-            assertFalse(actualEntities.hasNext());
+            assertThat(actualEntities)
+                    .containsExactlyElementsIn(entities.values());
         }
 
         private Map<Key, Entity> createAndStoreTestEntities(int bulkSize) {
@@ -396,18 +349,9 @@ class DatastoreWrapperTest {
         assertTrue(result.hasNext());
         Entity second = result.next();
 
-        assertThat(expctedEntities).contains(first);
-        assertThat(expctedEntities).contains(second);
-
-        assertFalse(result.hasNext());
-        assertFalse(result.hasNext());
-        assertFalse(result.hasNext());
-
-        try {
-            result.next();
-            fail();
-        } catch (NoSuchElementException ignored) {
-        }
+        assertThat(expctedEntities)
+                .containsExactly(first, second);
+        assertThrows(NoSuchElementException.class, result::next);
     }
 
     @Test
@@ -422,7 +366,7 @@ class DatastoreWrapperTest {
         Key entityKey = new TenantAwareFunction0<Key>(tenantId) {
             @Override
             public Key apply() {
-                Key entityKey = wrapper.keyFactory(Kind.of(NAMESPACE_HOLDER_KIND))
+                Key entityKey = wrapper.keyFactory(NAMESPACE_HOLDER_KIND)
                                        .newKey(key);
                 Entity entity = Entity.newBuilder(entityKey)
                                       .build();

@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class DatastoreWrapperTestEnv {
 
-    public static final String NAMESPACE_HOLDER_KIND = "spine.test.NAMESPACE_HOLDER_KIND";
+    public static final Kind NAMESPACE_HOLDER_KIND = Kind.of("spine.test.NAMESPACE_HOLDER_KIND");
     public static final Kind GENERIC_ENTITY_KIND = Kind.of("my.entity");
 
     private static final String SERVICE_ACCOUNT_RESOURCE_PATH = "spine-dev.json";
@@ -62,7 +62,7 @@ public class DatastoreWrapperTestEnv {
     public static void ensureNamespace(String namespaceValue, Datastore datastore) {
         KeyFactory keyFactory = datastore.newKeyFactory()
                                          .setNamespace(namespaceValue)
-                                         .setKind(NAMESPACE_HOLDER_KIND);
+                                         .setKind(NAMESPACE_HOLDER_KIND.value());
         Entity entity = Entity.newBuilder(keyFactory.newKey(42L))
                               .build();
         datastore.put(entity);

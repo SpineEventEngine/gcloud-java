@@ -42,7 +42,7 @@ import java.util.NoSuchElementException;
  * @param <R>
  *         the type of queried objects
  */
-final class DsQueryPageIterator<R> implements Iterator<DsQueryIterator> {
+final class DsQueryPageIterator<R> implements Iterator<DsQueryIterator<R>> {
 
     private final DatastoreWrapper datastore;
 

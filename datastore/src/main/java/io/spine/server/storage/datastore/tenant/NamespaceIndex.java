@@ -141,8 +141,7 @@ final class NamespaceIndex implements TenantIndex {
     boolean contains(Namespace namespace) {
         checkNotNull(namespace);
 
-        if (namespace.getValue()
-                     .isEmpty()) { // Default namespace, always exists
+        if (namespace.value().isEmpty()) { // Default namespace, always exists
             return true;
         }
 

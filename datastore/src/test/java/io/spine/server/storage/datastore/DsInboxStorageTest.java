@@ -41,15 +41,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 import static io.spine.server.storage.datastore.given.DsInboxStorageTestEnv.generate;
 import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
-import static java.util.stream.Collectors.toList;
+import static java.util.Comparator.comparing;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -96,7 +96,6 @@ class DsInboxStorageTest extends InboxStorageTest {
     @Test
     @DisplayName("read and write multiple `InboxMessage` instances")
     void readAndWriteMultipleMessages() {
-
         InboxStorage storage = storage();
         int totalMessages = 10;
         ShardIndex index = newIndex(1, 18);
@@ -108,13 +107,8 @@ class DsInboxStorageTest extends InboxStorageTest {
         storage.writeAll(messages);
 
         ImmutableList<InboxMessage> contents = readAllAndCompare(storage, index, messages);
-        List<InboxMessage> chronologicallySorted =
-                contents.stream()
-                        .sorted((m1, m2) -> Timestamps.compare(m1.getWhenReceived(),
-                                                               m2.getWhenReceived()))
-                        .collect(toList());
-
-        assertEquals(contents, chronologicallySorted);
+        assertThat(contents)
+             .isInStrictOrder(comparing(InboxMessage::getWhenReceived, Timestamps.comparator()));
     }
 
     @Test
@@ -159,7 +153,6 @@ class DsInboxStorageTest extends InboxStorageTest {
     @Test
     @DisplayName("mark messages delivered")
     void markMessagedDelivered() {
-
         ShardIndex index = newIndex(3, 71);
         ImmutableList<InboxMessage> messages = generate(10, index);
         InboxStorage storage = storage();

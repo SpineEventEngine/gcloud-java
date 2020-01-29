@@ -25,7 +25,7 @@ import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.LongValue;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StringValue;
-import com.google.cloud.datastore.TimestampValue;
+import com.google.protobuf.Timestamp;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.InboxReadRequest;
@@ -37,11 +37,11 @@ import io.spine.string.Stringifiers;
 import java.util.Iterator;
 import java.util.Optional;
 
-import static com.google.cloud.Timestamp.fromProto;
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Timestamps.toNanos;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 
 /**
@@ -69,9 +69,9 @@ public class DsInboxStorage
     public Page<InboxMessage> readAll(ShardIndex index, int pageSize) {
         checkNotNull(index);
 
-        EntityQuery.Builder builder = queryInShard(index);
-        builder.setOrderBy(asc(Column.whenReceived.columnName()),
-                           asc(Column.version.columnName()));
+        EntityQuery.Builder builder = queryInShard(index)
+                .setOrderBy(asc(Column.receivedAt.columnName()),
+                            asc(Column.version.columnName()));
         Iterator<InboxMessage> iterator = readAll(builder, pageSize);
         return new InboxPage(iterator, pageSize);
     }
@@ -147,8 +147,9 @@ public class DsInboxStorage
                                    .toString());
         }),
 
-        whenReceived("when_received", (m) -> {
-            return TimestampValue.of(fromProto(m.getWhenReceived()));
+        receivedAt("received_at", (m) -> {
+            Timestamp timestamp = m.getWhenReceived();
+            return LongValue.of(toNanos(timestamp));
         }),
 
         version("version", (m) -> {
@@ -163,7 +164,6 @@ public class DsInboxStorage
         /**
          * Obtains the value of the column from the given message.
          */
-        @SuppressWarnings("NonSerializableFieldInSerializableClass") // This enum isn't serialized.
         private final Getter<InboxMessage> getter;
 
         Column(String name, Getter<InboxMessage> getter) {
