@@ -38,11 +38,6 @@ import static java.util.Optional.ofNullable;
 
 /**
  * A Cloud Datastore transaction wrapper.
- *
- * @implNote The wrapper provides API for basic operations which can be done transactionally.
- *         There is no mechanism for a bulk write, since the limits on a single transaction
- *         {@code Commit} operation are lower than the limits on a single {@code Put} operation.
- * @see <a href="https://cloud.google.com/datastore/docs/concepts/limits">Transaction limits</a>
  */
 public final class TransactionWrapper implements AutoCloseable {
 
@@ -96,7 +91,13 @@ public final class TransactionWrapper implements AutoCloseable {
     }
 
     /**
-     * Puts the given entity into the Datastore in the transaction.
+     * Puts the given entities into the Datastore in the transaction.
+     *
+     * @implNote Unlike {@link DatastoreWrapper}, {@code TransactionWrapper} does not provide
+     *         a mechanism for writing large numbers of entities. Only 500 entities can be written
+     *         in a single transaction. Please see
+     *         the <a href="https://cloud.google.com/datastore/docs/concepts/limits">transaction
+     *         limits</a> for more info.
      */
     public void createOrUpdate(Collection<Entity> entities) throws DatastoreException {
         Entity[] array = new Entity[entities.size()];
