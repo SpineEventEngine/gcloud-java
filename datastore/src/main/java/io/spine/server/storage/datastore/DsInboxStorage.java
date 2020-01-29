@@ -41,6 +41,7 @@ import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.OrderBy.asc;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Timestamps.toNanos;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 
 /**
@@ -49,8 +50,6 @@ import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 public class DsInboxStorage
         extends DsMessageStorage<InboxMessageId, InboxMessage, InboxReadRequest>
         implements InboxStorage {
-
-    private static final int NANOS_PER_SECOND = 1_000_000;
 
     protected DsInboxStorage(DatastoreWrapper datastore, boolean multitenant) {
         super(datastore, multitenant);
@@ -150,8 +149,7 @@ public class DsInboxStorage
 
         receivedAt("received_at", (m) -> {
             Timestamp timestamp = m.getWhenReceived();
-            long epochNanos = timestamp.getSeconds() * NANOS_PER_SECOND + timestamp.getNanos();
-            return LongValue.of(epochNanos);
+            return LongValue.of(toNanos(timestamp));
         }),
 
         version("version", (m) -> {
