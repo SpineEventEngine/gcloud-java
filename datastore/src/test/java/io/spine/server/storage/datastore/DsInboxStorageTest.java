@@ -41,15 +41,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
+import static io.spine.server.delivery.InboxMessageStatus.DELIVERED;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
 import static io.spine.server.storage.datastore.given.DsInboxStorageTestEnv.generate;
 import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
 import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -68,11 +71,10 @@ class DsInboxStorageTest extends InboxStorageTest {
 
     @Override
     @AfterEach
-    protected  void tearDown() {
+    protected void tearDown() {
         factory.tearDown();
         super.tearDown();
     }
-
 
     @Override
     protected InboxStorage storage() {
@@ -108,7 +110,7 @@ class DsInboxStorageTest extends InboxStorageTest {
 
         ImmutableList<InboxMessage> contents = readAllAndCompare(storage, index, messages);
         assertThat(contents)
-             .isInStrictOrder(comparing(InboxMessage::getWhenReceived, Timestamps.comparator()));
+                .isInStrictOrder(comparing(InboxMessage::getWhenReceived, Timestamps.comparator()));
     }
 
     @Test
@@ -166,8 +168,9 @@ class DsInboxStorageTest extends InboxStorageTest {
         UnmodifiableIterator<InboxMessage> iterator = messages.iterator();
         InboxMessage remainingNonDelivered = iterator.next();
         ImmutableList<InboxMessage> toMarkDelivered = ImmutableList.copyOf(iterator);
+        List<InboxMessage> markedDelivered = markDelivered(toMarkDelivered);
 
-        storage.markDelivered(toMarkDelivered);
+        storage.writeAll(markedDelivered);
         ImmutableList<InboxMessage> originalMarkedDelivered =
                 toMarkDelivered.stream()
                                .map(m -> m.toBuilder()
@@ -180,6 +183,14 @@ class DsInboxStorageTest extends InboxStorageTest {
                                                         .contents();
         assertTrue(readResult.contains(remainingNonDelivered));
         assertTrue(readResult.containsAll(originalMarkedDelivered));
+    }
+
+    private static List<InboxMessage> markDelivered(ImmutableList<InboxMessage> toMarkDelivered) {
+        return toMarkDelivered.stream()
+                              .map(m -> m.toBuilder()
+                                         .setStatus(DELIVERED)
+                                         .vBuild())
+                              .collect(toList());
     }
 
     @Test

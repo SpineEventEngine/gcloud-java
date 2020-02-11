@@ -18,18 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.storage.datastore;
+
+import io.spine.server.ServerEnvironment;
+import io.spine.server.delivery.CatchUpTest;
+import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+
 /**
- * The versions of the libraries to be used.
- *
- * <p>This file defines versions for the dependencies that are not covered by
- * {@code .config/gradle/dependencies.gradle}.
+ * Smoke tests on {@link io.spine.server.delivery.CatchUp CatchUp} functionality.
  */
+@DisplayName("Datastore-backed `CatchUp` should ")
+class DsCatchUpSmokeTest extends CatchUpTest {
 
-ext {
-    versionToPublish = '1.4.5'
-    
-    spineBaseVersion = '1.4.3'
-    spineCoreVersion = '1.4.5'
+    private TestDatastoreStorageFactory factory;
 
-    datastoreVersion = '1.102.0'
+    @BeforeEach
+    @Override
+    public void setUp() {
+        super.setUp();
+        factory = TestDatastoreStorageFactory.local();
+        ServerEnvironment.instance()
+                         .configureStorageForTests(factory);
+    }
+
+    @AfterEach
+    @Override
+    public void tearDown() {
+        super.tearDown();
+        if (factory != null) {
+            factory.tearDown();
+        }
+    }
 }

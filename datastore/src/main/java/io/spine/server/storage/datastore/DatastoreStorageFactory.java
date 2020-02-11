@@ -30,6 +30,7 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.ColumnMapping;
@@ -140,11 +141,9 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         DsProjectionStorageDelegate<I> recordStorage =
                 configure(DsProjectionStorageDelegate.newDelegateBuilder(), cls, context);
-        DsPropertyStorage propertyStorage = createPropertyStorage(context);
         DsProjectionStorage<I> result =
                 new DsProjectionStorage<>(cls,
                                           recordStorage,
-                                          propertyStorage,
                                           context.isMultitenant());
         return result;
     }
@@ -153,6 +152,12 @@ public class DatastoreStorageFactory implements StorageFactory {
     public InboxStorage createInboxStorage(boolean multitenant) {
         DatastoreWrapper wrapper = systemWrapperFor(InboxStorage.class, multitenant);
         return new DsInboxStorage(wrapper, multitenant);
+    }
+
+    @Override
+    public CatchUpStorage createCatchUpStorage(boolean multitenant) {
+        DatastoreWrapper wrapper = systemWrapperFor(CatchUpStorage.class, multitenant);
+        return new DsCatchUpStorage(wrapper, multitenant);
     }
 
     public ColumnMapping<Value<?>> columnMapping() {

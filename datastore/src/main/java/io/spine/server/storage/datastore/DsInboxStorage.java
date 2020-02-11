@@ -77,7 +77,7 @@ public class DsInboxStorage
     }
 
     @Override
-    public Optional<InboxMessage> oldestMessageToDeliver(ShardIndex index) {
+    public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
         int indexValue = index.getIndex();
         int totalValue = index.getOfTotal();
         EntityQuery.Builder builder =
