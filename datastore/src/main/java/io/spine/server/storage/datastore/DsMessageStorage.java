@@ -144,6 +144,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      * @param message
      *         the message to write
      */
+    @SuppressWarnings("OverlyBroadCatchBlock")  // We react to all the exceptions similarly.
     final void writeTransactionally(M message) {
         checkNotNull(message);
 
