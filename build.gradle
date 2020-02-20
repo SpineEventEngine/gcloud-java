@@ -99,6 +99,12 @@ subprojects {
 
     defaultRepositories(project)
 
+    // Required to fetch `androidx.annotation:annotation:1.1.0`,
+    // which is a transitive dependency of `com.google.cloud:google-cloud-datastore`.
+    repositories {
+        maven { url = 'https://maven.google.com/'}
+    }
+
     dependencies {
         errorprone deps.build.errorProneCore
         errorproneJavac deps.build.errorProneJavac
