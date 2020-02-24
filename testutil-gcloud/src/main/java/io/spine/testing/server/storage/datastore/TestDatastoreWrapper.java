@@ -38,6 +38,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.Collections.synchronizedList;
 
 /**
  * Custom extension of the {@link DatastoreWrapper} for the integration testing.
@@ -63,7 +64,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
      */
     private static final int MAX_CLEANUP_ATTEMPTS = 5;
 
-    private static final Collection<Kind> kindsCache = new ArrayList<>();
+    private static final Collection<Kind> kindsCache = synchronizedList(new ArrayList<>());
 
     private final boolean waitForConsistency;
 

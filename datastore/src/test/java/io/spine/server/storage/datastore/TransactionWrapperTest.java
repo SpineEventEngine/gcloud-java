@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
@@ -49,7 +50,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.localDatastore;
 import static java.util.concurrent.Executors.newFixedThreadPool;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.generate;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -189,23 +189,41 @@ class TransactionWrapperTest {
     @Test
     @DisplayName("run many transactions at a time")
     void runManyAtATime() throws InterruptedException {
-        int workerCount = 1117;
+        int workerCount = 117;
         ExecutorService service = newFixedThreadPool(workerCount);
         List<Key> keys = generate(() -> keyFactory.newKey(newUuid()))
                 .limit(workerCount)
                 .collect(toList());
-        keys.stream()
-            .map(key -> Entity
-                    .newBuilder(key)
-                    .set("a", newUuid())
-                    .build())
-            .forEach(entity -> service.execute(() -> {
-                try (TransactionWrapper tx = datastore.newTransaction()) {
-                    tx.createOrUpdate(entity);
-                    tx.commit();
-                }
-            }));
-        service.awaitTermination(5, SECONDS);
+        List<Callable<Key>> tasks =
+                keys.stream()
+                    .map(key -> Entity
+                            .newBuilder(key)
+                            .set("a", newUuid())
+                            .build())
+                    .map(entity -> (Callable<Key>) () -> {
+                             try (TransactionWrapper tx = datastore.newTransaction()) {
+                                 tx.createOrUpdate(entity);
+                                 tx.commit();
+                                 Entity result = datastore.read(entity.getKey());
+                                 assertThat(result).isNotNull();
+                             }
+                             return entity.getKey();
+                         }
+                    )
+                    .collect(toList());
+        service.invokeAll(tasks);
+//            .forEach(entity -> service.execute(() -> {
+//                try (TransactionWrapper tx = datastore.newTransaction()) {
+//                        tx.createOrUpdate(entity);
+//                        tx.commit();
+//                        Entity result = datastore.read(entity.getKey());
+//                        assertThat(result).isNotNull();
+//                    } catch (Throwable e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }));
+        assertThat(service.shutdownNow()).isEmpty();
         for (Key key : keys) {
             Entity read = datastore.read(key);
             assertThat(read)
