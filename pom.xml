@@ -51,12 +51,6 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
-    <artifactId>spine-server</artifactId>
-    <version />
-    <scope>test</scope>
-  </dependency>
-  <dependency>
-    <groupId>io.spine</groupId>
     <artifactId>spine-testutil-server</artifactId>
     <version>1.4.8</version>
     <scope>test</scope>
