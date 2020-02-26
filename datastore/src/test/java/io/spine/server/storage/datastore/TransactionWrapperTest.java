@@ -212,17 +212,6 @@ class TransactionWrapperTest {
                     )
                     .collect(toList());
         service.invokeAll(tasks);
-//            .forEach(entity -> service.execute(() -> {
-//                try (TransactionWrapper tx = datastore.newTransaction()) {
-//                        tx.createOrUpdate(entity);
-//                        tx.commit();
-//                        Entity result = datastore.read(entity.getKey());
-//                        assertThat(result).isNotNull();
-//                    } catch (Throwable e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }));
         assertThat(service.shutdownNow()).isEmpty();
         for (Key key : keys) {
             Entity read = datastore.read(key);
