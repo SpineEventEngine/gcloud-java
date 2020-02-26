@@ -28,6 +28,8 @@ import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.truth.Truth8;
 import com.google.protobuf.Empty;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
@@ -140,6 +142,50 @@ class TransactionWrapperTest {
     }
 
     @Test
+    @DisplayName("delete single entity and many entities in a bulk by their keys transactionally")
+    void writeDelete() {
+        int entityCount = 20;
+        List<Entity> entities =
+                generate(() -> Entity.newBuilder(keyFactory.newKey(newUuid()))
+                                     .set("uuid", newUuid())
+                                     .build())
+                        .limit(entityCount)
+                        .collect(toList());
+
+        TransactionWrapper creationTx = datastore.newTransaction();
+        creationTx.create(entities);
+        creationTx.commit();
+
+        Entity firstEntity = entities.remove(0);
+        TransactionWrapper singleDeletionTx = datastore.newTransaction();
+        Key toDelete = firstEntity.getKey();
+        singleDeletionTx.delete(toDelete);
+        singleDeletionTx.commit();
+
+        TransactionWrapper firstReadTx = datastore.newTransaction();
+        Truth8.assertThat(
+                firstReadTx.read(toDelete)
+        ).isEmpty();
+        firstReadTx.commit();
+
+        TransactionWrapper bulkDeletionTx = datastore.newTransaction();
+        List<Key> remainingKeys = entities.stream()
+                            .map(Entity::getKey)
+                            .collect(toList());
+        Key[] keysToDelete = Iterables.toArray(remainingKeys, Key.class);
+        bulkDeletionTx.delete(keysToDelete);
+        bulkDeletionTx.commit();
+
+        TransactionWrapper bulkReadTx = datastore.newTransaction();
+        for (Key key : keysToDelete) {
+            Truth8.assertThat(
+                    bulkReadTx.read(key)
+            ).isEmpty();
+        }
+        bulkReadTx.commit();
+    }
+
+    @Test
     @DisplayName("rollback changes")
     void rollback() {
         Key key = keyFactory.newKey(newUuid());
@@ -229,11 +275,13 @@ class TransactionWrapperTest {
                 .addAncestor(PathElement.of(TEST_KIND.value(), newUuid()));
         Entity[] entities = generate(() -> ancestorFactory.newKey(newUuid()))
                 .limit(count)
-                .map(key -> Entity.newBuilder(key).build())
+                .map(key -> Entity.newBuilder(key)
+                                  .build())
                 .toArray(Entity[]::new);
         datastore.createOrUpdate(entities);
 
-        Key ancestorKey = ancestorFactory.newKey().getParent();
+        Key ancestorKey = ancestorFactory.newKey()
+                                         .getParent();
         try (TransactionWrapper tx = datastore.newTransaction()) {
             DsQueryIterator<Entity> readEntities = tx.read(Query.newEntityQueryBuilder()
                                                                 .setKind(TEST_KIND.value())
@@ -249,7 +297,8 @@ class TransactionWrapperTest {
     @DisplayName("fail early on `create` if entity already exists")
     void insertTwice() {
         Key key = keyFactory.newKey(newUuid());
-        Entity entity = Entity.newBuilder(key).build();
+        Entity entity = Entity.newBuilder(key)
+                              .build();
         try (TransactionWrapper tx = datastore.newTransaction()) {
             tx.createOrUpdate(entity);
             DatastoreException exception = assertThrows(DatastoreException.class,
@@ -267,7 +316,8 @@ class TransactionWrapperTest {
     void insert() {
         Key key = keyFactory.newKey(newUuid());
         String propertyName = "randomValue";
-        Entity oldEntity = Entity.newBuilder(key).build();
+        Entity oldEntity = Entity.newBuilder(key)
+                                 .build();
         Entity newEntity = Entity.newBuilder(key)
                                  .set(propertyName, 42L)
                                  .build();
@@ -287,14 +337,16 @@ class TransactionWrapperTest {
     void insertMany() {
         Key key = keyFactory.newKey(newUuid());
         String propertyName = "some_property";
-        Entity oldEntity = Entity.newBuilder(key).build();
+        Entity oldEntity = Entity.newBuilder(key)
+                                 .build();
         Entity newEntity = Entity.newBuilder(key)
                                  .set(propertyName, 42L)
                                  .build();
         datastore.createOrUpdate(oldEntity);
         Key freshNewKey = keyFactory.newKey(newUuid());
         try (TransactionWrapper tx = datastore.newTransaction()) {
-            Entity freshNewEntity = Entity.newBuilder(freshNewKey).build();
+            Entity freshNewEntity = Entity.newBuilder(freshNewKey)
+                                          .build();
             tx.create(ImmutableList.of(freshNewEntity, newEntity));
             assertThrows(DatastoreException.class, tx::commit);
         }
@@ -309,14 +361,16 @@ class TransactionWrapperTest {
     void putMany() {
         String propertyName = "foo";
         Key key = keyFactory.newKey(newUuid());
-        Entity oldEntity = Entity.newBuilder(key).build();
+        Entity oldEntity = Entity.newBuilder(key)
+                                 .build();
         Entity newEntity = Entity.newBuilder(key)
                                  .set(propertyName, 42L)
                                  .build();
         datastore.createOrUpdate(oldEntity);
         Key freshNewKey = keyFactory.newKey(newUuid());
         try (TransactionWrapper tx = datastore.newTransaction()) {
-            Entity freshNewEntity = Entity.newBuilder(freshNewKey).build();
+            Entity freshNewEntity = Entity.newBuilder(freshNewKey)
+                                          .build();
             tx.createOrUpdate(ImmutableList.of(freshNewEntity, newEntity));
             tx.commit();
         }
@@ -382,7 +436,8 @@ class TransactionWrapperTest {
         int count = 2;
         List<Entity> entities = generate(() -> keyFactory.newKey(newUuid()))
                 .limit(count)
-                .map(key -> Entity.newBuilder(key).build())
+                .map(key -> Entity.newBuilder(key)
+                                  .build())
                 .collect(toList());
         datastore.createOrUpdate(entities);
         try (TransactionWrapper tx = datastore.newTransaction()) {
