@@ -113,6 +113,21 @@ public class DsInboxStorage
         return Optional.empty();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Writes the message in a new transaction.
+     */
+    @Override
+    public void write(InboxMessage message) {
+        writeTransactionally(message);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Writes all the messages in a single new transaction.
+     */
     @Override
     public void writeAll(Iterable<InboxMessage> messages) {
         writeAllTransactionally(messages);
