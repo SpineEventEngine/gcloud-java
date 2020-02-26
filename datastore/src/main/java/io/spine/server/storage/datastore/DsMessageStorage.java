@@ -23,9 +23,11 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.EntityQuery;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
+import io.spine.annotation.SPI;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.ReadRequest;
@@ -43,6 +45,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.unsupported;
 import static java.util.stream.Collectors.toList;
 
+
 /**
  * An abstract base for storages operating plain {@link Message}s in Datastore.
  *
@@ -56,6 +59,8 @@ import static java.util.stream.Collectors.toList;
  * @param <R>
  *         the type of the read request specific to this storage
  */
+@SPI
+@SuppressWarnings("WeakerAccess")   // API methods are exposed for the descendants
 public abstract class DsMessageStorage<I, M extends Message, R extends ReadRequest<I>>
         extends AbstractStorage<I, M, R> {
 
@@ -87,25 +92,110 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     /**
      * Obtains an identifier for the message.
      */
-    abstract I idOf(M message);
+    protected abstract I idOf(M message);
 
     /**
      * Obtains the array of the message columns to use while writing messages to the storage.
      */
-    abstract MessageColumn<M>[] columns();
+    protected abstract MessageColumn<M>[] columns();
+
+    @Override
+    public Optional<M> read(R request) {
+        checkNotNull(request);
+
+        I id = request.recordId();
+        Key key = key(id);
+        @Nullable Entity entity = datastore.read(key);
+        if (entity == null) {
+            return Optional.empty();
+        }
+        M message = Entities.toMessage(entity, typeUrl);
+        return Optional.of(message);
+    }
 
     /**
-     * Converts the given message to {@link Entity}.
+     * Reads all the messages from the storage.
+     *
+     * <p>Allows to customize the read query with the parameters such as filters and ordering
+     * by passing them via {@code queryBuilder}.
+     *
+     * @param queryBuilder
+     *         the partially composed query builder
+     * @param readBatchSize
+     *         the batch size to use while reading
+     * @return an iterator over the result set
+     * @see DatastoreWrapper#readAll(StructuredQuery, int)
      */
-    final Entity toEntity(M message) {
-        I id = idOf(message);
-        Key key = key(id);
-        Entity.Builder builder = Entities.builderFromMessage(message, key);
+    protected Iterator<M> readAll(EntityQuery.Builder queryBuilder, int readBatchSize) {
+        StructuredQuery<Entity> query = queryBuilder.setKind(kind.value())
+                                                    .build();
+        Iterator<Entity> iterator = datastore.readAll(query, readBatchSize);
+        Iterator<M> transformed = asStateIterator(iterator);
+        return transformed;
+    }
 
-        for (MessageColumn<M> value : columns()) {
-            value.fill(builder, message);
+    /**
+     * Starts a new transaction and reads all the messages from the storage in its scope.
+     *
+     * @param queryBuilder
+     *         the partially composed query builder
+     * @param limit
+     *         a maximum number of message to return
+     * @return an iterator over the result set
+     * @see #readAll(EntityQuery.Builder, int) for a non-transactional read
+     */
+    protected Iterator<M> readAllTransactionally(EntityQuery.Builder queryBuilder, int limit) {
+        return readAllTransactionally(queryBuilder.setLimit(limit));
+    }
+
+    /**
+     * Reads the messages from the storage.
+     *
+     * <p>The caller is responsible for setting the query limits and interpreting the results.
+     * This call does not trigger reading of the entire dataset page-by-page.
+     *
+     * <p>The read operation is not performed transactionally.
+     *
+     * @param queryBuilder
+     *         the partially composed query builder
+     * @see DatastoreWrapper#read(StructuredQuery)
+     * @see #readAll(EntityQuery.Builder, int)
+     * @see #readAllTransactionally(EntityQuery.Builder) for a transactional read
+     */
+    protected Iterator<M> read(EntityQuery.Builder queryBuilder) {
+        StructuredQuery<Entity> query = queryBuilder.setKind(kind.value())
+                                                    .build();
+        DsQueryIterator<Entity> iterator = datastore.read(query);
+        Iterator<M> result = asStateIterator(iterator);
+        return result;
+    }
+
+    /**
+     * Starts new transaction and reads the messages from the storage
+     * in the scope of the started transaction.
+     *
+     * <p>The caller is responsible for setting the query limits and interpreting the results.
+     * This call does not trigger reading of the entire dataset page-by-page.
+     *
+     * @param queryBuilder
+     *         the partially composed query builder
+     * @see DatastoreWrapper#read(StructuredQuery)
+     * @see #read(EntityQuery.Builder) for a non-transactional read operation
+     */
+    @SuppressWarnings("OverlyBroadCatchBlock")
+    // Handling all exceptions similarly.
+    protected Iterator<M> readAllTransactionally(EntityQuery.Builder queryBuilder) {
+        StructuredQuery<Entity> query = queryBuilder.setKind(kind.value())
+                                                    .build();
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            DsQueryIterator<Entity> iterator = tx.read(query);
+            Iterator<M> result = asStateIterator(iterator);
+            return result;
+        } catch (RuntimeException e) {
+            throw newIllegalStateException(
+                    e, "Bulk reading from the kind `%s` in a transaction failed.", kind
+            );
         }
-        return builder.build();
     }
 
     /**
@@ -138,28 +228,6 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     }
 
     /**
-     * Behaves similarly to {@link #write(Message)}, but performs the operation
-     * in scope of a Datastore transaction.
-     *
-     * @param message
-     *         the message to write
-     */
-    @SuppressWarnings("OverlyBroadCatchBlock")  // We react to all the exceptions similarly.
-    final void writeTransactionally(M message) {
-        checkNotNull(message);
-
-        try (TransactionWrapper tx = datastore.newTransaction()) {
-            Entity entity = toEntity(message);
-            tx.createOrUpdate(entity);
-            tx.commit();
-        } catch (RuntimeException e) {
-            throw newIllegalStateException(e,
-                                           "Error writing a `%s` in transaction.",
-                                           message.getClass().getName());
-        }
-    }
-
-    /**
      * Writes all the passed messages to the storage in a bulk.
      *
      * <p>Messages may either end up as the updates of existing Datastore records — in case
@@ -176,43 +244,50 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     }
 
     /**
-     * Reads all the messages from the storage.
+     * Behaves similarly to {@link #write(Message)}, but performs the operation
+     * in scope of a Datastore transaction.
      *
-     * <p>Allows to customize the read query with the parameters such as filters and ordering
-     * by passing them via {@code queryBuilder}.
-     *
-     * @param queryBuilder
-     *         the partially composed query builder
-     * @param readBatchSize
-     *         the batch size to use while reading
-     * @return an iterator over the result set
-     * @see DatastoreWrapper#readAll(StructuredQuery, int)
+     * @param message
+     *         the message to write
      */
-    Iterator<M> readAll(EntityQuery.Builder queryBuilder, int readBatchSize) {
-        StructuredQuery<Entity> query = queryBuilder.setKind(kind.value())
-                                                    .build();
-        Iterator<Entity> iterator = datastore.readAll(query, readBatchSize);
-        Iterator<M> transformed = Iterators.transform(iterator,
-                                                      (e) -> Entities.toMessage(e, typeUrl));
-        return transformed;
+    @SuppressWarnings("OverlyBroadCatchBlock")  // We react to all the exceptions similarly.
+    protected final void writeTransactionally(M message) {
+        checkNotNull(message);
+
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            Entity entity = toEntity(message);
+            tx.createOrUpdate(entity);
+            tx.commit();
+        } catch (RuntimeException e) {
+            throw newIllegalStateException(e,
+                                           "Error writing a `%s` in transaction.",
+                                           message.getClass()
+                                                  .getName());
+        }
     }
 
     /**
-     * Reads the messages from the storage.
+     * Writes all the passed messages to the storage in a bulk.
      *
-     * <p>The caller is responsible for setting the query limits and interpreting the results.
-     * This call does not trigger reading of the entire dataset page-by-page.
-     *
-     * @param queryBuilder the partially composed query builder
-     * @see DatastoreWrapper#read(StructuredQuery)
-     * @see #readAll(EntityQuery.Builder, int)
+     * <p>Messages may either end up as the updates of existing Datastore records — in case
+     * there are records with the same identifiers — or as new records.
      */
-    Iterator<M> read(EntityQuery.Builder queryBuilder) {
-        StructuredQuery<Entity> query = queryBuilder.setKind(kind.value())
-                                                    .build();
-        DsQueryIterator<Entity> iterator = datastore.read(query);
-        Iterator<M> result = Iterators.transform(iterator, (e) -> Entities.toMessage(e, typeUrl));
-        return result;
+    @SuppressWarnings("OverlyBroadCatchBlock") // We react to all the exceptions similarly.
+    protected void writeAllTransactionally(Iterable<M> messages) {
+        checkNotNull(messages);
+
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            List<Entity> entities =
+                    stream(messages)
+                            .map(this::toEntity)
+                            .collect(toList());
+            tx.createOrUpdate(entities);
+            tx.commit();
+        } catch (RuntimeException e) {
+            throw newIllegalStateException(e,
+                                           "Bulk write to the kind `%s` in a transaction failed.",
+                                           kind);
+        }
     }
 
     /**
@@ -230,20 +305,6 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
         datastore.delete(keys);
     }
 
-    @Override
-    public Optional<M> read(R request) {
-        checkNotNull(request);
-
-        I id = request.recordId();
-        Key key = key(id);
-        @Nullable Entity entity = datastore.read(key);
-        if (entity == null) {
-            return Optional.empty();
-        }
-        M message = Entities.toMessage(entity, typeUrl);
-        return Optional.of(message);
-    }
-
     /**
      * Always throws an {@link UnsupportedOperationException}.
      */
@@ -257,9 +318,49 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     /**
      * Obtains the Datastore {@code Key} value out of the message identifier.
      */
-    private Key key(I id) {
+    protected Key key(I id) {
         String keyValue = Stringifiers.toString(id);
         return datastore.keyFor(kind, RecordId.of(keyValue));
+    }
+
+    /**
+     * Creates a Datastore {@code Key} with an ancestor.
+     *
+     * @param keyValue
+     *         the raw key value
+     * @param ancestor
+     *         the path to ancestor
+     * @return a new {@code Key} instance
+     */
+    protected final Key keyWithAncestor(String keyValue, PathElement ancestor) {
+        Key result = datastore.keyFactory(kind)
+                              .addAncestor(ancestor)
+                              .newKey(keyValue);
+        return result;
+    }
+
+    protected final Key parentKey(Kind parentKind, Object parentId) {
+        String keyValue = Stringifiers.toString(parentId);
+        return datastore.keyFactory(parentKind)
+                        .newKey(keyValue);
+    }
+
+    /**
+     * Converts the given message to {@link Entity}.
+     */
+    private Entity toEntity(M message) {
+        I id = idOf(message);
+        Key key = key(id);
+        Entity.Builder builder = Entities.builderFromMessage(message, key);
+
+        for (MessageColumn<M> value : columns()) {
+            value.fill(builder, message);
+        }
+        return builder.build();
+    }
+
+    private Iterator<M> asStateIterator(Iterator<Entity> iterator) {
+        return Iterators.transform(iterator, (e) -> Entities.toMessage(e, typeUrl));
     }
 
     /**
