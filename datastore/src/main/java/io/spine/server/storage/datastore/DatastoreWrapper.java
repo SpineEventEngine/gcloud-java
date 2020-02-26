@@ -337,7 +337,7 @@ public class DatastoreWrapper implements Logging {
      * Deletes all existing {@link Entity Entities} with the given keys.
      *
      * @param keys
-     *         {@link Key Keys} of the {@link Entity Entities} to delete. May be nonexistent
+     *         {@code Keys} of the {@code Entities} to delete. May be nonexistent
      */
     public void delete(Key... keys) {
         datastore.delete(keys);
