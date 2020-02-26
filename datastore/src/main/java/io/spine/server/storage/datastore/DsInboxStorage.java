@@ -133,6 +133,16 @@ public class DsInboxStorage
         writeAllTransactionally(messages);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Removes all the messages in a single new transaction.
+     */
+    @Override
+    public void removeAll(Iterable<InboxMessage> messages) {
+        removeAllTransactionally(messages);
+    }
+
     private EntityQuery.Builder queryPage(ShardIndex index, @Nullable Timestamp sinceWhen) {
         return queryByTime(index, sinceWhen)
                 .setOrderBy(asc(Column.receivedAt.columnName()),

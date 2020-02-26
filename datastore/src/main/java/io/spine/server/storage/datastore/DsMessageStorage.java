@@ -284,9 +284,9 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
             tx.createOrUpdate(entities);
             tx.commit();
         } catch (RuntimeException e) {
-            throw newIllegalStateException(e,
-                                           "Bulk write to the kind `%s` in a transaction failed.",
-                                           kind);
+            throw newIllegalStateException(
+                    e, "Bulk write to the kind `%s` in a transaction failed.",kind
+            );
         }
     }
 
@@ -298,11 +298,36 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      */
     public void removeAll(Iterable<M> messages) {
         checkNotNull(messages);
+        Key[] keys = toKeys(messages);
+        datastore.delete(keys);
+    }
 
-        Key[] keys = stream(messages)
+    /**
+     * Starts a new transaction and removes all the messages from the storage by their identifiers
+     * in its scope.
+     *
+     * <p>If for any passed message there is no record with the same identifier, this message
+     * is ignored.
+     *
+     * @see #removeAll(Iterable) for a non-transactional version
+     */
+    public void removeAllTransactionally(Iterable<M> messages) {
+        checkNotNull(messages);
+        Key[] keys = toKeys(messages);
+        try(TransactionWrapper tx = datastore.newTransaction()) {
+            tx.delete(keys);
+            tx.commit();
+        } catch (RuntimeException e) {
+            throw newIllegalStateException(
+                    e, "Bulk deletion from the kind `%s` in a transaction failed.", kind
+            );
+        }
+    }
+
+    private Key[] toKeys(Iterable<M> messages) {
+        return stream(messages)
                 .map(m -> key(idOf(m)))
                 .toArray(Key[]::new);
-        datastore.delete(keys);
     }
 
     /**
