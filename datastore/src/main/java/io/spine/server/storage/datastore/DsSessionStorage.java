@@ -46,12 +46,12 @@ public final class DsSessionStorage
     }
 
     @Override
-    ShardIndex idOf(ShardSessionRecord message) {
+    protected ShardIndex idOf(ShardSessionRecord message) {
         return message.getIndex();
     }
 
     @Override
-    MessageColumn<ShardSessionRecord>[] columns() {
+    protected MessageColumn<ShardSessionRecord>[] columns() {
         return Column.values();
     }
 

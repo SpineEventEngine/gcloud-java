@@ -66,12 +66,12 @@ public class DsCatchUpStorage extends DsMessageStorage<CatchUpId, CatchUp, Catch
     }
 
     @Override
-    CatchUpId idOf(CatchUp message) {
+    protected  CatchUpId idOf(CatchUp message) {
         return message.getId();
     }
 
     @Override
-    MessageColumn<CatchUp>[] columns() {
+    protected  MessageColumn<CatchUp>[] columns() {
         return Column.values();
     }
 
