@@ -109,8 +109,27 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
         if (entity == null) {
             return Optional.empty();
         }
-        M message = Entities.toMessage(entity, typeUrl);
+        M message = toMessage(entity);
         return Optional.of(message);
+    }
+
+    /**
+     * Reads the message according to the passed read request.
+     *
+     * @param request
+     *         the request describing the criteria to search for the message
+     * @return the message, or {@code null} if there is no such a message
+     */
+    public Optional<M> readTransactionally(R request) {
+        checkNotNull(request);
+
+        I id = request.recordId();
+        Key key = key(id);
+        try (TransactionWrapper tx = datastore.newTransaction()) {
+            Optional<Entity> result = tx.read(key);
+            tx.commit();
+            return result.map(this::toMessage);
+        }
     }
 
     /**
@@ -187,7 +206,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     protected Iterator<M> readAllTransactionally(EntityQuery.Builder queryBuilder) {
         StructuredQuery<Entity> query = queryBuilder.setKind(kind.value())
                                                     .build();
-        try (TransactionWrapper tx = datastore.newTransaction()) {
+        try (TransactionWrapper tx = newTransaction()) {
             DsQueryIterator<Entity> iterator = tx.read(query);
             Iterator<M> result = asStateIterator(iterator);
             return result;
@@ -228,6 +247,16 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     }
 
     /**
+     * Starts a new transaction.
+     *
+     * <p>Designed for usage in the descendants requiring more than just a read or just a write
+     * operation per transaction.
+     */
+    protected final TransactionWrapper newTransaction() {
+        return datastore.newTransaction();
+    }
+
+    /**
      * Writes all the passed messages to the storage in a bulk.
      *
      * <p>Messages may either end up as the updates of existing Datastore records — in case
@@ -254,7 +283,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     protected final void writeTransactionally(M message) {
         checkNotNull(message);
 
-        try (TransactionWrapper tx = datastore.newTransaction()) {
+        try (TransactionWrapper tx = newTransaction()) {
             Entity entity = toEntity(message);
             tx.createOrUpdate(entity);
             tx.commit();
@@ -276,7 +305,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     protected void writeAllTransactionally(Iterable<M> messages) {
         checkNotNull(messages);
 
-        try (TransactionWrapper tx = datastore.newTransaction()) {
+        try (TransactionWrapper tx = newTransaction()) {
             List<Entity> entities =
                     stream(messages)
                             .map(this::toEntity)
@@ -314,7 +343,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     public void removeAllTransactionally(Iterable<M> messages) {
         checkNotNull(messages);
         Key[] keys = toKeys(messages);
-        try(TransactionWrapper tx = datastore.newTransaction()) {
+        try(TransactionWrapper tx = newTransaction()) {
             tx.delete(keys);
             tx.commit();
         } catch (RuntimeException e) {
@@ -373,7 +402,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     /**
      * Converts the given message to {@link Entity}.
      */
-    private Entity toEntity(M message) {
+    protected final Entity toEntity(M message) {
         I id = idOf(message);
         Key key = key(id);
         Entity.Builder builder = Entities.builderFromMessage(message, key);
@@ -384,8 +413,16 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
         return builder.build();
     }
 
+    /**
+     * Converts the given {@link Entity} to message.
+     */
+    protected final M toMessage(Entity e) {
+        return Entities.toMessage(e, typeUrl);
+    }
+
+
     private Iterator<M> asStateIterator(Iterator<Entity> iterator) {
-        return Iterators.transform(iterator, (e) -> Entities.toMessage(e, typeUrl));
+        return Iterators.transform(iterator, this::toMessage);
     }
 
     /**

@@ -27,11 +27,13 @@ import io.spine.server.delivery.AbstractWorkRegistry;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.base.Time.currentTime;
 
 /**
  * A {@link io.spine.server.delivery.ShardedWorkRegistry} based on the Google Datastore storage.
@@ -63,20 +65,17 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
     /**
      * {@inheritDoc}
      *
-     * <p>When picking up a shard, performs a double check to ensure that the write into database
-     * was not overridden by another node. If the write was overridden, gives up the shard to
-     * the other node and returns {@code Optional.empty()}.
+     * <p>The potential concurrent access to the same record is handled by using the Datastore
+     * transaction mechanism. In case of any parallel executions of {@code pickUp} operation,
+     * the one started earlier wins.
      */
     @Override
     public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
-        Optional<ShardProcessingSession> picked = super.pickUp(index, nodeId);
-        return picked.filter(session -> pickedBy(index, nodeId));
-    }
-
-    private boolean pickedBy(ShardIndex index, NodeId nodeId) {
-        Optional<ShardSessionRecord> stored = find(index);
-        return stored.map(record -> record.getPickedBy().equals(nodeId))
-                     .orElse(false);
+        checkNotNull(index);
+        checkNotNull(nodeId);
+        Optional<ShardSessionRecord> result =
+                storage.updateTransactionally(index, new UpdateNodeIfAbsent(index, nodeId));
+        return result.map(this::asSession);
     }
 
     @Override
@@ -115,5 +114,40 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
      */
     protected DsSessionStorage storage() {
         return storage;
+    }
+
+    /**
+     * Updates the {@code nodeId} for the {@link ShardSessionRecord} with the specified
+     * {@link ShardIndex} if the record has not been picked by anyone.
+     *
+     * <p>If there is no such a record, creates a new record.
+     */
+    private static class UpdateNodeIfAbsent implements DsSessionStorage.RecordUpdate {
+
+        private final ShardIndex index;
+        private final NodeId nodeToSet;
+
+        private UpdateNodeIfAbsent(ShardIndex index, NodeId set) {
+            this.index = index;
+            nodeToSet = set;
+        }
+
+        @Override
+        public Optional<ShardSessionRecord> createOrUpdate(@Nullable ShardSessionRecord previous) {
+            if (previous != null && previous.hasPickedBy()) {
+                return Optional.empty();
+            }
+            ShardSessionRecord.Builder builder =
+                    previous == null
+                    ? ShardSessionRecord.newBuilder()
+                                        .setIndex(index)
+                    : previous.toBuilder();
+
+            ShardSessionRecord updated =
+                    builder.setPickedBy(nodeToSet)
+                           .setWhenLastPicked(currentTime())
+                           .vBuild();
+            return Optional.of(updated);
+        }
     }
 }
