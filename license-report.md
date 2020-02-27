@@ -1,6 +1,6 @@
 
     
-# Dependencies of `io.spine.gcloud:spine-datastore:1.4.8`
+# Dependencies of `io.spine.gcloud:spine-datastore:1.4.9`
 
 ## Runtime
 1. **Group:** androidx.annotation **Name:** annotation **Version:** 1.1.0
@@ -650,12 +650,12 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Mon Feb 24 17:25:31 EET 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Thu Feb 27 19:15:28 EET 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.gcloud:spine-stackdriver-trace:1.4.8`
+# Dependencies of `io.spine.gcloud:spine-stackdriver-trace:1.4.9`
 
 ## Runtime
 1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.9
@@ -1309,12 +1309,12 @@ This report was generated on **Mon Feb 24 17:25:31 EET 2020** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Mon Feb 24 17:25:37 EET 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Thu Feb 27 19:15:30 EET 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.gcloud:spine-testutil-gcloud:1.4.8`
+# Dependencies of `io.spine.gcloud:spine-testutil-gcloud:1.4.9`
 
 ## Runtime
 1. **Group:** androidx.annotation **Name:** annotation **Version:** 1.1.0
@@ -1985,4 +1985,4 @@ This report was generated on **Mon Feb 24 17:25:37 EET 2020** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Mon Feb 24 17:25:41 EET 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Thu Feb 27 19:15:33 EET 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
