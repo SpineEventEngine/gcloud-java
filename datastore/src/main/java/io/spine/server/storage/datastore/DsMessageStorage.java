@@ -45,9 +45,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.unsupported;
 import static java.util.stream.Collectors.toList;
 
-
 /**
- * An abstract base for storages operating plain {@link Message}s in Datastore.
+ * An abstract base for storage operating plain {@link Message}s in Datastore.
  *
  * <p>To store {@code Message}s representing {@link io.spine.server.entity.Entity Entity} states
  * refer to {@link DsRecordStorage} and its descendants.
@@ -58,9 +57,12 @@ import static java.util.stream.Collectors.toList;
  *         the type of the stored message
  * @param <R>
  *         the type of the read request specific to this storage
+ * @apiNote Most of the methods are designed to be {@code protected} in order to provide SPI
+ *         users with more features, rather than repeating the same code {@code DsMessageStorage}
+ *         already has.
  */
 @SPI
-@SuppressWarnings("WeakerAccess")   // API methods are exposed for the descendants
+@SuppressWarnings({"WeakerAccess", "ClassWithTooManyMethods"})  // The methods are for SPI users.
 public abstract class DsMessageStorage<I, M extends Message, R extends ReadRequest<I>>
         extends AbstractStorage<I, M, R> {
 
@@ -314,7 +316,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
             tx.commit();
         } catch (RuntimeException e) {
             throw newIllegalStateException(
-                    e, "Bulk write to the kind `%s` in a transaction failed.",kind
+                    e, "Bulk write to the kind `%s` in a transaction failed.", kind
             );
         }
     }
@@ -343,7 +345,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     public void removeAllTransactionally(Iterable<M> messages) {
         checkNotNull(messages);
         Key[] keys = toKeys(messages);
-        try(TransactionWrapper tx = newTransaction()) {
+        try (TransactionWrapper tx = newTransaction()) {
             tx.delete(keys);
             tx.commit();
         } catch (RuntimeException e) {
@@ -419,7 +421,6 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
     protected final M toMessage(Entity e) {
         return Entities.toMessage(e, typeUrl);
     }
-
 
     private Iterator<M> asStateIterator(Iterator<Entity> iterator) {
         return Iterators.transform(iterator, this::toMessage);
