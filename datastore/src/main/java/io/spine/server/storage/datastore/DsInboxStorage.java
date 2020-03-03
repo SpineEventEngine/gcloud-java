@@ -62,6 +62,30 @@ import static java.util.Arrays.copyOfRange;
 
 /**
  * {@link InboxStorage} implementation based on Google Cloud Datastore.
+ *
+ * <p>Allows to run on top of either Datastore in native mode or Firestore in Datastore mode.
+ *
+ * <p>When operating in a native Datastore mode, no messages are modified or read in transactions
+ * and no parent-child relations are used to store the records. In practice, such an approach
+ * means there is no guarantee for the read, write and delete operations to be executed in
+ * the order of calling.
+ *
+ * <p>For Firestore in Datastore mode there are few improvements:
+ *
+ * <ul>
+ *     <li>The {@code InboxMessage} records are stored as children of a common parent, grouped by
+ *     the {@code ShardIndex}.
+ *
+ *     <li>All read, write and remove operations are performed transactionally, i.e. taking
+ *     the ancestor filter and composite Datastore keys into account. As Datastore guarantees
+ *     the serializable isolation for transactions, all the modifications of the records
+ *     are executed in a strict order.
+ * </ul>
+ *
+ * <p>The unit tests are launched on the local Datastore emulator which only supports Datastore
+ * native mode at the moment. Therefore, by default, {@code DsInboxStorage}
+ * {@linkplain DsInboxStorage#DsInboxStorage(DatastoreWrapper, boolean) is created} in this mode
+ *  as well.
  */
 public class DsInboxStorage
         extends DsMessageStorage<InboxMessageId, InboxMessage, InboxReadRequest>
@@ -287,24 +311,62 @@ public class DsInboxStorage
         }
     }
 
+    /**
+     * A behavior of the storage depending on the Datastore mode.
+     */
     private interface Behavior {
 
+        /**
+         * Creates a new key for the given identifier.
+         */
         Key key(InboxMessageId id);
 
-        Iterator<InboxMessage> readAll(EntityQuery.Builder builder);
+        /**
+         * Reads all messages according to the passed query.
+         */
+        Iterator<InboxMessage> readAll(EntityQuery.Builder query);
 
+        /**
+         * Reads all messages according to the passed query and the maximum size of the elements
+         * returned in a single result set.
+         */
         Iterator<InboxMessage> readAll(EntityQuery.Builder query, int size);
 
+        /**
+         * Writes the message to the storage.
+         *
+         * <p>The message is updated by its key if it exists, or created if not.
+         */
         void write(InboxMessage message);
 
+        /**
+         * Writes all the passed messages to the storage in a single operation.
+         *
+         * <p>Any messages which keys are not present in the underlying storage will be created
+         * as new.
+         */
         void writeAll(Iterable<InboxMessage> messages);
 
+        /**
+         * Removes all the messages in a single operation.
+         *
+         * <p>Any messages absent in the underlying storage are ignored.
+         */
         void removeAll(Iterable<InboxMessage> messages);
 
+        /**
+         * Creates a query filtering the {@code InboxMessage}s according to the shard index
+         * and the additional filters passed.
+         */
         EntityQuery.Builder queryInShard(ShardIndex index,
                                          StructuredQuery.Filter... additionalFilters);
     }
 
+    /**
+     * An implementation of the behavior specific to the Firestore in Datastore mode.
+     *
+     * @see DsInboxStorage class-level docs for more details
+     */
     private final class FirestoreBehavior implements Behavior {
 
         @Override
@@ -352,6 +414,11 @@ public class DsInboxStorage
         }
     }
 
+    /**
+     * An implementation of the behavior specific to the Datastore in native mode.
+     *
+     * @see DsInboxStorage class-level docs for more details
+     */
     private final class NativeBehavior implements Behavior {
 
         @Override
