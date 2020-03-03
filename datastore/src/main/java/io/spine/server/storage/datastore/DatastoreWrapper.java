@@ -418,7 +418,7 @@ public class DatastoreWrapper implements Logging {
     public KeyFactory keyFactory(Kind kind) {
         checkNotNull(kind);
         KeyFactory keyFactory = datastore.newKeyFactory()
-                                        .setKind(kind.value());
+                                         .setKind(kind.value());
         Namespace namespace = namespaceSupplier.get();
         _trace().log("Retrieving KeyFactory for kind `%s` in `%s` namespace.",
                      kind, namespace.value());

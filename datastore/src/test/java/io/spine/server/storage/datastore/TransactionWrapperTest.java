@@ -165,13 +165,14 @@ class TransactionWrapperTest {
         TransactionWrapper firstReadTx = datastore.newTransaction();
         Truth8.assertThat(
                 firstReadTx.read(toDelete)
-        ).isEmpty();
+        )
+              .isEmpty();
         firstReadTx.commit();
 
         TransactionWrapper bulkDeletionTx = datastore.newTransaction();
         List<Key> remainingKeys = entities.stream()
-                            .map(Entity::getKey)
-                            .collect(toList());
+                                          .map(Entity::getKey)
+                                          .collect(toList());
         Key[] keysToDelete = Iterables.toArray(remainingKeys, Key.class);
         bulkDeletionTx.delete(keysToDelete);
         bulkDeletionTx.commit();
@@ -180,7 +181,8 @@ class TransactionWrapperTest {
         for (Key key : keysToDelete) {
             Truth8.assertThat(
                     bulkReadTx.read(key)
-            ).isEmpty();
+            )
+                  .isEmpty();
         }
         bulkReadTx.commit();
     }

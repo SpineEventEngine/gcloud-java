@@ -376,7 +376,14 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
      */
     protected Key key(I id) {
         String keyValue = Stringifiers.toString(id);
-        return datastore.keyFor(kind, RecordId.of(keyValue));
+        return key(RecordId.of(keyValue));
+    }
+
+    /**
+     * Creates a new Datastore {@code Key} value from the provided record identifier.
+     */
+    protected final Key key(RecordId recordId) {
+        return datastore.keyFor(kind, recordId);
     }
 
     /**

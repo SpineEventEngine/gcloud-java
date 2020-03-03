@@ -58,6 +58,7 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.gt;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.hasAncestor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
+import static java.util.Arrays.copyOfRange;
 
 /**
  * {@link InboxStorage} implementation based on Google Cloud Datastore.
@@ -66,12 +67,44 @@ public class DsInboxStorage
         extends DsMessageStorage<InboxMessageId, InboxMessage, InboxReadRequest>
         implements InboxStorage {
 
+    private final Behavior behavior;
+
     private static final Kind PARENT_KIND = Kind.of(
             TypeUrl.of(ShardSessionRecord.getDefaultInstance())
     );
 
+    /**
+     * Creates the instance of {@code DsInboxStorage} operating with Datastore database
+     * in {@link DatastoreMode#NATIVE native} mode.
+     *
+     * @param datastore
+     *         a datastore wrapper
+     * @param multitenant
+     *         whether this storage should support multi-tenancy
+     */
     protected DsInboxStorage(DatastoreWrapper datastore, boolean multitenant) {
+        this(datastore, multitenant, DatastoreMode.NATIVE);
+    }
+
+    /**
+     * Creates the instance of {@code DsInboxStorage} which takes the mode in which Datastore
+     * database was created.
+     *
+     * <p>The operations performed with the records are adjusted according to the limits implied
+     * by the Datastore operation mode.
+     *
+     * @param datastore
+     *         a datastore wrapper
+     * @param multitenant
+     *         whether this storage should support multi-tenancy
+     * @param mode
+     *         a mode in which the underlying Datastore database operates
+     */
+    protected DsInboxStorage(DatastoreWrapper datastore, boolean multitenant, DatastoreMode mode) {
         super(datastore, multitenant);
+        this.behavior = mode == DatastoreMode.NATIVE
+                        ? new NativeBehavior()
+                        : new FirestoreBehavior();
     }
 
     @Override
@@ -81,10 +114,7 @@ public class DsInboxStorage
 
     @Override
     protected final Key key(InboxMessageId id) {
-        String keyValue = id.getUuid();
-        String parentKeyValue = Stringifiers.toString(id.getIndex());
-        PathElement ancestor = PathElement.of(PARENT_KIND.value(), parentKeyValue);
-        return keyWithAncestor(keyValue, ancestor);
+        return behavior.key(id);
     }
 
     @Override
@@ -98,7 +128,7 @@ public class DsInboxStorage
         InboxPage page = new InboxPage(
                 sinceWhen -> {
                     EntityQuery.Builder query = queryPage(index, sinceWhen);
-                    return readAllTransactionally(query, pageSize);
+                    return behavior.readAll(query, pageSize);
                 });
         return page;
     }
@@ -106,7 +136,7 @@ public class DsInboxStorage
     @Override
     public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
         EntityQuery.Builder builder = queryInShard(index, statusFilter(TO_DELIVER)).setLimit(1);
-        Iterator<InboxMessage> iterator = readAllTransactionally(builder);
+        Iterator<InboxMessage> iterator = behavior.readAll(builder);
         if (iterator.hasNext()) {
             return Optional.of(iterator.next());
         }
@@ -120,7 +150,7 @@ public class DsInboxStorage
      */
     @Override
     public void write(InboxMessage message) {
-        writeTransactionally(message);
+        behavior.write(message);
     }
 
     /**
@@ -130,7 +160,7 @@ public class DsInboxStorage
      */
     @Override
     public void writeAll(Iterable<InboxMessage> messages) {
-        writeAllTransactionally(messages);
+        behavior.writeAll(messages);
     }
 
     /**
@@ -140,7 +170,7 @@ public class DsInboxStorage
      */
     @Override
     public void removeAll(Iterable<InboxMessage> messages) {
-        removeAllTransactionally(messages);
+        behavior.removeAll(messages);
     }
 
     private EntityQuery.Builder queryPage(ShardIndex index, @Nullable Timestamp sinceWhen) {
@@ -157,12 +187,7 @@ public class DsInboxStorage
 
     private EntityQuery.Builder queryInShard(ShardIndex index,
                                              StructuredQuery.Filter... additionalFilters) {
-        Key parentKey = parentKey(PARENT_KIND, index);
-        StructuredQuery.Filter[] columnFilters = columnFilters(index, additionalFilters);
-
-        PropertyFilter ancestorFilter = hasAncestor(parentKey);
-        return Query.newEntityQueryBuilder()
-                    .setFilter(and(ancestorFilter, columnFilters));
+        return behavior.queryInShard(index, additionalFilters);
     }
 
     private static PropertyFilter statusFilter(InboxMessageStatus status) {
@@ -259,6 +284,114 @@ public class DsInboxStorage
         @Override
         public Getter<InboxMessage> getter() {
             return getter;
+        }
+    }
+
+    private interface Behavior {
+
+        Key key(InboxMessageId id);
+
+        Iterator<InboxMessage> readAll(EntityQuery.Builder builder);
+
+        Iterator<InboxMessage> readAll(EntityQuery.Builder query, int size);
+
+        void write(InboxMessage message);
+
+        void writeAll(Iterable<InboxMessage> messages);
+
+        void removeAll(Iterable<InboxMessage> messages);
+
+        EntityQuery.Builder queryInShard(ShardIndex index,
+                                         StructuredQuery.Filter... additionalFilters);
+    }
+
+    private final class FirestoreBehavior implements Behavior {
+
+        @Override
+        public Key key(InboxMessageId id) {
+            String keyValue = id.getUuid();
+            String parentKeyValue = Stringifiers.toString(id.getIndex());
+            PathElement ancestor = PathElement.of(PARENT_KIND.value(), parentKeyValue);
+            return keyWithAncestor(keyValue, ancestor);
+        }
+
+        @Override
+        public Iterator<InboxMessage> readAll(EntityQuery.Builder query) {
+            return readAllTransactionally(query);
+        }
+
+        @Override
+        public Iterator<InboxMessage> readAll(EntityQuery.Builder query, int size) {
+            return readAllTransactionally(query, size);
+        }
+
+        @Override
+        public void write(InboxMessage message) {
+            writeTransactionally(message);
+        }
+
+        @Override
+        public void writeAll(Iterable<InboxMessage> messages) {
+            writeAllTransactionally(messages);
+        }
+
+        @Override
+        public void removeAll(Iterable<InboxMessage> messages) {
+            removeAllTransactionally(messages);
+        }
+
+        @Override
+        public EntityQuery.Builder queryInShard(ShardIndex index,
+                                                StructuredQuery.Filter... additionalFilters) {
+            Key parentKey = parentKey(PARENT_KIND, index);
+            StructuredQuery.Filter[] columnFilters = columnFilters(index, additionalFilters);
+
+            PropertyFilter ancestorFilter = hasAncestor(parentKey);
+            return Query.newEntityQueryBuilder()
+                        .setFilter(and(ancestorFilter, columnFilters));
+        }
+    }
+
+    private final class NativeBehavior implements Behavior {
+
+        @Override
+        public Key key(InboxMessageId id) {
+            String rawValue = id.getUuid();
+            return DsInboxStorage.super.key(RecordId.of(rawValue));
+        }
+
+        @Override
+        public Iterator<InboxMessage> readAll(EntityQuery.Builder query) {
+            return DsInboxStorage.super.read(query);
+        }
+
+        @Override
+        public Iterator<InboxMessage> readAll(EntityQuery.Builder query, int size) {
+            return DsInboxStorage.super.readAll(query, size);
+        }
+
+        @Override
+        public void write(InboxMessage message) {
+            DsInboxStorage.super.write(message);
+        }
+
+        @Override
+        public void writeAll(Iterable<InboxMessage> messages) {
+            DsInboxStorage.super.writeAll(messages);
+        }
+
+        @Override
+        public void removeAll(Iterable<InboxMessage> messages) {
+            DsInboxStorage.super.removeAll(messages);
+        }
+
+        @Override
+        public EntityQuery.Builder queryInShard(ShardIndex index,
+                                                StructuredQuery.Filter... additionalFilters) {
+            StructuredQuery.Filter[] columnFilters = columnFilters(index, additionalFilters);
+            return Query.newEntityQueryBuilder()
+                        .setFilter(and(columnFilters[0],
+                                       copyOfRange(columnFilters, 1, columnFilters.length)));
         }
     }
 }
