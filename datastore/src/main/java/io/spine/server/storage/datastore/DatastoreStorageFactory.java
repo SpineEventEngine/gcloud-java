@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
@@ -148,9 +149,38 @@ public class DatastoreStorageFactory implements StorageFactory {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * Creates a Datastore-specific {@link InboxStorage} taking into account the support
+     * of multi-tenant storage required.
+     *
+     * <p>By default, creates an instance of storage for Datastore in native mode.
+     *
+     * @apiNote In order to change this behavior and supply a custom implementation, an SPI
+     *         user should override {@link #inboxStorageWith(DatastoreWrapper, boolean)
+     *         inboxStorageWith(multitenant, DatastoreWrapper)} method.
+     * @see DsInboxStorage for more details on supported modes
+     */
     @Override
-    public InboxStorage createInboxStorage(boolean multitenant) {
+    public final InboxStorage createInboxStorage(boolean multitenant) {
         DatastoreWrapper wrapper = systemWrapperFor(InboxStorage.class, multitenant);
+        return inboxStorageWith(wrapper, multitenant);
+    }
+
+    /**
+     * Creates a Datastore-specific {@link InboxStorage}.
+     *
+     * <p>SPI users should override this method in order to supply a custom implementation.
+     *
+     * @param wrapper
+     *         a wrapper over Datastore
+     * @param multitenant
+     *         whether the created storage should support multi-tenancy
+     * @return a new instance of {@code InboxStorage}
+     */
+    @SPI
+    protected InboxStorage inboxStorageWith(DatastoreWrapper wrapper, boolean multitenant) {
         return new DsInboxStorage(wrapper, multitenant);
     }
 
@@ -201,7 +231,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     private String namespaceFromOptions() {
-        return nullToEmpty(datastore.getOptions().getNamespace());
+        return nullToEmpty(datastore.getOptions()
+                                    .getNamespace());
     }
 
     /**
