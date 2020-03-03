@@ -41,7 +41,7 @@ public enum DatastoreMode {
      * Firestore in Datastore mode.
      *
      * <p>In this mode, Datastore becomes strongly consistent in most cases. However, some limits
-     * are still <a href="https://cloud.google.com/datastore/docs/concepts/limits#limits">applied.</a>
+     * still <a href="https://cloud.google.com/datastore/docs/concepts/limits#limits">apply.</a>
      *
      * <p>All new Cloud projects provide this mode as a default one.
      */
