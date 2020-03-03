@@ -434,7 +434,8 @@ public class DsInboxStorage
 
         @Override
         public Iterator<InboxMessage> readAll(EntityQuery.Builder query, int size) {
-            return DsInboxStorage.super.readAll(query, size);
+            EntityQuery.Builder withLimit = query.setLimit(size);
+            return DsInboxStorage.super.read(withLimit);
         }
 
         @Override
