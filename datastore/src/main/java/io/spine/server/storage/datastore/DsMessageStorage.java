@@ -46,7 +46,7 @@ import static io.spine.util.Exceptions.unsupported;
 import static java.util.stream.Collectors.toList;
 
 /**
- * An abstract base for storage operating plain {@link Message}s in Datastore.
+ * An abstract base for a storage persisting plain {@link Message}s in Datastore.
  *
  * <p>To store {@code Message}s representing {@link io.spine.server.entity.Entity Entity} states
  * refer to {@link DsRecordStorage} and its descendants.
