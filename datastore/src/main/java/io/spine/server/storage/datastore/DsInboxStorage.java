@@ -91,7 +91,7 @@ public class DsInboxStorage
         extends DsMessageStorage<InboxMessageId, InboxMessage, InboxReadRequest>
         implements InboxStorage {
 
-    private final Behavior behavior;
+    private final Client client;
 
     private static final Kind PARENT_KIND = Kind.of(
             TypeUrl.of(ShardSessionRecord.getDefaultInstance())
@@ -126,9 +126,9 @@ public class DsInboxStorage
      */
     protected DsInboxStorage(DatastoreWrapper datastore, boolean multitenant, DatastoreMode mode) {
         super(datastore, multitenant);
-        this.behavior = mode == DatastoreMode.NATIVE
-                        ? new NativeBehavior()
-                        : new FirestoreBehavior();
+        this.client = mode == DatastoreMode.NATIVE
+                        ? new NativeClient()
+                        : new FirestoreClient();
     }
 
     @Override
@@ -138,7 +138,7 @@ public class DsInboxStorage
 
     @Override
     protected final Key key(InboxMessageId id) {
-        return behavior.key(id);
+        return client.key(id);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class DsInboxStorage
         InboxPage page = new InboxPage(
                 sinceWhen -> {
                     EntityQuery.Builder query = queryPage(index, sinceWhen);
-                    return behavior.readAll(query, pageSize);
+                    return client.readAll(query, pageSize);
                 });
         return page;
     }
@@ -160,7 +160,7 @@ public class DsInboxStorage
     @Override
     public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
         EntityQuery.Builder builder = queryInShard(index, statusFilter(TO_DELIVER)).setLimit(1);
-        Iterator<InboxMessage> iterator = behavior.readAll(builder);
+        Iterator<InboxMessage> iterator = client.readAll(builder);
         if (iterator.hasNext()) {
             return Optional.of(iterator.next());
         }
@@ -174,7 +174,7 @@ public class DsInboxStorage
      */
     @Override
     public void write(InboxMessage message) {
-        behavior.write(message);
+        client.write(message);
     }
 
     /**
@@ -184,7 +184,7 @@ public class DsInboxStorage
      */
     @Override
     public void writeAll(Iterable<InboxMessage> messages) {
-        behavior.writeAll(messages);
+        client.writeAll(messages);
     }
 
     /**
@@ -194,7 +194,7 @@ public class DsInboxStorage
      */
     @Override
     public void removeAll(Iterable<InboxMessage> messages) {
-        behavior.removeAll(messages);
+        client.removeAll(messages);
     }
 
     private EntityQuery.Builder queryPage(ShardIndex index, @Nullable Timestamp sinceWhen) {
@@ -211,7 +211,7 @@ public class DsInboxStorage
 
     private EntityQuery.Builder queryInShard(ShardIndex index,
                                              StructuredQuery.Filter... additionalFilters) {
-        return behavior.queryInShard(index, additionalFilters);
+        return client.queryInShard(index, additionalFilters);
     }
 
     private static PropertyFilter statusFilter(InboxMessageStatus status) {
@@ -312,9 +312,10 @@ public class DsInboxStorage
     }
 
     /**
-     * A behavior of the storage depending on the Datastore mode.
+     * A client to the Datastore instance which implementation depends on the mode
+     * in which Datastore runs.
      */
-    private interface Behavior {
+    private interface Client {
 
         /**
          * Creates a new key for the given identifier.
@@ -363,11 +364,11 @@ public class DsInboxStorage
     }
 
     /**
-     * An implementation of the behavior specific to the Firestore in Datastore mode.
+     * An implementation of the client specific to the Firestore in Datastore mode.
      *
      * @see DsInboxStorage class-level docs for more details
      */
-    private final class FirestoreBehavior implements Behavior {
+    private final class FirestoreClient implements Client {
 
         @Override
         public Key key(InboxMessageId id) {
@@ -415,11 +416,11 @@ public class DsInboxStorage
     }
 
     /**
-     * An implementation of the behavior specific to the Datastore in native mode.
+     * An implementation of the client specific to the Datastore in native mode.
      *
      * @see DsInboxStorage class-level docs for more details
      */
-    private final class NativeBehavior implements Behavior {
+    private final class NativeClient implements Client {
 
         @Override
         public Key key(InboxMessageId id) {
