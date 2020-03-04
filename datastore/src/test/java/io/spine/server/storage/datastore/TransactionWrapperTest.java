@@ -244,16 +244,7 @@ class TransactionWrapperTest {
                             .newBuilder(key)
                             .set("a", newUuid())
                             .build())
-                    .map(entity -> (Callable<Key>) () -> {
-                             try (TransactionWrapper tx = datastore.newTransaction()) {
-                                 tx.createOrUpdate(entity);
-                                 tx.commit();
-                                 Entity result = datastore.read(entity.getKey());
-                                 assertThat(result).isNotNull();
-                             }
-                             return entity.getKey();
-                         }
-                    )
+                    .map(this::asEntityWriteJob)
                     .collect(toList());
         service.invokeAll(tasks);
         assertThat(service.shutdownNow()).isEmpty();
@@ -262,6 +253,26 @@ class TransactionWrapperTest {
             assertThat(read)
                     .isNotNull();
         }
+    }
+
+    /**
+     * Returns a {@code Callable} writing the passed entity to the storage in a new transaction.
+     *
+     * <p>If the entity already exists, it will be overwritten. If there is no such entity in
+     * the storage, the entity record will be created.
+     *
+     * <p>The result of the created {@code Callable} is the {@link Key} assigned to the entity.
+     */
+    private Callable<Key> asEntityWriteJob(Entity entity) {
+        return () -> {
+                 try (TransactionWrapper tx = datastore.newTransaction()) {
+                     tx.createOrUpdate(entity);
+                     tx.commit();
+                     Entity result = datastore.read(entity.getKey());
+                     assertThat(result).isNotNull();
+                 }
+                 return entity.getKey();
+             };
     }
 
     @SlowTest
