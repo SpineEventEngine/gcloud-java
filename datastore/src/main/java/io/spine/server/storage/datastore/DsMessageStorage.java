@@ -291,7 +291,7 @@ public abstract class DsMessageStorage<I, M extends Message, R extends ReadReque
             tx.commit();
         } catch (RuntimeException e) {
             throw newIllegalStateException(e,
-                                           "Error writing a `%s` in transaction.",
+                                           "Error writing a `%s` in a transaction.",
                                            message.getClass()
                                                   .getName());
         }
