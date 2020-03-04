@@ -29,7 +29,6 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.truth.Truth8;
 import com.google.protobuf.Empty;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
@@ -49,6 +48,7 @@ import java.util.stream.Stream;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.hasAncestor;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.localDatastore;
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -163,10 +163,8 @@ class TransactionWrapperTest {
         singleDeletionTx.commit();
 
         TransactionWrapper firstReadTx = datastore.newTransaction();
-        Truth8.assertThat(
-                firstReadTx.read(toDelete)
-        )
-              .isEmpty();
+        assertThat(firstReadTx.read(toDelete))
+                .isEmpty();
         firstReadTx.commit();
 
         TransactionWrapper bulkDeletionTx = datastore.newTransaction();
@@ -179,10 +177,8 @@ class TransactionWrapperTest {
 
         TransactionWrapper bulkReadTx = datastore.newTransaction();
         for (Key key : keysToDelete) {
-            Truth8.assertThat(
-                    bulkReadTx.read(key)
-            )
-                  .isEmpty();
+            assertThat(bulkReadTx.read(key))
+                    .isEmpty();
         }
         bulkReadTx.commit();
     }
