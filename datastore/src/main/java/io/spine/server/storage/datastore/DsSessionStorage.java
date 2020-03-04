@@ -20,18 +20,23 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.DatastoreException;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.LongValue;
-import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardSessionRecord;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.cloud.Timestamp.fromProto;
+import static com.google.cloud.datastore.Query.newEntityQueryBuilder;
 import static io.spine.server.storage.datastore.DatastoreWrapper.MAX_ENTITIES_PER_WRITE_REQUEST;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A Datastore-based storage which contains {@code ShardSessionRecord}s.
@@ -46,12 +51,12 @@ public final class DsSessionStorage
     }
 
     @Override
-    ShardIndex idOf(ShardSessionRecord message) {
+    protected ShardIndex idOf(ShardSessionRecord message) {
         return message.getIndex();
     }
 
     @Override
-    MessageColumn<ShardSessionRecord>[] columns() {
+    protected MessageColumn<ShardSessionRecord>[] columns() {
         return Column.values();
     }
 
@@ -59,14 +64,86 @@ public final class DsSessionStorage
      * Obtains all the session records present in the storage.
      */
     Iterator<ShardSessionRecord> readAll() {
-        return readAll(Query.newEntityQueryBuilder(), MAX_ENTITIES_PER_WRITE_REQUEST);
+        return readAll(newEntityQueryBuilder(), MAX_ENTITIES_PER_WRITE_REQUEST);
     }
 
     /**
      * Obtains the session record for the shard with the given index.
+     *
+     * <p>The read operation is executed in a new transaction.
      */
     Optional<ShardSessionRecord> read(ShardIndex index) {
-        return read(new ShardSessionReadRequest(index));
+        return readTransactionally(new ShardSessionReadRequest(index));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Executes the write operation in a new transaction.
+     *
+     * @param message
+     */
+    @Override
+    public void write(ShardSessionRecord message) {
+        writeTransactionally(message);
+    }
+
+    /**
+     * Attempts to execute the update of the {@link ShardSessionRecord} in a scope of a new
+     * Datastore transaction.
+     *
+     * <p>Returns the updated record if the update succeeded.
+     *
+     * <p>Returns {@code Optional.empty()} if the update could not be executed, either because
+     * the rules of the passed {@code RecordUpdate} prevented it, or due to a concurrent changes
+     * which have happened to the corresponding Datastore entity.
+     *
+     * @param index
+     *         index of a record to execute an update for
+     * @param update
+     *         an update to perform
+     * @return a modified record, or {@code Optional.empty()} if the update could not be executed
+     */
+    Optional<ShardSessionRecord> updateTransactionally(ShardIndex index, RecordUpdate update) {
+        try (TransactionWrapper tx = newTransaction()) {
+            Key key = key(index);
+            Optional<Entity> result = tx.read(key);
+
+            @Nullable ShardSessionRecord existing =
+                    result.map(this::toMessage)
+                          .orElse(null);
+            Optional<ShardSessionRecord> updated = update.createOrUpdate(existing);
+            if (updated.isPresent()) {
+                ShardSessionRecord asRecord = updated.get();
+                tx.createOrUpdate(toEntity(asRecord));
+                tx.commit();
+            }
+            return updated;
+        } catch (DatastoreException e) {
+            return Optional.empty();
+        } catch (RuntimeException e) {
+            throw newIllegalStateException(
+                    e, "Cannot update the `ShardSessionRecord` with index `%s` in a transaction.",
+                    index);
+        }
+    }
+
+    /**
+     * A method object telling how to update {@link ShardSessionRecord}s depending on the current
+     * state of the records in Datastore.
+     */
+    interface RecordUpdate {
+
+        /**
+         * Decides in which update the existing record should result.
+         *
+         * @param previous
+         *         the previous record currently residing in the storage, or {@code null}
+         *         if there is no such record
+         * @return a version of the record to write to the storage,
+         *         or {@code Optional.empty()} if no update should be performed
+         */
+        Optional<ShardSessionRecord> createOrUpdate(@Nullable ShardSessionRecord previous);
     }
 
     /**

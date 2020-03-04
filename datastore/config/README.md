@@ -1,7 +1,11 @@
-This folder contains a sample Datastore index configuration in `index.yaml` file.
+This folder contains sample configurations of Datastore indexes
 
-The Datastore index must be configured as follows:
- - Contain the Spine internal types config.
- - Contain your custom `Aggregate` types config.
- 
-For more details, please see `index.yaml`.
+Depending on the mode in which your Datastore runs one should choose either
+
+- `index-datastore-native.yaml` for the Datastore in native mode;
+- `index-firestore-in-datastore-mode.yaml` for the Firestore in Datastore mode.
+
+Each of the configurations lists the indexes for the system records (e.g. `Event`) and the samples 
+for the user-defined entities.
+
+Feel free to modify the samples according to your needs.

@@ -169,6 +169,17 @@ public final class TransactionWrapper implements AutoCloseable {
     }
 
     /**
+     * Deletes all existing {@link Entity Entities} with the given keys in a scope of
+     * the ongoing transaction.
+     *
+     * @param keys
+     *         the keys of the entities to delete; may point to non-existent entities
+     */
+    public void delete(Key... keys) {
+        tx.delete(keys);
+    }
+
+    /**
      * Commits this transaction.
      *
      * @throws DatastoreException

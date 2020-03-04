@@ -18,18 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.storage.datastore;
+
 /**
- * The versions of the libraries to be used.
- *
- * <p>This file defines versions for the dependencies that are not covered by
- * {@code .config/gradle/dependencies.gradle}.
+ * A mode in which Google Datastore operates.
  */
+public enum DatastoreMode {
 
-ext {
-    versionToPublish = '1.4.11'
-    
-    spineBaseVersion = '1.4.10'
-    spineCoreVersion = '1.4.11'
+    /**
+     * Native Datastore mode.
+     *
+     * <p>In this mode, Datastore is mostly eventually consistent. Also it has significant
+     * <a href="https://cloud.google.com/datastore/docs/concepts/limits#Cloud_Datastore_limits">limitations</a>
+     * on accessing the records.
+     *
+     * <p>Since recently, the projects in Google Cloud cannot be created in this mode.
+     * So this one works primarily for the legacy applications.
+     */
+    NATIVE,
 
-    datastoreVersion = '1.102.2'
+    /**
+     * Firestore in Datastore mode.
+     *
+     * <p>In this mode, Datastore becomes strongly consistent in most cases. However, some limits
+     * still <a href="https://cloud.google.com/datastore/docs/concepts/limits#limits">apply.</a>
+     *
+     * <p>All new Cloud projects provide this mode as a default one.
+     */
+    FIRESTORE_AS_DATASTORE
 }

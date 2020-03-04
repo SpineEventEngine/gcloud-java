@@ -1,4 +1,4 @@
-# The GAE Datastore sample indexes.
+# The indexes for Firestore in Datastore mode.
 
 indexes:
 
@@ -7,21 +7,23 @@ indexes:
   - kind: spine.core.Event
     ancestor: no
     properties:
-    - name: type
-    - name: created
+      - name: type
+      - name: created
 
   # Index required for `DsInboxStorage.readAll` query.
 
   - kind: spine.server.delivery.InboxMessage
+    ancestor: yes
     properties:
       - name: inbox_shard
       - name: of_total_inbox_shards
-      - name: when_received
+      - name: received_at
       - name: version
 
-  # Index required for `DsInboxStorage.oldestMessageToDeliver` query.
+  # Index required for `DsInboxStorage.newestMessageToDeliver` query.
 
   - kind: spine.server.delivery.InboxMessage
+    ancestor: yes
     properties:
       - name: inbox_shard
       - name: of_total_inbox_shards
@@ -38,22 +40,22 @@ indexes:
     # Copy as is:
     # ------------------
     properties:
-    - name: aggregate_id
-    - name: created
-      direction: desc
-    - name: version
-      direction: desc
-    - name: snapshot
+      - name: aggregate_id
+      - name: created
+        direction: desc
+      - name: version
+        direction: desc
+      - name: snapshot
     # ------------------
 
   - kind: myapp.example.MySecondAggregate # Replace with your Aggregate Protobuf type name.
     # Copy as is:
     # ------------------
     properties:
-    - name: aggregate_id
-    - name: created
-      direction: desc
-    - name: version
-      direction: desc
-    - name: snapshot
+      - name: aggregate_id
+      - name: created
+        direction: desc
+      - name: version
+        direction: desc
+      - name: snapshot
     # ------------------

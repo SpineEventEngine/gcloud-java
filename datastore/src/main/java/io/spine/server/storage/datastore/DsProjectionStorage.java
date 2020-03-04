@@ -21,60 +21,26 @@
 package io.spine.server.storage.datastore;
 
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
-import java.util.Optional;
-
-import static io.spine.protobuf.Messages.isDefault;
 
 /**
  * Datastore implementation of the {@link ProjectionStorage}.
  */
 public class DsProjectionStorage<I> extends ProjectionStorage<I> {
 
-    private static final String LAST_EVENT_TIMESTAMP_ID = "datastore_event_timestamp_";
-
     private final DsRecordStorage<I> recordStorage;
-    private final DsPropertyStorage propertyStorage;
-
-    private final RecordId lastTimestampId;
 
     protected DsProjectionStorage(Class<? extends Projection<I, ?, ?>> projectionClass,
                                   DsRecordStorage<I> recordStorage,
-                                  DsPropertyStorage propertyStorage,
                                   boolean multitenant) {
         super(projectionClass, multitenant);
         this.recordStorage = recordStorage;
-        this.propertyStorage = propertyStorage;
-        this.lastTimestampId =
-                RecordId.of(LAST_EVENT_TIMESTAMP_ID + projectionClass.getCanonicalName());
-    }
-
-    @Override
-    public void writeLastHandledEventTime(Timestamp timestamp) {
-        propertyStorage.write(lastTimestampId, timestamp);
-    }
-
-    @Override
-    public @Nullable Timestamp readLastHandledEventTime() {
-        Optional<Message> optional =
-                propertyStorage.read(lastTimestampId, Timestamp.getDescriptor());
-        if (!optional.isPresent()) {
-            return null;
-        }
-        Timestamp timestamp = (Timestamp) optional.get();
-        if (isDefault(timestamp)) {
-            return null;
-        }
-        return timestamp;
     }
 
     @Override

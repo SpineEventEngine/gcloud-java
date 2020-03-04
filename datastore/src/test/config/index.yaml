@@ -1,80 +1,112 @@
-# The GAE Datastore indexes required to run the Spine gcloud-java library tests in the test
-# remote environment.
+# The Google Datastore indexes required to run the Spine `gcloud-java` unit tests in the remote
+# test environment in the Datastore instance running in the native mode.
 
 indexes:
 
   - kind: spine.core.Event
-    ancestor: no
     properties:
-    - name: type
-    - name: created
+      - name: type
+      - name: created
+
+  - kind: spine.server.delivery.InboxMessage
+    properties:
+      - name: inbox_shard
+      - name: of_total_inbox_shards
+      - name: received_at
+      - name: version
+
+  - kind: spine.server.delivery.InboxMessage
+    properties:
+      - name: inbox_shard
+      - name: of_total_inbox_shards
+      - name: when_received
+      - name: version
+
+ - kind: spine.test.aggregate.Project
+    properties:
+      - name: aggregate_id
+      - name: version
+        direction: desc
+      - name: created
+        direction: desc
+      - name: snapshot
 
   - kind: spine.test.aggregate.Project
     properties:
-    - name: aggregate_id
-    - name: created
-      direction: desc
-    - name: version
-      direction: desc
-    - name: snapshot
+      - name: version
+        direction: desc
+      - name: created
+        direction: desc
+      - name: snapshot
 
-  - kind: spine.system.server.EntityHistory
+  - kind: spine.test.aggregate.Sequence
     properties:
-    - name: aggregate_id
-    - name: version
-      direction: desc
-    - name: created
-      direction: desc
-    - name: snapshot
+      - name: aggregate_id
+      - name: version
+        direction: desc
+      - name: created
+        direction: desc
+      - name: snapshot
 
-  - kind: spine.system.server.CommandLifecycle
+  - kind: spine.test.aggregate.Sequence
     properties:
-    - name: aggregate_id
-    - name: version
-      direction: desc
-    - name: created
-      direction: desc
-    - name: snapshot
+      - name: version
+        direction: desc
+      - name: created
+        direction: desc
+      - name: snapshot
 
-  - kind: spine.test.datastore.College
+  - kind: spine.test.delivery.Calc
     properties:
-    - name: archived
-    - name: deleted
-    - name: stateSponsored
-
-  - kind: spine.test.datastore.College
-    properties:
-    - name: archived
-    - name: deleted
-    - name: name
-      direction: desc
+      - name: aggregate_id
+      - name: version
+        direction: desc
+      - name: created
+        direction: desc
+      - name: snapshot
 
   - kind: spine.test.datastore.College
     properties:
-    - name: archived
-    - name: deleted
-    - name: studentCount
-      
-  - kind: spine.test.datastore.College
-    properties:
-    - name: archived
-    - name: deleted
-    - name: admissionDeadline
-      
-  - kind: spine.test.datastore.College
-    properties:
-    - name: archived
-    - name: deleted
-    - name: name
-      
-  - kind: spine.test.datastore.College
-    properties:
-    - name: archived
-    - name: deleted
-    - name: passingGrade
+      - name: archived
+      - name: deleted
+      - name: name
+        direction: desc
 
   - kind: spine.test.datastore.College
     properties:
-    - name: stateSponsored
-    - name: studentCount
-    - name: name
+      - name: archived
+      - name: deleted
+      - name: name
+
+  - kind: spine.test.datastore.College
+    properties:
+      - name: archived
+      - name: deleted
+      - name: state_sponsored
+      - name: student_count
+      - name: name
+
+  - kind: spine.test.datastore.College
+    properties:
+      - name: archived
+      - name: deleted
+      - name: admission_deadline
+
+  - kind: spine.test.datastore.College
+    properties:
+      - name: archived
+      - name: deleted
+      - name: student_count
+
+  - kind: spine.test.datastore.College
+    properties:
+      - name: archived
+      - name: deleted
+      - name: passing_grade
+
+  - kind: spine.test.datastore.College
+    properties:
+      - name: archived
+      - name: deleted
+      - name: state_sponsored
+

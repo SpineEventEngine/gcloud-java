@@ -21,20 +21,12 @@
 package io.spine.server.storage.datastore.given;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.client.EntityId;
-import io.spine.core.Event;
-import io.spine.protobuf.AnyPacker;
-import io.spine.server.delivery.InboxId;
-import io.spine.server.delivery.InboxLabel;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.InboxMessageStatus;
-import io.spine.server.delivery.InboxSignalId;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.test.delivery.Calc;
-import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 
@@ -42,6 +34,8 @@ import java.security.SecureRandom;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
+import static io.spine.server.delivery.given.TestInboxMessages.toDeliver;
+import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
 
 /**
  * Test environment for {@link DsInboxStorageTest}.
@@ -62,44 +56,22 @@ public class DsInboxStorageTestEnv {
     /**
      * Generates an {@link InboxMessage} with the specified values.
      *
-     * The message values are set as if it was received {@code now} and its status is
-     * {@link InboxMessageStatus#TO_DELIVER TO_DELIVER}.
+     * The message values are set as if it was received at {@code whenReceived} time
+     * and its status was {@link InboxMessageStatus#TO_DELIVER TO_DELIVER}.
      */
-    public static InboxMessage generate(int shardIndex,
-                                        int totalShards,
-                                        Timestamp whenReceived) {
+    public static InboxMessage generate(int shardIndex, int totalShards, Timestamp whenReceived) {
         checkNotNull(whenReceived);
-        NumberAdded message = NumberAdded.newBuilder()
-                                         .setValue(random.nextInt(100))
-                                         .vBuild();
-        Event event = factory.createEvent(message);
-        InboxSignalId signalId = InboxSignalId.newBuilder()
-                                              .setValue(event.getId()
-                                                             .getValue())
-                                              .vBuild();
+        InboxMessage message = toDeliver("target-entity-id", TypeUrl.of(Calc.class), whenReceived);
 
-        EntityId entityId =
-                EntityId.newBuilder()
-                        .setId(AnyPacker.pack(StringValue.of("target-entity-id")))
-                        .build();
-
-        TypeUrl typeUrl = TypeUrl.of(Calc.class);
-        InboxId inboxId = InboxId.newBuilder()
-                                 .setEntityId(entityId)
-                                 .setTypeUrl(typeUrl.value())
-                                 .vBuild();
-        ShardIndex index = TestShardIndex.newIndex(shardIndex, totalShards);
+        InboxMessageId modifiedId =
+                message.getId()
+                       .toBuilder()
+                       .setIndex(newIndex(shardIndex, totalShards))
+                       .vBuild();
         InboxMessage result =
-                InboxMessage.newBuilder()
-                            .setId(InboxMessageId.generate())
-                            .setSignalId(signalId)
-                            .setInboxId(inboxId)
-                            .setShardIndex(index)
-                            .setLabel(InboxLabel.REACT_UPON_EVENT)
-                            .setStatus(InboxMessageStatus.TO_DELIVER)
-                            .setEvent(event)
-                            .setWhenReceived(whenReceived)
-                            .vBuild();
+                message.toBuilder()
+                       .setId(modifiedId)
+                       .vBuild();
         return result;
     }
 
