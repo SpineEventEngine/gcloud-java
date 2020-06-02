@@ -20,16 +20,25 @@
 
 package io.spine.server.storage.datastore;
 
+import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.AggregateStorageTruncationTest;
-import io.spine.server.storage.StorageFactory;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("`DsAggregateStorage` after truncation should")
 public class DsAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
 
-    @Override
-    protected StorageFactory storageFactory() {
-        return TestDatastoreStorageFactory.local();
+    @BeforeAll
+    static void prepareStorageFactory() {
+        ServerEnvironment.instance()
+                         .configureStorageForTests(TestDatastoreStorageFactory.local());
+    }
+
+    @AfterAll
+    static void resetStorageFactory() {
+        ServerEnvironment.instance()
+                         .reset();
     }
 }

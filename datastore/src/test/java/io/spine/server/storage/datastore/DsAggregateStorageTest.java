@@ -44,7 +44,6 @@ import io.spine.server.storage.datastore.given.CountingDatastoreWrapper;
 import io.spine.server.storage.datastore.given.aggregate.ProjectAggregateRepository;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.Project;
-import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.storage.StateImported;
 import io.spine.testdata.Sample;
@@ -237,11 +236,10 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         @BeforeEach
         void setUp() {
             ServerEnvironment.instance().configureStorage(datastoreFactory);
-            BoundedContext boundedContext =
-                    BoundedContext.singleTenant(DsAggregateStorageTest.class.getName())
-                                  .build();
             repository = new ProjectAggregateRepository();
-            boundedContext.register(repository);
+            BoundedContext.singleTenant(DsAggregateStorageTest.class.getName())
+                          .add(repository)
+                          .build();
 
             factory = new TestActorRequestFactory(DsAggregateStorageTest.class);
             id = newId();

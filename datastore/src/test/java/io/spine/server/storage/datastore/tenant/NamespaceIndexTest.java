@@ -184,7 +184,8 @@ class NamespaceIndexTest {
         with(tenantId).run(
                 () -> storage.write(id, record)
         );
-        Set<TenantId> tenantIds = context.tenantIndex()
+        Set<TenantId> tenantIds = context.internalAccess()
+                                         .tenantIndex()
                                          .all();
         assertThat(tenantIds).containsExactly(tenantId);
     }

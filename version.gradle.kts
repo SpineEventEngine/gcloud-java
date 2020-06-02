@@ -18,8 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'spine-gcloud-java'
+/**
+ * The versions of the libraries to be used.
+ *
+ * This file defines versions for the dependencies that are not covered by
+ * `.config/gradle/dependencies.gradle`.
+ */
 
-include 'datastore'
-include 'stackdriver-trace'
-include 'testutil-gcloud'
+val spineCoreVersion: String by extra("1.5.14")
+val versionToPublish: String by extra(spineCoreVersion)
+val spineBaseVersion: String by extra("1.5.12")
+val datastoreVersion: String by extra("1.102.2")
