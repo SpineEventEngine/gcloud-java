@@ -211,5 +211,3 @@ apply {
     from(Deps.scripts.repoLicenseReport(project))
     from(Deps.scripts.generatePom(project))
 }
-
-
