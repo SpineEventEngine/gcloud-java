@@ -18,30 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.github.psxpaul.task.ExecFork
+
 plugins {
-    id "com.github.psxpaul.execfork" version '0.1.13'
+    `java-library`
+    id("com.github.psxpaul.execfork").version("0.1.13")
 }
 
-ext {
-    runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
-}
+val datastoreVersion: String by extra
+val spineCoreVersion: String by extra
 
 dependencies {
     // Google Cloud Datastore
-    api(group: 'com.google.cloud', name: 'google-cloud-datastore', version: datastoreVersion) {
-        exclude group: 'com.google.protobuf'
-        exclude group: 'com.google.guava'
+    api("com.google.cloud:google-cloud-datastore:1.102.2") {
+        exclude(group = "com.google.protobuf")
+        exclude(group = "com.google.guava")
     }
 
-    testImplementation project(path: ":testutil-gcloud")
-    testImplementation "io.spine:spine-server:$spineCoreVersion"
+    testImplementation(project(":testutil-gcloud"))
+    testImplementation("io.spine:spine-server:$spineCoreVersion")
 }
 
-task startDatastore(type: com.github.psxpaul.task.ExecFork) {
+val startDatastore by tasks.registering(ExecFork::class) {
     description = "Starts local in-memory datastore."
     group = "Build Setup"
+    shouldRunAfter(tasks.assemble)
 
-    executable = "$rootDir/scripts/start-datastore.${runsOnWindows ? 'bat' : 'sh'}"
+    val runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
+    val extension = if (runsOnWindows) "bat" else "sh"
+    executable = "$rootDir/scripts/start-datastore.$extension"
 
     // Default port for the emulator is 8081.
     //
@@ -56,5 +61,4 @@ task startDatastore(type: com.github.psxpaul.task.ExecFork) {
     killDescendants = false
 }
 
-tasks.withType(Test) { it.dependsOn startDatastore }
-startDatastore.shouldRunAfter assemble
+tasks.withType(Test::class) { dependsOn(startDatastore) }

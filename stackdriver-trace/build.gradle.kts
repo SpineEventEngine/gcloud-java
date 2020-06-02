@@ -18,7 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+plugins {
+    `java-library`
+}
 
 dependencies {
-    api "com.google.cloud:google-cloud-trace:0.109.3-beta"
+    api("com.google.cloud:google-cloud-trace:0.109.3-beta")
 }

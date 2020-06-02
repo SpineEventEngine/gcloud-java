@@ -18,7 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.gradle.internal.Deps
+
 dependencies {
-    implementation project(path: ':datastore')
-    implementation deps.test.junit5Api
+    implementation(project(":datastore"))
+    Deps.test.junit5Api.forEach { implementation(it) }
 }

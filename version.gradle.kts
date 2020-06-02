@@ -28,4 +28,3 @@
 val spineCoreVersion: String by extra("1.5.14")
 val versionToPublish: String by extra(spineCoreVersion)
 val spineBaseVersion: String by extra("1.5.12")
-val datastoreVersion: String by extra("1.102.2")
