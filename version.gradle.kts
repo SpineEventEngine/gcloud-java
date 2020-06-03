@@ -18,7 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    implementation project(path: ':datastore')
-    implementation deps.test.junit5Api
-}
+/**
+ * The versions of the libraries to be used.
+ *
+ * This file defines versions for the dependencies that are not covered by
+ * `.config/gradle/dependencies.gradle`.
+ */
+
+val spineCoreVersion: String by extra("1.5.14")
+val versionToPublish: String by extra(spineCoreVersion)
+val spineBaseVersion: String by extra("1.5.12")

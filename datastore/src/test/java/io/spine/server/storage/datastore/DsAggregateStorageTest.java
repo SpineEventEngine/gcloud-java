@@ -169,7 +169,6 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         private DsAggregateStorage<ProjectId> storage;
         private CountingDatastoreWrapper datastoreWrapper;
 
-
         @BeforeEach
         void setUp() {
             datastoreWrapper = new CountingDatastoreWrapper(datastoreFactory().datastore(), false);
@@ -209,7 +208,9 @@ class DsAggregateStorageTest extends AggregateStorageTest {
                     .setVersion(version)
                     .setTimestamp(currentTime())
                     .vBuild();
-            Event latestEvent = factory.createEvent(eventMessage, increment(version), currentTime());
+            Event latestEvent = factory.createEvent(eventMessage,
+                                                    increment(version),
+                                                    currentTime());
             AggregateHistory historyAfterSnapshot = AggregateHistory
                     .newBuilder()
                     .setSnapshot(latestSnapshot)
@@ -236,12 +237,12 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
         @BeforeEach
         void setUp() {
-            ServerEnvironment.instance().configureStorage(datastoreFactory);
-            BoundedContext boundedContext =
-                    BoundedContext.singleTenant(DsAggregateStorageTest.class.getName())
-                                  .build();
+            ServerEnvironment.instance()
+                             .configureStorage(datastoreFactory);
             repository = new ProjectAggregateRepository();
-            boundedContext.register(repository);
+            BoundedContext.singleTenant(DsAggregateStorageTest.class.getName())
+                          .add(repository)
+                          .build();
 
             factory = new TestActorRequestFactory(DsAggregateStorageTest.class);
             id = newId();

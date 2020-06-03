@@ -18,8 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = 'spine-gcloud-java'
+import io.spine.gradle.internal.Deps
 
-include 'datastore'
-include 'stackdriver-trace'
-include 'testutil-gcloud'
+dependencies {
+    implementation(project(":datastore"))
+    Deps.test.junit5Api.forEach { implementation(it) }
+}

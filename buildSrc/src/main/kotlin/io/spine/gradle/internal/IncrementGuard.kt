@@ -18,27 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore;
+package io.spine.gradle.internal
 
-import io.spine.server.ServerEnvironment;
-import io.spine.server.aggregate.AggregateStorageTruncationTest;
-import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 
-@DisplayName("`DsAggregateStorage` after truncation should")
-public class DsAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
+/**
+ * Gradle plugin which adds a [CheckVersionIncrement] task.
+ *
+ * The task is called `checkVersionIncrement` inserted before the `check` task.
+ */
+class IncrementGuard : Plugin<Project> {
 
-    @BeforeAll
-    static void prepareStorageFactory() {
-        ServerEnvironment.instance()
-                         .configureStorageForTests(TestDatastoreStorageFactory.local());
+    companion object {
+        const val taskName = "checkVersionIncrement"
     }
 
-    @AfterAll
-    static void resetStorageFactory() {
-        ServerEnvironment.instance()
-                         .reset();
+    override fun apply(target: Project) {
+        val tasks = target.tasks
+        tasks.register(taskName, CheckVersionIncrement::class.java) {
+            it.repository = PublishingRepos.cloudRepo
+            tasks.getByName("check").dependsOn(it)
+
+            it.shouldRunAfter("test")
+        }
     }
 }

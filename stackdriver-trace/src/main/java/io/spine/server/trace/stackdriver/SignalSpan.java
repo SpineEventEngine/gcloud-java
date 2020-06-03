@@ -108,7 +108,7 @@ public class SignalSpan {
 
     private Span.Builder buildSpan(ProjectId projectId) {
         SpanId spanId = SpanId.random();
-        Timestamp whenStarted = signal.time();
+        Timestamp whenStarted = signal.timestamp();
         Timestamp whenFinished = Time.currentTime();
         TruncatableString displayName = Truncate.stringTo(displayName(), SPAN_DISPLAY_NAME_LENGTH);
         return Span

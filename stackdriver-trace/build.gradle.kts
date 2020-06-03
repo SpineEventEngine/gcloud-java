@@ -18,27 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore;
+plugins {
+    `java-library`
+}
 
-import io.spine.server.ServerEnvironment;
-import io.spine.server.aggregate.AggregateStorageTruncationTest;
-import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-
-@DisplayName("`DsAggregateStorage` after truncation should")
-public class DsAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
-
-    @BeforeAll
-    static void prepareStorageFactory() {
-        ServerEnvironment.instance()
-                         .configureStorageForTests(TestDatastoreStorageFactory.local());
-    }
-
-    @AfterAll
-    static void resetStorageFactory() {
-        ServerEnvironment.instance()
-                         .reset();
-    }
+dependencies {
+    api("com.google.cloud:google-cloud-trace:0.109.3-beta")
 }
