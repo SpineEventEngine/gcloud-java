@@ -26,6 +26,7 @@ import com.google.cloud.datastore.Key;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
 import io.spine.base.Identifier;
+import io.spine.base.Tests;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
 import io.spine.server.BoundedContext;
@@ -164,7 +165,7 @@ class NamespaceIndexTest {
                 .setDatastore(datastore)
                 .build();
         ServerEnvironment.instance()
-                         .configureStorage(storageFactory);
+                         .use(storageFactory, Tests.class);
         storageFactory.configureTenantIndex(contextBuilder);
         BoundedContext context = contextBuilder.build();
         RecordStorage<String> storage = storageFactory

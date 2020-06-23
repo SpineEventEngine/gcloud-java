@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
+import io.spine.base.Tests;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.AggregateStorageTruncationTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
@@ -33,7 +34,7 @@ public class DsAggregateStorageTruncationTest extends AggregateStorageTruncation
     @BeforeAll
     static void prepareStorageFactory() {
         ServerEnvironment.instance()
-                         .configureStorageForTests(TestDatastoreStorageFactory.local());
+                         .use(TestDatastoreStorageFactory.local(), Tests.class);
     }
 
     @AfterAll

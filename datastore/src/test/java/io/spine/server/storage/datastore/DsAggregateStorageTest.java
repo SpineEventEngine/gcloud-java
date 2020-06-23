@@ -25,6 +25,7 @@ import com.google.common.collect.Streams;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.Tests;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
@@ -238,7 +239,7 @@ class DsAggregateStorageTest extends AggregateStorageTest {
         @BeforeEach
         void setUp() {
             ServerEnvironment.instance()
-                             .configureStorage(datastoreFactory);
+                             .use(datastoreFactory, Tests.class);
             repository = new ProjectAggregateRepository();
             BoundedContext.singleTenant(DsAggregateStorageTest.class.getName())
                           .add(repository)

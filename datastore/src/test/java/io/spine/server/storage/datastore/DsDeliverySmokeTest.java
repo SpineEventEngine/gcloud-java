@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.datastore;
 
+import io.spine.base.Tests;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.DeliveryTest;
 import io.spine.testing.SlowTest;
@@ -48,7 +49,7 @@ public class DsDeliverySmokeTest extends DeliveryTest {
         super.setUp();
         factory = TestDatastoreStorageFactory.local();
         ServerEnvironment.instance()
-                         .configureStorageForTests(factory);
+                         .use(factory, Tests.class);
     }
 
     @AfterEach
