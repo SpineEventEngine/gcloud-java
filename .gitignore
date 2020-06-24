@@ -7,7 +7,7 @@
 !/.idea/codeStyleSettings.xml
 
 # Gradle interim configs
-.gradle/*
+*/.gradle/*
 
 # Generated source code
 */generated/*

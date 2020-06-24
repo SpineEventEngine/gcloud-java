@@ -18,13 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries to be used.
- *
- * This file defines versions for the dependencies that are not covered by
- * `.config/gradle/dependencies.gradle`.
- */
+import io.spine.gradle.internal.IncrementGuard
 
-val spineBaseVersion: String by extra("1.5.21")
-val spineCoreVersion: String by extra("1.5.21")
-val versionToPublish: String by extra("1.5.22")
+plugins {
+    `java-library`
+}
+
+apply<IncrementGuard>()
+
+dependencies {
+    // Google Cloud Pubsub protos
+    api("com.google.api.grpc:proto-google-cloud-pubsub-v1:1.89.0")
+}

@@ -12,7 +12,7 @@ all modules and does not describe the project structure per-subproject.
 
 <groupId>io.spine.gcloud</groupId>
 <artifactId>spine-gcloud-java</artifactId>
-<version>1.5.14</version>
+<version>1.5.22</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -25,6 +25,12 @@ all modules and does not describe the project structure per-subproject.
 </licenses>
 
 <dependencies>
+  <dependency>
+    <groupId>com.google.api.grpc</groupId>
+    <artifactId>proto-google-cloud-pubsub-v1</artifactId>
+    <version>1.89.0</version>
+    <scope>compile</scope>
+  </dependency>
   <dependency>
     <groupId>com.google.cloud</groupId>
     <artifactId>google-cloud-datastore</artifactId>
@@ -40,7 +46,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-server</artifactId>
-    <version>1.5.14</version>
+    <version>1.5.21</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -52,7 +58,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-testutil-server</artifactId>
-    <version>1.5.14</version>
+    <version>1.5.21</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -108,12 +114,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-protoc-plugin</artifactId>
-    <version>1.5.12</version>
+    <version>1.5.21</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>
     <artifactId>pmd-java</artifactId>
-    <version>6.20.0</version>
+    <version>6.24.0</version>
   </dependency>
   <dependency>
     <groupId>org.jacoco</groupId>

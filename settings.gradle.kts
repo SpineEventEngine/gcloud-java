@@ -23,3 +23,4 @@ rootProject.name = "spine-gcloud-java"
 include("datastore")
 include("stackdriver-trace")
 include("testutil-gcloud")
+include("pubsub")

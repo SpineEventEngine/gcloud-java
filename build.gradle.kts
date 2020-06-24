@@ -63,7 +63,7 @@ allprojects {
 }
 
 extra["credentialsPropertyFile"] = PublishingRepos.cloudRepo.credentials
-extra["projectsToPublish"] = listOf("datastore", "stackdriver-trace", "testutil-gcloud")
+extra["projectsToPublish"] = listOf("datastore", "stackdriver-trace", "testutil-gcloud", "pubsub")
 
 subprojects {
     apply {
