@@ -18,9 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "spine-gcloud-java"
+import io.spine.gradle.internal.IncrementGuard
 
-include("datastore")
-include("stackdriver-trace")
-include("testutil-gcloud")
-include("pubsub")
+plugins {
+    `java-library`
+}
+
+apply<IncrementGuard>()
+
+dependencies {
+    // Google Cloud Pubsub protos
+    api("com.google.api.grpc:proto-google-cloud-pubsub-v1:1.89.0")
+}
