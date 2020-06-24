@@ -99,7 +99,7 @@ private data class MavenMetadata(var versioning: Versioning = Versioning()) {
          * Fetches the metadata for the repository and parses the document.
          *
          * <p>If the document could not be found, assumes that the module was never
-         * previously released and thus has no metadata.
+         * released and thus has no metadata.
          */
         fun fetchAndParse(url: URL): MavenMetadata? {
             return try {
