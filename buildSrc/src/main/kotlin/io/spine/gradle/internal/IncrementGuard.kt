@@ -38,10 +38,15 @@ class IncrementGuard : Plugin<Project> {
     override fun apply(target: Project) {
         val envVar: Optional<String> =
                 Optional.ofNullable(System.getenv("TRAVIS_PULL_REQUEST"))
-        if (envVar.isPresent) {
-            println("Env var present.")
-        } else {
-            println("Env var not present.")
+        if (!envVar.isPresent) {
+            // Don't run the check if not run on Travis CI.
+            // If we run the check outside of Travis, we have no way to know if it's PR or not. If
+            // it's local build, it's OK to fail, but if it's some other CI tool, we will always
+            // run the check on it, which can lead to failed master builds once again.
+            return
+        }
+        if (envVar.get() == "false") {
+            return
         }
         val tasks = target.tasks
         tasks.register(taskName, CheckVersionIncrement::class.java) {
