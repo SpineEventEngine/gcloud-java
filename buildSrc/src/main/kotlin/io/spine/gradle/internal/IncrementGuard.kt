@@ -22,6 +22,7 @@ package io.spine.gradle.internal
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import java.util.Optional;
 
 /**
  * Gradle plugin which adds a [CheckVersionIncrement] task.
@@ -35,6 +36,13 @@ class IncrementGuard : Plugin<Project> {
     }
 
     override fun apply(target: Project) {
+        val envVar: Optional<String> =
+                Optional.ofNullable(System.getenv("TRAVIS_PULL_REQUEST"))
+        if (envVar.isPresent) {
+            println("Env var present.")
+        } else {
+            println("Env var not present.")
+        }
         val tasks = target.tasks
         tasks.register(taskName, CheckVersionIncrement::class.java) {
             repository = PublishingRepos.cloudRepo
