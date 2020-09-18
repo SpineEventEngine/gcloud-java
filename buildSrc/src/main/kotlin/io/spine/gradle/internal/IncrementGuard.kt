@@ -69,6 +69,6 @@ class IncrementGuard : Plugin<Project> {
      */
     private fun isTravisPullRequest(): Boolean {
         val isPullRequest = System.getenv("TRAVIS_PULL_REQUEST")
-        return isPullRequest != null && isPullRequest != "false"
+        return isPullRequest != null && isPullRequest == "false"
     }
 }
