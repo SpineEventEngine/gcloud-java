@@ -22,7 +22,6 @@ package io.spine.gradle.internal
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import java.util.Optional;
 
 /**
  * Gradle plugin which adds a [CheckVersionIncrement] task.
@@ -35,25 +34,41 @@ class IncrementGuard : Plugin<Project> {
         const val taskName = "checkVersionIncrement"
     }
 
+    /**
+     * Adds the [CheckVersionIncrement] task to the project.
+     *
+     * Only adds the check if the project is built on Travis CI and the job is a pull request.
+     *
+     * The task will never run outside of Travis CI or when building individual branches. This is
+     * done to prevent unexpected CI fails when re-building `master` multiple times, creating git
+     * tags, and in other cases that go outside of the "usual" development cycle.
+     */
     override fun apply(target: Project) {
-        val envVar: Optional<String> =
-                Optional.ofNullable(System.getenv("TRAVIS_PULL_REQUEST"))
-        if (!envVar.isPresent) {
-            // Don't run the check if not run on Travis CI.
-            // If we run the check outside of Travis, we have no way to know if it's PR or not. If
-            // it's local build, it's OK to fail, but if it's some other CI tool, we will always
-            // run the check on it, which can lead to failed master builds once again.
-            return
-        }
-        if (envVar.get() == "false") {
-            return
-        }
         val tasks = target.tasks
         tasks.register(taskName, CheckVersionIncrement::class.java) {
             repository = PublishingRepos.cloudRepo
             tasks.getByName("check").dependsOn(this)
 
             shouldRunAfter("test")
+            if (!isTravisPullRequest()) {
+                logger.info("The build does not represent a Travis pull request job, the " +
+                        "`checkVersionIncrement` task is disabled.")
+                this.enabled = false
+            }
         }
+    }
+
+    /**
+     * Returns `true` if the current build is a Travis job which represents a GitHub pull request.
+     *
+     * Implementation note: the `TRAVIS_PULL_REQUEST` environment variable contains the pull
+     * request number rather than `"true"` in positive case, hence the check.
+     *
+     * @see <a href="https://docs.travis-ci.com/user/environment-variables/#default-environment-variables">
+     *     List of default environment variables provided for Travis builds</a>
+     */
+    private fun isTravisPullRequest(): Boolean {
+        val isPullRequest = System.getenv("TRAVIS_PULL_REQUEST")
+        return isPullRequest != null && isPullRequest != "false"
     }
 }
