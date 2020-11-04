@@ -128,25 +128,26 @@ public final class TestDatastores implements Logging {
      */
     public static Datastore remote(Resource serviceAccount) {
         checkNotNull(serviceAccount);
-        try {
-            Credentials credentials = credentialsFrom(serviceAccount);
-            DatastoreOptions options = DatastoreOptions
-                    .newBuilder()
-                    .setCredentials(credentials)
-                    .build();
-            Datastore datastore = options.getService();
-            return datastore;
-        } catch (IOException e) {
-            throw newIllegalStateException(
-                    e, "Problems parsing the credentials file `%s`.", serviceAccount
-            );
-        }
+        Credentials credentials = credentialsFrom(serviceAccount);
+        DatastoreOptions options = DatastoreOptions
+                .newBuilder()
+                .setCredentials(credentials)
+                .build();
+        Datastore datastore = options.getService();
+        return datastore;
     }
 
-    private static Credentials credentialsFrom(Resource serviceAccount) throws IOException {
-        InputStream is = serviceAccount.open();
-        ServiceAccountCredentials credentials = fromStream(is);
-        return credentials;
+    private static Credentials credentialsFrom(Resource serviceAccount) {
+        try {
+            InputStream is = serviceAccount.open();
+            ServiceAccountCredentials credentials = fromStream(is);
+            return credentials;
+        } catch (IOException e) {
+            throw newIllegalStateException(
+                    e, "Unable to parse Service Account credentials from `%s` resource.",
+                    serviceAccount
+            );
+        }
     }
 
     /**
