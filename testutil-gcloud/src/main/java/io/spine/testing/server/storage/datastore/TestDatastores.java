@@ -59,7 +59,9 @@ public final class TestDatastores implements Logging {
      */
     private static final ProjectId DEFAULT_LOCAL_PROJECT_ID = ProjectId.of("test-project");
 
-    /** Prevents instantiation of this utility class. */
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private TestDatastores() {
     }
 
@@ -117,7 +119,7 @@ public final class TestDatastores implements Logging {
      */
     public static Datastore remote(String serviceAccountPath) {
         checkNotNull(serviceAccountPath);
-        return remote(file(serviceAccountPath));
+        return remote(file(serviceAccountPath, TestDatastores.class.getClassLoader()));
     }
 
     /**
@@ -126,26 +128,31 @@ public final class TestDatastores implements Logging {
      */
     public static Datastore remote(Resource serviceAccount) {
         checkNotNull(serviceAccount);
+        Credentials credentials = credentialsFrom(serviceAccount);
+        DatastoreOptions options = DatastoreOptions
+                .newBuilder()
+                .setCredentials(credentials)
+                .build();
+        Datastore datastore = options.getService();
+        return datastore;
+    }
+
+    private static Credentials credentialsFrom(Resource serviceAccount) {
         try {
-            Credentials credentials = credentialsFrom(serviceAccount);
-            DatastoreOptions options = DatastoreOptions
-                    .newBuilder()
-                    .setCredentials(credentials)
-                    .build();
-            Datastore datastore = options.getService();
-            return datastore;
+            InputStream is = serviceAccount.open();
+            ServiceAccountCredentials credentials = fromStream(is);
+            return credentials;
         } catch (IOException e) {
             throw newIllegalStateException(
-                    e, "Problems parsing the credentials file `%s`.", serviceAccount);
+                    e, "Unable to parse Service Account credentials from `%s` resource.",
+                    serviceAccount
+            );
         }
     }
 
-    private static Credentials credentialsFrom(Resource serviceAccount) throws IOException {
-        InputStream is = serviceAccount.open();
-        ServiceAccountCredentials credentials = fromStream(is);
-        return credentials;
-    }
-
+    /**
+     * Returns the default project ID that is used when running on a local Datastore emulator.
+     */
     public static ProjectId defaultLocalProjectId() {
         return DEFAULT_LOCAL_PROJECT_ID;
     }

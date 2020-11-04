@@ -19,21 +19,16 @@
  */
 
 import com.github.psxpaul.task.ExecFork
-import io.spine.gradle.internal.IncrementGuard
 
 plugins {
-    `java-library`
     id("com.github.psxpaul.execfork").version("0.1.13")
 }
 
-apply<IncrementGuard>()
-
-val datastoreVersion: String by extra
 val spineCoreVersion: String by extra
 
 dependencies {
     // Google Cloud Datastore
-    api("com.google.cloud:google-cloud-datastore:1.102.2") {
+    api("com.google.cloud:google-cloud-datastore:1.105.0") {
         exclude(group = "com.google.protobuf")
         exclude(group = "com.google.guava")
     }

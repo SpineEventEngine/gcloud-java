@@ -18,15 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.IncrementGuard
-
-plugins {
-    `java-library`
-}
-
-apply<IncrementGuard>()
-
 dependencies {
     // Google Cloud Pubsub protos
-    api("com.google.api.grpc:proto-google-cloud-pubsub-v1:1.89.0")
+    api("com.google.api.grpc:proto-google-cloud-pubsub-v1:1.90.7")
 }
