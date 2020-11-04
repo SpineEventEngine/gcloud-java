@@ -105,7 +105,9 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
         @Test
         @DisplayName("the service account resource")
         void byResource() {
-            Resource serviceAccount = Resource.file(SPINE_DEV_JSON);
+            Resource serviceAccount = Resource.file(
+                    SPINE_DEV_JSON, TestDatastoresTest.class.getClassLoader()
+            );
             Datastore datastore = TestDatastores.remote(serviceAccount);
             String projectId = datastore.getOptions()
                                         .getProjectId();
@@ -116,7 +118,9 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
     @Test
     @DisplayName("throw an `ISE` when can't properly parse account credentials from resource")
     void throwOnInvalidResource() {
-        Resource resource = Resource.file("random.json");
+        Resource resource = Resource.file(
+                "random.json", TestDatastoresTest.class.getClassLoader()
+        );
         assertThrows(IllegalStateException.class, () -> TestDatastores.remote(resource));
     }
 }
