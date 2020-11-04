@@ -23,5 +23,5 @@ plugins {
 }
 
 dependencies {
-    api("com.google.cloud:google-cloud-trace:0.109.3-beta")
+    api("com.google.cloud:google-cloud-trace:1.2.6")
 }
