@@ -59,7 +59,9 @@ public final class TestDatastores implements Logging {
      */
     private static final ProjectId DEFAULT_LOCAL_PROJECT_ID = ProjectId.of("test-project");
 
-    /** Prevents instantiation of this utility class. */
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private TestDatastores() {
     }
 
@@ -117,7 +119,7 @@ public final class TestDatastores implements Logging {
      */
     public static Datastore remote(String serviceAccountPath) {
         checkNotNull(serviceAccountPath);
-        return remote(file(serviceAccountPath));
+        return remote(file(serviceAccountPath, TestDatastores.class.getClassLoader()));
     }
 
     /**
@@ -136,7 +138,8 @@ public final class TestDatastores implements Logging {
             return datastore;
         } catch (IOException e) {
             throw newIllegalStateException(
-                    e, "Problems parsing the credentials file `%s`.", serviceAccount);
+                    e, "Problems parsing the credentials file `%s`.", serviceAccount
+            );
         }
     }
 
@@ -146,6 +149,9 @@ public final class TestDatastores implements Logging {
         return credentials;
     }
 
+    /**
+     * Returns a stub local GCP project ID.
+     */
     public static ProjectId defaultLocalProjectId() {
         return DEFAULT_LOCAL_PROJECT_ID;
     }
