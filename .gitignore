@@ -94,13 +94,6 @@ hs_err_pid*
 .packages
 pubspec.lock
 
-# Credentials to Maven repositories and Google Cloud Storage used for Travis build reports
-credentials.tar
-credentials.properties
-cloudrepo.properties
-deploy_key_rsa
-gcs-auth-key.json
-
 # Credentials to the test Datastore environment.
 # They are stored in the encrypted file and are decrypted on the CI server only.
 
