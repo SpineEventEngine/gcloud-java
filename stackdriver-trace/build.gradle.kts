@@ -18,10 +18,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-plugins {
-    `java-library`
-}
-
 dependencies {
     api("com.google.cloud:google-cloud-trace:1.2.6")
 }

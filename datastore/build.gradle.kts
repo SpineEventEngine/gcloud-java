@@ -19,16 +19,11 @@
  */
 
 import com.github.psxpaul.task.ExecFork
-import io.spine.gradle.internal.IncrementGuard
 
 plugins {
-    `java-library`
     id("com.github.psxpaul.execfork").version("0.1.13")
 }
 
-apply<IncrementGuard>()
-
-val datastoreVersion: String by extra
 val spineCoreVersion: String by extra
 
 dependencies {
