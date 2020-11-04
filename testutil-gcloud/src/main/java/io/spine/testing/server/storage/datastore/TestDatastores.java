@@ -150,7 +150,7 @@ public final class TestDatastores implements Logging {
     }
 
     /**
-     * Returns a stub local GCP project ID.
+     * Returns the default project ID that is used when running on a local Datastore emulator.
      */
     public static ProjectId defaultLocalProjectId() {
         return DEFAULT_LOCAL_PROJECT_ID;
