@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -288,7 +287,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         checkNotNull(records);
 
         Collection<Entity> entitiesToWrite = new ArrayList<>(records.size());
-        for (Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
+        for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
             Entity entity = entityRecordToEntity(record.getKey(), record.getValue());
             entitiesToWrite.add(entity);
         }
