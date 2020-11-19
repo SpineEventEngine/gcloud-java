@@ -98,8 +98,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.columnMapping = checkNotNull(b.getColumnMapping());
         this.columnFilterAdapter = FilterAdapter.of(this.columnMapping);
         this.idLookup = new DsLookupByIds<>(this.datastore, this.typeUrl);
-        this.queryLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
-                                                 this.columnFilterAdapter);
+        this.queryLookup =
+                new DsLookupByQueries(this.datastore, this.typeUrl, this.columnFilterAdapter);
     }
 
     private Key keyOf(I id) {
