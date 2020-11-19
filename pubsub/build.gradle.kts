@@ -20,5 +20,5 @@
 
 dependencies {
     // Google Cloud Pubsub protos
-    api("com.google.api.grpc:proto-google-cloud-pubsub-v1:1.90.7")
+    api("com.google.api.grpc:proto-google-cloud-pubsub-v1:1.91.0")
 }
