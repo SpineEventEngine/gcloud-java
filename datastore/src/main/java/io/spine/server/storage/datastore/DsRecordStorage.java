@@ -87,7 +87,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * Creates new instance by the passed builder.
      */
     protected DsRecordStorage(
-            RecordStorageBuilder<I, ? extends RecordStorage, ? extends RecordStorageBuilder> b) {
+            RecordStorageBuilder<I,
+                                 ? extends RecordStorage<I>,
+                                 ? extends RecordStorageBuilder<I,? extends RecordStorage<I>, ?>> b
+    ) {
         super(b.getEntityClass(), b.isMultitenant());
         this.typeUrl = TypeUrl.from(b.getDescriptor());
         this.idClass = checkNotNull(b.getIdClass());
