@@ -238,8 +238,8 @@ class DsAggregateStorageTest extends AggregateStorageTest {
 
         @BeforeEach
         void setUp() {
-            ServerEnvironment.instance()
-                             .use(datastoreFactory, Tests.class);
+            ServerEnvironment.when(Tests.class)
+                             .use(datastoreFactory);
             repository = new ProjectAggregateRepository();
             BoundedContext.singleTenant(DsAggregateStorageTest.class.getName())
                           .add(repository)

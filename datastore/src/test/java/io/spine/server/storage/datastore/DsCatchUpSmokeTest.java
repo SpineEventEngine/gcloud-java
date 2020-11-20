@@ -46,8 +46,8 @@ class DsCatchUpSmokeTest extends CatchUpTest {
     @BeforeEach
     public void setUp() {
         factory = TestDatastoreStorageFactory.local();
-        ServerEnvironment.instance()
-                         .use(factory, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(factory);
     }
 
     @Override

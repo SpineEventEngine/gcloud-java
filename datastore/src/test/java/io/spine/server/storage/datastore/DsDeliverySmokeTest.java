@@ -48,8 +48,8 @@ public class DsDeliverySmokeTest extends DeliveryTest {
     public void setUp() {
         super.setUp();
         factory = TestDatastoreStorageFactory.local();
-        ServerEnvironment.instance()
-                         .use(factory, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(factory);
     }
 
     @AfterEach
