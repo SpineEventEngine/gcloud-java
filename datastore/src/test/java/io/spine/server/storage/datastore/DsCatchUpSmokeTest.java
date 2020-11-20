@@ -36,23 +36,21 @@ import org.junit.jupiter.api.Test;
  *
  * <p>The tests are extremely slow, so several long tests from {@link CatchUpTest} are disabled.
  */
-@DisplayName("Datastore-backed `CatchUp` should ")
 @SlowTest
+@DisplayName("Datastore-backed `CatchUp` should ")
 class DsCatchUpSmokeTest extends CatchUpTest {
 
     private TestDatastoreStorageFactory factory;
 
-    @Override
     @BeforeEach
-    public void setUp() {
+    void prepareStorageFactory() {
         factory = TestDatastoreStorageFactory.local();
-        ServerEnvironment.instance()
-                         .use(factory, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(factory);
     }
 
-    @Override
     @AfterEach
-    public void tearDown() {
+    void tearDownStorageFactory() {
         if (factory != null) {
             factory.tearDown();
         }

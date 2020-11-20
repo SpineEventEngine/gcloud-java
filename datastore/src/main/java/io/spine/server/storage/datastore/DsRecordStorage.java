@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -88,7 +87,10 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
      * Creates new instance by the passed builder.
      */
     protected DsRecordStorage(
-            RecordStorageBuilder<I, ? extends RecordStorage, ? extends RecordStorageBuilder> b) {
+            RecordStorageBuilder<I,
+                                 ? extends RecordStorage<I>,
+                                 ? extends RecordStorageBuilder<I, ? extends RecordStorage<I>, ?>> b
+    ) {
         super(b.getEntityClass(), b.isMultitenant());
         this.typeUrl = TypeUrl.from(b.getDescriptor());
         this.idClass = checkNotNull(b.getIdClass());
@@ -96,8 +98,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         this.columnMapping = checkNotNull(b.getColumnMapping());
         this.columnFilterAdapter = FilterAdapter.of(this.columnMapping);
         this.idLookup = new DsLookupByIds<>(this.datastore, this.typeUrl);
-        this.queryLookup = new DsLookupByQueries(this.datastore, this.typeUrl,
-                                                 this.columnFilterAdapter);
+        this.queryLookup =
+                new DsLookupByQueries(this.datastore, this.typeUrl, this.columnFilterAdapter);
     }
 
     private Key keyOf(I id) {
@@ -288,7 +290,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
         checkNotNull(records);
 
         Collection<Entity> entitiesToWrite = new ArrayList<>(records.size());
-        for (Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
+        for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
             Entity entity = entityRecordToEntity(record.getKey(), record.getValue());
             entitiesToWrite.add(entity);
         }

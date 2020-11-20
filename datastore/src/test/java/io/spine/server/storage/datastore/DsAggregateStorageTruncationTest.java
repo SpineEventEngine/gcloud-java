@@ -29,12 +29,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("`DsAggregateStorage` after truncation should")
-public class DsAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
+class DsAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
 
     @BeforeAll
     static void prepareStorageFactory() {
-        ServerEnvironment.instance()
-                         .use(TestDatastoreStorageFactory.local(), Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(TestDatastoreStorageFactory.local());
     }
 
     @AfterAll

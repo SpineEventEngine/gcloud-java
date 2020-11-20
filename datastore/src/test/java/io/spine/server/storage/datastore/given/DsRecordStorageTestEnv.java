@@ -56,7 +56,6 @@ import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static java.util.Collections.shuffle;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
@@ -245,8 +244,8 @@ public class DsRecordStorageTestEnv {
         return entity;
     }
 
-    private static CollegeEntity createAndStoreEntity(RecordStorage<CollegeId> storage,
-                                                      String name) {
+    private static CollegeEntity
+    createAndStoreEntity(RecordStorage<CollegeId> storage, String name) {
         CollegeId id = newCollegeId();
         College state = newCollege(id, name);
         CollegeEntity entity = CollegeEntity.create(id, state);
@@ -254,9 +253,10 @@ public class DsRecordStorageTestEnv {
         return entity;
     }
 
-    public static void storeEntity(RecordStorage<CollegeId> storage, CollegeEntity entity) {
+    private static void storeEntity(RecordStorage<CollegeId> storage, CollegeEntity entity) {
         EntityRecord record = newEntityRecord(entity.id(), entity.state());
-        EntityRecordWithColumns withColumns = create(record, entity, storage);
+        EntityRecordWithColumns withColumns =
+                EntityRecordWithColumns.create(record, entity, storage);
         storage.write(entity.id(), withColumns);
     }
 

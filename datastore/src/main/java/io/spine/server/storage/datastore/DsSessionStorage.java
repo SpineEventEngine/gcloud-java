@@ -80,8 +80,6 @@ public final class DsSessionStorage
      * {@inheritDoc}
      *
      * <p>Executes the write operation in a new transaction.
-     *
-     * @param message
      */
     @Override
     public void write(ShardSessionRecord message) {

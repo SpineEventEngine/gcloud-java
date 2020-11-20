@@ -164,8 +164,8 @@ class NamespaceIndexTest {
                 .newBuilder()
                 .setDatastore(datastore)
                 .build();
-        ServerEnvironment.instance()
-                         .use(storageFactory, Tests.class);
+        ServerEnvironment.when(Tests.class)
+                         .use(storageFactory);
         storageFactory.configureTenantIndex(contextBuilder);
         BoundedContext context = contextBuilder.build();
         RecordStorage<String> storage = storageFactory
