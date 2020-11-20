@@ -89,7 +89,7 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     protected DsRecordStorage(
             RecordStorageBuilder<I,
                                  ? extends RecordStorage<I>,
-                                 ? extends RecordStorageBuilder<I,? extends RecordStorage<I>, ?>> b
+                                 ? extends RecordStorageBuilder<I, ? extends RecordStorage<I>, ?>> b
     ) {
         super(b.getEntityClass(), b.isMultitenant());
         this.typeUrl = TypeUrl.from(b.getDescriptor());
