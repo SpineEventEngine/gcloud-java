@@ -20,7 +20,6 @@
 
 import io.spine.gradle.internal.DependencyResolution
 import io.spine.gradle.internal.Deps
-import io.spine.gradle.internal.IncrementGuard
 import io.spine.gradle.internal.PublishingRepos
 
 buildscript {
@@ -211,5 +210,4 @@ apply {
     from(Deps.scripts.publish(project))
     from(Deps.scripts.repoLicenseReport(project))
     from(Deps.scripts.generatePom(project))
-    plugin(IncrementGuard::class)
 }

@@ -25,6 +25,6 @@
  * `.config/gradle/dependencies.gradle`.
  */
 
-val spineBaseVersion: String by extra("1.6.12")
-val spineCoreVersion: String by extra("1.6.13")
-val versionToPublish: String by extra("1.6.12")
+val spineBaseVersion: String by extra("1.6.13")
+val spineCoreVersion: String by extra("1.6.15")
+val versionToPublish: String by extra("1.6.15")
