@@ -53,6 +53,7 @@ open class CheckVersionIncrement : DefaultTask() {
         val artifact = "${project.artifactPath()}/${MavenMetadata.FILE_NAME}"
         val repoUrl = repository.releases
         val metadata = fetch(repoUrl, artifact)
+        project.logger.warn(metadata.toString())
         val versions = metadata?.versioning?.versions
         val versionExists = versions?.contains(version) ?: false
         if (versionExists) {
