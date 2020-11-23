@@ -25,7 +25,6 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import java.io.FileNotFoundException
@@ -70,7 +69,7 @@ open class CheckVersionIncrement : DefaultTask() {
 
     private fun fetch(repository: String, artifact: String): MavenMetadata? {
         val url = URL("$repository/$artifact")
-        return MavenMetadata.fetchAndParse(url, project.logger)
+        return MavenMetadata.fetchAndParse(url)
     }
 
     private fun Project.artifactPath(): String {
@@ -102,12 +101,11 @@ private data class MavenMetadata(var versioning: Versioning = Versioning()) {
          * <p>If the document could not be found, assumes that the module was never
          * released and thus has no metadata.
          */
-        fun fetchAndParse(url: URL, logger: Logger): MavenMetadata? {
+        fun fetchAndParse(url: URL): MavenMetadata? {
             return try {
                 val metadata = mapper.readValue(url, MavenMetadata::class.java)
                 metadata
             } catch (e: FileNotFoundException) {
-                logger.error("Cannot fetch Maven metadata from ${url}.", e)
                 null
             }
         }
