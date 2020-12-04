@@ -23,17 +23,11 @@ package io.spine.server.storage.datastore.tenant;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.Messages.isDefault;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isEmptyString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("`SingleTenantNamespaceSupplier` should")
@@ -45,9 +39,9 @@ class SingleTenantNamespaceSupplierTest {
         NamespaceSupplier supplier = NamespaceSupplier.singleTenant();
         Namespace namespace = supplier.get();
         assertNotNull(namespace);
-        assertThat(namespace.value(), isEmptyString());
-        TenantId tenantId = namespace.toTenantId();
-        assertThat(tenantId, isEffectivelyDefault());
+        assertThat(namespace.value()).isEmpty();
+        TenantId tenant = namespace.toTenantId();
+        assertThat(isEffectivelyDefault(tenant)).isTrue();
     }
 
     @Test
@@ -56,40 +50,24 @@ class SingleTenantNamespaceSupplierTest {
         String namespaceValue = "my-custom-namespace";
         NamespaceSupplier supplier = NamespaceSupplier.singleTenant(namespaceValue);
         Namespace namespace = supplier.get();
-        assertNotNull(namespace);
-        assertEquals(namespaceValue, namespace.value());
+        assertThat(namespace).isNotNull();
+        assertThat(namespace.value()).isEqualTo(namespaceValue);
 
-        TenantId tenantId = namespace.toTenantId();
-        assertThat(tenantId, not(isEffectivelyDefault()));
-        String actualNamespaceValue = tenantId.getValue();
-        assertEquals(namespaceValue, actualNamespaceValue);
+        TenantId tenant = namespace.toTenantId();
+        assertThat(isEffectivelyDefault(tenant)).isFalse();
+        assertThat(tenant.getValue()).isEqualTo(namespaceValue);
     }
 
-    @SuppressWarnings("OverlyComplexAnonymousInnerClass") // OK for the test purposes
-    private static Matcher<TenantId> isEffectivelyDefault() {
-        return new BaseMatcher<TenantId>() {
-            @Override
-            public boolean matches(Object item) {
-                if (!(item instanceof TenantId)) {
-                    return false;
-                }
-                TenantId tenantId = (TenantId) item;
-                InternetDomain domain = tenantId.getDomain();
-                if (!isDefault(domain)) {
-                    return false;
-                }
-                EmailAddress email = tenantId.getEmail();
-                if (!isDefault(email)) {
-                    return false;
-                }
-                String value = tenantId.getValue();
-                return value.isEmpty();
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("not default, as expected");
-            }
-        };
+    private static boolean isEffectivelyDefault(TenantId tenant) {
+        InternetDomain domain = tenant.getDomain();
+        if (!isDefault(domain)) {
+            return false;
+        }
+        EmailAddress email = tenant.getEmail();
+        if (!isDefault(email)) {
+            return false;
+        }
+        String value = tenant.getValue();
+        return value.isEmpty();
     }
 }

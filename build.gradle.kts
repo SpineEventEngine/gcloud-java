@@ -134,9 +134,6 @@ subprojects {
                            name = "spine-server",
                            version = spineCoreVersion,
                            classifier = "test")
-        testImplementation(Deps.test.hamcrest)
-        testImplementation(Deps.test.guavaTestlib)
-        testImplementation(Deps.test.junitPioneer)
         Deps.test.junit5Api.forEach { testImplementation(it) }
         Deps.test.truth.forEach { testImplementation(it) }
         testRuntimeOnly(Deps.test.junit5Runner)

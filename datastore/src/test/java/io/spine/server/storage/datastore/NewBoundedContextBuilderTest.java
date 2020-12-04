@@ -21,6 +21,7 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.common.truth.Truth;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.storage.datastore.tenant.TestNamespaceIndex;
@@ -31,10 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.google.common.truth.Truth8.assertThat;
 
 @DisplayName("DatastoreStorageFactory should")
 class NewBoundedContextBuilderTest {
@@ -45,14 +43,14 @@ class NewBoundedContextBuilderTest {
         DatastoreStorageFactory factory = givenFactory();
         BoundedContextBuilder builder = BoundedContext.multitenant(
                 NewBoundedContextBuilderTest.class.getName());
-        assertFalse(builder.tenantIndex()
-                           .isPresent());
+        assertThat(builder.tenantIndex()).isEmpty();
 
         Optional<? extends TenantIndex> updatedIndex =
                 factory.configureTenantIndex(builder)
                        .tenantIndex();
-        assertTrue(updatedIndex.isPresent());
-        assertThat(updatedIndex.get(), instanceOf(TestNamespaceIndex.getType()));
+        assertThat(updatedIndex).isPresent();
+        Truth.assertThat(updatedIndex.get())
+             .isInstanceOf(TestNamespaceIndex.getType());
     }
 
     private static DatastoreStorageFactory givenFactory() {
