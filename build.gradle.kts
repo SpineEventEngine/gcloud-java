@@ -45,7 +45,7 @@ buildscript {
 }
 
 plugins {
-    java
+    `java-library`
     idea
     jacoco
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
@@ -122,20 +122,24 @@ subprojects {
     dependencies {
         errorprone(Deps.build.errorProneCore)
         errorproneJavac(Deps.build.errorProneJavac)
-        // For dependencies config. based on version of Java, see:
-        //  https://github.com/epeee/junit-jupiter-extension-testing/blob/57b7ba75ab64ed8c229d2a5b14a954d6ae359189/gradle/errorprone.gradle
 
         implementation("io.spine:spine-server:$spineCoreVersion")
+
+        compileOnlyApi(Deps.build.checkerAnnotations)
+        compileOnlyApi(Deps.build.jsr305Annotations)
+        Deps.build.errorProneAnnotations.forEach { compileOnlyApi(it) }
 
         testImplementation("io.spine:spine-testutil-server:$spineCoreVersion")
         testImplementation(group = "io.spine",
                            name = "spine-server",
                            version = spineCoreVersion,
                            classifier = "test")
-        Deps.test.junit5Api.forEach { testImplementation(it) }
-        testImplementation(Deps.test.junit5Runner)
         testImplementation(Deps.test.hamcrest)
         testImplementation(Deps.test.guavaTestlib)
+        testImplementation(Deps.test.junitPioneer)
+        Deps.test.junit5Api.forEach { testImplementation(it) }
+        Deps.test.truth.forEach { testImplementation(it) }
+        testRuntimeOnly(Deps.test.junit5Runner)
     }
 
     // Apply the same IDEA module configuration for each of sub-projects.
