@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.Messages.isDefault;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("`SingleTenantNamespaceSupplier` should")
 class SingleTenantNamespaceSupplierTest {
@@ -38,10 +37,13 @@ class SingleTenantNamespaceSupplierTest {
     void testProduceEmpty() {
         NamespaceSupplier supplier = NamespaceSupplier.singleTenant();
         Namespace namespace = supplier.get();
-        assertNotNull(namespace);
-        assertThat(namespace.value()).isEmpty();
+        assertThat(namespace)
+                .isNotNull();
+        assertThat(namespace.value())
+                .isEmpty();
         TenantId tenant = namespace.toTenantId();
-        assertThat(isEffectivelyDefault(tenant)).isTrue();
+        assertThat(isEffectivelyDefault(tenant))
+                .isTrue();
     }
 
     @Test
@@ -50,12 +52,16 @@ class SingleTenantNamespaceSupplierTest {
         String namespaceValue = "my-custom-namespace";
         NamespaceSupplier supplier = NamespaceSupplier.singleTenant(namespaceValue);
         Namespace namespace = supplier.get();
-        assertThat(namespace).isNotNull();
-        assertThat(namespace.value()).isEqualTo(namespaceValue);
+        assertThat(namespace)
+                .isNotNull();
+        assertThat(namespace.value())
+                .isEqualTo(namespaceValue);
 
         TenantId tenant = namespace.toTenantId();
-        assertThat(isEffectivelyDefault(tenant)).isFalse();
-        assertThat(tenant.getValue()).isEqualTo(namespaceValue);
+        assertThat(isEffectivelyDefault(tenant))
+                .isFalse();
+        assertThat(tenant.getValue())
+                .isEqualTo(namespaceValue);
     }
 
     private static boolean isEffectivelyDefault(TenantId tenant) {
