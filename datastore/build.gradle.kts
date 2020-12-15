@@ -31,7 +31,7 @@ val spineCoreVersion: String by extra
 
 dependencies {
     // Google Cloud Datastore
-    api("com.google.cloud:google-cloud-datastore:1.105.2") {
+    api("com.google.cloud:google-cloud-datastore:1.105.3") {
         exclude(group = "com.google.protobuf")
         exclude(group = "com.google.guava")
     }
