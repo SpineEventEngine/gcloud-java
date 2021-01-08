@@ -1,6 +1,6 @@
 
     
-# Dependencies of `io.spine.gcloud:spine-datastore:1.7.0`
+# Dependencies of `io.spine.gcloud:spine-datastore:1.7.1`
 
 ## Runtime
 1. **Group:** com.fasterxml.jackson **Name:** jackson-bom **Version:** 2.12.0 **No license information found**
@@ -592,12 +592,12 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Tue Dec 15 12:20:09 EET 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 08 17:38:01 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.gcloud:spine-pubsub:1.7.0`
+# Dependencies of `io.spine.gcloud:spine-pubsub:1.7.1`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -1003,12 +1003,12 @@ This report was generated on **Tue Dec 15 12:20:09 EET 2020** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Tue Dec 15 12:20:20 EET 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 08 17:38:07 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.gcloud:spine-stackdriver-trace:1.7.0`
+# Dependencies of `io.spine.gcloud:spine-stackdriver-trace:1.7.1`
 
 ## Runtime
 1. **Group:** com.fasterxml.jackson **Name:** jackson-bom **Version:** 2.12.0 **No license information found**
@@ -1594,12 +1594,12 @@ This report was generated on **Tue Dec 15 12:20:20 EET 2020** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Tue Dec 15 12:20:43 EET 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 08 17:38:16 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.gcloud:spine-testutil-gcloud:1.7.0`
+# Dependencies of `io.spine.gcloud:spine-testutil-gcloud:1.7.1`
 
 ## Runtime
 1. **Group:** com.fasterxml.jackson **Name:** jackson-bom **Version:** 2.12.0 **No license information found**
@@ -2191,4 +2191,4 @@ This report was generated on **Tue Dec 15 12:20:43 EET 2020** using [Gradle-Lice
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Tue Dec 15 12:20:48 EET 2020** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Jan 08 17:38:19 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
