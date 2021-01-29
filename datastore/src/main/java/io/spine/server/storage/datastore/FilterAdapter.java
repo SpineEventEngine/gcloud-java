@@ -31,8 +31,8 @@ import com.google.protobuf.Any;
 import io.spine.client.Filter;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.ColumnMapping;
-import io.spine.server.entity.storage.ColumnTypeMapping;
+import io.spine.server.storage.ColumnMapping;
+import io.spine.server.storage.ColumnTypeMapping;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

@@ -31,18 +31,14 @@ import com.google.cloud.datastore.Value;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.annotation.SPI;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.ColumnMapping;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionStorage;
+import io.spine.server.storage.ColumnMapping;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -51,6 +47,7 @@ import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.tenant.NsConverterFactory;
 import io.spine.server.storage.datastore.tenant.PrefixedNsConverterFactory;
+import io.spine.server.storage.memory.InMemoryRecordStorage;
 import io.spine.server.tenant.TenantIndex;
 
 import java.util.Map;
@@ -91,7 +88,8 @@ public class DatastoreStorageFactory implements StorageFactory {
      * <p>The repeated calls of the methods of this factory should refer to the same instance of
      * the wrapped {@code Datastore} per class of the target {@code Storage}.
      */
-    private final Map<Class<? extends Storage>, DatastoreWrapper> sysWrappers = newConcurrentMap();
+    private final
+    Map<Class<? extends Storage<?, ?>>, DatastoreWrapper> sysWrappers = newConcurrentMap();
 
     private final ColumnMapping<Value<?>> columnMapping;
 
@@ -120,80 +118,13 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> AggregateStorage<I>
-    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> cls) {
-        checkNotNull(cls);
+    public <I, R extends Message> InMemoryRecordStorage<I, R>
+    createRecordStorage(ContextSpec context, RecordSpec<I, R, ?> spec) {
         checkNotNull(context);
+        checkNotNull(spec);
 
-        DsAggregateStorage<I> result =
-                new DsAggregateStorage<>(cls, wrapperFor(context), context.isMultitenant());
+        DsRecordStorage<I, R> result = configure(DsRecordStorage.newBuilder(), spec, context);
         return result;
-    }
-
-    @Override
-    public <I> RecordStorage<I>
-    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> cls) {
-        checkNotNull(cls);
-        checkNotNull(context);
-
-        DsRecordStorage<I> result = configure(DsRecordStorage.newBuilder(), cls, context);
-        return result;
-    }
-
-    @Override
-    public <I> ProjectionStorage<I>
-    createProjectionStorage(ContextSpec context, Class<? extends Projection<I, ?, ?>> cls) {
-        checkNotNull(cls);
-        checkNotNull(context);
-
-        DsProjectionStorageDelegate<I> recordStorage =
-                configure(DsProjectionStorageDelegate.newDelegateBuilder(), cls, context);
-        DsProjectionStorage<I> result =
-                new DsProjectionStorage<>(cls,
-                                          recordStorage,
-                                          context.isMultitenant());
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * Creates a Datastore-specific {@link InboxStorage} taking into account the support
-     * of multi-tenant storage required.
-     *
-     * <p>By default, creates an instance of storage for Datastore in native mode.
-     *
-     * @apiNote In order to change this behavior and supply a custom implementation, an SPI
-     *         user should override {@link #inboxStorageWith(DatastoreWrapper, boolean)
-     *         inboxStorageWith(multitenant, DatastoreWrapper)} method.
-     * @see DsInboxStorage for more details on supported modes
-     */
-    @Override
-    public final InboxStorage createInboxStorage(boolean multitenant) {
-        DatastoreWrapper wrapper = systemWrapperFor(InboxStorage.class, multitenant);
-        return inboxStorageWith(wrapper, multitenant);
-    }
-
-    /**
-     * Creates a Datastore-specific {@link InboxStorage}.
-     *
-     * <p>SPI users should override this method in order to supply a custom implementation.
-     *
-     * @param wrapper
-     *         a wrapper over Datastore
-     * @param multitenant
-     *         whether the created storage should support multi-tenancy
-     * @return a new instance of {@code InboxStorage}
-     */
-    @SPI
-    protected InboxStorage inboxStorageWith(DatastoreWrapper wrapper, boolean multitenant) {
-        return new DsInboxStorage(wrapper, multitenant);
-    }
-
-    @Override
-    public CatchUpStorage createCatchUpStorage(boolean multitenant) {
-        DatastoreWrapper wrapper = systemWrapperFor(CatchUpStorage.class, multitenant);
-        return new DsCatchUpStorage(wrapper, multitenant);
     }
 
     public ColumnMapping<Value<?>> columnMapping() {
@@ -203,7 +134,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     /**
      * Configures the passed builder of the storage to serve the passed entity class.
      */
-    private <I, S extends RecordStorage<I>, B extends RecordStorageBuilder<I, S, B>>
+    private <I, R extends Message, S extends RecordStorage<I, R>,
+            B extends RecordStorageBuilder<I, S, B>>
     S configure(B builder, Class<? extends Entity<I, ?>> cls, ContextSpec context) {
         builder.setModelClass(asEntityClass(cls))
                .setDatastore(wrapperFor(context))
@@ -279,8 +211,8 @@ public class DatastoreStorageFactory implements StorageFactory {
         return contextWrappers.get(spec);
     }
 
-    final DatastoreWrapper systemWrapperFor(Class<? extends Storage> targetStorage,
-                                            boolean multitenant) {
+    final DatastoreWrapper
+    systemWrapperFor(Class<? extends Storage<?, ?>> targetStorage, boolean multitenant) {
         DatastoreWrapper wrapper = sysWrappers
                 .computeIfAbsent(targetStorage, k -> createDatastoreWrapper(multitenant));
         return wrapper;

@@ -31,7 +31,7 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.ContextSpec;
-import io.spine.server.entity.storage.ColumnMapping;
+import io.spine.server.storage.ColumnMapping;
 import io.spine.server.storage.datastore.given.TestColumnMapping;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.BeforeEach;

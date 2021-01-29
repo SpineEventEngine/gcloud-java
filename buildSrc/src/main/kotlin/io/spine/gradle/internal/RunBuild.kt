@@ -26,12 +26,12 @@
 
 package io.spine.gradle.internal
 
+import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.os.OperatingSystem
-import java.io.File
 
 /**
  * A Gradle task which runs another Gradle build.
@@ -76,8 +76,8 @@ open class RunBuild : DefaultTask() {
         val command = mutableListOf<String>()
         command.add("${project.rootDir}/$script")
         val shouldClean = project.gradle
-            .taskGraph
-            .hasTask(":clean")
+                                 .taskGraph
+                                 .hasTask(":clean")
         if (shouldClean) {
             command.add("clean")
         }

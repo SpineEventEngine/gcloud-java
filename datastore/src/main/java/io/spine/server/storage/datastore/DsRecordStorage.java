@@ -37,10 +37,10 @@ import com.google.protobuf.Message;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
+import io.spine.server.storage.ColumnMapping;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -66,7 +66,7 @@ import static java.util.Optional.empty;
  *
  * @see DatastoreStorageFactory
  */
-public class DsRecordStorage<I> extends RecordStorage<I> {
+public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
 
     private final DatastoreWrapper datastore;
     private final Class<I> idClass;
@@ -323,8 +323,8 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
     /**
      * A newBuilder for the {@code DsRecordStorage}.
      */
-    public static final class Builder<I>
-            extends RecordStorageBuilder<I, DsRecordStorage<I>, Builder<I>> {
+    public static final class Builder<I, R extends Message>
+            extends RecordStorageBuilder<I, DsRecordStorage<I, R>, Builder<I, R>> {
 
         /**
          * Prevents direct instantiation.
@@ -337,14 +337,14 @@ public class DsRecordStorage<I> extends RecordStorage<I> {
          * Creates new instance of the {@code DsRecordStorage}.
          */
         @Override
-        public DsRecordStorage<I> build() {
+        public DsRecordStorage<I, R> build() {
             checkRequiredFields();
-            DsRecordStorage<I> storage = new DsRecordStorage<>(this);
+            DsRecordStorage<I, R> storage = new DsRecordStorage<>(this);
             return storage;
         }
 
         @Override
-        Builder<I> self() {
+        Builder<I, R> self() {
             return this;
         }
     }

@@ -40,8 +40,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Version;
-import io.spine.server.entity.storage.AbstractColumnMapping;
-import io.spine.server.entity.storage.ColumnTypeMapping;
+import io.spine.server.storage.AbstractColumnMapping;
+import io.spine.server.storage.ColumnTypeMapping;
 import io.spine.string.Stringifiers;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;

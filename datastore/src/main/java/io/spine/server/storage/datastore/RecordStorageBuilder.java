@@ -31,7 +31,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.ColumnMapping;
+import io.spine.server.storage.ColumnMapping;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 
