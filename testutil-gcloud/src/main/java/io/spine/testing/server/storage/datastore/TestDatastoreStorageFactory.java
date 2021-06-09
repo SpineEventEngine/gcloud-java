@@ -50,7 +50,6 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private final Collection<DatastoreWrapper> allCreatedWrappers = new HashSet<>();
 
-    @SuppressWarnings("TestOnlyProblems") /* This type is not a part of "production code" per se. */
     protected TestDatastoreStorageFactory(Datastore datastore) {
         super(DatastoreStorageFactory.newBuilderWithDefaults(datastore));
     }
