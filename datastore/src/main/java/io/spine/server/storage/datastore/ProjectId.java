@@ -32,7 +32,7 @@ import com.google.cloud.datastore.DatastoreOptions;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value-type representing the GAE project ID.
+ * A value-type representing the Google Cloud project ID.
  */
 public final class ProjectId extends DsIdentifier {
 

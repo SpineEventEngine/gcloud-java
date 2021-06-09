@@ -34,7 +34,6 @@ import com.google.cloud.datastore.Query;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import io.spine.core.TenantId;
-import io.spine.server.BoundedContext;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.tenant.TenantIndex;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,6 +46,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.server.storage.datastore.tenant.NamespaceConverter.NOT_A_TENANT;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A DAO for the Datastore {@link Namespace Namespaces}.
@@ -62,8 +62,6 @@ final class NamespaceIndex implements TenantIndex {
     private final NsConverterFactory converterFactory;
     private final boolean multitenant;
 
-    private boolean registered;
-
     NamespaceIndex(Datastore datastore, boolean multitenant, NsConverterFactory converterFactory) {
         this(new DefaultNamespaceQuery(datastore),
              multitenant,
@@ -77,18 +75,6 @@ final class NamespaceIndex implements TenantIndex {
         this.namespaceQuery = checkNotNull(namespaceQuery);
         this.converterFactory = converterFactory;
         this.multitenant = multitenant;
-    }
-
-    @Override
-    public void registerWith(BoundedContext context) {
-        checkNotNull(context);
-        registered = true;
-        // Do nothing more, as this implementation does not rely on any `BoundedContext` properties.
-    }
-
-    @Override
-    public boolean isRegistered() {
-        return registered;
     }
 
     /**
@@ -241,7 +227,7 @@ final class NamespaceIndex implements TenantIndex {
          */
         @Override
         public @Nullable Namespace apply(@Nullable Key key) {
-            checkNotNull(key);
+            requireNonNull(key);
             return Namespace.fromNameOf(key, multitenant, converterFactory);
         }
     }

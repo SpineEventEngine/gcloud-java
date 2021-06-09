@@ -28,6 +28,7 @@ package io.spine.server.storage.datastore.tenant;
 
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.testing.UtilityClassTest;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,17 +36,13 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("`DatastoreTenants` should")
-class DatastoreTenantsTest {
+final class DatastoreTenantsTest extends UtilityClassTest<DatastoreTenants> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void havePrivateUtilityCtor() {
-        assertHasPrivateParameterlessCtor(DatastoreTenants.class);
+    DatastoreTenantsTest() {
+        super(DatastoreTenants.class);
     }
 
     @Test

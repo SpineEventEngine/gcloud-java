@@ -32,6 +32,7 @@ import io.spine.server.storage.datastore.DatastoreWrapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A {@link TestDatastoreStorageFactory} which allows to inject a custom {@link DatastoreWrapper}.
@@ -53,11 +54,11 @@ public final class SpyStorageFactory extends TestDatastoreStorageFactory {
     }
 
     public SpyStorageFactory() {
-        super(checkNotNull(injectedWrapper).datastore());
+        super(requireNonNull(injectedWrapper).datastore());
     }
 
     @Override
-    protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
+    public DatastoreWrapper newDatastoreWrapper(boolean multitenant) {
         return injectedWrapper;
     }
 

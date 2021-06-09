@@ -41,7 +41,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.min;
-import static java.util.Collections.unmodifiableList;
 
 /**
  * A low-level Datastore lookup.
@@ -67,7 +66,7 @@ final class DsReaderLookup implements Logging {
                                                      .build();
         DsQueryIterator<R> iterator = new DsQueryIterator<>(queryWithNamespace, datastore);
         iterator._trace()
-                .log("Reading entities of `%s` kind in `%s` namespace.",
+                .log("Reading the records of `%s` kind in `%s` namespace.",
                      query.getKind(), namespace.value());
         return iterator;
     }
@@ -83,7 +82,7 @@ final class DsReaderLookup implements Logging {
         List<Entity> entities = keysList.size() <= MAX_KEYS_PER_READ_REQUEST
                                 ? fetch(keysList)
                                 : readBulk(keysList);
-        return unmodifiableList(entities);
+        return entities;
     }
 
     /**
@@ -99,7 +98,7 @@ final class DsReaderLookup implements Logging {
      */
     private List<Entity> readBulk(List<Key> keys) {
         int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
-        _trace().log("Reading a big bulk of entities synchronously. The data is read as %d pages.",
+        _trace().log("Reading a big bulk of records synchronously. The data is read as %d pages.",
                      pageCount);
         int lowerBound = 0;
         int higherBound = MAX_KEYS_PER_READ_REQUEST;

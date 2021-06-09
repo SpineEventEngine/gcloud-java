@@ -32,7 +32,6 @@ import com.google.common.flogger.FluentLogger;
 import io.spine.annotation.Internal;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.DatastoreWrapper;
-import io.spine.server.storage.datastore.DsColumnMapping;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -51,12 +50,13 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private final Collection<DatastoreWrapper> allCreatedWrappers = new HashSet<>();
 
+    @SuppressWarnings("TestOnlyProblems") /* This type is not a part of "production code" per se. */
     protected TestDatastoreStorageFactory(Datastore datastore) {
-        super(DatastoreStorageFactory
-                      .newBuilder()
-                      .setDatastore(datastore)
-                      .setColumnMapping(new DsColumnMapping())
-        );
+        super(DatastoreStorageFactory.newBuilderWithDefaults(datastore));
+    }
+
+    protected TestDatastoreStorageFactory(DatastoreStorageFactory.Builder builder) {
+        super(builder);
     }
 
     /**
@@ -76,9 +76,18 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         return new TestDatastoreStorageFactory(datastore);
     }
 
+    /**
+     * Creates a new factory instance based
+     * on the pre-configured builder of a {@code DatastoreStorageFactory}.
+     */
+    public static TestDatastoreStorageFactory basedOn(DatastoreStorageFactory.Builder builder) {
+        checkNotNull(builder);
+        return new TestDatastoreStorageFactory(builder);
+    }
+
     @Internal
     @Override
-    protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
+    public DatastoreWrapper newDatastoreWrapper(boolean multitenant) {
         TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(datastore(), false);
         allCreatedWrappers.add(wrapper);
         return wrapper;
@@ -88,6 +97,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     protected Iterable<DatastoreWrapper> wrappers() {
         return ImmutableSet.copyOf(allCreatedWrappers);
     }
+
 
     /**
      * Performs operations on setting up the local datastore.

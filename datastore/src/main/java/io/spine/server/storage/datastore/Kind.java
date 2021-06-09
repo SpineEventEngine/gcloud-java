@@ -35,6 +35,7 @@ import io.spine.value.StringTypeValue;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 /**
  * A data transfer object representing a Datastore
@@ -60,7 +61,7 @@ public final class Kind extends StringTypeValue {
      * Creates a new instance of {@code Kind} representing an ancillary Datastore kind.
      *
      * @param value
-     *         the name of the kind
+     *         the name of the {@code Kind}
      * @param ancillary
      *         the flag showing that the {@code Kind} is ancillary; must be set to {@code true}
      */
@@ -69,24 +70,59 @@ public final class Kind extends StringTypeValue {
         checkArgument(ancillary);
     }
 
+    /**
+     * Creates a new {@code Kind} using the passed {@code String}
+     * as the {@code Kind}'s name.
+     */
     public static Kind of(String value) {
+        checkNotEmptyOrBlank(value);
         return new Kind(value);
     }
 
+    /**
+     * Creates a new {@code Kind} using the {@code TypeName} form of
+     * the passed {@code TypeUrl} as the {@code Kind}'s name.
+     */
     public static Kind of(TypeUrl typeUrl) {
+        checkNotNull(typeUrl);
         return new Kind(typeUrl.toTypeName()
                                .value());
     }
 
+    /**
+     * Creates a new {@code Kind} with the name equal to the type name
+     * corresponding to the passed {@code Message} type.
+     */
+    public static Kind of(Class<? extends Message> recordType) {
+        checkNotNull(recordType);
+        TypeUrl typeUrl = TypeUrl.of(recordType);
+        Kind result = of(typeUrl);
+        return result;
+    }
+
+    /**
+     * Creates a new {@code Kind} with the name equal to the full name
+     * of the passed {@code Descriptor}.
+     */
     public static Kind of(Descriptor descriptor) {
+        checkNotNull(descriptor);
         return new Kind(descriptor.getFullName());
     }
 
-    public static Kind of(Message message) {
-        return of(message.getDescriptorForType());
+    /**
+     * Creates a new {@code Kind} with the name equal to the type name
+     * of the passed {@code Message} instance.
+     */
+    public static Kind of(Message record) {
+        checkNotNull(record);
+        return of(record.getDescriptorForType());
     }
 
+    /**
+     * Creates a new {@code Kind} naming it after the passed {@code TypeName}.
+     */
     public static Kind of(TypeName typeName) {
+        checkNotNull(typeName);
         return new Kind(typeName.value());
     }
 

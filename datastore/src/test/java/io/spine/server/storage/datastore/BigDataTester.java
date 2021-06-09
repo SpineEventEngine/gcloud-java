@@ -27,13 +27,14 @@
 package io.spine.server.storage.datastore;
 
 import com.google.common.base.Throwables;
+import com.google.protobuf.Message;
 import io.spine.client.ResponseFormat;
 import io.spine.logging.Logging;
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.RecordStorageUnderTest;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -59,25 +60,36 @@ import static org.junit.jupiter.api.Assertions.fail;
  * the operations and the consistency of the data (i.e. count of the records written and read).
  *
  * @param <I>
- *         the type of the ID in the tested {@linkplain RecordStorage}
+ *         the type of the ID in the tested {@link RecordStorage}
+ * @param <R>
+ *         the type of the records served by the {@code RecordStorage} under test
  */
-public final class BigDataTester<I> implements Logging {
+public final class BigDataTester<I, R extends Message> implements Logging {
 
     private static final int DEFAULT_BULK_SIZE = 500;
 
     private final int bulkSize;
-    private final EntryFactory<I> entryFactory;
+    private final EntryFactory<I, R> entryFactory;
     private final long writeMillisLimit;
     private final long readMillisLimit;
 
-    private BigDataTester(Builder<I> builder) {
+    private BigDataTester(Builder<I, R> builder) {
         this.bulkSize = builder.bulkSize;
         this.entryFactory = builder.entryFactory;
         this.writeMillisLimit = builder.writeMillisLimit;
         this.readMillisLimit = builder.readMillisLimit;
     }
 
-    public static <I> Builder<I> newBuilder() {
+    /**
+     * Creates a new {@code Builder} for this test utility.
+     *
+     * @param <I>
+     *         the type of the ID in the tested {@link RecordStorage}
+     * @param <R>
+     *         the type of the records served by the {@code RecordStorage} under test
+     * @return a new instance of {@code Builder}
+     */
+    public static <I, R extends Message> Builder<I, R> newBuilder() {
         return new Builder<>();
     }
 
@@ -99,15 +111,16 @@ public final class BigDataTester<I> implements Logging {
      * <p>This method performs {@code debug} logging of the measure results. To see the log, run
      * the tests with {@code debug} logging.
      */
-    public void testBigDataOperations(RecordStorage<I> storage) {
+    public void testBigDataOperations(RecordStorageUnderTest<I, R> storage) {
         checkNotNull(storage);
-        Map<I, EntityRecordWithColumns> records = new HashMap<>(bulkSize);
+        Collection<R> records = new ArrayList<>(bulkSize);
         for (int i = 0; i < bulkSize; i++) {
-            records.put(entryFactory.newId(), entryFactory.newRecord());
+            I id = entryFactory.newId();
+            records.add(entryFactory.newRecord(id));
         }
 
         long writeStart = System.currentTimeMillis();
-        storage.write(records);
+        storage.writeBatch(records);
         long writeEnd = System.currentTimeMillis();
 
         long writeTime = writeEnd - writeStart;
@@ -128,7 +141,7 @@ public final class BigDataTester<I> implements Logging {
         long readStart = System.currentTimeMillis();
 
         // Do not test data equality here, only the sizes and time
-        Iterator<EntityRecord> readRecords = storage.readAll(ResponseFormat.getDefaultInstance());
+        Iterator<R> readResults = storage.readAll();
 
         long readEnd = System.currentTimeMillis();
         long readTime = readEnd - readStart;
@@ -140,7 +153,7 @@ public final class BigDataTester<I> implements Logging {
         }
         _debug().log("Reading took %d millis.", readTime);
 
-        assertEquals(records.size(), size(readRecords), "Unexpected records count read.");
+        assertEquals(records.size(), size(readResults), "Unexpected record count read.");
     }
 
     /**
@@ -151,24 +164,28 @@ public final class BigDataTester<I> implements Logging {
      *
      * @param <I>
      *         the type of the record ID
+     * @param <R>
+     *         the type of the record
      */
-    public interface EntryFactory<I> {
+    public interface EntryFactory<I, R extends Message> {
 
         I newId();
 
-        EntityRecordWithColumns newRecord();
+        R newRecord(I id);
     }
 
     /**
      * A builder for the {@code BigDataTester}.
      *
      * @param <I>
-     *         the target type of the ID in the tested {@linkplain RecordStorage}
+     *         the target type of the ID in the tested {@link RecordStorage}
+     * @param <R>
+     *         the type of the record served by the {@code RecordStorage} under test
      */
-    public static class Builder<I> {
+    public static class Builder<I, R extends Message> {
 
         private int bulkSize;
-        private EntryFactory<I> entryFactory;
+        private EntryFactory<I, R> entryFactory;
         private long writeMillisLimit;
         private long readMillisLimit;
 
@@ -187,7 +204,7 @@ public final class BigDataTester<I> implements Logging {
          *         {@link #DEFAULT_BULK_SIZE}
          */
         @SuppressWarnings("unused")
-        public Builder<I> setBulkSize(int bulkSize) {
+        public Builder<I, R> setBulkSize(int bulkSize) {
             checkArgument(bulkSize > 0,
                           "The records bulk size should be greater then 0.");
             this.bulkSize = bulkSize;
@@ -197,7 +214,7 @@ public final class BigDataTester<I> implements Logging {
         /**
          * Assigns an {@link EntryFactory} which generates the test data.
          */
-        public Builder<I> setEntryFactory(EntryFactory<I> entryFactory) {
+        public Builder<I, R> setEntryFactory(EntryFactory<I, R> entryFactory) {
             this.entryFactory = entryFactory;
             return this;
         }
@@ -206,7 +223,7 @@ public final class BigDataTester<I> implements Logging {
          * Assigns the the max time in milliseconds which is allowed for the write
          * operation to execute for.
          */
-        public Builder<I> setWriteLimit(long writeMillisLimit) {
+        public Builder<I, R> setWriteLimit(long writeMillisLimit) {
             checkArgument(writeMillisLimit > 0,
                           "The write time limit should be greater then 0.");
             this.writeMillisLimit = writeMillisLimit;
@@ -217,7 +234,7 @@ public final class BigDataTester<I> implements Logging {
          * Assigns the max time in milliseconds which is allowed for the read
          * operation to execute for.
          */
-        public Builder<I> setReadLimit(long readMillisLimit) {
+        public Builder<I, R> setReadLimit(long readMillisLimit) {
             checkArgument(readMillisLimit > 0,
                           "The read time limit should be greater then 0.");
             this.readMillisLimit = readMillisLimit;
@@ -227,14 +244,14 @@ public final class BigDataTester<I> implements Logging {
         /**
          * Creates new instance of the {@code BigDataTester}.
          */
-        public BigDataTester<I> build() {
+        public BigDataTester<I, R> build() {
             checkNotNull(entryFactory);
             if (bulkSize == 0) {
                 bulkSize = DEFAULT_BULK_SIZE;
             }
             checkArgument(writeMillisLimit != 0, "Write time limit should be set.");
             checkArgument(readMillisLimit != 0, "Read time limit should be set.");
-            BigDataTester<I> tester = new BigDataTester<>(this);
+            BigDataTester<I, R> tester = new BigDataTester<>(this);
             return tester;
         }
     }

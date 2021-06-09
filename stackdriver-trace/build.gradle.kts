@@ -25,5 +25,5 @@
  */
 
 dependencies {
-    api("com.google.cloud:google-cloud-trace:1.2.8")
+    api("com.google.cloud:google-cloud-trace:1.4.1")
 }

@@ -40,8 +40,7 @@ public interface NsConverterFactory {
      * into account.
      *
      * @param multitenant
-     *         {@code true} if the created converter should be suitable for multi-tenant
-     *         environment,
+     *         {@code true} if the created converter should support multi-tenant environment,
      *         {@code false} otherwise
      * @return new converter instance
      */
@@ -51,7 +50,7 @@ public interface NsConverterFactory {
      * Creates an instance of the {@code NsConverterFactory} with the framework default
      * conversion implementation.
      *
-     * @return a new instanace of {@code NsConverterFactory} with the default converter
+     * @return a new instance of {@code NsConverterFactory} with the default converter
      *         implementations used
      */
     static NsConverterFactory defaults() {

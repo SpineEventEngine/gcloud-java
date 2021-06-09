@@ -82,6 +82,7 @@ public final class DatastoreTenants {
      */
     public static TenantIndex index(Datastore datastore, NsConverterFactory converterFactory) {
         checkNotNull(datastore);
+        checkNotNull(converterFactory);
         // We assume we are in a multi-tenant execution environment
         TenantIndex index = new NamespaceIndex(datastore, true, converterFactory);
         return index;

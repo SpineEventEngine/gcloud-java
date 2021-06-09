@@ -24,78 +24,148 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.DependencyResolution
-import io.spine.gradle.internal.Deps
-import io.spine.gradle.internal.PublishingRepos
+import io.spine.internal.dependency.ErrorProne
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.gradle.DependencyResolution
+import io.spine.internal.gradle.PublishingRepos
+import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.applyStandard
+import io.spine.internal.gradle.forceVersions
+import io.spine.internal.gradle.spinePublishing
 
+
+@Suppress("RemoveRedundantQualifierName") // Cannot use imported things here.
 buildscript {
-
     apply(from = "$rootDir/version.gradle.kts")
-
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    val resolution = io.spine.gradle.internal.DependencyResolution
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    val deps = io.spine.gradle.internal.Deps
-
-    resolution.defaultRepositories(repositories)
+    io.spine.internal.gradle.doApplyStandard(repositories)
+    io.spine.internal.gradle.doForceVersions(configurations)
 
     val spineBaseVersion: String by extra
 
     dependencies {
-        classpath(deps.build.gradlePlugins.errorProne) {
-            exclude(group = "com.google.guava")
-        }
-        classpath(deps.build.gradlePlugins.protobuf)
-        classpath("io.spine.tools:spine-model-compiler:$spineBaseVersion")
+        classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
     }
 }
 
+repositories {
+    repositories.applyStandard()
+}
+
+@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     `java-library`
+    kotlin("jvm") version io.spine.internal.dependency.Kotlin.version
     idea
-    jacoco
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    id("com.google.protobuf").version(io.spine.gradle.internal.Deps.versions.protobufPlugin)
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    id("net.ltgt.errorprone").version(io.spine.gradle.internal.Deps.versions.errorPronePlugin)
+    io.spine.internal.dependency.Protobuf.GradlePlugin.apply {
+        id(id) version version
+    }
+    io.spine.internal.dependency.ErrorProne.GradlePlugin.apply {
+        id(id) version version
+    }
+}
+
+spinePublishing {
+    targetRepositories.addAll(setOf(
+        PublishingRepos.cloudRepo
+        //, PublishingRepos.gitHub("core-java")
+    ))
+    projectsToPublish.addAll(
+        "datastore",
+        "stackdriver-trace",
+        "testutil-gcloud",
+        "pubsub"
+    )
 }
 
 allprojects {
     apply(from = "$rootDir/version.gradle.kts")
-    apply(from = "$rootDir/config/gradle/dependencies.gradle")
+
+    apply {
+        plugin("jacoco")
+        plugin("idea")
+    }
 
     group = "io.spine.gcloud"
     version = extra["versionToPublish"]!!
+
 }
 
-extra["credentialsPropertyFile"] = PublishingRepos.cloudRepo.credentials
-extra["projectsToPublish"] = listOf("datastore", "stackdriver-trace", "testutil-gcloud", "pubsub")
-
 subprojects {
+
     apply {
         plugin("java-library")
-        plugin("pmd")
-        plugin("idea")
-        plugin("maven-publish")
-        plugin("net.ltgt.errorprone")
         plugin("com.google.protobuf")
-        plugin("io.spine.tools.spine-model-compiler")
-        from(Deps.scripts.modelCompiler(project))
-        from(Deps.scripts.slowTests(project))
-        from(Deps.scripts.testOutput(project))
-        from(Deps.scripts.javadocOptions(project))
-        from(Deps.scripts.javacArgs(project))
-        from(Deps.scripts.projectLicenseReport(project))
-        from(Deps.scripts.pmd(project))
+        plugin("net.ltgt.errorprone")
+        plugin("io.spine.mc-java")
+        plugin("kotlin")
+        plugin("pmd")
+        plugin("maven-publish")
+
+        with(Scripts) {
+            from(javacArgs(project))
+            from(modelCompiler(project))
+            from(projectLicenseReport(project))
+            from(slowTests(project))
+            from(testOutput(project))
+            from(javadocOptions(project))
+
+        }
     }
 
-    DependencyResolution.excludeProtobufLite(configurations)
+    extensions["modelCompiler"].withGroovyBuilder {
+        setProperty("generateValidation", true)
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    repositories.applyStandard()
+    // Required to fetch `androidx.annotation:annotation:1.1.0`,
+    // which is a transitive dependency of `com.google.cloud:google-cloud-datastore`.
+    repositories {
+        google()
+    }
+
+    configurations.forceVersions()
     configurations {
         all {
             resolutionStrategy {
-                force(Deps.build.guava, Deps.test.guavaTestlib)
+                force(
+                    "io.grpc:grpc-api:${io.spine.internal.dependency.Grpc.version}",
+                    "io.grpc:grpc-protobuf-lite:${io.spine.internal.dependency.Grpc.version}",
+                    io.spine.internal.dependency.Grpc.core,
+                    io.spine.internal.dependency.Grpc.context,
+                    io.spine.internal.dependency.Grpc.stub,
+                    io.spine.internal.dependency.Grpc.protobuf,
+
+                    "io.perfmark:perfmark-api:0.23.0",
+
+                    "com.google.api.grpc:proto-google-common-protos:2.2.1"
+                )
             }
         }
+    }
+    DependencyResolution.excludeProtobufLite(configurations)
+
+    val spineCoreVersion: String by extra
+    val spineBaseVersion: String by extra
+
+    dependencies {
+        ErrorProne.apply {
+            errorprone(core)
+            errorproneJavac(javacPlugin)
+        }
+
+        implementation("io.spine:spine-server:$spineCoreVersion")
+
+        testImplementation(JUnit.runner)
+        testImplementation("io.spine.tools:spine-testutil-server:$spineCoreVersion")
+        testImplementation(group = "io.spine",
+                           name = "spine-server",
+                           version = spineCoreVersion,
+                           classifier = "test")
     }
 
     val sourcesRootDir = "$projectDir/src"
@@ -106,62 +176,6 @@ subprojects {
     val generatedTestGrpcDir = "$generatedRootDir/test/grpc"
     val generatedSpineDir = "$generatedRootDir/main/spine"
     val generatedTestSpineDir = "$generatedRootDir/test/spine"
-    val testArtifactsScript = "$rootDir/scripts/test-artifacts.gradle"
-    val filterInternalJavadocsScript = "$rootDir/config/gradle/filter-internal-javadoc.gradle"
-    val updateDocsPlugin = "$rootDir/scripts/update-gh-pages.gradle"
-
-    java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    DependencyResolution.defaultRepositories(repositories)
-
-    // Required to fetch `androidx.annotation:annotation:1.1.0`,
-    // which is a transitive dependency of `com.google.cloud:google-cloud-datastore`.
-    repositories {
-        google()
-    }
-
-    val spineCoreVersion: String by extra
-
-    dependencies {
-        errorprone(Deps.build.errorProneCore)
-        errorproneJavac(Deps.build.errorProneJavac)
-
-        implementation("io.spine:spine-server:$spineCoreVersion")
-
-        compileOnlyApi(Deps.build.checkerAnnotations)
-        compileOnlyApi(Deps.build.jsr305Annotations)
-        Deps.build.errorProneAnnotations.forEach { compileOnlyApi(it) }
-
-        testImplementation("io.spine:spine-testutil-server:$spineCoreVersion")
-        testImplementation(group = "io.spine",
-                           name = "spine-server",
-                           version = spineCoreVersion,
-                           classifier = "test")
-        Deps.test.junit5Api.forEach { testImplementation(it) }
-        Deps.test.truth.forEach { testImplementation(it) }
-        testRuntimeOnly(Deps.test.junit5Runner)
-    }
-
-    // Apply the same IDEA module configuration for each of sub-projects.
-    idea {
-        module {
-            generatedSourceDirs.addAll(files(
-                    generatedJavaDir,
-                    generatedGrpcDir,
-                    generatedSpineDir,
-                    generatedTestJavaDir,
-                    generatedTestGrpcDir,
-                    generatedTestSpineDir
-            ))
-            testSourceDirs.add(file(generatedTestJavaDir))
-
-            isDownloadJavadoc = true
-            isDownloadSources = true
-        }
-    }
 
     sourceSets {
         main {
@@ -210,11 +224,41 @@ subprojects {
         archiveClassifier.set("javadoc")
         dependsOn(tasks.javadoc)
     }
+
+    // Apply the same IDEA module configuration for each of sub-projects.
+    idea {
+        module {
+            generatedSourceDirs.addAll(files(
+                generatedJavaDir,
+                generatedGrpcDir,
+                generatedSpineDir,
+                generatedTestJavaDir,
+                generatedTestGrpcDir,
+                generatedTestSpineDir
+            ))
+            testSourceDirs.add(file(generatedTestJavaDir))
+
+            isDownloadJavadoc = true
+            isDownloadSources = true
+        }
+    }
+
+    apply(from = Scripts.updateGitHubPages(project))
+    afterEvaluate {
+        tasks.getByName("publish").dependsOn("updateGitHubPages")
+    }
+
+    apply(from = Scripts.pmd(project))
 }
 
 apply {
-    from(Deps.scripts.jacoco(project))
-    from(Deps.scripts.publish(project))
-    from(Deps.scripts.repoLicenseReport(project))
-    from(Deps.scripts.generatePom(project))
+    with(Scripts) {
+        // Aggregated coverage report across all subprojects.
+        from(jacoco(project))
+        // Generate a repository-wide report of 3rd-party dependencies and their licenses.
+        from(repoLicenseReport(project))
+        // Generate a `pom.xml` file containing first-level dependency of all projects
+        // in the repository.
+        from(generatePom(project))
+    }
 }

@@ -34,9 +34,13 @@ import static com.google.common.base.Preconditions.checkArgument;
  * A utility for working with {@link io.spine.server.delivery.ShardIndex ShardIndex} instances
  * in Datastore-related tests.
  */
-public class TestShardIndex {
+public final class TestShardIndex {
 
-    private TestShardIndex() {}
+    /**
+     * Prevents this utility from instantiating.
+     */
+    private TestShardIndex() {
+    }
 
     /**
      * Creates a new {@link ShardIndex}.

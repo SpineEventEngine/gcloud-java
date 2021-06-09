@@ -40,7 +40,7 @@ import java.util.Optional;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
-@DisplayName("DatastoreStorageFactory should")
+@DisplayName("`DatastoreStorageFactory` should")
 class NewBoundedContextBuilderTest {
 
     @Test
@@ -53,13 +53,10 @@ class NewBoundedContextBuilderTest {
         assertThat(builder.tenantIndex())
                 .isEmpty();
 
-        Optional<? extends TenantIndex> updatedIndex =
-                factory.configureTenantIndex(builder)
-                       .tenantIndex();
-        assertThat(updatedIndex)
-                .isPresent();
-        assertThat(updatedIndex.get())
-                .isInstanceOf(TestNamespaceIndex.getType());
+        Optional<? extends TenantIndex> updatedIndex = factory.configureTenantIndex(builder)
+                                                              .tenantIndex();
+        assertThat(updatedIndex).isPresent();
+        assertThat(updatedIndex.get()).isInstanceOf(TestNamespaceIndex.getType());
     }
 
     private static DatastoreStorageFactory givenFactory() {

@@ -26,16 +26,17 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.Query;
+import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.Transaction;
+import io.spine.server.storage.datastore.record.RecordId;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,15 +46,11 @@ import static java.util.Optional.ofNullable;
 /**
  * A Cloud Datastore transaction wrapper.
  */
-public final class TransactionWrapper implements AutoCloseable {
+public final class TransactionWrapper extends DatastoreMedium implements AutoCloseable {
 
-    private final Transaction tx;
-    private final NamespaceSupplier namespaceSupplier;
 
-    TransactionWrapper(Transaction tx,
-                       NamespaceSupplier namespaceSupplier) {
-        this.tx = checkNotNull(tx);
-        this.namespaceSupplier = checkNotNull(namespaceSupplier);
+    TransactionWrapper(Transaction tx, NamespaceSupplier namespaceSupplier) {
+        super(tx, namespaceSupplier);
     }
 
     /**
@@ -67,8 +64,9 @@ public final class TransactionWrapper implements AutoCloseable {
      *         upon failure
      * @see Transaction#add(com.google.cloud.datastore.FullEntity)
      */
+    @Override
     public void create(Entity entity) throws DatastoreException {
-        tx.add(entity);
+        storage().add(entity);
     }
 
     /**
@@ -86,14 +84,15 @@ public final class TransactionWrapper implements AutoCloseable {
     public void create(Collection<Entity> entities) throws DatastoreException {
         Entity[] array = new Entity[entities.size()];
         entities.toArray(array);
-        tx.add(array);
+        storage().add(array);
     }
 
     /**
      * Puts the given entity into the Datastore in the transaction.
      */
+    @Override
     public void createOrUpdate(Entity entity) throws DatastoreException {
-        tx.put(entity);
+        storage().put(entity);
     }
 
     /**
@@ -105,20 +104,21 @@ public final class TransactionWrapper implements AutoCloseable {
      *         the <a href="https://cloud.google.com/datastore/docs/concepts/limits">transaction
      *         limits</a> for more info.
      */
+    @Override
     public void createOrUpdate(Collection<Entity> entities) throws DatastoreException {
         Entity[] array = new Entity[entities.size()];
         entities.toArray(array);
-        tx.put(array);
+        storage().put(array);
     }
 
     /**
-     * Reads an entity from the Datastore in the transaction.
+     * {@inheritDoc}
      *
-     * @return the entity with the given key or {@code Optional.empty()} if such an entity does not
-     *         exist
+     * <p>Executes the operation within this transaction.
      */
+    @Override
     public Optional<Entity> read(Key key) {
-        Entity entity = tx.get(key);
+        Entity entity = storage().get(key);
         return ofNullable(entity);
     }
 
@@ -139,39 +139,34 @@ public final class TransactionWrapper implements AutoCloseable {
      *         values for nonexistent keys)
      * @see com.google.cloud.datastore.DatastoreReader#fetch(Key...)
      */
-    public List<Entity> lookup(Collection<Key> keys) {
+    @Override
+    public List<Entity> lookup(List<Key> keys) {
         checkNotNull(keys);
-        DsReaderLookup lookup = new DsReaderLookup(tx);
+        DsReaderLookup lookup = new DsReaderLookup(storage());
         return lookup.find(keys);
     }
 
     /**
-     * Queries the Datastore with the given arguments within the transaction.
+     * {@inheritDoc}
      *
-     * <p>Datastore only supports ancestor queries within a transaction.
-     * A {@link DatastoreException} is thrown if the given query is not an ancestor query.
-     *
-     * <p>The Datastore may return a partial result set, so an execution of this method may result
-     * in several Datastore queries.
-     *
-     * <p>The limit included in the {@link StructuredQuery}, will be a maximum count of objects in
-     * the returned iterator.
-     *
-     * <p>The returned {@link DsQueryIterator} allows to {@linkplain DsQueryIterator#nextPageQuery()
-     * create a query} to the next page of results reusing an existing cursor.
-     *
-     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
-     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
-     *
-     * @param ancestorQuery
-     *         {@link Query} to execute upon the Datastore
-     * @param <R>
-     *         the type of queried objects
-     * @return results fo the query as a lazily evaluated {@link Iterator}
+     * <p>Executes the operation within this transaction.
      */
+    @Override
     public <R> DsQueryIterator<R> read(StructuredQuery<R> ancestorQuery) throws DatastoreException {
-        DsReaderLookup lookup = new DsReaderLookup(tx);
-        return lookup.execute(ancestorQuery, namespaceSupplier.get());
+        DsReaderLookup lookup = new DsReaderLookup(storage());
+        return lookup.execute(ancestorQuery, namespace());
+    }
+
+    @Override
+    public Key keyFor(Kind kind, RecordId id) {
+        Key result = wrapper().keyFor(kind, id);
+        return result;
+    }
+
+    @Override
+    public KeyFactory keyFactory(Kind kind) {
+        KeyFactory result = wrapper().keyFactory(kind);
+        return result;
     }
 
     /**
@@ -181,8 +176,9 @@ public final class TransactionWrapper implements AutoCloseable {
      * @param keys
      *         the keys of the entities to delete; may point to non-existent entities
      */
+    @Override
     public void delete(Key... keys) {
-        tx.delete(keys);
+        storage().delete(keys);
     }
 
     /**
@@ -192,7 +188,7 @@ public final class TransactionWrapper implements AutoCloseable {
      *         if the transaction is no longer active
      */
     public void commit() {
-        tx.commit();
+        tx().commit();
     }
 
     /**
@@ -202,7 +198,7 @@ public final class TransactionWrapper implements AutoCloseable {
      *         if the transaction is no longer active
      */
     public void rollback() {
-        tx.rollback();
+        tx().rollback();
     }
 
     /**
@@ -210,8 +206,18 @@ public final class TransactionWrapper implements AutoCloseable {
      */
     @Override
     public void close() {
-        if (tx.isActive()) {
+        if (tx().isActive()) {
             rollback();
         }
+    }
+
+    private Transaction tx() {
+        return (Transaction) storage();
+    }
+
+    private DatastoreWrapper wrapper() {
+        Datastore naked = tx().getDatastore();
+        DatastoreWrapper wrapper = DatastoreWrapper.wrap(naked, namespaceSupplier());
+        return wrapper;
     }
 }

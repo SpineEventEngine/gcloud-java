@@ -68,7 +68,7 @@ public final class DsQueryIterator<R> extends UnmodifiableIterator<R> implements
 
     private boolean terminated;
 
-    DsQueryIterator(StructuredQuery<R> query, DatastoreReader datastore) {
+    public DsQueryIterator(StructuredQuery<R> query, DatastoreReader datastore) {
         super();
         this.query = checkNotNull(query);
         this.limit = query.getLimit();

@@ -26,6 +26,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
@@ -35,6 +36,7 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
@@ -49,9 +51,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Stream;
 
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.hasAncestor;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -63,6 +65,7 @@ import static java.util.stream.Stream.generate;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`TransactionWrapper` should")
+@SuppressWarnings("ClassWithTooManyMethods")    /* It's fine for a test. */
 class TransactionWrapperTest {
 
     private static final Kind TEST_KIND = Kind.of(TypeUrl.of(Empty.class));
@@ -74,7 +77,6 @@ class TransactionWrapperTest {
     void setUp() {
         datastore = TestDatastoreWrapper.wrap(localDatastore(), false);
         keyFactory = datastore.keyFactory(TEST_KIND);
-
     }
 
     @AfterEach
@@ -92,7 +94,8 @@ class TransactionWrapperTest {
         TransactionWrapper tx = datastore.newTransaction();
         tx.createOrUpdate(entity);
         tx.commit();
-        Entity readEntity = datastore.read(key);
+
+        Entity readEntity = assertEntityExists(key);
         assertThat(readEntity)
                 .isEqualTo(entity);
     }
@@ -140,10 +143,10 @@ class TransactionWrapperTest {
 
         tx.commit();
 
-        Entity finalEntity = datastore.read(key);
-        assertThat(finalEntity)
-                .isNotNull();
-        assertThat(finalEntity.getLong(field))
+        Optional<Entity> finalEntity = datastore.read(key);
+        assertThat(finalEntity).isPresent();
+        assertThat(finalEntity.get()
+                              .getLong(field))
                 .isEqualTo(updated.getLong(field));
     }
 
@@ -183,8 +186,7 @@ class TransactionWrapperTest {
 
         TransactionWrapper bulkReadTx = datastore.newTransaction();
         for (Key key : keysToDelete) {
-            assertThat(bulkReadTx.read(key))
-                    .isEmpty();
+            assertNoEntityWith(key);
         }
         bulkReadTx.commit();
     }
@@ -199,9 +201,8 @@ class TransactionWrapperTest {
         TransactionWrapper tx = datastore.newTransaction();
         tx.createOrUpdate(entity);
         tx.rollback();
-        Entity readEntity = datastore.read(key);
-        assertThat(readEntity)
-                .isNull();
+
+        assertNoEntityWith(key);
     }
 
     @Test
@@ -214,9 +215,7 @@ class TransactionWrapperTest {
                                   .build();
             tx.createOrUpdate(entity);
         }
-        Entity readEntity = datastore.read(key);
-        assertThat(readEntity)
-                .isNull();
+        assertNoEntityWith(key);
     }
 
     @Test
@@ -230,9 +229,7 @@ class TransactionWrapperTest {
             tx.createOrUpdate(entity);
             tx.commit();
         }
-        Entity readEntity = datastore.read(key);
-        assertThat(readEntity)
-                .isNotNull();
+        assertEntityExists(key);
     }
 
     @SlowTest
@@ -255,9 +252,7 @@ class TransactionWrapperTest {
         service.invokeAll(tasks);
         assertThat(service.shutdownNow()).isEmpty();
         for (Key key : keys) {
-            Entity read = datastore.read(key);
-            assertThat(read)
-                    .isNotNull();
+            assertEntityExists(key);
         }
     }
 
@@ -271,14 +266,14 @@ class TransactionWrapperTest {
      */
     private Callable<Key> asEntityWriteJob(Entity entity) {
         return () -> {
-                 try (TransactionWrapper tx = datastore.newTransaction()) {
-                     tx.createOrUpdate(entity);
-                     tx.commit();
-                     Entity result = datastore.read(entity.getKey());
-                     assertThat(result).isNotNull();
-                 }
-                 return entity.getKey();
-             };
+            try (TransactionWrapper tx = datastore.newTransaction()) {
+                tx.createOrUpdate(entity);
+                tx.commit();
+                Key key = entity.getKey();
+                assertEntityExists(key);
+            }
+            return entity.getKey();
+        };
     }
 
     @SlowTest
@@ -288,11 +283,12 @@ class TransactionWrapperTest {
         int count = 100;
         KeyFactory ancestorFactory = keyFactory
                 .addAncestor(PathElement.of(TEST_KIND.value(), newUuid()));
-        Entity[] entities = generate(() -> ancestorFactory.newKey(newUuid()))
-                .limit(count)
-                .map(key -> Entity.newBuilder(key)
-                                  .build())
-                .toArray(Entity[]::new);
+        ImmutableList<Entity> entities =
+                generate(() -> ancestorFactory.newKey(newUuid()))
+                        .limit(count)
+                        .map(key -> Entity.newBuilder(key)
+                                          .build())
+                        .collect(toImmutableList());
         datastore.createOrUpdate(entities);
 
         Key ancestorKey = ancestorFactory.newKey()
@@ -366,8 +362,11 @@ class TransactionWrapperTest {
             assertThrows(DatastoreException.class, tx::commit);
         }
         assertThat(datastore.read(freshNewKey))
-                .isNull();
-        assertThat(datastore.read(oldEntity.getKey()))
+                .isEmpty();
+        Optional<Entity> oldEntityRead = datastore.read(oldEntity.getKey());
+        assertThat(oldEntityRead)
+                .isPresent();
+        assertThat(oldEntityRead.get())
                 .isEqualTo(oldEntity);
     }
 
@@ -390,8 +389,11 @@ class TransactionWrapperTest {
             tx.commit();
         }
         assertThat(datastore.read(freshNewKey))
-                .isNotNull();
-        assertThat(datastore.read(oldEntity.getKey()))
+                .isPresent();
+        Optional<Entity> oldEntityRead = datastore.read(oldEntity.getKey());
+        assertThat(oldEntityRead)
+                .isPresent();
+        assertThat(oldEntityRead.get())
                 .isEqualTo(newEntity);
     }
 
@@ -399,15 +401,16 @@ class TransactionWrapperTest {
     @DisplayName("read multiple entities by IDs")
     void lookup() {
         int count = 10;
-        Entity[] entities = generate(() -> keyFactory.newKey(newUuid()))
-                .limit(count)
-                .map(key -> Entity.newBuilder(key)
-                                  .build())
-                .toArray(Entity[]::new);
+        ImmutableList<Entity> entities =
+                generate(() -> keyFactory.newKey(newUuid()))
+                        .limit(count)
+                        .map(key -> Entity.newBuilder(key)
+                                          .build())
+                        .collect(toImmutableList());
         datastore.createOrUpdate(entities);
 
-        Entity firstEntity = entities[2];
-        Entity secondEntity = entities[5];
+        Entity firstEntity = entities.get(2);
+        Entity secondEntity = entities.get(5);
         List<Key> keys = ImmutableList.of(
                 firstEntity.getKey(),
                 keyFactory.newKey(newUuid()),
@@ -427,16 +430,17 @@ class TransactionWrapperTest {
     void lookupBulk() {
         int count = 2020;
         keyFactory.addAncestor(PathElement.of(TEST_KIND.value(), newUuid()));
-        Entity[] entities = generate(() -> keyFactory.newKey(newUuid()))
-                .limit(count)
-                .map(key -> Entity.newBuilder(key)
-                                  .build())
-                .toArray(Entity[]::new);
+        ImmutableList<Entity> entities =
+                generate(() -> keyFactory.newKey(newUuid()))
+                        .limit(count)
+                        .map(key -> Entity.newBuilder(key)
+                                          .build())
+                        .collect(toImmutableList());
         datastore.createOrUpdate(entities);
 
-        List<Key> keys = Stream.of(entities)
-                               .map(Entity::getKey)
-                               .collect(toList());
+        List<Key> keys = entities.stream()
+                                 .map(BaseEntity::getKey)
+                                 .collect(toList());
         try (TransactionWrapper tx = datastore.newTransaction()) {
             List<Entity> readEntities = tx.lookup(keys);
             tx.commit();
@@ -463,5 +467,19 @@ class TransactionWrapperTest {
             assertThrows(DatastoreException.class, () -> tx.read(query));
             tx.commit();
         }
+    }
+
+    @CanIgnoreReturnValue
+    private Entity assertEntityExists(Key key) {
+        Optional<Entity> result = datastore.read(key);
+        assertThat(result)
+                .isPresent();
+        return result.get();
+    }
+
+    private void assertNoEntityWith(Key key) {
+        Optional<Entity> readEntity = datastore.read(key);
+        assertThat(readEntity)
+                .isEmpty();
     }
 }

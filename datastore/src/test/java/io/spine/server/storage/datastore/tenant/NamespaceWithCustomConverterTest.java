@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("`Namespace` with custom converter should")
-class NamespaceWithCustomConverterTest {
+final class NamespaceWithCustomConverterTest {
 
     private static final ProjectId PROJECT_ID = ProjectId.of("arbitraryproject");
     @SuppressWarnings("UnnecessaryLambda")
@@ -64,7 +64,7 @@ class NamespaceWithCustomConverterTest {
     @DisplayName("construct from `Key`")
     void testFromKey() {
         String ns = "my.test.namespace.from.key";
-        Key key = Key.newBuilder(PROJECT_ID.getValue(), "some.kind", ns)
+        Key key = Key.newBuilder(PROJECT_ID.value(), "some.kind", ns)
                      .build();
         Namespace namespace = Namespace.fromNameOf(key, true, factory);
         assertNotNull(namespace);

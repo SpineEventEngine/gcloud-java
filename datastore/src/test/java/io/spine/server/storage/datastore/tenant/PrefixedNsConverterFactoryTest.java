@@ -34,7 +34,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.tenant.NamespaceConverter.NOT_A_TENANT;
 
 @DisplayName("PrefixedNsConverterFactory should")
-class PrefixedNsConverterFactoryTest {
+final class PrefixedNsConverterFactoryTest {
 
     @Test
     @DisplayName("ignore namespaces which do not start from the prefix")

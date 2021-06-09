@@ -32,7 +32,6 @@ import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.DatastoreReader;
 import com.google.cloud.datastore.DatastoreWriter;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
@@ -43,6 +42,8 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import io.spine.logging.Logging;
+import io.spine.server.storage.datastore.record.Entities;
+import io.spine.server.storage.datastore.record.RecordId;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -51,6 +52,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -62,13 +64,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * Adapts {@link Datastore} API for being used for storages.
  */
-@SuppressWarnings("ClassWithTooManyMethods")
-public class DatastoreWrapper implements Logging {
+public class DatastoreWrapper extends DatastoreMedium implements Logging {
 
     static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
-
-    private final NamespaceSupplier namespaceSupplier;
-    private final Datastore datastore;
 
     /**
      * Creates a new instance of {@code DatastoreWrapper}.
@@ -80,8 +78,7 @@ public class DatastoreWrapper implements Logging {
      *         the queries from the datastore
      */
     protected DatastoreWrapper(Datastore datastore, NamespaceSupplier supplier) {
-        this.namespaceSupplier = checkNotNull(supplier);
-        this.datastore = checkNotNull(datastore);
+        super(datastore, supplier);
     }
 
     /**
@@ -91,34 +88,16 @@ public class DatastoreWrapper implements Logging {
         return new DatastoreWrapper(datastore, supplier);
     }
 
-    /**
-     * Creates an instance of {@link com.google.cloud.datastore.Key} basing on the Datastore
-     * entity {@code kind} and {@code recordId}.
-     *
-     * @param kind
-     *         the kind of the Datastore entity
-     * @param recordId
-     *         the ID of the record
-     * @return the Datastore {@code Key} instance
-     */
-    Key keyFor(Kind kind, RecordId recordId) {
+    @Override
+    public Key keyFor(Kind kind, RecordId recordId) {
         KeyFactory keyFactory = keyFactory(kind);
-        Key key = keyFactory.newKey(recordId.getValue());
-
+        Key key = keyFactory.newKey(recordId.value());
         return key;
     }
 
-    /**
-     * Writes new {@link Entity} into the Datastore.
-     *
-     * @param entity
-     *         new {@link Entity} to put into the Datastore
-     * @throws DatastoreException
-     *         upon failure
-     * @see DatastoreWriter#add(FullEntity)
-     */
+    @Override
     public void create(Entity entity) throws DatastoreException {
-        datastore.add(entity);
+        storage().add(entity);
     }
 
     /**
@@ -131,59 +110,29 @@ public class DatastoreWrapper implements Logging {
      * @see DatastoreWriter#update(Entity...)
      */
     public void update(Entity entity) throws DatastoreException {
-        datastore.update(entity);
+        storage().update(entity);
     }
 
-    /**
-     * Writes an {@link Entity} to the Datastore or modifies an existing one.
-     *
-     * @param entity
-     *         the {@link Entity} to write or update
-     * @see DatastoreWrapper#create(Entity)
-     * @see DatastoreWrapper#update(Entity)
-     */
+    @Override
     public void createOrUpdate(Entity entity) {
-        datastore.put(entity);
+        storage().put(entity);
     }
 
-    /**
-     * Writes the {@link Entity entities} to the Datastore or modifies the existing ones.
-     *
-     * @param entities
-     *         the {@link Entity Entities} to write or update
-     * @see DatastoreWrapper#createOrUpdate(Entity)
-     */
-    public void createOrUpdate(Entity... entities) {
-        if (entities.length <= MAX_ENTITIES_PER_WRITE_REQUEST) {
-            writeSmallBulk(entities);
-        } else {
-            writeBulk(entities);
-        }
-    }
 
-    /**
-     * Writes the {@link Entity entities} to the Datastore or modifies the existing ones.
-     *
-     * @param entities
-     *         a {@link Collection} of {@link Entity Entities} to write or update
-     * @see DatastoreWrapper#createOrUpdate(Entity)
-     */
+    @Override
     public void createOrUpdate(Collection<Entity> entities) {
         Entity[] array = new Entity[entities.size()];
         entities.toArray(array);
-        createOrUpdate(array);
+        if (array.length <= MAX_ENTITIES_PER_WRITE_REQUEST) {
+            writeSmallBulk(array);
+        } else {
+            writeBulk(array);
+        }
     }
 
-    /**
-     * Retrieves an {@link Entity} with the given key from the Datastore.
-     *
-     * @param key
-     *         {@link Key} to search for
-     * @return the {@link Entity} or {@code null} in case of no results for the key given
-     * @see DatastoreReader#get(Key)
-     */
-    public @Nullable Entity read(Key key) {
-        return datastore.get(key);
+    @Override
+    public Optional<Entity> read(Key key) {
+        return Optional.ofNullable(storage().get(key));
     }
 
     /**
@@ -200,56 +149,24 @@ public class DatastoreWrapper implements Logging {
      * @return an {@code Iterator} over the found entities in the order of keys
      *         (including {@code null} values for nonexistent keys)
      * @see DatastoreReader#fetch(Key...)
-     * @deprecated Use {@link #lookup(Collection)} instead.
+     * @deprecated Use {@link #lookup(List)} instead.
      */
     @Deprecated
     public Iterator<@Nullable Entity> read(Iterable<Key> keys) {
         return lookup(ImmutableList.copyOf(keys)).iterator();
     }
 
-    /**
-     * Retrieves an {@link Entity} for each of the given keys.
-     *
-     * <p>The results are returned in an order matching that of the provided keys
-     * with {@code null}s in place of missing and inactive entities.
-     *
-     * @param keys
-     *         {@link Key Keys} to search for
-     * @return an {@code List} of the found entities in the order of keys (including {@code null}
-     *         values for nonexistent keys)
-     * @see DatastoreReader#fetch(Key...)
-     */
-    public List<@Nullable Entity> lookup(Collection<Key> keys) {
+    @Override
+    public List<@Nullable Entity> lookup(List<Key> keys) {
         checkNotNull(keys);
-        DsReaderLookup lookup = new DsReaderLookup(datastore);
+        DsReaderLookup lookup = new DsReaderLookup(storage());
         return lookup.find(keys);
     }
 
-    /**
-     * Queries the Datastore with the given arguments.
-     *
-     * <p>The Datastore may return a partial result set, so an execution of this method may
-     * result in several Datastore queries.
-     *
-     * <p>The limit included in the {@link StructuredQuery}, will be a maximum count of objects
-     * in the returned iterator.
-     *
-     * <p>The returned {@link DsQueryIterator} allows to {@linkplain DsQueryIterator#nextPageQuery()
-     * create a query} to the next page of results reusing an existing cursor.
-     *
-     * <p>The resulting {@code Iterator} is evaluated lazily. A call to
-     * {@link Iterator#remove() Iterator.remove()} causes an {@link UnsupportedOperationException}.
-     *
-     * @param query
-     *         {@link Query} to execute upon the Datastore
-     * @param <R>
-     *         the type of queried objects
-     * @return results fo the query as a lazily evaluated {@link Iterator}
-     * @see DatastoreReader#run(Query)
-     */
+    @Override
     public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
-        DsReaderLookup lookup = new DsReaderLookup(datastore);
-        return lookup.execute(query, namespaceSupplier.get());
+        DsReaderLookup lookup = new DsReaderLookup(storage());
+        return lookup.execute(query, namespace());
     }
 
     /**
@@ -339,14 +256,9 @@ public class DatastoreWrapper implements Logging {
                       .build();
     }
 
-    /**
-     * Deletes all existing {@link Entity Entities} with the given keys.
-     *
-     * @param keys
-     *         {@code Keys} of the {@code Entities} to delete. May be nonexistent
-     */
+    @Override
     public void delete(Key... keys) {
-        datastore.delete(keys);
+        storage().delete(keys);
     }
 
     /**
@@ -357,7 +269,7 @@ public class DatastoreWrapper implements Logging {
      */
     @VisibleForTesting
     protected void dropTable(Kind table) {
-        Namespace namespace = namespaceSupplier.get();
+        Namespace namespace = namespace();
         StructuredQuery<Entity> query =
                 Query.newEntityQueryBuilder()
                      .setNamespace(namespace.value())
@@ -409,23 +321,16 @@ public class DatastoreWrapper implements Logging {
      * @see TransactionWrapper
      */
     public final TransactionWrapper newTransaction() {
-        Transaction tx = datastore.newTransaction();
-        return new TransactionWrapper(tx, namespaceSupplier);
+        Transaction tx = datastore().newTransaction();
+        return new TransactionWrapper(tx, namespaceSupplier());
     }
 
-    /**
-     * Retrieves an instance of {@link KeyFactory} unique for given Kind of data
-     * regarding the current namespace.
-     *
-     * @param kind
-     *         kind of {@link Entity} to generate keys for
-     * @return an instance of {@link KeyFactory} for given kind
-     */
+    @Override
     public KeyFactory keyFactory(Kind kind) {
         checkNotNull(kind);
-        KeyFactory keyFactory = datastore.newKeyFactory()
+        KeyFactory keyFactory = datastore().newKeyFactory()
                                          .setKind(kind.value());
-        Namespace namespace = namespaceSupplier.get();
+        Namespace namespace = namespace();
         _trace().log("Retrieving KeyFactory for kind `%s` in `%s` namespace.",
                      kind, namespace.value());
         keyFactory.setNamespace(namespace.value());
@@ -434,7 +339,7 @@ public class DatastoreWrapper implements Logging {
 
     @VisibleForTesting
     public Datastore datastore() {
-        return datastore;
+        return (Datastore) storage();
     }
 
     private void writeBulk(Entity[] entities) {
@@ -449,6 +354,6 @@ public class DatastoreWrapper implements Logging {
     }
 
     private void writeSmallBulk(Entity[] entities) {
-        datastore.put(entities);
+        storage().put(entities);
     }
 }

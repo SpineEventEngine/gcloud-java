@@ -28,23 +28,16 @@ package io.spine.server.storage.datastore.given;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import io.spine.core.TenantId;
-import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.Kind;
-import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.testing.server.storage.datastore.TestDatastores;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * A test environment for {@link io.spine.server.storage.datastore.DatastoreWrapperTest}.
  */
-public class DatastoreWrapperTestEnv {
+public final class DatastoreWrapperTestEnv {
 
     public static final Kind NAMESPACE_HOLDER_KIND = Kind.of("spine.test.NAMESPACE_HOLDER_KIND");
-    public static final Kind GENERIC_ENTITY_KIND = Kind.of("my.entity");
 
     private static final String SERVICE_ACCOUNT_RESOURCE_PATH = "spine-dev.json";
 
@@ -54,17 +47,9 @@ public class DatastoreWrapperTestEnv {
     private DatastoreWrapperTestEnv() {
     }
 
-    public static void checkTenantIdInKey(String id, TenantId tenantId, DatastoreWrapper wrapper) {
-        new TenantAwareOperation(tenantId) {
-            @Override
-            public void run() {
-                Key key = wrapper.keyFactory(GENERIC_ENTITY_KIND)
-                                 .newKey(42L);
-                assertEquals(id, key.getNamespace());
-            }
-        }.execute();
-    }
-
+    /**
+     * Forces Datastore to create a namespace with the given name.
+     */
     public static void ensureNamespace(String namespaceValue, Datastore datastore) {
         KeyFactory keyFactory = datastore.newKeyFactory()
                                          .setNamespace(namespaceValue)
@@ -74,10 +59,21 @@ public class DatastoreWrapperTestEnv {
         datastore.put(entity);
     }
 
+    /**
+     * Returns the {@code Datastore} instance connected to the Datastore emulator
+     * running {@linkplain TestDatastores#local() locally}.
+     */
     public static Datastore localDatastore() {
         return TestDatastores.local();
     }
 
+    /**
+     * Returns the {@code Datastore} instance connected to the Datastore instance
+     * running remotely.
+     *
+     * <p>The connection to a remote Datastore instance is performed via default service
+     * account defined by the {@code spine-dev.json} credential file.
+     */
     public static Datastore remoteDatastore() {
         return TestDatastores.remote(SERVICE_ACCOUNT_RESOURCE_PATH);
     }

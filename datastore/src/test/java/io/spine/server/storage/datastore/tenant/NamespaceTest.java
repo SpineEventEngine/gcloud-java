@@ -45,13 +45,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`Namespace` should")
-class NamespaceTest {
+final class NamespaceTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
         ProjectId defaultProjectId = defaultLocalProjectId();
-        Key defaultKey = Key.newBuilder(defaultProjectId.getValue(), "kind", "name")
+        Key defaultKey = Key.newBuilder(defaultProjectId.value(), "kind", "name")
                             .build();
         new NullPointerTester()
                 .setDefault(ProjectId.class, defaultProjectId)
@@ -153,7 +153,7 @@ class NamespaceTest {
     @DisplayName("return null if `Key` is empty")
     void testEmptyKey() {
         ProjectId projectId = ProjectId.of("project");
-        Key emptyKey = Key.newBuilder(projectId.getValue(), "my.type", 42)
+        Key emptyKey = Key.newBuilder(projectId.value(), "my.type", 42)
                           .build();
         Namespace namespace = Namespace.fromNameOf(emptyKey, false);
         assertNull(namespace);

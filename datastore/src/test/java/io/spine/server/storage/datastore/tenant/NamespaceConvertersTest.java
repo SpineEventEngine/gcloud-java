@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("`NamespaceConverters` should")
-class NamespaceConvertersTest extends UtilityClassTest<NamespaceConverters> {
+final class NamespaceConvertersTest extends UtilityClassTest<NamespaceConverters> {
 
     NamespaceConvertersTest() {
         super(NamespaceConverters.class);

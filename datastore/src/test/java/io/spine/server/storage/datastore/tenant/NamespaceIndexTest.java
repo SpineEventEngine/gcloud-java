@@ -32,17 +32,19 @@ import com.google.cloud.datastore.Key;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
 import io.spine.base.Identifier;
-import io.spine.base.Tests;
 import io.spine.core.TenantId;
+import io.spine.environment.Tests;
 import io.spine.net.InternetDomain;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
-import io.spine.server.storage.datastore.tenant.given.TestProjection;
+import io.spine.server.storage.datastore.tenant.given.CollegeProjection;
 import io.spine.test.datastore.College;
+import io.spine.test.datastore.CollegeId;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.AfterEach;
@@ -71,7 +73,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("`NamespaceIndex` should")
-class NamespaceIndexTest {
+final class NamespaceIndexTest {
 
     private static final NsConverterFactory converterFactory = NsConverterFactory.defaults();
 
@@ -174,14 +176,17 @@ class NamespaceIndexTest {
                          .use(storageFactory);
         storageFactory.configureTenantIndex(contextBuilder);
         BoundedContext context = contextBuilder.build();
-        RecordStorage<String> storage = storageFactory
-                .createRecordStorage(context.spec(), TestProjection.class);
-        String id = "ABC";
+        RecordStorage<CollegeId, EntityRecord> storage = storageFactory
+                .createRecordStorage(context.spec(), EntityRecordSpec.of(CollegeProjection.class));
+        CollegeId id = CollegeId.newBuilder()
+                                     .setValue("Aeronautic Forgery College")
+                                     .vBuild();
         EntityRecord record = EntityRecord
                 .newBuilder()
                 .setEntityId(Identifier.pack(id))
                 .setState(pack(College.newBuilder()
-                                      .setName(id)
+                                      .setId(id)
+                                      .setName(id.getValue())
                                       .build()))
                 .build();
         TenantId tenantId = TenantId
@@ -202,14 +207,6 @@ class NamespaceIndexTest {
     void testAsync() {
         assertTimeout(Duration.ofSeconds(5L),
                       NamespaceIndexTest::testSynchronizeAccessMethods);
-    }
-
-    @Test
-    @DisplayName("confirm registration")
-    void registered() {
-        namespaceIndex.registerWith(context);
-        assertThat(namespaceIndex.isRegistered())
-                .isTrue();
     }
 
     @SuppressWarnings("OverlyLongMethod")
