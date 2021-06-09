@@ -106,7 +106,12 @@ public final class DsSessionStorage
      */
     @Override
     public Optional<ShardSessionRecord> read(ShardIndex index) {
-        return readTransactionally(index);
+        Key key = keyOf(index);
+        try (TransactionWrapper tx = newTransaction()) {
+            Optional<Entity> result = tx.read(key);
+            tx.commit();
+            return result.map(this::toRecord);
+        }
     }
 
     /**
@@ -122,8 +127,17 @@ public final class DsSessionStorage
     /**
      * Writes the record to the storage in a new transaction.
      */
-    public void write(ShardSessionRecord message) {
-        writeTransactionally(appendColumns(message));
+    @SuppressWarnings("OverlyBroadCatchBlock")  /* Treating all exceptions similarly. */
+    public final void write(ShardSessionRecord message) {
+        try (TransactionWrapper tx = newTransaction()) {
+            RecordWithColumns<ShardIndex, ShardSessionRecord> record = appendColumns(message);
+            Entity entity = entityRecordToEntity(record);
+            tx.createOrUpdate(entity);
+            tx.commit();
+        } catch (RuntimeException e) {
+            throw newIllegalStateException(e, "Error writing a `ShardSessionRecord`" +
+                    " in a transaction.");
+        }
     }
 
     /**
