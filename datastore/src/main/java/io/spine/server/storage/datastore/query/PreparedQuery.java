@@ -26,7 +26,6 @@
 
 package io.spine.server.storage.datastore.query;
 
-import com.google.cloud.datastore.Entity;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.FieldMask;
@@ -38,10 +37,6 @@ import io.spine.query.SortBy;
 import io.spine.server.storage.datastore.record.DsEntitySpec;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.List;
-
-import static java.util.Collections.unmodifiableList;
 
 /**
  * A {@link RecordQuery} prepared for optimal execution in terms of Datastore
@@ -136,32 +131,4 @@ public abstract class PreparedQuery<I, R extends Message> {
         return spec;
     }
 
-    /**
-     * The result obtained from Datastore directly by sending one or more queries to it.
-     *
-     * <p>In order to be returned as a lookup result, needs to be post-processed in memory.
-     */
-    static final class IntermediateResult {
-
-        private final List<@Nullable Entity> entities;
-
-        /**
-         * Creates a new instance by referencing (not copying) the given list of Entities.
-         *
-         * @param entities
-         *         list of Datastore entities, some of which may be {@code null} in case
-         *         they were queried by identifiers, and the requested records
-         *         were missing from the underlying storage
-         * @apiNote This ctor does not utilize an {@code ImmutableList},
-         *         as it cannot contain {@code null}s.
-         */
-        @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")  /* To improve performance. */
-        IntermediateResult(List<@Nullable Entity> entities) {
-            this.entities = entities;
-        }
-
-        List<@Nullable Entity> entities() {
-            return unmodifiableList(entities);
-        }
-    }
 }

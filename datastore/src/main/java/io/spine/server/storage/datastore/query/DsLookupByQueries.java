@@ -32,31 +32,21 @@ import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.Filter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.query.QueryPredicate;
 import io.spine.query.RecordQuery;
-import io.spine.query.SortBy;
 import io.spine.server.storage.datastore.DatastoreMedium;
 import io.spine.server.storage.datastore.DsQueryIterator;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.storage.datastore.record.DsEntitySpec;
-import io.spine.server.storage.datastore.record.Entities;
-import io.spine.server.storage.datastore.record.FieldMaskApplier;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.server.storage.datastore.record.DsEntityComparator.implementing;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -68,12 +58,17 @@ import static java.util.stream.Collectors.toList;
  */
 final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> {
 
-    private static final int MISSING_LIMIT = 0;
-
     private final DatastoreMedium datastore;
 
-    //TODO:2021-02-28:alex.tymchenko: document!
-    private final @Nullable Filter ancestorFilter;
+    /**
+     * An ancestor filter specific to the record layout according to which the queried records
+     * are stored.
+     *
+     * <p>If the records are stored flat (i.e., no ancestor-child hierarchy is used)
+     * this filter is {@code null}.
+     */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private final Optional<Filter> ancestorFilter;
 
     /**
      * A converter from {@link Entity} to {@code <R>} instances.
@@ -91,10 +86,10 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
         this.ancestorFilter = ancestorFilter(query, datastore);
     }
 
-    private @Nullable Filter ancestorFilter(RecordQuery<I, R> query, DatastoreMedium datastore) {
-        Optional<Filter> maybeFilter = spec().layout()
-                                             .ancestorFilter(query, datastore);
-        return maybeFilter.orElse(null);
+    private Optional<Filter> ancestorFilter(RecordQuery<I, R> query, DatastoreMedium datastore) {
+        Optional<Filter> result = spec().layout()
+                                        .ancestorFilter(query, datastore);
+        return result;
     }
 
     @Override
@@ -115,7 +110,7 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
         ImmutableList<Entity> results;
         List<StructuredQuery<Entity>> queries = split(query);
         if (queries.size() == 1) {
-            results = findForSingle(queries.get(0));
+            results = runSingleQuery(queries.get(0));
             transformer = new ConvertAsIs<>(recordType(), mask());
         } else {
             results = readAndJoin(queries);
@@ -127,9 +122,9 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
 
     private List<StructuredQuery<Entity>> split(RecordQuery<?, R> query) {
         QueryPredicate<R> rootPredicate = query.subject()
-                                                           .predicate();
+                                               .predicate();
         Kind kind = spec().kind();
-        if(rootPredicate.isEmpty()) {
+        if (rootPredicate.isEmpty()) {
             StructuredQuery<Entity> result = new QueryWithFilter(query, kind).withNoFilter();
             return ImmutableList.of(result);
         }
@@ -141,30 +136,32 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
         return queries;
     }
 
-    private Collection<Filter>
-    toDatastoreFilters(QueryPredicate<R> rootPredicate) {
-        Collection<Filter> dsFilters =
-                DsFilters.fromPredicate(rootPredicate, columnAdapter());
+    private Collection<Filter> toDatastoreFilters(QueryPredicate<R> rootPredicate) {
+        Collection<Filter> dsFilters = DsFilters.fromPredicate(rootPredicate, columnAdapter());
         return dsFilters;
     }
 
-    private ImmutableList<Entity> findForSingle(StructuredQuery<Entity> query) {
+    private ImmutableList<Entity> runSingleQuery(StructuredQuery<Entity> query) {
         StructuredQuery<Entity> adjustedForLayout = adjustForLayout(query);
         DsQueryIterator<Entity> iterator = datastore.read(adjustedForLayout);
         ImmutableList<Entity> result = ImmutableList.copyOf(iterator);
         return result;
     }
 
+    /**
+     * Appends the Datastore's native ancestor filter, if the queried records are stored
+     * in ancestor-child hierarchy.
+     */
     private StructuredQuery<Entity> adjustForLayout(StructuredQuery<Entity> query) {
-        if(ancestorFilter == null) {
+        if (!ancestorFilter.isPresent()) {
             return query;
         }
         Filter filter = query.getFilter();
-        CompositeFilter filterWithNesting = CompositeFilter.and(filter, ancestorFilter);
+        CompositeFilter filterWithNesting = CompositeFilter.and(filter, ancestorFilter.get());
 
         StructuredQuery<Entity> result = query.toBuilder()
-                                              .setFilter(filterWithNesting)
-                                              .build();
+                .setFilter(filterWithNesting)
+                .build();
         return result;
     }
 
@@ -193,194 +190,4 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
                 .setLimit(Integer.MAX_VALUE)
                 .build();
     }
-
-    private abstract static class ToRecords<R extends Message>
-            implements Function<IntermediateResult, Iterable<R>> {
-
-        private final TypeUrl recordType;
-        private final FieldMask mask;
-
-        protected ToRecords(TypeUrl type, FieldMask mask) {
-            recordType = type;
-            this.mask = mask;
-        }
-
-        @Override
-        public Iterable<R> apply(IntermediateResult result) {
-            List<@Nullable Entity> entities = result.entities();
-            Stream<Entity> stream =
-                    entities.stream()
-                            .filter(Objects::nonNull);
-            stream = filter(stream);
-            ImmutableList<R> records =
-                    stream.map(this::toRecord)
-                          .map(this::mask)
-                          .collect(toImmutableList());
-            return records;
-        }
-
-        private R mask(R r) {
-            return FieldMaskApplier.<R>recordMasker(mask).apply(r);
-        }
-
-        private R toRecord(Entity e) {
-            return Entities.toMessage(e, recordType);
-        }
-
-        protected abstract Stream<Entity> filter(Stream<Entity> entities);
-    }
-
-    /**
-     * Converts the original {@code Entity} instances into the records of {@code <R>}
-     * and applies the field mask to each of them.
-     *
-     * <p>Performs no intermediate filtering.
-     *
-     * @param <R>
-     *         the type of the records to convert each {@code Entity} into
-     */
-    private static final class ConvertAsIs<R extends Message> extends ToRecords<R> {
-
-        private ConvertAsIs(TypeUrl type, FieldMask mask) {
-            super(type, mask);
-        }
-
-        @Override
-        protected Stream<Entity> filter(Stream<Entity> entities) {
-            return entities;
-        }
-    }
-
-    /**
-     * Sorts and limits the original list of {@code Entity} objects, then converts each of them
-     * to the {@code <R>}-typed records and applies the specified field mask to each of them.
-     *
-     * @param <R>
-     *         the type of the records to convert each {@code Entity} into
-     */
-    private static final class SortAndLimit<R extends Message> extends ToRecords<R> {
-
-        private final ImmutableList<SortBy<?, R>> sorting;
-        private final @Nullable Integer limit;
-
-        private SortAndLimit(TypeUrl type, FieldMask mask,
-                             ImmutableList<SortBy<?, R>> sorting,
-                             @Nullable Integer limit) {
-            super(type, mask);
-            this.sorting = sorting;
-            this.limit = limit;
-        }
-
-        @Override
-        protected Stream<Entity> filter(Stream<Entity> entities) {
-
-            Stream<Entity> currentStream = entities;
-            if (!sorting.isEmpty()) {
-                currentStream = currentStream.sorted(implementing(sorting));
-            }
-            if (limit != null && limit != MISSING_LIMIT) {
-                currentStream = currentStream.limit(limit);
-            }
-            return currentStream;
-        }
-    }
-
-//
-//    /**
-//     * Finds a collection of entities matching provided {@link QueryParameters} in Datastore and
-//     * returns them according to the specified {@code format}.
-//     *
-//     * @param params
-//     *         parameters specifying the filters for records to conform to
-//     * @param format
-//     *         format of the search specifying limits, order and field mask to apply to the results
-//     * @return an iterator over the entity records from the Datastore
-//     */
-//    Iterator<EntityRecord> find(QueryParameters params, ResponseFormat format) {
-//        List<StructuredQuery<Entity>> queries = splitToMultipleDsQueries(params, format);
-//        FieldMask mask = format.getFieldMask();
-//        if (queries.size() == 1) {
-//            Iterator<EntityRecord> results = find(queries.get(0), mask);
-//            return results;
-//        }
-//
-//        Iterator<EntityRecord> results =
-//                find(queries, format.getOrderBy(), format.getLimit(), mask);
-//        return results;
-//    }
-//
-//    private List<StructuredQuery<Entity>>
-//    splitToMultipleDsQueries(QueryParameters params, ResponseFormat format) {
-//        checkNotNull(params);
-//
-//        List<StructuredQuery<Entity>> queries = buildDsFilters(params.iterator())
-//                .stream()
-//                .map(new QueryWithFilter(format, Kind.of(typeUrl)))
-//                .collect(toList());
-//        return queries;
-//    }
-//
-//    private Collection<StructuredQuery.Filter>
-//    buildDsFilters(Iterator<CompositeQueryParameter> compositeParameters) {
-//        Collection<CompositeQueryParameter> params = newArrayList(compositeParameters);
-//        Collection<StructuredQuery.Filter> predicate =
-//                DsFilters.fromParams(params, columnFilterAdapter);
-//        return predicate;
-//    }
-//
-//    /**
-//     * Performs the given Datastore {@linkplain com.google.cloud.datastore.StructuredQuery queries}
-//     * and combines results into a single lazy iterator applying the field mask to each item.
-//     *
-//     * @param query
-//     *         a query to perform
-//     * @param fieldMask
-//     *         a {@code FieldMask} to apply to all the retrieved entity states
-//     * @return an iterator over the resulting entity records
-//     */
-//    private Iterator<EntityRecord> find(StructuredQuery<Entity> query, FieldMask fieldMask) {
-//        return find(singleton(query), OrderBy.getDefaultInstance(), MISSING_LIMIT, fieldMask);
-//    }
-//
-//    /**
-//     * Performs the given Datastore {@linkplain com.google.cloud.datastore.StructuredQuery queries}
-//     * and combines results into a single iterator applying the field mask to each item.
-//     *
-//     * <p>Provided {@link OrderBy inMemOrderBy} is applied to the combined results of Datastore
-//     * reads and sorts them in-memory. Otherwise the read results will be lazy.
-//     *
-//     * @param queries
-//     *         queries to perform
-//     * @param inMemOrderBy
-//     *         an order by which the retrieved entities are sorted in-memory
-//     * @param limit
-//     *         an integer limit of number of records to be returned
-//     * @param fieldMask
-//     *         a {@code FieldMask} to apply to all the retrieved entity states
-//     * @return an iterator over the resulting entity records
-//     */
-//    private Iterator<EntityRecord> find(Collection<StructuredQuery<Entity>> queries,
-//                                        OrderBy inMemOrderBy, int limit, FieldMask fieldMask) {
-//        checkNotNull(queries);
-//        checkNotNull(inMemOrderBy);
-//        checkNotNull(fieldMask);
-//        checkArgument(limit >= 0, "A query limit cannot be negative.");
-//        checkArgument(queries.size() > 0, "At least one query is required.");
-//
-//        Stream<Entity> entities = readAndJoin(queries);
-//
-//        if (!isDefault(inMemOrderBy)) {
-//            entities = entities.sorted(implementing(inMemOrderBy));
-//        }
-//        if (limit != MISSING_LIMIT) {
-//            entities = entities.limit(limit);
-//        }
-//
-//        Iterator<EntityRecord> recordIterator =
-//                entities.map(Entities::toRecord)
-//                        .map(recordMasker(fieldMask))
-//                        .iterator();
-//
-//        return recordIterator;
-//    }
 }
