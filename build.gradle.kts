@@ -150,7 +150,6 @@ subprojects {
     DependencyResolution.excludeProtobufLite(configurations)
 
     val spineCoreVersion: String by extra
-    val spineBaseVersion: String by extra
 
     dependencies {
         ErrorProne.apply {
