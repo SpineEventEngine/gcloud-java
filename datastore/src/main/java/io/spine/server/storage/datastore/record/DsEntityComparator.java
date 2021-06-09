@@ -43,6 +43,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Arrays.stream;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A comparator for {@linkplain Entity Datastore entities} by attributes corresponding to
@@ -100,6 +101,7 @@ public class DsEntityComparator implements Comparator<Entity>, Serializable {
                      : result.thenComparing(thisComparator);
 
         }
+        requireNonNull(result, "Cannot create sorting comparator for zero sorting directives.");
         return result;
     }
 
@@ -156,6 +158,7 @@ public class DsEntityComparator implements Comparator<Entity>, Serializable {
         },
         TIMESTAMP(ValueType.TIMESTAMP) {
             @Override
+            @SuppressWarnings("OverlyStrongTypeCast")   /* Set the type explicitly. */
             @Nullable Comparable extract(Value<?> value) {
                 return (Timestamp) value.get();
             }

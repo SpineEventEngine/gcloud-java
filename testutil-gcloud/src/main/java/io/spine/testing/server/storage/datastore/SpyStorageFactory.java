@@ -59,7 +59,7 @@ public final class SpyStorageFactory extends TestDatastoreStorageFactory {
 
     @Override
     public DatastoreWrapper newDatastoreWrapper(boolean multitenant) {
-        return injectedWrapper;
+        return requireNonNull(injectedWrapper);
     }
 
     @VisibleForTesting
