@@ -41,9 +41,19 @@ buildscript {
     io.spine.internal.gradle.doForceVersions(configurations)
 
     val spineBaseVersion: String by extra
+    val kotlinVersion = io.spine.internal.dependency.Kotlin.version
 
     dependencies {
         classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force(
+                "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+                "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion"
+            )
+        }
     }
 }
 
