@@ -43,10 +43,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.query.Direction.ASC;
 
 /**
- * A function transforming the input {@link com.google.cloud.datastore.StructuredQuery.Filter
- * Filter} into a {@link com.google.cloud.datastore.StructuredQuery} with the given newBuilder.
+ * A template of a Datastore's {@code Query} built upon some generic properties of the passed
+ * {@code RecordQuery} (such as sorting and limit) and awaiting a Datastore's native {@code Filter}
+ * — supplied by other routines — to produce an instance of {@code StructuredQuery} ready
+ * for execution against Datastore.
  *
- * //TODO:2021-04-14:alex.tymchenko: rewrite this description! It makes no sense.
+ * <p>The transformation of {@code RecordQuery} into one or more {@code StructuredQuery}
+ * instances is a complex process. Several different parties are involved into it, including
+ * {@linkplain DsFilters utility} producing the Datastore {@code Filters}.
+ *
+ * <p>This type serves a "staging area" by accumulating the pieces required
+ * to build a proper {@code StructuredQuery}.
  */
 final class QueryWithFilter implements Function<StructuredQuery.Filter, StructuredQuery<Entity>> {
 
