@@ -34,13 +34,11 @@ import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Time.currentTime;
 
 /**
  * A {@link io.spine.server.delivery.ShardedWorkRegistry} based on the Google Datastore storage.
@@ -121,40 +119,5 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
      */
     protected DsSessionStorage storage() {
         return storage;
-    }
-
-    /**
-     * Updates the {@code nodeId} for the {@link ShardSessionRecord} with the specified
-     * {@link ShardIndex} if the record has not been picked by anyone.
-     *
-     * <p>If there is no such a record, creates a new record.
-     */
-    private static class UpdateNodeIfAbsent implements RecordUpdate {
-
-        private final ShardIndex index;
-        private final NodeId nodeToSet;
-
-        private UpdateNodeIfAbsent(ShardIndex index, NodeId set) {
-            this.index = index;
-            nodeToSet = set;
-        }
-
-        @Override
-        public Optional<ShardSessionRecord> createOrUpdate(@Nullable ShardSessionRecord previous) {
-            if (previous != null && previous.hasPickedBy()) {
-                return Optional.empty();
-            }
-            ShardSessionRecord.Builder builder =
-                    previous == null
-                    ? ShardSessionRecord.newBuilder()
-                                        .setIndex(index)
-                    : previous.toBuilder();
-
-            ShardSessionRecord updated =
-                    builder.setPickedBy(nodeToSet)
-                           .setWhenLastPicked(currentTime())
-                           .vBuild();
-            return Optional.of(updated);
-        }
     }
 }
