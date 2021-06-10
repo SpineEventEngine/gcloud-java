@@ -28,7 +28,6 @@ package io.spine.server.storage.datastore;
 
 import com.google.common.base.Throwables;
 import com.google.protobuf.Message;
-import io.spine.client.ResponseFormat;
 import io.spine.logging.Logging;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageUnderTest;
@@ -36,7 +35,6 @@ import io.spine.server.storage.RecordStorageUnderTest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -99,11 +97,11 @@ public final class BigDataTester<I, R extends Message> implements Logging {
      * <p>The execution flow is as follows:
      * <ol>
      *     <li>Produce the records with the given {@link EntryFactory}.
-     *     <li>Measure the time of the {@linkplain RecordStorage#write(Map) bulk write}.
+     *     <li>Measure the time of the {@linkplain RecordStorage#writeAll(Iterable) bulk write}.
      *     <li>Fail if the time is over the specified limit.
      *     <li>Wait 1 second to ensure the Datastore has established the data consistency.
      *     <li>Measure the time of the
-     *         {@linkplain RecordStorage#readAll(ResponseFormat) bulk read}.
+     *         {@linkplain RecordStorage#readAll() bulk read}.
      *     <li>Fail if the time is over the specified limit.
      *     <li>Check the count of the records written and read is equal.
      * </ol>
