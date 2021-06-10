@@ -169,8 +169,14 @@ public final class BigDataTester<I, R extends Message> implements Logging {
      */
     public interface EntryFactory<I, R extends Message> {
 
+        /**
+         * Creates a new identifier.
+         */
         I newId();
 
+        /**
+         * Creates a record for the passed identifier.
+         */
         R newRecord(I id);
     }
 
