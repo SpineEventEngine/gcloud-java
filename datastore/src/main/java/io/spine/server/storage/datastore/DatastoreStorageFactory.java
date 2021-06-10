@@ -76,7 +76,10 @@ import static io.spine.server.storage.datastore.config.TxSetting.enabled;
  *
  * <p>As a convenience API, provides an ability to configure the {@link BoundedContextBuilder}s
  * with the {@link TenantIndex} specific to the instance of {@code Datastore} configured for this
- * factory
+ * factory.
+ *
+ * <p>As per design intention of {@link StorageFactory}, by default all storages created by
+ * this factory delegate the execution to instances of a pre-configured {@link DsRecordStorage}.
  *
  * @see DatastoreStorageFactory#configureTenantIndex(BoundedContextBuilder)
  */
@@ -104,14 +107,29 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
     private final
     Map<Class<? extends Storage<?, ?>>, DatastoreWrapper> sysWrappers = newConcurrentMap();
 
+    /**
+     * The mapping of the values from the Java type system to the types native to Datastore.
+     */
     private final ColumnMapping<Value<?>> columnMapping;
 
+    /**
+     * A factory of {@link io.spine.server.storage.datastore.tenant.Namespace} converters.
+     */
     private final NsConverterFactory converterFactory;
 
+    /**
+     * The settings of transactional behavior, per each stored record type.
+     */
     private final TxSettings txSettings;
 
+    /**
+     * The set of functions producing custom storage implementations, if set by library end-users.
+     */
     private final CustomStorages customStorages;
 
+    /**
+     * Layouts of records stored as Datastore Entities, per stored record type.
+     */
     private final RecordLayouts recordLayouts;
 
     protected DatastoreStorageFactory(Builder builder) {
@@ -171,23 +189,12 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
         return configuration;
     }
 
-    public ColumnMapping<Value<?>> columnMapping() {
+    /**
+     * Returns the column mapping set for this factory.
+     */
+    public final ColumnMapping<Value<?>> columnMapping() {
         return columnMapping;
     }
-
-//    /**
-//     * Configures the passed builder of the storage to serve the passed entity class.
-//     */
-//    private <I, R extends Message, S extends RecordStorage<I, R>,
-//            B extends RecordStorageBuilder<I, S, B>>
-//    S configure(B builder, Class<? extends Entity<I, ?>> cls, ContextSpec context) {
-//        builder.setModelClass(asEntityClass(cls))
-//               .setDatastore(wrapperFor(context))
-//               .setMultitenant(context.isMultitenant())
-//               .setColumnMapping(columnMapping);
-//        S storage = builder.build();
-//        return storage;
-//    }
 
     private NamespaceSupplier createNamespaceSupplier(boolean multitenant) {
         String defaultNamespace = namespaceFromOptions();
@@ -289,13 +296,15 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
 
     /**
      * Creates a new instance of {@code Builder}, passing the {@code Datastore} to it, and
-     * configuring the {@code Builder} instance with some default settings.
+     * configuring the {@code Builder} instance with some default settings, such as
+     * {@linkplain DsColumnMapping column mapping} and
+     * {@linkplain NsConverterFactory#defaults() namespace converter factory}.
      */
     @VisibleForTesting
     public static Builder newBuilderWithDefaults(Datastore datastore) {
         checkNotNull(datastore);
         Builder result = newBuilder().setDatastore(datastore)
-                                      .withDefaults();
+                                     .withDefaults();
         return result;
     }
 
@@ -317,7 +326,7 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
         }
 
         /**
-         * Assigns the {@link Datastore} to use for the DB interactions.
+         * Assigns the {@link Datastore} to use for the storage interactions.
          *
          * <p>If the provided {@code Datastore} is configured with a namespace:
          * <ul>
@@ -325,14 +334,12 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
          *     <li>resulting multitenant storages will concatenate the provided namespace with
          *         the tenant identifier. See {@link #setNamespaceConverter} for more configuration.
          * </ul>
+         *
+         * @return this instance of {@code Builder}
          */
         public Builder setDatastore(Datastore datastore) {
             this.datastore = checkNotNull(datastore);
             return this;
-        }
-
-        public Datastore getDatastore() {
-            return this.datastore;
         }
 
         /**
@@ -342,7 +349,7 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
          *
          * @param columnMapping
          *         the storage rules for entity columns
-         * @return self for method chaining
+         * @return this instance of {@code Builder}
          */
         @CanIgnoreReturnValue
         public Builder setColumnMapping(ColumnMapping<Value<?>> columnMapping) {
@@ -359,7 +366,7 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
          *
          * @param converter
          *         a custom converter for the Tenant IDs
-         * @return self for method chaining
+         * @return this instance of {@code Builder}
          */
         @CanIgnoreReturnValue
         public Builder setNamespaceConverter(NamespaceConverter converter) {
@@ -367,6 +374,15 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
             return this;
         }
 
+        /**
+         * Enables the transactional operations for the given type of stored records.
+         *
+         * @param recordType
+         *         the stored type
+         * @param <R>
+         *         the stored type
+         * @return this instance of {@code Builder}
+         */
         @CanIgnoreReturnValue
         public <R extends Message> Builder enableTransactions(Class<R> recordType) {
             checkNotNull(recordType);
@@ -374,6 +390,24 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
             return this;
         }
 
+        /**
+         * Tells to use a custom function to create a record storage when this factory is
+         * asked to provide a storage for a specified record type.
+         *
+         * <p>If the record type is an {@link io.spine.server.entity.Entity Entity} state,
+         * please use {@link #useCustomStorage(Class, CreateEntityStorage)
+         * useCustomStorage(entityStateType, CreateEntityStorage)}.
+         *
+         * @param recordType
+         *         the stored type
+         * @param callback
+         *         a callback to create a custom storage
+         * @param <I>
+         *         the type of identifiers of stored records
+         * @param <R>
+         *         the stored type
+         * @return this instance of {@code Builder}
+         */
         @CanIgnoreReturnValue
         public <I, R extends Message>
         Builder useCustomStorage(Class<R> recordType, CreateMessageStorage<I, R> callback) {
@@ -383,6 +417,24 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
             return this;
         }
 
+        /**
+         * Tells to use a custom function to create a storage of Spine Entities when this factory is
+         * asked to provide a storage for a specified entity type.
+         *
+         * <p>If the record type is not an {@link io.spine.server.entity.Entity Entity} state,
+         * please use {@link #useCustomStorage(Class, CreateMessageStorage)
+         * useCustomStorage(recordType, CreateMessageStorage)}.
+         *
+         * @param stateType
+         *         the type of the stored Spine's Entity state
+         * @param callback
+         *         a callback to create a custom storage
+         * @param <I>
+         *         the type of identifiers of stored records
+         * @param <S>
+         *         the type of the stored Spine's Entity state
+         * @return this instance of {@code Builder}
+         */
         @CanIgnoreReturnValue
         public <I, S extends EntityState<I>>
         Builder useCustomStorage(Class<S> stateType, CreateEntityStorage<I> callback) {
@@ -392,6 +444,20 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
             return this;
         }
 
+        /**
+         * Specified the layout of Datastore Entities to use when operating with the records of
+         * a particular type.
+         *
+         * @param recordType
+         *         the type of stored records
+         * @param layout
+         *         the layout to use
+         * @param <I>
+         *         the type of record identifiers
+         * @param <R>
+         *         the type of stored records
+         * @return this instance of {@code Builder}
+         */
         @CanIgnoreReturnValue
         public <I, R extends Message>
         Builder organizeRecords(Class<R> recordType, RecordLayout<I, R> layout) {
