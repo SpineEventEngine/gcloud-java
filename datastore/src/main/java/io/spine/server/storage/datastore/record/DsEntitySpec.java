@@ -37,19 +37,18 @@ import io.spine.server.storage.datastore.config.RecordLayout;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Tells how to structure Datastore Entities used to persist Protobuf messages.
+ * Tells how to structure Datastore Entities when persisting Protobuf messages.
  *
- * <p>Incorporates the knowledge of both Datastore Entity structure
- * and the ancestor-children relations between Entities.
+ * <p>Some Proto messages are more efficiently stored in an ancestor-child tree structure.
+ * For others, a flat list of Entities is sufficient.
  *
- *
+ * <p>This type tells both how to structure records in terms of hierarchy, and how to transform
+ * each Protobuf {@code Message} record into a Datastore Entity with its attributes.
  */
 public final class DsEntitySpec<I, R extends Message> {
 
     private final RecordSpec<I, R, ?> recordSpec;
     private final RecordLayout<I, R> layout;
-
-    //TODO:2021-04-15:alex.tymchenko: move `kind` here.
 
     /**
      * Creates a new instance of the Datastore Entity specification.
@@ -105,6 +104,9 @@ public final class DsEntitySpec<I, R extends Message> {
         return key;
     }
 
+    /**
+     * Returns a Datastore {@code Kind} for the stored record.
+     */
     public Kind kind() {
         return layout.recordKind();
     }

@@ -77,6 +77,18 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
      */
     private @MonotonicNonNull ToRecords<R> transformer = null;
 
+    /**
+     * Creates a new lookup for the passed {@code RecordQuery}.
+     *
+     * @param datastore
+     *         Datastore connector
+     * @param query
+     *         a query to create this lookup for
+     * @param columnAdapter
+     *         an adapter of {@code RecordQuery} parameter values to Datastore-native types
+     * @param spec
+     *         Entity specification of the queried records
+     */
     DsLookupByQueries(DatastoreMedium datastore,
                       RecordQuery<I, R> query,
                       FilterAdapter columnAdapter,
@@ -93,13 +105,13 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
     }
 
     @Override
-    protected IntermediateResult fetchFromDatastore() {
+    IntermediateResult fetchFromDatastore() {
         ImmutableList<Entity> rawEntities = findByPredicates(query());
         return new IntermediateResult(rawEntities);
     }
 
     @Override
-    protected Iterable<R> toRecords(IntermediateResult result) {
+    Iterable<R> toRecords(IntermediateResult result) {
         checkNotNull(transformer,
                      "In-memory transformer `Datastore Entity`->`Stored record` isn't set.");
         Iterable<R> records = transformer.apply(result);

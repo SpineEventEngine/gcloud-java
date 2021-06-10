@@ -130,7 +130,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
         Iterable<R> result =
                 read((storage) -> DsLookup.onTopOf(datastore, columnFilterAdapter, dsSpec)
                                           .with(query)
-                                          .readRecords());
+                                          .execute());
         return result.iterator();
     }
 

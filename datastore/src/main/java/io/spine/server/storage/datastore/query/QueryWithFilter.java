@@ -59,7 +59,7 @@ final class QueryWithFilter implements Function<StructuredQuery.Filter, Structur
         this.builder = Query.newEntityQueryBuilder()
                             .setKind(kind.value());
         ImmutableList<? extends SortBy<?, ?>> sorting = query.sorting();
-        if(!sorting.isEmpty()) {
+        if (!sorting.isEmpty()) {
             for (SortBy<?, ?> sortBy : sorting) {
                 StructuredQuery.OrderBy orderBy = translateSortBy(sortBy);
                 builder.addOrderBy(orderBy);
@@ -74,7 +74,7 @@ final class QueryWithFilter implements Function<StructuredQuery.Filter, Structur
     private static StructuredQuery.OrderBy translateSortBy(SortBy<?, ?> sortBy) {
         RecordColumn<?, ?> column = sortBy.column();
         String columnName = column.name()
-                             .value();
+                                  .value();
         return sortBy.direction() == ASC
                ? asc(columnName)
                : desc(columnName);
@@ -91,7 +91,7 @@ final class QueryWithFilter implements Function<StructuredQuery.Filter, Structur
     /**
      * Creates a new {@code StructuredQuery} without filters.
      */
-    public StructuredQuery<Entity> withNoFilter() {
+    StructuredQuery<Entity> withNoFilter() {
         StructuredQuery<Entity> result = builder.build();
         return result;
     }

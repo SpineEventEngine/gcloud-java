@@ -44,6 +44,11 @@ import java.util.Optional;
  * <p>Datastore allows to store Entities in flat structure or by grouping the Entities into
  * Entity groups according to ancestor-child relations.
  *
+ * <p>Descendants may define their own layout for records and then plug it into
+ * their storage factory via
+ * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#organizeRecords(Class, RecordLayout)
+ * DatastoreStorageFactory.newBuilder().organizeRecords(typeOfRecord, recordLayout)}.
+ *
  * @param <I>
  *         the type of identifiers of the stored records
  * @param <R>

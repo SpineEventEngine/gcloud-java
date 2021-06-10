@@ -46,8 +46,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
  * Filters the contents of {@link IntermediateResult} and converts them
  * to the {@code R}-typed records.
  */
-abstract class ToRecords<R extends Message>
-        implements Function<IntermediateResult, Iterable<R>> {
+abstract class ToRecords<R extends Message> implements Function<IntermediateResult, Iterable<R>> {
 
     private final TypeUrl recordType;
     private final Function<R, R> masker;

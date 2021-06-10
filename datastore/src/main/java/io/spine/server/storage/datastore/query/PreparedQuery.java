@@ -44,6 +44,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * <p>Due to Datastore limitations, some {@code RecordQuery} instances are processed partly
  * via the Datastore querying, and partly by filtering the intermediate results in memory.
+ * This type analyzes the queries and determines the execution strategy.
  */
 @Internal
 public abstract class PreparedQuery<I, R extends Message> {
@@ -53,6 +54,17 @@ public abstract class PreparedQuery<I, R extends Message> {
     private final FilterAdapter columnAdapter;
     private final DsEntitySpec<I, R> spec;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param query
+     *         an original {@code RecordQuery} to execute
+     * @param adapter
+     *         an adapter for the values set by Spine-specific predicates
+     *         to those applicable to Datastore-native Filters
+     * @param spec
+     *         a specification of an Entity
+     */
     PreparedQuery(RecordQuery<I, R> query, FilterAdapter adapter, DsEntitySpec<I, R> spec) {
         this.query = query;
         this.recordType = TypeUrl.of(query.subject()
@@ -61,14 +73,10 @@ public abstract class PreparedQuery<I, R extends Message> {
         this.spec = spec;
     }
 
-    //TODO:2021-04-13:alex.tymchenko: document.
+    /**
+     * Executes the query and returns the read result.
+     */
     public final Iterable<R> execute() {
-        IntermediateResult intermediateResult = fetchFromDatastore();
-        Iterable<R> result = toRecords(intermediateResult);
-        return result;
-    }
-
-    public final Iterable<R> readRecords() {
         IntermediateResult intermediateResult = fetchFromDatastore();
         Iterable<R> result = toRecords(intermediateResult);
         return result;
@@ -79,7 +87,7 @@ public abstract class PreparedQuery<I, R extends Message> {
      *
      * <p>Returns an intermediate result to be processed further.
      */
-    protected abstract IntermediateResult fetchFromDatastore();
+    abstract IntermediateResult fetchFromDatastore();
 
     /**
      * Turns the intermediate results obtained from Datastore into the desired format of records.
@@ -87,48 +95,81 @@ public abstract class PreparedQuery<I, R extends Message> {
      * <p>Some complex {@code RecordQuery} instances may require additional in-memory processing
      * at this stage. Other queries typically only require the conversion of data format.
      */
-    protected abstract Iterable<R> toRecords(IntermediateResult result);
+    abstract Iterable<R> toRecords(IntermediateResult result);
 
-    protected final RecordQuery<I, R> query() {
+    /**
+     * Returns the original {@code RecordQuery}.
+     */
+    final RecordQuery<I, R> query() {
         return query;
     }
 
-    protected final TypeUrl recordType() {
+    /**
+     * Returns the type URL of the queried records.
+     */
+    final TypeUrl recordType() {
         return recordType;
     }
 
-    protected final ImmutableList<SortBy<?, R>> sorting() {
+    /**
+     * Returns the sorting directives of the original {@code RecordQuery}.
+     */
+    final ImmutableList<SortBy<?, R>> sorting() {
         return query.sorting();
     }
 
-    protected final boolean hasOrdering() {
+    /**
+     * Tells whether the original {@code RecordQuery} has sorting directives.
+     */
+    final boolean hasSorting() {
         return !sorting().isEmpty();
     }
 
-    protected final QueryPredicate<R> predicate() {
-        return query.subject().predicate();
+    /**
+     * Returns the predicate of the original {@code RecordQuery}.
+     */
+    final QueryPredicate<R> predicate() {
+        return query.subject()
+                    .predicate();
     }
 
-    protected final ImmutableSet<I> identifiers() {
+    /**
+     * Returns the identifiers which were specified by the original {@code RecordQuery}.
+     */
+    final ImmutableSet<I> identifiers() {
         return query.subject()
                     .id()
                     .values();
     }
 
-    protected final @Nullable Integer limit() {
+    /**
+     * Returns the limit set by the original {@code RecordQuery}.
+     *
+     * <p>Returns {@code null} if no limit was set.
+     */
+    final @Nullable Integer limit() {
         return query.limit();
     }
 
-    protected final FieldMask mask() {
+    /**
+     * Returns the field mask set by the original {@code RecordQuery}.
+     */
+    final FieldMask mask() {
         return query.mask();
     }
 
-    protected final FilterAdapter columnAdapter() {
+    /**
+     * Returns the adapter from the {@code RecordQuery} predicates
+     * to native Datastore {@code Filter}s.
+     */
+    final FilterAdapter columnAdapter() {
         return columnAdapter;
     }
 
-    protected final DsEntitySpec<I, R> spec() {
+    /**
+     * Returns the specification of the Datastore Entity to use in querying.
+     */
+    final DsEntitySpec<I, R> spec() {
         return spec;
     }
-
 }

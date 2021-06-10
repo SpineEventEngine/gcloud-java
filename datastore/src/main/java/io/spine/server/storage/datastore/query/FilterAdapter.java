@@ -27,8 +27,6 @@
 package io.spine.server.storage.datastore.query;
 
 import com.google.cloud.datastore.Value;
-import io.spine.client.Filter;
-import io.spine.query.Column;
 import io.spine.query.SubjectParameter;
 import io.spine.server.storage.ColumnMapping;
 import io.spine.server.storage.ColumnTypeMapping;
@@ -72,29 +70,4 @@ public final class FilterAdapter {
         Value<?> result = typeMapping.applyTo(paramValue);
         return result;
     }
-
-    /**
-     //     * Extracts the filter parameter from the given {@link Filter} and converts it into
-     //     * the Datastore {@link Value}.
-     //     *
-     //     * @param column
-     //     *         the {@link Column} targeted by the given filter
-     //     * @param columnFilter
-     //     *         the filter
-     //     * @return new instance of {@link Value} representing the value of the given filter
-     //     */
-//    Value<?> toValue(Column column, Filter columnFilter) {
-//        checkNotNull(column);
-//        checkNotNull(columnFilter);
-//
-//        Any filterValue = columnFilter.getValue();
-//        Class<?> columnClass = column.type();
-//        Object filterValueUnpacked = TypeConverter.toObject(filterValue, columnClass);
-//
-//        ColumnTypeMapping<?, ? extends Value<?>> typeMapping =
-//                columnMapping.of(filterValueUnpacked.getClass());
-//
-//        Value<?> result = typeMapping.applyTo(filterValueUnpacked);
-//        return result;
-//    }
 }

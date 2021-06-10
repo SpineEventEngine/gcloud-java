@@ -83,7 +83,6 @@ public final class DsLookup<I, R extends Message> {
                     .isEmpty()) {
             return new DsLookupByIds<>(datastore, query, adapter, spec);
         }
-
         return new DsLookupByQueries<>(datastore, query, adapter, spec);
     }
 }

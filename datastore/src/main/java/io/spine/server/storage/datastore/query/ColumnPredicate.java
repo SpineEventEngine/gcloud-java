@@ -42,14 +42,25 @@ import java.util.function.Predicate;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Test if a Datastore entity matches query parameters.
+ * Tests if a Datastore Entity matches the parameters defined
+ * by the {@linkplain Subject query subject}.
+ *
+ * @implNote The methods of this type rely upon the provided instance of {@link
+ *         FilterAdapter}, therefore cannot be made {@code static}.
  */
 final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
 
     private final Subject<I, R> querySubject;
-
     private final FilterAdapter adapter;
 
+    /**
+     * Creates a new predicate instance.
+     *
+     * @param querySubject
+     *         a subject of the {@code RecordQuery} to test against
+     * @param adapter
+     *         an adapter of values of the query parameters to Datastore-native types
+     */
     ColumnPredicate(Subject<I, R> querySubject, FilterAdapter adapter) {
         this.querySubject = querySubject;
         this.adapter = adapter;
@@ -68,10 +79,11 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     }
 
     private boolean testPredicate(QueryPredicate<R> predicate, Entity entity) {
-        boolean match;
         LogicalOperator operator = predicate.operator();
         ImmutableList<SubjectParameter<?, ?, ?>> parameters = predicate.allParams();
         ImmutableList<QueryPredicate<R>> children = predicate.children();
+
+        boolean match;
         switch (operator) {
             case AND:
                 match = checkAnd(entity, parameters, children);
@@ -87,43 +99,65 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
         return !match;
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")    /* To avoid multiple similar methods. */
     private boolean checkAnd(Entity entity,
                              ImmutableList<SubjectParameter<?, ?, ?>> params,
                              ImmutableList<QueryPredicate<R>> children) {
-        for (SubjectParameter<?, ?, ?> param : params) {
-            boolean matches = checkParamValue(param, entity);
-            if (!matches) {
-                return false;
-            }
+        if (checkAndParams(entity, params)) {
+            return false;
         }
+        return !checkAndChildren(entity, children);
+    }
+
+    private boolean checkAndChildren(Entity entity, ImmutableList<QueryPredicate<R>> children) {
         for (QueryPredicate<R> child : children) {
             boolean matches = testPredicate(child, entity);
             if (!matches) {
-                return false;
+                return true;
             }
         }
-
-        return true;
+        return false;
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")    /* To avoid multiple similar methods. */
+    private boolean checkAndParams(Entity entity, ImmutableList<SubjectParameter<?, ?, ?>> params) {
+        for (SubjectParameter<?, ?, ?> param : params) {
+            boolean matches = checkParamValue(param, entity);
+            if (!matches) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean checkOr(Entity entity,
                             ImmutableList<SubjectParameter<?, ?, ?>> params,
                             ImmutableList<QueryPredicate<R>> children) {
-        for (SubjectParameter<?, ?, ?> param : params) {
-            boolean matches = checkParamValue(param, entity);
-            if (matches) {
-                return true;
-            }
+        if (checkOrParams(entity, params)) {
+            return true;
         }
+        if (checkOrChildren(entity, children)) {
+            return true;
+        }
+        return params.isEmpty();
+    }
+
+    private boolean checkOrChildren(Entity entity, ImmutableList<QueryPredicate<R>> children) {
         for (QueryPredicate<R> child : children) {
             boolean matches = testPredicate(child, entity);
             if (matches) {
                 return true;
             }
         }
-        return params.isEmpty();
+        return false;
+    }
+
+    private boolean checkOrParams(Entity entity, ImmutableList<SubjectParameter<?, ?, ?>> params) {
+        for (SubjectParameter<?, ?, ?> param : params) {
+            boolean matches = checkParamValue(param, entity);
+            if (matches) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean checkParamValue(SubjectParameter<?, ?, ?> parameter, Entity entity) {
