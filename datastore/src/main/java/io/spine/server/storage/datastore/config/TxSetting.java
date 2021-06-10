@@ -34,7 +34,7 @@ import io.spine.server.storage.datastore.DatastoreStorageFactory;
  * transactions for reads and writes.
  *
  * <p>This type is internal. Framework users may turn transactions on for a particular storage,
- * by calling {@link DatastoreStorageFactory.Builder#enableTransactions(Class)
+ * by calling {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#enableTransactions(Class)
  * DatastoreStorageFactory.newBuilder().enableTransactions(recordType)}.
  */
 @Internal

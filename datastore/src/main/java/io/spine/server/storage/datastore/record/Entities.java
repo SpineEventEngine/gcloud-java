@@ -128,8 +128,8 @@ public final class Entities {
     }
 
     /**
-     * Creates an incomplete {@link Entity.Builder} with given {@link Key} and from given
-     * proto {@code Message}.
+     * Creates an incomplete {@link com.google.datastore.v1.Entity.Builder} with given {@link Key}
+     * and from the given proto {@code Message}.
      *
      * @param message
      *         source of data to be put into the {@link Entity}
