@@ -27,6 +27,8 @@
 package io.spine.server.storage.datastore.given;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.entity.storage.EntityRecordSpec;
+import io.spine.server.projection.Projection;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
@@ -52,5 +54,17 @@ public final class TestRecordSpec {
         return new MessageRecordSpec<>(
                 StgProjectId.class, StgProject.class, StgProject::getId, ImmutableSet.of()
         );
+    }
+
+    /**
+     * Creates a new {@code EntityRecordSpec} describing how instances of {@link ProjectDetails}
+     * projection are stored.
+     */
+    public static EntityRecordSpec<StgProjectId, StgProject, ProjectDetails> projectDetailsSpec() {
+        return EntityRecordSpec.of(ProjectDetails.class);
+    }
+
+    private static class ProjectDetails
+            extends Projection<StgProjectId, StgProject, StgProject.Builder> {
     }
 }
