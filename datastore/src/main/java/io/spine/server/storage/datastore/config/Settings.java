@@ -48,7 +48,8 @@ import static java.util.Optional.empty;
  * @param <B>
  *         the type of the builder of the {@code T}-typed settings class
  */
-class Settings<S, T, B> {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")    /* By design. */
+abstract class Settings<S, T, B> {
 
     /**
      * Values of settings per the type of the records served by the configured storage.
