@@ -30,6 +30,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Identifier;
+import io.spine.server.ContextSpec;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
@@ -46,6 +47,7 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -65,7 +67,8 @@ final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
     @BeforeEach
     void setUp() {
         factory.setUp();
-        registry = new DsShardedWorkRegistry(factory);
+        ContextSpec context = singleTenant(DsShardedWorkRegistryTest.class.getName());
+        registry = new DsShardedWorkRegistry(factory, context);
     }
 
     @AfterEach

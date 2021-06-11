@@ -28,6 +28,7 @@ package io.spine.server.storage.datastore.delivery;
 
 import com.google.protobuf.Duration;
 import io.spine.logging.Logging;
+import io.spine.server.ContextSpec;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.AbstractWorkRegistry;
 import io.spine.server.delivery.ShardIndex;
@@ -47,8 +48,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * the session is {@linkplain #pickUp(ShardIndex, NodeId) picked up}, the corresponding
  * {@code Entity} in the Datastore is updated.
  *
- * <p>It is recommended to use this implementation with Cloud Firestore in Datastore mode,
- * as it provides the strong consistency for queries.
+ * <p>This storage uses transactions for read and write operations. It is also recommended to use
+ * this implementation with Cloud Firestore in Datastore mode, as it enforces serializable isolation
+ * for transactions.
  */
 public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Logging {
 
@@ -57,14 +59,20 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
     /**
      * Creates an instance of registry using the {@link DatastoreStorageFactory} passed.
      *
-     * <p>The storage initialized by this registry is always single-tenant, since its
-     * records represent the application-wide registry of server nodes, which aren't split
-     * by tenant.
+     * <p>The storage initialized by this registry serves the records representing
+     * the application-wide registry of server nodes and their respective shard deliveries.
+     * Therefore, it is recommended to create this registry in scope of a single-tenant
+     * system-internal Bounded Context.
+     *
+     * @param factory
+     *         factory to create a record storage for the registry
+     * @param context
+     *         specification of the Bounded Context in which the created storage will reside
      */
-    public DsShardedWorkRegistry(DatastoreStorageFactory factory) {
+    public DsShardedWorkRegistry(DatastoreStorageFactory factory, ContextSpec context) {
         super();
         checkNotNull(factory);
-        this.storage = new DsSessionStorage(factory);
+        this.storage = new DsSessionStorage(factory, context);
     }
 
     /**

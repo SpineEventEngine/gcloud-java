@@ -50,6 +50,14 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A Datastore-based storage which contains {@code ShardSessionRecord}s.
+ *
+ * <p>This storage serves the records on shard delivery sessions. As long as
+ * {@link io.spine.server.delivery.Delivery Delivery} is a system routine that typically serves
+ * several Domain Bounded Contexts, it is recommended to make this storage a single-tenant one.
+ *
+ * <p>As all storages require a definition of the Bounded Context to which they belong,
+ * library users are required to provide such for this storage as well. In most cases, this
+ * will be a system-internal Bounded Context describing the Delivery.
  */
 public final class DsSessionStorage
         extends DsRecordStorage<ShardIndex, ShardSessionRecord> {
@@ -60,23 +68,30 @@ public final class DsSessionStorage
     /**
      * Creates a new instance of this storage.
      *
+     * <p>Unlike other storages, this one typically resides in a system-internal Bounded Context
+     * which describes Delivery and other system routines. Library users are required to supply
+     * the reference to such a context, as it is most likely initialized prior to creating
+     * this storage.
+     *
      * @param factory
      *         the storage factory on top of which this storage is to be created
+     * @param context
+     *         the Bounded Context in scope of which this storage is created
      */
     @SuppressWarnings("WeakerAccess")   /* This ctor is a part of public API. */
-    public DsSessionStorage(DatastoreStorageFactory factory) {
-        super(configureWith(factory));
+    public DsSessionStorage(DatastoreStorageFactory factory, ContextSpec context) {
+        super(configureWith(factory, context));
         this.spec = messageSpec();
     }
 
     private static StorageConfiguration<ShardIndex, ShardSessionRecord>
-    configureWith(DatastoreStorageFactory factory) {
+    configureWith(DatastoreStorageFactory factory, ContextSpec context) {
         DatastoreWrapper wrapper = factory.systemWrapperFor(DsSessionStorage.class, multitenant);
         StorageConfiguration<ShardIndex, ShardSessionRecord> config =
                 StorageConfiguration.<ShardIndex, ShardSessionRecord>newBuilder()
                         .withDatastore(wrapper)
                         .withRecordSpec(newRecordSpec())
-                        .withContext(ContextSpec.multitenant("System"))
+                        .withContext(context)
                         .withMapping(factory.columnMapping())
                         .withTxSetting(TxSetting.enabled())
                         .build();
