@@ -27,10 +27,12 @@
 package io.spine.server.storage.datastore.query;
 
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Value;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.client.Filter;
+import io.spine.query.ComparisonOperator;
 import io.spine.query.QueryPredicate;
 import io.spine.query.SubjectParameter;
 import io.spine.server.storage.ColumnMapping;
@@ -156,7 +158,7 @@ final class DsFilters {
         return group;
     }
 
-    private static StructuredQuery.PropertyFilter
+    private static PropertyFilter
     createFilter(SubjectParameter<?, ?, ?> parameter, ColumnMapping<Value<?>> mapping) {
         checkNotNull(parameter);
         checkNotNull(mapping);
@@ -166,19 +168,25 @@ final class DsFilters {
         String columnName = parameter.column()
                                      .name()
                                      .value();
-        switch (parameter.operator()) {
+        PropertyFilter result = asFilter(columnName, parameter.operator(), value);
+        return result;
+    }
+
+    private static PropertyFilter
+    asFilter(String column, ComparisonOperator operator, Value<?> value) {
+        switch (operator) {
             case EQUALS:
-                return eq(columnName, value);
+                return eq(column, value);
             case GREATER_THAN:
-                return gt(columnName, value);
+                return gt(column, value);
             case LESS_THAN:
-                return lt(columnName, value);
+                return lt(column, value);
             case GREATER_OR_EQUALS:
-                return ge(columnName, value);
+                return ge(column, value);
             case LESS_OR_EQUALS:
-                return le(columnName, value);
+                return le(column, value);
             default:
-                throw new IllegalStateException(parameter.operator().name());
+                throw new IllegalStateException(operator.name());
         }
     }
 }
