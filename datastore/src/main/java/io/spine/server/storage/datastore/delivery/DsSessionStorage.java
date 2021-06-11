@@ -150,8 +150,8 @@ public final class DsSessionStorage
             tx.createOrUpdate(entity);
             tx.commit();
         } catch (RuntimeException e) {
-            throw newIllegalStateException(e, "Error writing a `ShardSessionRecord`" +
-                    " in a transaction.");
+            throw newIllegalStateException(e,
+                                           "Cannot write a `ShardSessionRecord` in a transaction.");
         }
     }
 
