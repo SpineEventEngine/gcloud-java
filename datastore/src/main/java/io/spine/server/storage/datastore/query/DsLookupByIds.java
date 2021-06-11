@@ -104,12 +104,11 @@ final class DsLookupByIds<I, R extends Message> extends PreparedQuery<I, R> {
     }
 
     private Predicate<Entity> columnPredicate() {
-        if (!(predicate().allParams()
-                         .isEmpty() && predicate().children()
-                                                  .isEmpty())) {
-            return new ColumnPredicate<>(query().subject(), columnAdapter());
+        if(predicate().isEmpty()) {
+            return entity -> true;
         }
-        return entity -> true;
+        ColumnPredicate<I, R> result = new ColumnPredicate<>(query().subject(), columnAdapter());
+        return result;
     }
 
     private List<@Nullable Entity> readList(Iterable<I> ids) {
