@@ -41,7 +41,6 @@ buildscript {
     io.spine.internal.gradle.doForceVersions(configurations)
 
     val spineBaseVersion: String by extra
-    val kotlinVersion = io.spine.internal.dependency.Kotlin.version
 
     dependencies {
         classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
@@ -57,7 +56,6 @@ buildscript {
     }
 }
 
-@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     `java-library`
     kotlin("jvm") version io.spine.internal.dependency.Kotlin.version
@@ -65,6 +63,7 @@ plugins {
     io.spine.internal.dependency.Protobuf.GradlePlugin.apply {
         id(id) version version
     }
+    @Suppress("RemoveRedundantQualifierName") // Cannot use imported things here.
     io.spine.internal.dependency.ErrorProne.GradlePlugin.apply {
         id(id) version version
     }
