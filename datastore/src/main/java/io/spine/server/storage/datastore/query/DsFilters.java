@@ -126,10 +126,7 @@ final class DsFilters {
             StructuredQuery.Filter group = handleConjunctiveGroup(dnf, mapping);
             result.add(group);
         } else {
-            checkState(dnf.allParams()
-                          .isEmpty(),
-                       "Top-level disjunctive predicate in DNF " +
-                               "must not have its own parameters.");
+            ensureNoParametersIn(dnf);
             ImmutableList<QueryPredicate<R>> children = dnf.children();
             for (QueryPredicate<R> child : children) {
                 StructuredQuery.Filter group = handleConjunctiveGroup(child, mapping);
@@ -137,6 +134,23 @@ final class DsFilters {
             }
         }
         return result.build();
+    }
+
+    /**
+     * Checks that the passed predicates has no parameters.
+     *
+     * <p>This check makes sense for the top-level predicates of the disjunctive expression,
+     * in case it has been previously converted to disjunctive normal form. Instead of parameters,
+     * it should only have child predicates. E.g. {@code (A && B) || (C && D && E) || ...}
+     *
+     * <p>If the condition fails, this method throws an {@link IllegalStateException}.
+     */
+    private static <R extends Message>
+    void ensureNoParametersIn(QueryPredicate<R> predicate) throws IllegalStateException {
+        boolean noParameters = predicate.allParams()
+                                        .isEmpty();
+        checkState(noParameters,
+                   "Top-level disjunctive predicate in DNF must not have its own parameters.");
     }
 
     private static <R extends Message> StructuredQuery.Filter
