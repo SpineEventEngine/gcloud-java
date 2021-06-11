@@ -38,8 +38,8 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * to the {@linkplain io.spine.server.storage.datastore.DatastoreStorageFactory Datastore
  * storage factory}.
  *
- * <p>This type is internal. The library users are able to supply the custom layout
- * for the stored records via
+ * <p>This type is internal. The library users are able to supply their custom layouts
+ * for stored records via
  * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#organizeRecords(Class,
  * RecordLayout)
  * DatastoreStorageFactory.newBuilder().organizeRecords(...)}.
@@ -77,7 +77,7 @@ public final class RecordLayouts
      * @implNote This method relies on the fact that the layout registered for the
      *         storage of {@code <R>}-typed records with {@code <I>}-typed identifiers has the
      *         corresponding generic parameters. Therefore, a plain class-cast is performed
-     *         when obtaining. If that fails, an exception is thrown.
+     *         when obtaining. If that fails, the exception is thrown.
      */
     public <I, R extends Message> RecordLayout<I, R> find(Class<? extends Message> domainType) {
         Optional<RecordLayout<?, ?>> optional = findValue(domainType);
@@ -117,11 +117,14 @@ public final class RecordLayouts
         try {
             layout = (RecordLayout<I, R>) raw;
         } catch (Exception e) {
-            throw newIllegalArgumentException(e,
-                                              "Error using the provided storage layout" +
-                                                      " for type `%s`.", domainType);
+            throw andExplainWhy(e, domainType);
         }
         return layout;
+    }
+
+    private static IllegalArgumentException andExplainWhy(Exception e, Class<?> domainType) {
+        throw newIllegalArgumentException(
+                e, "Error using the provided storage layout for type `%s`.", domainType);
     }
 
     /**
