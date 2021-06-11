@@ -69,8 +69,8 @@ final class DsFilters {
      * <p>The returned {@code Collection} contains the same predicate as the passed
      * {@code Collection} of query parameters. The difference is in
      * <ul>
-     *     <li>type: from a {@code QueryPredicate} to Datastore {@link Filter};
-     *     <li>format: all the resulting {@link Filter}s are conjunctive (as Datastore does not
+     *     <li>type: from a {@code QueryPredicate} to Datastore {@code Filter};
+     *     <li>format: all the resulting {@code Filter}s are conjunctive (as Datastore does not
      *         support disjunction) and are related with each other in the disjunctive way.
      * </ul>
      *
@@ -78,20 +78,19 @@ final class DsFilters {
      *
      * <p>Given query predicates {@code p1}, {@code p2}, {@code p3}, {@code p4}, {@code p5} passed
      * into the method within the following construction: {@code p1 & (p2 | p3) & (p4 | p5)}. Then
-     * the resulting {@code Collection} of {@linkplain Filter Filters} will be constructed as
+     * the resulting {@code Collection} of {@code Filters} will be constructed as
      * {@code (p1 & p2 & p4) | (p1 & p2 & p5) | (p1 & p3 & p4) | (p1 & p3 & p5)}.
      *
      * <p>The separate conjunctive groups (e.g. {@code (p1 & p2 & p4)}) in the result
-     * {@code Collection} are placed into a single {@link Filter} instances one per group.
+     * {@code Collection} are placed into a single {@code Filter} instances one per group.
      *
      * <p>In other words, the predicate expression is brought into the
      * <a href="https://en.wikipedia.org/wiki/Disjunctive_normal_form">disjunctive normal form</a>.
      *
-     * <p>Note that by the convention, the distinct
-     * {@link QueryPredicate} instances are considered to be joined by the {@code &}
-     * operator. but the resulting {@link Filter} instances are specified to be joined with
-     * {@code |} operator, so that the merged result of executing the queries with each of
-     * the filters will be the result of the whole expression.
+     * <p>Note that by the convention, the distinct {@code QueryPredicate} instances
+     * are considered to be joined by the {@code &} operator. However, the resulting {@code Filter}
+     * instances are specified to be joined with {@code |} operator, so that the merged result
+     * of executing the queries with each of the filters will be the result of the whole expression.
      *
      * <p>If the given parameter {@code Collection} is empty, and empty {@code Collection}
      * is returned.
@@ -100,7 +99,7 @@ final class DsFilters {
      *         the predicate to convert
      * @param adapter
      *         an adapter performing the required type conversions
-     * @return the equivalent expression of in Datastore {@link Filter} instances
+     * @return the equivalent expression of in Datastore {@code Filter} instances
      */
     static <R extends Message> Collection<StructuredQuery.Filter>
     fromPredicate(QueryPredicate<R> predicate, FilterAdapter adapter) {
