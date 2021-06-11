@@ -108,7 +108,7 @@ public final class CustomStorages
         }
 
         @Override
-        Builder asThis() {
+        Builder self() {
             return this;
         }
 

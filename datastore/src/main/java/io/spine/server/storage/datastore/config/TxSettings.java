@@ -93,7 +93,7 @@ public final class TxSettings
         }
 
         @Override
-        Builder asThis() {
+        Builder self() {
             return this;
         }
     }

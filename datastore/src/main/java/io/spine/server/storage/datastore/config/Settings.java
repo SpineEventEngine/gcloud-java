@@ -93,7 +93,7 @@ class Settings<S, T, B> {
         /**
          * Return the type of a particular builder implementation, for call chaining.
          */
-        abstract B asThis();
+        abstract B self();
 
         /**
          * Adds a setting the specific type of stored record.
@@ -114,7 +114,7 @@ class Settings<S, T, B> {
             checkNotNull(recordType);
             checkNotNull(value);
             values.put(recordType, value);
-            return asThis();
+            return self();
         }
 
         /**

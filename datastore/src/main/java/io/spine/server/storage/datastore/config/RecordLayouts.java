@@ -135,7 +135,7 @@ public final class RecordLayouts
         }
 
         @Override
-        Builder asThis() {
+        Builder self() {
             return this;
         }
 
