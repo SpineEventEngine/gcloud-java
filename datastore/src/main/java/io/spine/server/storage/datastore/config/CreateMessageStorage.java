@@ -29,7 +29,7 @@ package io.spine.server.storage.datastore.config;
 import com.google.protobuf.Message;
 
 /**
- * A callback to create a storage for plain {@code Message} records.
+ * A function to create a storage for plain {@code Message} records.
  *
  * @param <I>
  *         the type of record identifiers

@@ -29,11 +29,12 @@ package io.spine.server.storage.datastore.config;
 import io.spine.server.entity.EntityRecord;
 
 /**
- * A callback to create a storage for {@link io.spine.server.entity.Entity Entity} states.
+ * A function to create a storage for {@link io.spine.server.entity.Entity Entity} states.
  *
  * @param <I>
  *         the type of {@code Entity} identifiers
  */
+@FunctionalInterface
 public interface CreateEntityStorage<I> extends CreateStorage<I, EntityRecord> {
 
 }
