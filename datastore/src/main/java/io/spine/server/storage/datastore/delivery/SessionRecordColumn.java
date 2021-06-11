@@ -36,10 +36,15 @@ import static io.spine.query.RecordColumn.create;
 
 /**
  * The definitions of record columns to store along with the {@link ShardSessionRecord}.
+ *
+ * @apiNote This type is made {@code public} to allow library users query the stored
+ *         {@code ShardSessionRecord}s via storage API, in case they need to read
+ *         the storage contents manually.
  */
 @RecordColumns(ofType = ShardSessionRecord.class)
-@SuppressWarnings("BadImport")  /* Using `create` API for columns for brevity.  */
-final class SessionRecordColumn {
+@SuppressWarnings({"BadImport" /* Using `create` API for columns for brevity.  */,
+        "WeakerAccess" /* See API note. */})
+public final class SessionRecordColumn {
 
     public static final RecordColumn<ShardSessionRecord, Integer>
             shard = create("shard", Integer.class, (r) -> r.getIndex()
@@ -67,6 +72,9 @@ final class SessionRecordColumn {
     private SessionRecordColumn() {
     }
 
+    /**
+     * Returns the definitions of all columns.
+     */
     public static ImmutableList<RecordColumn<ShardSessionRecord, ?>> definitions() {
         return ImmutableList.of(shard, total_shards, node, when_last_picked);
     }
