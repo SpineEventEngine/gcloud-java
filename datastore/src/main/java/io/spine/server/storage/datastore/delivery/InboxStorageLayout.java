@@ -107,7 +107,7 @@ public final class InboxStorageLayout
         }
         for (QueryPredicate<InboxMessage> child : predicate.children()) {
             Optional<ShardIndex> maybeResult = findShardIn(child);
-            if(maybeResult.isPresent()) {
+            if (maybeResult.isPresent()) {
                 return maybeResult;
             }
         }
