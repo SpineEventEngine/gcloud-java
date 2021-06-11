@@ -50,15 +50,11 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             force(
-                "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
-                "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion"
+                io.spine.internal.dependency.Kotlin.stdLib,
+                io.spine.internal.dependency.Kotlin.stdLibCommon
             )
         }
     }
-}
-
-repositories {
-    repositories.applyStandard()
 }
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
@@ -98,6 +94,7 @@ allprojects {
     group = "io.spine.gcloud"
     version = extra["versionToPublish"]!!
 
+    repositories.applyStandard()
 }
 
 subprojects {
@@ -118,7 +115,6 @@ subprojects {
             from(slowTests(project))
             from(testOutput(project))
             from(javadocOptions(project))
-
         }
     }
 
@@ -131,7 +127,6 @@ subprojects {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    repositories.applyStandard()
     // Required to fetch `androidx.annotation:annotation:1.1.0`,
     // which is a transitive dependency of `com.google.cloud:google-cloud-datastore`.
     repositories {
