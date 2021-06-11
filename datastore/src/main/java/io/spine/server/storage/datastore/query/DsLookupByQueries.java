@@ -47,7 +47,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static java.util.stream.Collectors.toList;
 
 /**
  * An {@code Entity} lookup using {@linkplain QueryPredicate Spine query predicates}.
@@ -144,7 +143,7 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
         List<StructuredQuery<Entity>> queries = toDatastoreFilters(rootPredicate)
                 .stream()
                 .map(new QueryWithFilter(query, kind))
-                .collect(toList());
+                .collect(toImmutableList());
         return queries;
     }
 
