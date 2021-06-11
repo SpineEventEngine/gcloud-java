@@ -53,7 +53,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract class DatastoreMedium {
 
-    private final DatastoreReaderWriter datastoreReaderWriter;
+    private final DatastoreReaderWriter writer;
     private final NamespaceSupplier namespaceSupplier;
 
     /**
@@ -61,7 +61,7 @@ public abstract class DatastoreMedium {
      * the provider of the current Datastore namespace.
      */
     protected DatastoreMedium(DatastoreReaderWriter writer, NamespaceSupplier supplier) {
-        datastoreReaderWriter = checkNotNull(writer);
+        this.writer = checkNotNull(writer);
         namespaceSupplier = checkNotNull(supplier);
     }
 
@@ -69,7 +69,7 @@ public abstract class DatastoreMedium {
      * Returns the low-level reader-writer implementation.
      */
     protected final DatastoreReaderWriter storage() {
-        return datastoreReaderWriter;
+        return writer;
     }
 
     /**
