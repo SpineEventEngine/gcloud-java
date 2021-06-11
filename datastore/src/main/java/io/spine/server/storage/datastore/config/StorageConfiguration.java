@@ -125,6 +125,7 @@ public final class StorageConfiguration<I, R extends Message> {
      *         the type of records persisted in the configured storage
      */
     public static class Builder<I, R extends Message> {
+
         private ContextSpec context;
         private DatastoreWrapper datastore;
         private DsEntitySpec<I, R> recordSpec;
@@ -242,7 +243,8 @@ public final class StorageConfiguration<I, R extends Message> {
 
         private static void ensureSet(Object setting) {
             checkNotNull(setting, "`%s` must be set.",
-                         setting.getClass().getSimpleName());
+                         setting.getClass()
+                                .getSimpleName());
         }
 
         private void configureTxSetting() {
