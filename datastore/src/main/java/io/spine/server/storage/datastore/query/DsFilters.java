@@ -109,7 +109,7 @@ final class DsFilters {
         checkNotNull(adapter);
 
         Collection<StructuredQuery.Filter> results;
-        if(predicate.isEmpty()) {
+        if (predicate.isEmpty()) {
             results = emptySet();
         } else {
             results = toDsFilters(predicate, adapter);
@@ -142,7 +142,8 @@ final class DsFilters {
     private static <R extends Message> StructuredQuery.Filter
     handleConjunctiveGroup(QueryPredicate<R> predicate, ColumnMapping<Value<?>> mapping) {
 
-        checkState(predicate.children().isEmpty(),
+        checkState(predicate.children()
+                            .isEmpty(),
                    "Children collection must be empty for a conjunctive predicate group.");
         ImmutableList<SubjectParameter<?, ?, ?>> parameters = predicate.allParams();
         List<StructuredQuery.Filter> filters =
@@ -152,10 +153,20 @@ final class DsFilters {
 
         checkState(!filters.isEmpty());
         StructuredQuery.Filter first = filters.get(0);
-        StructuredQuery.Filter[] other = filters.subList(1, filters.size())
-                                                .toArray(new StructuredQuery.Filter[filters.size() - 1]);
+        StructuredQuery.Filter[] other = skipFirst(filters);
         StructuredQuery.Filter group = and(first, other);
         return group;
+    }
+
+    /**
+     * Returns the contents of the passed list as a new array, but does not include
+     * the first element of the list into the result.
+     */
+    private static StructuredQuery.Filter[] skipFirst(List<StructuredQuery.Filter> filters) {
+        int size = filters.size();
+        List<StructuredQuery.Filter> sublist = filters.subList(1, size);
+        StructuredQuery.Filter[] result = sublist.toArray(new StructuredQuery.Filter[size - 1]);
+        return result;
     }
 
     private static PropertyFilter
