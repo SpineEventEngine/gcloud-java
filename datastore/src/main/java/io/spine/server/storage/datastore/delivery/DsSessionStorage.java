@@ -107,10 +107,10 @@ public final class DsSessionStorage
     private static MessageRecordSpec<ShardIndex, ShardSessionRecord> messageSpec() {
         @SuppressWarnings("ConstantConditions")     /* Protobuf getters never return `nulls`. */
         MessageRecordSpec<ShardIndex, ShardSessionRecord> spec =
-        new MessageRecordSpec<>(ShardIndex.class,
-                                ShardSessionRecord.class,
-                                ShardSessionRecord::getIndex,
-                                SessionRecordColumn.definitions());
+                new MessageRecordSpec<>(ShardIndex.class,
+                                        ShardSessionRecord.class,
+                                        ShardSessionRecord::getIndex,
+                                        SessionRecordColumn.definitions());
         return spec;
     }
 
