@@ -97,7 +97,6 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         return ImmutableSet.copyOf(allCreatedWrappers);
     }
 
-
     /**
      * Performs operations on setting up the local datastore.
      *
