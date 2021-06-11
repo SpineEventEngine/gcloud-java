@@ -219,14 +219,30 @@ public final class StorageConfiguration<I, R extends Message> {
             return this;
         }
 
+        /**
+         * Builds a new {@code StorageConfiguration} on top of this {@code Builder}.
+         *
+         * <p>The required fields are as follows:
+         * <ul>
+         *     <li>{@linkplain #withContext(ContextSpec) specification of the Bounded Context},
+         *     <li>{@linkplain #withDatastore(DatastoreWrapper) Datastore wrapper},
+         *     <li>{@linkplain #withRecordSpec(DsEntitySpec) specification of the stored record},
+         *     <li>{@linkplain #withMapping(ColumnMapping) column mapping}.
+         * </ul>
+         */
         public StorageConfiguration<I, R> build() {
-            checkNotNull(context, "`ContextSpec` must be set.");
-            checkNotNull(datastore, "`DatastoreWrapper` must be set.");
-            checkNotNull(recordSpec, "`DsRecordSpec` must be set.");
-            checkNotNull(columnMapping, "`ColumnMapping` must be set.");
+            ensureSet(context);
+            ensureSet(datastore);
+            ensureSet(recordSpec);
+            ensureSet(columnMapping);
 
             configureTxSetting();
             return new StorageConfiguration<>(this);
+        }
+
+        private static void ensureSet(Object setting) {
+            checkNotNull(setting, "`%s` must be set.",
+                         setting.getClass().getSimpleName());
         }
 
         private void configureTxSetting() {
