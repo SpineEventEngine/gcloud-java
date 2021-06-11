@@ -171,7 +171,7 @@ public final class DsSessionStorage
      *         an update to perform
      * @return a modified record, or {@code Optional.empty()} if the update could not be executed
      */
-    Optional<ShardSessionRecord> updateTransactionally(ShardIndex index, RecordUpdate update) {
+    Optional<ShardSessionRecord> updateTransactionally(ShardIndex index, PrepareForWrite update) {
         try (TransactionWrapper tx = newTransaction()) {
             Key key = keyOf(index);
             Optional<Entity> result = tx.read(key);
@@ -179,7 +179,7 @@ public final class DsSessionStorage
             @Nullable ShardSessionRecord existing =
                     result.map(this::toRecord)
                           .orElse(null);
-            Optional<ShardSessionRecord> updated = update.createOrUpdate(existing);
+            Optional<ShardSessionRecord> updated = update.prepare(existing);
             if (updated.isPresent()) {
                 ShardSessionRecord asRecord = updated.get();
                 tx.createOrUpdate(toEntity(asRecord));

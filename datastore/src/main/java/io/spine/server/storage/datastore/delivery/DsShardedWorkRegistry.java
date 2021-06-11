@@ -87,7 +87,7 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
         checkNotNull(index);
         checkNotNull(nodeId);
         Optional<ShardSessionRecord> result =
-                storage().updateTransactionally(index, new UpdateNodeIfAbsent(index, nodeId));
+                storage().updateTransactionally(index, new SetNodeIfAbsent(index, nodeId));
         return result.map(this::asSession);
     }
 

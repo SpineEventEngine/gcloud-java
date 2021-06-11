@@ -26,49 +26,25 @@
 
 package io.spine.server.storage.datastore.delivery;
 
-import io.spine.server.NodeId;
-import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardSessionRecord;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 
-import static io.spine.base.Time.currentTime;
-
 /**
- * Updates the {@code nodeId} for the {@link ShardSessionRecord} with the specified
- * {@link ShardIndex} if the record has not been picked by anyone.
- *
- * <p>If there is no such a record, creates a new record.
+ * A method object telling how to modify {@link ShardSessionRecord}s — depending on its content and
+ * the current state of the system — before it can be written to the storage.
  */
-final class UpdateNodeIfAbsent implements RecordUpdate {
-
-    private final ShardIndex index;
-    private final NodeId nodeToSet;
+interface PrepareForWrite {
 
     /**
-     * Creates the operation for the given shard index and node ID.
+     * Transforms the passed instance of {@code ShardSessionRecord} depending on its content.
+     *
+     * @param previous
+     *         the previous record currently residing in the storage, or {@code null}
+     *         if there is no such record
+     * @return a instance of the record ready to be written to the storage,
+     *         or {@code Optional.empty()} if no storage update should be performed
      */
-    UpdateNodeIfAbsent(ShardIndex index, NodeId node) {
-        this.index = index;
-        nodeToSet = node;
-    }
-
-    @Override
-    public Optional<ShardSessionRecord> createOrUpdate(@Nullable ShardSessionRecord previous) {
-        if (previous != null && previous.hasPickedBy()) {
-            return Optional.empty();
-        }
-        ShardSessionRecord.Builder builder =
-                previous == null
-                ? ShardSessionRecord.newBuilder()
-                        .setIndex(index)
-                : previous.toBuilder();
-
-        ShardSessionRecord updated =
-                builder.setPickedBy(nodeToSet)
-                       .setWhenLastPicked(currentTime())
-                       .vBuild();
-        return Optional.of(updated);
-    }
+    Optional<ShardSessionRecord> prepare(@Nullable ShardSessionRecord previous);
 }

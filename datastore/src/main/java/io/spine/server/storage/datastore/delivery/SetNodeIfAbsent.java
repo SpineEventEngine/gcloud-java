@@ -26,25 +26,50 @@
 
 package io.spine.server.storage.datastore.delivery;
 
+import io.spine.server.NodeId;
+import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardSessionRecord;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 
+import static io.spine.base.Time.currentTime;
+
 /**
- * A method object telling how to update {@link ShardSessionRecord}s depending on the current
- * state of the records in Datastore.
+ * Updates the {@code nodeId} for the {@link ShardSessionRecord} with the specified
+ * {@link ShardIndex} if the record has not been picked by anyone.
+ *
+ * <p>If {@code null} is passed, creates a new record, sets the node ID to it, and returns it
+ * as a result.
  */
-interface RecordUpdate {
+final class SetNodeIfAbsent implements PrepareForWrite {
+
+    private final ShardIndex index;
+    private final NodeId nodeToSet;
 
     /**
-     * Decides in which update the existing record should result.
-     *
-     * @param previous
-     *         the previous record currently residing in the storage, or {@code null}
-     *         if there is no such record
-     * @return a version of the record to write to the storage,
-     *         or {@code Optional.empty()} if no update should be performed
+     * Creates the operation for the given shard index and node ID.
      */
-    Optional<ShardSessionRecord> createOrUpdate(@Nullable ShardSessionRecord previous);
+    SetNodeIfAbsent(ShardIndex index, NodeId node) {
+        this.index = index;
+        nodeToSet = node;
+    }
+
+    @Override
+    public Optional<ShardSessionRecord> prepare(@Nullable ShardSessionRecord previous) {
+        if (previous != null && previous.hasPickedBy()) {
+            return Optional.empty();
+        }
+        ShardSessionRecord.Builder builder =
+                previous == null
+                ? ShardSessionRecord.newBuilder()
+                        .setIndex(index)
+                : previous.toBuilder();
+
+        ShardSessionRecord updated =
+                builder.setPickedBy(nodeToSet)
+                       .setWhenLastPicked(currentTime())
+                       .vBuild();
+        return Optional.of(updated);
+    }
 }
