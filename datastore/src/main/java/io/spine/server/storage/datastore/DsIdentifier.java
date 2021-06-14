@@ -51,7 +51,7 @@ public abstract class DsIdentifier extends StringTypeValue {
     }
 
     @Override
-    @SuppressWarnings("DuplicateStringLiteralInspection")       /* Common term used. */
+    @SuppressWarnings("DuplicateStringLiteralInspection")   /* Common term used. */
     public final String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("value", value())
