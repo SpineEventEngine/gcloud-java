@@ -106,7 +106,7 @@ public final class DsSessionStorage
 
     private static MessageRecordSpec<ShardIndex, ShardSessionRecord> messageSpec() {
         @SuppressWarnings("ConstantConditions")     /* Protobuf getters never return `nulls`. */
-        MessageRecordSpec<ShardIndex, ShardSessionRecord> spec =
+                MessageRecordSpec<ShardIndex, ShardSessionRecord> spec =
                 new MessageRecordSpec<>(ShardIndex.class,
                                         ShardSessionRecord.class,
                                         ShardSessionRecord::getIndex,
@@ -150,8 +150,8 @@ public final class DsSessionStorage
             tx.createOrUpdate(entity);
             tx.commit();
         } catch (RuntimeException e) {
-            throw newIllegalStateException(e,
-                                           "Cannot write a `ShardSessionRecord` in a transaction.");
+            throw newIllegalStateException(
+                    e, "Cannot write a `ShardSessionRecord` in a transaction.");
         }
     }
 
