@@ -85,15 +85,15 @@ final class DsFiltersTest {
         Collection<StructuredQuery.Filter> filters =
                 fromPredicate(subject.predicate(), adapter);
 
-        IterableSubject asserted = assertThat(filters);
+        IterableSubject assertFilters = assertThat(filters);
         String idStringColumnName = idString().name()
                                               .value();
-        asserted.contains(and(gt(idStringColumnName, idStringValue),
-                              eq(ArchivedColumn.instance()
-                                               .toString(), archivedValue)));
-        asserted.contains(and(lt(idStringColumnName, idStringValue),
-                              eq(DeletedColumn.instance()
-                                              .toString(), deletedValue)));
+        assertFilters.contains(and(gt(idStringColumnName, idStringValue),
+                                   eq(ArchivedColumn.instance()
+                                                    .toString(), archivedValue)));
+        assertFilters.contains(and(lt(idStringColumnName, idStringValue),
+                                   eq(DeletedColumn.instance()
+                                                   .toString(), deletedValue)));
     }
 
     @Test
@@ -104,10 +104,8 @@ final class DsFiltersTest {
 
         StgProject.Query query =
                 StgProject.query()
-                          .either(project -> project.idString()
-                                                    .isGreaterThan(idStringValue),
-                                  project -> project.dueDate()
-                                                    .isLessThan(dueDateValue))
+                          .either(project -> project.idString().isGreaterThan(idStringValue),
+                                  project -> project.dueDate().isLessThan(dueDateValue))
                           .build();
 
         FilterAdapter adapter = FilterAdapter.of(new DsColumnMapping());
@@ -115,14 +113,14 @@ final class DsFiltersTest {
         Collection<StructuredQuery.Filter> filters =
                 fromPredicate(subject.predicate(), adapter);
 
-        IterableSubject asserted = assertThat(filters);
+        IterableSubject assertFilters = assertThat(filters);
         String idStringColumnName = idString().name()
                                               .value();
         TimestampValue expectedDueDate = toTimestampValue(dueDateValue);
         String dueDateColumnName = dueDate().name()
                                             .value();
-        asserted.contains(gt(idStringColumnName, idStringValue));
-        asserted.contains(lt(dueDateColumnName, expectedDueDate));
+        assertFilters.contains(gt(idStringColumnName, idStringValue));
+        assertFilters.contains(lt(dueDateColumnName, expectedDueDate));
     }
 
     private static TimestampValue toTimestampValue(Timestamp dueDateValue) {
