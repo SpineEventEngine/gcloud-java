@@ -42,6 +42,9 @@ buildscript {
 
     val spineBaseVersion: String by extra
 
+    @Suppress("LocalVariableName")  // For better readability.
+    val Kotlin = io.spine.internal.dependency.Kotlin
+
     dependencies {
         classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
     }
@@ -49,8 +52,8 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             force(
-                io.spine.internal.dependency.Kotlin.stdLib,
-                io.spine.internal.dependency.Kotlin.stdLibCommon
+                Kotlin.stdLib,
+                Kotlin.stdLibCommon
             )
         }
     }
