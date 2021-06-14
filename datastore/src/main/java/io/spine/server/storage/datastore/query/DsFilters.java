@@ -49,6 +49,7 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.le;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.query.LogicalOperator.AND;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
@@ -126,7 +127,7 @@ final class DsFilters {
             StructuredQuery.Filter group = handleConjunctiveGroup(dnf, mapping);
             result.add(group);
         } else {
-            ensureNoParametersIn(dnf);
+            handleParameters(dnf.allParams(), mapping, result);
             ImmutableList<QueryPredicate<R>> children = dnf.children();
             for (QueryPredicate<R> child : children) {
                 StructuredQuery.Filter group = handleConjunctiveGroup(child, mapping);
@@ -137,20 +138,17 @@ final class DsFilters {
     }
 
     /**
-     * Checks that the passed predicates has no parameters.
-     *
-     * <p>This check makes sense for the top-level predicates of the disjunctive expression,
-     * in case it has been previously converted to disjunctive normal form. Instead of parameters,
-     * it should only have child predicates. E.g. {@code (A && B) || (C && D && E) || ...}
-     *
-     * <p>If the condition fails, this method throws an {@link IllegalStateException}.
+     * Converts each of the passed parameter to a distinct {@link StructuredQuery.Filter} according
+     * to the passed column mapping, and appends it to the result builder.
      */
-    private static <R extends Message>
-    void ensureNoParametersIn(QueryPredicate<R> predicate) throws IllegalStateException {
-        boolean noParameters = predicate.allParams()
-                                        .isEmpty();
-        checkState(noParameters,
-                   "Top-level disjunctive predicate in DNF must not have its own parameters.");
+    private static void handleParameters(ImmutableList<SubjectParameter<?, ?, ?>> parameters,
+                                         ColumnMapping<Value<?>> mapping,
+                                         ImmutableList.Builder<StructuredQuery.Filter> result) {
+        ImmutableList<PropertyFilter> filters = parameters
+                .stream()
+                .map(param -> createFilter(param, mapping))
+                .collect(toImmutableList());
+        result.addAll(filters);
     }
 
     private static <R extends Message> StructuredQuery.Filter

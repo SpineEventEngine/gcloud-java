@@ -27,7 +27,10 @@
 package io.spine.server.storage.datastore.query;
 
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.cloud.datastore.TimestampValue;
 import com.google.common.truth.IterableSubject;
+import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
 import io.spine.query.QueryPredicate;
@@ -40,6 +43,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
+import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.gt;
@@ -47,6 +51,7 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.le;
 import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.lt;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.query.DsFilters.fromPredicate;
+import static io.spine.test.storage.StgProject.Column.dueDate;
 import static io.spine.test.storage.StgProject.Column.idString;
 import static io.spine.testing.Assertions.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
@@ -61,8 +66,8 @@ final class DsFiltersTest {
     }
 
     @Test
-    @DisplayName("generate filters from query predicates with multiple `either()` groups")
-    void testCompositeParams() {
+    @DisplayName("generate filters from query predicates with multiple complex `either()` groups")
+    void testCompositeEither() {
         String idStringValue = "42";
         boolean archivedValue = true;
         boolean deletedValue = true;
@@ -89,6 +94,41 @@ final class DsFiltersTest {
         asserted.contains(and(lt(idStringColumnName, idStringValue),
                               eq(DeletedColumn.instance()
                                               .toString(), deletedValue)));
+    }
+
+    @Test
+    @DisplayName("generate filters from query predicates with multiple simple `either()` groups")
+    void testFlatEither() {
+        String idStringValue = "42";
+        Timestamp dueDateValue = Time.currentTime();
+
+        StgProject.Query query =
+                StgProject.query()
+                          .either(project -> project.idString()
+                                                    .isGreaterThan(idStringValue),
+                                  project -> project.dueDate()
+                                                    .isLessThan(dueDateValue))
+                          .build();
+
+        FilterAdapter adapter = FilterAdapter.of(new DsColumnMapping());
+        Subject<StgProjectId, StgProject> subject = query.subject();
+        Collection<StructuredQuery.Filter> filters =
+                fromPredicate(subject.predicate(), adapter);
+
+        IterableSubject asserted = assertThat(filters);
+        String idStringColumnName = idString().name()
+                                              .value();
+        TimestampValue expectedDueDate = toTimestampValue(dueDateValue);
+        String dueDateColumnName = dueDate().name()
+                                            .value();
+        asserted.contains(gt(idStringColumnName, idStringValue));
+        asserted.contains(lt(dueDateColumnName, expectedDueDate));
+    }
+
+    private static TimestampValue toTimestampValue(Timestamp dueDateValue) {
+        return TimestampValue.of(
+                ofTimeSecondsAndNanos(dueDateValue.getSeconds(), dueDateValue.getNanos())
+        );
     }
 
     @Test
