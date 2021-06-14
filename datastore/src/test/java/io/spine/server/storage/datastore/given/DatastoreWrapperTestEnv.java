@@ -71,7 +71,7 @@ public final class DatastoreWrapperTestEnv {
      * Returns the {@code Datastore} instance connected to the Datastore instance
      * running remotely.
      *
-     * <p>The connection to a remote Datastore instance is performed via default service
+     * <p>The connection to a remote Datastore instance is performed via the service
      * account defined by the {@code spine-dev.json} credential file.
      */
     public static Datastore remoteDatastore() {
