@@ -44,7 +44,7 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.config.CreateEntityStorage;
-import io.spine.server.storage.datastore.config.CreateMessageStorage;
+import io.spine.server.storage.datastore.config.CreateRecordStorage;
 import io.spine.server.storage.datastore.config.CreateStorage;
 import io.spine.server.storage.datastore.config.CustomStorages;
 import io.spine.server.storage.datastore.config.DsColumnMapping;
@@ -395,10 +395,12 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
          * asked to provide a storage for a specified record type.
          *
          * <p>If the record type is an {@link io.spine.server.entity.Entity Entity} state,
-         * please use {@link #useCustomStorage(Class, CreateEntityStorage)
-         * useCustomStorage(entityStateType, CreateEntityStorage)}.
+         * please use {@link #useEntityStorage(Class, CreateEntityStorage)
+         * useEntityStorage(entityStateType, CreateEntityStorage)}.
          *
-         * @param recordType
+         * @param id
+         *         the type of identifiers of the stored records
+         * @param record
          *         the stored type
          * @param callback
          *         a callback to create a custom storage
@@ -409,11 +411,13 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
          * @return this instance of {@code Builder}
          */
         @CanIgnoreReturnValue
+        @SuppressWarnings("unused") /* `id` parameter used to set `I` value explicitly. */
         public <I, R extends Message>
-        Builder useCustomStorage(Class<R> recordType, CreateMessageStorage<I, R> callback) {
-            checkNotNull(recordType);
+        Builder useRecordStorage(Class<I> id, Class<R> record, CreateRecordStorage<I, R> callback) {
+            checkNotNull(id);
+            checkNotNull(record);
             checkNotNull(callback);
-            customStorages.add(recordType, callback);
+            customStorages.add(record, callback);
             return this;
         }
 
@@ -422,8 +426,8 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
          * asked to provide a storage for a specified entity type.
          *
          * <p>If the record type is not an {@link io.spine.server.entity.Entity Entity} state,
-         * please use {@link #useCustomStorage(Class, CreateMessageStorage)
-         * useCustomStorage(recordType, CreateMessageStorage)}.
+         * please use {@link #useRecordStorage(Class, Class, CreateRecordStorage)
+         * useRecordStorage(idType, recordType, CreateRecordStorage)}.
          *
          * @param stateType
          *         the type of the stored Spine's Entity state
@@ -437,7 +441,7 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
          */
         @CanIgnoreReturnValue
         public <I, S extends EntityState<I>>
-        Builder useCustomStorage(Class<S> stateType, CreateEntityStorage<I> callback) {
+        Builder useEntityStorage(Class<S> stateType, CreateEntityStorage<I> callback) {
             checkNotNull(stateType);
             checkNotNull(callback);
             customStorages.add(stateType, callback);

@@ -43,8 +43,6 @@ import io.spine.server.storage.ColumnMapping;
 import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.datastore.config.CreateEntityStorage;
-import io.spine.server.storage.datastore.config.CreateMessageStorage;
 import io.spine.server.storage.datastore.given.DatastoreStorageFactoryTestEnv.DifferentTestEntity;
 import io.spine.server.storage.datastore.given.DatastoreStorageFactoryTestEnv.TestEntity;
 import io.spine.server.storage.datastore.given.TestEnvironment;
@@ -202,7 +200,7 @@ final class DatastoreStorageFactoryTest {
     class CustomStorage {
 
         @Test
-        @DisplayName("for plain Protobuf Message records")
+        @DisplayName("for plain Protobuf `Message` records")
         void plainRecord() {
             ContextSpec spec = ContextSpec.singleTenant(testName());
             InMemoryRecordStorage<StgProjectId, StgProject> customStorage =
@@ -211,9 +209,8 @@ final class DatastoreStorageFactoryTest {
             DatastoreStorageFactory factory = DatastoreStorageFactory
                     .newBuilder()
                     .setDatastore(TestDatastores.local())
-                    .useCustomStorage(StgProject.class,
-                                      (CreateMessageStorage<StgProjectId, StgProject>)
-                                              configuration -> customStorage)
+                    .useRecordStorage(StgProjectId.class, StgProject.class,
+                                      configuration -> customStorage)
                     .build();
             RecordStorage<StgProjectId, StgProject> actualStorage =
                     factory.createRecordStorage(spec, stgProjectSpec());
@@ -230,9 +227,8 @@ final class DatastoreStorageFactoryTest {
             DatastoreStorageFactory factory = DatastoreStorageFactory
                     .newBuilder()
                     .setDatastore(TestDatastores.local())
-                    .useCustomStorage(StgProject.class,
-                                      (CreateEntityStorage<StgProjectId>)
-                                              configuration -> customEntityStorage)
+                    .useEntityStorage(StgProject.class,
+                                      configuration -> customEntityStorage)
                     .build();
             RecordStorage<StgProjectId, EntityRecord> actualStorage =
                     factory.createRecordStorage(spec, projectDetailsSpec());

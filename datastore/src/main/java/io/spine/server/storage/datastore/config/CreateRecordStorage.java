@@ -33,10 +33,9 @@ import com.google.protobuf.Message;
  *
  * @param <I>
  *         the type of record identifiers
- * @param <M>
+ * @param <R>
  *         the type of {@code Message} records
  */
 @FunctionalInterface
-public interface CreateMessageStorage<I, M extends Message> extends CreateStorage<I, M> {
-
+public interface CreateRecordStorage<I, R extends Message> extends CreateStorage<I, R> {
 }

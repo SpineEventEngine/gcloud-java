@@ -40,11 +40,11 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>This type is internal. The library users are able to supply the custom storage implementation
  * per stored record type via
- * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#useCustomStorage(Class, CreateMessageStorage)
- * DatastoreStorageFactory.newBuilder().useCustomStorage(MessageClass, CreateMessageStorage)} for
+ * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#useRecordStorage(Class, Class, CreateRecordStorage)
+ * DatastoreStorageFactory.newBuilder().useRecordStorage(IdClass, RecordClass, CreateRecordStorage)} for
  * plain records
- * and {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#useCustomStorage(Class, CreateEntityStorage)
- * DatastoreStorageFactory.newBuilder().useCustomStorage(EntityStateClass, CreateEntityStorage)}
+ * and {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#useEntityStorage(Class, CreateEntityStorage)
+ * DatastoreStorageFactory.newBuilder().useEntityStorage(EntityStateClass, CreateEntityStorage)}
  * for Entities.
  */
 @Internal
