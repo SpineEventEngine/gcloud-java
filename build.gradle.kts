@@ -26,10 +26,10 @@
 
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.DependencyResolution
 import io.spine.internal.gradle.PublishingRepos
 import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyStandard
+import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.spinePublishing
 
@@ -135,17 +135,19 @@ subprojects {
         google()
     }
 
+    val gRpc = io.spine.internal.dependency.Grpc
+
     configurations.forceVersions()
     configurations {
         all {
             resolutionStrategy {
                 force(
-                    "io.grpc:grpc-api:${io.spine.internal.dependency.Grpc.version}",
-                    "io.grpc:grpc-protobuf-lite:${io.spine.internal.dependency.Grpc.version}",
-                    io.spine.internal.dependency.Grpc.core,
-                    io.spine.internal.dependency.Grpc.context,
-                    io.spine.internal.dependency.Grpc.stub,
-                    io.spine.internal.dependency.Grpc.protobuf,
+                    "io.grpc:grpc-api:${gRpc.version}",
+                    "io.grpc:grpc-protobuf-lite:${gRpc.version}",
+                    gRpc.core,
+                    gRpc.context,
+                    gRpc.stub,
+                    gRpc.protobuf,
 
                     "io.perfmark:perfmark-api:0.23.0",
 
@@ -154,7 +156,7 @@ subprojects {
             }
         }
     }
-    DependencyResolution.excludeProtobufLite(configurations)
+    configurations.excludeProtobufLite()
 
     val spineCoreVersion: String by extra
 
