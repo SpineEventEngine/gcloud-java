@@ -43,7 +43,7 @@ jobs:
         run: chmod +x ./scripts/install-gcloud.sh && ./scripts/install-gcloud.sh
 
       - name: Add the newly installed Google Cloud SDK to PATH
-        run: source $HOME/google-cloud-sdk/path.bash.inc && source ~/.bashrc
+        run: source ~/google-cloud-sdk/path.bash.inc && source ~/google-cloud-sdk/completion.bash.inc && source ~/.bashrc
 
       - name: Start Datastore emulator
         run: ./scripts/start-datastore.sh &
