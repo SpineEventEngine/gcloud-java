@@ -50,6 +50,10 @@ public final class FilterAdapter {
         this.columnMapping = columnMapping;
     }
 
+    /**
+     * Returns the column mapping used in transformation from the platform-specific values of
+     * query parameters to Datastore-native {@link Value}s.
+     */
     ColumnMapping<Value<?>> columnMapping() {
         return columnMapping;
     }
