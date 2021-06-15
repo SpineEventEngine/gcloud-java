@@ -35,6 +35,15 @@ jobs:
         env:
           GCS_CREDENTIALS_KEY: ${{ secrets.GCS_CREDENTIALS_KEY }}
 
+      - name: Install GCloud Tools utility
+        run: chmod +x ./scripts/install-gcloud.sh && ./scripts/install-gcloud.sh
+
+      - name: Add the newly installed GCloud SDK to PATH
+        run: source $HOME/google-cloud-sdk/path.bash.inc
+
+      - name: Start Datastore emulator
+        run: ./scripts/start-datastore.sh &
+
       - name: Publish artifacts to Maven
         run: ./gradlew build publish --stacktrace
         env:
