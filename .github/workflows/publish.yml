@@ -42,13 +42,16 @@ jobs:
       - name: Install Google Cloud SDK utility
         run: chmod +x ./scripts/install-gcloud.sh && ./scripts/install-gcloud.sh
 
-        # Also appends the `gcloud` utility to the PATH for this particular terminal session.
-      - name: Install and start the Datastore emulator
+        # Appends the `gcloud` utility to the PATH for this particular terminal session.
+      - name: Install the Datastore emulator
         run: >
           source ~/google-cloud-sdk/path.bash.inc
-          && source ~/google-cloud-sdk/completion.bash.inc
-          && source ~/.bashrc
           && gcloud components install cloud-datastore-emulator
+
+      # Appends the `gcloud` utility to the PATH for this particular terminal session.
+      - name: Start the Datastore emulator
+        run: >
+          source ~/google-cloud-sdk/path.bash.inc
           && ./scripts/start-datastore.sh &
 
       - name: Publish artifacts to Maven
