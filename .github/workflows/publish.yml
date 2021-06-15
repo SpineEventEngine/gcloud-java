@@ -46,7 +46,7 @@ jobs:
       - name: Install the Datastore emulator
         run: >
           source ~/google-cloud-sdk/path.bash.inc
-          && gcloud components install cloud-datastore-emulator
+          && gcloud components install cloud-datastore-emulator --quiet
 
       # Appends the `gcloud` utility to the PATH for this particular terminal session.
       - name: Start the Datastore emulator
@@ -54,8 +54,11 @@ jobs:
           source ~/google-cloud-sdk/path.bash.inc
           && ./scripts/start-datastore.sh &
 
+      # Appends the `gcloud` utility to the PATH for this particular terminal session.
       - name: Publish artifacts to Maven
-        run: ./gradlew build publish --stacktrace
+        run: >
+          source ~/google-cloud-sdk/path.bash.inc
+          ./gradlew build publish --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORMAL_GIT_HUB_PAGES_AUTHOR: developers@spine.io
