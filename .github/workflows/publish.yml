@@ -35,7 +35,6 @@ jobs:
         env:
           GCS_CREDENTIALS_KEY: ${{ secrets.GCS_CREDENTIALS_KEY }}
 
-        # Install the utility and override the
       - name: Install GCloud Tools utility
         run: chmod +x ./scripts/install-gcloud.sh && ./scripts/install-gcloud.sh
 
