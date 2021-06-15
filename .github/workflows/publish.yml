@@ -59,7 +59,7 @@ jobs:
       - name: Publish artifacts to Maven
         run: >
           source ~/google-cloud-sdk/path.bash.inc
-          ./gradlew build publish --stacktrace
+          && ./gradlew build publish --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORMAL_GIT_HUB_PAGES_AUTHOR: developers@spine.io
