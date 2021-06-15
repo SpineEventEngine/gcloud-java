@@ -40,4 +40,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORMAL_GIT_HUB_PAGES_AUTHOR: developers@spine.io
-          REPO_SLUG: SpineEventEngine/base
+          REPO_SLUG: SpineEventEngine/gcloud-java
