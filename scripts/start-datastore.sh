@@ -26,4 +26,5 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+export JAVA="java -Xms512m -Xmx4g"
 gcloud beta emulators datastore start --project=test-project --consistency 1.0 --no-store-on-disk

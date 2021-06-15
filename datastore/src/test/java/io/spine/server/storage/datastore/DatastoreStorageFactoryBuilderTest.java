@@ -31,8 +31,12 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.ContextSpec;
-import io.spine.server.entity.storage.ColumnMapping;
+import io.spine.server.storage.ColumnMapping;
+import io.spine.server.storage.datastore.config.DsColumnMapping;
+import io.spine.server.storage.datastore.config.FlatLayout;
+import io.spine.server.storage.datastore.config.RecordLayout;
 import io.spine.server.storage.datastore.given.TestColumnMapping;
+import io.spine.test.storage.StgProject;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,16 +45,16 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.ContextSpec.singleTenant;
+import static io.spine.testing.Assertions.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.server.storage.datastore.TestDatastores.defaultLocalProjectId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("DatastoreStorageFactory.Builder should")
-class DatastoreStorageFactoryBuilderTest {
+@DisplayName("`DatastoreStorageFactory.Builder` should")
+final class DatastoreStorageFactoryBuilderTest {
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
@@ -65,6 +69,7 @@ class DatastoreStorageFactoryBuilderTest {
                 .setDefault(Datastore.class,
                             datastore())
                 .setDefault(ColumnMapping.class, new DsColumnMapping())
+                .setDefault(RecordLayout.class, new FlatLayout<>(StgProject.class))
                 .testInstanceMethods(DatastoreStorageFactory.newBuilder(),
                                      NullPointerTester.Visibility.PACKAGE);
     }
@@ -107,11 +112,11 @@ class DatastoreStorageFactoryBuilderTest {
         void setUp() {
             builder = DatastoreOptions
                     .newBuilder()
-                    .setProjectId(defaultLocalProjectId().getValue());
+                    .setProjectId(defaultLocalProjectId().value());
         }
 
         @Test
-        @DisplayName("allow custom namespace for single tenant instances")
+        @DisplayName("allow custom namespace for single-tenant instances")
         void testCustomNamespace() {
             String namespace = "my.custom.namespace";
             DatastoreOptions options =
@@ -133,7 +138,7 @@ class DatastoreStorageFactoryBuilderTest {
     }
 
     @Test
-    @DisplayName("fail to construct without Datastore")
+    @DisplayName("fail to construct without `Datastore`")
     void testRequireDatastore() {
         assertThrows(NullPointerException.class, DatastoreStorageFactory.newBuilder()::build);
     }

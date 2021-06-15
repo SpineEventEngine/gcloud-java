@@ -59,10 +59,18 @@ public final class TestEnvironment {
         return onCi;
     }
 
+    /**
+     * Returns a new specification of a multi-tenant {@code BoundedContext} named after
+     * this type.
+     */
     public static ContextSpec multiTenantSpec() {
         return multitenant(TestEnvironment.class.getSimpleName());
     }
 
+    /**
+     * Returns a new specification of a single-tenant {@code BoundedContext} named after
+     * this type.
+     */
     public static ContextSpec singleTenantSpec() {
         return singleTenant(TestEnvironment.class.getSimpleName());
     }

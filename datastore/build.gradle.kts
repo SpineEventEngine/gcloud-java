@@ -34,13 +34,15 @@ plugins {
 apply<IncrementGuard>()
 
 val spineCoreVersion: String by extra
+val spineBaseVersion: String by extra
 
 dependencies {
     // Google Cloud Datastore
-    api("com.google.cloud:google-cloud-datastore:1.105.3") {
+    api("com.google.cloud:google-cloud-datastore:1.106.5") {
         exclude(group = "com.google.protobuf")
         exclude(group = "com.google.guava")
     }
+    api("io.spine:spine-base:$spineBaseVersion")
 
     testImplementation(project(":testutil-gcloud"))
     testImplementation("io.spine:spine-server:$spineCoreVersion")

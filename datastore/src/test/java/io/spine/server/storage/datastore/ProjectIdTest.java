@@ -39,7 +39,7 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.server.storage.datastore.TestDatastores.local;
 
 @DisplayName("`ProjectId` should")
-class ProjectIdTest {
+final class ProjectIdTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)

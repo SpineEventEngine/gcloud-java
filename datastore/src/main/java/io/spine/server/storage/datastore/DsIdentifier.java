@@ -32,19 +32,26 @@ import io.spine.value.StringTypeValue;
 /**
  * Abstract base for Datastore-related identifiers.
  */
-abstract class DsIdentifier extends StringTypeValue {
+public abstract class DsIdentifier extends StringTypeValue {
 
     private static final long serialVersionUID = 0L;
 
-    DsIdentifier(String value) {
+    protected DsIdentifier(String value) {
         super(value);
     }
 
-    public final String getValue() {
-        return value();
+    /**
+     * {@inheritDoc}
+     *
+     * Overrides to declare the method as {@code final}.
+     */
+    @Override
+    public final String value() {
+        return super.value();
     }
 
     @Override
+    @SuppressWarnings("DuplicateStringLiteralInspection")   /* Common term used. */
     public final String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("value", value())

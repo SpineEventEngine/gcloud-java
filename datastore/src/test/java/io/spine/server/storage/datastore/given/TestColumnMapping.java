@@ -27,8 +27,8 @@
 package io.spine.server.storage.datastore.given;
 
 import com.google.cloud.datastore.StringValue;
-import io.spine.server.entity.storage.ColumnTypeMapping;
-import io.spine.server.storage.datastore.DsColumnMapping;
+import io.spine.server.storage.ColumnTypeMapping;
+import io.spine.server.storage.datastore.config.DsColumnMapping;
 
 /**
  * A test column mapping which alters the mapping rules for {@code String} columns.

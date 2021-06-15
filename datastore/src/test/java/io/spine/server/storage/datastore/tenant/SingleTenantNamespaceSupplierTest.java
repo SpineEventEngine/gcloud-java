@@ -36,7 +36,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.Messages.isDefault;
 
 @DisplayName("`SingleTenantNamespaceSupplier` should")
-class SingleTenantNamespaceSupplierTest {
+final class SingleTenantNamespaceSupplierTest {
 
     @Test
     @DisplayName("produce empty namespace")

@@ -32,26 +32,43 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Timestamp;
+import com.google.common.truth.Truth8;
 import io.spine.base.Identifier;
-import io.spine.base.Time;
 import io.spine.core.TenantId;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
-import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.storage.ColumnMapping;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.ColumnMapping;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.datastore.given.DatastoreStorageFactoryTestEnv.DifferentTestEntity;
+import io.spine.server.storage.datastore.given.DatastoreStorageFactoryTestEnv.TestEntity;
 import io.spine.server.storage.datastore.given.TestEnvironment;
-import io.spine.test.datastore.College;
-import io.spine.test.datastore.CollegeId;
-import io.spine.test.storage.Project;
-import io.spine.test.storage.ProjectId;
+import io.spine.server.storage.datastore.record.DsRecordStorage;
+import io.spine.server.storage.datastore.record.RecordId;
+import io.spine.server.storage.datastore.tenant.TestNamespaceIndex;
+import io.spine.server.storage.memory.InMemoryRecordStorage;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.tenant.TenantIndex;
+import io.spine.test.storage.StgProject;
+import io.spine.test.storage.StgProjectId;
+import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
+import io.spine.testing.server.storage.datastore.TestDatastores;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.ContextSpec.multitenant;
+import static io.spine.server.storage.datastore.given.DatastoreStorageFactoryTestEnv.factoryFor;
+import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
+import static io.spine.server.storage.datastore.given.TestRecordSpec.projectDetailsSpec;
+import static io.spine.server.storage.datastore.given.TestRecordSpec.stgProjectSpec;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.server.storage.datastore.TestDatastores.defaultLocalProjectId;
@@ -61,35 +78,32 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`DatastoreStorageFactory` should")
-class DatastoreStorageFactoryTest {
+final class DatastoreStorageFactoryTest {
 
     private static final DatastoreOptions DUMMY_OPTIONS =
             DatastoreOptions.newBuilder()
-                            .setProjectId("dummy-dataset")
-                            .build();
+                    .setProjectId("dummy-dataset")
+                    .build();
 
     private static final Datastore datastore = DUMMY_OPTIONS.getService();
 
-    private static final StorageFactory factory =
-            DatastoreStorageFactory.newBuilder()
-                                   .setDatastore(datastore)
-                                   .build();
+    private static final DatastoreStorageFactory factory =
+            factoryFor(datastore);
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
-        new NullPointerTester().setDefault(ContextSpec.class, TestEnvironment.singleTenantSpec())
+        new NullPointerTester().setDefault(ContextSpec.class, singleTenantSpec())
+                               .setDefault(RecordSpec.class, stgProjectSpec())
                                .testAllPublicInstanceMethods(factory);
     }
 
     @Test
     @DisplayName("create multitenant storages")
     void testCreateMultitenant() {
-        StorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                        .setDatastore(datastore)
-                                                        .build();
-        RecordStorage storage =
-                factory.createRecordStorage(TestEnvironment.multiTenantSpec(), TestEntity.class);
+        StorageFactory factory = factoryFor(datastore);
+        RecordStorage<?, ?> storage =
+                factory.createRecordStorage(TestEnvironment.multiTenantSpec(), TestEntity.spec());
         assertTrue(storage.isMultitenant());
         storage.close();
     }
@@ -97,22 +111,20 @@ class DatastoreStorageFactoryTest {
     @Test
     @DisplayName("create separate record storage per state type")
     void testDependsOnStateType() {
-        ContextSpec spec = TestEnvironment.singleTenantSpec();
-        DsRecordStorage<?> storage =
-                (DsRecordStorage<?>) factory.createRecordStorage(spec, TestEntity.class);
+        ContextSpec contextSpec = singleTenantSpec();
+        DsRecordStorage<?, ?> storage = (DsRecordStorage<?, ?>)
+                factory.createRecordStorage(contextSpec, TestEntity.spec());
         assertNotNull(storage);
-        DsRecordStorage<?> differentStorage =
-                (DsRecordStorage<?>) factory.createRecordStorage(spec, DifferentTestEntity.class);
+        DsRecordStorage<?, ?> differentStorage = (DsRecordStorage<?, ?>)
+                factory.createRecordStorage(contextSpec, DifferentTestEntity.spec());
         assertNotNull(differentStorage);
-        assertNotEquals(storage.getKind(), differentStorage.getKind());
+        assertNotEquals(storage.kind(), differentStorage.kind());
     }
 
     @Test
     @DisplayName("have default column mapping")
     void testDefaultColumnMapping() {
-        DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                                 .setDatastore(datastore)
-                                                                 .build();
+        DatastoreStorageFactory factory = factoryFor(datastore);
         ColumnMapping<Value<?>> mapping = factory.columnMapping();
         assertNotNull(mapping);
     }
@@ -120,9 +132,7 @@ class DatastoreStorageFactoryTest {
     @Test
     @DisplayName("do nothing on close")
     void testClose() {
-        DatastoreStorageFactory factory = DatastoreStorageFactory.newBuilder()
-                                                                 .setDatastore(datastore)
-                                                                 .build();
+        DatastoreStorageFactory factory = factoryFor(datastore);
         factory.close();
         // Multiple calls are allowed as no action is performed
         factory.close();
@@ -137,18 +147,15 @@ class DatastoreStorageFactoryTest {
                 .vBuild();
         String namespace = "Vnon-null-or-empty-namespace";
         DatastoreOptions options = local().getOptions()
-                                          .toBuilder()
-                                          .setNamespace(namespace)
-                                          .build();
-        ContextSpec spec =
-                multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
-        Datastore datastore = options.getService();
-        DatastoreStorageFactory factory = DatastoreStorageFactory
-                .newBuilder()
-                .setDatastore(datastore)
+                .toBuilder()
+                .setNamespace(namespace)
                 .build();
-        DsPropertyStorage storage = factory.createPropertyStorage(spec);
-        Key key = whiteForTenant(storage, tenant)
+        ContextSpec spec = multitenant(testName());
+        Datastore datastore = options.getService();
+        DatastoreStorageFactory factory = factoryFor(datastore);
+        RecordStorage<StgProjectId, StgProject> storage =
+                factory.createRecordStorage(spec, stgProjectSpec());
+        Key key = writeForTenant(storage, tenant)
                 .setNamespace(namespace + ".V" + tenant.getValue())
                 .build();
         Entity entity = datastore.get(key);
@@ -162,44 +169,93 @@ class DatastoreStorageFactoryTest {
                 .newBuilder()
                 .setValue("your-company")
                 .vBuild();
-        ContextSpec spec =
-                multitenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
+        ContextSpec spec = multitenant(testName());
         Datastore datastore = local();
-        DatastoreStorageFactory factory = DatastoreStorageFactory
-                .newBuilder()
-                .setDatastore(datastore)
-                .build();
-        DsPropertyStorage storage = factory.createPropertyStorage(spec);
-        Key key = whiteForTenant(storage, tenant)
+        DatastoreStorageFactory factory = factoryFor(datastore);
+        RecordStorage<StgProjectId, StgProject> storage =
+                factory.createRecordStorage(spec, stgProjectSpec());
+        Key key = writeForTenant(storage, tenant)
                 .setNamespace('V' + tenant.getValue())
                 .build();
         Entity entity = datastore.get(key);
         assertThat(entity).isNotNull();
     }
 
-    private static Key.Builder whiteForTenant(DsPropertyStorage storage, TenantId tenant) {
-        RecordId recordId = RecordId.of(Identifier.newUuid());
-        Timestamp message = Time.currentTime();
+    @Test
+    @DisplayName("configure `BoundedContextBuilder` with the `TenantIndex`")
+    void testProduceBcBuilder() {
+        DatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
+        BoundedContextBuilder builder = BoundedContext.multitenant(testName());
+        Truth8.assertThat(builder.tenantIndex())
+              .isEmpty();
+        Optional<? extends TenantIndex> updatedIndex = factory.configureTenantIndex(builder)
+                                                              .tenantIndex();
+        Truth8.assertThat(updatedIndex)
+              .isPresent();
+        assertThat(updatedIndex.get()).isInstanceOf(TestNamespaceIndex.getType());
+    }
+
+    @Nested
+    @DisplayName("allow customizing a storage")
+    class CustomStorage {
+
+        @Test
+        @DisplayName("for plain Protobuf `Message` records")
+        void plainRecord() {
+            ContextSpec spec = ContextSpec.singleTenant(testName());
+            InMemoryRecordStorage<StgProjectId, StgProject> customStorage =
+                    InMemoryStorageFactory.newInstance()
+                                          .createRecordStorage(spec, stgProjectSpec());
+            DatastoreStorageFactory factory = DatastoreStorageFactory
+                    .newBuilder()
+                    .setDatastore(TestDatastores.local())
+                    .useRecordStorage(StgProjectId.class, StgProject.class,
+                                      configuration -> customStorage)
+                    .build();
+            RecordStorage<StgProjectId, StgProject> actualStorage =
+                    factory.createRecordStorage(spec, stgProjectSpec());
+            assertThat(actualStorage).isEqualTo(customStorage);
+        }
+
+        @Test
+        @DisplayName("for an Entity state")
+        void entity() {
+            ContextSpec spec = ContextSpec.singleTenant(testName());
+            InMemoryRecordStorage<StgProjectId, EntityRecord> customEntityStorage =
+                    InMemoryStorageFactory.newInstance()
+                                          .createRecordStorage(spec, projectDetailsSpec());
+            DatastoreStorageFactory factory = DatastoreStorageFactory
+                    .newBuilder()
+                    .setDatastore(TestDatastores.local())
+                    .useEntityStorage(StgProject.class,
+                                      configuration -> customEntityStorage)
+                    .build();
+            RecordStorage<StgProjectId, EntityRecord> actualStorage =
+                    factory.createRecordStorage(spec, projectDetailsSpec());
+            assertThat(actualStorage).isEqualTo(customEntityStorage);
+        }
+    }
+
+    private static String testName() {
+        return DatastoreStorageFactoryBuilderTest.class.getSimpleName();
+    }
+
+    private static Key.Builder writeForTenant(RecordStorage<StgProjectId, StgProject> storage,
+                                              TenantId tenant) {
+        StgProjectId id = StgProjectId.newBuilder()
+                .setId(Identifier.newUuid())
+                .vBuild();
+        StgProject project = StgProject.newBuilder()
+                .setId(id)
+                .setName("Sample storage project")
+                .vBuild();
         with(tenant).run(
-                () -> storage.write(recordId, message)
+                () -> storage.write(id, project)
         );
-        return Key.newBuilder(defaultLocalProjectId().getValue(),
-                              TypeName.of(message)
+        RecordId recordId = RecordId.ofEntityId(id);
+        return Key.newBuilder(defaultLocalProjectId().value(),
+                              TypeName.of(project)
                                       .value(),
-                              recordId.getValue());
-    }
-
-    private static class TestEntity extends AbstractEntity<ProjectId, Project> {
-
-        private TestEntity(ProjectId id) {
-            super(id);
-        }
-    }
-
-    private static class DifferentTestEntity extends AbstractEntity<CollegeId, College> {
-
-        protected DifferentTestEntity(CollegeId id) {
-            super(id);
-        }
+                              recordId.value());
     }
 }

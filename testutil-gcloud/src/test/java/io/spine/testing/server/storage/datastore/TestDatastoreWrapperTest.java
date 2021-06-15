@@ -33,7 +33,10 @@ import io.spine.testing.server.storage.datastore.given.ATestDatastoreWrapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.server.storage.datastore.given.ATestDatastoreWrapper.wrap;
 import static io.spine.testing.server.storage.datastore.given.AnEntity.withKeyCreatedBy;
@@ -80,14 +83,14 @@ class TestDatastoreWrapperTest {
         wrapper.createOrUpdate(entity);
 
         // Make sure the entity is read from the Datastore by key.
-        Entity entityReadBeforeClear = wrapper.read(key);
-        assertThat(entityReadBeforeClear).isNotNull();
+        Optional<Entity> entityReadBeforeClear = wrapper.read(key);
+        assertThat(entityReadBeforeClear).isPresent();
 
         // Drop all data.
         wrapper.dropAllTables();
 
         // Make sure the entity is no longer present in the Datastore.
-        Entity entityReadAfterClear = wrapper.read(key);
-        assertThat(entityReadAfterClear).isNull();
+        Optional<Entity> entityReadAfterClear = wrapper.read(key);
+        assertThat(entityReadAfterClear).isEmpty();
     }
 }

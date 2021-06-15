@@ -35,7 +35,10 @@ import com.google.protobuf.Any;
 import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
+import io.spine.server.storage.datastore.record.Entities;
+import io.spine.server.storage.datastore.record.RecordId;
 import io.spine.server.tenant.TenantAwareFunction0;
+import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -57,15 +60,13 @@ import static com.google.cloud.datastore.Query.newEntityQueryBuilder;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
-import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.GENERIC_ENTITY_KIND;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.NAMESPACE_HOLDER_KIND;
-import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.checkTenantIdInKey;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.ensureNamespace;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.localDatastore;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.remoteDatastore;
 import static io.spine.server.storage.datastore.given.TestEnvironment.runsOnCi;
-import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.multitenant;
-import static io.spine.server.storage.datastore.tenant.TestNamespaceSuppliers.singleTenant;
+import static io.spine.server.storage.datastore.given.TestNamespaceSuppliers.multitenant;
+import static io.spine.server.storage.datastore.given.TestNamespaceSuppliers.singleTenant;
 import static io.spine.testing.server.storage.datastore.TestDatastoreWrapper.wrap;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,7 +75,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @DisplayName("`DatastoreWrapper` should")
-class DatastoreWrapperTest {
+final class DatastoreWrapperTest {
+
+    private static final Kind GENERIC_ENTITY_KIND = Kind.of("my.entity");
 
     @AfterAll
     static void tearDown() {
@@ -111,7 +114,8 @@ class DatastoreWrapperTest {
             // Wait for some time to make sure the writing is complete
             Thread.sleep(bulkSize * 5L);
 
-            Collection<Entity> readEntities = newArrayList(wrapper.lookup(entities.keySet()));
+            ImmutableList<Key> keys = ImmutableList.copyOf(entities.keySet());
+            Collection<Entity> readEntities = wrapper.lookup(keys);
             assertEquals(entities.size(), readEntities.size());
             assertTrue(expectedEntities.containsAll(readEntities));
         }
@@ -175,7 +179,8 @@ class DatastoreWrapperTest {
 
             wrapper.createOrUpdate(expectedEntities);
 
-            Collection<Entity> readEntities = newArrayList(wrapper.lookup(entities.keySet()));
+            ImmutableList<Key> keys = ImmutableList.copyOf(entities.keySet());
+            Collection<Entity> readEntities = wrapper.lookup(keys);
             assertEquals(entities.size(), readEntities.size());
             assertTrue(expectedEntities.containsAll(readEntities));
         }
@@ -334,6 +339,17 @@ class DatastoreWrapperTest {
         checkTenantIdInKey(tenantId1Prefixed, id1, wrapper);
         checkTenantIdInKey(tenantId2Prefixed, id2, wrapper);
         checkTenantIdInKey(tenantId3Prefixed, id3, wrapper);
+    }
+
+    static void checkTenantIdInKey(String id, TenantId tenantId, DatastoreWrapper wrapper) {
+        new TenantAwareOperation(tenantId) {
+            @Override
+            public void run() {
+                Key key = wrapper.keyFactory(GENERIC_ENTITY_KIND)
+                                 .newKey(42L);
+                assertEquals(id, key.getNamespace());
+            }
+        }.execute();
     }
 
     @Test

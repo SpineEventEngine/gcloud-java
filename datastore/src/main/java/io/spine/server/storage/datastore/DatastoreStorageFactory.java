@@ -31,21 +31,30 @@ import com.google.cloud.datastore.Value;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.annotation.SPI;
+import io.spine.base.EntityState;
+import io.spine.logging.Logging;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.ColumnMapping;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionStorage;
+import io.spine.server.storage.ColumnMapping;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.datastore.config.CreateEntityStorage;
+import io.spine.server.storage.datastore.config.CreateRecordStorage;
+import io.spine.server.storage.datastore.config.CreateStorage;
+import io.spine.server.storage.datastore.config.CustomStorages;
+import io.spine.server.storage.datastore.config.DsColumnMapping;
+import io.spine.server.storage.datastore.config.RecordLayout;
+import io.spine.server.storage.datastore.config.RecordLayouts;
+import io.spine.server.storage.datastore.config.StorageConfiguration;
+import io.spine.server.storage.datastore.config.TxSetting;
+import io.spine.server.storage.datastore.config.TxSettings;
+import io.spine.server.storage.datastore.record.DsEntitySpec;
+import io.spine.server.storage.datastore.record.DsRecordStorage;
 import io.spine.server.storage.datastore.tenant.DatastoreTenants;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
@@ -54,23 +63,27 @@ import io.spine.server.storage.datastore.tenant.PrefixedNsConverterFactory;
 import io.spine.server.tenant.TenantIndex;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
+import static io.spine.server.storage.datastore.config.TxSetting.enabled;
 
 /**
  * Creates {@link Storage}s based on {@link Datastore}.
  *
  * <p>As a convenience API, provides an ability to configure the {@link BoundedContextBuilder}s
  * with the {@link TenantIndex} specific to the instance of {@code Datastore} configured for this
- * factory
+ * factory.
+ *
+ * <p>As per design intention of {@link StorageFactory}, by default all storages created by
+ * this factory delegate the execution to instances of a pre-configured {@link DsRecordStorage}.
  *
  * @see DatastoreStorageFactory#configureTenantIndex(BoundedContextBuilder)
  */
-public class DatastoreStorageFactory implements StorageFactory {
+public class DatastoreStorageFactory implements StorageFactory, Logging {
 
     private final Datastore datastore;
 
@@ -91,21 +104,48 @@ public class DatastoreStorageFactory implements StorageFactory {
      * <p>The repeated calls of the methods of this factory should refer to the same instance of
      * the wrapped {@code Datastore} per class of the target {@code Storage}.
      */
-    private final Map<Class<? extends Storage>, DatastoreWrapper> sysWrappers = newConcurrentMap();
+    private final
+    Map<Class<? extends Storage<?, ?>>, DatastoreWrapper> sysWrappers = newConcurrentMap();
 
+    /**
+     * The mapping of the values from the Java type system to the types native to Datastore.
+     */
     private final ColumnMapping<Value<?>> columnMapping;
 
+    /**
+     * A factory of {@link io.spine.server.storage.datastore.tenant.Namespace} converters.
+     */
     private final NsConverterFactory converterFactory;
+
+    /**
+     * The settings of transactional behavior, per each stored record type.
+     */
+    private final TxSettings txSettings;
+
+    /**
+     * The set of functions producing custom storage implementations, if set by library end-users.
+     */
+    private final CustomStorages customStorages;
+
+    /**
+     * Layouts of records stored as Datastore Entities, per stored record type.
+     */
+    private final RecordLayouts recordLayouts;
 
     protected DatastoreStorageFactory(Builder builder) {
         this.columnMapping = builder.columnMapping;
         this.datastore = builder.datastore;
         this.converterFactory = builder.converterFactory;
+        this.txSettings = builder.txSettings.build();
+        this.customStorages = builder.customStorages.build();
+        this.recordLayouts = builder.layouts.build();
     }
 
     /**
      * Configures the passed {@link BoundedContextBuilder} with the {@link TenantIndex} built on
      * top of the {@code Datastore} specific to this factory instance.
+     *
+     * <p>This configuration is only suitable for multi-tenant {@code BoundedContext}s.
      *
      * @param builder
      *         the instance of the builder to configure the tenant index for
@@ -120,103 +160,40 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> AggregateStorage<I>
-    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> cls) {
-        checkNotNull(cls);
+    public <I, R extends Message> RecordStorage<I, R>
+    createRecordStorage(ContextSpec context, RecordSpec<I, R, ?> spec) {
         checkNotNull(context);
-
-        DsAggregateStorage<I> result =
-                new DsAggregateStorage<>(cls, wrapperFor(context), context.isMultitenant());
+        checkNotNull(spec);
+        StorageConfiguration<I, R> config = configurationWith(context, spec);
+        Optional<CreateStorage<I, R>> custom = customStorages.find(spec);
+        RecordStorage<I, R> result =
+                custom.map(callback -> callback.apply(config))
+                      .orElse(new DsRecordStorage<>(config));
         return result;
     }
 
-    @Override
-    public <I> RecordStorage<I>
-    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> cls) {
-        checkNotNull(cls);
-        checkNotNull(context);
-
-        DsRecordStorage<I> result = configure(DsRecordStorage.newBuilder(), cls, context);
-        return result;
-    }
-
-    @Override
-    public <I> ProjectionStorage<I>
-    createProjectionStorage(ContextSpec context, Class<? extends Projection<I, ?, ?>> cls) {
-        checkNotNull(cls);
-        checkNotNull(context);
-
-        DsProjectionStorageDelegate<I> recordStorage =
-                configure(DsProjectionStorageDelegate.newDelegateBuilder(), cls, context);
-        DsProjectionStorage<I> result =
-                new DsProjectionStorage<>(cls,
-                                          recordStorage,
-                                          context.isMultitenant());
-        return result;
+    private <I, R extends Message>
+    StorageConfiguration<I, R> configurationWith(ContextSpec context, RecordSpec<I, R, ?> spec) {
+        DatastoreWrapper wrapper = wrapperFor(context);
+        Class<? extends Message> recordType = spec.sourceType();
+        TxSetting behavior = txSettings.find(recordType);
+        RecordLayout<I, R> layout = recordLayouts.find(recordType);
+        DsEntitySpec<I, R> dsSpec = new DsEntitySpec<>(spec, layout);
+        StorageConfiguration<I, R> configuration = StorageConfiguration.<I, R>newBuilder()
+                .withDatastore(wrapper)
+                .withTxSetting(behavior)
+                .withContext(context)
+                .withMapping(columnMapping)
+                .withRecordSpec(dsSpec)
+                .build();
+        return configuration;
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * Creates a Datastore-specific {@link InboxStorage} taking into account the support
-     * of multi-tenant storage required.
-     *
-     * <p>By default, creates an instance of storage for Datastore in native mode.
-     *
-     * @apiNote In order to change this behavior and supply a custom implementation, an SPI
-     *         user should override {@link #inboxStorageWith(DatastoreWrapper, boolean)
-     *         inboxStorageWith(multitenant, DatastoreWrapper)} method.
-     * @see DsInboxStorage for more details on supported modes
+     * Returns the column mapping set for this factory.
      */
-    @Override
-    public final InboxStorage createInboxStorage(boolean multitenant) {
-        DatastoreWrapper wrapper = systemWrapperFor(InboxStorage.class, multitenant);
-        return inboxStorageWith(wrapper, multitenant);
-    }
-
-    /**
-     * Creates a Datastore-specific {@link InboxStorage}.
-     *
-     * <p>SPI users should override this method in order to supply a custom implementation.
-     *
-     * @param wrapper
-     *         a wrapper over Datastore
-     * @param multitenant
-     *         whether the created storage should support multi-tenancy
-     * @return a new instance of {@code InboxStorage}
-     */
-    @SPI
-    protected InboxStorage inboxStorageWith(DatastoreWrapper wrapper, boolean multitenant) {
-        return new DsInboxStorage(wrapper, multitenant);
-    }
-
-    @Override
-    public CatchUpStorage createCatchUpStorage(boolean multitenant) {
-        DatastoreWrapper wrapper = systemWrapperFor(CatchUpStorage.class, multitenant);
-        return new DsCatchUpStorage(wrapper, multitenant);
-    }
-
-    public ColumnMapping<Value<?>> columnMapping() {
+    public final ColumnMapping<Value<?>> columnMapping() {
         return columnMapping;
-    }
-
-    /**
-     * Configures the passed builder of the storage to serve the passed entity class.
-     */
-    private <I, S extends RecordStorage<I>, B extends RecordStorageBuilder<I, S, B>>
-    S configure(B builder, Class<? extends Entity<I, ?>> cls, ContextSpec context) {
-        builder.setModelClass(asEntityClass(cls))
-               .setDatastore(wrapperFor(context))
-               .setMultitenant(context.isMultitenant())
-               .setColumnMapping(columnMapping);
-        S storage = builder.build();
-        return storage;
-    }
-
-    protected DsPropertyStorage createPropertyStorage(ContextSpec spec) {
-        DatastoreWrapper datastore = wrapperFor(spec);
-        DsPropertyStorage propertyStorage = DsPropertyStorage.newInstance(datastore);
-        return propertyStorage;
     }
 
     private NamespaceSupplier createNamespaceSupplier(boolean multitenant) {
@@ -273,34 +250,62 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     final DatastoreWrapper wrapperFor(ContextSpec spec) {
         if (!contextWrappers.containsKey(spec)) {
-            DatastoreWrapper wrapper = createDatastoreWrapper(spec.isMultitenant());
+            DatastoreWrapper wrapper = newDatastoreWrapper(spec.isMultitenant());
             contextWrappers.put(spec, wrapper);
         }
         return contextWrappers.get(spec);
     }
 
-    final DatastoreWrapper systemWrapperFor(Class<? extends Storage> targetStorage,
-                                            boolean multitenant) {
+    /**
+     * Creates a Datastore wrapper for system components,
+     * such as {@link io.spine.server.delivery.Delivery Delivery}.
+     *
+     * @param targetStorage
+     *         the storage to create a Datastore wrapper for
+     * @param multitenant
+     *         whether the wrapper should support multi-tenancy
+     * @return a new instance of Datastore wrapper
+     */
+    @Internal
+    public final DatastoreWrapper
+    systemWrapperFor(Class<? extends Storage<?, ?>> targetStorage, boolean multitenant) {
         DatastoreWrapper wrapper = sysWrappers
-                .computeIfAbsent(targetStorage, k -> createDatastoreWrapper(multitenant));
+                .computeIfAbsent(targetStorage, k -> newDatastoreWrapper(multitenant));
         return wrapper;
     }
 
     /**
-     * Creates an instance of {@link DatastoreWrapper} based on the passed {@code ContextSpec}.
+     * Creates a new  instance of {@link DatastoreWrapper}.
+     *
+     * @param multitenant
+     *         tells whether the created instance should support multi-tenancy
      */
     @Internal
     @VisibleForTesting
-    protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
+    protected DatastoreWrapper newDatastoreWrapper(boolean multitenant) {
         NamespaceSupplier supplier = createNamespaceSupplier(multitenant);
         return wrap(datastore, supplier);
     }
 
     /**
-     * Creates new instance of {@link Builder}.
+     * Creates new instance of {@code Builder}.
      */
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    /**
+     * Creates a new instance of {@code Builder}, passing the {@code Datastore} to it, and
+     * configuring the {@code Builder} instance with some default settings, such as
+     * {@linkplain DsColumnMapping column mapping} and
+     * {@linkplain NsConverterFactory#defaults() namespace converter factory}.
+     */
+    @VisibleForTesting
+    public static Builder newBuilderWithDefaults(Datastore datastore) {
+        checkNotNull(datastore);
+        Builder result = newBuilder().setDatastore(datastore)
+                                     .withDefaults();
+        return result;
     }
 
     /**
@@ -312,13 +317,16 @@ public class DatastoreStorageFactory implements StorageFactory {
         private ColumnMapping<Value<?>> columnMapping;
         private NamespaceConverter namespaceConverter;
         private NsConverterFactory converterFactory;
+        private final TxSettings.Builder txSettings = TxSettings.newBuilder();
+        private final RecordLayouts.Builder layouts = RecordLayouts.newBuilder();
+        private final CustomStorages.Builder customStorages = CustomStorages.newBuilder();
 
         /** Avoid direct initialization. */
         private Builder() {
         }
 
         /**
-         * Assigns the {@link Datastore} to use for the DB interactions.
+         * Assigns the {@link Datastore} to use for the storage interactions.
          *
          * <p>If the provided {@code Datastore} is configured with a namespace:
          * <ul>
@@ -326,14 +334,12 @@ public class DatastoreStorageFactory implements StorageFactory {
          *     <li>resulting multitenant storages will concatenate the provided namespace with
          *         the tenant identifier. See {@link #setNamespaceConverter} for more configuration.
          * </ul>
+         *
+         * @return this instance of {@code Builder}
          */
         public Builder setDatastore(Datastore datastore) {
             this.datastore = checkNotNull(datastore);
             return this;
-        }
-
-        public Datastore getDatastore() {
-            return this.datastore;
         }
 
         /**
@@ -343,10 +349,10 @@ public class DatastoreStorageFactory implements StorageFactory {
          *
          * @param columnMapping
          *         the storage rules for entity columns
-         * @return self for method chaining
+         * @return this instance of {@code Builder}
          */
-        public Builder
-        setColumnMapping(ColumnMapping<Value<?>> columnMapping) {
+        @CanIgnoreReturnValue
+        public Builder setColumnMapping(ColumnMapping<Value<?>> columnMapping) {
             this.columnMapping = checkNotNull(columnMapping);
             return this;
         }
@@ -360,10 +366,108 @@ public class DatastoreStorageFactory implements StorageFactory {
          *
          * @param converter
          *         a custom converter for the Tenant IDs
-         * @return self for method chaining
+         * @return this instance of {@code Builder}
          */
+        @CanIgnoreReturnValue
         public Builder setNamespaceConverter(NamespaceConverter converter) {
             this.namespaceConverter = checkNotNull(converter);
+            return this;
+        }
+
+        /**
+         * Enables the transactional operations for the given type of stored records.
+         *
+         * @param recordType
+         *         the stored type
+         * @param <R>
+         *         the stored type
+         * @return this instance of {@code Builder}
+         */
+        @CanIgnoreReturnValue
+        public <R extends Message> Builder enableTransactions(Class<R> recordType) {
+            checkNotNull(recordType);
+            txSettings.add(recordType, enabled());
+            return this;
+        }
+
+        /**
+         * Tells to use a custom function to create a record storage when this factory is
+         * asked to provide a storage for a specified record type.
+         *
+         * <p>If the record type is an {@link io.spine.server.entity.Entity Entity} state,
+         * please use {@link #useEntityStorage(Class, CreateEntityStorage)
+         * useEntityStorage(entityStateType, CreateEntityStorage)}.
+         *
+         * @param id
+         *         the type of identifiers of the stored records
+         * @param record
+         *         the stored type
+         * @param callback
+         *         a callback to create a custom storage
+         * @param <I>
+         *         the type of identifiers of stored records
+         * @param <R>
+         *         the stored type
+         * @return this instance of {@code Builder}
+         */
+        @CanIgnoreReturnValue
+        @SuppressWarnings("unused") /* `id` parameter used to set `I` value explicitly. */
+        public <I, R extends Message>
+        Builder useRecordStorage(Class<I> id, Class<R> record, CreateRecordStorage<I, R> callback) {
+            checkNotNull(id);
+            checkNotNull(record);
+            checkNotNull(callback);
+            customStorages.add(record, callback);
+            return this;
+        }
+
+        /**
+         * Tells to use a custom function to create a storage of Spine Entities when this factory is
+         * asked to provide a storage for a specified entity type.
+         *
+         * <p>If the record type is not an {@link io.spine.server.entity.Entity Entity} state,
+         * please use {@link #useRecordStorage(Class, Class, CreateRecordStorage)
+         * useRecordStorage(idType, recordType, CreateRecordStorage)}.
+         *
+         * @param stateType
+         *         the type of the stored Spine's Entity state
+         * @param callback
+         *         a callback to create a custom storage
+         * @param <I>
+         *         the type of identifiers of stored records
+         * @param <S>
+         *         the type of the stored Spine's Entity state
+         * @return this instance of {@code Builder}
+         */
+        @CanIgnoreReturnValue
+        public <I, S extends EntityState<I>>
+        Builder useEntityStorage(Class<S> stateType, CreateEntityStorage<I> callback) {
+            checkNotNull(stateType);
+            checkNotNull(callback);
+            customStorages.add(stateType, callback);
+            return this;
+        }
+
+        /**
+         * Specified the layout of Datastore Entities to use when operating with the records of
+         * a particular type.
+         *
+         * @param recordType
+         *         the type of stored records
+         * @param layout
+         *         the layout to use
+         * @param <I>
+         *         the type of record identifiers
+         * @param <R>
+         *         the type of stored records
+         * @return this instance of {@code Builder}
+         */
+        @CanIgnoreReturnValue
+        public <I, R extends Message>
+        Builder organizeRecords(Class<R> recordType, RecordLayout<I, R> layout) {
+            checkNotNull(recordType);
+            checkNotNull(layout);
+            layouts.add(recordType, layout);
             return this;
         }
 
@@ -376,15 +480,28 @@ public class DatastoreStorageFactory implements StorageFactory {
          */
         public DatastoreStorageFactory build() {
             checkNotNull(datastore);
-            if (columnMapping == null) {
-                columnMapping = new DsColumnMapping();
-            }
+            return new DatastoreStorageFactory(withDefaults());
+        }
+
+        @CanIgnoreReturnValue
+        private Builder withDefaults() {
+            setupMapping();
+            setupNsConverter();
+            return this;
+        }
+
+        private void setupNsConverter() {
             if (namespaceConverter == null) {
                 converterFactory = NsConverterFactory.defaults();
             } else {
                 converterFactory = multitenant -> namespaceConverter;
             }
-            return new DatastoreStorageFactory(this);
+        }
+
+        private void setupMapping() {
+            if (columnMapping == null) {
+                columnMapping = new DsColumnMapping();
+            }
         }
     }
 }

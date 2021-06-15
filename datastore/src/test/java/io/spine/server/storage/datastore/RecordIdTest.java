@@ -26,6 +26,7 @@
 
 package io.spine.server.storage.datastore;
 
+import io.spine.server.storage.datastore.record.RecordId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -50,6 +51,6 @@ class RecordIdTest {
         RecordId recordId = RecordId.of(idAsString);
 
         assertNotNull(recordId);
-        assertEquals(idAsString, recordId.getValue());
+        assertEquals(idAsString, recordId.value());
     }
 }

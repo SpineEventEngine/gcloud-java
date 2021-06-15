@@ -33,7 +33,10 @@ import io.spine.server.storage.datastore.DatastoreWrapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.server.storage.datastore.given.AnEntity.withKeyCreatedBy;
 
@@ -51,7 +54,7 @@ class TestDatastoreStorageFactoryTest {
     @DisplayName("wrap the specified Datastore with a `TestDatastoreWrapper`")
     void wrapDatastore() {
         TestDatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
-        DatastoreWrapper wrapper = factory.createDatastoreWrapper(false);
+        DatastoreWrapper wrapper = factory.newDatastoreWrapper(false);
         assertThat(wrapper).isInstanceOf(TestDatastoreWrapper.class);
     }
 
@@ -60,7 +63,7 @@ class TestDatastoreStorageFactoryTest {
     void clearDatastore() {
         // Initialize the factory.
         TestDatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
-        DatastoreWrapper wrapper = factory.createDatastoreWrapper(false);
+        DatastoreWrapper wrapper = factory.newDatastoreWrapper(false);
 
         // Create an entity.
         Entity entity = withKeyCreatedBy(wrapper);
@@ -68,14 +71,14 @@ class TestDatastoreStorageFactoryTest {
         wrapper.createOrUpdate(entity);
 
         // Make sure the entity is read from the Datastore by key.
-        Entity entityReadBeforeClear = wrapper.read(key);
-        assertThat(entityReadBeforeClear).isNotNull();
+        Optional<Entity> entityReadBeforeClear = wrapper.read(key);
+        assertThat(entityReadBeforeClear).isPresent();
 
         // Clear the Datastore.
         factory.clear();
 
         // Make sure entity is no longer present.
-        Entity entityReadAfterClear = wrapper.read(key);
-        assertThat(entityReadAfterClear).isNull();
+        Optional<Entity> entityReadAfterClear = wrapper.read(key);
+        assertThat(entityReadAfterClear).isEmpty();
     }
 }
