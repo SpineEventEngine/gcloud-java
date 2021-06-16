@@ -39,7 +39,7 @@ jobs:
       - name: Decrypt the credentials for the Spine-Dev service account
         run: ./config/scripts/decrypt.sh "$SPINE_DEV_KEY" ./spine-dev.json.gpg ./spine-dev.json
         env:
-          GCS_CREDENTIALS_KEY: ${{ secrets.SPINE_DEV_KEY }}
+          SPINE_DEV_KEY: ${{ secrets.SPINE_DEV_KEY }}
 
         # The OS-managed Google Cloud SDK does not provide a Datastore emulator.
       - name: Remove the OS-managed Google Cloud SDK
