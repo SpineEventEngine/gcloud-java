@@ -25,7 +25,7 @@
  */
 
 import com.github.psxpaul.task.ExecFork
-import io.spine.gradle.internal.IncrementGuard
+import io.spine.internal.gradle.IncrementGuard
 
 plugins {
     id("com.github.psxpaul.execfork").version("0.1.13")
