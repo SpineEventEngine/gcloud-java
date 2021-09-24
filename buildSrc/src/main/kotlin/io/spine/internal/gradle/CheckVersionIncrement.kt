@@ -45,8 +45,8 @@ open class CheckVersionIncrement : DefaultTask() {
     /**
      * The Maven repository in which to look for published artifacts.
      *
-     * We only check the `releases` repository. Artifacts in `snapshots` repository still may be
-     * overridden.
+     * We check both the `releases` and `snapshots` repositories. Artifacts in either of these repos
+     * may not be overwritten.
      */
     @Input
     lateinit var repository: Repository
@@ -57,7 +57,14 @@ open class CheckVersionIncrement : DefaultTask() {
     @TaskAction
     private fun fetchAndCheck() {
         val artifact = "${project.artifactPath()}/${MavenMetadata.FILE_NAME}"
-        val repoUrl = repository.releases
+        checkInRepo(repository.snapshots, artifact)
+
+        if (repository.releases != repository.snapshots) {
+            checkInRepo(repository.releases, artifact)
+        }
+    }
+
+    private fun checkInRepo(repoUrl: String, artifact: String) {
         val metadata = fetch(repoUrl, artifact)
         val versions = metadata?.versioning?.versions
         val versionExists = versions?.contains(version) ?: false

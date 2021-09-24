@@ -24,22 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+import io.spine.internal.dependency.Pmd
 
-// https://github.com/JetBrains/kotlin
-// https://github.com/Kotlin
-object Kotlin {
-    @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
-    const val version      = "1.5.30"
-    const val reflect      = "org.jetbrains.kotlin:kotlin-reflect:${version}"
-    const val stdLib       = "org.jetbrains.kotlin:kotlin-stdlib:${version}"
-    const val stdLibCommon = "org.jetbrains.kotlin:kotlin-stdlib-common:${version}"
-    const val stdLibJdk8   = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version}"
+plugins {
+    pmd
+}
 
-    // https://github.com/Kotlin/dokka
-    object Dokka {
+pmd {
+    toolVersion = Pmd.version
+    isConsoleOutput = true
+    incrementalAnalysis.set(true)
 
-        const val version = "1.5.0"
-        const val pluginId = "org.jetbrains.dokka"
-    }
+    // The build is going to fail in case of violations.
+    isIgnoreFailures = false
+
+    // Disable the default rule set to use the custom rules (see below).
+    ruleSets = listOf()
+
+    // Load PMD settings from a file in `buildSrc/resources/`.
+    val classLoader = Pmd.javaClass.classLoader
+    val settingsResource = classLoader.getResource("pmd.xml")!!
+    val pmdSettings: String = settingsResource.readText()
+    val textResource: TextResource = resources.text.fromString(pmdSettings)
+    ruleSetConfig = textResource
+
+    reportsDir = file("build/reports/pmd")
+
+    // Just analyze the main sources; do not analyze tests.
+    val javaExtension: JavaPluginExtension =
+        project.extensions.getByType(JavaPluginExtension::class.java)
+    val mainSourceSet = javaExtension.sourceSets.getByName("main")
+    sourceSets = listOf(mainSourceSet)
 }
