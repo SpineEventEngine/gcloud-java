@@ -85,6 +85,8 @@ spinePublishing {
     )
 }
 
+val spineBaseVersion: String by extra
+
 allprojects {
     apply(from = "$rootDir/version.gradle.kts")
 
@@ -112,7 +114,6 @@ subprojects {
 
         with(Scripts) {
             from(javacArgs(project))
-            from(modelCompiler(project))
             from(projectLicenseReport(project))
             from(slowTests(project))
             from(testOutput(project))
@@ -120,13 +121,13 @@ subprojects {
         }
     }
 
-    extensions["modelCompiler"].withGroovyBuilder {
-        setProperty("generateValidation", true)
-    }
-
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlin {
+        explicitApi()
     }
 
     // Required to fetch `androidx.annotation:annotation:1.1.0`,
@@ -151,7 +152,10 @@ subprojects {
 
                     "io.perfmark:perfmark-api:0.23.0",
 
-                    "com.google.api.grpc:proto-google-common-protos:2.2.1"
+                    "com.google.api.grpc:proto-google-common-protos:2.2.1",
+
+                    "io.spine:spine-base:$spineBaseVersion",
+                    "io.spine.tools:spine-testlib:$spineBaseVersion"
                 )
             }
         }

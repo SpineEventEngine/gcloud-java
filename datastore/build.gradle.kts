@@ -35,6 +35,7 @@ apply<IncrementGuard>()
 
 val spineCoreVersion: String by extra
 val spineBaseVersion: String by extra
+val spineBaseTypesVersion: String by extra
 
 dependencies {
     // Google Cloud Datastore
@@ -43,6 +44,7 @@ dependencies {
         exclude(group = "com.google.guava")
     }
     api("io.spine:spine-base:$spineBaseVersion")
+    api("io.spine:spine-base-types:$spineBaseTypesVersion")
 
     testImplementation(project(":testutil-gcloud"))
     testImplementation("io.spine:spine-server:$spineCoreVersion")
@@ -71,3 +73,11 @@ val startDatastore by tasks.registering(ExecFork::class) {
 }
 
 tasks.withType(Test::class) { dependsOn(startDatastore) }
+
+//TODO:2021-07-22:alexander.yevsyukov: Turn to WARN and investigate duplicates.
+// see https://github.com/SpineEventEngine/base/issues/657
+val dupStrategy = DuplicatesStrategy.INCLUDE
+tasks.processResources.get().duplicatesStrategy = dupStrategy
+tasks.processTestResources.get().duplicatesStrategy = dupStrategy
+tasks.sourceJar.get().duplicatesStrategy = dupStrategy
+tasks.jar.get().duplicatesStrategy = dupStrategy
