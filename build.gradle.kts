@@ -26,29 +26,32 @@
 
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.PublishingRepos
 import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
-import io.spine.internal.gradle.spinePublishing
-
+import io.spine.internal.gradle.publish.PublishingRepos
+import io.spine.internal.gradle.publish.spinePublishing
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imported things here.
 buildscript {
     apply(from = "$rootDir/version.gradle.kts")
     io.spine.internal.gradle.doApplyStandard(repositories)
-    io.spine.internal.gradle.doForceVersions(configurations)
+    repositories {
+        val repo = io.spine.internal.gradle.publish.PublishingRepos
+        repo.gitHub("gradle-execfork-plugin")
+    }
 
     val spineBaseVersion: String by extra
 
-    @Suppress("LocalVariableName")  // For better readability.
-    val Kotlin = io.spine.internal.dependency.Kotlin
-
     dependencies {
         classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
+        classpath("io.spine.tools:gradle-execfork-plugin:0.1.16")
     }
 
+    @Suppress("LocalVariableName")  // For better readability.
+    val Kotlin = io.spine.internal.dependency.Kotlin
+    io.spine.internal.gradle.doForceVersions(configurations)
     configurations.all {
         resolutionStrategy {
             force(
@@ -73,10 +76,10 @@ plugins {
 }
 
 spinePublishing {
-    targetRepositories.addAll(setOf(
+    targetRepositories.addAll(
         PublishingRepos.cloudRepo,
         PublishingRepos.gitHub("gcloud-java")
-    ))
+    )
     projectsToPublish.addAll(
         "datastore",
         "stackdriver-trace",
@@ -119,6 +122,8 @@ subprojects {
             from(testOutput(project))
             from(javadocOptions(project))
         }
+
+        plugin("pmd-settings")
     }
 
     java {
@@ -259,8 +264,6 @@ subprojects {
     afterEvaluate {
         tasks.getByName("publish").dependsOn("updateGitHubPages")
     }
-
-    apply(from = Scripts.pmd(project))
 }
 
 apply {
