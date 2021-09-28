@@ -24,11 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.github.psxpaul.task.ExecFork
 import io.spine.internal.gradle.IncrementGuard
+import io.spine.tools.gradle.exec.ExecFork
 
 plugins {
-    id("com.github.psxpaul.execfork").version("0.1.13")
+    id("io.spine.execfork")
 }
 
 apply<IncrementGuard>()
