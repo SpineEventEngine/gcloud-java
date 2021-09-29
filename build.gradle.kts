@@ -37,6 +37,7 @@ import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.github.pages.updateGitHubPages
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imported things here.
 buildscript {
@@ -142,13 +143,22 @@ subprojects {
         rootFolder.set(rootDir)
     }
 
+    val javaVersion = JavaVersion.VERSION_1_8
+
     java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
     }
 
     kotlin {
         explicitApi()
+    }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = javaVersion.toString()
+            freeCompilerArgs = listOf("-Xskip-prerelease-check")
+        }
     }
 
     // Required to fetch `androidx.annotation:annotation:1.1.0`,
