@@ -25,7 +25,10 @@
  */
 
 import io.spine.internal.dependency.ErrorProne
+import io.spine.internal.dependency.GoogleApis
+import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.PerfMark
 import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.excludeProtobufLite
@@ -37,16 +40,18 @@ import io.spine.internal.gradle.publish.spinePublishing
 buildscript {
     apply(from = "$rootDir/version.gradle.kts")
     io.spine.internal.gradle.doApplyStandard(repositories)
+
+    val execForkPlugin = io.spine.internal.dependency.ExecForkPlugin
     repositories {
-        val repo = io.spine.internal.gradle.publish.PublishingRepos
-        repo.gitHub("gradle-execfork-plugin")
+        val repos = io.spine.internal.gradle.publish.PublishingRepos
+        repos.gitHub(execForkPlugin.repository)
     }
 
     val spineBaseVersion: String by extra
 
     dependencies {
         classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
-        classpath("io.spine.tools:gradle-execfork-plugin:0.1.16")
+        classpath(execForkPlugin.classpath)
     }
 
     @Suppress("LocalVariableName")  // For better readability.
@@ -76,10 +81,13 @@ plugins {
 }
 
 spinePublishing {
-    targetRepositories.addAll(
-        PublishingRepos.cloudRepo,
-        PublishingRepos.gitHub("gcloud-java")
-    )
+    with(PublishingRepos) {
+        targetRepositories.addAll(
+            cloudRepo,
+            cloudArtifactRegistry,
+            gitHub("gcloud-java")
+        )
+    }
     projectsToPublish.addAll(
         "datastore",
         "stackdriver-trace",
@@ -141,23 +149,21 @@ subprojects {
         google()
     }
 
-    val gRpc = io.spine.internal.dependency.Grpc
-
     configurations.forceVersions()
     configurations {
         all {
             resolutionStrategy {
                 force(
-                    "io.grpc:grpc-api:${gRpc.version}",
-                    "io.grpc:grpc-protobuf-lite:${gRpc.version}",
-                    gRpc.core,
-                    gRpc.context,
-                    gRpc.stub,
-                    gRpc.protobuf,
+                    Grpc.api,
+                    Grpc.core,
+                    Grpc.context,
+                    Grpc.stub,
+                    Grpc.protobuf,
+                    Grpc.protobufLite,
 
-                    "io.perfmark:perfmark-api:0.23.0",
+                    PerfMark.api,
 
-                    "com.google.api.grpc:proto-google-common-protos:2.2.1",
+                    GoogleApis.commonProtos,
 
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion"

@@ -26,19 +26,13 @@
 
 package io.spine.internal.dependency
 
-// https://github.com/grpc/grpc-java
-@Suppress("unused")
-object Grpc {
-    @Suppress("MemberVisibilityCanBePrivate")
-    const val version        = "1.38.0"
-    const val api            = "io.grpc:grpc-api:${version}"
-    const val core           = "io.grpc:grpc-core:${version}"
-    const val context        = "io.grpc:grpc-context:${version}"
-    const val stub           = "io.grpc:grpc-stub:${version}"
-    const val okHttp         = "io.grpc:grpc-okhttp:${version}"
-    const val protobuf       = "io.grpc:grpc-protobuf:${version}"
-    const val protobufLite   = "io.grpc:grpc-protobuf-lite:${version}"
-    const val protobufPlugin = "io.grpc:protoc-gen-grpc-java:${version}"
-    const val netty          = "io.grpc:grpc-netty:${version}"
-    const val nettyShaded    = "io.grpc:grpc-netty-shaded:${version}"
+object ExecForkPlugin {
+
+    const val version = "0.1.16"
+
+    // The name of the GitHub repository where the plugin is published using GitHub Packages.
+    const val repository = "gradle-execfork-plugin"
+
+    // The argument to be passed to the `classpath()` clause in `buildscript` for using the plugin.
+    const val classpath = "io.spine.tools:gradle-execfork-plugin:$version"
 }
