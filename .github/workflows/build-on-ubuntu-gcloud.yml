@@ -18,6 +18,12 @@ jobs:
       - name: Pull config
         run: git submodule update --init --recursive
 
+        # This operation is specific to `gcloud-java` repository only.
+      - name: Decrypt the credentials for the Spine-Dev service account
+        run: ./config/scripts/decrypt.sh "$SPINE_DEV_KEY" ./.github/keys/spine-dev.json.gpg ./spine-dev.json
+        env:
+          SPINE_DEV_KEY: ${{ secrets.SPINE_DEV_KEY }}
+
         # The OS-managed Google Cloud SDK does not provide a Datastore emulator.
       - name: Remove the OS-managed Google Cloud SDK
         run: sudo apt-get remove google-cloud-sdk
