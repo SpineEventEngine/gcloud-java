@@ -142,12 +142,10 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            InternetDomain domain = InternetDomain
-                    .newBuilder()
+            InternetDomain domain = InternetDomain.newBuilder()
                     .setValue(namespace)
                     .vBuild();
-            TenantId tenantId = TenantId
-                    .newBuilder()
+            TenantId tenantId = TenantId.newBuilder()
                     .setDomain(domain)
                     .vBuild();
             return tenantId;
@@ -170,12 +168,10 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            EmailAddress email = EmailAddress
-                    .newBuilder()
+            EmailAddress email = EmailAddress.newBuilder()
                     .setValue(namespace)
                     .vBuild();
-            TenantId tenantId = TenantId
-                    .newBuilder()
+            TenantId tenantId = TenantId.newBuilder()
                     .setEmail(email)
                     .vBuild();
             return tenantId;
@@ -197,8 +193,7 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            TenantId tenantId = TenantId
-                    .newBuilder()
+            TenantId tenantId = TenantId.newBuilder()
                     .setValue(namespace)
                     .vBuild();
             return tenantId;
@@ -215,8 +210,7 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId toTenantId(String namespace) {
-            TenantId tenantId = TenantId
-                    .newBuilder()
+            TenantId tenantId = TenantId.newBuilder()
                     .setValue(namespace)
                     .vBuild();
             return tenantId;

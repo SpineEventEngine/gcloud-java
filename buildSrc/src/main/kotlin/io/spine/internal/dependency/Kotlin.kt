@@ -30,16 +30,9 @@ package io.spine.internal.dependency
 // https://github.com/Kotlin
 object Kotlin {
     @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
-    const val version      = "1.5.0"
+    const val version      = "1.5.30"
     const val reflect      = "org.jetbrains.kotlin:kotlin-reflect:${version}"
     const val stdLib       = "org.jetbrains.kotlin:kotlin-stdlib:${version}"
     const val stdLibCommon = "org.jetbrains.kotlin:kotlin-stdlib-common:${version}"
     const val stdLibJdk8   = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version}"
-
-    // https://github.com/Kotlin/dokka
-    object Dokka {
-
-        const val version = "1.4.32"
-        const val pluginId = "org.jetbrains.dokka"
-    }
 }

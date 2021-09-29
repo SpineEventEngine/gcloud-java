@@ -26,11 +26,14 @@
 
 package io.spine.internal.gradle
 
+import io.spine.internal.gradle.publish.PublishingRepos
+import io.spine.internal.gradle.publish.PublishingRepos.gitHub
 import java.io.File
 import java.net.URI
 import java.util.*
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 
 /**
  * A Maven repository.
@@ -88,131 +91,151 @@ data class Credentials(
 )
 
 /**
- * Repositories to which we may publish. Normally, only one repository will be used.
- *
- * See `publish.gradle` for details of the publishing process.
- */
-object PublishingRepos {
-
-    @Suppress("HttpUrlsUsage") // HTTPS is not supported by this repository.
-    val mavenTeamDev = Repository(
-        name = "maven.teamdev.com",
-        releases = "http://maven.teamdev.com/repository/spine",
-        snapshots = "http://maven.teamdev.com/repository/spine-snapshots",
-        credentialsFile = "credentials.properties"
-    )
-    val cloudRepo = Repository(
-        name = "CloudRepo",
-        releases = "https://spine.mycloudrepo.io/public/repositories/releases",
-        snapshots = "https://spine.mycloudrepo.io/public/repositories/snapshots",
-        credentialsFile = "cloudrepo.properties"
-    )
-
-    fun gitHub(repoName: String): Repository {
-        var githubActor: String? = System.getenv("GITHUB_ACTOR")
-        githubActor = if (githubActor.isNullOrEmpty()) {
-            "developers@spine.io"
-        } else {
-            githubActor
-        }
-
-        return Repository(
-            name = "GitHub Packages",
-            releases = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
-            snapshots = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
-            credentialValues = { project ->
-                Credentials(
-                    username = githubActor,
-                    // This is a trick. Gradle only supports password or AWS credentials. Thus,
-                    // we pass the GitHub token as a "password".
-                    // https://docs.github.com/en/actions/guides/publishing-java-packages-with-gradle#publishing-packages-to-github-packages
-                    password = readGitHubToken(project)
-                )
-            }
-        )
-    }
-
-    private fun readGitHubToken(project: Project): String {
-        val githubToken: String? = System.getenv("GITHUB_TOKEN")
-        return if (githubToken.isNullOrEmpty()) {
-            // Use the personal access token for the `developers@spine.io` account.
-            // Only has the permission to read public GitHub packages.
-            val targetDir = "${project.buildDir}/token"
-            project.file(targetDir).mkdirs()
-            project.exec {
-                // Unzip with password "123", allow overriding, quietly,
-                // into the target dir, the given archive.
-                commandLine("unzip", "-P", "123", "-oq", "-d", targetDir, "${project.rootDir}/buildSrc/aus.weis")
-            }
-            val file = project.file("$targetDir/token.txt")
-            file.readText()
-        } else {
-            githubToken
-        }
-    }
-}
-
-/**
  * Defines names of additional repositories commonly used in the framework projects.
  *
  * @see [applyStandard]
  */
 @Suppress("unused")
 object Repos {
-    val oldSpine: String = PublishingRepos.mavenTeamDev.releases
-    val oldSpineSnapshots: String = PublishingRepos.mavenTeamDev.snapshots
+    @Deprecated(
+        message = "Please use another repository.",
+        replaceWith = ReplaceWith("artifactRegistry"),
+        level = DeprecationLevel.ERROR
+    )
+    val oldSpine = PublishingRepos.mavenTeamDev.releases
 
-    val spine: String = PublishingRepos.cloudRepo.releases
-    val spineSnapshots: String = PublishingRepos.cloudRepo.snapshots
+    @Deprecated(
+        message = "Please use another repository.",
+        replaceWith = ReplaceWith("artifactRegistrySnapshots"),
+        level = DeprecationLevel.ERROR
+    )
+    val oldSpineSnapshots = PublishingRepos.mavenTeamDev.snapshots
 
-    const val sonatypeReleases: String = "https://oss.sonatype.org/content/repositories/snapshots"
-    const val sonatypeSnapshots: String = "https://oss.sonatype.org/content/repositories/snapshots"
+    val spine = PublishingRepos.cloudRepo.releases
+    val spineSnapshots = PublishingRepos.cloudRepo.snapshots
+
+    val artifactRegistry = PublishingRepos.cloudArtifactRegistry.releases
+    val artifactRegistrySnapshots = PublishingRepos.cloudArtifactRegistry.snapshots
+
+    @Deprecated(
+        message = "Sonatype release repository redirects to the Maven Central",
+        replaceWith = ReplaceWith("sonatypeSnapshots"),
+        level = DeprecationLevel.ERROR
+    )
+    const val sonatypeReleases = "https://oss.sonatype.org/content/repositories/snapshots"
+    const val sonatypeSnapshots = "https://oss.sonatype.org/content/repositories/snapshots"
 }
 
 /**
- * The function to be used in `buildscript` clauses when fully-qualified call must be made.
+ * Registers the standard set of Maven repositories.
+ *
+ * To be used in `buildscript` clauses when a fully-qualified call must be made.
  */
 @Suppress("unused")
-fun doApplyStandard(repositories: RepositoryHandler) {
-    repositories.applyStandard()
+fun doApplyStandard(repositories: RepositoryHandler) = repositories.applyStandard()
+
+/**
+ * Registers the selected GitHub Packages repos as Maven repositories.
+ *
+ * To be used in `buildscript` clauses when a fully-qualified call must be made.
+ *
+ * @param repositories
+ *          the handler to accept registration of the GitHub Packages repository
+ * @param shortRepositoryName
+ *          the short name of the GitHub repository (e.g. "core-java")
+ * @param project
+ *          the project which is going to consume or publish artifacts from
+ *          the registered repository
+ * @see applyGitHubPackages
+ */
+@Suppress("unused")
+fun doApplyGitHubPackages(
+    repositories: RepositoryHandler,
+    shortRepositoryName: String,
+    project: Project
+) = repositories.applyGitHubPackages(shortRepositoryName, project)
+
+/**
+ * Applies the repositories hosted at GitHub Packages, to which Spine artifacts were published.
+ *
+ * This method should be used by those wishing to have Spine artifacts published
+ * to GitHub Packages as dependencies.
+ *
+ * @param shortRepositoryName
+ *          the short name of the GitHub repository (e.g. "core-java")
+ * @param project
+ *          the project which is going to consume or publish artifacts from
+ *          the registered repository
+ */
+fun RepositoryHandler.applyGitHubPackages(shortRepositoryName: String, project: Project) {
+    val repository = gitHub(shortRepositoryName)
+    val credentials = repository.credentials(project)
+
+    credentials?.let {
+        spineMavenRepo(it, repository.releases)
+        spineMavenRepo(it, repository.snapshots)
+    }
 }
 
 /**
  * Applies repositories commonly used by Spine Event Engine projects.
+ *
+ * Does not include the repositories hosted at GitHub Packages.
+ *
+ * @see applyGitHubPackages
  */
 @Suppress("unused")
 fun RepositoryHandler.applyStandard() {
 
-    apply {
-        gradlePluginPortal()
-        mavenLocal()
+    gradlePluginPortal()
+    mavenLocal()
 
-        val libraryGroup = "io.spine"
-        val toolsGroup = "io.spine.tools"
-        val gcloudGroup = "io.spine.gcloud"
+    val spineRepos = listOf(
+        Repos.spine,
+        Repos.spineSnapshots,
+        Repos.artifactRegistry,
+        Repos.artifactRegistrySnapshots
+    )
 
-        maven {
-            url = URI(Repos.spine)
-            content {
-                includeGroup(libraryGroup)
-                includeGroup(toolsGroup)
-                includeGroup(gcloudGroup)
+    spineRepos
+        .map { URI(it) }
+        .forEach {
+            maven {
+                url = it
+                includeSpineOnly()
             }
         }
-        maven {
-            url = URI(Repos.spineSnapshots)
-            content {
-                includeGroup(libraryGroup)
-                includeGroup(toolsGroup)
-                includeGroup(gcloudGroup)
-            }
+
+    mavenCentral()
+    maven {
+        url = URI(Repos.sonatypeSnapshots)
+    }
+}
+
+/**
+ * Registers the Maven repository with the passed [repoCredentials] for authorization.
+ *
+ * Only includes the Spine-related artifact groups.
+ */
+private fun RepositoryHandler.spineMavenRepo(
+    repoCredentials: Credentials,
+    repoUrl: String
+) {
+    maven {
+        url = URI(repoUrl)
+        includeSpineOnly()
+        credentials {
+            username = repoCredentials.username
+            password = repoCredentials.password
         }
-        mavenCentral()
-        maven {
-            url = URI(Repos.sonatypeReleases)
-        }
-        maven {
-            url = URI(Repos.sonatypeSnapshots)
-        }
+    }
+}
+
+/**
+ * Narrows down the search for this repository to Spine-related artifact groups.
+ */
+private fun MavenArtifactRepository.includeSpineOnly() {
+    content {
+        includeGroupByRegex("io\\.spine.*")
     }
 }

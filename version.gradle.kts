@@ -24,13 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries to be used.
- *
- * This file defines versions for the dependencies that are not covered by
- * `.config/gradle/dependencies.gradle`.
- */
-
-val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.34")
-val spineCoreVersion: String by extra("2.0.0-SNAPSHOT.25")
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.4")
+val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.62")
+val spineBaseTypesVersion: String by extra("2.0.0-SNAPSHOT.59")
+val spineCoreVersion: String by extra("2.0.0-SNAPSHOT.61")
+val versionToPublish: String by extra("2.0.0-SNAPSHOT.62")

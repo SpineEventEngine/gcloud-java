@@ -25,30 +25,41 @@
  */
 
 import io.spine.internal.dependency.ErrorProne
+import io.spine.internal.dependency.GoogleApis
+import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.PublishingRepos
+import io.spine.internal.dependency.PerfMark
+import io.spine.internal.gradle.JavadocConfig
 import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
-import io.spine.internal.gradle.spinePublishing
-
+import io.spine.internal.gradle.github.pages.updateGitHubPages
+import io.spine.internal.gradle.publish.PublishingRepos
+import io.spine.internal.gradle.publish.spinePublishing
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imported things here.
 buildscript {
     apply(from = "$rootDir/version.gradle.kts")
     io.spine.internal.gradle.doApplyStandard(repositories)
-    io.spine.internal.gradle.doForceVersions(configurations)
+
+    val execForkPlugin = io.spine.internal.dependency.ExecForkPlugin
+    repositories {
+        val repos = io.spine.internal.gradle.publish.PublishingRepos
+        repos.gitHub(execForkPlugin.repository)
+    }
 
     val spineBaseVersion: String by extra
 
-    @Suppress("LocalVariableName")  // For better readability.
-    val Kotlin = io.spine.internal.dependency.Kotlin
-
     dependencies {
         classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
+        classpath(execForkPlugin.classpath)
     }
 
+    @Suppress("LocalVariableName")  // For better readability.
+    val Kotlin = io.spine.internal.dependency.Kotlin
+    io.spine.internal.gradle.doForceVersions(configurations)
     configurations.all {
         resolutionStrategy {
             force(
@@ -73,10 +84,13 @@ plugins {
 }
 
 spinePublishing {
-    targetRepositories.addAll(setOf(
-        PublishingRepos.cloudRepo,
-        PublishingRepos.gitHub("gcloud-java")
-    ))
+    with(PublishingRepos) {
+        targetRepositories.addAll(
+            cloudRepo,
+            cloudArtifactRegistry,
+            gitHub("gcloud-java")
+        )
+    }
     projectsToPublish.addAll(
         "datastore",
         "stackdriver-trace",
@@ -84,6 +98,8 @@ spinePublishing {
         "pubsub"
     )
 }
+
+val spineBaseVersion: String by extra
 
 allprojects {
     apply(from = "$rootDir/version.gradle.kts")
@@ -112,21 +128,37 @@ subprojects {
 
         with(Scripts) {
             from(javacArgs(project))
-            from(modelCompiler(project))
             from(projectLicenseReport(project))
             from(slowTests(project))
             from(testOutput(project))
-            from(javadocOptions(project))
         }
+
+        plugin("pmd-settings")
     }
 
-    extensions["modelCompiler"].withGroovyBuilder {
-        setProperty("generateValidation", true)
+    JavadocConfig.applyTo(project)
+
+    updateGitHubPages {
+        allowInternalJavadoc.set(true)
+        rootFolder.set(rootDir)
     }
+
+    val javaVersion = JavaVersion.VERSION_1_8
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
+    }
+
+    kotlin {
+        explicitApi()
+    }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = javaVersion.toString()
+            freeCompilerArgs = listOf("-Xskip-prerelease-check")
+        }
     }
 
     // Required to fetch `androidx.annotation:annotation:1.1.0`,
@@ -135,23 +167,24 @@ subprojects {
         google()
     }
 
-    val gRpc = io.spine.internal.dependency.Grpc
-
     configurations.forceVersions()
     configurations {
         all {
             resolutionStrategy {
                 force(
-                    "io.grpc:grpc-api:${gRpc.version}",
-                    "io.grpc:grpc-protobuf-lite:${gRpc.version}",
-                    gRpc.core,
-                    gRpc.context,
-                    gRpc.stub,
-                    gRpc.protobuf,
+                    Grpc.api,
+                    Grpc.core,
+                    Grpc.context,
+                    Grpc.stub,
+                    Grpc.protobuf,
+                    Grpc.protobufLite,
 
-                    "io.perfmark:perfmark-api:0.23.0",
+                    PerfMark.api,
 
-                    "com.google.api.grpc:proto-google-common-protos:2.2.1"
+                    GoogleApis.commonProtos,
+
+                    "io.spine:spine-base:$spineBaseVersion",
+                    "io.spine.tools:spine-testlib:$spineBaseVersion"
                 )
             }
         }
@@ -251,12 +284,9 @@ subprojects {
         }
     }
 
-    apply(from = Scripts.updateGitHubPages(project))
     afterEvaluate {
         tasks.getByName("publish").dependsOn("updateGitHubPages")
     }
-
-    apply(from = Scripts.pmd(project))
 }
 
 apply {

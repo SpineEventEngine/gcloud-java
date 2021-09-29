@@ -41,6 +41,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
+import com.google.errorprone.annotations.InlineMe;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.record.Entities;
 import io.spine.server.storage.datastore.record.RecordId;
@@ -152,7 +153,11 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
      * @deprecated Use {@link #lookup(List)} instead.
      */
     @Deprecated
-    public Iterator<@Nullable Entity> read(Iterable<Key> keys) {
+    @InlineMe(
+            replacement = "this.lookup(ImmutableList.copyOf(keys)).iterator()",
+            imports = "com.google.common.collect.ImmutableList"
+    )
+    public final Iterator<@Nullable Entity> read(Iterable<Key> keys) {
         return lookup(ImmutableList.copyOf(keys)).iterator();
     }
 
