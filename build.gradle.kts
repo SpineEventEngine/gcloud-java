@@ -29,10 +29,12 @@ import io.spine.internal.dependency.GoogleApis
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.PerfMark
+import io.spine.internal.gradle.JavadocConfig
 import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
+import io.spine.internal.gradle.github.pages.updateGitHubPages
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
 
@@ -128,10 +130,16 @@ subprojects {
             from(projectLicenseReport(project))
             from(slowTests(project))
             from(testOutput(project))
-            from(javadocOptions(project))
         }
 
         plugin("pmd-settings")
+    }
+
+    JavadocConfig.applyTo(project)
+
+    updateGitHubPages {
+        allowInternalJavadoc.set(true)
+        rootFolder.set(rootDir)
     }
 
     java {
@@ -266,7 +274,6 @@ subprojects {
         }
     }
 
-    apply(from = Scripts.updateGitHubPages(project))
     afterEvaluate {
         tasks.getByName("publish").dependsOn("updateGitHubPages")
     }
