@@ -24,16 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.GoogleCloud
+package io.spine.internal.dependency
 
-dependencies {
-    api(GoogleCloud.trace)
+object GoogleCloud {
+    // https://github.com/googleapis/java-pubsub
+    const val pubSubGrpcApi = "com.google.api.grpc:proto-google-cloud-pubsub-v1:1.95.1"
+
+    // https://github.com/googleapis/java-trace
+    const val trace = "com.google.cloud:google-cloud-trace:1.4.1"
+
+    // https://github.com/googleapis/java-datastore
+    const val datastore = "com.google.cloud:google-cloud-datastore:1.106.5"
 }
-
-//TODO:2021-07-22:alexander.yevsyukov: Turn to WARN and investigate duplicates.
-// see https://github.com/SpineEventEngine/base/issues/657
-val dupStrategy = DuplicatesStrategy.INCLUDE
-tasks.processResources.get().duplicatesStrategy = dupStrategy
-tasks.processTestResources.get().duplicatesStrategy = dupStrategy
-tasks.sourceJar.get().duplicatesStrategy = dupStrategy
-tasks.jar.get().duplicatesStrategy = dupStrategy

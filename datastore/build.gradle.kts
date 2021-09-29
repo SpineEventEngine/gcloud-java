@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.GoogleCloud
 import io.spine.internal.gradle.IncrementGuard
 import io.spine.tools.gradle.exec.ExecFork
 
@@ -39,7 +40,7 @@ val spineBaseTypesVersion: String by extra
 
 dependencies {
     // Google Cloud Datastore
-    api("com.google.cloud:google-cloud-datastore:1.106.5") {
+    api(GoogleCloud.datastore) {
         exclude(group = "com.google.protobuf")
         exclude(group = "com.google.guava")
     }

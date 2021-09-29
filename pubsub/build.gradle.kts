@@ -24,9 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.GoogleCloud
+
 dependencies {
     // Google Cloud Pubsub protos
-    api("com.google.api.grpc:proto-google-cloud-pubsub-v1:1.95.1")
+    api(GoogleCloud.pubSubGrpcApi)
 }
 
 //TODO:2021-07-22:alexander.yevsyukov: Turn to WARN and investigate duplicates.
