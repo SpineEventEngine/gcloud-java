@@ -30,13 +30,20 @@ import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.PerfMark
 import io.spine.internal.gradle.JavadocConfig
-import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyStandard
+import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.github.pages.updateGitHubPages
+import io.spine.internal.gradle.javac.configureErrorProne
+import io.spine.internal.gradle.javac.configureJavac
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
+import io.spine.internal.gradle.report.coverage.JacocoConfig
+import io.spine.internal.gradle.report.license.LicenseReporter
+import io.spine.internal.gradle.report.pom.PomGenerator
+import io.spine.internal.gradle.testing.configureLogging
+import io.spine.internal.gradle.testing.registerTestTasks
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imported things here.
@@ -77,9 +84,8 @@ plugins {
     io.spine.internal.dependency.Protobuf.GradlePlugin.apply {
         id(id) version version
     }
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imported things here.
     io.spine.internal.dependency.ErrorProne.GradlePlugin.apply {
-        id(id) version version
+        id(id)
     }
 }
 
@@ -125,23 +131,22 @@ subprojects {
         plugin("kotlin")
         plugin("pmd")
         plugin("maven-publish")
-
-        with(Scripts) {
-            from(javacArgs(project))
-            from(projectLicenseReport(project))
-            from(slowTests(project))
-            from(testOutput(project))
-        }
-
         plugin("pmd-settings")
     }
 
-    JavadocConfig.applyTo(project)
-
-    updateGitHubPages {
-        allowInternalJavadoc.set(true)
-        rootFolder.set(rootDir)
+    tasks {
+        withType<JavaCompile> {
+            configureJavac()
+            configureErrorProne()
+        }
+        withType<Test> {
+            configureLogging()
+        }
+        registerTestTasks()
     }
+    LicenseReporter.generateReportIn(project)
+    JavadocConfig.applyTo(project)
+    CheckStyleConfig.applyTo(project)
 
     val javaVersion = JavaVersion.VERSION_1_8
 
@@ -203,10 +208,12 @@ subprojects {
 
         testImplementation(JUnit.runner)
         testImplementation("io.spine.tools:spine-testutil-server:$spineCoreVersion")
-        testImplementation(group = "io.spine",
-                           name = "spine-server",
-                           version = spineCoreVersion,
-                           classifier = "test")
+        testImplementation(
+            group = "io.spine",
+            name = "spine-server",
+            version = spineCoreVersion,
+            classifier = "test"
+        )
     }
 
     val sourcesRootDir = "$projectDir/src"
@@ -269,14 +276,16 @@ subprojects {
     // Apply the same IDEA module configuration for each of sub-projects.
     idea {
         module {
-            generatedSourceDirs.addAll(files(
-                generatedJavaDir,
-                generatedGrpcDir,
-                generatedSpineDir,
-                generatedTestJavaDir,
-                generatedTestGrpcDir,
-                generatedTestSpineDir
-            ))
+            generatedSourceDirs.addAll(
+                files(
+                    generatedJavaDir,
+                    generatedGrpcDir,
+                    generatedSpineDir,
+                    generatedTestJavaDir,
+                    generatedTestGrpcDir,
+                    generatedTestSpineDir
+                )
+            )
             testSourceDirs.add(file(generatedTestJavaDir))
 
             isDownloadJavadoc = true
@@ -284,19 +293,13 @@ subprojects {
         }
     }
 
-    afterEvaluate {
-        tasks.getByName("publish").dependsOn("updateGitHubPages")
+    updateGitHubPages(spineBaseVersion) {
+        allowInternalJavadoc.set(true)
+        rootFolder.set(rootDir)
     }
+    project.tasks["publish"].dependsOn("${project.path}:updateGitHubPages")
 }
 
-apply {
-    with(Scripts) {
-        // Aggregated coverage report across all subprojects.
-        from(jacoco(project))
-        // Generate a repository-wide report of 3rd-party dependencies and their licenses.
-        from(repoLicenseReport(project))
-        // Generate a `pom.xml` file containing first-level dependency of all projects
-        // in the repository.
-        from(generatePom(project))
-    }
-}
+JacocoConfig.applyTo(project)
+PomGenerator.applyTo(project)
+LicenseReporter.mergeAllReports(project)

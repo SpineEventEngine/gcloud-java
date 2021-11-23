@@ -26,7 +26,12 @@
 
 package io.spine.internal.dependency
 
+@Suppress("unused")
 object GoogleCloud {
+
+    // https://github.com/googleapis/java-core
+    const val core = "com.google.cloud:google-cloud-core:2.1.7"
+
     // https://github.com/googleapis/java-pubsub
     const val pubSubGrpcApi = "com.google.api.grpc:proto-google-cloud-pubsub-v1:1.95.1"
 
