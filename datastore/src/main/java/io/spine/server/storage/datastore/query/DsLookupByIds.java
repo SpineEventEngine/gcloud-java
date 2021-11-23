@@ -51,6 +51,10 @@ import static io.spine.server.storage.datastore.record.FieldMaskApplier.recordMa
 /**
  * An {@code Entity} lookup in Google Datastore using {@code Entity} identifiers.
  *
+ * @param <I>
+ *         the type of identifiers of the searched records
+ * @param <R>
+ *         the type of searched records
  * @implNote Lookup is performed by reading all the entities with Datastore Keys matching
  *         the provided IDs first and then applying other query constraints in-memory.
  */

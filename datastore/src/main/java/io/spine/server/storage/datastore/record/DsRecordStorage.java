@@ -59,6 +59,10 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * {@link RecordStorage} implementation based on Google Cloud Datastore.
  *
+ * @param <I>
+ *         the type of identifiers of the stored records
+ * @param <R>
+ *         the type of stored records
  * @see DatastoreStorageFactory
  */
 public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {

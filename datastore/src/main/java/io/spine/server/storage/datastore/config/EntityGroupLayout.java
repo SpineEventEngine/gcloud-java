@@ -47,6 +47,13 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.hasAnces
  *
  * <p>By extending this type, the descendants describe how to obtain an ancestor key for a certain
  * stored record and how to query the records with regards to their ancestor-child structure.
+ *
+ * @param <I>
+ *         the type of the identifiers of the stored records
+ * @param <R>
+ *         the type of the stored records
+ * @param <P>
+ *         the type of the "parent" records
  */
 @SPI
 public abstract class EntityGroupLayout<I, R extends Message, P extends Message>

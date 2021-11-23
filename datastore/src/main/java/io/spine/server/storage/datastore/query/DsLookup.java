@@ -34,6 +34,11 @@ import io.spine.server.storage.datastore.record.DsEntitySpec;
 
 /**
  * Factory for record lookup methods.
+ *
+ * @param <I>
+ *         the type of the identifiers of the searched records
+ * @param <R>
+ *         the type of the searched records
  */
 public final class DsLookup<I, R extends Message> {
 
@@ -58,9 +63,9 @@ public final class DsLookup<I, R extends Message> {
      *         the specification telling how the Protobuf Message is stored in terms of Datastore
      *         Entities
      * @param <I>
-     *         the type of identifiers of the stored records
+     *         the type of identifiers of the searched records
      * @param <R>
-     *         the type of stored records
+     *         the type of searched records
      * @return a new instance of Datastore lookup
      */
     public static <I, R extends Message> DsLookup<I, R>

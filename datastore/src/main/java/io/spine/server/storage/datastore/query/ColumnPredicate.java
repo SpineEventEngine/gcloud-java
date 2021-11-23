@@ -45,6 +45,10 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * Tests if a Datastore Entity matches the parameters defined
  * by the {@linkplain Subject query subject}.
  *
+ * @param <I>
+ *         the type of the identifiers of the queried records
+ * @param <R>
+ *         the type of the queried records
  * @implNote The methods of this type rely upon the provided instance of {@link
  *         FilterAdapter}, therefore cannot be made {@code static}.
  */

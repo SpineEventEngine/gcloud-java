@@ -37,6 +37,11 @@ import java.util.Optional;
 
 /**
  * Describes the type of storage layout, in which the records are stored in a flat structure.
+ *
+ * @param <I>
+ *         the type of the identifiers of the stored records
+ * @param <R>
+ *         the type of the stored records
  */
 public final class FlatLayout<I, R extends Message> extends RecordLayout<I, R> {
 

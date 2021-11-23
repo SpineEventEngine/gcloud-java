@@ -45,6 +45,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * <p>Due to Datastore limitations, some {@code RecordQuery} instances are processed partly
  * via the Datastore querying, and partly by filtering the intermediate results in memory.
  * This type analyzes the queries and determines the execution strategy.
+ *
+ * @param <I>
+ *         the type of identifiers of the queried records
+ * @param <R>
+ *         the type of queried records
  */
 @Internal
 public abstract class PreparedQuery<I, R extends Message> {

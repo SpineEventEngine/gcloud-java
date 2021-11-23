@@ -51,6 +51,10 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 /**
  * An {@code Entity} lookup using {@linkplain QueryPredicate Spine query predicates}.
  *
+ * @param <I>
+ *         the type of identifiers of the searched records
+ * @param <R>
+ *         the type of searched records
  * @implNote Due to Datastore restrictions, execution of a single
  *         {@link io.spine.query.Query Query} may result into several Datastore reads.
  *         See {@link DsFilters} for details.
