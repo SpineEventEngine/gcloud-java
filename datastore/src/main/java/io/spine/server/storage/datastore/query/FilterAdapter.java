@@ -29,7 +29,6 @@ package io.spine.server.storage.datastore.query;
 import com.google.cloud.datastore.Value;
 import io.spine.query.SubjectParameter;
 import io.spine.server.storage.ColumnMapping;
-import io.spine.server.storage.ColumnTypeMapping;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -68,10 +67,9 @@ public final class FilterAdapter {
      */
     Value<?> transformValue(SubjectParameter<?, ?, ?> parameter) {
         checkNotNull(parameter);
-        Object paramValue = parameter.value();
-        ColumnTypeMapping<?, ? extends Value<?>> typeMapping =
-                columnMapping.of(paramValue.getClass());
-        Value<?> result = typeMapping.applyTo(paramValue);
+        var paramValue = parameter.value();
+        var typeMapping = columnMapping.of(paramValue.getClass());
+        var result = typeMapping.applyTo(paramValue);
         return result;
     }
 }

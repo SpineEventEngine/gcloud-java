@@ -27,15 +27,12 @@
 package io.spine.server.storage.datastore.query;
 
 import com.google.cloud.datastore.Entity;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.server.storage.datastore.record.Entities;
 import io.spine.server.storage.datastore.record.FieldMaskApplier;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -69,12 +66,13 @@ abstract class ToRecords<R extends Message> implements Function<IntermediateResu
 
     @Override
     public Iterable<R> apply(IntermediateResult result) {
-        List<@Nullable Entity> entities = result.entities();
-        Stream<Entity> stream =
+        var entities = result.entities();
+        var stream =
                 entities.stream()
                         .filter(Objects::nonNull);
         stream = filter(stream);
-        ImmutableList<R> records =
+        @SuppressWarnings("ConstantConditions") /* `null` were already filtered out. */
+        var records =
                 stream.map(this::toRecord)
                       .map(masker)
                       .collect(toImmutableList());

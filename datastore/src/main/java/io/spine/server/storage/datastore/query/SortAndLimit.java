@@ -77,7 +77,7 @@ final class SortAndLimit<R extends Message> extends ToRecords<R> {
 
     @Override
     protected Stream<Entity> filter(Stream<Entity> entities) {
-        Stream<Entity> currentStream = entities;
+        var currentStream = entities;
         if (!sorting.isEmpty()) {
             currentStream = currentStream.sorted(implementing(sorting));
         }

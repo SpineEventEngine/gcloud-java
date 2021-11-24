@@ -82,8 +82,8 @@ public abstract class PreparedQuery<I, R extends Message> {
      * Executes the query and returns the read result.
      */
     public final Iterable<R> execute() {
-        IntermediateResult intermediateResult = fetchFromDatastore();
-        Iterable<R> result = toRecords(intermediateResult);
+        var intermediateResult = fetchFromDatastore();
+        var result = toRecords(intermediateResult);
         return result;
     }
 

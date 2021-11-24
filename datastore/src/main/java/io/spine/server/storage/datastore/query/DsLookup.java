@@ -28,7 +28,6 @@ package io.spine.server.storage.datastore.query;
 
 import com.google.protobuf.Message;
 import io.spine.query.RecordQuery;
-import io.spine.query.Subject;
 import io.spine.server.storage.datastore.DatastoreMedium;
 import io.spine.server.storage.datastore.record.DsEntitySpec;
 
@@ -82,7 +81,7 @@ public final class DsLookup<I, R extends Message> {
      * @return a new instance of prepared query
      */
     public PreparedQuery<I, R> with(RecordQuery<I, R> query) {
-        Subject<I, R> subject = query.subject();
+        var subject = query.subject();
         if (!subject.id()
                     .values()
                     .isEmpty()) {
