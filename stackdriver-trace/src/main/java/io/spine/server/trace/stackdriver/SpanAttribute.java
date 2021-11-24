@@ -27,9 +27,6 @@
 package io.spine.server.trace.stackdriver;
 
 import com.google.devtools.cloudtrace.v2.AttributeValue;
-import com.google.devtools.cloudtrace.v2.TruncatableString;
-import com.google.protobuf.Message;
-import io.spine.core.TenantId;
 import io.spine.json.Json;
 import io.spine.string.Stringifiers;
 
@@ -43,47 +40,47 @@ enum SpanAttribute {
     BoundedContext {
         @Override
         AttributeValue value(SignalSpan signalSpan) {
-            String fullName = signalSpan.contextName().getValue();
+            var fullName = signalSpan.contextName().getValue();
             return SpanAttribute.stringValue(fullName);
         }
     },
     Tenant {
         @Override
         AttributeValue value(SignalSpan signalSpan) {
-            TenantId tenantId = signalSpan.signal().tenant();
-            String tenantString = Json.toCompactJson(tenantId);
+            var tenantId = signalSpan.signal().tenant();
+            var tenantString = Json.toCompactJson(tenantId);
             return SpanAttribute.stringValue(tenantString);
         }
     },
     EntityID {
         @Override
         AttributeValue value(SignalSpan signalSpan) {
-            Message id = unpack(signalSpan.receiver().getId());
-            String printedId = Stringifiers.toString(id);
+            var id = unpack(signalSpan.receiver().getId());
+            var printedId = Stringifiers.toString(id);
             return SpanAttribute.stringValue(printedId);
         }
     },
     SignalID {
         @Override
         AttributeValue value(SignalSpan signalSpan) {
-            String printedId = signalSpan.signal().id().value();
+            var printedId = signalSpan.signal().id().value();
             return SpanAttribute.stringValue(printedId);
         }
     },
     EntityType {
         @Override
         AttributeValue value(SignalSpan signalSpan) {
-            String entityType = signalSpan.receiver()
-                                          .getTypeUrl();
+            var entityType = signalSpan.receiver()
+                                       .getTypeUrl();
             return SpanAttribute.stringValue(entityType);
         }
     },
     SignalType {
         @Override
         AttributeValue value(SignalSpan signalSpan) {
-            String signalType = signalSpan.signal()
-                                          .enclosedTypeUrl()
-                                          .value();
+            var signalType = signalSpan.signal()
+                                       .enclosedTypeUrl()
+                                       .value();
             return SpanAttribute.stringValue(signalType);
         }
     };
@@ -106,8 +103,8 @@ enum SpanAttribute {
     abstract AttributeValue value(SignalSpan signalSpan);
 
     private static AttributeValue stringValue(String value) {
-        TruncatableString truncatable = Truncate.stringTo(value, MAX_SIZE);
-        AttributeValue attributeValue = AttributeValue
+        var truncatable = Truncate.stringTo(value, MAX_SIZE);
+        var attributeValue = AttributeValue
                 .newBuilder()
                 .setStringValue(truncatable)
                 .build();

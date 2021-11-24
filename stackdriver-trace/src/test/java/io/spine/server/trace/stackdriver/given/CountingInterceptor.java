@@ -54,8 +54,8 @@ public final class CountingInterceptor implements ClientInterceptor {
     public <ReqT, RespT> ClientCall<ReqT, RespT>
     interceptCall(MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
         callCount.incrementAndGet();
-        RespT answer = method.getResponseMarshaller()
-                             .parse(new ByteArrayInputStream(EMPTY_INPUT));
+        var answer = method.getResponseMarshaller()
+                           .parse(new ByteArrayInputStream(EMPTY_INPUT));
         return new NoOpClientCall<>(answer);
     }
 

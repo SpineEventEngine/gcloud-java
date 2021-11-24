@@ -30,8 +30,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Utf8;
 import com.google.devtools.cloudtrace.v2.TruncatableString;
 
-import java.nio.charset.Charset;
-
 /**
  * Utilities for working with {@link TruncatableString}.
  */
@@ -53,13 +51,13 @@ final class Truncate {
      * @return truncated string
      */
     static TruncatableString stringTo(String value, int length) {
-        int fullLength = Utf8.encodedLength(value);
+        var fullLength = Utf8.encodedLength(value);
         if (fullLength <= length) {
             return stringOf(value, 0);
         } else {
-            Charset utf8 = Charsets.UTF_8;
-            byte[] utf8Bytes = value.getBytes(utf8);
-            String utf8String = new String(utf8Bytes, 0, length, utf8);
+            var utf8 = Charsets.UTF_8;
+            var utf8Bytes = value.getBytes(utf8);
+            var utf8String = new String(utf8Bytes, 0, length, utf8);
             return stringOf(utf8String, fullLength - length);
         }
     }

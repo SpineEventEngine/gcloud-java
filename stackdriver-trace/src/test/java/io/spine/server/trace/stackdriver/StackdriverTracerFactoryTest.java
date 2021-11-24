@@ -28,12 +28,8 @@ package io.spine.server.trace.stackdriver;
 
 import com.google.api.gax.grpc.GrpcCallContext;
 import com.google.api.gax.rpc.ClientContext;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.StringSubject;
-import com.google.common.truth.Subject;
 import com.google.protobuf.Empty;
-import io.grpc.CallCredentials;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.auth.MoreCallCredentials;
@@ -44,7 +40,6 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.server.ContextSpec;
-import io.spine.server.trace.Tracer;
 import io.spine.server.trace.stackdriver.given.CountingInterceptor;
 import io.spine.system.server.EntityTypeName;
 import io.spine.test.stackdriver.CreateProject;
@@ -57,7 +52,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
 import static com.google.common.truth.Truth.assertThat;
@@ -86,13 +80,13 @@ class StackdriverTracerFactoryTest {
                 .forName("never to be called because of the interceptor")
                 .intercept(interceptor)
                 .build();
-        InputStream credentialsFile = StackdriverTracerFactoryTest.class
+        var credentialsFile = StackdriverTracerFactoryTest.class
                 .getClassLoader()
                 .getResourceAsStream("spine-dev.json");
         assertNotNull(credentialsFile);
-        ServiceAccountCredentials credentials = fromStream(credentialsFile);
-        CallCredentials callCredentials = MoreCallCredentials.from(credentials);
-        CallOptions options = CallOptions.DEFAULT.withCallCredentials(callCredentials);
+        var credentials = fromStream(credentialsFile);
+        var callCredentials = MoreCallCredentials.from(credentials);
+        var options = CallOptions.DEFAULT.withCallCredentials(callCredentials);
         realGrpcContext = GrpcCallContext.of(channel, options);
     }
 
@@ -104,8 +98,8 @@ class StackdriverTracerFactoryTest {
     @Test
     @DisplayName("provide gRPC endpoint")
     void endpoint() {
-        String endpoint = StackdriverTracerFactory.stackdriverEndpoint();
-        StringSubject assertEndpoint = assertThat(endpoint);
+        var endpoint = StackdriverTracerFactory.stackdriverEndpoint();
+        var assertEndpoint = assertThat(endpoint);
         assertEndpoint.isNotNull();
         assertEndpoint.isNotEmpty();
     }
@@ -130,7 +124,7 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("when creating tracers")
         void factory() {
-            StackdriverTracerFactory factory = StackdriverTracerFactory
+            var factory = StackdriverTracerFactory
                     .newBuilder()
                     .setGcpProjectId(REAL_GCP_PROJECT)
                     .setCallContext(realGrpcContext)
@@ -148,7 +142,7 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("a client context")
         void clientContext() {
-            StackdriverTracerFactory.Builder builder = StackdriverTracerFactory
+            var builder = StackdriverTracerFactory
                     .newBuilder()
                     .setGcpProjectId("test123");
             assertThrows(NullPointerException.class, builder::build);
@@ -157,11 +151,11 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("a GCP project ID")
         void gcpProjectId() {
-            ClientContext context = ClientContext
+            var context = ClientContext
                     .newBuilder()
                     .setDefaultCallContext(GrpcCallContext.createDefault())
                     .build();
-            StackdriverTracerFactory.Builder builder = StackdriverTracerFactory
+            var builder = StackdriverTracerFactory
                     .newBuilder()
                     .setClientContext(context);
             assertThrows(NullPointerException.class, builder::build);
@@ -175,7 +169,7 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("ClientContext")
         void clientContext() {
-            ClientContext context = ClientContext
+            var context = ClientContext
                     .newBuilder()
                     .setDefaultCallContext(GrpcCallContext.createDefault())
                     .build();
@@ -214,9 +208,9 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("of correct type")
         void type() {
-            StackdriverTracerFactory tracerFactory = factory.build();
-            Tracer tracer = tracerFactory.trace(SPEC, Event.getDefaultInstance());
-            Subject assertTracer = assertThat(tracer);
+            var tracerFactory = factory.build();
+            var tracer = tracerFactory.trace(SPEC, Event.getDefaultInstance());
+            var assertTracer = assertThat(tracer);
             assertTracer.isNotNull();
             assertTracer.isInstanceOf(StackdriverTracer.class);
         }
@@ -224,10 +218,10 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("which sends requests sequentially")
         void forSyncExecution() throws Exception {
-            StackdriverTracerFactory tracerFactory = factory.forbidMultiThreading()
-                                                            .build();
+            var tracerFactory = factory.forbidMultiThreading()
+                                       .build();
             assertThat(interceptor.callCount()).isEqualTo(0);
-            Tracer tracer = tracerFactory.trace(SPEC, Event.getDefaultInstance());
+            var tracer = tracerFactory.trace(SPEC, Event.getDefaultInstance());
             tracer.close();
             tracerFactory.close();
             assertThat(interceptor.callCount()).isEqualTo(1);
@@ -236,9 +230,9 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("which sends requests in parallel")
         void forAsyncExecution() throws Exception {
-            StackdriverTracerFactory tracerFactory = factory.build();
+            var tracerFactory = factory.build();
             assertThat(interceptor.callCount()).isEqualTo(0);
-            Tracer tracer = tracerFactory.trace(SPEC, Command.getDefaultInstance());
+            var tracer = tracerFactory.trace(SPEC, Command.getDefaultInstance());
             tracer.close();
             tracerFactory.close();
             assertThat(interceptor.callCount()).isEqualTo(1);
@@ -247,25 +241,25 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("and post non-empty requests")
         void nonEmpty() throws Exception {
-            StackdriverTracerFactory tracerFactory = factory.build();
+            var tracerFactory = factory.build();
             assertThat(interceptor.callCount()).isEqualTo(0);
-            TestActorRequestFactory requests =
+            var requests =
                     new TestActorRequestFactory(StackdriverTracerFactoryTest.class);
-            CreateProject command = CreateProject
+            var command = CreateProject
                     .newBuilder()
                     .setUuid(newUuid())
                     .setName("TestProject")
                     .vBuild();
-            Command cmd = requests.command()
-                                  .create(command);
-            Tracer tracer = tracerFactory.trace(SPEC, cmd);
-            MessageId receiverId = MessageId
+            var cmd = requests.command()
+                              .create(command);
+            var tracer = tracerFactory.trace(SPEC, cmd);
+            var receiverId = MessageId
                     .newBuilder()
                     .setId(Identifier.pack("SampleEntityId"))
                     .setTypeUrl(TypeUrl.of(Empty.class).value())
                     .setVersion(zero())
                     .vBuild();
-            EntityTypeName entityType = EntityTypeName
+            var entityType = EntityTypeName
                     .newBuilder()
                     .setJavaClassName(StackdriverTracerFactoryTest.class.getCanonicalName())
                     .vBuild();

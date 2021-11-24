@@ -65,20 +65,20 @@ public class StackdriverTracer extends AbstractTracer {
 
     @Override
     public void processedBy(MessageId receiver, EntityTypeName receiverType) {
-        SignalSpan signalSpan = SignalSpan
+        var signalSpan = SignalSpan
                 .newBuilder()
                 .setContext(context)
                 .setSignal(signal())
                 .setReceiver(receiver)
                 .setReceiverType(receiverType)
                 .build();
-        Span span = signalSpan.asTraceSpan(projectId);
+        var span = signalSpan.asTraceSpan(projectId);
         spans.add(span);
     }
 
     @Override
     public void close() {
-        BatchWriteSpansRequest request = BatchWriteSpansRequest
+        var request = BatchWriteSpansRequest
                 .newBuilder()
                 .setName(projectId.asName().value())
                 .addAllSpans(spans)

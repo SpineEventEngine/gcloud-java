@@ -41,7 +41,7 @@ class SignalSpanTest {
     @Test
     @DisplayName("not accept nulls on construction")
     void nulls() {
-        NullPointerTester tester = new NullPointerTester();
+        var tester = new NullPointerTester();
         tester.setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
               .setDefault(MessageId.class, MessageId.getDefaultInstance())
               .setDefault(EntityTypeName.class, EntityTypeName.getDefaultInstance());
