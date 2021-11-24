@@ -133,8 +133,8 @@ public final class Namespace {
         checkNotNull(id);
         checkNotNull(converterFactory);
 
-        NamespaceConverter converter = converterFactory.get(multitenant);
-        String ns = converter.toString(id);
+        var converter = converterFactory.get(multitenant);
+        var ns = converter.toString(id);
         return new Namespace(ns, converter);
     }
 
@@ -172,13 +172,13 @@ public final class Namespace {
         checkNotNull(key);
         checkNotNull(converterFactory);
 
-        String namespace = key.getName();
+        var namespace = key.getName();
         if (isNullOrEmpty(namespace)) {
             return null;
         }
 
-        NamespaceConverter converter = converterFactory.get(multitenant);
-        Namespace result = new Namespace(namespace, converter);
+        var converter = converterFactory.get(multitenant);
+        var result = new Namespace(namespace, converter);
         return result;
     }
 
@@ -213,8 +213,8 @@ public final class Namespace {
     }
 
     private static String escapeIllegalCharacters(String candidateNamespace) {
-        String result = AT_SYMBOL_PATTERN.matcher(candidateNamespace)
-                                         .replaceAll(quoteReplacement(AT_SYMBOL_REPLACEMENT));
+        var result = AT_SYMBOL_PATTERN.matcher(candidateNamespace)
+                                      .replaceAll(quoteReplacement(AT_SYMBOL_REPLACEMENT));
         return result;
     }
 
@@ -253,7 +253,7 @@ public final class Namespace {
      * @return a {@link TenantId} represented by this {@code Namespace}
      */
     TenantId toTenantId() {
-        TenantId tenantId = converter.convert(value());
+        var tenantId = converter.convert(value());
         return tenantId;
     }
 
@@ -270,7 +270,7 @@ public final class Namespace {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Namespace namespace = (Namespace) o;
+        var namespace = (Namespace) o;
         return Objects.equal(value(), namespace.value());
     }
 
@@ -312,9 +312,9 @@ public final class Namespace {
         private final NamespaceConverter namespaceConverter;
 
         static ConverterType forTenantId(TenantId tenantId) {
-            TenantId.KindCase kindCase = tenantId.getKindCase();
-            String kindCaseName = kindCase.name();
-            ConverterType converter = valueOf(kindCaseName);
+            var kindCase = tenantId.getKindCase();
+            var kindCaseName = kindCase.name();
+            var converter = valueOf(kindCaseName);
             return converter;
         }
 

@@ -52,7 +52,7 @@ final class DefaultNamespaceConverter extends NamespaceConverter {
     }
 
     private static NamespaceConverter forTenant(TenantId id) {
-        Namespace.ConverterType converterType = Namespace.ConverterType.forTenantId(id);
+        var converterType = Namespace.ConverterType.forTenantId(id);
         return converterType.converter();
     }
 
@@ -67,7 +67,7 @@ final class DefaultNamespaceConverter extends NamespaceConverter {
         if (!multitenant) {
             converterType = Namespace.ConverterType.SINGLE_CUSTOM;
         } else {
-            String typePrefix = String.valueOf(namespace.charAt(0));
+            var typePrefix = String.valueOf(namespace.charAt(0));
             converterType = Namespace.typeOfPrefix(typePrefix);
             checkState(converterType != null,
                        "Could not determine a `TenantId` converter for namespace %s.",

@@ -54,7 +54,7 @@ public final class PrefixedNsConverterFactory implements NsConverterFactory {
 
     @Override
     public NamespaceConverter get(boolean multitenant) {
-        NamespaceConverter converter = delegate.get(multitenant);
+        var converter = delegate.get(multitenant);
         return new Converter(namespacePrefix, converter);
     }
 

@@ -32,6 +32,7 @@ import io.spine.server.tenant.TenantFunction;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A {@link NamespaceSupplier} for multitenant storage factories.
@@ -56,10 +57,10 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
      */
     @Override
     public Namespace get() {
-        TenantIdRetriever retriever = new TenantIdRetriever();
-        TenantId tenantId = retriever.execute();
-        checkNotNull(tenantId);
-        Namespace result = Namespace.of(tenantId, true, converterFactory);
+        var retriever = new TenantIdRetriever();
+        var tenantId = retriever.execute();
+        requireNonNull(tenantId);
+        var result = Namespace.of(tenantId, true, converterFactory);
         return result;
     }
 
@@ -69,7 +70,7 @@ final class MultitenantNamespaceSupplier extends NamespaceSupplier {
     }
 
     /**
-     * A function disclosuring the current tenant {@linkplain TenantId ID}.
+     * A function disclosing the current tenant {@linkplain TenantId ID}.
      */
     private static class TenantIdRetriever extends TenantFunction<TenantId> {
 

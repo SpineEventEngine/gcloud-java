@@ -115,7 +115,7 @@ final class NamespaceConverters {
         @Override
         protected final TenantId toTenantId(String namespace) {
             if (namespace.startsWith(prefix) && namespace.length() > prefix.length()) {
-                String significantNamespacePart = namespace.substring(prefix.length());
+                var significantNamespacePart = namespace.substring(prefix.length());
                 return significantStringToTenantId(significantNamespacePart);
             } else {
                 return NOT_A_TENANT;
@@ -135,19 +135,19 @@ final class NamespaceConverters {
 
         @Override
         protected String toSignificantString(TenantId tenantId) {
-            String value = tenantId.getDomain()
-                                   .getValue();
+            var value = tenantId.getDomain()
+                                .getValue();
             return value;
         }
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            InternetDomain domain = InternetDomain.newBuilder()
-                    .setValue(namespace)
-                    .vBuild();
-            TenantId tenantId = TenantId.newBuilder()
-                    .setDomain(domain)
-                    .vBuild();
+            var domain = InternetDomain.newBuilder()
+                                       .setValue(namespace)
+                                       .vBuild();
+            var tenantId = TenantId.newBuilder()
+                                   .setDomain(domain)
+                                   .vBuild();
             return tenantId;
         }
     }
@@ -161,19 +161,19 @@ final class NamespaceConverters {
 
         @Override
         protected String toSignificantString(TenantId tenantId) {
-            String value = tenantId.getEmail()
-                                   .getValue();
+            var value = tenantId.getEmail()
+                                .getValue();
             return value;
         }
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            EmailAddress email = EmailAddress.newBuilder()
-                    .setValue(namespace)
-                    .vBuild();
-            TenantId tenantId = TenantId.newBuilder()
-                    .setEmail(email)
-                    .vBuild();
+            var email = EmailAddress.newBuilder()
+                                    .setValue(namespace)
+                                    .vBuild();
+            var tenantId = TenantId.newBuilder()
+                                   .setEmail(email)
+                                   .vBuild();
             return tenantId;
         }
     }
@@ -187,15 +187,15 @@ final class NamespaceConverters {
 
         @Override
         protected String toSignificantString(TenantId tenantId) {
-            String value = tenantId.getValue();
+            var value = tenantId.getValue();
             return value;
         }
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            TenantId tenantId = TenantId.newBuilder()
-                    .setValue(namespace)
-                    .vBuild();
+            var tenantId = TenantId.newBuilder()
+                                   .setValue(namespace)
+                                   .vBuild();
             return tenantId;
         }
     }
@@ -204,15 +204,15 @@ final class NamespaceConverters {
 
         @Override
         protected String toString(TenantId tenantId) {
-            String ns = tenantId.getValue();
+            var ns = tenantId.getValue();
             return ns;
         }
 
         @Override
         protected TenantId toTenantId(String namespace) {
-            TenantId tenantId = TenantId.newBuilder()
-                    .setValue(namespace)
-                    .vBuild();
+            var tenantId = TenantId.newBuilder()
+                                   .setValue(namespace)
+                                   .vBuild();
             return tenantId;
         }
     }
