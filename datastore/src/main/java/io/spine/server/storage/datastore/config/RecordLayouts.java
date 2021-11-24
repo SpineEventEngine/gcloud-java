@@ -29,8 +29,6 @@ package io.spine.server.storage.datastore.config;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 
-import java.util.Optional;
-
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -81,7 +79,7 @@ public final class RecordLayouts
      */
     public <I, R extends Message> RecordLayout<I, R> find(Class<? extends Message> domainType) {
         var optional = findValue(domainType);
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             return new FlatLayout<>(domainType);
         }
         var raw = optional.get();
