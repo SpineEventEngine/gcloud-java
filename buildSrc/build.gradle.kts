@@ -78,6 +78,13 @@ val guavaVersion = "30.1.1-jre"
  */
 val errorProneVersion = "2.0.2"
 
+val javaVersion = JavaVersion.VERSION_11
+
+java {
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+}
+
 dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
     implementation("com.google.cloud.artifactregistry:artifactregistry-auth-common:$googleAuthToolVersion") {

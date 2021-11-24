@@ -57,16 +57,17 @@ buildscript {
         repos.gitHub(execForkPlugin.repository)
     }
 
-    val spineBaseVersion: String by extra
+    val mcJavaVersion: String by extra
 
     dependencies {
-        classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
+        classpath("io.spine.tools:spine-mc-java:$mcJavaVersion")
         classpath(execForkPlugin.classpath)
     }
 
+    io.spine.internal.gradle.doForceVersions(configurations)
+
     @Suppress("LocalVariableName")  // For better readability.
     val Kotlin = io.spine.internal.dependency.Kotlin
-    io.spine.internal.gradle.doForceVersions(configurations)
     configurations.all {
         resolutionStrategy {
             force(
@@ -77,6 +78,8 @@ buildscript {
     }
 }
 
+repositories.applyStandard()
+
 plugins {
     `java-library`
     kotlin("jvm") version io.spine.internal.dependency.Kotlin.version
@@ -84,6 +87,7 @@ plugins {
     io.spine.internal.dependency.Protobuf.GradlePlugin.apply {
         id(id) version version
     }
+    @Suppress("RemoveRedundantQualifierName")
     io.spine.internal.dependency.ErrorProne.GradlePlugin.apply {
         id(id)
     }
@@ -111,8 +115,28 @@ allprojects {
     apply(from = "$rootDir/version.gradle.kts")
 
     apply {
+        plugin("java-library")
+        plugin("kotlin")
         plugin("jacoco")
         plugin("idea")
+    }
+
+    val javaVersion = JavaVersion.VERSION_11
+
+    java {
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
+    }
+
+    kotlin {
+        explicitApi()
+    }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = javaVersion.toString()
+            freeCompilerArgs = listOf("-Xskip-prerelease-check")
+        }
     }
 
     group = "io.spine.gcloud"
@@ -124,11 +148,9 @@ allprojects {
 subprojects {
 
     apply {
-        plugin("java-library")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
         plugin("io.spine.mc-java")
-        plugin("kotlin")
         plugin("pmd")
         plugin("maven-publish")
         plugin("pmd-settings")
@@ -147,24 +169,6 @@ subprojects {
     LicenseReporter.generateReportIn(project)
     JavadocConfig.applyTo(project)
     CheckStyleConfig.applyTo(project)
-
-    val javaVersion = JavaVersion.VERSION_1_8
-
-    java {
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
-    }
-
-    kotlin {
-        explicitApi()
-    }
-
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = javaVersion.toString()
-            freeCompilerArgs = listOf("-Xskip-prerelease-check")
-        }
-    }
 
     // Required to fetch `androidx.annotation:annotation:1.1.0`,
     // which is a transitive dependency of `com.google.cloud:google-cloud-datastore`.
