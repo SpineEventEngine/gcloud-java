@@ -80,11 +80,11 @@ public final class RecordLayouts
      *         when obtaining. If that fails, the exception is thrown.
      */
     public <I, R extends Message> RecordLayout<I, R> find(Class<? extends Message> domainType) {
-        Optional<RecordLayout<?, ?>> optional = findValue(domainType);
+        var optional = findValue(domainType);
         if (!optional.isPresent()) {
             return new FlatLayout<>(domainType);
         }
-        RecordLayout<?, ?> raw = optional.get();
+        var raw = optional.get();
         RecordLayout<I, R> result = cast(raw, domainType);
         return result;
     }

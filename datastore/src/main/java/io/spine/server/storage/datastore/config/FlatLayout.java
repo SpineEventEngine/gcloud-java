@@ -59,7 +59,7 @@ public final class FlatLayout<I, R extends Message> extends RecordLayout<I, R> {
 
     @Override
     public Key keyOf(I id, DatastoreMedium datastore) {
-        RecordId recordId = asRecordId(id);
+        var recordId = asRecordId(id);
         return newKey(recordId, datastore);
     }
 

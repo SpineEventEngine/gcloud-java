@@ -83,7 +83,7 @@ public abstract class RecordLayout<I, R extends Message> {
      * @return a new {@code Key} instance
      */
     protected Key newKey(RecordId id, DatastoreMedium datastore) {
-        Key key = datastore.keyFor(recordKind(), id);
+        var key = datastore.keyFor(recordKind(), id);
         return key;
     }
 

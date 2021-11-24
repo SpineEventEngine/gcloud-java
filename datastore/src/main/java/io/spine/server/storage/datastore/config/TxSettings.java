@@ -29,8 +29,6 @@ package io.spine.server.storage.datastore.config;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 
-import java.util.Optional;
-
 /**
  * The settings of transactional behavior for storage implementations available
  * through the {@linkplain io.spine.server.storage.datastore.DatastoreStorageFactory Datastore
@@ -69,8 +67,8 @@ public final class TxSettings
      * @return the transactional setting for the storage
      */
     public <R extends Message> TxSetting find(Class<R> recordType) {
-        Optional<TxSetting> optional = findValue(recordType);
-        TxSetting result = optional.orElseGet(TxSetting::disabled);
+        var optional = findValue(recordType);
+        var result = optional.orElseGet(TxSetting::disabled);
         return result;
     }
 

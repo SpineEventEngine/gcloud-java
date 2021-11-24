@@ -97,7 +97,7 @@ public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
     @Override
     protected ColumnTypeMapping<ByteString, BlobValue> ofByteString() {
         return bytes -> {
-            Blob blob = Blob.copyFrom(bytes.asReadOnlyByteBuffer());
+            var blob = Blob.copyFrom(bytes.asReadOnlyByteBuffer());
             return BlobValue.of(blob);
         };
     }
@@ -110,7 +110,7 @@ public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
     @Override
     protected ColumnTypeMapping<Message, StringValue> ofMessage() {
         return msg -> {
-            String str = Stringifiers.toString(msg);
+            var str = Stringifiers.toString(msg);
             return StringValue.of(str);
         };
     }

@@ -69,8 +69,8 @@ public final class CustomStorages
      *         or {@code Optional.empty()} in case none was found
      */
     public <I, R extends Message> Optional<CreateStorage<I, R>> find(RecordSpec<I, R, ?> spec) {
-        Class<? extends Message> domainType = spec.sourceType();
-        Optional<CreateStorage<?, ?>> optional = findValue(domainType);
+        var domainType = spec.sourceType();
+        var optional = findValue(domainType);
         Optional<CreateStorage<I, R>> result =
                 optional.map(callback -> cast(callback, spec.idType(), domainType));
         return result;

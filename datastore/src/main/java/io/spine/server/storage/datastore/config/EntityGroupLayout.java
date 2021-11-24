@@ -89,9 +89,9 @@ public abstract class EntityGroupLayout<I, R extends Message, P extends Message>
      */
     @Override
     public final Key keyOf(I id, DatastoreMedium datastore) {
-        RecordId parentRecordId = toAncestorRecordId(id);
-        PathElement ancestor = PathElement.of(parentKind.value(), parentRecordId.value());
-        Key result = datastore.keyFactory(recordKind())
+        var parentRecordId = toAncestorRecordId(id);
+        var ancestor = PathElement.of(parentKind.value(), parentRecordId.value());
+        var result = datastore.keyFactory(recordKind())
                               .addAncestor(ancestor)
                               .newKey(Stringifiers.toString(id));
         return result;
@@ -121,9 +121,9 @@ public abstract class EntityGroupLayout<I, R extends Message, P extends Message>
     @Override
     public Optional<StructuredQuery.Filter> ancestorFilter(RecordQuery<I, R> query,
                                                            DatastoreMedium datastore) {
-        RecordId parentId = extractAncestorId(query);
-        Key parentKey = datastore.keyFor(parentKind, parentId);
-        StructuredQuery.PropertyFilter ancestorFilter = hasAncestor(parentKey);
+        var parentId = extractAncestorId(query);
+        var parentKey = datastore.keyFor(parentKind, parentId);
+        var ancestorFilter = hasAncestor(parentKey);
         return Optional.of(ancestorFilter);
     }
 }
