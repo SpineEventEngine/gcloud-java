@@ -60,13 +60,12 @@ final class SetNodeIfAbsent implements PrepareForWrite {
         if (previous != null && previous.hasPickedBy()) {
             return Optional.empty();
         }
-        ShardSessionRecord.Builder builder =
-                previous == null
-                ? ShardSessionRecord.newBuilder()
-                        .setIndex(index)
-                : previous.toBuilder();
+        var builder = previous == null
+                      ? ShardSessionRecord.newBuilder()
+                                          .setIndex(index)
+                      : previous.toBuilder();
 
-        ShardSessionRecord updated =
+        var updated =
                 builder.setPickedBy(nodeToSet)
                        .setWhenLastPicked(currentTime())
                        .vBuild();
