@@ -95,8 +95,8 @@ public final class Kind extends StringTypeValue {
      */
     public static Kind of(Class<? extends Message> recordType) {
         checkNotNull(recordType);
-        TypeUrl typeUrl = TypeUrl.of(recordType);
-        Kind result = of(typeUrl);
+        var typeUrl = TypeUrl.of(recordType);
+        var result = of(typeUrl);
         return result;
     }
 

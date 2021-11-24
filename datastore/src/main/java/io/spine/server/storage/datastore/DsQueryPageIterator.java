@@ -83,7 +83,7 @@ final class DsQueryPageIterator<R> implements Iterator<DsQueryIterator<R>> {
     }
 
     private DsQueryIterator<R> loadNextPage() {
-        StructuredQuery<R> nextPageQuery = currentPage.nextPageQuery();
+        var nextPageQuery = currentPage.nextPageQuery();
         return datastore.read(nextPageQuery);
     }
 }

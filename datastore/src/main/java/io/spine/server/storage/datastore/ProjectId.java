@@ -50,7 +50,7 @@ public final class ProjectId extends DsIdentifier {
      * @return new instance of {@code ProjectId}
      */
     public static ProjectId of(String projectId) {
-        ProjectId result = new ProjectId(checkNotNull(projectId));
+        var result = new ProjectId(checkNotNull(projectId));
         return result;
     }
 
@@ -64,8 +64,8 @@ public final class ProjectId extends DsIdentifier {
      */
     public static ProjectId of(Datastore datastore) {
         checkNotNull(datastore);
-        DatastoreOptions options = datastore.getOptions();
-        String value = options.getProjectId();
+        var options = datastore.getOptions();
+        var value = options.getProjectId();
         return of(value);
     }
 }

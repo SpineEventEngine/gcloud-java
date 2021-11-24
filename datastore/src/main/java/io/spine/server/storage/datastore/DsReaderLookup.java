@@ -61,10 +61,10 @@ final class DsReaderLookup implements Logging {
         checkNotNull(query);
         checkNotNull(namespace);
 
-        StructuredQuery<R> queryWithNamespace = query.toBuilder()
-                                                     .setNamespace(namespace.value())
-                                                     .build();
-        DsQueryIterator<R> iterator = new DsQueryIterator<>(queryWithNamespace, datastore);
+        var queryWithNamespace = query.toBuilder()
+                                      .setNamespace(namespace.value())
+                                      .build();
+        var iterator = new DsQueryIterator<>(queryWithNamespace, datastore);
         iterator._trace()
                 .log("Reading the records of `%s` kind in `%s` namespace.",
                      query.getKind(), namespace.value());
@@ -78,8 +78,8 @@ final class DsReaderLookup implements Logging {
      * not in the database, {@code null} values are returned.
      */
     List<@Nullable Entity> find(Collection<Key> keys) {
-        ImmutableList<Key> keysList = ImmutableList.copyOf(keys);
-        List<Entity> entities = keysList.size() <= MAX_KEYS_PER_READ_REQUEST
+        var keysList = ImmutableList.copyOf(keys);
+        var entities = keysList.size() <= MAX_KEYS_PER_READ_REQUEST
                                 ? fetch(keysList)
                                 : readBulk(keysList);
         return entities;
@@ -97,16 +97,16 @@ final class DsReaderLookup implements Logging {
      * @return ordered sequence of {@link Entity entities}
      */
     private List<Entity> readBulk(List<Key> keys) {
-        int pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
+        var pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
         _trace().log("Reading a big bulk of records synchronously. The data is read as %d pages.",
                      pageCount);
-        int lowerBound = 0;
-        int higherBound = MAX_KEYS_PER_READ_REQUEST;
-        int keysLeft = keys.size();
+        var lowerBound = 0;
+        var higherBound = MAX_KEYS_PER_READ_REQUEST;
+        var keysLeft = keys.size();
         List<Entity> result = new ArrayList<>(keys.size());
-        for (int i = 0; i < pageCount; i++) {
-            List<Key> keysPage = keys.subList(lowerBound, higherBound);
-            List<Entity> page = fetch(keysPage);
+        for (var i = 0; i < pageCount; i++) {
+            var keysPage = keys.subList(lowerBound, higherBound);
+            var page = fetch(keysPage);
             result.addAll(page);
 
             keysLeft -= keysPage.size();
@@ -118,7 +118,7 @@ final class DsReaderLookup implements Logging {
     }
 
     private List<Entity> fetch(List<Key> keys) {
-        Key[] keysArray = new Key[keys.size()];
+        var keysArray = new Key[keys.size()];
         keys.toArray(keysArray);
         return datastore.fetch(keysArray);
     }

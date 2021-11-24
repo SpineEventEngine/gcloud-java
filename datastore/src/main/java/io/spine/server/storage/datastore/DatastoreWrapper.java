@@ -91,8 +91,8 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
 
     @Override
     public Key keyFor(Kind kind, RecordId recordId) {
-        KeyFactory keyFactory = keyFactory(kind);
-        Key key = keyFactory.newKey(recordId.value());
+        var keyFactory = keyFactory(kind);
+        var key = keyFactory.newKey(recordId.value());
         return key;
     }
 
@@ -122,7 +122,7 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
 
     @Override
     public void createOrUpdate(Collection<Entity> entities) {
-        Entity[] array = new Entity[entities.size()];
+        var array = new Entity[entities.size()];
         entities.toArray(array);
         if (array.length <= MAX_ENTITIES_PER_WRITE_REQUEST) {
             writeSmallBulk(array);
@@ -164,13 +164,13 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
     @Override
     public List<@Nullable Entity> lookup(List<Key> keys) {
         checkNotNull(keys);
-        DsReaderLookup lookup = new DsReaderLookup(storage());
+        var lookup = new DsReaderLookup(storage());
         return lookup.find(keys);
     }
 
     @Override
     public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
-        DsReaderLookup lookup = new DsReaderLookup(storage());
+        var lookup = new DsReaderLookup(storage());
         return lookup.execute(query, namespace());
     }
 
@@ -239,6 +239,7 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit} or
      *         the provided {@code batchSize} is 0
      */
+    @SuppressWarnings("UnstableApiUsage")   /* Guava's `Streams.stream` is fine. */
     private <R> Iterator<R>
     readAllPageByPage(StructuredQuery<R> query, @Nullable Integer pageSize) {
         checkArgument(query.getLimit() == null,
@@ -246,7 +247,7 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
         checkArgument(pageSize == null || pageSize != 0,
                       "The size of a single read operation cannot be 0.");
 
-        StructuredQuery<R> limitedQuery = limit(query, pageSize);
+        var limitedQuery = limit(query, pageSize);
         return stream(new DsQueryPageIterator<>(limitedQuery, this))
                 .flatMap(Streams::stream)
                 .iterator();
@@ -274,7 +275,7 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
      */
     @VisibleForTesting
     protected void dropTable(Kind table) {
-        Namespace namespace = namespace();
+        var namespace = namespace();
         StructuredQuery<Entity> query =
                 Query.newEntityQueryBuilder()
                      .setNamespace(namespace.value())
@@ -289,25 +290,25 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
 
     @VisibleForTesting
     protected void deleteEntities(Collection<Entity> entities) {
-        List<Key> keyList =
+        var keyList =
                 entities.stream()
                         .map(BaseEntity::getKey)
                         .collect(toList());
-        Key[] keys = new Key[keyList.size()];
+        var keys = new Key[keyList.size()];
         keyList.toArray(keys);
         deleteEntities(keys);
     }
 
     private void deleteEntities(Key[] keys) {
         if (keys.length > MAX_ENTITIES_PER_WRITE_REQUEST) {
-            int start = 0;
-            int end = MAX_ENTITIES_PER_WRITE_REQUEST;
+            var start = 0;
+            var end = MAX_ENTITIES_PER_WRITE_REQUEST;
             while (true) {
-                int length = end - start;
+                var length = end - start;
                 if (length <= 0) {
                     return;
                 }
-                Key[] keysSubarray = new Key[length];
+                var keysSubarray = new Key[length];
                 System.arraycopy(keys, start, keysSubarray, 0, keysSubarray.length);
                 delete(keysSubarray);
 
@@ -326,16 +327,16 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
      * @see TransactionWrapper
      */
     public final TransactionWrapper newTransaction() {
-        Transaction tx = datastore().newTransaction();
+        var tx = datastore().newTransaction();
         return new TransactionWrapper(tx, namespaceSupplier());
     }
 
     @Override
     public KeyFactory keyFactory(Kind kind) {
         checkNotNull(kind);
-        KeyFactory keyFactory = datastore().newKeyFactory()
-                                         .setKind(kind.value());
-        Namespace namespace = namespace();
+        var keyFactory = datastore().newKeyFactory()
+                                    .setKind(kind.value());
+        var namespace = namespace();
         _trace().log("Retrieving KeyFactory for kind `%s` in `%s` namespace.",
                      kind, namespace.value());
         keyFactory.setNamespace(namespace.value());
@@ -348,12 +349,12 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
     }
 
     private void writeBulk(Entity[] entities) {
-        int partsCount = entities.length / MAX_ENTITIES_PER_WRITE_REQUEST + 1;
-        for (int i = 0; i < partsCount; i++) {
-            int partHead = i * MAX_ENTITIES_PER_WRITE_REQUEST;
-            int partTail = min(partHead + MAX_ENTITIES_PER_WRITE_REQUEST, entities.length);
+        var partsCount = entities.length / MAX_ENTITIES_PER_WRITE_REQUEST + 1;
+        for (var i = 0; i < partsCount; i++) {
+            var partHead = i * MAX_ENTITIES_PER_WRITE_REQUEST;
+            var partTail = min(partHead + MAX_ENTITIES_PER_WRITE_REQUEST, entities.length);
 
-            Entity[] part = Arrays.copyOfRange(entities, partHead, partTail);
+            var part = Arrays.copyOfRange(entities, partHead, partTail);
             writeSmallBulk(part);
         }
     }
