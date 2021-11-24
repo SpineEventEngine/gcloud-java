@@ -324,5 +324,6 @@ public final class Namespace {
 
         NamespaceConverter converter() {
             return namespaceConverter;
-        }}
+        }
+    }
 }

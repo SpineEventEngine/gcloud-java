@@ -142,12 +142,14 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            var domain = InternetDomain.newBuilder()
-                                       .setValue(namespace)
-                                       .vBuild();
-            var tenantId = TenantId.newBuilder()
-                                   .setDomain(domain)
-                                   .vBuild();
+            var domain =
+                    InternetDomain.newBuilder()
+                            .setValue(namespace)
+                            .vBuild();
+            var tenantId =
+                    TenantId.newBuilder()
+                            .setDomain(domain)
+                            .vBuild();
             return tenantId;
         }
     }
@@ -168,12 +170,14 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            var email = EmailAddress.newBuilder()
-                                    .setValue(namespace)
-                                    .vBuild();
-            var tenantId = TenantId.newBuilder()
-                                   .setEmail(email)
-                                   .vBuild();
+            var email =
+                    EmailAddress.newBuilder()
+                            .setValue(namespace)
+                            .vBuild();
+            var tenantId =
+                    TenantId.newBuilder()
+                            .setEmail(email)
+                            .vBuild();
             return tenantId;
         }
     }
@@ -193,9 +197,10 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId significantStringToTenantId(String namespace) {
-            var tenantId = TenantId.newBuilder()
-                                   .setValue(namespace)
-                                   .vBuild();
+            var tenantId =
+                    TenantId.newBuilder()
+                            .setValue(namespace)
+                            .vBuild();
             return tenantId;
         }
     }
@@ -210,9 +215,10 @@ final class NamespaceConverters {
 
         @Override
         protected TenantId toTenantId(String namespace) {
-            var tenantId = TenantId.newBuilder()
-                                   .setValue(namespace)
-                                   .vBuild();
+            var tenantId =
+                    TenantId.newBuilder()
+                            .setValue(namespace)
+                            .vBuild();
             return tenantId;
         }
     }

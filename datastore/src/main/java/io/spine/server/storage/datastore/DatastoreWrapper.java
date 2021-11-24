@@ -36,7 +36,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
-import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
@@ -45,7 +44,6 @@ import com.google.errorprone.annotations.InlineMe;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.record.Entities;
 import io.spine.server.storage.datastore.record.RecordId;
-import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -118,7 +116,6 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
     public void createOrUpdate(Entity entity) {
         storage().put(entity);
     }
-
 
     @Override
     public void createOrUpdate(Collection<Entity> entities) {

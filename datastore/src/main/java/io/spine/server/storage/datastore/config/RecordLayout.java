@@ -46,8 +46,8 @@ import java.util.Optional;
  *
  * <p>Descendants may define their own layout for records and then plug it into
  * their storage factory via
- * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#organizeRecords(Class, RecordLayout)
- * DatastoreStorageFactory.newBuilder().organizeRecords(typeOfRecord, recordLayout)}.
+ * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#organizeRecords(Class,
+ * RecordLayout) DatastoreStorageFactory.newBuilder().organizeRecords(typeOfRecord, recordLayout)}.
  *
  * @param <I>
  *         the type of identifiers of the stored records

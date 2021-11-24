@@ -62,7 +62,7 @@ final class SetNodeIfAbsent implements PrepareForWrite {
         }
         var builder = previous == null
                       ? ShardSessionRecord.newBuilder()
-                                          .setIndex(index)
+                              .setIndex(index)
                       : previous.toBuilder();
 
         var updated =

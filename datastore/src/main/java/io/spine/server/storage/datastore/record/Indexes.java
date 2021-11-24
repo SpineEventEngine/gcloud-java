@@ -29,7 +29,6 @@ package io.spine.server.storage.datastore.record;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
-import com.google.common.collect.Streams;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.string.Stringifiers;
@@ -78,8 +77,8 @@ public final class Indexes {
         Iterator<Key> allEntities = datastore.read(query);
         @SuppressWarnings("UnstableApiUsage")   /* Guava's `Streams.stream` is OK in this case. */
         var idIterator = stream(allEntities)
-                                .map(idExtractor(idType))
-                                .iterator();
+                .map(idExtractor(idType))
+                .iterator();
         return idIterator;
     }
 

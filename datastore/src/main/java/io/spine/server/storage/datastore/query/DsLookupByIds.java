@@ -107,7 +107,7 @@ final class DsLookupByIds<I, R extends Message> extends PreparedQuery<I, R> {
     }
 
     private Predicate<Entity> columnPredicate() {
-        if(predicate().isEmpty()) {
+        if (predicate().isEmpty()) {
             return entity -> true;
         }
         var result = new ColumnPredicate<>(query().subject(), columnAdapter());

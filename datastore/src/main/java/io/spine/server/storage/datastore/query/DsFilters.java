@@ -159,8 +159,8 @@ final class DsFilters {
         var parameters = predicate.allParams();
         List<StructuredQuery.Filter> filters =
                 parameters.stream()
-                          .map(param -> createFilter(param, mapping))
-                          .collect(toList());
+                        .map(param -> createFilter(param, mapping))
+                        .collect(toList());
 
         checkState(!filters.isEmpty());
         var first = filters.get(0);

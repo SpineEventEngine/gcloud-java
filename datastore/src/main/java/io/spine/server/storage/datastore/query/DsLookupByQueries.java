@@ -173,8 +173,8 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
         var filterWithNesting = CompositeFilter.and(filter, ancestorFilter.get());
 
         var result = query.toBuilder()
-                          .setFilter(filterWithNesting)
-                          .build();
+                .setFilter(filterWithNesting)
+                .build();
         return result;
     }
 
@@ -190,12 +190,12 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
         @SuppressWarnings("UnstableApiUsage")   /* Relying onto Guava's API. */
         var entities =
                 queries.stream()
-                       .map(DsLookupByQueries::clearLimit)
-                       .map(this::adjustForLayout)
-                       .map(datastore::read)
-                       .flatMap(Streams::stream)
-                       .distinct()
-                       .collect(toImmutableList());
+                        .map(DsLookupByQueries::clearLimit)
+                        .map(this::adjustForLayout)
+                        .map(datastore::read)
+                        .flatMap(Streams::stream)
+                        .distinct()
+                        .collect(toImmutableList());
         return entities;
     }
 

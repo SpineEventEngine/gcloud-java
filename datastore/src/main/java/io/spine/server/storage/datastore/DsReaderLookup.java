@@ -62,8 +62,8 @@ final class DsReaderLookup implements Logging {
         checkNotNull(namespace);
 
         var queryWithNamespace = query.toBuilder()
-                                      .setNamespace(namespace.value())
-                                      .build();
+                .setNamespace(namespace.value())
+                .build();
         var iterator = new DsQueryIterator<>(queryWithNamespace, datastore);
         iterator._trace()
                 .log("Reading the records of `%s` kind in `%s` namespace.",
@@ -80,8 +80,8 @@ final class DsReaderLookup implements Logging {
     List<@Nullable Entity> find(Collection<Key> keys) {
         var keysList = ImmutableList.copyOf(keys);
         var entities = keysList.size() <= MAX_KEYS_PER_READ_REQUEST
-                                ? fetch(keysList)
-                                : readBulk(keysList);
+                       ? fetch(keysList)
+                       : readBulk(keysList);
         return entities;
     }
 

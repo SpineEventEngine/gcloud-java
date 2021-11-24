@@ -26,7 +26,6 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
@@ -47,7 +46,6 @@ import static java.util.Optional.ofNullable;
  * A Cloud Datastore transaction wrapper.
  */
 public final class TransactionWrapper extends DatastoreMedium implements AutoCloseable {
-
 
     TransactionWrapper(Transaction tx, NamespaceSupplier namespaceSupplier) {
         super(tx, namespaceSupplier);
@@ -98,9 +96,9 @@ public final class TransactionWrapper extends DatastoreMedium implements AutoClo
     /**
      * Puts the given entities into the Datastore in the transaction.
      *
-     * @implNote Unlike {@link DatastoreWrapper}, {@code TransactionWrapper} does not provide
-     *         a mechanism for writing large numbers of entities. Only 500 entities can be written
-     *         in a single transaction. Please see
+     * @implNote Unlike {@link DatastoreWrapper}, {@code TransactionWrapper} does not
+     *         provide a mechanism for writing large numbers of entities. Only 500 entities
+     *         can be written in a single transaction. Please see
      *         the <a href="https://cloud.google.com/datastore/docs/concepts/limits">transaction
      *         limits</a> for more info.
      */

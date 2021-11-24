@@ -27,7 +27,6 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

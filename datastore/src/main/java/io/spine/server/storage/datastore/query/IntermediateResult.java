@@ -65,8 +65,8 @@ final class IntermediateResult {
      *
      * <p>The returned list is unmodifiable.
      *
-     * @apiNote Guava's {@code ImmutableList} is not applicable here, as it isn't capable of holding
-     *         {@code null} values
+     * @apiNote Guava's {@code ImmutableList} is not applicable here, as it isn't capable of
+     *         holding {@code null} values
      */
     List<@Nullable Entity> entities() {
         return unmodifiableList(entities);

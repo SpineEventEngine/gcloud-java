@@ -31,7 +31,8 @@ import io.spine.server.storage.datastore.DatastoreMedium;
 /**
  * A function reading the values of specific type from Datastore.
  *
- * @param <V> the type of values to read
+ * @param <V>
+ *         the type of values to read
  */
 @FunctionalInterface
 interface ReadOperation<V> {
