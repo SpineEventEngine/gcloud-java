@@ -55,14 +55,6 @@ import org.gradle.process.CommandLineArgumentProvider
  */
 fun JavaCompile.configureJavac() {
 
-    if (JavaVersion.current() != JavacConfig.EXPECTED_JAVA_VERSION) {
-        throw GradleException("Spine Event Engine can be built with JDK 8 only." +
-                " Supporting JDK 11 and above at build-time is planned in 2.0 release." +
-                " Please use the pre-built binaries available in the Spine Maven repository." +
-                " See https://github.com/SpineEventEngine/base/issues/457."
-        )
-    }
-
     with(options) {
         encoding = JavacConfig.SOURCE_FILES_ENCODING
         compilerArgumentProviders.add(JavacConfig.ARGUMENTS)
@@ -74,7 +66,6 @@ fun JavaCompile.configureJavac() {
  */
 private object JavacConfig {
     const val SOURCE_FILES_ENCODING = "UTF-8"
-    val EXPECTED_JAVA_VERSION = JavaVersion.VERSION_1_8
     val ARGUMENTS = CommandLineArgumentProvider {
         listOf(
 
