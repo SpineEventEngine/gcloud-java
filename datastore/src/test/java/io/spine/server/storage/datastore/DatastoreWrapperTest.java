@@ -325,15 +325,18 @@ final class DatastoreWrapperTest {
                 .newBuilder()
                 .setValue(tenantId3)
                 .vBuild();
-        var id1 = TenantId.newBuilder()
-                          .setValue(tenantId1)
-                          .vBuild();
-        var id2 = TenantId.newBuilder()
-                          .setEmail(emailAddress2)
-                          .vBuild();
-        var id3 = TenantId.newBuilder()
-                          .setDomain(internetDomain3)
-                          .vBuild();
+        var id1 = TenantId
+                .newBuilder()
+                .setValue(tenantId1)
+                .vBuild();
+        var id2 = TenantId
+                .newBuilder()
+                .setEmail(emailAddress2)
+                .vBuild();
+        var id3 = TenantId
+                .newBuilder()
+                .setDomain(internetDomain3)
+                .vBuild();
         checkTenantIdInKey(tenantId1Prefixed, id1, wrapper);
         checkTenantIdInKey(tenantId2Prefixed, id2, wrapper);
         checkTenantIdInKey(tenantId3Prefixed, id3, wrapper);
@@ -388,8 +391,9 @@ final class DatastoreWrapperTest {
             public Key apply() {
                 var entityKey = wrapper.keyFactory(NAMESPACE_HOLDER_KIND)
                                        .newKey(key);
-                var entity = Entity.newBuilder(entityKey)
-                                   .build();
+                var entity = Entity
+                        .newBuilder(entityKey)
+                        .build();
                 wrapper.create(entity);
                 return entityKey;
             }

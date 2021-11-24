@@ -53,8 +53,9 @@ public final class DatastoreWrapperTestEnv {
         var keyFactory = datastore.newKeyFactory()
                                   .setNamespace(namespaceValue)
                                   .setKind(NAMESPACE_HOLDER_KIND.value());
-        var entity = Entity.newBuilder(keyFactory.newKey(42L))
-                           .build();
+        var entity = Entity
+                .newBuilder(keyFactory.newKey(42L))
+                .build();
         datastore.put(entity);
     }
 

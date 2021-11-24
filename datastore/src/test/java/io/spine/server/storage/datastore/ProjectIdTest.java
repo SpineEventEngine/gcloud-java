@@ -75,9 +75,9 @@ final class ProjectIdTest {
 
     private static Datastore datastore(String projectId) {
         var options = local().getOptions()
-                             .toBuilder()
-                             .setProjectId(projectId)
-                             .build();
+                .toBuilder()
+                .setProjectId(projectId)
+                .build();
         var datastore = options.getService();
         return datastore;
     }

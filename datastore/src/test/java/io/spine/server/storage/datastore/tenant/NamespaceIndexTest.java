@@ -174,16 +174,17 @@ final class NamespaceIndexTest {
         var context = contextBuilder.build();
         var storage = storageFactory
                 .createRecordStorage(context.spec(), EntityRecordSpec.of(CollegeProjection.class));
-        var id = CollegeId.newBuilder()
-                          .setValue("Aeronautic Forgery College")
-                          .vBuild();
+        var id = CollegeId
+                .newBuilder()
+                .setValue("Aeronautic Forgery College")
+                .vBuild();
         var record = EntityRecord
                 .newBuilder()
                 .setEntityId(Identifier.pack(id))
                 .setState(pack(College.newBuilder()
-                                      .setId(id)
-                                      .setName(id.getValue())
-                                      .build()))
+                                       .setId(id)
+                                       .setName(id.getValue())
+                                       .build()))
                 .build();
         var tenantId = TenantId
                 .newBuilder()
@@ -214,11 +215,11 @@ final class NamespaceIndexTest {
         keys.add(key("Vtenant3"));
         Collection<TenantId> initialTenantIds =
                 keys.stream()
-                    .map(key -> TenantId.newBuilder()
-                                        .setValue(key.getName()
-                                                     .substring(1))
-                                        .vBuild())
-                    .collect(toList());
+                        .map(key -> TenantId.newBuilder()
+                                .setValue(key.getName()
+                                             .substring(1))
+                                .vBuild())
+                        .collect(toList());
 
         NamespaceIndex.NamespaceQuery namespaceQuery = keys::iterator;
         // The tested object
@@ -291,7 +292,7 @@ final class NamespaceIndexTest {
 
     private static Key key(String name) {
         var key = Key.newBuilder("some-proj", "some-kind", name)
-                     .build();
+                .build();
         return key;
     }
 

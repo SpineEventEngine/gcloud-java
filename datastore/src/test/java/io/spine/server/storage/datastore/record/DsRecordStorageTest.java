@@ -84,21 +84,21 @@ final class DsRecordStorageTest extends RecordStorageDelegateTest {
         var storage = newStorage();
 
         BigDataTester.<StgProjectId, StgProject>newBuilder()
-                     .setEntryFactory(new BigDataTester.EntryFactory<>() {
-                         @Override
-                         public StgProjectId newId() {
-                             return DsRecordStorageTest.this.newId();
-                         }
+                .setEntryFactory(new BigDataTester.EntryFactory<>() {
+                    @Override
+                    public StgProjectId newId() {
+                        return DsRecordStorageTest.this.newId();
+                    }
 
-                         @Override
-                         public StgProject newRecord(StgProjectId id) {
-                             return DsRecordStorageTest.this.newStorageRecord(id);
-                         }
-                     })
-                     .setReadLimit(maxReadTime)
-                     .setWriteLimit(maxWriteTime)
-                     .build()
-                     .testBigDataOperations(storage);
+                    @Override
+                    public StgProject newRecord(StgProjectId id) {
+                        return DsRecordStorageTest.this.newStorageRecord(id);
+                    }
+                })
+                .setReadLimit(maxReadTime)
+                .setWriteLimit(maxWriteTime)
+                .build()
+                .testBigDataOperations(storage);
     }
 
     @Test

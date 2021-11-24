@@ -154,7 +154,7 @@ final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
 
     private static NodeId newNode() {
         return NodeId.newBuilder()
-                     .setValue(Identifier.newUuid())
-                     .vBuild();
+                .setValue(Identifier.newUuid())
+                .vBuild();
     }
 }

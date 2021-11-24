@@ -27,8 +27,6 @@
 package io.spine.server.storage.datastore.tenant;
 
 import io.spine.core.TenantId;
-import io.spine.net.EmailAddress;
-import io.spine.net.InternetDomain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

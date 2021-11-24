@@ -52,7 +52,7 @@ final class NamespaceTest {
     void testNulls() {
         var defaultProjectId = defaultLocalProjectId();
         var defaultKey = Key.newBuilder(defaultProjectId.value(), "kind", "name")
-                            .build();
+                .build();
         new NullPointerTester()
                 .setDefault(ProjectId.class, defaultProjectId)
                 .setDefault(TenantId.class, TenantId.getDefaultInstance())
@@ -154,7 +154,7 @@ final class NamespaceTest {
     void testEmptyKey() {
         var projectId = ProjectId.of("project");
         var emptyKey = Key.newBuilder(projectId.value(), "my.type", 42)
-                          .build();
+                .build();
         var namespace = Namespace.fromNameOf(emptyKey, false);
         assertNull(namespace);
     }
@@ -187,7 +187,7 @@ final class NamespaceTest {
 
     private static void checkConstructFromKey(String ns, boolean multitenant) {
         var key = Key.newBuilder("my-simple-project", "any.kind", ns)
-                     .build();
+                .build();
         var namespace = Namespace.fromNameOf(key, multitenant);
         assertNotNull(namespace);
         assertEquals(ns, namespace.value());
