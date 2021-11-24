@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Streams.stream;
 
 /**
  * A utility for generating the
@@ -75,17 +76,18 @@ public final class Indexes {
                                           .setKind(kind.value())
                                           .build();
         Iterator<Key> allEntities = datastore.read(query);
-        Iterator<I> idIterator = Streams.stream(allEntities)
-                                        .map(idExtractor(idType))
-                                        .iterator();
+        @SuppressWarnings("UnstableApiUsage")   /* Guava's `Streams.stream` is OK in this case. */
+        var idIterator = stream(allEntities)
+                                .map(idExtractor(idType))
+                                .iterator();
         return idIterator;
     }
 
     private static <I> Function<Key, @Nullable I> idExtractor(Class<I> idType) {
         return key -> {
             checkNotNull(key);
-            String stringId = key.getName();
-            I id = Stringifiers.fromString(stringId, idType);
+            var stringId = key.getName();
+            var id = Stringifiers.fromString(stringId, idType);
             return id;
         };
     }

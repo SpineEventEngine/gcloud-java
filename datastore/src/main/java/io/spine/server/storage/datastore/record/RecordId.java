@@ -61,7 +61,7 @@ public final class RecordId extends DsIdentifier {
      * @return the Datastore record identifier
      */
     public static RecordId ofEntityId(Object id) {
-        String idAsString = Stringifiers.toString(id);
+        var idAsString = Stringifiers.toString(id);
         return of(idAsString);
     }
 }

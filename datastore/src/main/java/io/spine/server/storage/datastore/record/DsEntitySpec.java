@@ -105,7 +105,7 @@ public final class DsEntitySpec<I, R extends Message> {
      * @return a new instance of Datastore Entity key
      */
     public Key keyOf(I id, DatastoreMedium datastore) {
-        Key key = layout.keyOf(id, datastore);
+        var key = layout.keyOf(id, datastore);
         return key;
     }
 

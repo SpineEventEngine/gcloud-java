@@ -64,7 +64,7 @@ public final class FieldMaskApplier {
     }
 
     private <R extends Message> R recordMasker(R record) {
-        R result = applyMask(fieldMask, record);
+        var result = applyMask(fieldMask, record);
         return result;
     }
 }
