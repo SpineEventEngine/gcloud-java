@@ -26,7 +26,6 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import io.spine.core.TenantId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,36 +38,33 @@ final class PrefixedNsConverterFactoryTest {
     @Test
     @DisplayName("ignore namespaces which do not start from the prefix")
     void ignoreNonMatching() {
-        String prefix = "in";
-        PrefixedNsConverterFactory factory =
-                new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
-        NamespaceConverter converter = factory.get(true);
-        TenantId matchingTenant = converter.convert(prefix + ".Vstring");
+        var prefix = "in";
+        var factory = new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
+        var converter = factory.get(true);
+        var matchingTenant = converter.convert(prefix + ".Vstring");
         assertThat(matchingTenant.getValue()).isEqualTo("string");
 
-        TenantId nonMatchingTenant = converter.convert("ABCDE");
+        var nonMatchingTenant = converter.convert("ABCDE");
         assertThat(nonMatchingTenant).isSameInstanceAs(NOT_A_TENANT);
     }
 
     @Test
     @DisplayName("ignore namespaces which contain only the prefix")
     void ignoreSolePrefix() {
-        String prefix = "pro";
-        PrefixedNsConverterFactory factory =
-                new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
-        NamespaceConverter converter = factory.get(true);
-        TenantId nonMatchingTenant = converter.convert(prefix);
+        var prefix = "pro";
+        var factory = new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
+        var converter = factory.get(true);
+        var nonMatchingTenant = converter.convert(prefix);
         assertThat(nonMatchingTenant).isSameInstanceAs(NOT_A_TENANT);
     }
 
     @Test
     @DisplayName("ignore namespaces a longer prefix")
     void ignoreLongerPrefix() {
-        String prefix = "pre";
-        PrefixedNsConverterFactory factory =
-                new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
-        NamespaceConverter converter = factory.get(true);
-        TenantId nonMatchingTenant = converter.convert("pre-processing");
+        var prefix = "pre";
+        var factory = new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
+        var converter = factory.get(true);
+        var nonMatchingTenant = converter.convert("pre-processing");
         assertThat(nonMatchingTenant).isSameInstanceAs(NOT_A_TENANT);
     }
 }

@@ -26,7 +26,6 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import io.spine.core.TenantId;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,15 +42,15 @@ final class NamespaceConvertersTest extends UtilityClassTest<NamespaceConverters
     @Test
     @DisplayName("create custom namespace converter")
     void testCustomConverter() {
-        NamespaceConverter converter = NamespaceConverters.forCustomNamespace();
-        Namespace namespace = Namespace.of("namespace");
-        TenantId fromInternalConverter = namespace.toTenantId();
-        TenantId fromExternalConverter = converter.convert(namespace.value());
+        var converter = NamespaceConverters.forCustomNamespace();
+        var namespace = Namespace.of("namespace");
+        var fromInternalConverter = namespace.toTenantId();
+        var fromExternalConverter = converter.convert(namespace.value());
 
         assertEquals(fromInternalConverter, fromExternalConverter);
 
-        String restored = converter.reverse()
-                                   .convert(fromExternalConverter);
+        var restored = converter.reverse()
+                                .convert(fromExternalConverter);
         assertEquals(namespace.value(), restored);
     }
 }

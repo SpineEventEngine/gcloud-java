@@ -47,14 +47,14 @@ final class NamespaceWithCustomConverterTest {
     @Test
     @DisplayName("construct from `TenantId`")
     void testFromTenantId() {
-        String ns = "my.test.namespace.from.tenant.id";
-        TenantId tenantId = TenantId
+        var ns = "my.test.namespace.from.tenant.id";
+        var tenantId = TenantId
                 .newBuilder()
                 .setValue(ns)
                 .vBuild();
-        boolean multitenant = true;
-        Namespace namespace = Namespace.of(tenantId, multitenant, factory);
-        NamespaceConverter converter = factory.get(multitenant);
+        var multitenant = true;
+        var namespace = Namespace.of(tenantId, multitenant, factory);
+        var converter = factory.get(multitenant);
         assertNotNull(converter);
         assertEquals(converter.reverse()
                               .convert(tenantId), namespace.value());
@@ -63,10 +63,10 @@ final class NamespaceWithCustomConverterTest {
     @Test
     @DisplayName("construct from `Key`")
     void testFromKey() {
-        String ns = "my.test.namespace.from.key";
-        Key key = Key.newBuilder(PROJECT_ID.value(), "some.kind", ns)
+        var ns = "my.test.namespace.from.key";
+        var key = Key.newBuilder(PROJECT_ID.value(), "some.kind", ns)
                      .build();
-        Namespace namespace = Namespace.fromNameOf(key, true, factory);
+        var namespace = Namespace.fromNameOf(key, true, factory);
         assertNotNull(namespace);
         assertEquals(ns, namespace.value());
     }
@@ -74,12 +74,12 @@ final class NamespaceWithCustomConverterTest {
     @Test
     @DisplayName("restore to `TenantId`")
     void testToTenantId() {
-        String ns = "my.test.namespace.to.tenant.id";
-        TenantId tenantId = TenantId
+        var ns = "my.test.namespace.to.tenant.id";
+        var tenantId = TenantId
                 .newBuilder()
                 .setValue(ns)
                 .vBuild();
-        Namespace namespace = Namespace.of(tenantId, true, factory);
+        var namespace = Namespace.of(tenantId, true, factory);
         assertEquals(tenantId, namespace.toTenantId());
     }
 

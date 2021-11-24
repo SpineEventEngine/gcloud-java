@@ -27,10 +27,8 @@
 package io.spine.server.storage.datastore.tenant;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Key;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.IterableSubject;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.environment.Tests;
@@ -40,7 +38,6 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordSpec;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.tenant.given.CollegeProjection;
 import io.spine.test.datastore.College;
@@ -57,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.truth.Truth.assertThat;
@@ -102,8 +98,8 @@ final class NamespaceIndexTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
-        Namespace defaultNamespace = Namespace.of("some-string");
-        TenantId tenantId = TenantId.getDefaultInstance();
+        var defaultNamespace = Namespace.of("some-string");
+        var tenantId = TenantId.getDefaultInstance();
 
         new NullPointerTester()
                 .setDefault(Namespace.class, defaultNamespace)
@@ -115,14 +111,14 @@ final class NamespaceIndexTest {
     @Test
     @DisplayName("store tenant IDs")
     void testStore() {
-        Set<TenantId> existingIds = namespaceIndex.all();
-        int idCount = existingIds.size();
+        var existingIds = namespaceIndex.all();
+        var idCount = existingIds.size();
 
-        TenantId newId = newTenantId();
+        var newId = newTenantId();
         namespaceIndex.keep(newId);
 
-        Set<TenantId> ids = namespaceIndex.all();
-        IterableSubject assertIds = assertThat(ids);
+        var ids = namespaceIndex.all();
+        var assertIds = assertThat(ids);
         assertIds.isNotNull();
         assertIds.hasSize(idCount + 1);
 
@@ -140,8 +136,8 @@ final class NamespaceIndexTest {
     @Test
     @DisplayName("find existing namespaces")
     void testFindExisting() {
-        TenantId newId = newTenantId();
-        Namespace newNamespace = Namespace.of(newId, true);
+        var newId = newTenantId();
+        var newNamespace = Namespace.of(newId, true);
 
         namespaceIndex.keep(newId);
         assertTrue(namespaceIndex.contains(newNamespace));
@@ -150,8 +146,8 @@ final class NamespaceIndexTest {
     @Test
     @DisplayName("not find non-existing namespaces")
     void testNotFindNonExisting() {
-        TenantId fakeId = newTenantId();
-        Namespace fakeNamespace = Namespace.of(fakeId, true);
+        var fakeId = newTenantId();
+        var fakeNamespace = Namespace.of(fakeId, true);
 
         assertFalse(namespaceIndex.contains(fakeNamespace));
     }
@@ -159,29 +155,29 @@ final class NamespaceIndexTest {
     @Test
     @DisplayName("find tenants by prefixed namespaces")
     void findPrefixedNamespaces() {
-        Datastore datastore = TestDatastores
+        var datastore = TestDatastores
                 .local()
                 .getOptions()
                 .toBuilder()
                 .setNamespace("Vcustom-namespace")
                 .build()
                 .getService();
-        BoundedContextBuilder contextBuilder = BoundedContextBuilder
+        var contextBuilder = BoundedContextBuilder
                 .assumingTests(true);
-        DatastoreStorageFactory storageFactory = DatastoreStorageFactory
+        var storageFactory = DatastoreStorageFactory
                 .newBuilder()
                 .setDatastore(datastore)
                 .build();
         ServerEnvironment.when(Tests.class)
                          .use(storageFactory);
         storageFactory.configureTenantIndex(contextBuilder);
-        BoundedContext context = contextBuilder.build();
-        RecordStorage<CollegeId, EntityRecord> storage = storageFactory
+        var context = contextBuilder.build();
+        var storage = storageFactory
                 .createRecordStorage(context.spec(), EntityRecordSpec.of(CollegeProjection.class));
-        CollegeId id = CollegeId.newBuilder()
-                                     .setValue("Aeronautic Forgery College")
-                                     .vBuild();
-        EntityRecord record = EntityRecord
+        var id = CollegeId.newBuilder()
+                          .setValue("Aeronautic Forgery College")
+                          .vBuild();
+        var record = EntityRecord
                 .newBuilder()
                 .setEntityId(Identifier.pack(id))
                 .setState(pack(College.newBuilder()
@@ -189,16 +185,16 @@ final class NamespaceIndexTest {
                                       .setName(id.getValue())
                                       .build()))
                 .build();
-        TenantId tenantId = TenantId
+        var tenantId = TenantId
                 .newBuilder()
                 .setValue("XYZ")
                 .build();
         with(tenantId).run(
                 () -> storage.write(id, record)
         );
-        Set<TenantId> tenantIds = context.internalAccess()
-                                         .tenantIndex()
-                                         .all();
+        var tenantIds = context.internalAccess()
+                               .tenantIndex()
+                               .all();
         assertThat(tenantIds).containsExactly(tenantId);
     }
 
@@ -226,41 +222,41 @@ final class NamespaceIndexTest {
 
         NamespaceIndex.NamespaceQuery namespaceQuery = keys::iterator;
         // The tested object
-        NamespaceIndex namespaceIndex = nsIndexFor(namespaceQuery);
+        var namespaceIndex = nsIndexFor(namespaceQuery);
 
         // The test flow
         Runnable flow = () -> {
             // Initial value check
-            Set<TenantId> initialIdsActual = namespaceIndex.all(); // sync
+            var initialIdsActual = namespaceIndex.all(); // sync
             // The keep may already be called
             assertTrue(initialIdsActual.size() >= initialTenantIds.size());
             assertThat(initialIdsActual).containsAtLeastElementsIn(initialTenantIds);
 
             // Add new element
-            InternetDomain domain = InternetDomain
+            var domain = InternetDomain
                     .newBuilder()
                     .setValue("my.tenant.com")
                     .vBuild();
-            TenantId newTenantId = TenantId
+            var newTenantId = TenantId
                     .newBuilder()
                     .setDomain(domain)
                     .vBuild();
             namespaceIndex.keep(newTenantId); // sync
 
             // Check new value added
-            boolean success = namespaceIndex.contains(Namespace.of(newTenantId,    // sync
-                                                                   true));
+            var success = namespaceIndex.contains(Namespace.of(newTenantId,    // sync
+                                                               true));
             assertTrue(success);
 
             // Check returned set has newly added element
-            Set<TenantId> updatedIds = namespaceIndex.all(); // sync
+            var updatedIds = namespaceIndex.all(); // sync
             assertEquals(updatedIds.size(), initialTenantIds.size() + 1);
             assertThat(updatedIds).contains(newTenantId);
         };
 
         // Test execution threads
-        Thread firstThread = new Thread(flow);
-        Thread secondThread = new Thread(flow);
+        var firstThread = new Thread(flow);
+        var secondThread = new Thread(flow);
 
         // Collect thread failures
         Map<Thread, Throwable> threadFailures = new HashMap<>(2);
@@ -279,7 +275,7 @@ final class NamespaceIndexTest {
 
         // Check for failures
         // Throw if any, failing the test
-        for (Throwable failure : threadFailures.values()) {
+        for (var failure : threadFailures.values()) {
             fail(format("Test thread has thrown a Throwable. %s",
                         getStackTraceAsString(failure)));
         }
@@ -294,20 +290,20 @@ final class NamespaceIndexTest {
     }
 
     private static Key key(String name) {
-        Key key = Key.newBuilder("some-proj", "some-kind", name)
+        var key = Key.newBuilder("some-proj", "some-kind", name)
                      .build();
         return key;
     }
 
     private static Datastore datastore() {
-        String namespace = "Vsome-namespace";
-        DatastoreOptions options = TestDatastores
+        var namespace = "Vsome-namespace";
+        var options = TestDatastores
                 .local()
                 .getOptions()
                 .toBuilder()
                 .setNamespace(namespace)
                 .build();
-        Datastore datastore = options.getService();
+        var datastore = options.getService();
         return datastore;
     }
 }

@@ -26,7 +26,6 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StructuredQuery;
@@ -41,7 +40,6 @@ import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,7 +79,7 @@ final class DatastoreWrapperTest {
 
     @AfterAll
     static void tearDown() {
-        DatastoreWrapper wrapper = wrap(localDatastore(), singleTenant());
+        var wrapper = wrap(localDatastore(), singleTenant());
         wrapper.dropTable(NAMESPACE_HOLDER_KIND);
     }
 
@@ -104,17 +102,17 @@ final class DatastoreWrapperTest {
         @Test
         @DisplayName("support bulk reads")
         void testBulkRead() throws InterruptedException {
-            int bulkSize = 1001;
+            var bulkSize = 1001;
 
-            Map<Key, Entity> entities = newTestEntities(bulkSize, wrapper);
-            Collection<Entity> expectedEntities = entities.values();
+            var entities = newTestEntities(bulkSize, wrapper);
+            var expectedEntities = entities.values();
 
             wrapper.createOrUpdate(expectedEntities);
 
             // Wait for some time to make sure the writing is complete
             Thread.sleep(bulkSize * 5L);
 
-            ImmutableList<Key> keys = ImmutableList.copyOf(entities.keySet());
+            var keys = ImmutableList.copyOf(entities.keySet());
             Collection<Entity> readEntities = wrapper.lookup(keys);
             assertEquals(entities.size(), readEntities.size());
             assertTrue(expectedEntities.containsAll(readEntities));
@@ -124,10 +122,10 @@ final class DatastoreWrapperTest {
         @Test
         @DisplayName("support big bulk reads")
         void testBigBulkRead() throws InterruptedException {
-            int bulkSize = 2001;
+            var bulkSize = 2001;
 
-            Map<Key, Entity> entities = newTestEntities(bulkSize, wrapper);
-            Collection<Entity> expectedEntities = entities.values();
+            var entities = newTestEntities(bulkSize, wrapper);
+            var expectedEntities = entities.values();
 
             wrapper.createOrUpdate(expectedEntities);
 
@@ -173,13 +171,13 @@ final class DatastoreWrapperTest {
         void testBulkRead() {
             assumeTrue(runsOnCi());
 
-            int entityCount = 5;
-            Map<Key, Entity> entities = newTestEntities(entityCount, wrapper);
-            Collection<Entity> expectedEntities = entities.values();
+            var entityCount = 5;
+            var entities = newTestEntities(entityCount, wrapper);
+            var expectedEntities = entities.values();
 
             wrapper.createOrUpdate(expectedEntities);
 
-            ImmutableList<Key> keys = ImmutableList.copyOf(entities.keySet());
+            var keys = ImmutableList.copyOf(entities.keySet());
             Collection<Entity> readEntities = wrapper.lookup(keys);
             assertEquals(entities.size(), readEntities.size());
             assertTrue(expectedEntities.containsAll(readEntities));
@@ -206,9 +204,9 @@ final class DatastoreWrapperTest {
         @Test
         @DisplayName("replacing missing entities with null")
         void testMissingAreNull() throws InterruptedException {
-            int bulkSize = 3;
+            var bulkSize = 3;
 
-            Map<Key, Entity> entities = createAndStoreTestEntities(bulkSize);
+            var entities = createAndStoreTestEntities(bulkSize);
 
             // Wait for some time to make sure the writing is complete
             Thread.sleep(bulkSize * 5L);
@@ -223,7 +221,7 @@ final class DatastoreWrapperTest {
                     .add(presentKeys.get(2))
                     .build();
 
-            List<@Nullable Entity> actualEntities = wrapper.lookup(queryKeys);
+            var actualEntities = wrapper.lookup(queryKeys);
 
             assertThat(actualEntities)
                     .containsExactly(
@@ -239,9 +237,9 @@ final class DatastoreWrapperTest {
         @Test
         @DisplayName("preserving order")
         void test() throws InterruptedException {
-            int bulkSize = 3;
+            var bulkSize = 3;
 
-            Map<Key, Entity> entities = createAndStoreTestEntities(bulkSize);
+            var entities = createAndStoreTestEntities(bulkSize);
 
             // Wait for some time to make sure the writing is complete
             Thread.sleep(bulkSize * 5L);
@@ -254,15 +252,15 @@ final class DatastoreWrapperTest {
                     .add(presentKeys.get(1))
                     .build();
 
-            List<Entity> actualEntities = wrapper.lookup(queryKeys);
+            var actualEntities = wrapper.lookup(queryKeys);
 
             assertThat(actualEntities)
                     .containsExactlyElementsIn(entities.values());
         }
 
         private Map<Key, Entity> createAndStoreTestEntities(int bulkSize) {
-            Map<Key, Entity> entities = newTestEntities(bulkSize, wrapper);
-            Collection<Entity> expectedEntities = entities.values();
+            var entities = newTestEntities(bulkSize, wrapper);
+            var expectedEntities = entities.values();
             wrapper.createOrUpdate(expectedEntities);
             return entities;
         }
@@ -308,34 +306,34 @@ final class DatastoreWrapperTest {
     @Test
     @DisplayName("generate key factories aware of tenancy")
     void testGenerateKeyFactory() {
-        DatastoreWrapper wrapper = wrap(localDatastore(), multitenant());
-        String tenantId1 = "first-tenant-ID";
-        String tenantId1Prefixed = "Vfirst-tenant-ID";
-        String tenantId2 = "second@tenant.id";
-        String tenantId2Prefixed = "Esecond-at-tenant.id";
-        String tenantId3 = "third.id";
-        String tenantId3Prefixed = "Dthird.id";
-        Datastore datastore = wrapper.datastore();
+        var wrapper = wrap(localDatastore(), multitenant());
+        var tenantId1 = "first-tenant-ID";
+        var tenantId1Prefixed = "Vfirst-tenant-ID";
+        var tenantId2 = "second@tenant.id";
+        var tenantId2Prefixed = "Esecond-at-tenant.id";
+        var tenantId3 = "third.id";
+        var tenantId3Prefixed = "Dthird.id";
+        var datastore = wrapper.datastore();
         ensureNamespace(tenantId1Prefixed, datastore);
         ensureNamespace(tenantId2Prefixed, datastore);
         ensureNamespace(tenantId3Prefixed, datastore);
-        EmailAddress emailAddress2 = EmailAddress
+        var emailAddress2 = EmailAddress
                 .newBuilder()
                 .setValue(tenantId2)
                 .vBuild();
-        InternetDomain internetDomain3 = InternetDomain
+        var internetDomain3 = InternetDomain
                 .newBuilder()
                 .setValue(tenantId3)
                 .vBuild();
-        TenantId id1 = TenantId.newBuilder()
-                               .setValue(tenantId1)
-                               .vBuild();
-        TenantId id2 = TenantId.newBuilder()
-                               .setEmail(emailAddress2)
-                               .vBuild();
-        TenantId id3 = TenantId.newBuilder()
-                               .setDomain(internetDomain3)
-                               .vBuild();
+        var id1 = TenantId.newBuilder()
+                          .setValue(tenantId1)
+                          .vBuild();
+        var id2 = TenantId.newBuilder()
+                          .setEmail(emailAddress2)
+                          .vBuild();
+        var id3 = TenantId.newBuilder()
+                          .setDomain(internetDomain3)
+                          .vBuild();
         checkTenantIdInKey(tenantId1Prefixed, id1, wrapper);
         checkTenantIdInKey(tenantId2Prefixed, id2, wrapper);
         checkTenantIdInKey(tenantId3Prefixed, id3, wrapper);
@@ -345,7 +343,7 @@ final class DatastoreWrapperTest {
         new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
-                Key key = wrapper.keyFactory(GENERIC_ENTITY_KIND)
+                var key = wrapper.keyFactory(GENERIC_ENTITY_KIND)
                                  .newKey(42L);
                 assertEquals(id, key.getNamespace());
             }
@@ -355,10 +353,10 @@ final class DatastoreWrapperTest {
     @Test
     @DisplayName("produce lazy iterator on query read")
     void testLazyIterator() {
-        DatastoreWrapper wrapper = wrap(localDatastore(), singleTenant());
-        int count = 2;
+        var wrapper = wrap(localDatastore(), singleTenant());
+        var count = 2;
         Map<?, Entity> entities = newTestEntities(count, wrapper);
-        Collection<Entity> expctedEntities = entities.values();
+        var expctedEntities = entities.values();
         wrapper.createOrUpdate(expctedEntities);
 
         StructuredQuery<Entity> query = newEntityQueryBuilder()
@@ -367,9 +365,9 @@ final class DatastoreWrapperTest {
         Iterator<Entity> result = wrapper.read(query);
 
         assertTrue(result.hasNext());
-        Entity first = result.next();
+        var first = result.next();
         assertTrue(result.hasNext());
-        Entity second = result.next();
+        var second = result.next();
 
         assertThat(expctedEntities)
                 .containsExactly(first, second);
@@ -379,19 +377,19 @@ final class DatastoreWrapperTest {
     @Test
     @DisplayName("allow to add new namespaces 'on the go'")
     void testNewNamespaces() {
-        DatastoreWrapper wrapper = wrap(localDatastore(), multitenant());
-        TenantId tenantId = TenantId
+        var wrapper = wrap(localDatastore(), multitenant());
+        var tenantId = TenantId
                 .newBuilder()
                 .setValue("Luke_I_am_your_tenant.")
                 .vBuild();
-        String key = "noooooo";
-        Key entityKey = new TenantAwareFunction0<Key>(tenantId) {
+        var key = "noooooo";
+        var entityKey = new TenantAwareFunction0<Key>(tenantId) {
             @Override
             public Key apply() {
-                Key entityKey = wrapper.keyFactory(NAMESPACE_HOLDER_KIND)
+                var entityKey = wrapper.keyFactory(NAMESPACE_HOLDER_KIND)
                                        .newKey(key);
-                Entity entity = Entity.newBuilder(entityKey)
-                                      .build();
+                var entity = Entity.newBuilder(entityKey)
+                                   .build();
                 wrapper.create(entity);
                 return entityKey;
             }
@@ -407,10 +405,10 @@ final class DatastoreWrapperTest {
      */
     private static Map<Key, Entity> newTestEntities(int n, DatastoreWrapper wrapper) {
         Map<Key, Entity> result = new HashMap<>(n);
-        for (int i = 0; i < n; i++) {
-            Any message = Any.getDefaultInstance();
-            Key key = newKey(format("record-%s", i), wrapper);
-            Entity entity = Entities.fromMessage(message, key);
+        for (var i = 0; i < n; i++) {
+            var message = Any.getDefaultInstance();
+            var key = newKey(format("record-%s", i), wrapper);
+            var entity = Entities.fromMessage(message, key);
             result.put(key, entity);
         }
         return result;
@@ -420,7 +418,7 @@ final class DatastoreWrapperTest {
      * Cannot be moved to test environment because it uses package-local {@link RecordId}.
      */
     private static Key newKey(String id, DatastoreWrapper wrapper) {
-        RecordId recordId = new RecordId(id);
+        var recordId = new RecordId(id);
         return wrapper.keyFor(GENERIC_ENTITY_KIND, recordId);
     }
 }

@@ -50,8 +50,8 @@ final class NamespaceTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
-        ProjectId defaultProjectId = defaultLocalProjectId();
-        Key defaultKey = Key.newBuilder(defaultProjectId.value(), "kind", "name")
+        var defaultProjectId = defaultLocalProjectId();
+        var defaultKey = Key.newBuilder(defaultProjectId.value(), "kind", "name")
                             .build();
         new NullPointerTester()
                 .setDefault(ProjectId.class, defaultProjectId)
@@ -63,7 +63,7 @@ final class NamespaceTest {
     @Test
     @DisplayName("not accept empty `TenantId`s")
     void testEmptyTenantId() {
-        TenantId emptyId = TenantId.getDefaultInstance();
+        var emptyId = TenantId.getDefaultInstance();
         assertThrows(IllegalArgumentException.class,
                      () -> Namespace.of(emptyId, true));
     }
@@ -73,28 +73,28 @@ final class NamespaceTest {
     @Test
     @DisplayName("support equality")
     void testEquals() {
-        String aGroupValue = "namespace1";
-        TenantId aGroupTenantId = TenantId
+        var aGroupValue = "namespace1";
+        var aGroupTenantId = TenantId
                 .newBuilder()
                 .setValue(aGroupValue)
                 .vBuild();
-        Namespace aGroupNamespaceFromTenantId =
+        var aGroupNamespaceFromTenantId =
                 Namespace.of(aGroupTenantId, true, NsConverterFactory.defaults());
-        Namespace aGroupNamespaceFromString = Namespace.of(aGroupValue);
-        Namespace duplicateAGroupNamespaceFromString = Namespace.of(aGroupValue);
+        var aGroupNamespaceFromString = Namespace.of(aGroupValue);
+        var duplicateAGroupNamespaceFromString = Namespace.of(aGroupValue);
 
-        String bGroupValue = "namespace2";
-        EmailAddress bgGroupEmail = EmailAddress
+        var bGroupValue = "namespace2";
+        var bgGroupEmail = EmailAddress
                 .newBuilder()
                 .setValue(bGroupValue)
                 .vBuild();
-        TenantId bGroupTenantId = TenantId
+        var bGroupTenantId = TenantId
                 .newBuilder()
                 .setEmail(bgGroupEmail)
                 .vBuild();
-        Namespace bGroupNamespaceFromTenantId = Namespace.of(bGroupTenantId,true);
+        var bGroupNamespaceFromTenantId = Namespace.of(bGroupTenantId, true);
         // Same string but other type
-        Namespace cGroupNamespaceFromString = Namespace.of(bGroupValue);
+        var cGroupNamespaceFromString = Namespace.of(bGroupValue);
 
         new EqualsTester()
                 .addEqualityGroup(aGroupNamespaceFromTenantId)
@@ -107,24 +107,24 @@ final class NamespaceTest {
     @Test
     @DisplayName("restore self to `TenantId`")
     void testToTenantId() {
-        String randomTenantIdString = "arbitrary-tenant-id";
-        InternetDomain internetDomain = InternetDomain
+        var randomTenantIdString = "arbitrary-tenant-id";
+        var internetDomain = InternetDomain
                 .newBuilder()
                 .setValue(randomTenantIdString)
                 .vBuild();
-        TenantId domainId = TenantId
+        var domainId = TenantId
                 .newBuilder()
                 .setDomain(internetDomain)
                 .vBuild();
-        EmailAddress emailAddress = EmailAddress
+        var emailAddress = EmailAddress
                 .newBuilder()
                 .setValue(randomTenantIdString)
                 .vBuild();
-        TenantId emailId = TenantId
+        var emailId = TenantId
                 .newBuilder()
                 .setEmail(emailAddress)
                 .vBuild();
-        TenantId stringId = TenantId
+        var stringId = TenantId
                 .newBuilder()
                 .setValue(randomTenantIdString)
                 .vBuild();
@@ -132,17 +132,17 @@ final class NamespaceTest {
         assertNotEquals(domainId, stringId);
         assertNotEquals(emailId, stringId);
 
-        Namespace fromDomainId = Namespace.of(domainId, true);
-        Namespace fromEmailId = Namespace.of(emailId, true);
-        Namespace fromStringId = Namespace.of(stringId, true);
+        var fromDomainId = Namespace.of(domainId, true);
+        var fromEmailId = Namespace.of(emailId, true);
+        var fromStringId = Namespace.of(stringId, true);
 
         assertNotEquals(fromDomainId, fromEmailId);
         assertNotEquals(fromDomainId, fromStringId);
         assertNotEquals(fromEmailId, fromStringId);
 
-        TenantId domainIdRestored = fromDomainId.toTenantId();
-        TenantId emailIdRestored = fromEmailId.toTenantId();
-        TenantId stringIdRestored = fromStringId.toTenantId();
+        var domainIdRestored = fromDomainId.toTenantId();
+        var emailIdRestored = fromEmailId.toTenantId();
+        var stringIdRestored = fromStringId.toTenantId();
 
         assertEquals(domainId, domainIdRestored);
         assertEquals(emailId, emailIdRestored);
@@ -152,10 +152,10 @@ final class NamespaceTest {
     @Test
     @DisplayName("return null if `Key` is empty")
     void testEmptyKey() {
-        ProjectId projectId = ProjectId.of("project");
-        Key emptyKey = Key.newBuilder(projectId.value(), "my.type", 42)
+        var projectId = ProjectId.of("project");
+        var emptyKey = Key.newBuilder(projectId.value(), "my.type", 42)
                           .build();
-        Namespace namespace = Namespace.fromNameOf(emptyKey, false);
+        var namespace = Namespace.fromNameOf(emptyKey, false);
         assertNull(namespace);
     }
 
@@ -174,21 +174,21 @@ final class NamespaceTest {
     @Test
     @DisplayName("convert self to value-based `TenantId` if created from `String`")
     void testConvertToTenantId() {
-        String namespaceString = "my.namespace";
+        var namespaceString = "my.namespace";
 
-        TenantId expectedId = TenantId
+        var expectedId = TenantId
                 .newBuilder()
                 .setValue(namespaceString)
                 .vBuild();
-        Namespace namespace = Namespace.of(namespaceString);
-        TenantId actualId = namespace.toTenantId();
+        var namespace = Namespace.of(namespaceString);
+        var actualId = namespace.toTenantId();
         assertEquals(expectedId, actualId);
     }
 
     private static void checkConstructFromKey(String ns, boolean multitenant) {
-        Key key = Key.newBuilder("my-simple-project", "any.kind", ns)
+        var key = Key.newBuilder("my-simple-project", "any.kind", ns)
                      .build();
-        Namespace namespace = Namespace.fromNameOf(key, multitenant);
+        var namespace = Namespace.fromNameOf(key, multitenant);
         assertNotNull(namespace);
         assertEquals(ns, namespace.value());
     }

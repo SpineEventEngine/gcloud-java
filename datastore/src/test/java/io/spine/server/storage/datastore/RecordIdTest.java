@@ -47,8 +47,8 @@ class RecordIdTest {
     @Test
     @DisplayName("wrap non-empty `String` into record identifier")
     void testNonEmpty() {
-        String idAsString = newUuid();
-        RecordId recordId = RecordId.of(idAsString);
+        var idAsString = newUuid();
+        var recordId = RecordId.of(idAsString);
 
         assertNotNull(recordId);
         assertEquals(idAsString, recordId.value());

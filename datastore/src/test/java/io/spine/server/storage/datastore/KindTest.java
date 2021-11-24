@@ -58,13 +58,13 @@ final class KindTest {
     @Test
     @DisplayName("support equality")
     void testEquals() {
-        Kind anyFromDesc = Kind.of(Any.getDescriptor());
-        Kind anyFromTypeUrl = Kind.of(TypeUrl.of(Any.class));
-        Kind anyFromString = Kind.of("google.protobuf.Any");
+        var anyFromDesc = Kind.of(Any.getDescriptor());
+        var anyFromTypeUrl = Kind.of(TypeUrl.of(Any.class));
+        var anyFromString = Kind.of("google.protobuf.Any");
 
-        Kind fieldMaskFromInstance = Kind.of(FieldMask.getDefaultInstance());
-        Kind fieldMaskFromTypeName = Kind.of(TypeName.of(FieldMask.class));
-        Kind fieldMaskFromDesc = Kind.of(FieldMask.getDescriptor());
+        var fieldMaskFromInstance = Kind.of(FieldMask.getDefaultInstance());
+        var fieldMaskFromTypeName = Kind.of(TypeName.of(FieldMask.class));
+        var fieldMaskFromDesc = Kind.of(FieldMask.getDescriptor());
 
         new EqualsTester()
                 .addEqualityGroup(anyFromDesc, anyFromString, anyFromTypeUrl)
@@ -75,24 +75,24 @@ final class KindTest {
     @Test
     @DisplayName("not accept forbidden prefix")
     void testCheckValidity() {
-        String invalidKind = "__my.invalid.type";
+        var invalidKind = "__my.invalid.type";
         assertThrows(IllegalArgumentException.class, () -> Kind.of(invalidKind));
     }
 
     @Test
     @DisplayName("construct from string")
     void testFromString() {
-        String type = "my.custom.type";
-        Kind kind = Kind.of(type);
+        var type = "my.custom.type";
+        var kind = Kind.of(type);
         assertEquals(type, kind.value());
     }
 
     @Test
     @DisplayName("construct from `TypeUrl`")
     void testFromTypeUrl() {
-        Descriptors.Descriptor descriptor = Any.getDescriptor();
-        TypeUrl type = TypeUrl.from(descriptor);
-        Kind kind = Kind.of(type);
+        var descriptor = Any.getDescriptor();
+        var type = TypeUrl.from(descriptor);
+        var kind = Kind.of(type);
         assertEquals(descriptor.getFullName(), kind.value());
         assertEquals(type.toTypeName()
                          .value(), kind.value());
@@ -101,8 +101,8 @@ final class KindTest {
     @Test
     @DisplayName("construct from `Descriptor`")
     void testFromDescriptor() {
-        Descriptors.Descriptor descriptor = Any.getDescriptor();
-        Kind kind = Kind.of(descriptor);
+        var descriptor = Any.getDescriptor();
+        var kind = Kind.of(descriptor);
         assertEquals(descriptor.getFullName(), kind.value());
     }
 
@@ -110,7 +110,7 @@ final class KindTest {
     @DisplayName("construct from `Message`")
     void testFromMessage() {
         Message message = Any.getDefaultInstance();
-        Kind kind = Kind.of(message);
+        var kind = Kind.of(message);
         assertEquals(message.getDescriptorForType()
                             .getFullName(), kind.value());
     }
@@ -118,9 +118,9 @@ final class KindTest {
     @Test
     @DisplayName("construct from `TypeName`")
     void testFromTypeName() {
-        Descriptors.Descriptor descriptor = Any.getDescriptor();
-        TypeName type = TypeName.from(descriptor);
-        Kind kind = Kind.of(type);
+        var descriptor = Any.getDescriptor();
+        var type = TypeName.from(descriptor);
+        var kind = Kind.of(type);
         assertEquals(descriptor.getFullName(), kind.value());
         assertEquals(type.value(), kind.value());
     }

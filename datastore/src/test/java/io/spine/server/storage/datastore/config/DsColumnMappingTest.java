@@ -36,13 +36,12 @@ import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
 import com.google.cloud.datastore.Value;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.core.Version;
-import io.spine.server.storage.ColumnTypeMapping;
 import io.spine.string.Stringifiers;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProject.Status;
+import io.spine.testing.TestValues;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -63,77 +62,77 @@ final class DsColumnMappingTest {
         @Test
         @DisplayName("`String` as `StringValue`")
         void stringAsStringValue() {
-            String str = "test-string";
+            var str = "test-string";
             assertConverts(str, StringValue.of(str));
         }
 
         @Test
         @DisplayName("`Integer` as `LongValue`")
         void integerAsLongValue() {
-            int num = 42;
+            var num = 42;
             assertConverts(num, LongValue.of(num));
         }
 
         @Test
         @DisplayName("`Long` as `LongValue`")
         void longAsLongValue() {
-            long num = 42L;
+            var num = 42L;
             assertConverts(num, LongValue.of(num));
         }
 
         @Test
         @DisplayName("`Float` as `DoubleValue`")
         void floatAsDoubleValue() {
-            float num = 42.0F;
+            var num = 42.0F;
             assertConverts(num, DoubleValue.of(num));
         }
 
         @Test
         @DisplayName("`Double` as `DoubleValue`")
         void doubleAsDoubleValue() {
-            double num = 42.0;
+            var num = 42.0;
             assertConverts(num, DoubleValue.of(num));
         }
 
         @Test
         @DisplayName("`Boolean` as `BooleanValue`")
         void booleanAsBooleanValue() {
-            boolean value = false;
+            var value = false;
             assertConverts(value, BooleanValue.of(value));
         }
 
         @Test
         @DisplayName("`ByteString` as `BlobValue`")
         void byteStringAsBlobValue() {
-            String str = "some-test-string";
-            ByteString bytes = ByteString.copyFromUtf8(str);
-            Blob blob = Blob.copyFrom(str.getBytes(UTF_8));
-            BlobValue blobValue = BlobValue.of(blob);
+            var str = "some-test-string";
+            var bytes = ByteString.copyFromUtf8(str);
+            var blob = Blob.copyFrom(str.getBytes(UTF_8));
+            var blobValue = BlobValue.of(blob);
             assertConverts(bytes, blobValue);
         }
 
         @Test
         @DisplayName("`Enum` as `LongValue`")
         void enumAsLongValue() {
-            Status value = Status.CREATED;
+            var value = Status.CREATED;
             assertConverts(value, LongValue.of(value.getNumber()));
         }
 
         @Test
         @DisplayName("generic `Message` as `StringValue`")
         void messageAsStringValue() {
-            StgProject project = StgProject
+            var project = StgProject
                     .newBuilder()
                     .setName("project-name")
                     .build();
-            String messageAsString = Stringifiers.toString(project);
+            var messageAsString = Stringifiers.toString(project);
             assertConverts(project, StringValue.of(messageAsString));
         }
 
         @Test
         @DisplayName("`Timestamp` as `TimestampValue`")
         void timestampAsTimestampValue() {
-            Timestamp timestamp = Time.currentTime();
+            var timestamp = Time.currentTime();
             assertConverts(timestamp, TimestampValue.of(
                     ofTimeSecondsAndNanos(timestamp.getSeconds(), timestamp.getNanos())
             ));
@@ -142,8 +141,8 @@ final class DsColumnMappingTest {
         @Test
         @DisplayName("`Version` as `LongValue`")
         void versionAsLongValue() {
-            int number = 42;
-            Version version = Version
+            var number = 42;
+            var version = Version
                     .newBuilder()
                     .setNumber(number)
                     .build();
@@ -153,14 +152,14 @@ final class DsColumnMappingTest {
         @Test
         @DisplayName("`null` as `NullValue`")
         void nullAsNullValue() {
-            Value<?> persistedNull = mapping.ofNull()
-                                            .applyTo(null);
+            var persistedNull = mapping.ofNull()
+                                       .applyTo(TestValues.nullRef());
             assertThat(persistedNull).isEqualTo(NullValue.of());
         }
 
         private void assertConverts(Object original, Value<?> expected) {
-            ColumnTypeMapping<?, ? extends Value<?>> rule = mapping.of(original.getClass());
-            Value<?> result = rule.applyTo(original);
+            var rule = mapping.of(original.getClass());
+            var result = rule.applyTo(original);
             assertThat(result).isEqualTo(expected);
         }
     }

@@ -34,7 +34,6 @@ import io.spine.server.storage.RecordStorageUnderTest;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -100,8 +99,7 @@ public final class BigDataTester<I, R extends Message> implements Logging {
      *     <li>Measure the time of the {@linkplain RecordStorage#writeAll(Iterable) bulk write}.
      *     <li>Fail if the time is over the specified limit.
      *     <li>Wait 1 second to ensure the Datastore has established the data consistency.
-     *     <li>Measure the time of the
-     *         {@linkplain RecordStorage#readAll() bulk read}.
+     *     <li>Measure the time of the {@linkplain RecordStorage#readAll()  bulk read}.
      *     <li>Fail if the time is over the specified limit.
      *     <li>Check the count of the records written and read is equal.
      * </ol>
@@ -112,16 +110,16 @@ public final class BigDataTester<I, R extends Message> implements Logging {
     public void testBigDataOperations(RecordStorageUnderTest<I, R> storage) {
         checkNotNull(storage);
         Collection<R> records = new ArrayList<>(bulkSize);
-        for (int i = 0; i < bulkSize; i++) {
-            I id = entryFactory.newId();
+        for (var i = 0; i < bulkSize; i++) {
+            var id = entryFactory.newId();
             records.add(entryFactory.newRecord(id));
         }
 
-        long writeStart = System.currentTimeMillis();
+        var writeStart = System.currentTimeMillis();
         storage.writeBatch(records);
-        long writeEnd = System.currentTimeMillis();
+        var writeEnd = System.currentTimeMillis();
 
-        long writeTime = writeEnd - writeStart;
+        var writeTime = writeEnd - writeStart;
         if (writeTime > writeMillisLimit) {
             fail(format("Writing took too long. Expected %d millis but was %d millis.",
                         writeMillisLimit,
@@ -136,13 +134,13 @@ public final class BigDataTester<I, R extends Message> implements Logging {
             fail(Throwables.getStackTraceAsString(e));
         }
 
-        long readStart = System.currentTimeMillis();
+        var readStart = System.currentTimeMillis();
 
         // Do not test data equality here, only the sizes and time
-        Iterator<R> readResults = storage.readAll();
+        var readResults = storage.readAll();
 
-        long readEnd = System.currentTimeMillis();
-        long readTime = readEnd - readStart;
+        var readEnd = System.currentTimeMillis();
+        var readTime = readEnd - readStart;
 
         if (readTime > readMillisLimit) {
             fail(format("Reading took too long. Expected %d millis but was %d millis.",
@@ -255,7 +253,7 @@ public final class BigDataTester<I, R extends Message> implements Logging {
             }
             checkArgument(writeMillisLimit != 0, "Write time limit should be set.");
             checkArgument(readMillisLimit != 0, "Read time limit should be set.");
-            BigDataTester<I, R> tester = new BigDataTester<>(this);
+            var tester = new BigDataTester<>(this);
             return tester;
         }
     }

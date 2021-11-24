@@ -26,22 +26,15 @@
 
 package io.spine.server.storage.datastore.query;
 
-import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.TimestampValue;
-import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
-import io.spine.query.QueryPredicate;
-import io.spine.query.Subject;
 import io.spine.server.storage.datastore.config.DsColumnMapping;
 import io.spine.test.storage.StgProject;
-import io.spine.test.storage.StgProjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Collection;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 import static com.google.cloud.datastore.StructuredQuery.CompositeFilter.and;
@@ -68,11 +61,11 @@ final class DsFiltersTest {
     @Test
     @DisplayName("generate filters from query predicates with multiple complex `either()` groups")
     void testCompositeEither() {
-        String idStringValue = "42";
-        boolean archivedValue = true;
-        boolean deletedValue = true;
+        var idStringValue = "42";
+        var archivedValue = true;
+        var deletedValue = true;
 
-        StgProject.Query query =
+        var query =
                 StgProject.query()
                           .either(project -> project.idString().isGreaterThan(idStringValue)
                                                     .where(ArchivedColumn.is(), archivedValue),
@@ -80,14 +73,14 @@ final class DsFiltersTest {
                                                     .where(DeletedColumn.is(), deletedValue))
                           .build();
 
-        FilterAdapter adapter = FilterAdapter.of(new DsColumnMapping());
-        Subject<StgProjectId, StgProject> subject = query.subject();
-        Collection<StructuredQuery.Filter> filters =
+        var adapter = FilterAdapter.of(new DsColumnMapping());
+        var subject = query.subject();
+        var filters =
                 fromPredicate(subject.predicate(), adapter);
 
-        IterableSubject assertFilters = assertThat(filters);
-        String idStringColumnName = idString().name()
-                                              .value();
+        var assertFilters = assertThat(filters);
+        var idStringColumnName = idString().name()
+                                           .value();
         assertFilters.contains(and(gt(idStringColumnName, idStringValue),
                                    eq(ArchivedColumn.instance()
                                                     .toString(), archivedValue)));
@@ -99,26 +92,26 @@ final class DsFiltersTest {
     @Test
     @DisplayName("generate filters from query predicates with multiple simple `either()` groups")
     void testFlatEither() {
-        String idStringValue = "42";
-        Timestamp dueDateValue = Time.currentTime();
+        var idStringValue = "42";
+        var dueDateValue = Time.currentTime();
 
-        StgProject.Query query =
+        var query =
                 StgProject.query()
                           .either(project -> project.idString().isGreaterThan(idStringValue),
                                   project -> project.dueDate().isLessThan(dueDateValue))
                           .build();
 
-        FilterAdapter adapter = FilterAdapter.of(new DsColumnMapping());
-        Subject<StgProjectId, StgProject> subject = query.subject();
-        Collection<StructuredQuery.Filter> filters =
+        var adapter = FilterAdapter.of(new DsColumnMapping());
+        var subject = query.subject();
+        var filters =
                 fromPredicate(subject.predicate(), adapter);
 
-        IterableSubject assertFilters = assertThat(filters);
-        String idStringColumnName = idString().name()
-                                              .value();
-        TimestampValue expectedDueDate = toTimestampValue(dueDateValue);
-        String dueDateColumnName = dueDate().name()
-                                            .value();
+        var assertFilters = assertThat(filters);
+        var idStringColumnName = idString().name()
+                                           .value();
+        var expectedDueDate = toTimestampValue(dueDateValue);
+        var dueDateColumnName = dueDate().name()
+                                         .value();
         assertFilters.contains(gt(idStringColumnName, idStringValue));
         assertFilters.contains(lt(dueDateColumnName, expectedDueDate));
     }
@@ -132,19 +125,19 @@ final class DsFiltersTest {
     @Test
     @DisplayName("generate filters from a single `Query` predicate")
     void testSingleParameter() {
-        String idStringValue = "314";
+        var idStringValue = "314";
 
-        StgProject.Query query =
+        var query =
                 StgProject.query()
                           .idString()
                           .isLessOrEqualTo(idStringValue)
                           .build();
 
-        FilterAdapter columnFilterAdapter = FilterAdapter.of(new DsColumnMapping());
-        Collection<StructuredQuery.Filter> filters =
+        var columnFilterAdapter = FilterAdapter.of(new DsColumnMapping());
+        var filters =
                 fromPredicate(query.subject()
                                    .predicate(), columnFilterAdapter);
-        IterableSubject assertFilters = assertThat(filters);
+        var assertFilters = assertThat(filters);
         assertFilters.contains(and(le(idString().name()
                                                 .value(), idStringValue)));
     }
@@ -152,14 +145,14 @@ final class DsFiltersTest {
     @Test
     @DisplayName("generate filters for a `Query` with a empty predicate")
     void testEmptyParameters() {
-        QueryPredicate<StgProject> emptyPredicate =
+        var emptyPredicate =
                 StgProject.query()
                           .build()
                           .subject()
                           .predicate();
-        Collection<StructuredQuery.Filter> filters =
+        var filters =
                 fromPredicate(emptyPredicate, FilterAdapter.of(new DsColumnMapping()));
-        IterableSubject assertFilters = assertThat(filters);
+        var assertFilters = assertThat(filters);
         assertFilters.isNotNull();
         assertFilters.isEmpty();
     }
