@@ -205,7 +205,6 @@ subprojects {
     dependencies {
         ErrorProne.apply {
             errorprone(core)
-            errorproneJavac(javacPlugin)
         }
 
         implementation("io.spine:spine-server:$spineCoreVersion")
