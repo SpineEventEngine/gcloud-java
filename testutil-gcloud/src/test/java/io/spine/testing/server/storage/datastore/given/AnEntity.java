@@ -28,7 +28,6 @@ package io.spine.testing.server.storage.datastore.given;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.Kind;
 
@@ -41,21 +40,21 @@ public final class AnEntity {
     }
 
     public static Entity withKeyCreatedBy(DatastoreWrapper wrapper) {
-        Key key = keyCreatedBy(wrapper);
-        Entity entity = withKey(key);
+        var key = keyCreatedBy(wrapper);
+        var entity = withKey(key);
         return entity;
     }
 
     private static Entity withKey(Key key) {
-        Entity entity = Entity.newBuilder(key)
-                              .build();
+        var entity = Entity.newBuilder(key)
+                           .build();
         return entity;
     }
 
     private static Key keyCreatedBy(DatastoreWrapper wrapper) {
-        KeyFactory keyFactory = wrapper.keyFactory(ENTITY_KIND);
-        int someId = 151;
-        Key key = keyFactory.newKey(someId);
+        var keyFactory = wrapper.keyFactory(ENTITY_KIND);
+        var someId = 151;
+        var key = keyFactory.newKey(someId);
         return key;
     }
 }

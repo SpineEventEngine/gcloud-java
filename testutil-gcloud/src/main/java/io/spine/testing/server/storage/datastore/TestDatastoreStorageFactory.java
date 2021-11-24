@@ -87,7 +87,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     @Internal
     @Override
     public DatastoreWrapper newDatastoreWrapper(boolean multitenant) {
-        TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(datastore(), false);
+        var wrapper = TestDatastoreWrapper.wrap(datastore(), false);
         allCreatedWrappers.add(wrapper);
         return wrapper;
     }
@@ -125,9 +125,9 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      * @see #tearDown()
      */
     public void clear() {
-        Iterable<DatastoreWrapper> wrappers = wrappers();
-        for (DatastoreWrapper wrapper : wrappers) {
-            TestDatastoreWrapper datastore = (TestDatastoreWrapper) wrapper;
+        var wrappers = wrappers();
+        for (var wrapper : wrappers) {
+            var datastore = (TestDatastoreWrapper) wrapper;
             try {
                 datastore.dropAllTables();
             } catch (Throwable e) {
