@@ -103,8 +103,7 @@ final class DsFiltersTest {
 
         var adapter = FilterAdapter.of(new DsColumnMapping());
         var subject = query.subject();
-        var filters =
-                fromPredicate(subject.predicate(), adapter);
+        var filters = fromPredicate(subject.predicate(), adapter);
 
         var assertFilters = assertThat(filters);
         var idStringColumnName = idString().name()
