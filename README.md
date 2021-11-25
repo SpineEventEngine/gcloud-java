@@ -11,8 +11,8 @@ Support for Spine-based Java apps running at Google Cloud.
 
 ### Java Version
 
-Starting version `2.0.0-SNAPSHOT.63`, the artifacts of this library are being built with Java 11. 
-Therefore, the consumer applications have to use Java 11 or higher.
+Starting version `2.0.0-SNAPSHOT.63`, the artifacts of this library are being built with Java 11
+compilation target. Therefore, the consumer applications have to use Java 11 or higher.
 
 Previous versions were build with Java 8.
 
