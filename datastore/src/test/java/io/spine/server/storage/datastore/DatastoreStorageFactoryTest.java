@@ -132,8 +132,7 @@ final class DatastoreStorageFactoryTest {
     @Test
     @DisplayName("allow custom namespaces for multitenant storages")
     void namespaceForMultitenant() {
-        var tenant = TenantId
-                .newBuilder()
+        var tenant = TenantId.newBuilder()
                 .setValue("my-company")
                 .vBuild();
         var namespace = "Vnon-null-or-empty-namespace";
@@ -156,8 +155,7 @@ final class DatastoreStorageFactoryTest {
     @Test
     @DisplayName("allow no custom namespaces for multitenant storages")
     void testDatastoreNamespaceInOptions() {
-        var tenant = TenantId
-                .newBuilder()
+        var tenant = TenantId.newBuilder()
                 .setValue("your-company")
                 .vBuild();
         var spec = multitenant(testName());
@@ -197,8 +195,7 @@ final class DatastoreStorageFactoryTest {
             var customStorage =
                     InMemoryStorageFactory.newInstance()
                                           .createRecordStorage(spec, stgProjectSpec());
-            var factory = DatastoreStorageFactory
-                    .newBuilder()
+            var factory = DatastoreStorageFactory.newBuilder()
                     .setDatastore(TestDatastores.local())
                     .useRecordStorage(StgProjectId.class, StgProject.class,
                                       configuration -> customStorage)
@@ -215,8 +212,7 @@ final class DatastoreStorageFactoryTest {
             var customEntityStorage =
                     InMemoryStorageFactory.newInstance()
                                           .createRecordStorage(spec, projectDetailsSpec());
-            var factory = DatastoreStorageFactory
-                    .newBuilder()
+            var factory = DatastoreStorageFactory.newBuilder()
                     .setDatastore(TestDatastores.local())
                     .useEntityStorage(StgProject.class,
                                       configuration -> customEntityStorage)

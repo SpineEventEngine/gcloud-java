@@ -121,8 +121,7 @@ final class DsColumnMappingTest {
         @Test
         @DisplayName("generic `Message` as `StringValue`")
         void messageAsStringValue() {
-            var project = StgProject
-                    .newBuilder()
+            var project = StgProject.newBuilder()
                     .setName("project-name")
                     .build();
             var messageAsString = Stringifiers.toString(project);
@@ -142,8 +141,7 @@ final class DsColumnMappingTest {
         @DisplayName("`Version` as `LongValue`")
         void versionAsLongValue() {
             var number = 42;
-            var version = Version
-                    .newBuilder()
+            var version = Version.newBuilder()
                     .setNumber(number)
                     .build();
             assertConverts(version, LongValue.of(number));

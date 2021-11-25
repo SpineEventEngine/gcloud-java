@@ -74,8 +74,7 @@ final class NamespaceTest {
     @DisplayName("support equality")
     void testEquals() {
         var aGroupValue = "namespace1";
-        var aGroupTenantId = TenantId
-                .newBuilder()
+        var aGroupTenantId = TenantId.newBuilder()
                 .setValue(aGroupValue)
                 .vBuild();
         var aGroupNamespaceFromTenantId =
@@ -84,12 +83,10 @@ final class NamespaceTest {
         var duplicateAGroupNamespaceFromString = Namespace.of(aGroupValue);
 
         var bGroupValue = "namespace2";
-        var bgGroupEmail = EmailAddress
-                .newBuilder()
+        var bgGroupEmail = EmailAddress.newBuilder()
                 .setValue(bGroupValue)
                 .vBuild();
-        var bGroupTenantId = TenantId
-                .newBuilder()
+        var bGroupTenantId = TenantId.newBuilder()
                 .setEmail(bgGroupEmail)
                 .vBuild();
         var bGroupNamespaceFromTenantId = Namespace.of(bGroupTenantId, true);
@@ -108,24 +105,19 @@ final class NamespaceTest {
     @DisplayName("restore self to `TenantId`")
     void testToTenantId() {
         var randomTenantIdString = "arbitrary-tenant-id";
-        var internetDomain = InternetDomain
-                .newBuilder()
+        var internetDomain = InternetDomain.newBuilder()
                 .setValue(randomTenantIdString)
                 .vBuild();
-        var domainId = TenantId
-                .newBuilder()
+        var domainId = TenantId.newBuilder()
                 .setDomain(internetDomain)
                 .vBuild();
-        var emailAddress = EmailAddress
-                .newBuilder()
+        var emailAddress = EmailAddress.newBuilder()
                 .setValue(randomTenantIdString)
                 .vBuild();
-        var emailId = TenantId
-                .newBuilder()
+        var emailId = TenantId.newBuilder()
                 .setEmail(emailAddress)
                 .vBuild();
-        var stringId = TenantId
-                .newBuilder()
+        var stringId = TenantId.newBuilder()
                 .setValue(randomTenantIdString)
                 .vBuild();
         assertNotEquals(domainId, emailId);
@@ -176,8 +168,7 @@ final class NamespaceTest {
     void testConvertToTenantId() {
         var namespaceString = "my.namespace";
 
-        var expectedId = TenantId
-                .newBuilder()
+        var expectedId = TenantId.newBuilder()
                 .setValue(namespaceString)
                 .vBuild();
         var namespace = Namespace.of(namespaceString);

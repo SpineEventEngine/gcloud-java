@@ -77,8 +77,7 @@ final class NamespaceIndexTest {
     private BoundedContext context;
 
     private static TenantId newTenantId() {
-        return TenantId
-                .newBuilder()
+        return TenantId.newBuilder()
                 .setValue(TestValues.randomString())
                 .vBuild();
     }
@@ -164,8 +163,7 @@ final class NamespaceIndexTest {
                 .getService();
         var contextBuilder = BoundedContextBuilder
                 .assumingTests(true);
-        var storageFactory = DatastoreStorageFactory
-                .newBuilder()
+        var storageFactory = DatastoreStorageFactory.newBuilder()
                 .setDatastore(datastore)
                 .build();
         ServerEnvironment.when(Tests.class)
@@ -174,20 +172,17 @@ final class NamespaceIndexTest {
         var context = contextBuilder.build();
         var storage = storageFactory
                 .createRecordStorage(context.spec(), EntityRecordSpec.of(CollegeProjection.class));
-        var id = CollegeId
-                .newBuilder()
+        var id = CollegeId.newBuilder()
                 .setValue("Aeronautic Forgery College")
                 .vBuild();
-        var record = EntityRecord
-                .newBuilder()
+        var record = EntityRecord.newBuilder()
                 .setEntityId(Identifier.pack(id))
                 .setState(pack(College.newBuilder()
                                        .setId(id)
                                        .setName(id.getValue())
                                        .build()))
                 .build();
-        var tenantId = TenantId
-                .newBuilder()
+        var tenantId = TenantId.newBuilder()
                 .setValue("XYZ")
                 .build();
         with(tenantId).run(
@@ -234,12 +229,10 @@ final class NamespaceIndexTest {
             assertThat(initialIdsActual).containsAtLeastElementsIn(initialTenantIds);
 
             // Add new element
-            var domain = InternetDomain
-                    .newBuilder()
+            var domain = InternetDomain.newBuilder()
                     .setValue("my.tenant.com")
                     .vBuild();
-            var newTenantId = TenantId
-                    .newBuilder()
+            var newTenantId = TenantId.newBuilder()
                     .setDomain(domain)
                     .vBuild();
             namespaceIndex.keep(newTenantId); // sync

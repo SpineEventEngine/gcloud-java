@@ -48,8 +48,7 @@ final class NamespaceWithCustomConverterTest {
     @DisplayName("construct from `TenantId`")
     void testFromTenantId() {
         var ns = "my.test.namespace.from.tenant.id";
-        var tenantId = TenantId
-                .newBuilder()
+        var tenantId = TenantId.newBuilder()
                 .setValue(ns)
                 .vBuild();
         var multitenant = true;
@@ -76,8 +75,7 @@ final class NamespaceWithCustomConverterTest {
     @DisplayName("restore to `TenantId`")
     void testToTenantId() {
         var ns = "my.test.namespace.to.tenant.id";
-        var tenantId = TenantId
-                .newBuilder()
+        var tenantId = TenantId.newBuilder()
                 .setValue(ns)
                 .vBuild();
         var namespace = Namespace.of(tenantId, true, factory);

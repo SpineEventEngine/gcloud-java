@@ -113,8 +113,7 @@ class StackdriverTracerFactoryTest {
         void builder() {
             new NullPointerTester()
                     .setDefault(GrpcCallContext.class, GrpcCallContext.createDefault())
-                    .setDefault(ClientContext.class, ClientContext
-                            .newBuilder()
+                    .setDefault(ClientContext.class, ClientContext.newBuilder()
                             .setDefaultCallContext(GrpcCallContext.createDefault())
                             .build())
                     .setDefault(BoundedContextName.class, assumingTests())
@@ -124,8 +123,7 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("when creating tracers")
         void factory() {
-            var factory = StackdriverTracerFactory
-                    .newBuilder()
+            var factory = StackdriverTracerFactory.newBuilder()
                     .setGcpProjectId(REAL_GCP_PROJECT)
                     .setCallContext(realGrpcContext)
                     .build();
@@ -142,8 +140,7 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("a client context")
         void clientContext() {
-            var builder = StackdriverTracerFactory
-                    .newBuilder()
+            var builder = StackdriverTracerFactory.newBuilder()
                     .setGcpProjectId("test123");
             assertThrows(NullPointerException.class, builder::build);
         }
@@ -151,12 +148,10 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("a GCP project ID")
         void gcpProjectId() {
-            var context = ClientContext
-                    .newBuilder()
+            var context = ClientContext.newBuilder()
                     .setDefaultCallContext(GrpcCallContext.createDefault())
                     .build();
-            var builder = StackdriverTracerFactory
-                    .newBuilder()
+            var builder = StackdriverTracerFactory.newBuilder()
                     .setClientContext(context);
             assertThrows(NullPointerException.class, builder::build);
         }
@@ -169,12 +164,10 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("ClientContext")
         void clientContext() {
-            var context = ClientContext
-                    .newBuilder()
+            var context = ClientContext.newBuilder()
                     .setDefaultCallContext(GrpcCallContext.createDefault())
                     .build();
-            StackdriverTracerFactory
-                    .newBuilder()
+            StackdriverTracerFactory.newBuilder()
                     .setGcpProjectId("test321")
                     .setClientContext(context)
                     .build();
@@ -183,8 +176,7 @@ class StackdriverTracerFactoryTest {
         @Test
         @DisplayName("CallContext")
         void callContext() {
-            StackdriverTracerFactory
-                    .newBuilder()
+            StackdriverTracerFactory.newBuilder()
                     .setGcpProjectId("test132")
                     .setCallContext(GrpcCallContext.createDefault())
                     .build();
@@ -199,8 +191,7 @@ class StackdriverTracerFactoryTest {
 
         @BeforeEach
         void setUp() {
-            factory = StackdriverTracerFactory
-                    .newBuilder()
+            factory = StackdriverTracerFactory.newBuilder()
                     .setGcpProjectId(REAL_GCP_PROJECT)
                     .setCallContext(realGrpcContext);
         }
@@ -245,22 +236,19 @@ class StackdriverTracerFactoryTest {
             assertThat(interceptor.callCount()).isEqualTo(0);
             var requests =
                     new TestActorRequestFactory(StackdriverTracerFactoryTest.class);
-            var command = CreateProject
-                    .newBuilder()
+            var command = CreateProject.newBuilder()
                     .setUuid(newUuid())
                     .setName("TestProject")
                     .vBuild();
             var cmd = requests.command()
                               .create(command);
             var tracer = tracerFactory.trace(SPEC, cmd);
-            var receiverId = MessageId
-                    .newBuilder()
+            var receiverId = MessageId.newBuilder()
                     .setId(Identifier.pack("SampleEntityId"))
                     .setTypeUrl(TypeUrl.of(Empty.class).value())
                     .setVersion(zero())
                     .vBuild();
-            var entityType = EntityTypeName
-                    .newBuilder()
+            var entityType = EntityTypeName.newBuilder()
                     .setJavaClassName(StackdriverTracerFactoryTest.class.getCanonicalName())
                     .vBuild();
             tracer.processedBy(receiverId, entityType);

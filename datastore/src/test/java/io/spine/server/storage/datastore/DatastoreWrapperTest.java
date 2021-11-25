@@ -317,24 +317,19 @@ final class DatastoreWrapperTest {
         ensureNamespace(tenantId1Prefixed, datastore);
         ensureNamespace(tenantId2Prefixed, datastore);
         ensureNamespace(tenantId3Prefixed, datastore);
-        var emailAddress2 = EmailAddress
-                .newBuilder()
+        var emailAddress2 = EmailAddress.newBuilder()
                 .setValue(tenantId2)
                 .vBuild();
-        var internetDomain3 = InternetDomain
-                .newBuilder()
+        var internetDomain3 = InternetDomain.newBuilder()
                 .setValue(tenantId3)
                 .vBuild();
-        var id1 = TenantId
-                .newBuilder()
+        var id1 = TenantId.newBuilder()
                 .setValue(tenantId1)
                 .vBuild();
-        var id2 = TenantId
-                .newBuilder()
+        var id2 = TenantId.newBuilder()
                 .setEmail(emailAddress2)
                 .vBuild();
-        var id3 = TenantId
-                .newBuilder()
+        var id3 = TenantId.newBuilder()
                 .setDomain(internetDomain3)
                 .vBuild();
         checkTenantIdInKey(tenantId1Prefixed, id1, wrapper);
@@ -381,8 +376,7 @@ final class DatastoreWrapperTest {
     @DisplayName("allow to add new namespaces 'on the go'")
     void testNewNamespaces() {
         var wrapper = wrap(localDatastore(), multitenant());
-        var tenantId = TenantId
-                .newBuilder()
+        var tenantId = TenantId.newBuilder()
                 .setValue("Luke_I_am_your_tenant.")
                 .vBuild();
         var key = "noooooo";

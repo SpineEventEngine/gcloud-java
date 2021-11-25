@@ -104,8 +104,7 @@ public final class TestDatastores implements Logging {
      */
     public static Datastore local(ProjectId projectId, int port) {
         var address = format("%s:%d", LOCALHOST, port);
-        var options = DatastoreOptions
-                .newBuilder()
+        var options = DatastoreOptions.newBuilder()
                 .setProjectId(projectId.value())
                 .setHost(address)
                 .setCredentials(NoCredentials.getInstance())
@@ -133,8 +132,7 @@ public final class TestDatastores implements Logging {
     public static Datastore remote(Resource serviceAccount) {
         checkNotNull(serviceAccount);
         var credentials = credentialsFrom(serviceAccount);
-        var options = DatastoreOptions
-                .newBuilder()
+        var options = DatastoreOptions.newBuilder()
                 .setCredentials(credentials)
                 .build();
         var datastore = options.getService();

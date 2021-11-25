@@ -63,8 +63,7 @@ final class Truncate {
     }
 
     private static TruncatableString stringOf(String value, int removedBytes) {
-        return TruncatableString
-                .newBuilder()
+        return TruncatableString.newBuilder()
                 .setValue(value)
                 .setTruncatedByteCount(removedBytes)
                 .build();

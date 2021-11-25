@@ -88,8 +88,7 @@ public final class Entities {
         var typeName = type.value();
         var value = entity.getBlob(bytes);
         var valueBytes = ByteString.copyFrom(value.toByteArray());
-        var result = Any
-                .newBuilder()
+        var result = Any.newBuilder()
                 .setValue(valueBytes)
                 .setTypeUrl(typeName)
                 .build();

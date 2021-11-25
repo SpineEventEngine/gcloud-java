@@ -104,8 +104,7 @@ enum SpanAttribute {
 
     private static AttributeValue stringValue(String value) {
         var truncatable = Truncate.stringTo(value, MAX_SIZE);
-        var attributeValue = AttributeValue
-                .newBuilder()
+        var attributeValue = AttributeValue.newBuilder()
                 .setStringValue(truncatable)
                 .build();
         return attributeValue;

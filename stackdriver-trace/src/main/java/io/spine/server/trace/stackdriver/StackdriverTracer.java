@@ -65,8 +65,7 @@ public class StackdriverTracer extends AbstractTracer {
 
     @Override
     public void processedBy(MessageId receiver, EntityTypeName receiverType) {
-        var signalSpan = SignalSpan
-                .newBuilder()
+        var signalSpan = SignalSpan.newBuilder()
                 .setContext(context)
                 .setSignal(signal())
                 .setReceiver(receiver)
@@ -78,8 +77,7 @@ public class StackdriverTracer extends AbstractTracer {
 
     @Override
     public void close() {
-        var request = BatchWriteSpansRequest
-                .newBuilder()
+        var request = BatchWriteSpansRequest.newBuilder()
                 .setName(projectId.asName().value())
                 .addAllSpans(spans)
                 .build();

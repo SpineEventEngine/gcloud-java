@@ -51,8 +51,7 @@ final class DatastoreTenantsTest extends UtilityClassTest<DatastoreTenants> {
         assertThat(index).isInstanceOf(NamespaceIndex.class);
 
         var customNamespace = "Vmy-namespace";
-        var customId = TenantId
-                .newBuilder()
+        var customId = TenantId.newBuilder()
                 .setValue(customNamespace)
                 .vBuild();
         index.keep(customId);

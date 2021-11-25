@@ -76,8 +76,7 @@ final class DatastoreStorageFactoryBuilderTest {
     @Test
     @DisplayName("construct factories with default column mapping")
     void testDefaultColumnMapping() {
-        var factory = DatastoreStorageFactory
-                .newBuilder()
+        var factory = DatastoreStorageFactory.newBuilder()
                 .setDatastore(datastore())
                 .build();
         var mapping = factory.columnMapping();
@@ -88,8 +87,7 @@ final class DatastoreStorageFactoryBuilderTest {
     @DisplayName("construct factories with custom column mapping")
     void testCustomColumnMapping() {
         ColumnMapping<Value<?>> mapping = new TestColumnMapping();
-        var factory = DatastoreStorageFactory
-                .newBuilder()
+        var factory = DatastoreStorageFactory.newBuilder()
                 .setDatastore(datastore())
                 .setColumnMapping(mapping)
                 .build();
@@ -109,8 +107,7 @@ final class DatastoreStorageFactoryBuilderTest {
 
         @BeforeEach
         void setUp() {
-            builder = DatastoreOptions
-                    .newBuilder()
+            builder = DatastoreOptions.newBuilder()
                     .setProjectId(defaultLocalProjectId().value());
         }
 
@@ -123,8 +120,7 @@ final class DatastoreStorageFactoryBuilderTest {
                            .build();
             var spec =
                     singleTenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
-            var factory = DatastoreStorageFactory
-                    .newBuilder()
+            var factory = DatastoreStorageFactory.newBuilder()
                     .setDatastore(options.getService())
                     .build();
             assertNotNull(factory);

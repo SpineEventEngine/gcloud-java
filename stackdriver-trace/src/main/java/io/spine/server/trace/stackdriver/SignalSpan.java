@@ -112,8 +112,7 @@ public class SignalSpan {
         var whenStarted = signal.timestamp();
         var whenFinished = Time.currentTime();
         var displayName = Truncate.stringTo(displayName(), SPAN_DISPLAY_NAME_LENGTH);
-        return Span
-                .newBuilder()
+        return Span.newBuilder()
                 .setName(spanName(projectId, spanId).value())
                 .setSpanId(spanId.value())
                 .setDisplayName(displayName)
