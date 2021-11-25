@@ -266,8 +266,7 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
     @Internal
     public final DatastoreWrapper
     systemWrapperFor(Class<? extends Storage<?, ?>> targetStorage, boolean multitenant) {
-        var wrapper = sysWrappers
-                .computeIfAbsent(targetStorage, k -> newDatastoreWrapper(multitenant));
+        var wrapper = sysWrappers.computeIfAbsent(targetStorage, k -> newDatastoreWrapper(multitenant));
         return wrapper;
     }
 
@@ -300,8 +299,9 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
     @VisibleForTesting
     public static Builder newBuilderWithDefaults(Datastore datastore) {
         checkNotNull(datastore);
-        var result = newBuilder().setDatastore(datastore)
-                                 .withDefaults();
+        var result = newBuilder()
+                .setDatastore(datastore)
+                .withDefaults();
         return result;
     }
 

@@ -143,8 +143,7 @@ final class DsFilters {
     private static void handleParameters(ImmutableList<SubjectParameter<?, ?, ?>> parameters,
                                          ColumnMapping<Value<?>> mapping,
                                          ImmutableList.Builder<StructuredQuery.Filter> result) {
-        var filters = parameters
-                .stream()
+        var filters = parameters.stream()
                 .map(param -> createFilter(param, mapping))
                 .collect(toImmutableList());
         result.addAll(filters);
@@ -152,13 +151,11 @@ final class DsFilters {
 
     private static <R extends Message> StructuredQuery.Filter
     handleConjunctiveGroup(QueryPredicate<R> predicate, ColumnMapping<Value<?>> mapping) {
-
         checkState(predicate.children()
                             .isEmpty(),
                    "Children collection must be empty for a conjunctive predicate group.");
         var parameters = predicate.allParams();
-        List<StructuredQuery.Filter> filters =
-                parameters.stream()
+        List<StructuredQuery.Filter> filters = parameters.stream()
                         .map(param -> createFilter(param, mapping))
                         .collect(toList());
 
