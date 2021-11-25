@@ -182,8 +182,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
 
         recordWithCols.columnNames()
                       .forEach(columnName -> {
-                          var columnValue = recordWithCols.columnValue(columnName,
-                                                                       columnMapping);
+                          var columnValue = recordWithCols.columnValue(columnName, columnMapping);
                           entity.set(columnName.value(), columnValue);
                       });
 
