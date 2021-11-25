@@ -55,7 +55,7 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Streams.stream;
 import static java.lang.Math.min;
 import static java.util.stream.Collectors.toList;
@@ -65,7 +65,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class DatastoreWrapper extends DatastoreMedium implements Logging {
 
-    static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
+    private static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
     /**
      * Creates a new instance of {@code DatastoreWrapper}.
@@ -211,6 +211,7 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
+    @SuppressWarnings("unused")
     public <R> Iterator<R> readAll(StructuredQuery<R> query) {
         return readAllPageByPage(query, null);
     }
@@ -250,8 +251,8 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
                 .iterator();
     }
 
-    private static <R> StructuredQuery<R> limit(StructuredQuery<R> query,
-                                                @Nullable Integer batchSize) {
+    private static <R>
+    StructuredQuery<R> limit(StructuredQuery<R> query, @Nullable Integer batchSize) {
         return batchSize == null
                ? query
                : query.toBuilder()
@@ -273,24 +274,26 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
     @VisibleForTesting
     protected void dropTable(Kind table) {
         var namespace = namespace();
-        StructuredQuery<Entity> query =
-                Query.newEntityQueryBuilder()
-                     .setNamespace(namespace.value())
-                     .setKind(table.value())
-                     .build();
+        var query = Query.newKeyQueryBuilder()
+                         .setNamespace(namespace.value())
+                         .setKind(table.value())
+                         .build();
         _trace().log("Deleting all entities of `%s` kind in `%s` namespace.",
                      table, namespace.value());
-        Iterator<Entity> queryResult = read(query);
-        List<Entity> entities = newArrayList(queryResult);
-        deleteEntities(entities);
+        var queryResult = read(query);
+        var keys = toIterable(queryResult);
+        deleteEntities(toArray(keys, Key.class));
+    }
+
+    private static <T> Iterable<T> toIterable(Iterator<T> iterator) {
+        return () -> iterator;
     }
 
     @VisibleForTesting
     protected void deleteEntities(Collection<Entity> entities) {
-        var keyList =
-                entities.stream()
-                        .map(BaseEntity::getKey)
-                        .collect(toList());
+        var keyList = entities.stream()
+                .map(BaseEntity::getKey)
+                .collect(toList());
         var keys = new Key[keyList.size()];
         keyList.toArray(keys);
         deleteEntities(keys);
