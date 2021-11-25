@@ -334,8 +334,9 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
     @Override
     public KeyFactory keyFactory(Kind kind) {
         checkNotNull(kind);
-        var keyFactory = datastore().newKeyFactory()
-                                    .setKind(kind.value());
+        var keyFactory = datastore()
+                .newKeyFactory()
+                .setKind(kind.value());
         var namespace = namespace();
         _trace().log("Retrieving KeyFactory for kind `%s` in `%s` namespace.",
                      kind, namespace.value());
