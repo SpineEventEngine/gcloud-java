@@ -107,10 +107,9 @@ public final class DsQueryIterator<R> extends UnmodifiableIterator<R> implements
      */
     StructuredQuery<R> nextPageQuery() {
         var cursorAfter = currentPage.getCursorAfter();
-        var queryForMoreResults =
-                query.toBuilder()
-                     .setStartCursor(cursorAfter)
-                     .build();
+        var queryForMoreResults = query.toBuilder()
+                .setStartCursor(cursorAfter)
+                .build();
         return queryForMoreResults;
     }
 

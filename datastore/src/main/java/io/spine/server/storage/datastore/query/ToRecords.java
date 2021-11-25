@@ -67,9 +67,7 @@ abstract class ToRecords<R extends Message> implements Function<IntermediateResu
     @Override
     public Iterable<R> apply(IntermediateResult result) {
         var entities = result.entities();
-        var stream =
-                entities.stream()
-                        .filter(Objects::nonNull);
+        var stream = entities.stream().filter(Objects::nonNull);
         stream = filter(stream);
         @SuppressWarnings("ConstantConditions") /* `null` were already filtered out. */
         var records =

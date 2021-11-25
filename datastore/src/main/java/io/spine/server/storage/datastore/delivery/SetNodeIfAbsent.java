@@ -65,8 +65,7 @@ final class SetNodeIfAbsent implements PrepareForWrite {
                               .setIndex(index)
                       : previous.toBuilder();
 
-        var updated =
-                builder.setPickedBy(nodeToSet)
+        var updated = builder.setPickedBy(nodeToSet)
                        .setWhenLastPicked(currentTime())
                        .vBuild();
         return Optional.of(updated);
