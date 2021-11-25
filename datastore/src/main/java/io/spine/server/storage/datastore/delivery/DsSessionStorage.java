@@ -84,14 +84,13 @@ public final class DsSessionStorage
     private static StorageConfiguration<ShardIndex, ShardSessionRecord>
     configureWith(DatastoreStorageFactory factory, ContextSpec context) {
         var wrapper = factory.systemWrapperFor(DsSessionStorage.class, multitenant);
-        var config =
-                StorageConfiguration.<ShardIndex, ShardSessionRecord>newBuilder()
-                        .withDatastore(wrapper)
-                        .withRecordSpec(newRecordSpec())
-                        .withContext(context)
-                        .withMapping(factory.columnMapping())
-                        .withTxSetting(TxSetting.enabled())
-                        .build();
+        var config = StorageConfiguration.<ShardIndex, ShardSessionRecord>newBuilder()
+                .withDatastore(wrapper)
+                .withRecordSpec(newRecordSpec())
+                .withContext(context)
+                .withMapping(factory.columnMapping())
+                .withTxSetting(TxSetting.enabled())
+                .build();
         return config;
     }
 
@@ -141,7 +140,7 @@ public final class DsSessionStorage
      * Writes the record to the storage in a new transaction.
      */
     @SuppressWarnings("OverlyBroadCatchBlock")  /* Treating all exceptions similarly. */
-    public final void write(ShardSessionRecord message) {
+    public void write(ShardSessionRecord message) {
         try (var tx = newTransaction()) {
             var record = appendColumns(message);
             var entity = entityRecordToEntity(record);
