@@ -253,7 +253,7 @@ final class NamespaceIndexTest {
         var secondThread = new Thread(flow);
 
         // Collect thread failures
-        Map<Thread, Throwable> threadFailures = new HashMap<>(2);
+        var threadFailures = new HashMap<Thread, Throwable>(2);
         Thread.UncaughtExceptionHandler throwableCollector = threadFailures::put;
 
         firstThread.setUncaughtExceptionHandler(throwableCollector);
