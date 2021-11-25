@@ -63,9 +63,7 @@ final class NamespaceWithCustomConverterTest {
     @DisplayName("construct from `Key`")
     void testFromKey() {
         var ns = "my.test.namespace.from.key";
-        var key = Key
-                .newBuilder(PROJECT_ID.value(), "some.kind", ns)
-                .build();
+        var key = Key.newBuilder(PROJECT_ID.value(), "some.kind", ns).build();
         var namespace = Namespace.fromNameOf(key, true, factory);
         assertNotNull(namespace);
         assertEquals(ns, namespace.value());

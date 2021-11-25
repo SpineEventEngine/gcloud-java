@@ -142,12 +142,10 @@ public final class Entities {
 
         var messageBytes = message.toByteArray();
         var valueBlob = Blob.copyFrom(messageBytes);
-        var blobValue = BlobValue
-                .newBuilder(valueBlob)
+        var blobValue = BlobValue.newBuilder(valueBlob)
                 .setExcludeFromIndexes(true)
                 .build();
-        var builder = Entity
-                .newBuilder(key)
+        var builder = Entity.newBuilder(key)
                 .set(bytes, blobValue);
         return builder;
     }

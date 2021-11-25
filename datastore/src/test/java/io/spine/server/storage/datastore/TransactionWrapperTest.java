@@ -86,8 +86,7 @@ class TransactionWrapperTest {
     @DisplayName("write transactionally")
     void write() {
         var key = keyFactory.newKey(newUuid());
-        var entity = Entity
-                .newBuilder(key)
+        var entity = Entity.newBuilder(key)
                 .set("field", 42)
                 .build();
         var tx = datastore.newTransaction();
@@ -103,8 +102,7 @@ class TransactionWrapperTest {
     @DisplayName("read transactionally")
     void read() {
         var key = keyFactory.newKey(newUuid());
-        var entity = Entity
-                .newBuilder(key)
+        var entity = Entity.newBuilder(key)
                 .set("field_name", newUuid())
                 .build();
         datastore.create(entity);
@@ -196,8 +194,7 @@ class TransactionWrapperTest {
     @DisplayName("rollback changes")
     void rollback() {
         var key = keyFactory.newKey(newUuid());
-        var entity = Entity
-                .newBuilder(key)
+        var entity = Entity.newBuilder(key)
                 .set("example", newUuid())
                 .build();
         var tx = datastore.newTransaction();
@@ -212,8 +209,7 @@ class TransactionWrapperTest {
     void closeAndRollback() {
         var key = keyFactory.newKey(newUuid());
         try (var tx = datastore.newTransaction()) {
-            var entity = Entity
-                    .newBuilder(key)
+            var entity = Entity.newBuilder(key)
                     .set("test", newUuid())
                     .build();
             tx.createOrUpdate(entity);
@@ -226,8 +222,7 @@ class TransactionWrapperTest {
     void notRollbackIfNotActive() {
         var key = keyFactory.newKey(newUuid());
         try (var tx = datastore.newTransaction()) {
-            var entity = Entity
-                    .newBuilder(key)
+            var entity = Entity.newBuilder(key)
                     .set("test1", newUuid())
                     .build();
             tx.createOrUpdate(entity);
@@ -247,11 +242,10 @@ class TransactionWrapperTest {
                 .collect(toList());
         var tasks =
                 keys.stream()
-                        .map(key -> Entity
-                                .newBuilder(key)
+                        .map(key -> Entity.newBuilder(key)
                                 .set("a", newUuid())
-                                .build()
-                        ).map(this::asEntityWriteJob)
+                                .build())
+                        .map(this::asEntityWriteJob)
                         .collect(toList());
         service.invokeAll(tasks);
         assertThat(service.shutdownNow()).isEmpty();
@@ -290,10 +284,8 @@ class TransactionWrapperTest {
         var entities =
                 generate(() -> ancestorFactory.newKey(newUuid()))
                         .limit(count)
-                        .map(key -> Entity
-                                .newBuilder(key)
-                                .build()
-                        ).collect(toImmutableList());
+                        .map(key -> Entity.newBuilder(key).build())
+                        .collect(toImmutableList());
         datastore.createOrUpdate(entities);
 
         var ancestorKey = ancestorFactory.newKey()
@@ -332,13 +324,9 @@ class TransactionWrapperTest {
     void insert() {
         var key = keyFactory.newKey(newUuid());
         var propertyName = "randomValue";
-        var oldEntity = Entity
-                .newBuilder(key)
-                .build();
-        var newEntity = Entity
-                .newBuilder(key)
-                .set(propertyName, 42L)
-                .build();
+        var builder = Entity.newBuilder(key);
+        var oldEntity = builder.build();
+        var newEntity = builder.set(propertyName, 42L).build();
         datastore.createOrUpdate(oldEntity);
         try (var tx = datastore.newTransaction()) {
             tx.create(newEntity);
@@ -355,18 +343,13 @@ class TransactionWrapperTest {
     void insertMany() {
         var key = keyFactory.newKey(newUuid());
         var propertyName = "some_property";
-        var oldEntity = Entity
-                .newBuilder(key)
-                .build();
-        var newEntity = Entity
-                .newBuilder(key)
-                .set(propertyName, 42L)
-                .build();
+        var builder = Entity.newBuilder(key);
+        var oldEntity = builder.build();
+        var newEntity = builder.set(propertyName, 42L).build();
         datastore.createOrUpdate(oldEntity);
         var freshNewKey = keyFactory.newKey(newUuid());
         try (var tx = datastore.newTransaction()) {
-            var freshNewEntity = Entity.newBuilder(freshNewKey)
-                    .build();
+            var freshNewEntity = Entity.newBuilder(freshNewKey).build();
             tx.create(ImmutableList.of(freshNewEntity, newEntity));
             assertThrows(DatastoreException.class, tx::commit);
         }
@@ -384,19 +367,13 @@ class TransactionWrapperTest {
     void putMany() {
         var propertyName = "foo";
         var key = keyFactory.newKey(newUuid());
-        var oldEntity = Entity
-                .newBuilder(key)
-                .build();
-        var newEntity = Entity
-                .newBuilder(key)
-                .set(propertyName, 42L)
-                .build();
+        var builder = Entity.newBuilder(key);
+        var oldEntity = builder.build();
+        var newEntity = builder.set(propertyName, 42L).build();
         datastore.createOrUpdate(oldEntity);
         var freshNewKey = keyFactory.newKey(newUuid());
         try (var tx = datastore.newTransaction()) {
-            var freshNewEntity = Entity
-                    .newBuilder(freshNewKey)
-                    .build();
+            var freshNewEntity = Entity.newBuilder(freshNewKey).build();
             tx.createOrUpdate(ImmutableList.of(freshNewEntity, newEntity));
             tx.commit();
         }
@@ -416,10 +393,8 @@ class TransactionWrapperTest {
         var entities =
                 generate(() -> keyFactory.newKey(newUuid()))
                         .limit(count)
-                        .map(key -> Entity
-                                .newBuilder(key)
-                                .build()
-                        ).collect(toImmutableList());
+                        .map(key -> Entity.newBuilder(key).build())
+                        .collect(toImmutableList());
         datastore.createOrUpdate(entities);
 
         var firstEntity = entities.get(2);
@@ -446,10 +421,8 @@ class TransactionWrapperTest {
         var entities =
                 generate(() -> keyFactory.newKey(newUuid()))
                         .limit(count)
-                        .map(key -> Entity
-                                .newBuilder(key)
-                                .build()
-                        ).collect(toImmutableList());
+                        .map(key -> Entity.newBuilder(key).build())
+                        .collect(toImmutableList());
         datastore.createOrUpdate(entities);
 
         var keys = entities.stream()
@@ -469,10 +442,8 @@ class TransactionWrapperTest {
         var count = 2;
         var entities = generate(() -> keyFactory.newKey(newUuid()))
                 .limit(count)
-                .map(key -> Entity
-                        .newBuilder(key)
-                        .build()
-                ).collect(toList());
+                .map(key -> Entity.newBuilder(key).build())
+                .collect(toList());
         datastore.createOrUpdate(entities);
         try (var tx = datastore.newTransaction()) {
             StructuredQuery<Key> query = Query

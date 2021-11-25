@@ -56,10 +56,10 @@ final class TransactionalInboxStorageTest extends InboxStorageTest {
 
     private static TestDatastoreStorageFactory withTransactionalInbox() {
         var builder =
-                DatastoreStorageFactory
-                        .newBuilderWithDefaults(TestDatastores.local())
-                        .enableTransactions(InboxMessage.class)
-                        .organizeRecords(InboxMessage.class, new InboxStorageLayout());
+                DatastoreStorageFactory.newBuilderWithDefaults(TestDatastores.local())
+                                       .enableTransactions(InboxMessage.class)
+                                       .organizeRecords(InboxMessage.class,
+                                                        new InboxStorageLayout());
         var factory = TestDatastoreStorageFactory.basedOn(builder);
         return factory;
     }

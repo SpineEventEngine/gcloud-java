@@ -385,9 +385,7 @@ final class DatastoreWrapperTest {
             public Key apply() {
                 var entityKey = wrapper.keyFactory(NAMESPACE_HOLDER_KIND)
                                        .newKey(key);
-                var entity = Entity
-                        .newBuilder(entityKey)
-                        .build();
+                var entity = Entity.newBuilder(entityKey).build();
                 wrapper.create(entity);
                 return entityKey;
             }
