@@ -26,10 +26,10 @@
 
 package io.spine.internal.gradle.publish
 
-import io.spine.internal.gradle.publish.proto.AssembleProto
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import io.spine.internal.gradle.publish.proto.AssembleProto
 
 /**
  * This plugin allows publishing artifacts to remote Maven repositories.

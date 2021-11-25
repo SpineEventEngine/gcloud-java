@@ -31,6 +31,8 @@
 //
 // This task runs after `:check` task.
 
+import groovy.io.FileType
+
 import java.util.stream.Collectors
 
 // Required to grab dependencies for `jacocoRootReport` task.
