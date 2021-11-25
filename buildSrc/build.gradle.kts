@@ -25,29 +25,20 @@
  */
 
 /**
- * This script uses three declarations of the constant [licenseReportVersion] because
+ * This script uses two declarations of the constant [licenseReportVersion] because
  * currently there is no way to define a constant _before_ a build script of `buildSrc`.
  * We cannot use imports or do something else before the `buildscript` or `plugin` clauses.
  *
  * Therefore, when a version of [io.spine.internal.dependency.LicenseReport] changes, it should be
- * changed in the Kotlin object _and_ in this file below thrice.
+ * changed in the Kotlin object _and_ in this file below twice.
  */
-buildscript {
-    repositories {
-        gradlePluginPortal()
-    }
-    val licenseReportVersion = "1.16"
-    dependencies {
-        classpath("com.github.jk1:gradle-license-report:${licenseReportVersion}")
-    }
-}
 
 plugins {
     java
     groovy
     `kotlin-dsl`
     pmd
-    val licenseReportVersion = "1.16"
+    val licenseReportVersion = "2.0"
     id("com.github.jk1.dependency-license-report").version(licenseReportVersion)
 }
 
@@ -57,9 +48,16 @@ repositories {
     mavenCentral()
 }
 
-val jacksonVersion = "2.11.0"
+/**
+ * The version of Jackson used by `buildSrc`.
+ *
+ * Please keep this value in sync. with `io.spine.internal.dependency.Jackson.version`.
+ * It's not a requirement, but would be good in terms of consistency.
+ */
+val jacksonVersion = "2.13.0"
+
 val googleAuthToolVersion = "2.1.2"
-val licenseReportVersion = "1.16"
+val licenseReportVersion = "2.0"
 val grGitVersion = "3.1.1"
 
 /**
@@ -70,6 +68,23 @@ val grGitVersion = "3.1.1"
  */
 val guavaVersion = "30.1.1-jre"
 
+/**
+ * The version of ErrorProne Gradle plugin.
+ *
+ * Please keep in sync. with `io.spine.internal.dependency.ErrorProne.GradlePlugin.version`.
+ *
+ * @see <a href="https://github.com/tbroyer/gradle-errorprone-plugin/releases">
+ *     Error Prone Gradle Plugin Releases</a>
+ */
+val errorProneVersion = "2.0.2"
+
+val javaVersion = JavaVersion.VERSION_11
+
+java {
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+}
+
 dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
     implementation("com.google.cloud.artifactregistry:artifactregistry-auth-common:$googleAuthToolVersion") {
@@ -78,4 +93,5 @@ dependencies {
     implementation("com.google.guava:guava:$guavaVersion")
     api("com.github.jk1:gradle-license-report:$licenseReportVersion")
     implementation("org.ajoberstar.grgit:grgit-core:${grGitVersion}")
+    implementation("net.ltgt.gradle:gradle-errorprone-plugin:${errorProneVersion}")
 }

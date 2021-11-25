@@ -55,8 +55,8 @@ public final class DatastoreStorageFactoryTestEnv {
     public static DatastoreStorageFactory factoryFor(Datastore datastore) {
         checkNotNull(datastore);
         return DatastoreStorageFactory.newBuilder()
-                                      .setDatastore(datastore)
-                                      .build();
+                .setDatastore(datastore)
+                .build();
     }
 
     public static class TestEntity

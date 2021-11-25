@@ -27,7 +27,6 @@
 package io.spine.testing.server.storage.datastore;
 
 import com.google.auth.Credentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.NoCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
@@ -37,7 +36,6 @@ import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.ProjectId;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -105,14 +103,13 @@ public final class TestDatastores implements Logging {
      * which runs with the specified project ID.
      */
     public static Datastore local(ProjectId projectId, int port) {
-        String address = format("%s:%d", LOCALHOST, port);
-        DatastoreOptions options = DatastoreOptions
-                .newBuilder()
+        var address = format("%s:%d", LOCALHOST, port);
+        var options = DatastoreOptions.newBuilder()
                 .setProjectId(projectId.value())
                 .setHost(address)
                 .setCredentials(NoCredentials.getInstance())
                 .build();
-        Datastore datastore = options.getService();
+        var datastore = options.getService();
         return datastore;
     }
 
@@ -134,19 +131,18 @@ public final class TestDatastores implements Logging {
      */
     public static Datastore remote(Resource serviceAccount) {
         checkNotNull(serviceAccount);
-        Credentials credentials = credentialsFrom(serviceAccount);
-        DatastoreOptions options = DatastoreOptions
-                .newBuilder()
+        var credentials = credentialsFrom(serviceAccount);
+        var options = DatastoreOptions.newBuilder()
                 .setCredentials(credentials)
                 .build();
-        Datastore datastore = options.getService();
+        var datastore = options.getService();
         return datastore;
     }
 
     private static Credentials credentialsFrom(Resource serviceAccount) {
         try {
-            InputStream is = serviceAccount.open();
-            ServiceAccountCredentials credentials = fromStream(is);
+            var is = serviceAccount.open();
+            var credentials = fromStream(is);
             return credentials;
         } catch (IOException e) {
             throw newIllegalStateException(

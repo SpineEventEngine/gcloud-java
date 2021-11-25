@@ -36,7 +36,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
-import com.google.cloud.datastore.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
@@ -45,7 +44,6 @@ import com.google.errorprone.annotations.InlineMe;
 import io.spine.logging.Logging;
 import io.spine.server.storage.datastore.record.Entities;
 import io.spine.server.storage.datastore.record.RecordId;
-import io.spine.server.storage.datastore.tenant.Namespace;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -57,7 +55,7 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Streams.stream;
 import static java.lang.Math.min;
 import static java.util.stream.Collectors.toList;
@@ -67,7 +65,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class DatastoreWrapper extends DatastoreMedium implements Logging {
 
-    static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
+    private static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
     /**
      * Creates a new instance of {@code DatastoreWrapper}.
@@ -91,8 +89,8 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
 
     @Override
     public Key keyFor(Kind kind, RecordId recordId) {
-        KeyFactory keyFactory = keyFactory(kind);
-        Key key = keyFactory.newKey(recordId.value());
+        var keyFactory = keyFactory(kind);
+        var key = keyFactory.newKey(recordId.value());
         return key;
     }
 
@@ -119,10 +117,9 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
         storage().put(entity);
     }
 
-
     @Override
     public void createOrUpdate(Collection<Entity> entities) {
-        Entity[] array = new Entity[entities.size()];
+        var array = new Entity[entities.size()];
         entities.toArray(array);
         if (array.length <= MAX_ENTITIES_PER_WRITE_REQUEST) {
             writeSmallBulk(array);
@@ -164,13 +161,13 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
     @Override
     public List<@Nullable Entity> lookup(List<Key> keys) {
         checkNotNull(keys);
-        DsReaderLookup lookup = new DsReaderLookup(storage());
+        var lookup = new DsReaderLookup(storage());
         return lookup.find(keys);
     }
 
     @Override
     public <R> DsQueryIterator<R> read(StructuredQuery<R> query) {
-        DsReaderLookup lookup = new DsReaderLookup(storage());
+        var lookup = new DsReaderLookup(storage());
         return lookup.execute(query, namespace());
     }
 
@@ -214,6 +211,7 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
      * @throws IllegalArgumentException
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit}
      */
+    @SuppressWarnings("unused")
     public <R> Iterator<R> readAll(StructuredQuery<R> query) {
         return readAllPageByPage(query, null);
     }
@@ -239,6 +237,7 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit} or
      *         the provided {@code batchSize} is 0
      */
+    @SuppressWarnings("UnstableApiUsage")   /* Guava's `Streams.stream` is fine. */
     private <R> Iterator<R>
     readAllPageByPage(StructuredQuery<R> query, @Nullable Integer pageSize) {
         checkArgument(query.getLimit() == null,
@@ -246,14 +245,14 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
         checkArgument(pageSize == null || pageSize != 0,
                       "The size of a single read operation cannot be 0.");
 
-        StructuredQuery<R> limitedQuery = limit(query, pageSize);
+        var limitedQuery = limit(query, pageSize);
         return stream(new DsQueryPageIterator<>(limitedQuery, this))
                 .flatMap(Streams::stream)
                 .iterator();
     }
 
-    private static <R> StructuredQuery<R> limit(StructuredQuery<R> query,
-                                                @Nullable Integer batchSize) {
+    private static <R>
+    StructuredQuery<R> limit(StructuredQuery<R> query, @Nullable Integer batchSize) {
         return batchSize == null
                ? query
                : query.toBuilder()
@@ -274,40 +273,42 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
      */
     @VisibleForTesting
     protected void dropTable(Kind table) {
-        Namespace namespace = namespace();
-        StructuredQuery<Entity> query =
-                Query.newEntityQueryBuilder()
-                     .setNamespace(namespace.value())
-                     .setKind(table.value())
-                     .build();
+        var namespace = namespace();
+        var query = Query.newKeyQueryBuilder()
+                         .setNamespace(namespace.value())
+                         .setKind(table.value())
+                         .build();
         _trace().log("Deleting all entities of `%s` kind in `%s` namespace.",
                      table, namespace.value());
-        Iterator<Entity> queryResult = read(query);
-        List<Entity> entities = newArrayList(queryResult);
-        deleteEntities(entities);
+        var queryResult = read(query);
+        var keys = toIterable(queryResult);
+        deleteEntities(toArray(keys, Key.class));
+    }
+
+    private static <T> Iterable<T> toIterable(Iterator<T> iterator) {
+        return () -> iterator;
     }
 
     @VisibleForTesting
     protected void deleteEntities(Collection<Entity> entities) {
-        List<Key> keyList =
-                entities.stream()
-                        .map(BaseEntity::getKey)
-                        .collect(toList());
-        Key[] keys = new Key[keyList.size()];
+        var keyList = entities.stream()
+                .map(BaseEntity::getKey)
+                .collect(toList());
+        var keys = new Key[keyList.size()];
         keyList.toArray(keys);
         deleteEntities(keys);
     }
 
     private void deleteEntities(Key[] keys) {
         if (keys.length > MAX_ENTITIES_PER_WRITE_REQUEST) {
-            int start = 0;
-            int end = MAX_ENTITIES_PER_WRITE_REQUEST;
+            var start = 0;
+            var end = MAX_ENTITIES_PER_WRITE_REQUEST;
             while (true) {
-                int length = end - start;
+                var length = end - start;
                 if (length <= 0) {
                     return;
                 }
-                Key[] keysSubarray = new Key[length];
+                var keysSubarray = new Key[length];
                 System.arraycopy(keys, start, keysSubarray, 0, keysSubarray.length);
                 delete(keysSubarray);
 
@@ -326,16 +327,17 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
      * @see TransactionWrapper
      */
     public final TransactionWrapper newTransaction() {
-        Transaction tx = datastore().newTransaction();
+        var tx = datastore().newTransaction();
         return new TransactionWrapper(tx, namespaceSupplier());
     }
 
     @Override
     public KeyFactory keyFactory(Kind kind) {
         checkNotNull(kind);
-        KeyFactory keyFactory = datastore().newKeyFactory()
-                                         .setKind(kind.value());
-        Namespace namespace = namespace();
+        var keyFactory = datastore()
+                .newKeyFactory()
+                .setKind(kind.value());
+        var namespace = namespace();
         _trace().log("Retrieving KeyFactory for kind `%s` in `%s` namespace.",
                      kind, namespace.value());
         keyFactory.setNamespace(namespace.value());
@@ -348,12 +350,12 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
     }
 
     private void writeBulk(Entity[] entities) {
-        int partsCount = entities.length / MAX_ENTITIES_PER_WRITE_REQUEST + 1;
-        for (int i = 0; i < partsCount; i++) {
-            int partHead = i * MAX_ENTITIES_PER_WRITE_REQUEST;
-            int partTail = min(partHead + MAX_ENTITIES_PER_WRITE_REQUEST, entities.length);
+        var partsCount = entities.length / MAX_ENTITIES_PER_WRITE_REQUEST + 1;
+        for (var i = 0; i < partsCount; i++) {
+            var partHead = i * MAX_ENTITIES_PER_WRITE_REQUEST;
+            var partTail = min(partHead + MAX_ENTITIES_PER_WRITE_REQUEST, entities.length);
 
-            Entity[] part = Arrays.copyOfRange(entities, partHead, partTail);
+            var part = Arrays.copyOfRange(entities, partHead, partTail);
             writeSmallBulk(part);
         }
     }

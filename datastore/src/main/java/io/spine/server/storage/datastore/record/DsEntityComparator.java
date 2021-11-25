@@ -61,14 +61,14 @@ public class DsEntityComparator implements Comparator<Entity>, Serializable {
         this.column = column;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})  /* Fwk ensures the instances are comparable. */
+    @SuppressWarnings("unchecked")  /* Fwk ensures the instances are comparable. */
     @Override
     public int compare(Entity a, Entity b) {
         checkNotNull(a);
         checkNotNull(b);
 
-        Comparable aValue = ComparableValueExtractor.comparable(a.getValue(column));
-        Comparable bValue = ComparableValueExtractor.comparable(b.getValue(column));
+        var aValue = ComparableValueExtractor.comparable(a.getValue(column));
+        var bValue = ComparableValueExtractor.comparable(b.getValue(column));
 
         if (aValue == null) {
             return -1;
@@ -90,9 +90,9 @@ public class DsEntityComparator implements Comparator<Entity>, Serializable {
         Comparator<Entity> result = null;
         for (SortBy<?, ?> sortBy : sorting) {
             Comparator<Entity> thisComparator;
-            Direction direction = sortBy.direction();
-            String columnName = columnPathOf(sortBy);
-            DsEntityComparator template = new DsEntityComparator(columnName);
+            var direction = sortBy.direction();
+            var columnName = columnPathOf(sortBy);
+            var template = new DsEntityComparator(columnName);
             thisComparator = direction == Direction.ASC
                              ? template
                              : template.reversed();
@@ -178,8 +178,8 @@ public class DsEntityComparator implements Comparator<Entity>, Serializable {
         }
 
         private static @Nullable Comparable comparable(Value<?> value) {
-            ValueType type = value.getType();
-            ComparableValueExtractor extractor = pickForType(type);
+            var type = value.getType();
+            var extractor = pickForType(type);
             return extractor.extract(value);
         }
 

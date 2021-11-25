@@ -45,13 +45,11 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.datastore.config.CreateEntityStorage;
 import io.spine.server.storage.datastore.config.CreateRecordStorage;
-import io.spine.server.storage.datastore.config.CreateStorage;
 import io.spine.server.storage.datastore.config.CustomStorages;
 import io.spine.server.storage.datastore.config.DsColumnMapping;
 import io.spine.server.storage.datastore.config.RecordLayout;
 import io.spine.server.storage.datastore.config.RecordLayouts;
 import io.spine.server.storage.datastore.config.StorageConfiguration;
-import io.spine.server.storage.datastore.config.TxSetting;
 import io.spine.server.storage.datastore.config.TxSettings;
 import io.spine.server.storage.datastore.record.DsEntitySpec;
 import io.spine.server.storage.datastore.record.DsRecordStorage;
@@ -63,7 +61,6 @@ import io.spine.server.storage.datastore.tenant.PrefixedNsConverterFactory;
 import io.spine.server.tenant.TenantIndex;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.nullToEmpty;
@@ -154,7 +151,7 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
     @CanIgnoreReturnValue
     public BoundedContextBuilder configureTenantIndex(BoundedContextBuilder builder) {
         checkNotNull(builder);
-        TenantIndex index = DatastoreTenants.index(datastore, converterFactory());
+        var index = DatastoreTenants.index(datastore, converterFactory());
         builder.setTenantIndex(index);
         return builder;
     }
@@ -164,9 +161,9 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
     createRecordStorage(ContextSpec context, RecordSpec<I, R, ?> spec) {
         checkNotNull(context);
         checkNotNull(spec);
-        StorageConfiguration<I, R> config = configurationWith(context, spec);
-        Optional<CreateStorage<I, R>> custom = customStorages.find(spec);
-        RecordStorage<I, R> result =
+        var config = configurationWith(context, spec);
+        var custom = customStorages.find(spec);
+        var result =
                 custom.map(callback -> callback.apply(config))
                       .orElse(new DsRecordStorage<>(config));
         return result;
@@ -174,12 +171,12 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
 
     private <I, R extends Message>
     StorageConfiguration<I, R> configurationWith(ContextSpec context, RecordSpec<I, R, ?> spec) {
-        DatastoreWrapper wrapper = wrapperFor(context);
-        Class<? extends Message> recordType = spec.sourceType();
-        TxSetting behavior = txSettings.find(recordType);
+        var wrapper = wrapperFor(context);
+        var recordType = spec.sourceType();
+        var behavior = txSettings.find(recordType);
         RecordLayout<I, R> layout = recordLayouts.find(recordType);
-        DsEntitySpec<I, R> dsSpec = new DsEntitySpec<>(spec, layout);
-        StorageConfiguration<I, R> configuration = StorageConfiguration.<I, R>newBuilder()
+        var dsSpec = new DsEntitySpec<>(spec, layout);
+        var configuration = StorageConfiguration.<I, R>newBuilder()
                 .withDatastore(wrapper)
                 .withTxSetting(behavior)
                 .withContext(context)
@@ -197,9 +194,9 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
     }
 
     private NamespaceSupplier createNamespaceSupplier(boolean multitenant) {
-        String defaultNamespace = namespaceFromOptions();
+        var defaultNamespace = namespaceFromOptions();
         if (multitenant) {
-            NsConverterFactory factory = converterFactory();
+            var factory = converterFactory();
             return NamespaceSupplier.multitenant(factory);
         } else {
             return NamespaceSupplier.singleTenant(defaultNamespace);
@@ -207,7 +204,7 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
     }
 
     private NsConverterFactory converterFactory() {
-        String defaultNamespace = namespaceFromOptions();
+        var defaultNamespace = namespaceFromOptions();
         return defaultNamespace.isEmpty()
                ? converterFactory
                : new PrefixedNsConverterFactory(defaultNamespace, converterFactory);
@@ -250,7 +247,7 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
      */
     final DatastoreWrapper wrapperFor(ContextSpec spec) {
         if (!contextWrappers.containsKey(spec)) {
-            DatastoreWrapper wrapper = newDatastoreWrapper(spec.isMultitenant());
+            var wrapper = newDatastoreWrapper(spec.isMultitenant());
             contextWrappers.put(spec, wrapper);
         }
         return contextWrappers.get(spec);
@@ -269,8 +266,7 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
     @Internal
     public final DatastoreWrapper
     systemWrapperFor(Class<? extends Storage<?, ?>> targetStorage, boolean multitenant) {
-        DatastoreWrapper wrapper = sysWrappers
-                .computeIfAbsent(targetStorage, k -> newDatastoreWrapper(multitenant));
+        var wrapper = sysWrappers.computeIfAbsent(targetStorage, k -> newDatastoreWrapper(multitenant));
         return wrapper;
     }
 
@@ -283,7 +279,7 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
     @Internal
     @VisibleForTesting
     protected DatastoreWrapper newDatastoreWrapper(boolean multitenant) {
-        NamespaceSupplier supplier = createNamespaceSupplier(multitenant);
+        var supplier = createNamespaceSupplier(multitenant);
         return wrap(datastore, supplier);
     }
 
@@ -303,8 +299,9 @@ public class DatastoreStorageFactory implements StorageFactory, Logging {
     @VisibleForTesting
     public static Builder newBuilderWithDefaults(Datastore datastore) {
         checkNotNull(datastore);
-        Builder result = newBuilder().setDatastore(datastore)
-                                     .withDefaults();
+        var result = newBuilder()
+                .setDatastore(datastore)
+                .withDefaults();
         return result;
     }
 

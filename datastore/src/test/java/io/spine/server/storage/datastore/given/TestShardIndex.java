@@ -51,8 +51,8 @@ public final class TestShardIndex {
         checkArgument(shardIndex < totalShards,
                       "Shard index must be less than the total number of shards");
         return ShardIndex.newBuilder()
-                         .setIndex(shardIndex)
-                         .setOfTotal(totalShards)
-                         .vBuild();
+                .setIndex(shardIndex)
+                .setOfTotal(totalShards)
+                .vBuild();
     }
 }

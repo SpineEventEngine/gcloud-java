@@ -26,7 +26,6 @@
 
 package io.spine.testing.server.storage.datastore;
 
-import com.google.cloud.datastore.Datastore;
 import com.google.common.testing.NullPointerTester;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,11 +47,11 @@ class SpyStorageFactoryTest {
     @Test
     @DisplayName("inject a given `DatastoreWrapper`")
     void injectDatastoreWrapper() {
-        Datastore datastore = TestDatastores.local();
-        TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(datastore, false);
+        var datastore = TestDatastores.local();
+        var wrapper = TestDatastoreWrapper.wrap(datastore, false);
         SpyStorageFactory.injectWrapper(wrapper);
-        SpyStorageFactory factory = new SpyStorageFactory();
-        Datastore datastoreFromFactory = factory.datastore();
+        var factory = new SpyStorageFactory();
+        var datastoreFromFactory = factory.datastore();
 
         assertThat(datastoreFromFactory).isSameInstanceAs(datastore);
     }

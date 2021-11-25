@@ -28,7 +28,6 @@ package io.spine.server.storage.datastore.given;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.KeyFactory;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 
@@ -51,11 +50,10 @@ public final class DatastoreWrapperTestEnv {
      * Forces Datastore to create a namespace with the given name.
      */
     public static void ensureNamespace(String namespaceValue, Datastore datastore) {
-        KeyFactory keyFactory = datastore.newKeyFactory()
-                                         .setNamespace(namespaceValue)
-                                         .setKind(NAMESPACE_HOLDER_KIND.value());
-        Entity entity = Entity.newBuilder(keyFactory.newKey(42L))
-                              .build();
+        var keyFactory = datastore.newKeyFactory()
+                                  .setNamespace(namespaceValue)
+                                  .setKind(NAMESPACE_HOLDER_KIND.value());
+        var entity = Entity.newBuilder(keyFactory.newKey(42L)).build();
         datastore.put(entity);
     }
 

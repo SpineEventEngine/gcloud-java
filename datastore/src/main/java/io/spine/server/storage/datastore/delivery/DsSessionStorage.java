@@ -28,15 +28,12 @@ package io.spine.server.storage.datastore.delivery;
 
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
 import io.spine.server.ContextSpec;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
-import io.spine.server.storage.datastore.DatastoreWrapper;
-import io.spine.server.storage.datastore.TransactionWrapper;
 import io.spine.server.storage.datastore.config.StorageConfiguration;
 import io.spine.server.storage.datastore.config.TxSetting;
 import io.spine.server.storage.datastore.record.DsEntitySpec;
@@ -86,31 +83,31 @@ public final class DsSessionStorage
 
     private static StorageConfiguration<ShardIndex, ShardSessionRecord>
     configureWith(DatastoreStorageFactory factory, ContextSpec context) {
-        DatastoreWrapper wrapper = factory.systemWrapperFor(DsSessionStorage.class, multitenant);
-        StorageConfiguration<ShardIndex, ShardSessionRecord> config =
-                StorageConfiguration.<ShardIndex, ShardSessionRecord>newBuilder()
-                        .withDatastore(wrapper)
-                        .withRecordSpec(newRecordSpec())
-                        .withContext(context)
-                        .withMapping(factory.columnMapping())
-                        .withTxSetting(TxSetting.enabled())
-                        .build();
+        var wrapper = factory.systemWrapperFor(DsSessionStorage.class, multitenant);
+        var config = StorageConfiguration.<ShardIndex, ShardSessionRecord>newBuilder()
+                .withDatastore(wrapper)
+                .withRecordSpec(newRecordSpec())
+                .withContext(context)
+                .withMapping(factory.columnMapping())
+                .withTxSetting(TxSetting.enabled())
+                .build();
         return config;
     }
 
     private static DsEntitySpec<ShardIndex, ShardSessionRecord> newRecordSpec() {
-        MessageRecordSpec<ShardIndex, ShardSessionRecord> spec = messageSpec();
-        DsEntitySpec<ShardIndex, ShardSessionRecord> result = new DsEntitySpec<>(spec);
+        var spec = messageSpec();
+        var result = new DsEntitySpec<>(spec);
         return result;
     }
 
     private static MessageRecordSpec<ShardIndex, ShardSessionRecord> messageSpec() {
         @SuppressWarnings("ConstantConditions")     /* Protobuf getters never return `nulls`. */
-                MessageRecordSpec<ShardIndex, ShardSessionRecord> spec =
-                new MessageRecordSpec<>(ShardIndex.class,
-                                        ShardSessionRecord.class,
-                                        ShardSessionRecord::getIndex,
-                                        SessionRecordColumn.definitions());
+        var spec = new MessageRecordSpec<>(
+                ShardIndex.class,
+                ShardSessionRecord.class,
+                ShardSessionRecord::getIndex,
+                SessionRecordColumn.definitions()
+        );
         return spec;
     }
 
@@ -121,9 +118,9 @@ public final class DsSessionStorage
      */
     @Override
     public Optional<ShardSessionRecord> read(ShardIndex index) {
-        Key key = keyOf(index);
-        try (TransactionWrapper tx = newTransaction()) {
-            Optional<Entity> result = tx.read(key);
+        var key = keyOf(index);
+        try (var tx = newTransaction()) {
+            var result = tx.read(key);
             tx.commit();
             return result.map(this::toRecord);
         }
@@ -143,10 +140,10 @@ public final class DsSessionStorage
      * Writes the record to the storage in a new transaction.
      */
     @SuppressWarnings("OverlyBroadCatchBlock")  /* Treating all exceptions similarly. */
-    public final void write(ShardSessionRecord message) {
-        try (TransactionWrapper tx = newTransaction()) {
-            RecordWithColumns<ShardIndex, ShardSessionRecord> record = appendColumns(message);
-            Entity entity = entityRecordToEntity(record);
+    public void write(ShardSessionRecord message) {
+        try (var tx = newTransaction()) {
+            var record = appendColumns(message);
+            var entity = entityRecordToEntity(record);
             tx.createOrUpdate(entity);
             tx.commit();
         } catch (RuntimeException e) {
@@ -172,16 +169,16 @@ public final class DsSessionStorage
      * @return a modified record, or {@code Optional.empty()} if the update could not be executed
      */
     Optional<ShardSessionRecord> updateTransactionally(ShardIndex index, PrepareForWrite update) {
-        try (TransactionWrapper tx = newTransaction()) {
-            Key key = keyOf(index);
-            Optional<Entity> result = tx.read(key);
+        try (var tx = newTransaction()) {
+            var key = keyOf(index);
+            var result = tx.read(key);
 
             @Nullable ShardSessionRecord existing =
                     result.map(this::toRecord)
                           .orElse(null);
-            Optional<ShardSessionRecord> updated = update.prepare(existing);
+            var updated = update.prepare(existing);
             if (updated.isPresent()) {
-                ShardSessionRecord asRecord = updated.get();
+                var asRecord = updated.get();
                 tx.createOrUpdate(toEntity(asRecord));
                 tx.commit();
             }
@@ -196,14 +193,13 @@ public final class DsSessionStorage
     }
 
     private Entity toEntity(ShardSessionRecord record) {
-        RecordWithColumns<ShardIndex, ShardSessionRecord> withCols = appendColumns(record);
-        Entity result = entityRecordToEntity(withCols);
+        var withCols = appendColumns(record);
+        var result = entityRecordToEntity(withCols);
         return result;
     }
 
     private RecordWithColumns<ShardIndex, ShardSessionRecord> appendColumns(ShardSessionRecord r) {
-        RecordWithColumns<ShardIndex, ShardSessionRecord> withCols =
-                RecordWithColumns.create(r, spec);
+        var withCols = RecordWithColumns.create(r, spec);
         return withCols;
     }
 }

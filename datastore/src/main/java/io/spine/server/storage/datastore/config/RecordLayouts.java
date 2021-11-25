@@ -29,8 +29,6 @@ package io.spine.server.storage.datastore.config;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 
-import java.util.Optional;
-
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -80,11 +78,11 @@ public final class RecordLayouts
      *         when obtaining. If that fails, the exception is thrown.
      */
     public <I, R extends Message> RecordLayout<I, R> find(Class<? extends Message> domainType) {
-        Optional<RecordLayout<?, ?>> optional = findValue(domainType);
-        if (!optional.isPresent()) {
+        var optional = findValue(domainType);
+        if (optional.isEmpty()) {
             return new FlatLayout<>(domainType);
         }
-        RecordLayout<?, ?> raw = optional.get();
+        var raw = optional.get();
         RecordLayout<I, R> result = cast(raw, domainType);
         return result;
     }

@@ -26,14 +26,9 @@
 
 package io.spine.testing.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
 import com.google.common.testing.NullPointerTester;
-import io.spine.testing.server.storage.datastore.given.ATestDatastoreWrapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -54,8 +49,8 @@ class TestDatastoreWrapperTest {
     @Test
     @DisplayName("wait for consistency if the parameter is specified on creation")
     void waitForConsistency() {
-        ATestDatastoreWrapper wrapper = wrap(TestDatastores.local(), true);
-        Entity entity = withKeyCreatedBy(wrapper);
+        var wrapper = wrap(TestDatastores.local(), true);
+        var entity = withKeyCreatedBy(wrapper);
         wrapper.createOrUpdate(entity);
 
         assertThat(wrapper.waitedForConsistency()).isTrue();
@@ -64,8 +59,8 @@ class TestDatastoreWrapperTest {
     @Test
     @DisplayName("ignore the wait for consistency if the parameter was set to `false`")
     void notWaitForConsistency() {
-        ATestDatastoreWrapper wrapper = wrap(TestDatastores.local(), false);
-        Entity entity = withKeyCreatedBy(wrapper);
+        var wrapper = wrap(TestDatastores.local(), false);
+        var entity = withKeyCreatedBy(wrapper);
         wrapper.createOrUpdate(entity);
 
         assertThat(wrapper.waitedForConsistency()).isFalse();
@@ -75,22 +70,22 @@ class TestDatastoreWrapperTest {
     @DisplayName("drop all tables in the Datastore")
     void dropAllTables() {
         // Initialize the wrapper.
-        TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(TestDatastores.local(), false);
+        var wrapper = TestDatastoreWrapper.wrap(TestDatastores.local(), false);
 
         // Create an entity.
-        Entity entity = withKeyCreatedBy(wrapper);
-        Key key = entity.getKey();
+        var entity = withKeyCreatedBy(wrapper);
+        var key = entity.getKey();
         wrapper.createOrUpdate(entity);
 
         // Make sure the entity is read from the Datastore by key.
-        Optional<Entity> entityReadBeforeClear = wrapper.read(key);
+        var entityReadBeforeClear = wrapper.read(key);
         assertThat(entityReadBeforeClear).isPresent();
 
         // Drop all data.
         wrapper.dropAllTables();
 
         // Make sure the entity is no longer present in the Datastore.
-        Optional<Entity> entityReadAfterClear = wrapper.read(key);
+        var entityReadAfterClear = wrapper.read(key);
         assertThat(entityReadAfterClear).isEmpty();
     }
 }

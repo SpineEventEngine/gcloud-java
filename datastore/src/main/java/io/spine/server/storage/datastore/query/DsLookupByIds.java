@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
@@ -51,6 +50,10 @@ import static io.spine.server.storage.datastore.record.FieldMaskApplier.recordMa
 /**
  * An {@code Entity} lookup in Google Datastore using {@code Entity} identifiers.
  *
+ * @param <I>
+ *         the type of identifiers of the searched records
+ * @param <R>
+ *         the type of searched records
  * @implNote Lookup is performed by reading all the entities with Datastore Keys matching
  *         the provided IDs first and then applying other query constraints in-memory.
  */
@@ -80,45 +83,45 @@ final class DsLookupByIds<I, R extends Message> extends PreparedQuery<I, R> {
 
     @Override
     IntermediateResult fetchFromDatastore() {
-        List<@Nullable Entity> rawEntities = readList(identifiers());
+        var rawEntities = readList(identifiers());
         return new IntermediateResult(rawEntities);
     }
 
     @Override
     Iterable<R> toRecords(IntermediateResult intermediateResult) {
-        List<@Nullable Entity> rawEntities = intermediateResult.entities();
-        Predicate<Entity> predicate = columnPredicate();
-        Stream<@Nullable Entity> stream = rawEntities
+        var rawEntities = intermediateResult.entities();
+        var predicate = columnPredicate();
+        var stream = rawEntities
                 .stream()
                 .filter(Objects::nonNull)
                 .filter(predicate);
         if (hasSorting()) {
             stream = stream.sorted(implementing(sorting()));
         }
-        Stream<R> recordStream = stream.map(toMaskedRecord(mask()));
+        var recordStream = stream.map(toMaskedRecord(mask()));
         if (limit() != null && limit() > 0) {
             recordStream = recordStream.limit(limit());
         }
-        ImmutableList<R> result = recordStream.collect(toImmutableList());
+        var result = recordStream.collect(toImmutableList());
         return result;
     }
 
     private Predicate<Entity> columnPredicate() {
-        if(predicate().isEmpty()) {
+        if (predicate().isEmpty()) {
             return entity -> true;
         }
-        ColumnPredicate<I, R> result = new ColumnPredicate<>(query().subject(), columnAdapter());
+        var result = new ColumnPredicate<>(query().subject(), columnAdapter());
         return result;
     }
 
     private List<@Nullable Entity> readList(Iterable<I> ids) {
-        ImmutableList<Key> keys = toKeys(ids);
-        List<@Nullable Entity> entities = datastore.lookup(keys);
+        var keys = toKeys(ids);
+        var entities = datastore.lookup(keys);
         return entities;
     }
 
     private ImmutableList<Key> toKeys(Iterable<I> ids) {
-        ImmutableList<Key> keys = stream(ids)
+        var keys = stream(ids)
                 .map(id -> spec().keyOf(id, datastore))
                 .collect(toImmutableList());
         return keys;
@@ -128,7 +131,7 @@ final class DsLookupByIds<I, R extends Message> extends PreparedQuery<I, R> {
         Function<R, R> masker = recordMasker(mask);
         return entity -> {
             R record = toMessage(entity, recordType());
-            R maskedRecord = masker.apply(record);
+            var maskedRecord = masker.apply(record);
             return maskedRecord;
         };
     }

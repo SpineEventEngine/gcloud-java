@@ -40,12 +40,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>This type is internal. The library users are able to supply the custom storage implementation
  * per stored record type via
- * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#useRecordStorage(Class, Class, CreateRecordStorage)
- * DatastoreStorageFactory.newBuilder().useRecordStorage(IdClass, RecordClass, CreateRecordStorage)} for
- * plain records
- * and {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#useEntityStorage(Class, CreateEntityStorage)
- * DatastoreStorageFactory.newBuilder().useEntityStorage(EntityStateClass, CreateEntityStorage)}
- * for Entities.
+ * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#useRecordStorage(Class,
+ * Class, CreateRecordStorage) DatastoreStorageFactory.newBuilder().useRecordStorage(IdClass,
+ * RecordClass, CreateRecordStorage)} for plain records
+ * and {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#useEntityStorage(Class,
+ * CreateEntityStorage) DatastoreStorageFactory.newBuilder().useEntityStorage(EntityStateClass,
+ * CreateEntityStorage)} for Entities.
  */
 @Internal
 public final class CustomStorages
@@ -69,8 +69,8 @@ public final class CustomStorages
      *         or {@code Optional.empty()} in case none was found
      */
     public <I, R extends Message> Optional<CreateStorage<I, R>> find(RecordSpec<I, R, ?> spec) {
-        Class<? extends Message> domainType = spec.sourceType();
-        Optional<CreateStorage<?, ?>> optional = findValue(domainType);
+        var domainType = spec.sourceType();
+        var optional = findValue(domainType);
         Optional<CreateStorage<I, R>> result =
                 optional.map(callback -> cast(callback, spec.idType(), domainType));
         return result;

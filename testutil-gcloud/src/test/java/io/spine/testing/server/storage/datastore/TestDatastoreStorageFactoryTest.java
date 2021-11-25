@@ -26,14 +26,9 @@
 
 package io.spine.testing.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Key;
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.storage.datastore.DatastoreWrapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -53,8 +48,8 @@ class TestDatastoreStorageFactoryTest {
     @Test
     @DisplayName("wrap the specified Datastore with a `TestDatastoreWrapper`")
     void wrapDatastore() {
-        TestDatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
-        DatastoreWrapper wrapper = factory.newDatastoreWrapper(false);
+        var factory = TestDatastoreStorageFactory.local();
+        var wrapper = factory.newDatastoreWrapper(false);
         assertThat(wrapper).isInstanceOf(TestDatastoreWrapper.class);
     }
 
@@ -62,23 +57,23 @@ class TestDatastoreStorageFactoryTest {
     @DisplayName("clear all data in the Datastore")
     void clearDatastore() {
         // Initialize the factory.
-        TestDatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
-        DatastoreWrapper wrapper = factory.newDatastoreWrapper(false);
+        var factory = TestDatastoreStorageFactory.local();
+        var wrapper = factory.newDatastoreWrapper(false);
 
         // Create an entity.
-        Entity entity = withKeyCreatedBy(wrapper);
-        Key key = entity.getKey();
+        var entity = withKeyCreatedBy(wrapper);
+        var key = entity.getKey();
         wrapper.createOrUpdate(entity);
 
         // Make sure the entity is read from the Datastore by key.
-        Optional<Entity> entityReadBeforeClear = wrapper.read(key);
+        var entityReadBeforeClear = wrapper.read(key);
         assertThat(entityReadBeforeClear).isPresent();
 
         // Clear the Datastore.
         factory.clear();
 
         // Make sure entity is no longer present.
-        Optional<Entity> entityReadAfterClear = wrapper.read(key);
+        var entityReadAfterClear = wrapper.read(key);
         assertThat(entityReadAfterClear).isEmpty();
     }
 }

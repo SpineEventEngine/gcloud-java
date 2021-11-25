@@ -31,6 +31,11 @@ import io.spine.server.storage.RecordStorage;
 
 /**
  * Supplies the custom implementation of the record storage.
+ *
+ * @param <I>
+ *         the type of the identifiers of the stored records
+ * @param <R>
+ *         the type of the stored records
  */
 @FunctionalInterface
 public interface CreateStorage<I, R extends Message> {

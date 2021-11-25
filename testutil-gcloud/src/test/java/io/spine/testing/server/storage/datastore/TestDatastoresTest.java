@@ -26,8 +26,6 @@
 
 package io.spine.testing.server.storage.datastore;
 
-import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.io.Resource;
 import io.spine.server.storage.datastore.ProjectId;
 import io.spine.testing.UtilityClassTest;
@@ -56,38 +54,38 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
         @Test
         @DisplayName("the default emulator address")
         void atDefaultAddress() {
-            Datastore datastore = TestDatastores.local();
-            String host = datastore.getOptions()
-                                   .getHost();
-            String expectedHost = format(ADDRESS_FORMAT, DEFAULT_EMULATOR_PORT);
+            var datastore = TestDatastores.local();
+            var host = datastore.getOptions()
+                                .getHost();
+            var expectedHost = format(ADDRESS_FORMAT, DEFAULT_EMULATOR_PORT);
             assertThat(host).isEqualTo(expectedHost);
         }
 
         @Test
         @DisplayName("a custom port")
         void atCustomPort() {
-            int port = 8080;
-            Datastore datastore = TestDatastores.local(port);
-            String host = datastore.getOptions()
-                                   .getHost();
-            String expectedHost = format(ADDRESS_FORMAT, port);
+            var port = 8080;
+            var datastore = TestDatastores.local(port);
+            var host = datastore.getOptions()
+                                .getHost();
+            var expectedHost = format(ADDRESS_FORMAT, port);
             assertThat(host).isEqualTo(expectedHost);
         }
 
         @Test
         @DisplayName("a custom port with a custom project ID")
         void atCustomPortWithCustomId() {
-            int port = 8080;
-            String id = "the-test-project";
-            ProjectId projectId = ProjectId.of(id);
-            Datastore datastore = TestDatastores.local(projectId, port);
+            var port = 8080;
+            var id = "the-test-project";
+            var projectId = ProjectId.of(id);
+            var datastore = TestDatastores.local(projectId, port);
 
-            DatastoreOptions options = datastore.getOptions();
-            String host = options.getHost();
-            String expectedHost = format(ADDRESS_FORMAT, port);
+            var options = datastore.getOptions();
+            var host = options.getHost();
+            var expectedHost = format(ADDRESS_FORMAT, port);
             assertThat(host).isEqualTo(expectedHost);
 
-            String actualProjectId = options.getProjectId();
+            var actualProjectId = options.getProjectId();
             assertThat(actualProjectId).isEqualTo(id);
         }
     }
@@ -102,19 +100,19 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
         @Test
         @DisplayName("the service account resource at path")
         void byResourceAtPath() {
-            Datastore datastore = TestDatastores.remote(SPINE_DEV_JSON);
-            String projectId = datastore.getOptions()
-                                        .getProjectId();
+            var datastore = TestDatastores.remote(SPINE_DEV_JSON);
+            var projectId = datastore.getOptions()
+                                     .getProjectId();
             assertThat(projectId).isEqualTo(PROJECT_ID);
         }
 
         @Test
         @DisplayName("the service account resource")
         void byResource() {
-            Resource serviceAccount = localResource(SPINE_DEV_JSON);
-            Datastore datastore = TestDatastores.remote(serviceAccount);
-            String projectId = datastore.getOptions()
-                                        .getProjectId();
+            var serviceAccount = localResource(SPINE_DEV_JSON);
+            var datastore = TestDatastores.remote(serviceAccount);
+            var projectId = datastore.getOptions()
+                                     .getProjectId();
             assertThat(projectId).isEqualTo(PROJECT_ID);
         }
     }
@@ -122,7 +120,7 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
     @Test
     @DisplayName("throw an `ISE` when can't properly parse account credentials from resource")
     void throwOnInvalidResource() {
-        Resource resource = localResource("random.json");
+        var resource = localResource("random.json");
         assertThrows(IllegalStateException.class, () -> TestDatastores.remote(resource));
     }
 

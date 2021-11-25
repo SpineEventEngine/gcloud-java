@@ -26,7 +26,6 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreException;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
@@ -47,7 +46,6 @@ import static java.util.Optional.ofNullable;
  * A Cloud Datastore transaction wrapper.
  */
 public final class TransactionWrapper extends DatastoreMedium implements AutoCloseable {
-
 
     TransactionWrapper(Transaction tx, NamespaceSupplier namespaceSupplier) {
         super(tx, namespaceSupplier);
@@ -82,7 +80,7 @@ public final class TransactionWrapper extends DatastoreMedium implements AutoClo
      * @see Transaction#add(com.google.cloud.datastore.FullEntity...)
      */
     public void create(Collection<Entity> entities) throws DatastoreException {
-        Entity[] array = new Entity[entities.size()];
+        var array = new Entity[entities.size()];
         entities.toArray(array);
         storage().add(array);
     }
@@ -98,15 +96,15 @@ public final class TransactionWrapper extends DatastoreMedium implements AutoClo
     /**
      * Puts the given entities into the Datastore in the transaction.
      *
-     * @implNote Unlike {@link DatastoreWrapper}, {@code TransactionWrapper} does not provide
-     *         a mechanism for writing large numbers of entities. Only 500 entities can be written
-     *         in a single transaction. Please see
+     * @implNote Unlike {@link DatastoreWrapper}, {@code TransactionWrapper} does not
+     *         provide a mechanism for writing large numbers of entities. Only 500 entities
+     *         can be written in a single transaction. Please see
      *         the <a href="https://cloud.google.com/datastore/docs/concepts/limits">transaction
      *         limits</a> for more info.
      */
     @Override
     public void createOrUpdate(Collection<Entity> entities) throws DatastoreException {
-        Entity[] array = new Entity[entities.size()];
+        var array = new Entity[entities.size()];
         entities.toArray(array);
         storage().put(array);
     }
@@ -118,7 +116,7 @@ public final class TransactionWrapper extends DatastoreMedium implements AutoClo
      */
     @Override
     public Optional<Entity> read(Key key) {
-        Entity entity = storage().get(key);
+        var entity = storage().get(key);
         return ofNullable(entity);
     }
 
@@ -142,7 +140,7 @@ public final class TransactionWrapper extends DatastoreMedium implements AutoClo
     @Override
     public List<Entity> lookup(List<Key> keys) {
         checkNotNull(keys);
-        DsReaderLookup lookup = new DsReaderLookup(storage());
+        var lookup = new DsReaderLookup(storage());
         return lookup.find(keys);
     }
 
@@ -153,19 +151,19 @@ public final class TransactionWrapper extends DatastoreMedium implements AutoClo
      */
     @Override
     public <R> DsQueryIterator<R> read(StructuredQuery<R> ancestorQuery) throws DatastoreException {
-        DsReaderLookup lookup = new DsReaderLookup(storage());
+        var lookup = new DsReaderLookup(storage());
         return lookup.execute(ancestorQuery, namespace());
     }
 
     @Override
     public Key keyFor(Kind kind, RecordId id) {
-        Key result = wrapper().keyFor(kind, id);
+        var result = wrapper().keyFor(kind, id);
         return result;
     }
 
     @Override
     public KeyFactory keyFactory(Kind kind) {
-        KeyFactory result = wrapper().keyFactory(kind);
+        var result = wrapper().keyFactory(kind);
         return result;
     }
 
@@ -216,8 +214,8 @@ public final class TransactionWrapper extends DatastoreMedium implements AutoClo
     }
 
     private DatastoreWrapper wrapper() {
-        Datastore naked = tx().getDatastore();
-        DatastoreWrapper wrapper = DatastoreWrapper.wrap(naked, namespaceSupplier());
+        var naked = tx().getDatastore();
+        var wrapper = DatastoreWrapper.wrap(naked, namespaceSupplier());
         return wrapper;
     }
 }

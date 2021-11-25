@@ -54,8 +54,8 @@ public final class TestEnvironment {
      */
     @SuppressWarnings("CallToSystemGetenv")
     public static boolean runsOnCi() {
-        String ciEnvValue = getenv("CI");
-        boolean onCi = TRUE.equalsIgnoreCase(ciEnvValue);
+        var ciEnvValue = getenv("CI");
+        var onCi = TRUE.equalsIgnoreCase(ciEnvValue);
         return onCi;
     }
 

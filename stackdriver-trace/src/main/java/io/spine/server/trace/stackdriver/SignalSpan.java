@@ -26,11 +26,7 @@
 
 package io.spine.server.trace.stackdriver;
 
-import com.google.devtools.cloudtrace.v2.AttributeValue;
 import com.google.devtools.cloudtrace.v2.Span;
-import com.google.devtools.cloudtrace.v2.TruncatableString;
-import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.code.java.ClassName;
 import io.spine.core.BoundedContextName;
@@ -38,7 +34,6 @@ import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
 import io.spine.system.server.EntityTypeName;
-import io.spine.type.TypeName;
 
 import java.util.stream.Stream;
 
@@ -100,25 +95,24 @@ public class SignalSpan {
      * @return new span
      */
     protected Span asTraceSpan(ProjectId gcpProjectId) {
-        Span.Builder span = buildSpan(gcpProjectId);
+        var span = buildSpan(gcpProjectId);
         buildSpanAttributes(span);
         return span.build();
     }
 
     private String displayName() {
-        TypeName signalType = signal.enclosedTypeUrl()
-                                    .toTypeName();
-        ClassName className = ClassName.of(receiverType.getJavaClassName());
+        var signalType = signal.enclosedTypeUrl()
+                               .toTypeName();
+        var className = ClassName.of(receiverType.getJavaClassName());
         return format("%s handles %s", className.toSimple(), signalType.simpleName());
     }
 
     private Span.Builder buildSpan(ProjectId projectId) {
-        SpanId spanId = SpanId.random();
-        Timestamp whenStarted = signal.timestamp();
-        Timestamp whenFinished = Time.currentTime();
-        TruncatableString displayName = Truncate.stringTo(displayName(), SPAN_DISPLAY_NAME_LENGTH);
-        return Span
-                .newBuilder()
+        var spanId = SpanId.random();
+        var whenStarted = signal.timestamp();
+        var whenFinished = Time.currentTime();
+        var displayName = Truncate.stringTo(displayName(), SPAN_DISPLAY_NAME_LENGTH);
+        return Span.newBuilder()
                 .setName(spanName(projectId, spanId).value())
                 .setSpanId(spanId.value())
                 .setDisplayName(displayName)
@@ -127,20 +121,20 @@ public class SignalSpan {
     }
 
     private void buildSpanAttributes(Span.Builder span) {
-        Span.Attributes.Builder attributesBuilder = span.getAttributesBuilder();
+        var attributesBuilder = span.getAttributesBuilder();
         Stream.of(SpanAttribute.values())
               .forEach(attribute -> {
-                  String key = attribute.qualifiedName();
-                  AttributeValue value = attribute.value(this);
+                  var key = attribute.qualifiedName();
+                  var value = attribute.value(this);
                   attributesBuilder.putAttributeMap(key, value);
               });
     }
 
     private SpanName spanName(ProjectId projectId, SpanId spanId) {
-        Any id = signal.rootMessage()
+        var id = signal.rootMessage()
                        .getId();
-        SignalId signalId = (SignalId) unpack(id);
-        TraceId traceId = new TraceId(signalId);
+        var signalId = (SignalId) unpack(id);
+        var traceId = new TraceId(signalId);
         return SpanName.from(projectId, traceId, spanId);
     }
 

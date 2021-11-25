@@ -106,11 +106,10 @@ public final class DsQueryIterator<R> extends UnmodifiableIterator<R> implements
      * query results.
      */
     StructuredQuery<R> nextPageQuery() {
-        Cursor cursorAfter = currentPage.getCursorAfter();
-        StructuredQuery<R> queryForMoreResults =
-                query.toBuilder()
-                     .setStartCursor(cursorAfter)
-                     .build();
+        var cursorAfter = currentPage.getCursorAfter();
+        var queryForMoreResults = query.toBuilder()
+                .setStartCursor(cursorAfter)
+                .build();
         return queryForMoreResults;
     }
 
@@ -119,7 +118,7 @@ public final class DsQueryIterator<R> extends UnmodifiableIterator<R> implements
         if (!hasNext()) {
             throw new NoSuchElementException("The query results Iterator is empty.");
         }
-        R result = currentPage.next();
+        var result = currentPage.next();
         readCount++;
         return result;
     }

@@ -27,11 +27,8 @@
 package io.spine.server.storage.datastore.query;
 
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Value;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.query.ComparisonOperator;
-import io.spine.query.LogicalOperator;
 import io.spine.query.QueryPredicate;
 import io.spine.query.Subject;
 import io.spine.query.SubjectParameter;
@@ -45,6 +42,10 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * Tests if a Datastore Entity matches the parameters defined
  * by the {@linkplain Subject query subject}.
  *
+ * @param <I>
+ *         the type of the identifiers of the queried records
+ * @param <R>
+ *         the type of the queried records
  * @implNote The methods of this type rely upon the provided instance of {@link
  *         FilterAdapter}, therefore cannot be made {@code static}.
  */
@@ -73,15 +74,15 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
             return false;
         }
 
-        QueryPredicate<R> root = querySubject.predicate();
-        boolean result = testPredicate(root, entity);
+        var root = querySubject.predicate();
+        var result = testPredicate(root, entity);
         return result;
     }
 
     private boolean testPredicate(QueryPredicate<R> predicate, Entity entity) {
-        LogicalOperator operator = predicate.operator();
-        ImmutableList<SubjectParameter<?, ?, ?>> parameters = predicate.allParams();
-        ImmutableList<QueryPredicate<R>> children = predicate.children();
+        var operator = predicate.operator();
+        var parameters = predicate.allParams();
+        var children = predicate.children();
 
         boolean match;
         switch (operator) {
@@ -109,8 +110,8 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     }
 
     private boolean checkAndChildren(Entity entity, ImmutableList<QueryPredicate<R>> children) {
-        for (QueryPredicate<R> child : children) {
-            boolean matches = testPredicate(child, entity);
+        for (var child : children) {
+            var matches = testPredicate(child, entity);
             if (!matches) {
                 return true;
             }
@@ -119,8 +120,8 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     }
 
     private boolean checkAndParams(Entity entity, ImmutableList<SubjectParameter<?, ?, ?>> params) {
-        for (SubjectParameter<?, ?, ?> param : params) {
-            boolean matches = checkParamValue(param, entity);
+        for (var param : params) {
+            var matches = checkParamValue(param, entity);
             if (!matches) {
                 return true;
             }
@@ -141,8 +142,8 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     }
 
     private boolean checkOrChildren(Entity entity, ImmutableList<QueryPredicate<R>> children) {
-        for (QueryPredicate<R> child : children) {
-            boolean matches = testPredicate(child, entity);
+        for (var child : children) {
+            var matches = testPredicate(child, entity);
             if (matches) {
                 return true;
             }
@@ -151,8 +152,8 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     }
 
     private boolean checkOrParams(Entity entity, ImmutableList<SubjectParameter<?, ?, ?>> params) {
-        for (SubjectParameter<?, ?, ?> param : params) {
-            boolean matches = checkParamValue(param, entity);
+        for (var param : params) {
+            var matches = checkParamValue(param, entity);
             if (matches) {
                 return true;
             }
@@ -161,18 +162,18 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     }
 
     private boolean checkParamValue(SubjectParameter<?, ?, ?> parameter, Entity entity) {
-        String columnName = parameter.column()
-                                     .name()
-                                     .value();
+        var columnName = parameter.column()
+                                  .name()
+                                  .value();
         if (!entity.contains(columnName)) {
             return false;
         }
-        Value<?> typedActual = entity.getValue(columnName);
-        Object actual = typedActual.get();
-        Value<?> typedExpected = adapter.transformValue(parameter);
-        Object expected = typedExpected.get();
-        ComparisonOperator operator = parameter.operator();
-        boolean result = operator.eval(actual, expected);
+        var typedActual = entity.getValue(columnName);
+        var actual = typedActual.get();
+        var typedExpected = adapter.transformValue(parameter);
+        var expected = typedExpected.get();
+        var operator = parameter.operator();
+        var result = operator.eval(actual, expected);
         return result;
     }
 }

@@ -27,13 +27,10 @@
 package io.spine.server.storage.datastore.tenant;
 
 import io.spine.core.TenantId;
-import io.spine.server.tenant.TenantIndex;
 import io.spine.testing.UtilityClassTest;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -48,19 +45,18 @@ final class DatastoreTenantsTest extends UtilityClassTest<DatastoreTenants> {
     @Test
     @DisplayName("create tenant index")
     void testCreateIndex() {
-        TenantIndex index =
+        var index =
                 DatastoreTenants.index(TestDatastores.local(), NsConverterFactory.defaults());
         assertNotNull(index);
         assertThat(index).isInstanceOf(NamespaceIndex.class);
 
-        String customNamespace = "Vmy-namespace";
-        TenantId customId = TenantId
-                .newBuilder()
+        var customNamespace = "Vmy-namespace";
+        var customId = TenantId.newBuilder()
                 .setValue(customNamespace)
                 .vBuild();
         index.keep(customId);
 
-        Set<TenantId> ids = index.all();
+        var ids = index.all();
         assertThat(ids).contains(customId);
     }
 }

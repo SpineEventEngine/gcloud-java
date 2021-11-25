@@ -44,6 +44,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>This type tells both how to structure records in terms of hierarchy, and how to transform
  * each Protobuf {@code Message} record into a Datastore Entity with its attributes.
+ *
+ * @param <I>
+ *         the type of identifiers of the stored records
+ * @param <R>
+ *         the type of stored records
  */
 public final class DsEntitySpec<I, R extends Message> {
 
@@ -100,7 +105,7 @@ public final class DsEntitySpec<I, R extends Message> {
      * @return a new instance of Datastore Entity key
      */
     public Key keyOf(I id, DatastoreMedium datastore) {
-        Key key = layout.keyOf(id, datastore);
+        var key = layout.keyOf(id, datastore);
         return key;
     }
 

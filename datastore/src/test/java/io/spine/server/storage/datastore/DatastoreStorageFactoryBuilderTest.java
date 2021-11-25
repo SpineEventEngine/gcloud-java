@@ -30,7 +30,6 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.ContextSpec;
 import io.spine.server.storage.ColumnMapping;
 import io.spine.server.storage.datastore.config.DsColumnMapping;
 import io.spine.server.storage.datastore.config.FlatLayout;
@@ -77,11 +76,10 @@ final class DatastoreStorageFactoryBuilderTest {
     @Test
     @DisplayName("construct factories with default column mapping")
     void testDefaultColumnMapping() {
-        DatastoreStorageFactory factory = DatastoreStorageFactory
-                .newBuilder()
+        var factory = DatastoreStorageFactory.newBuilder()
                 .setDatastore(datastore())
                 .build();
-        ColumnMapping<Value<?>> mapping = factory.columnMapping();
+        var mapping = factory.columnMapping();
         assertNotNull(mapping);
     }
 
@@ -89,17 +87,16 @@ final class DatastoreStorageFactoryBuilderTest {
     @DisplayName("construct factories with custom column mapping")
     void testCustomColumnMapping() {
         ColumnMapping<Value<?>> mapping = new TestColumnMapping();
-        DatastoreStorageFactory factory = DatastoreStorageFactory
-                .newBuilder()
+        var factory = DatastoreStorageFactory.newBuilder()
                 .setDatastore(datastore())
                 .setColumnMapping(mapping)
                 .build();
-        ColumnMapping<Value<?>> mappingUsedByFactory = factory.columnMapping();
+        var mappingUsedByFactory = factory.columnMapping();
         assertNotNull(mappingUsedByFactory);
 
-        String someString = "some-test-string";
-        Value<?> value = mappingUsedByFactory.of(String.class)
-                                             .applyTo(someString);
+        var someString = "some-test-string";
+        var value = mappingUsedByFactory.of(String.class)
+                                        .applyTo(someString);
         assertThat(value).isEqualTo(TestColumnMapping.STRING_MAPPING_RESULT);
     }
 
@@ -110,29 +107,27 @@ final class DatastoreStorageFactoryBuilderTest {
 
         @BeforeEach
         void setUp() {
-            builder = DatastoreOptions
-                    .newBuilder()
+            builder = DatastoreOptions.newBuilder()
                     .setProjectId(defaultLocalProjectId().value());
         }
 
         @Test
         @DisplayName("allow custom namespace for single-tenant instances")
         void testCustomNamespace() {
-            String namespace = "my.custom.namespace";
-            DatastoreOptions options =
+            var namespace = "my.custom.namespace";
+            var options =
                     builder.setNamespace(namespace)
                            .build();
-            ContextSpec spec =
+            var spec =
                     singleTenant(DatastoreStorageFactoryBuilderTest.class.getSimpleName());
-            DatastoreStorageFactory factory = DatastoreStorageFactory
-                    .newBuilder()
+            var factory = DatastoreStorageFactory.newBuilder()
                     .setDatastore(options.getService())
                     .build();
             assertNotNull(factory);
-            String actualNamespace = factory.wrapperFor(spec)
-                                            .datastore()
-                                            .getOptions()
-                                            .getNamespace();
+            var actualNamespace = factory.wrapperFor(spec)
+                                         .datastore()
+                                         .getOptions()
+                                         .getNamespace();
             assertEquals(namespace, actualNamespace);
         }
     }

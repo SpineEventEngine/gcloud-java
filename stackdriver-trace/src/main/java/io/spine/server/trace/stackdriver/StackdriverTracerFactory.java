@@ -133,8 +133,7 @@ public class StackdriverTracerFactory implements TracerFactory {
          */
         public Builder setCallContext(GrpcCallContext callContext) {
             checkNotNull(callContext);
-            this.clientContext = ClientContext
-                    .newBuilder()
+            this.clientContext = ClientContext.newBuilder()
                     .setDefaultCallContext(callContext)
                     .build();
             return this;

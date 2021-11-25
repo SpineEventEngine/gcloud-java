@@ -27,7 +27,6 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -50,7 +49,7 @@ public final class ProjectId extends DsIdentifier {
      * @return new instance of {@code ProjectId}
      */
     public static ProjectId of(String projectId) {
-        ProjectId result = new ProjectId(checkNotNull(projectId));
+        var result = new ProjectId(checkNotNull(projectId));
         return result;
     }
 
@@ -64,8 +63,8 @@ public final class ProjectId extends DsIdentifier {
      */
     public static ProjectId of(Datastore datastore) {
         checkNotNull(datastore);
-        DatastoreOptions options = datastore.getOptions();
-        String value = options.getProjectId();
+        var options = datastore.getOptions();
+        var value = options.getProjectId();
         return of(value);
     }
 }

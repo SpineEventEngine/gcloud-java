@@ -27,7 +27,6 @@
 package io.spine.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
-import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import io.spine.testing.server.storage.datastore.TestDatastores;
@@ -52,11 +51,11 @@ final class ProjectIdTest {
     @Test
     @DisplayName("support equality")
     void testEquals() {
-        ProjectId a1 = ProjectId.of("a");
-        ProjectId a2 = ProjectId.of(datastore("a"));
+        var a1 = ProjectId.of("a");
+        var a2 = ProjectId.of(datastore("a"));
 
-        ProjectId b1 = ProjectId.of("b");
-        ProjectId b2 = ProjectId.of(datastore("b"));
+        var b1 = ProjectId.of("b");
+        var b2 = ProjectId.of(datastore("b"));
 
         new EqualsTester()
                 .addEqualityGroup(a1, a2)
@@ -67,19 +66,19 @@ final class ProjectIdTest {
     @Test
     @DisplayName("support `toString()`")
     void testToString() {
-        String value = "my-fancy-project-id";
-        ProjectId projectId = ProjectId.of(value);
-        String idAsString = projectId.toString();
+        var value = "my-fancy-project-id";
+        var projectId = ProjectId.of(value);
+        var idAsString = projectId.toString();
 
         assertThat(idAsString).contains(value);
     }
 
     private static Datastore datastore(String projectId) {
-        DatastoreOptions options = local().getOptions()
-                                          .toBuilder()
-                                          .setProjectId(projectId)
-                                          .build();
-        Datastore datastore = options.getService();
+        var options = local().getOptions()
+                .toBuilder()
+                .setProjectId(projectId)
+                .build();
+        var datastore = options.getService();
         return datastore;
     }
 }

@@ -79,17 +79,16 @@ public final class Entities {
         if (entity == null) {
             return defaultMessage(type);
         }
-        Any wrapped = toAny(entity, type);
-        M result = (M) unpack(wrapped);
+        var wrapped = toAny(entity, type);
+        var result = (M) unpack(wrapped);
         return result;
     }
 
     private static Any toAny(Entity entity, TypeUrl type) {
-        String typeName = type.value();
-        Blob value = entity.getBlob(bytes);
-        ByteString valueBytes = ByteString.copyFrom(value.toByteArray());
-        Any result = Any
-                .newBuilder()
+        var typeName = type.value();
+        var value = entity.getBlob(bytes);
+        var valueBytes = ByteString.copyFrom(value.toByteArray());
+        var result = Any.newBuilder()
                 .setValue(valueBytes)
                 .setTypeUrl(typeName)
                 .build();
@@ -122,8 +121,8 @@ public final class Entities {
      * @return new instance of {@link Entity} containing serialized proto message
      */
     public static Entity fromMessage(Message message, Key key) {
-        Entity.Builder builder = builderFromMessage(message, key);
-        Entity entity = builder.build();
+        var builder = builderFromMessage(message, key);
+        var entity = builder.build();
         return entity;
     }
 
@@ -141,26 +140,24 @@ public final class Entities {
         checkNotNull(message);
         checkNotNull(key);
 
-        byte[] messageBytes = message.toByteArray();
-        Blob valueBlob = Blob.copyFrom(messageBytes);
-        BlobValue blobValue = BlobValue
-                .newBuilder(valueBlob)
+        var messageBytes = message.toByteArray();
+        var valueBlob = Blob.copyFrom(messageBytes);
+        var blobValue = BlobValue.newBuilder(valueBlob)
                 .setExcludeFromIndexes(true)
                 .build();
-        Entity.Builder builder = Entity
-                .newBuilder(key)
+        var builder = Entity.newBuilder(key)
                 .set(bytes, blobValue);
         return builder;
     }
 
     @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"} /* Rely on caller. */)
     private static <M extends Message> M defaultMessage(TypeUrl type) {
-        Class<M> messageClass = (Class<M>) type.toJavaClass();
+        var messageClass = (Class<M>) type.toJavaClass();
         checkState(messageClass != null,
                    "Not found class for type url \"%s\". Try to rebuild the project.",
                    type.toTypeName()
                        .value());
-        M message = Internal.getDefaultInstance(messageClass);
+        var message = Internal.getDefaultInstance(messageClass);
         return message;
     }
 }

@@ -54,11 +54,10 @@ abstract class ShortTraceApiString extends TraceApiString {
      * @return hexadecimal string of a given length or shorter
      */
     static String hexOfLength(SignalId id, int resultLength) {
-        long mostSignificantBits = UUID.fromString(id.value())
-                                       .getMostSignificantBits();
-        long leastSignificantBits = UUID.fromString(id.value())
-                                        .getLeastSignificantBits();
-        String result = toHexString(mostSignificantBits) + toHexString(leastSignificantBits);
+        var uuid = UUID.fromString(id.value());
+        var mostSignificantBits = uuid.getMostSignificantBits();
+        var leastSignificantBits = uuid.getLeastSignificantBits();
+        var result = toHexString(mostSignificantBits) + toHexString(leastSignificantBits);
         return shorten(result, resultLength);
     }
 

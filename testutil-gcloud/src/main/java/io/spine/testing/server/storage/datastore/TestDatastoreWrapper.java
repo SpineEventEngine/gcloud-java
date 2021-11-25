@@ -43,8 +43,10 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.synchronizedList;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * Custom extension of the {@link DatastoreWrapper} for the integration testing.
@@ -127,10 +129,9 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
         }
     }
 
-    @SuppressWarnings("BusyWait")   // allows Datastore some time between cleanup attempts.
     private void dropTableConsistently(Kind table) {
         Integer remainingEntityCount = null;
-        int cleanupAttempts = 0;
+        var cleanupAttempts = 0;
 
         while ((remainingEntityCount == null
                 || remainingEntityCount > 0)
@@ -138,11 +139,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
 
             // sleep in between the cleanup attempts.
             if (cleanupAttempts > 0) {
-                try {
-                    Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
-                } catch (InterruptedException e) {
-                    throw new IllegalStateException(e);
-                }
+                sleepUninterruptibly(CONSISTENCY_AWAIT_TIME_MS, MILLISECONDS);
             }
 
             StructuredQuery<Entity> query = Query.newEntityQueryBuilder()
@@ -174,15 +171,10 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
         doWaitForConsistency();
     }
 
-    @SuppressWarnings("BusyWait")   // allow Datastore to become consistent before reading.
     @VisibleForTesting
     protected void doWaitForConsistency() {
-        for (int awaitCycle = 0; awaitCycle < CONSISTENCY_AWAIT_ITERATIONS; awaitCycle++) {
-            try {
-                Thread.sleep(CONSISTENCY_AWAIT_TIME_MS);
-            } catch (InterruptedException e) {
-                throw new IllegalStateException(e);
-            }
+        for (var awaitCycle = 0; awaitCycle < CONSISTENCY_AWAIT_ITERATIONS; awaitCycle++) {
+            sleepUninterruptibly(CONSISTENCY_AWAIT_TIME_MS, MILLISECONDS);
         }
     }
 
@@ -191,7 +183,7 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
      */
     public void dropAllTables() {
         _debug().log("Dropping all tables...");
-        for (Kind kind : kindsCache) {
+        for (var kind : kindsCache) {
             dropTable(kind);
         }
 

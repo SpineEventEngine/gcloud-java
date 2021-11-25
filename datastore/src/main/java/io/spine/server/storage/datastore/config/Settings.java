@@ -133,11 +133,11 @@ abstract class Settings<S, T, B> {
 
         private ImmutableMap<Class<? extends Message>, T> collect() {
             ImmutableMap.Builder<Class<? extends Message>, T> builder = ImmutableMap.builder();
-            for (Class<? extends Message> recordType : values.keySet()) {
-                T value = values.get(recordType);
+            for (var recordType : values.keySet()) {
+                var value = values.get(recordType);
                 builder.put(recordType, value);
             }
-            ImmutableMap<Class<? extends Message>, T> result = builder.build();
+            var result = builder.build();
             return result;
         }
     }

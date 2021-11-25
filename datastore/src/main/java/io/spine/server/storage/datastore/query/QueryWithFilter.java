@@ -30,7 +30,6 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.ImmutableList;
-import io.spine.query.RecordColumn;
 import io.spine.query.RecordQuery;
 import io.spine.query.SortBy;
 import io.spine.server.storage.datastore.Kind;
@@ -68,20 +67,20 @@ final class QueryWithFilter implements Function<StructuredQuery.Filter, Structur
         ImmutableList<? extends SortBy<?, ?>> sorting = query.sorting();
         if (!sorting.isEmpty()) {
             for (SortBy<?, ?> sortBy : sorting) {
-                StructuredQuery.OrderBy orderBy = translateSortBy(sortBy);
+                var orderBy = translateSortBy(sortBy);
                 builder.addOrderBy(orderBy);
             }
         }
-        Integer limit = query.limit();
+        var limit = query.limit();
         if (limit != null && limit > 0) {
             this.builder.setLimit(limit);
         }
     }
 
     private static StructuredQuery.OrderBy translateSortBy(SortBy<?, ?> sortBy) {
-        RecordColumn<?, ?> column = sortBy.column();
-        String columnName = column.name()
-                                  .value();
+        var column = sortBy.column();
+        var columnName = column.name()
+                               .value();
         return sortBy.direction() == ASC
                ? asc(columnName)
                : desc(columnName);
@@ -90,8 +89,8 @@ final class QueryWithFilter implements Function<StructuredQuery.Filter, Structur
     @Override
     public StructuredQuery<Entity> apply(StructuredQuery.Filter filter) {
         checkNotNull(filter);
-        StructuredQuery<Entity> query = builder.setFilter(filter)
-                                               .build();
+        var query = builder.setFilter(filter)
+                           .build();
         return query;
     }
 
@@ -99,7 +98,7 @@ final class QueryWithFilter implements Function<StructuredQuery.Filter, Structur
      * Creates a new {@code StructuredQuery} without filters.
      */
     StructuredQuery<Entity> withNoFilter() {
-        StructuredQuery<Entity> result = builder.build();
+        var result = builder.build();
         return result;
     }
 }

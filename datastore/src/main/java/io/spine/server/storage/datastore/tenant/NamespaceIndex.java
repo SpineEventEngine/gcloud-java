@@ -99,9 +99,9 @@ final class NamespaceIndex implements TenantIndex {
             fetchNamespaces();
 
             Set<TenantId> result = new HashSet<>(cache.size());
-            for (Namespace namespace : cache) {
+            for (var namespace : cache) {
                 if (namespace != null) {
-                    TenantId tenantId = namespace.toTenantId();
+                    var tenantId = namespace.toTenantId();
                     if (!NOT_A_TENANT.equals(tenantId)) {
                         result.add(tenantId);
                     }
@@ -138,13 +138,13 @@ final class NamespaceIndex implements TenantIndex {
         }
 
         synchronized (lock) {
-            boolean cachedNamespace = cache.contains(namespace);
+            var cachedNamespace = cache.contains(namespace);
             if (cachedNamespace) {
                 return true;
             }
 
             fetchNamespaces();
-            boolean result = cache.contains(namespace);
+            var result = cache.contains(namespace);
             return result;
         }
     }
@@ -153,10 +153,10 @@ final class NamespaceIndex implements TenantIndex {
      * Fetches the namespaces from the Datastore into the in-mem cache.
      */
     private void fetchNamespaces() {
-        Iterator<Key> existingNamespaces = namespaceQuery.run();
+        var existingNamespaces = namespaceQuery.run();
         Set<Namespace> newNamespaces = newHashSet();
-        NamespaceUnpacker unpacker = new NamespaceUnpacker(multitenant, converterFactory);
-        Iterator<Namespace> extractedNamespaces = Iterators.transform(existingNamespaces, unpacker);
+        var unpacker = new NamespaceUnpacker(multitenant, converterFactory);
+        var extractedNamespaces = Iterators.transform(existingNamespaces, unpacker);
         Iterators.addAll(newNamespaces, extractedNamespaces);
 
         // Never delete tenants, only add new ones

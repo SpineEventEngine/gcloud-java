@@ -35,10 +35,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.query.RecordQuery;
 import io.spine.server.storage.ColumnMapping;
-import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordWithColumns;
-import io.spine.server.storage.datastore.DatastoreMedium;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.Kind;
@@ -47,7 +45,9 @@ import io.spine.server.storage.datastore.config.StorageConfiguration;
 import io.spine.server.storage.datastore.config.TxSetting;
 import io.spine.server.storage.datastore.query.DsLookup;
 import io.spine.server.storage.datastore.query.FilterAdapter;
+import io.spine.server.storage.datastore.query.PreparedQuery;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Iterator;
 
@@ -59,6 +59,10 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * {@link RecordStorage} implementation based on Google Cloud Datastore.
  *
+ * @param <I>
+ *         the type of identifiers of the stored records
+ * @param <R>
+ *         the type of stored records
  * @see DatastoreStorageFactory
  */
 public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
@@ -94,9 +98,9 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
 
     @Override
     protected Iterator<I> index(RecordQuery<I, R> query) {
-        RecordSpec<I, R, ?> spec = recordSpec();
-        Iterator<R> recordIterator = readAllRecords(query);
-        Iterator<I> result = transform(recordIterator, spec::idFromRecord);
+        var spec = recordSpec();
+        var recordIterator = readAllRecords(query);
+        var result = transform(recordIterator, spec::idFromRecord);
         return result;
     }
 
@@ -108,7 +112,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
     @Override
     protected void writeRecord(RecordWithColumns<I, R> record) {
         checkNotNull(record, "Record is null.");
-        Entity entity = entityRecordToEntity(record);
+        var entity = entityRecordToEntity(record);
         write((storage) -> storage.createOrUpdate(entity));
     }
 
@@ -118,20 +122,23 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
 
         ImmutableList.Builder<Entity> entitiesToWrite = ImmutableList.builder();
         for (RecordWithColumns<I, R> record : records) {
-            Entity entity = entityRecordToEntity(record);
+            var entity = entityRecordToEntity(record);
             entitiesToWrite.add(entity);
         }
-        ImmutableList<Entity> prepared = entitiesToWrite.build();
+        var prepared = entitiesToWrite.build();
         write((storage) -> datastore.createOrUpdate(prepared));
     }
 
     @Override
     protected Iterator<R> readAllRecords(RecordQuery<I, R> query) {
-        Iterable<R> result =
-                read((storage) -> DsLookup.onTopOf(datastore, columnFilterAdapter, dsSpec)
-                                          .with(query)
-                                          .execute());
+        var result = read((storage) -> lookupWith(query).execute());
         return result.iterator();
+    }
+
+    @NonNull
+    private PreparedQuery<I, R> lookupWith(RecordQuery<I, R> query) {
+        return DsLookup.onTopOf(datastore, columnFilterAdapter, dsSpec)
+                       .with(query);
     }
 
     /**
@@ -143,7 +150,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
     @CanIgnoreReturnValue
     @Override
     protected boolean deleteRecord(I id) {
-        Key key = keyOf(id);
+        var key = keyOf(id);
         write(storage -> storage.delete(key));
         return true;
     }
@@ -160,7 +167,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
      * Creates a new {@code Key} for the passed record identifier.
      */
     protected final Key keyOf(I id) {
-        Key result = dsSpec.keyOf(id, datastore);
+        var result = dsSpec.keyOf(id, datastore);
         return result;
     }
 
@@ -168,19 +175,18 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
      * Creates a new Datastore {@code Entity} from the passed {@code RecordWithColumns}.
      */
     protected final Entity entityRecordToEntity(RecordWithColumns<I, R> recordWithCols) {
-        R record = recordWithCols.record();
-        I id = recordWithCols.id();
-        Key key = keyOf(id);
-        Entity.Builder entity = builderFromMessage(record, key);
+        var record = recordWithCols.record();
+        var id = recordWithCols.id();
+        var key = keyOf(id);
+        var entity = builderFromMessage(record, key);
 
         recordWithCols.columnNames()
                       .forEach(columnName -> {
-                          Value<?> columnValue = recordWithCols.columnValue(columnName,
-                                                                            columnMapping);
+                          var columnValue = recordWithCols.columnValue(columnName, columnMapping);
                           entity.set(columnName.value(), columnValue);
                       });
 
-        Entity completeEntity = entity.build();
+        var completeEntity = entity.build();
         return completeEntity;
     }
 
@@ -200,8 +206,8 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
 
     private <V> V read(ReadOperation<V> operation) {
         if (txSetting.txEnabled()) {
-            try (TransactionWrapper tx = newTransaction()) {
-                V result = operation.perform(tx);
+            try (var tx = newTransaction()) {
+                var result = operation.perform(tx);
                 tx.commit();
                 return result;
             } catch (RuntimeException e) {
@@ -209,14 +215,14 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
                         "Error executing `ReadOperation` transactionally.");
             }
         } else {
-            V result = operation.perform(datastore);
+            var result = operation.perform(datastore);
             return result;
         }
     }
 
     private void write(WriteOperation operation) {
         if (txSetting.txEnabled()) {
-            try (TransactionWrapper tx = newTransaction()) {
+            try (var tx = newTransaction()) {
                 operation.perform(tx);
                 tx.commit();
             } catch (RuntimeException e) {
@@ -224,9 +230,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
                         "Error executing `WriteOperation` transactionally.");
             }
         } else {
-            DatastoreMedium storage = datastore;
-            operation.perform(storage);
-
+            operation.perform(datastore);
         }
     }
 }

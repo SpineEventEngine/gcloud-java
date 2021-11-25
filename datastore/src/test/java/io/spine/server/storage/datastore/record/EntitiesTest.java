@@ -52,7 +52,7 @@ final class EntitiesTest extends UtilityClassTest<Entities> {
     }
 
     private static Key someKey() {
-        Kind kind = Kind.of(EntitiesTest.class.getName());
+        var kind = Kind.of(EntitiesTest.class.getName());
         return TestDatastoreStorageFactory
                 .local()
                 .newDatastoreWrapper(false)
@@ -63,8 +63,8 @@ final class EntitiesTest extends UtilityClassTest<Entities> {
     @Test
     @DisplayName("retrieve default message instance for `null` entity")
     void testNull() {
-        TypeUrl typeUrl = TypeUrl.from(StgProject.getDescriptor());
-        StgProject expected = StgProject.getDefaultInstance();
+        var typeUrl = TypeUrl.from(StgProject.getDescriptor());
+        var expected = StgProject.getDefaultInstance();
         StgProject actual = Entities.toMessage(null, typeUrl);
 
         assertEquals(expected, actual);

@@ -1,19 +1,31 @@
 # gcloud-java
 
-[![codecov][codecov-badge]][codecov] [![Build Status][travis-badge]][travis]
+[![codecov][codecov-badge]][codecov]
+[![Ubuntu build][ubuntu-build-badge]][gh-actions]
+
 
 [codecov]: https://codecov.io/gh/SpineEventEngine/gcloud-java
 [codecov-badge]: https://codecov.io/gh/SpineEventEngine/gcloud-java/branch/master/graph/badge.svg
-[travis]: https://travis-ci.com/SpineEventEngine/gcloud-java
-[travis-badge]: https://travis-ci.com/SpineEventEngine/gcloud-java.svg?branch=master
+[gh-actions]: https://github.com/SpineEventEngine/gcloud-java/actions
+[ubuntu-build-badge]: https://github.com/SpineEventEngine/gcloud-java/actions/workflows/build-on-ubuntu-gcloud.yml/badge.svg
+
  
 Support for Spine-based Java apps running at Google Cloud.
+
+### Java Version
+
+Starting version `2.0.0-SNAPSHOT.63`, the artifacts of this library are being built with Java 11
+compilation target. Therefore, the consumer applications have to use Java 11 or higher.
+
+Previous versions were build with Java 8.
 
 ### Artifacts
 
 Gradle:
 
 ```kotlin
+// Compatible with Java 8:
+
 dependencies {
     // Datastore Storage support library.
     implementation("io.spine.gcloud:spine-datastore:1.7.0")

@@ -26,9 +26,8 @@
 
 package io.spine.server.trace.stackdriver;
 
-import java.util.UUID;
-
 import static java.lang.Long.toHexString;
+import static java.util.UUID.randomUUID;
 
 /**
  * An identifier of a {@link com.google.devtools.cloudtrace.v2.Span}.
@@ -47,9 +46,8 @@ final class SpanId extends ShortTraceApiString {
      * Creates a random UUID-based span ID.
      */
     static SpanId random() {
-        long bits = UUID.randomUUID()
-                        .getLeastSignificantBits();
-        String value = shorten(toHexString(bits), MAX_LENGTH);
+        var bits = randomUUID().getLeastSignificantBits();
+        var value = shorten(toHexString(bits), MAX_LENGTH);
         return new SpanId(value);
     }
 }

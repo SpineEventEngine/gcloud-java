@@ -26,13 +26,8 @@
 
 package io.spine.server.storage.datastore.delivery;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import io.spine.query.ColumnName;
 import io.spine.query.QueryPredicate;
 import io.spine.query.RecordQuery;
-import io.spine.query.Subject;
-import io.spine.query.SubjectParameter;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.ShardIndex;
@@ -61,32 +56,32 @@ public final class InboxStorageLayout
 
     @Override
     protected RecordId toAncestorRecordId(InboxMessageId id) {
-        ShardIndex index = id.getIndex();
-        RecordId result = RecordId.ofEntityId(index);
+        var index = id.getIndex();
+        var result = RecordId.ofEntityId(index);
         return result;
     }
 
     @Override
     protected RecordId extractAncestorId(RecordQuery<InboxMessageId, InboxMessage> query) {
-        Subject<InboxMessageId, InboxMessage> subject = query.subject();
-        ImmutableSet<InboxMessageId> idValues = subject.id()
-                                                       .values();
-        int sizeOfIds = idValues.size();
+        var subject = query.subject();
+        var idValues = subject.id()
+                              .values();
+        var sizeOfIds = idValues.size();
         if (sizeOfIds > 1) {
             throw newIllegalArgumentException(
                     "Expected a single parent IDs for an `InboxMessage` query, but got %s.",
                     sizeOfIds);
         }
         if (sizeOfIds == 1) {
-            InboxMessageId queriedId = idValues.iterator()
-                                               .next();
+            var queriedId = idValues.iterator()
+                                    .next();
             return toAncestorRecordId(queriedId);
         }
-        QueryPredicate<InboxMessage> predicate = subject.predicate();
-        Optional<ShardIndex> referencedShard = findShardIn(predicate);
+        var predicate = subject.predicate();
+        var referencedShard = findShardIn(predicate);
         if (referencedShard.isPresent()) {
-            ShardIndex value = referencedShard.get();
-            RecordId result = RecordId.ofEntityId(value);
+            var value = referencedShard.get();
+            var result = RecordId.ofEntityId(value);
             return result;
         }
         throw newIllegalArgumentException(
@@ -96,17 +91,17 @@ public final class InboxStorageLayout
 
     @SuppressWarnings("MethodWithMultipleLoops")    /* For brevity. */
     private static Optional<ShardIndex> findShardIn(QueryPredicate<InboxMessage> predicate) {
-        ImmutableList<SubjectParameter<?, ?, ?>> parameters = predicate.allParams();
-        for (SubjectParameter<?, ?, ?> parameter : parameters) {
-            ColumnName columnName = parameter.column()
-                                             .name();
+        var parameters = predicate.allParams();
+        for (var parameter : parameters) {
+            var columnName = parameter.column()
+                                      .name();
             if (columnName.equals(inbox_shard.name())) {
-                ShardIndex shard = (ShardIndex) parameter.value();
+                var shard = (ShardIndex) parameter.value();
                 return Optional.of(shard);
             }
         }
-        for (QueryPredicate<InboxMessage> child : predicate.children()) {
-            Optional<ShardIndex> maybeResult = findShardIn(child);
+        for (var child : predicate.children()) {
+            var maybeResult = findShardIn(child);
             if (maybeResult.isPresent()) {
                 return maybeResult;
             }
@@ -116,7 +111,7 @@ public final class InboxStorageLayout
 
     @Override
     protected RecordId asRecordId(InboxMessageId id) {
-        RecordId result = RecordId.of(id.getUuid());
+        var result = RecordId.of(id.getUuid());
         return result;
     }
 }

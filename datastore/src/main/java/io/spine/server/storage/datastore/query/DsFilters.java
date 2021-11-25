@@ -36,7 +36,6 @@ import io.spine.query.ComparisonOperator;
 import io.spine.query.QueryPredicate;
 import io.spine.query.SubjectParameter;
 import io.spine.server.storage.ColumnMapping;
-import io.spine.server.storage.ColumnTypeMapping;
 
 import java.util.Collection;
 import java.util.List;
@@ -121,16 +120,16 @@ final class DsFilters {
     private static <R extends Message> Collection<StructuredQuery.Filter>
     toDsFilters(QueryPredicate<R> predicate, FilterAdapter adapter) {
         ImmutableList.Builder<StructuredQuery.Filter> result = ImmutableList.builder();
-        QueryPredicate<R> dnf = predicate.toDnf();
-        ColumnMapping<Value<?>> mapping = adapter.columnMapping();
+        var dnf = predicate.toDnf();
+        var mapping = adapter.columnMapping();
         if (dnf.operator() == AND) {
-            StructuredQuery.Filter group = handleConjunctiveGroup(dnf, mapping);
+            var group = handleConjunctiveGroup(dnf, mapping);
             result.add(group);
         } else {
             handleParameters(dnf.allParams(), mapping, result);
-            ImmutableList<QueryPredicate<R>> children = dnf.children();
-            for (QueryPredicate<R> child : children) {
-                StructuredQuery.Filter group = handleConjunctiveGroup(child, mapping);
+            var children = dnf.children();
+            for (var child : children) {
+                var group = handleConjunctiveGroup(child, mapping);
                 result.add(group);
             }
         }
@@ -144,8 +143,7 @@ final class DsFilters {
     private static void handleParameters(ImmutableList<SubjectParameter<?, ?, ?>> parameters,
                                          ColumnMapping<Value<?>> mapping,
                                          ImmutableList.Builder<StructuredQuery.Filter> result) {
-        ImmutableList<PropertyFilter> filters = parameters
-                .stream()
+        var filters = parameters.stream()
                 .map(param -> createFilter(param, mapping))
                 .collect(toImmutableList());
         result.addAll(filters);
@@ -153,19 +151,17 @@ final class DsFilters {
 
     private static <R extends Message> StructuredQuery.Filter
     handleConjunctiveGroup(QueryPredicate<R> predicate, ColumnMapping<Value<?>> mapping) {
-
         checkState(predicate.children()
                             .isEmpty(),
                    "Children collection must be empty for a conjunctive predicate group.");
-        ImmutableList<SubjectParameter<?, ?, ?>> parameters = predicate.allParams();
-        List<StructuredQuery.Filter> filters =
-                parameters.stream()
-                          .map(param -> createFilter(param, mapping))
-                          .collect(toList());
+        var parameters = predicate.allParams();
+        List<StructuredQuery.Filter> filters = parameters.stream()
+                        .map(param -> createFilter(param, mapping))
+                        .collect(toList());
 
         checkState(!filters.isEmpty());
-        StructuredQuery.Filter first = filters.get(0);
-        StructuredQuery.Filter[] other = skipFirst(filters);
+        var first = filters.get(0);
+        var other = skipFirst(filters);
         StructuredQuery.Filter group = and(first, other);
         return group;
     }
@@ -175,9 +171,9 @@ final class DsFilters {
      * the first element of the list into the result.
      */
     private static StructuredQuery.Filter[] skipFirst(List<StructuredQuery.Filter> filters) {
-        int size = filters.size();
-        List<StructuredQuery.Filter> sublist = filters.subList(1, size);
-        StructuredQuery.Filter[] result = sublist.toArray(new StructuredQuery.Filter[size - 1]);
+        var size = filters.size();
+        var sublist = filters.subList(1, size);
+        var result = sublist.toArray(new StructuredQuery.Filter[size - 1]);
         return result;
     }
 
@@ -185,13 +181,13 @@ final class DsFilters {
     createFilter(SubjectParameter<?, ?, ?> parameter, ColumnMapping<Value<?>> mapping) {
         checkNotNull(parameter);
         checkNotNull(mapping);
-        Object paramValue = parameter.value();
-        ColumnTypeMapping<?, ? extends Value<?>> typeMapping = mapping.of(paramValue.getClass());
-        Value<?> value = typeMapping.applyTo(paramValue);
-        String columnName = parameter.column()
-                                     .name()
-                                     .value();
-        PropertyFilter result = asFilter(columnName, parameter.operator(), value);
+        var paramValue = parameter.value();
+        var typeMapping = mapping.of(paramValue.getClass());
+        var value = typeMapping.applyTo(paramValue);
+        var columnName = parameter.column()
+                                  .name()
+                                  .value();
+        var result = asFilter(columnName, parameter.operator(), value);
         return result;
     }
 

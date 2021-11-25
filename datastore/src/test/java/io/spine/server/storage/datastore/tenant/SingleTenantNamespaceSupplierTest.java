@@ -27,8 +27,6 @@
 package io.spine.server.storage.datastore.tenant;
 
 import io.spine.core.TenantId;
-import io.spine.net.EmailAddress;
-import io.spine.net.InternetDomain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -41,13 +39,13 @@ final class SingleTenantNamespaceSupplierTest {
     @Test
     @DisplayName("produce empty namespace")
     void testProduceEmpty() {
-        NamespaceSupplier supplier = NamespaceSupplier.singleTenant();
-        Namespace namespace = supplier.get();
+        var supplier = NamespaceSupplier.singleTenant();
+        var namespace = supplier.get();
         assertThat(namespace)
                 .isNotNull();
         assertThat(namespace.value())
                 .isEmpty();
-        TenantId tenant = namespace.toTenantId();
+        var tenant = namespace.toTenantId();
         assertThat(isEffectivelyDefault(tenant))
                 .isTrue();
     }
@@ -55,15 +53,15 @@ final class SingleTenantNamespaceSupplierTest {
     @Test
     @DisplayName("produce custom namespace")
     void testProduceCustom() {
-        String namespaceValue = "my-custom-namespace";
-        NamespaceSupplier supplier = NamespaceSupplier.singleTenant(namespaceValue);
-        Namespace namespace = supplier.get();
+        var namespaceValue = "my-custom-namespace";
+        var supplier = NamespaceSupplier.singleTenant(namespaceValue);
+        var namespace = supplier.get();
         assertThat(namespace)
                 .isNotNull();
         assertThat(namespace.value())
                 .isEqualTo(namespaceValue);
 
-        TenantId tenant = namespace.toTenantId();
+        var tenant = namespace.toTenantId();
         assertThat(isEffectivelyDefault(tenant))
                 .isFalse();
         assertThat(tenant.getValue())
@@ -71,15 +69,15 @@ final class SingleTenantNamespaceSupplierTest {
     }
 
     private static boolean isEffectivelyDefault(TenantId tenant) {
-        InternetDomain domain = tenant.getDomain();
+        var domain = tenant.getDomain();
         if (!isDefault(domain)) {
             return false;
         }
-        EmailAddress email = tenant.getEmail();
+        var email = tenant.getEmail();
         if (!isDefault(email)) {
             return false;
         }
-        String value = tenant.getValue();
+        var value = tenant.getValue();
         return value.isEmpty();
     }
 }

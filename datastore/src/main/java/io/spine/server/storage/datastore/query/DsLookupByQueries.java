@@ -36,8 +36,6 @@ import com.google.protobuf.Message;
 import io.spine.query.QueryPredicate;
 import io.spine.query.RecordQuery;
 import io.spine.server.storage.datastore.DatastoreMedium;
-import io.spine.server.storage.datastore.DsQueryIterator;
-import io.spine.server.storage.datastore.Kind;
 import io.spine.server.storage.datastore.record.DsEntitySpec;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -51,6 +49,10 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 /**
  * An {@code Entity} lookup using {@linkplain QueryPredicate Spine query predicates}.
  *
+ * @param <I>
+ *         the type of identifiers of the searched records
+ * @param <R>
+ *         the type of searched records
  * @implNote Due to Datastore restrictions, execution of a single
  *         {@link io.spine.query.Query Query} may result into several Datastore reads.
  *         See {@link DsFilters} for details.
@@ -98,14 +100,14 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
     }
 
     private Optional<Filter> ancestorFilter(RecordQuery<I, R> query, DatastoreMedium datastore) {
-        Optional<Filter> result = spec().layout()
-                                        .ancestorFilter(query, datastore);
+        var result = spec().layout()
+                           .ancestorFilter(query, datastore);
         return result;
     }
 
     @Override
     IntermediateResult fetchFromDatastore() {
-        ImmutableList<Entity> rawEntities = findByPredicates(query());
+        var rawEntities = findByPredicates(query());
         return new IntermediateResult(rawEntities);
     }
 
@@ -113,13 +115,13 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
     Iterable<R> toRecords(IntermediateResult result) {
         checkNotNull(transformer,
                      "In-memory transformer `Datastore Entity`->`Stored record` isn't set.");
-        Iterable<R> records = transformer.apply(result);
+        var records = transformer.apply(result);
         return records;
     }
 
     private ImmutableList<Entity> findByPredicates(RecordQuery<?, R> query) {
         ImmutableList<Entity> results;
-        List<StructuredQuery<Entity>> queries = split(query);
+        var queries = split(query);
         if (queries.size() == 1) {
             results = runSingleQuery(queries.get(0));
             transformer = new ConvertAsIs<>(recordType(), mask());
@@ -132,11 +134,11 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
     }
 
     private List<StructuredQuery<Entity>> split(RecordQuery<?, R> query) {
-        QueryPredicate<R> rootPredicate = query.subject()
-                                               .predicate();
-        Kind kind = spec().kind();
+        var rootPredicate = query.subject()
+                                 .predicate();
+        var kind = spec().kind();
         if (rootPredicate.isEmpty()) {
-            StructuredQuery<Entity> result = new QueryWithFilter(query, kind).withNoFilter();
+            var result = new QueryWithFilter(query, kind).withNoFilter();
             return ImmutableList.of(result);
         }
 
@@ -148,14 +150,14 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
     }
 
     private Collection<Filter> toDatastoreFilters(QueryPredicate<R> rootPredicate) {
-        Collection<Filter> dsFilters = DsFilters.fromPredicate(rootPredicate, columnAdapter());
-        return dsFilters;
+        var filters = DsFilters.fromPredicate(rootPredicate, columnAdapter());
+        return filters;
     }
 
     private ImmutableList<Entity> runSingleQuery(StructuredQuery<Entity> query) {
-        StructuredQuery<Entity> adjustedForLayout = adjustForLayout(query);
-        DsQueryIterator<Entity> iterator = datastore.read(adjustedForLayout);
-        ImmutableList<Entity> result = ImmutableList.copyOf(iterator);
+        var adjustedForLayout = adjustForLayout(query);
+        var iterator = datastore.read(adjustedForLayout);
+        var result = ImmutableList.copyOf(iterator);
         return result;
     }
 
@@ -164,13 +166,13 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
      * in ancestor-child hierarchy.
      */
     private StructuredQuery<Entity> adjustForLayout(StructuredQuery<Entity> query) {
-        if (!ancestorFilter.isPresent()) {
+        if (ancestorFilter.isEmpty()) {
             return query;
         }
-        Filter filter = query.getFilter();
-        CompositeFilter filterWithNesting = CompositeFilter.and(filter, ancestorFilter.get());
+        var filter = query.getFilter();
+        var filterWithNesting = CompositeFilter.and(filter, ancestorFilter.get());
 
-        StructuredQuery<Entity> result = query.toBuilder()
+        var result = query.toBuilder()
                 .setFilter(filterWithNesting)
                 .build();
         return result;
@@ -185,14 +187,15 @@ final class DsLookupByQueries<I, R extends Message> extends PreparedQuery<I, R> 
      * <p>Each query is run without the {@code limit} set.
      */
     private ImmutableList<Entity> readAndJoin(Collection<StructuredQuery<Entity>> queries) {
-        ImmutableList<Entity> entities =
+        @SuppressWarnings("UnstableApiUsage")   /* Relying onto Guava's API. */
+        var entities =
                 queries.stream()
-                       .map(DsLookupByQueries::clearLimit)
-                       .map(this::adjustForLayout)
-                       .map(datastore::read)
-                       .flatMap(Streams::stream)
-                       .distinct()
-                       .collect(toImmutableList());
+                        .map(DsLookupByQueries::clearLimit)
+                        .map(this::adjustForLayout)
+                        .map(datastore::read)
+                        .flatMap(Streams::stream)
+                        .distinct()
+                        .collect(toImmutableList());
         return entities;
     }
 
