@@ -33,6 +33,7 @@ import io.spine.server.delivery.AbstractWorkRegistry;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
+import io.spine.server.delivery.WorkerId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -79,9 +80,24 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
     public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
         checkNotNull(index);
         checkNotNull(nodeId);
+
+        WorkerId worker = currentWorkerFor(nodeId);
         Optional<ShardSessionRecord> result =
-                storage.updateTransactionally(index, new UpdateNodeIfAbsent(index, nodeId));
+                storage.updateTransactionally(index, new UpdateWorkerIfAbsent(index, worker));
         return result.map(this::asSession);
+    }
+
+    /**
+     * Creates a worker ID by combining the given node ID with the ID of the current Java thread,
+     * in which the execution in performed.
+     */
+    @Override
+    protected WorkerId currentWorkerFor(NodeId id) {
+        long threadId = Thread.currentThread().getId();
+        return WorkerId.newBuilder()
+                .setNodeId(id)
+                .setValue(Long.toString(threadId))
+                .vBuild();
     }
 
     @Override
@@ -123,24 +139,24 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
     }
 
     /**
-     * Updates the {@code nodeId} for the {@link ShardSessionRecord} with the specified
+     * Updates the {@code workerId} for the {@link ShardSessionRecord} with the specified
      * {@link ShardIndex} if the record has not been picked by anyone.
      *
      * <p>If there is no such a record, creates a new record.
      */
-    private static class UpdateNodeIfAbsent implements DsSessionStorage.RecordUpdate {
+    private static class UpdateWorkerIfAbsent implements DsSessionStorage.RecordUpdate {
 
         private final ShardIndex index;
-        private final NodeId nodeToSet;
+        private final WorkerId workerToSet;
 
-        private UpdateNodeIfAbsent(ShardIndex index, NodeId set) {
+        private UpdateWorkerIfAbsent(ShardIndex index, WorkerId worker) {
             this.index = index;
-            nodeToSet = set;
+            workerToSet = worker;
         }
 
         @Override
         public Optional<ShardSessionRecord> createOrUpdate(@Nullable ShardSessionRecord previous) {
-            if (previous != null && previous.hasPickedBy()) {
+            if (previous != null && previous.hasWorker()) {
                 return Optional.empty();
             }
             ShardSessionRecord.Builder builder =
@@ -150,7 +166,7 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
                     : previous.toBuilder();
 
             ShardSessionRecord updated =
-                    builder.setPickedBy(nodeToSet)
+                    builder.setWorker(workerToSet)
                            .setWhenLastPicked(currentTime())
                            .vBuild();
             return Optional.of(updated);
