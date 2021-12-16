@@ -16,16 +16,16 @@ Gradle:
 ```kotlin
 dependencies {
     // Datastore Storage support library.
-    implementation("io.spine.gcloud:spine-datastore:1.7.0")
+    implementation("io.spine.gcloud:spine-datastore:1.8.0")
 
     // Pub/Sub messaging support library.
-    implementation("io.spine.gcloud:spine-pubsub:1.7.0")
+    implementation("io.spine.gcloud:spine-pubsub:1.8.0")
 
     // Stackdriver Trace support library.
-    implementation("io.spine.gcloud:spine-stackdriver-trace:1.7.0")
+    implementation("io.spine.gcloud:spine-stackdriver-trace:1.8.0")
 
     // Datastore-related test utilities (if needed).
-    implementation("io.spine.gcloud:testutil-gcloud:1.7.0")
+    implementation("io.spine.gcloud:testutil-gcloud:1.8.0")
 }
 ```
 
