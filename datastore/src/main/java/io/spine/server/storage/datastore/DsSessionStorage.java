@@ -34,6 +34,7 @@ import com.google.cloud.datastore.StringValue;
 import com.google.cloud.datastore.TimestampValue;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardSessionRecord;
+import io.spine.server.delivery.WorkerId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -165,9 +166,11 @@ public final class DsSessionStorage
                                  .getOfTotal());
         }),
 
-        node((m) -> {
-            return StringValue.of(m.getPickedBy()
-                                   .getValue());
+        worker((m) -> {
+            WorkerId worker = m.getWorker();
+            String value = worker.getNodeId().getValue() + '-' + worker.getValue();
+            return StringValue.of(value);
+
         }),
 
         when_last_picked((m) -> {
