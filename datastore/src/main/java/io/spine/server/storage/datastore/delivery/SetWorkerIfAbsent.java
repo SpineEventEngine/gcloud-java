@@ -26,48 +26,50 @@
 
 package io.spine.server.storage.datastore.delivery;
 
-import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardSessionRecord;
+import io.spine.server.delivery.WorkerId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 
 import static io.spine.base.Time.currentTime;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
- * Updates the {@code nodeId} for the {@link ShardSessionRecord} with the specified
- * {@link ShardIndex} if the record has not been picked by anyone.
+ * Updates the {@code worker} for the {@link ShardSessionRecord} with the specified
+ * {@link ShardIndex} if the record has not been assigned a worker by anyone.
  *
- * <p>If {@code null} is passed, creates a new record, sets the node ID to it, and returns it
+ * <p>If {@code null} is passed, creates a new record, sets the worker to it, and returns it
  * as a result.
  */
-final class SetNodeIfAbsent implements PrepareForWrite {
+final class SetWorkerIfAbsent implements PrepareForWrite {
 
     private final ShardIndex index;
-    private final NodeId nodeToSet;
+    private final WorkerId worker;
 
     /**
-     * Creates the operation for the given shard index and node ID.
+     * Creates the operation for the given shard index and worker ID.
      */
-    SetNodeIfAbsent(ShardIndex index, NodeId node) {
+    SetWorkerIfAbsent(ShardIndex index, WorkerId worker) {
         this.index = index;
-        nodeToSet = node;
+        this.worker = worker;
     }
 
     @Override
     public Optional<ShardSessionRecord> prepare(@Nullable ShardSessionRecord previous) {
-        if (previous != null && previous.hasPickedBy()) {
+        if (nonNull(previous) && previous.hasWorker()) {
             return Optional.empty();
         }
-        var builder = previous == null
-                      ? ShardSessionRecord.newBuilder()
-                              .setIndex(index)
-                      : previous.toBuilder();
 
-        var updated = builder.setPickedBy(nodeToSet)
+        var builder = isNull(previous)
+                      ? ShardSessionRecord.newBuilder().setIndex(index)
+                      : previous.toBuilder();
+        var updated = builder.setWorker(worker)
                        .setWhenLastPicked(currentTime())
                        .vBuild();
+
         return Optional.of(updated);
     }
 }

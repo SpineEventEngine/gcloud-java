@@ -86,7 +86,7 @@ final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
 
         var record = readSingleRecord(index);
         assertThat(record.getIndex()).isEqualTo(index);
-        assertThat(record.getPickedBy()).isEqualTo(nodeId);
+        assertThat(record.getWorker().getNodeId()).isEqualTo(nodeId);
     }
 
     @Test
@@ -112,7 +112,7 @@ final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
     }
 
     @Test
-    @DisplayName("complete the shard session (once picked up) and make it available for picking up")
+    @DisplayName("complete the shard session (once a worker assigned) and make it available for picking up")
     void completeSessionAndMakeItAvailable() {
         var optional = registry.pickUp(index, nodeId);
         assertTrue(optional.isPresent());
@@ -123,14 +123,14 @@ final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
         session.complete();
 
         var completedRecord = readSingleRecord(index);
-        assertFalse(completedRecord.hasPickedBy());
+        assertFalse(completedRecord.hasWorker());
 
         var anotherNode = newNode();
         var anotherOptional = registry.pickUp(index, anotherNode);
         assertTrue(anotherOptional.isPresent());
 
         var secondSessionRecord = readSingleRecord(index);
-        assertThat(secondSessionRecord.getPickedBy()).isEqualTo(anotherNode);
+        assertThat(secondSessionRecord.getWorker().getNodeId()).isEqualTo(anotherNode);
 
         var whenPickedSecond = secondSessionRecord.getWhenLastPicked();
         assertTrue(Timestamps.compare(whenPickedFirst, whenPickedSecond) < 0);
