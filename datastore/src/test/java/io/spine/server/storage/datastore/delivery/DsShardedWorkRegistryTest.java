@@ -92,7 +92,6 @@ final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
     @Test
     @DisplayName("not be able to pick up the shard if it's already picked up")
     void cannotPickUpIfTaken() {
-
         var session = registry.pickUp(index, nodeId);
         assertTrue(session.isPresent());
 
