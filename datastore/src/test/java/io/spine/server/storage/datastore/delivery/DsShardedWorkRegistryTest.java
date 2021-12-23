@@ -100,26 +100,25 @@ final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
     @DisplayName("pick up shards from different threads of the same node using different worker ID")
     void pickUpFromDifferentThreads() throws InterruptedException {
         var firstWorker = new AtomicReference<WorkerId>();
-        var firstPickUp = (Runnable) () -> {
+        var firstPickUp = new Thread(() -> {
             var index = newIndex(1, 15);
             var record = assertPickUp(index);
             firstWorker.set(record.getWorker());
-        };
+        });
 
-        var t1 = new Thread(firstPickUp);
-        t1.start();
-        t1.join();
+        firstPickUp.start();
 
         var secondWorker = new AtomicReference<WorkerId>();
-        var secondPickUp = (Runnable) () -> {
+        var secondPickUp = new Thread(() -> {
             var index = newIndex(2, 15);
             var record = assertPickUp(index);
             secondWorker.set(record.getWorker());
-        };
+        });
 
-        var t2 = new Thread(secondPickUp);
-        t2.start();
-        t2.join();
+        secondPickUp.start();
+
+        firstPickUp.join();
+        secondPickUp.join();
 
         assertNotEquals(
                 firstWorker.get(),

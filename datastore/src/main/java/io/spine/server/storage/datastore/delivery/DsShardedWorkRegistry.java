@@ -87,10 +87,13 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
     public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId node) {
         checkNotNull(index);
         checkNotNull(node);
+
         var worker = currentWorkerFor(node);
         var operation = new SetWorkerIfAbsent(index, worker);
-        var result = storage().updateTransactionally(index, operation);
-        return result.map(this::asSession);
+        var record = storage().updateTransactionally(index, operation);
+        var session = record.map(this::asSession);
+
+        return session;
     }
 
     /**
