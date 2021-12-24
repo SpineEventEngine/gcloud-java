@@ -41,8 +41,8 @@ import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
 class SessionRecordColumnTest {
 
     @Nested
-    @DisplayName("return the modified value for `worker` column when")
-    class UpdateWorkerColumn {
+    @DisplayName("modify value of `worker` column when")
+    class ModifyWorkerColumnWhen {
 
         private final NodeId initialNode = newNodeId();
         private final WorkerId initialWorker = newWorkerId(initialNode);
