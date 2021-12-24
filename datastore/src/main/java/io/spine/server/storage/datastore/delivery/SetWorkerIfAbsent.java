@@ -39,10 +39,10 @@ import static java.util.Objects.nonNull;
 
 /**
  * Sets the {@code worker} for the {@link ShardSessionRecord} with the specified
- * {@link ShardIndex} if the record exists and has not been assigned a worker.
+ * {@link ShardIndex} if the record already exists and has not been picked up.
  *
- * <p>If {@code null} is passed, creates a new record, assigns the worker to it, and returns it
- * as a result.
+ * <p>If the record doesn't exist ({@code null} is passed), creates a new record,
+ * sets the worker to it, and returns it as a result.
  */
 final class SetWorkerIfAbsent implements PrepareForWrite {
 
