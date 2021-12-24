@@ -55,8 +55,12 @@ public final class SessionRecordColumn {
                                                                          .getOfTotal());
 
     public static final RecordColumn<ShardSessionRecord, String>
-            worker = create("worker", String.class, (r) -> r.getWorker()
-                                                        .getValue());
+            worker = create("worker", String.class, (r) -> {
+                var id = r.getWorker();
+                var node = id.getNodeId();
+                var result = node.getValue() + '-' + id.getValue();
+                return result;
+    });
 
     public static final RecordColumn<ShardSessionRecord, Timestamp>
             when_last_picked = create("when_last_picked", Timestamp.class,
