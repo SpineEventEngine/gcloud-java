@@ -37,7 +37,7 @@ import static com.google.common.truth.Truth.*;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
 
-@DisplayName("SessionRecordColumn should")
+@DisplayName("`SessionRecordColumn` should")
 class SessionRecordColumnTest {
 
     @Nested
