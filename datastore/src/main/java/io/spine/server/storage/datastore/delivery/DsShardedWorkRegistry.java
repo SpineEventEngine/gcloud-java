@@ -34,6 +34,7 @@ import io.spine.server.delivery.AbstractWorkRegistry;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
+import io.spine.server.delivery.WorkerId;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 
 import java.util.Iterator;
@@ -48,7 +49,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * the session is {@linkplain #pickUp(ShardIndex, NodeId) picked up}, the corresponding
  * {@code Entity} in the Datastore is updated.
  *
- * <p>This storage uses transactions for read and write operations. It is also recommended to use
+ * <p>This storage uses transactions for read and write operations. It is also recommended using
  * this implementation with Cloud Firestore in Datastore mode, as it enforces serializable isolation
  * for transactions.
  */
@@ -83,12 +84,30 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
      * the one started earlier wins.
      */
     @Override
-    public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
+    public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId node) {
         checkNotNull(index);
-        checkNotNull(nodeId);
-        var operation = new SetNodeIfAbsent(index, nodeId);
-        var result = storage().updateTransactionally(index, operation);
-        return result.map(this::asSession);
+        checkNotNull(node);
+        var worker = currentWorkerFor(node);
+        var operation = new SetWorkerIfAbsent(index, worker);
+        var record = storage().updateTransactionally(index, operation);
+        var session = record.map(this::asSession);
+        return session;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation uses an identifier of the current thread as a {@code WorkerId}.
+     */
+    @Override
+    protected WorkerId currentWorkerFor(NodeId node) {
+        var currentThread = Thread.currentThread().getId();
+        var worker = WorkerId
+                .newBuilder()
+                .setNodeId(node)
+                .setValue(String.valueOf(currentThread))
+                .vBuild();
+        return worker;
     }
 
     @Override

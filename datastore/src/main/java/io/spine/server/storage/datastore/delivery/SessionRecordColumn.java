@@ -55,8 +55,12 @@ public final class SessionRecordColumn {
                                                                          .getOfTotal());
 
     public static final RecordColumn<ShardSessionRecord, String>
-            node = create("node", String.class, (r) -> r.getPickedBy()
-                                                        .getValue());
+            worker = create("worker", String.class, (r) -> {
+                var id = r.getWorker();
+                var node = id.getNodeId();
+                var result = node.getValue() + '-' + id.getValue();
+                return result;
+    });
 
     public static final RecordColumn<ShardSessionRecord, Timestamp>
             when_last_picked = create("when_last_picked", Timestamp.class,
@@ -65,7 +69,7 @@ public final class SessionRecordColumn {
     /**
      * Prevents this type from instantiation.
      *
-     * <p>This class exists exclusively as a container of the column definitions. Thus it isn't
+     * <p>This class exists exclusively as a container of the column definitions. Thus, it isn't
      * expected to be instantiated. See the {@link RecordColumns} docs for more details on
      * this approach.
      */
@@ -76,6 +80,6 @@ public final class SessionRecordColumn {
      * Returns the definitions of all columns.
      */
     public static ImmutableList<RecordColumn<ShardSessionRecord, ?>> definitions() {
-        return ImmutableList.of(shard, total_shards, node, when_last_picked);
+        return ImmutableList.of(shard, total_shards, worker, when_last_picked);
     }
 }

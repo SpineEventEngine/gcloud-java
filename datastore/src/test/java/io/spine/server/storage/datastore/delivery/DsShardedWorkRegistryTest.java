@@ -27,36 +27,37 @@
 package io.spine.server.storage.datastore.delivery;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.util.Timestamps;
-import io.spine.base.Identifier;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.ShardedWorkRegistry;
 import io.spine.server.delivery.ShardedWorkRegistryTest;
+import io.spine.server.delivery.WorkerId;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.base.Identifier.*;
 import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @DisplayName("`DsShardedWorkRegistry` should")
 final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
 
     private static final ShardIndex index = newIndex(1, 15);
+    private static final NodeId node = newNode();
 
-    private static final NodeId nodeId = newNode();
-
-    private final TestDatastoreStorageFactory factory =
-            TestDatastoreStorageFactory.local();
-
+    private final TestDatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
     private DsShardedWorkRegistry registry;
 
     @BeforeEach
@@ -76,64 +77,100 @@ final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
         return registry;
     }
 
-    @Test
-    @DisplayName("pick up the shard and write a corresponding record to the storage")
-    void pickUp() {
-        var session = registry.pickUp(index, nodeId);
-        assertTrue(session.isPresent());
-        assertThat(session.get()
-                          .shardIndex()).isEqualTo(index);
+    @Nested
+    @DisplayName("pick up")
+    class PickUp {
 
-        var record = readSingleRecord(index);
-        assertThat(record.getIndex()).isEqualTo(index);
-        assertThat(record.getPickedBy()).isEqualTo(nodeId);
+        @Test
+        @DisplayName("a shard and write the corresponding record to the storage")
+        void pickUp() {
+            assertPickUp(index);
+        }
+
+        @Test
+        @DisplayName("shards from different threads within the same node using different worker IDs")
+        void pickUpFromDifferentThreads() throws InterruptedException {
+            var firstWorker = new AtomicReference<WorkerId>();
+            var firstPickUp = new Thread(() -> {
+                var index = newIndex(1, 15);
+                var record = assertPickUp(index);
+                firstWorker.set(record.getWorker());
+            });
+            firstPickUp.start();
+
+            var secondWorker = new AtomicReference<WorkerId>();
+            var secondPickUp = new Thread(() -> {
+                var index = newIndex(2, 15);
+                var record = assertPickUp(index);
+                secondWorker.set(record.getWorker());
+            });
+            secondPickUp.start();
+
+            firstPickUp.join();
+            secondPickUp.join();
+
+            assertNotEquals(
+                    firstWorker.get(),
+                    secondWorker.get()
+            );
+        }
+
+        @CanIgnoreReturnValue
+        private ShardSessionRecord assertPickUp(ShardIndex index) {
+            var session = registry.pickUp(index, node);
+            assertThat(session).isPresent();
+            assertThat(session.get().shardIndex()).isEqualTo(index);
+
+            var record = readSingleRecord(index);
+            assertThat(record.getIndex()).isEqualTo(index);
+            assertThat(record.getWorker().getNodeId()).isEqualTo(node);
+
+            return record;
+        }
     }
 
     @Test
     @DisplayName("not be able to pick up the shard if it's already picked up")
     void cannotPickUpIfTaken() {
+        var session = registry.pickUp(index, node);
+        assertThat(session).isPresent();
 
-        var session = registry.pickUp(index, nodeId);
-        assertTrue(session.isPresent());
-
-        var sameIdxSameNode = registry.pickUp(index, nodeId);
-        assertFalse(sameIdxSameNode.isPresent());
+        var sameIdxSameNode = registry.pickUp(index, node);
+        assertThat(sameIdxSameNode).isEmpty();
 
         var sameIdxAnotherNode = registry.pickUp(index, newNode());
-        assertFalse(sameIdxAnotherNode.isPresent());
+        assertThat(sameIdxAnotherNode).isEmpty();
 
         var anotherIdx = newIndex(24, 100);
-        var anotherIdxSameNode = registry.pickUp(anotherIdx, nodeId);
-        assertTrue(anotherIdxSameNode.isPresent());
+        var anotherIdxSameNode = registry.pickUp(anotherIdx, node);
+        assertThat(anotherIdxSameNode).isPresent();
 
-        var anotherIdxAnotherNode =
-                registry.pickUp(anotherIdx, newNode());
-        assertFalse(anotherIdxAnotherNode.isPresent());
+        var anotherIdxAnotherNode = registry.pickUp(anotherIdx, newNode());
+        assertThat(anotherIdxAnotherNode).isEmpty();
     }
 
     @Test
-    @DisplayName("complete the shard session (once picked up) and make it available for picking up")
+    @DisplayName("complete the shard session (once a worker assigned) and make it available for picking up")
     void completeSessionAndMakeItAvailable() {
-        var optional = registry.pickUp(index, nodeId);
-        assertTrue(optional.isPresent());
+        var optional = registry.pickUp(index, node);
+        assertThat(optional).isPresent();
 
         var whenPickedFirst = readSingleRecord(index).getWhenLastPicked();
-
         var session = (DsShardProcessingSession) optional.get();
         session.complete();
 
         var completedRecord = readSingleRecord(index);
-        assertFalse(completedRecord.hasPickedBy());
+        assertThat(completedRecord.hasWorker()).isFalse();
 
         var anotherNode = newNode();
         var anotherOptional = registry.pickUp(index, anotherNode);
-        assertTrue(anotherOptional.isPresent());
+        assertThat(anotherOptional).isPresent();
 
         var secondSessionRecord = readSingleRecord(index);
-        assertThat(secondSessionRecord.getPickedBy()).isEqualTo(anotherNode);
+        assertThat(secondSessionRecord.getWorker().getNodeId()).isEqualTo(anotherNode);
 
         var whenPickedSecond = secondSessionRecord.getWhenLastPicked();
-        assertTrue(Timestamps.compare(whenPickedFirst, whenPickedSecond) < 0);
+        assertThat(Timestamps.compare(whenPickedFirst, whenPickedSecond)).isLessThan(0);
     }
 
     @Test
@@ -154,7 +191,7 @@ final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
 
     private static NodeId newNode() {
         return NodeId.newBuilder()
-                .setValue(Identifier.newUuid())
+                .setValue(newUuid())
                 .vBuild();
     }
 }
