@@ -56,6 +56,7 @@ final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
 
     private static final ShardIndex index = newIndex(1, 15);
     private static final NodeId node = newNode();
+
     private final TestDatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
     private DsShardedWorkRegistry registry;
 
