@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.Apache
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.GoogleApis
 import io.spine.internal.dependency.Grpc
@@ -181,7 +182,11 @@ subprojects {
         all {
             resolutionStrategy {
                 force(
+                    Apache.httpCore,
+                    Apache.codec,
+
                     Grpc.api,
+                    Grpc.auth,
                     Grpc.core,
                     Grpc.context,
                     Grpc.stub,
@@ -190,6 +195,7 @@ subprojects {
 
                     PerfMark.api,
 
+                    GoogleApis.AuthLibrary.credentials,
                     GoogleApis.commonProtos,
 
                     "io.spine:spine-base:$spineBaseVersion",

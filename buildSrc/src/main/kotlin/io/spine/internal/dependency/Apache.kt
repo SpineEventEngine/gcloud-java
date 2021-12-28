@@ -26,20 +26,12 @@
 
 package io.spine.internal.dependency
 
-// https://github.com/grpc/grpc-java
-@Suppress("unused")
-object Grpc {
-    @Suppress("MemberVisibilityCanBePrivate")
-    const val version        = "1.43.1"
-    const val api            = "io.grpc:grpc-api:${version}"
-    const val auth           = "io.grpc:grpc-auth:${version}"
-    const val core           = "io.grpc:grpc-core:${version}"
-    const val context        = "io.grpc:grpc-context:${version}"
-    const val stub           = "io.grpc:grpc-stub:${version}"
-    const val okHttp         = "io.grpc:grpc-okhttp:${version}"
-    const val protobuf       = "io.grpc:grpc-protobuf:${version}"
-    const val protobufLite   = "io.grpc:grpc-protobuf-lite:${version}"
-    const val protobufPlugin = "io.grpc:protoc-gen-grpc-java:${version}"
-    const val netty          = "io.grpc:grpc-netty:${version}"
-    const val nettyShaded    = "io.grpc:grpc-netty-shaded:${version}"
+// https://commons.apache.org/
+object Apache {
+
+    // https://hc.apache.org/downloads.cgi
+    const val httpCore = "org.apache.httpcomponents:httpcore:4.4.14"
+
+    // https://commons.apache.org/proper/commons-codec/changes-report.html
+    const val codec = "commons-codec:commons-codec:1.15"
 }

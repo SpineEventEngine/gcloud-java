@@ -51,7 +51,7 @@ object GoogleApis {
 
     // https://github.com/googleapis/google-auth-library-java
     object AuthLibrary {
-        const val version = "1.1.0"
+        const val version = "1.3.0"
         const val credentials = "com.google.auth:google-auth-library-credentials:${version}"
         const val oAuth2Http = "com.google.auth:google-auth-library-oauth2-http:${version}"
     }
