@@ -62,7 +62,7 @@ import static io.spine.server.ContextSpec.singleTenant;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("StackdriverTracerFactory should")
+@DisplayName("`StackdriverTracerFactory` should")
 class StackdriverTracerFactoryTest {
 
     private static final String REAL_GCP_PROJECT = "spine-dev";

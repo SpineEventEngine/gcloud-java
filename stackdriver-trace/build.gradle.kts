@@ -28,6 +28,29 @@ import io.spine.internal.dependency.GoogleCloud
 
 dependencies {
     api(GoogleCloud.trace)
+
+    testImplementation("com.google.auth:google-auth-library-oauth2-http:1.3.0")
+    testImplementation("io.grpc:grpc-auth") {
+        version {
+            strictly("1.43.1")
+        }
+    }
+
+    testImplementation("com.google.auth:google-auth-library-credentials") {
+        version {
+            strictly("1.3.0")
+        }
+    }
+    testImplementation("org.apache.httpcomponents:httpcore") {
+        version {
+            strictly("4.4.14")
+        }
+    }
+    testImplementation("commons-codec:commons-codec") {
+        version {
+            strictly("1.15")
+        }
+    }
 }
 
 //TODO:2021-07-22:alexander.yevsyukov: Turn to WARN and investigate duplicates.
