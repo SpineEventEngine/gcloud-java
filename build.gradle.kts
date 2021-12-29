@@ -183,10 +183,10 @@ subprojects {
             resolutionStrategy {
                 force(
                     Apache.httpCore,
-//                    Apache.codec,
+                    Apache.codec,
 
                     Grpc.api,
-//                    Grpc.auth,
+                    Grpc.auth,
                     Grpc.core,
                     Grpc.context,
                     Grpc.stub,
