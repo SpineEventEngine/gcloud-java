@@ -24,16 +24,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.GoogleApis
 import io.spine.internal.dependency.GoogleCloud
+import io.spine.internal.dependency.Grpc
 
 dependencies {
     api(GoogleCloud.trace)
+    testImplementation(GoogleApis.AuthLibrary.oAuth2Http)
+    testImplementation(Grpc.auth)
 }
 
-//TODO:2021-07-22:alexander.yevsyukov: Turn to WARN and investigate duplicates.
-// see https://github.com/SpineEventEngine/base/issues/657
-val dupStrategy = DuplicatesStrategy.INCLUDE
-tasks.processResources.get().duplicatesStrategy = dupStrategy
-tasks.processTestResources.get().duplicatesStrategy = dupStrategy
-tasks.sourceJar.get().duplicatesStrategy = dupStrategy
-tasks.jar.get().duplicatesStrategy = dupStrategy
+tasks {
+
+    // Turn to `WARN` and investigate duplicates.
+    // See: https://github.com/SpineEventEngine/base/issues/657
+    val strategy = DuplicatesStrategy.INCLUDE
+
+    processResources { duplicatesStrategy = strategy }
+    processTestResources { duplicatesStrategy = strategy }
+    sourceJar { duplicatesStrategy = strategy }
+    jar { duplicatesStrategy = strategy }
+}
