@@ -32,8 +32,8 @@ object GoogleCloud {
     // https://github.com/googleapis/java-core
     const val core = "com.google.cloud:google-cloud-core:2.3.3"
 
-    // https://github.com/googleapis/java-pubsub
-    const val pubSubGrpcApi = "com.google.cloud:google-cloud-pubsub:1.115.0"
+    // https://github.com/googleapis/java-pubsub/tree/main/proto-google-cloud-pubsub-v1
+    const val pubSubGrpcApi = "com.google.api.grpc:proto-google-cloud-pubsub-v1:1.97.0"
 
     // https://github.com/googleapis/java-trace
     const val trace = "com.google.cloud:google-cloud-trace:2.1.0"
