@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.ApacheHttp
+import io.spine.internal.dependency.CommonsCodec
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.GoogleApis
 import io.spine.internal.dependency.Grpc
@@ -82,15 +84,11 @@ repositories.applyStandard()
 
 plugins {
     `java-library`
-    kotlin("jvm") version io.spine.internal.dependency.Kotlin.version
+    kotlin("jvm")
     idea
-    io.spine.internal.dependency.Protobuf.GradlePlugin.apply {
-        id(id) version version
-    }
+    io.spine.internal.dependency.Protobuf.GradlePlugin.apply { id(id) }
     @Suppress("RemoveRedundantQualifierName")
-    io.spine.internal.dependency.ErrorProne.GradlePlugin.apply {
-        id(id)
-    }
+    io.spine.internal.dependency.ErrorProne.GradlePlugin.apply { id(id) }
 }
 
 spinePublishing {
@@ -181,17 +179,18 @@ subprojects {
         all {
             resolutionStrategy {
                 force(
+                    ApacheHttp.core,
+                    CommonsCodec.lib,
                     Grpc.api,
+                    Grpc.auth,
                     Grpc.core,
                     Grpc.context,
                     Grpc.stub,
                     Grpc.protobuf,
                     Grpc.protobufLite,
-
                     PerfMark.api,
-
+                    GoogleApis.AuthLibrary.credentials,
                     GoogleApis.commonProtos,
-
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion"
                 )

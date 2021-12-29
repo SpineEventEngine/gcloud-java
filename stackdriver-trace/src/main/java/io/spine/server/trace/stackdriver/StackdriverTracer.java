@@ -34,9 +34,9 @@ import io.spine.core.Signal;
 import io.spine.server.trace.AbstractTracer;
 import io.spine.system.server.EntityTypeName;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.api.client.util.Lists.newArrayList;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.synchronizedList;
 
@@ -60,7 +60,7 @@ public class StackdriverTracer extends AbstractTracer {
         this.traceService = checkNotNull(traceService);
         this.projectId = checkNotNull(gcpProjectId);
         this.context = checkNotNull(context);
-        this.spans = synchronizedList(newArrayList());
+        this.spans = synchronizedList(new ArrayList<>());
     }
 
     @Override
