@@ -74,7 +74,7 @@ buildscript {
         resolutionStrategy {
             force(
                 Kotlin.stdLib,
-                Kotlin.stdLibCommon
+                Kotlin.stdLibCommon,
             )
         }
     }
