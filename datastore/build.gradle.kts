@@ -25,7 +25,7 @@
  */
 
 import io.spine.internal.dependency.GoogleCloud
-import io.spine.internal.gradle.IncrementGuard
+import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.tools.gradle.exec.ExecFork
 
 plugins {

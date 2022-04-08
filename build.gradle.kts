@@ -31,7 +31,7 @@ import io.spine.internal.dependency.GoogleApis
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.PerfMark
-import io.spine.internal.gradle.JavadocConfig
+import io.spine.internal.gradle.javadoc.JavadocConfig
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
@@ -92,19 +92,19 @@ plugins {
 }
 
 spinePublishing {
-    with(PublishingRepos) {
-        targetRepositories.addAll(
-            cloudRepo,
-            cloudArtifactRegistry,
-            gitHub("gcloud-java")
-        )
-    }
-    projectsToPublish.addAll(
+    modules = setOf(
         "datastore",
         "stackdriver-trace",
         "testutil-gcloud",
-        "pubsub"
+        "pubsub",
     )
+    destinations = with(PublishingRepos) {
+        setOf(
+            cloudRepo,
+            cloudArtifactRegistry,
+            gitHub("gcloud-java"),
+        )
+    }
 }
 
 val spineBaseVersion: String by extra
