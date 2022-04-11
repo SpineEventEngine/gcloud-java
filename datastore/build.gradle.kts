@@ -80,5 +80,4 @@ tasks.withType(Test::class) { dependsOn(startDatastore) }
 val dupStrategy = DuplicatesStrategy.INCLUDE
 tasks.processResources.get().duplicatesStrategy = dupStrategy
 tasks.processTestResources.get().duplicatesStrategy = dupStrategy
-tasks.sourceJar.get().duplicatesStrategy = dupStrategy
 tasks.jar.get().duplicatesStrategy = dupStrategy

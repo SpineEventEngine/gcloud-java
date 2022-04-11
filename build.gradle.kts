@@ -50,7 +50,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imported things here.
 buildscript {
-    apply(from = "$rootDir/version.gradle.kts")
     io.spine.internal.gradle.doApplyStandard(repositories)
 
     val execForkPlugin = io.spine.internal.dependency.ExecForkPlugin
@@ -59,6 +58,7 @@ buildscript {
         repos.gitHub(execForkPlugin.repository)
     }
 
+    apply(from = "$rootDir/version.gradle.kts")
     val mcJavaVersion: String by extra
 
     dependencies {
@@ -80,15 +80,14 @@ buildscript {
     }
 }
 
-repositories.applyStandard()
-
 plugins {
     `java-library`
     kotlin("jvm")
     idea
-    io.spine.internal.dependency.Protobuf.GradlePlugin.apply { id(id) }
+
     @Suppress("RemoveRedundantQualifierName")
-    io.spine.internal.dependency.ErrorProne.GradlePlugin.apply { id(id) }
+    id(io.spine.internal.dependency.ErrorProne.GradlePlugin.id)
+    id(io.spine.internal.dependency.Protobuf.GradlePlugin.id)
 }
 
 spinePublishing {
@@ -119,24 +118,6 @@ allprojects {
         plugin("idea")
     }
 
-    val javaVersion = JavaVersion.VERSION_11
-
-    java {
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
-    }
-
-    kotlin {
-        explicitApi()
-    }
-
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = javaVersion.toString()
-            freeCompilerArgs = listOf("-Xskip-prerelease-check")
-        }
-    }
-
     group = "io.spine.gcloud"
     version = extra["versionToPublish"]!!
 
@@ -144,7 +125,6 @@ allprojects {
 }
 
 subprojects {
-
     apply {
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
@@ -154,16 +134,29 @@ subprojects {
         plugin("pmd-settings")
     }
 
-    tasks {
-        withType<JavaCompile> {
+    val javaVersion = JavaVersion.VERSION_11
+
+    java {
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
+
+        tasks.withType<JavaCompile>().configureEach {
             configureJavac()
             configureErrorProne()
         }
-        withType<Test> {
-            configureLogging()
-        }
-        registerTestTasks()
     }
+
+    kotlin {
+        explicitApi()
+
+        tasks.withType<KotlinCompile>().configureEach {
+            kotlinOptions {
+                jvmTarget = javaVersion.toString()
+                freeCompilerArgs = listOf("-Xskip-prerelease-check")
+            }
+        }
+    }
+
     LicenseReporter.generateReportIn(project)
     JavadocConfig.applyTo(project)
     CheckStyleConfig.applyTo(project)
@@ -174,8 +167,9 @@ subprojects {
         google()
     }
 
-    configurations.forceVersions()
     configurations {
+        forceVersions()
+        excludeProtobufLite()
         all {
             resolutionStrategy {
                 force(
@@ -197,10 +191,8 @@ subprojects {
             }
         }
     }
-    configurations.excludeProtobufLite()
 
     val spineCoreVersion: String by extra
-
     dependencies {
         ErrorProne.apply {
             errorprone(core)
@@ -218,7 +210,6 @@ subprojects {
         )
     }
 
-    val sourcesRootDir = "$projectDir/src"
     val generatedRootDir = "$projectDir/generated"
     val generatedJavaDir = "$generatedRootDir/main/java"
     val generatedTestJavaDir = "$generatedRootDir/test/java"
@@ -229,50 +220,35 @@ subprojects {
 
     sourceSets {
         main {
-            java.srcDirs(generatedJavaDir, "$sourcesRootDir/main/java", generatedSpineDir)
+            java.srcDirs(generatedJavaDir, generatedSpineDir)
             resources.srcDir("$generatedRootDir/main/resources")
-            proto.srcDirs("$sourcesRootDir/main/proto")
         }
         test {
-            java.srcDirs(generatedTestJavaDir, "$sourcesRootDir/test/java", generatedTestSpineDir)
+            java.srcDirs(generatedTestJavaDir, generatedTestSpineDir)
             resources.srcDir("$generatedRootDir/test/resources")
-            proto.srcDir("$sourcesRootDir/test/proto")
         }
     }
 
-    val copyCredentials by tasks.registering(Copy::class) {
-        val resourceDir = "$projectDir/src/test/resources"
-        val fileName = "spine-dev.json"
-        val sourceFile = file("$rootDir/$fileName")
-
-        from(sourceFile)
-        into(resourceDir)
-    }
-
-    tasks.processTestResources {
-        dependsOn(copyCredentials)
-    }
-
-    tasks.test {
-        useJUnitPlatform {
-            includeEngines("junit-jupiter")
+    tasks {
+        registerTestTasks()
+        withType<Test>().configureEach {
+            configureLogging()
+            useJUnitPlatform {
+                includeEngines("junit-jupiter")
+            }
         }
-    }
 
-    tasks.register("sourceJar", Jar::class) {
-        from(sourceSets.main.get().allJava)
-        archiveClassifier.set("sources")
-    }
+        val copyCredentials by registering(Copy::class) {
+            val resourceDir = "$projectDir/src/test/resources"
+            val fileName = "spine-dev.json"
+            val sourceFile = file("$rootDir/$fileName")
 
-    tasks.register("testOutputJar", Jar::class) {
-        from(sourceSets.test.get().output)
-        archiveClassifier.set("test")
-    }
-
-    tasks.register("javadocJar", Jar::class) {
-        from("$projectDir/build/docs/javadoc")
-        archiveClassifier.set("javadoc")
-        dependsOn(tasks.javadoc)
+            from(sourceFile)
+            into(resourceDir)
+        }
+        processTestResources {
+            dependsOn(copyCredentials)
+        }
     }
 
     // Apply the same IDEA module configuration for each of sub-projects.
@@ -299,7 +275,10 @@ subprojects {
         allowInternalJavadoc.set(true)
         rootFolder.set(rootDir)
     }
-    project.tasks["publish"].dependsOn("${project.path}:updateGitHubPages")
+
+    project.tasks.named("publish") {
+        dependsOn("${project.path}:updateGitHubPages")
+    }
 }
 
 JacocoConfig.applyTo(project)
