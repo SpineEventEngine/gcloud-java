@@ -95,13 +95,13 @@ spinePublishing {
         "datastore",
         "stackdriver-trace",
         "testutil-gcloud",
-        "pubsub",
+        "pubsub"
     )
     destinations = with(PublishingRepos) {
         setOf(
             cloudRepo,
             cloudArtifactRegistry,
-            gitHub("gcloud-java"),
+            gitHub("gcloud-java")
         )
     }
 }
