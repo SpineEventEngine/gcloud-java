@@ -42,6 +42,5 @@ tasks {
 
     processResources { duplicatesStrategy = strategy }
     processTestResources { duplicatesStrategy = strategy }
-    sourceJar { duplicatesStrategy = strategy }
     jar { duplicatesStrategy = strategy }
 }

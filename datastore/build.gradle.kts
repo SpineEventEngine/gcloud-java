@@ -25,7 +25,7 @@
  */
 
 import io.spine.internal.dependency.GoogleCloud
-import io.spine.internal.gradle.IncrementGuard
+import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.tools.gradle.exec.ExecFork
 
 plugins {
@@ -73,12 +73,17 @@ val startDatastore by tasks.registering(ExecFork::class) {
     killDescendants = false
 }
 
-tasks.withType(Test::class) { dependsOn(startDatastore) }
+tasks.withType<Test>().configureEach {
+    dependsOn(startDatastore)
+}
 
-//TODO:2021-07-22:alexander.yevsyukov: Turn to WARN and investigate duplicates.
-// see https://github.com/SpineEventEngine/base/issues/657
-val dupStrategy = DuplicatesStrategy.INCLUDE
-tasks.processResources.get().duplicatesStrategy = dupStrategy
-tasks.processTestResources.get().duplicatesStrategy = dupStrategy
-tasks.sourceJar.get().duplicatesStrategy = dupStrategy
-tasks.jar.get().duplicatesStrategy = dupStrategy
+tasks {
+
+    // Turn to `WARN` and investigate duplicates.
+    // See: https://github.com/SpineEventEngine/base/issues/657
+    val strategy = DuplicatesStrategy.INCLUDE
+
+    processResources { duplicatesStrategy = strategy }
+    processTestResources { duplicatesStrategy = strategy }
+    jar { duplicatesStrategy = strategy }
+}
