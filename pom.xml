@@ -10,7 +10,7 @@ all modules and does not describe the project structure per-subproject.
  -->
 <groupId>io.spine.gcloud</groupId>
 <artifactId>spine-gcloud-java</artifactId>
-<version>2.0.0-SNAPSHOT.66</version>
+<version>2.0.0-SNAPSHOT.67</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -44,19 +44,19 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base</artifactId>
-    <version>2.0.0-SNAPSHOT.75</version>
+    <version>2.0.0-SNAPSHOT.88</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base-types</artifactId>
-    <version>2.0.0-SNAPSHOT.75</version>
+    <version>2.0.0-SNAPSHOT.88</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-server</artifactId>
-    <version>2.0.0-SNAPSHOT.89</version>
+    <version>2.0.0-SNAPSHOT.94</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -74,13 +74,13 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-auth</artifactId>
-    <version>1.43.1</version>
+    <version>1.45.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-testutil-server</artifactId>
-    <version>2.0.0-SNAPSHOT.89</version>
+    <version>2.0.0-SNAPSHOT.94</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -102,7 +102,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.puppycrawl.tools</groupId>
     <artifactId>checkstyle</artifactId>
-    <version>9.2</version>
+    <version>10.1</version>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
@@ -112,18 +112,18 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-checks</artifactId>
-    <version>2.0.0-SNAPSHOT.76</version>
+    <version>2.0.0-SNAPSHOT.83</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-protoc</artifactId>
-    <version>2.0.0-SNAPSHOT.76</version>
+    <version>2.0.0-SNAPSHOT.83</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>
     <artifactId>pmd-java</artifactId>
-    <version>6.41.0</version>
+    <version>6.44.0</version>
   </dependency>
   <dependency>
     <groupId>org.jacoco</groupId>
