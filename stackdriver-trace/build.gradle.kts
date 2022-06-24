@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+val cloudTraceVersion: String by extra
+
 dependencies {
-    api("com.google.cloud:google-cloud-trace:1.2.8")
+    api("com.google.cloud:google-cloud-trace:$cloudTraceVersion")
 }

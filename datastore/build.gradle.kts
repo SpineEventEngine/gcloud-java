@@ -34,10 +34,11 @@ plugins {
 apply<IncrementGuard>()
 
 val spineCoreVersion: String by extra
+val cloudDatastoreVersion: String by extra
 
 dependencies {
     // Google Cloud Datastore
-    api("com.google.cloud:google-cloud-datastore:1.105.3") {
+    api("com.google.cloud:google-cloud-datastore:$cloudDatastoreVersion") {
         exclude(group = "com.google.protobuf")
         exclude(group = "com.google.guava")
     }

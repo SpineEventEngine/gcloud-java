@@ -24,7 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+val cloudPubsubV1Version: String by extra
+
 dependencies {
     // Google Cloud Pubsub protos
-    api("com.google.api.grpc:proto-google-cloud-pubsub-v1:1.92.1")
+    api("com.google.api.grpc:proto-google-cloud-pubsub-v1:$cloudPubsubV1Version")
 }
