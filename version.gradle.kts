@@ -31,7 +31,7 @@
  * `.config/gradle/dependencies.gradle`.
  */
 
-val cloudDatastoreVersion: String by extra("1.105.3")
+val cloudDatastoreVersion: String by extra("2.8.0")
 val cloudPubsubV1Version: String by extra("1.92.1")
 val cloudTraceVersion: String by extra("1.2.8")
 
