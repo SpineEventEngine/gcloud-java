@@ -1,0 +1,53 @@
+name: Build under Ubuntu
+
+on:
+  pull_request:
+    branches:
+      - master
+      - 1.x-dev
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
+      - uses: actions/setup-java@v3
+        with:
+          java-version: 8
+          distribution: zulu
+
+        # This operation is specific to `gcloud-java` repository only.
+        - name: Decrypt the credentials for the Spine-Dev service account
+          run: ./config/scripts/decrypt.sh "$SPINE_DEV_KEY" ./.github/keys/spine-dev.json.gpg ./spine-dev.json
+          env:
+            SPINE_DEV_KEY: ${{ secrets.SPINE_DEV_KEY }}
+
+          # The OS-managed Google Cloud SDK does not provide a Datastore emulator.
+        - name: Remove the OS-managed Google Cloud SDK
+          run: sudo apt-get remove google-cloud-sdk
+
+        - name: Install Google Cloud SDK utility
+          run: chmod +x ./scripts/install-gcloud.sh && ./scripts/install-gcloud.sh
+
+          # Appends the `gcloud` utility to the PATH for this particular terminal session.
+        - name: Install the Datastore emulator and Cloud Beta tools
+          run: >
+            source ~/google-cloud-sdk/path.bash.inc
+            && gcloud components install cloud-datastore-emulator --quiet
+            && gcloud components install beta --quiet
+
+          # Appends the `gcloud` utility to the PATH for this particular terminal session.
+        - name: Start the Datastore emulator
+          run: >
+            source ~/google-cloud-sdk/path.bash.inc
+            && ./scripts/start-datastore.sh &
+
+        - name: Build project and run tests
+          run: >
+            source ~/google-cloud-sdk/path.bash.inc
+            && ./gradlew build --stacktrace
