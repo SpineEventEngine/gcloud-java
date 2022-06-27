@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+val cloudTraceVersion: String by extra
+
+val grpcVersion = "1.46.0"
+val googleOauth2Version = "1.7.0"
+
 dependencies {
-    api("com.google.cloud:google-cloud-trace:1.2.8")
+    api("com.google.cloud:google-cloud-trace:$cloudTraceVersion")
+
+    /**
+     * The following libraries are the dependencies of the most recent `google-cloud-trace`.
+     *
+     * However, for some reason, they aren't available via `compileClasspath` as previously.
+     * The tests heavily rely onto these libraries, therefore they are added ad-hoc.
+     */
+    testImplementation("com.google.auth:google-auth-library-oauth2-http:$googleOauth2Version")
+    testImplementation("io.grpc:grpc-core:$grpcVersion")
+    testImplementation("io.grpc:grpc-auth:$grpcVersion")
 }

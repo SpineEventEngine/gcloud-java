@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,9 @@ import io.spine.core.Signal;
 import io.spine.server.trace.AbstractTracer;
 import io.spine.system.server.EntityTypeName;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.api.client.util.Lists.newArrayList;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.synchronizedList;
 
@@ -60,7 +60,7 @@ public class StackdriverTracer extends AbstractTracer {
         this.traceService = checkNotNull(traceService);
         this.projectId = checkNotNull(gcpProjectId);
         this.context = checkNotNull(context);
-        this.spans = synchronizedList(newArrayList());
+        this.spans = synchronizedList(new ArrayList<>());
     }
 
     @Override

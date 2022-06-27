@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ object Versions {
     val appengineApi     = "1.9.82"
     val appenginePlugin  = "2.2.0"
     val findBugs         = "3.0.2"
-    val guava            = "30.0-jre"
+    val guava            = "31.1-jre"
     val protobuf         = "3.13.0"
     val grpc             = "1.28.1"
     val flogger          = "0.5.1"

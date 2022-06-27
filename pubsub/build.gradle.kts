@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+val cloudPubsubV1Version: String by extra
+
 dependencies {
     // Google Cloud Pubsub protos
-    api("com.google.api.grpc:proto-google-cloud-pubsub-v1:1.92.1")
+    api("com.google.api.grpc:proto-google-cloud-pubsub-v1:$cloudPubsubV1Version")
 }

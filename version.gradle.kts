@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,10 @@
  * `.config/gradle/dependencies.gradle`.
  */
 
-val spineBaseVersion: String by extra("1.8.0")
-val spineCoreVersion: String by extra("1.8.0")
-val versionToPublish: String by extra("1.8.0")
+val cloudDatastoreVersion: String by extra("2.8.0")
+val cloudPubsubV1Version: String by extra("1.101.1")
+val cloudTraceVersion: String by extra("2.2.0")
+
+val spineBaseVersion: String by extra("1.8.2")
+val spineCoreVersion: String by extra("1.8.2")
+val versionToPublish: String by extra("1.8.2")

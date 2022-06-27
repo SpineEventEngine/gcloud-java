@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,11 @@ plugins {
 apply<IncrementGuard>()
 
 val spineCoreVersion: String by extra
+val cloudDatastoreVersion: String by extra
 
 dependencies {
     // Google Cloud Datastore
-    api("com.google.cloud:google-cloud-datastore:1.105.3") {
+    api("com.google.cloud:google-cloud-datastore:$cloudDatastoreVersion") {
         exclude(group = "com.google.protobuf")
         exclude(group = "com.google.guava")
     }
