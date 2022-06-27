@@ -26,6 +26,19 @@
 
 val cloudTraceVersion: String by extra
 
+val grpcVersion = "1.46.0"
+val googleOauth2Version = "1.7.0"
+
 dependencies {
     api("com.google.cloud:google-cloud-trace:$cloudTraceVersion")
+
+    /**
+     * The following libraries are the dependencies of the most recent `google-cloud-trace`.
+     *
+     * However, for some reason, they aren't available via `compileClasspath` as previously.
+     * The tests heavily rely onto these libraries, therefore they are added ad-hoc.
+     */
+    testImplementation("com.google.auth:google-auth-library-oauth2-http:$googleOauth2Version")
+    testImplementation("io.grpc:grpc-core:$grpcVersion")
+    testImplementation("io.grpc:grpc-auth:$grpcVersion")
 }
