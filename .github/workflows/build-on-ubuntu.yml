@@ -2,10 +2,6 @@ name: Build under Ubuntu
 
 on:
   pull_request:
-    branches:
-      - master
-      - v1
-
 
 jobs:
   build:
