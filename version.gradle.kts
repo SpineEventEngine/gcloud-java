@@ -37,4 +37,4 @@ val cloudTraceVersion: String by extra("2.2.0")
 
 val spineBaseVersion: String by extra("1.8.2")
 val spineCoreVersion: String by extra("1.8.2")
-val versionToPublish: String by extra("1.8.2")
+val versionToPublish: String by extra("1.9.0-SNAPSHOT.1")
