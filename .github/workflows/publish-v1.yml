@@ -49,16 +49,6 @@ jobs:
         env:
           GRADLE_PORTAL_CREDENTIALS_KEY: ${{ secrets.GRADLE_PORTAL_CREDENTIALS_KEY }}
 
-      - name: Ensure test resource directory exists
-        run: mkdir ./integration-tests/test-app/src/main/resources/
-        shell: bash
-
-      - name: Decrypt Firebase service account key
-        run: ./config/scripts/decrypt.sh "$FIREBASE_SA_KEY" ./.github/keys/firebase-sa.json.gpg ./integration-tests/test-app/src/main/resources/spine-dev.json
-        shell: bash
-        env:
-          FIREBASE_SA_KEY: ${{ secrets.FIREBASE_SA_KEY }}
-
       - name: Append Gradle properties
         run: cat ./gradle-plugin-portal.secret.properties >> ./gradle.properties
 
