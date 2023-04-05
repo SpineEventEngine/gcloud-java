@@ -32,7 +32,7 @@ import com.google.cloud.datastore.Key;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
 import io.spine.base.Identifier;
-import io.spine.base.Tests;
+import io.spine.environment.Tests;
 import io.spine.core.TenantId;
 import io.spine.net.InternetDomain;
 import io.spine.server.BoundedContext;
