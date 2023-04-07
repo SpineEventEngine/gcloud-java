@@ -60,7 +60,7 @@ jobs:
         # updated with the contents of 2.x branch. So this operation should be performed
         # manually, if really needed.
         # See https://github.com/SpineEventEngine/config/tree/master/scripts/publish-documentation.
-        run: ./gradlew publish -x test -x updateGitHubPages --stacktrace
+        run: ./gradlew publish -x test --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORMAL_GIT_HUB_PAGES_AUTHOR: developers@spine.io
