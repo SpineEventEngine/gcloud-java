@@ -31,10 +31,10 @@
  * `.config/gradle/dependencies.gradle`.
  */
 
-val cloudDatastoreVersion: String by extra("2.8.0")
-val cloudPubsubV1Version: String by extra("1.101.1")
-val cloudTraceVersion: String by extra("2.2.0")
+val cloudDatastoreVersion: String by extra("2.14.2")
+val cloudPubsubV1Version: String by extra("1.105.8")
+val cloudTraceVersion: String by extra("2.14.0")
 
-val spineBaseVersion: String by extra("1.8.2")
-val spineCoreVersion: String by extra("1.8.2")
-val versionToPublish: String by extra("1.8.2")
+val spineBaseVersion: String by extra("1.9.0-SNAPSHOT.5")
+val spineCoreVersion: String by extra("1.9.0-SNAPSHOT.10")
+val versionToPublish: String by extra("1.9.0-SNAPSHOT.1")

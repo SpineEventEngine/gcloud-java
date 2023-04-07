@@ -26,7 +26,7 @@
 
 package io.spine.server.storage.datastore;
 
-import io.spine.base.Tests;
+import io.spine.environment.Tests;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.AggregateStorageTruncationTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;

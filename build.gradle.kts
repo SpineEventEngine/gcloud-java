@@ -84,7 +84,15 @@ subprojects {
         from(Deps.scripts.slowTests(project))
         from(Deps.scripts.testOutput(project))
         from(Deps.scripts.javadocOptions(project))
-        from(Deps.scripts.javacArgs(project))
+
+        // Instead of using `Deps.scripts.javacArgs(project)`, this project needs a special
+        // version of this script, made for JDK 11.
+        //
+        // The reason is that Datastore emulator now requires JDK 11+ to start,
+        // and this library requires it in order to run tests.
+        //
+        from("${rootDir}/javac-args-jdk11.gradle")
+
         from(Deps.scripts.projectLicenseReport(project))
         from(Deps.scripts.pmd(project))
     }
