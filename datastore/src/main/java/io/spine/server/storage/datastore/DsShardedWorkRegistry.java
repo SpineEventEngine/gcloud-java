@@ -30,8 +30,8 @@ import com.google.protobuf.Duration;
 import io.spine.logging.Logging;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.AbstractWorkRegistry;
+import io.spine.server.delivery.PickUpOutcome;
 import io.spine.server.delivery.ShardIndex;
-import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.WorkerId;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -41,6 +41,8 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
+import static io.spine.server.delivery.PickUpOutcomeMixin.alreadyPicked;
+import static io.spine.server.delivery.PickUpOutcomeMixin.pickedUp;
 
 /**
  * A {@link io.spine.server.delivery.ShardedWorkRegistry} based on the Google Datastore storage.
@@ -77,14 +79,24 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
      * the one started earlier wins.
      */
     @Override
-    public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
+    public synchronized PickUpOutcome pickUp(ShardIndex index, NodeId nodeId) {
         checkNotNull(index);
         checkNotNull(nodeId);
 
         WorkerId worker = currentWorkerFor(nodeId);
-        Optional<ShardSessionRecord> result =
-                storage.updateTransactionally(index, new UpdateWorkerIfAbsent(index, worker));
-        return result.map(this::asSession);
+        UpdateWorkerIfAbsent updateAction = new UpdateWorkerIfAbsent(index, worker);
+        Optional<ShardSessionRecord> result = storage.updateTransactionally(index, updateAction);
+        if (result.isPresent()) {
+            return pickedUp(result.get());
+        } else {
+            ShardSessionRecord notUpdated = updateAction.previous().get();
+            return alreadyPicked(notUpdated.getWorker(), notUpdated.getWhenLastPicked());
+        }
+    }
+
+    @Override
+    public void release(ShardSessionRecord session) {
+        clearNode(session);
     }
 
     /**
@@ -126,11 +138,6 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
         return read;
     }
 
-    @Override
-    protected ShardProcessingSession asSession(ShardSessionRecord record) {
-        return new DsShardProcessingSession(record, () -> clearNode(record));
-    }
-
     /**
      * Obtains the session storage which persists the session records.
      */
@@ -143,11 +150,14 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
      * {@link ShardIndex} if the record has not been picked by anyone.
      *
      * <p>If there is no such a record, creates a new record.
+     *
+     * <p>Preserves the record state before updating if the supplied record is not {@code null}.
      */
     private static class UpdateWorkerIfAbsent implements DsSessionStorage.RecordUpdate {
 
         private final ShardIndex index;
         private final WorkerId workerToSet;
+        private ShardSessionRecord previous;
 
         private UpdateWorkerIfAbsent(ShardIndex index, WorkerId worker) {
             this.index = index;
@@ -156,8 +166,11 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
 
         @Override
         public Optional<ShardSessionRecord> createOrUpdate(@Nullable ShardSessionRecord previous) {
-            if (previous != null && previous.hasWorker()) {
-                return Optional.empty();
+            if (previous != null) {
+                this.previous = previous;
+                if (previous.hasWorker()) {
+                    return Optional.empty();
+                }
             }
             ShardSessionRecord.Builder builder =
                     previous == null
@@ -170,6 +183,15 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
                            .setWhenLastPicked(currentTime())
                            .vBuild();
             return Optional.of(updated);
+        }
+
+        /**
+         * Returns the {@code ShardSessionRecord} state before the update is executed, or empty
+         * {@code Optional} if the is no previous record or
+         * the {@linkplain #createOrUpdate(ShardSessionRecord) createOrUpdate()} is not called yet.
+         */
+        private Optional<ShardSessionRecord> previous() {
+            return Optional.ofNullable(previous);
         }
     }
 }
