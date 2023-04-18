@@ -125,7 +125,7 @@ public final class DsSessionStorage
             }
             return updated;
         } catch (DatastoreException e) {
-            return Optional.empty();
+            throw e;
         } catch (RuntimeException e) {
             throw newIllegalStateException(
                     e, "Cannot update the `ShardSessionRecord` with index `%s` in a transaction.",
