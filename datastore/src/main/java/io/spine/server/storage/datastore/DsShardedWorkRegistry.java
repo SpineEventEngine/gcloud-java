@@ -26,6 +26,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.datastore.DatastoreException;
 import com.google.protobuf.Duration;
 import io.spine.logging.Logging;
 import io.spine.server.NodeId;
@@ -78,13 +79,14 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
      * transaction mechanism. In case of any parallel executions of {@code pickUp} operation,
      * the one started earlier wins.
      *
-     * @throws com.google.datastore.v1.client.DatastoreException
+     * @throws DatastoreException
      *         if there is a problem updating an entity in Datastore. This exception may signal
      *         about a technical issue communicating with Datastore, or about a concurrent
      *         change of a corresponding entity.
      */
     @Override
-    public synchronized PickUpOutcome pickUp(ShardIndex index, NodeId nodeId) {
+    public synchronized PickUpOutcome pickUp(ShardIndex index, NodeId nodeId)
+            throws DatastoreException {
         checkNotNull(index);
         checkNotNull(nodeId);
 

@@ -112,7 +112,8 @@ public final class DsSessionStorage
      *         be updated due to a concurrent changes which have happened to the corresponding
      *         Datastore entity.
      */
-    Optional<ShardSessionRecord> updateTransactionally(ShardIndex index, RecordUpdate update) {
+    Optional<ShardSessionRecord> updateTransactionally(ShardIndex index, RecordUpdate update)
+            throws DatastoreException {
         try (TransactionWrapper tx = newTransaction()) {
             Key key = key(index);
             Optional<Entity> result = tx.read(key);
