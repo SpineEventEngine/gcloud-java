@@ -32,6 +32,7 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.base.Identifier;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.PickUpOutcome;
+import io.spine.server.delivery.ShardAlreadyPickedUp;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.ShardedWorkRegistry;
@@ -97,22 +98,33 @@ class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
 
         PickUpOutcome outcome = registry.pickUp(index, nodeId);
         assertThat(outcome.hasSession()).isTrue();
+        ShardSessionRecord session = outcome.getSession();
 
         PickUpOutcome sameIdxSameNode = registry.pickUp(index, nodeId);
         assertThat(sameIdxSameNode.hasSession()).isFalse();
         assertThat(sameIdxSameNode.hasAlreadyPicked()).isTrue();
 
+        ShardAlreadyPickedUp alreadyPicked = sameIdxSameNode.getAlreadyPicked();
+        assertThat(alreadyPicked.getWorker()).isEqualTo(session.getWorker());
+
         PickUpOutcome sameIdxAnotherNode = registry.pickUp(index, newNode());
         assertThat(sameIdxAnotherNode.hasSession()).isFalse();
         assertThat(sameIdxAnotherNode.hasAlreadyPicked()).isTrue();
 
+        ShardAlreadyPickedUp anotherAlreadyPicked = sameIdxAnotherNode.getAlreadyPicked();
+        assertThat(anotherAlreadyPicked.getWorker()).isEqualTo(session.getWorker());
+
         ShardIndex anotherIdx = newIndex(24, 100);
         PickUpOutcome anotherIdxSameNode = registry.pickUp(anotherIdx, nodeId);
         assertThat(anotherIdxSameNode.hasSession()).isTrue();
+        ShardSessionRecord anotherSession = anotherIdxSameNode.getSession();
 
         PickUpOutcome anotherIdxAnotherNode = registry.pickUp(anotherIdx, newNode());
         assertThat(anotherIdxAnotherNode.hasSession()).isFalse();
         assertThat(anotherIdxAnotherNode.hasAlreadyPicked()).isTrue();
+
+        ShardAlreadyPickedUp oneMoreAnotherPicked = anotherIdxAnotherNode.getAlreadyPicked();
+        assertThat(oneMoreAnotherPicked.getWorker()).isEqualTo(anotherSession.getWorker());
     }
 
     @Test
@@ -153,7 +165,8 @@ class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
     }
 
     private ShardSessionRecord readSingleRecord(ShardIndex index) {
-        Optional<ShardSessionRecord> record = registry.storage().read(index);
+        Optional<ShardSessionRecord> record = registry.storage()
+                                                      .read(index);
         assertThat(record).isPresent();
         return record.get();
     }
