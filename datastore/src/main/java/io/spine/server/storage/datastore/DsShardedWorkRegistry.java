@@ -77,6 +77,11 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
      * <p>The potential concurrent access to the same record is handled by using the Datastore
      * transaction mechanism. In case of any parallel executions of {@code pickUp} operation,
      * the one started earlier wins.
+     *
+     * @throws com.google.datastore.v1.client.DatastoreException
+     *         if there is a problem updating an entity in Datastore. This exception may signal
+     *         about a technical issue communicating with Datastore, or about a concurrent
+     *         change of a corresponding entity.
      */
     @Override
     public synchronized PickUpOutcome pickUp(ShardIndex index, NodeId nodeId) {
@@ -89,7 +94,8 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
         if (result.isPresent()) {
             return pickedUp(result.get());
         } else {
-            ShardSessionRecord notUpdated = updateAction.previous().get();
+            ShardSessionRecord notUpdated = updateAction.previous()
+                                                        .get();
             return alreadyPicked(notUpdated.getWorker(), notUpdated.getWhenLastPicked());
         }
     }
@@ -105,11 +111,12 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
      */
     @Override
     protected WorkerId currentWorkerFor(NodeId id) {
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread()
+                              .getId();
         return WorkerId.newBuilder()
-                .setNodeId(id)
-                .setValue(Long.toString(threadId))
-                .vBuild();
+                       .setNodeId(id)
+                       .setValue(Long.toString(threadId))
+                       .vBuild();
     }
 
     @Override

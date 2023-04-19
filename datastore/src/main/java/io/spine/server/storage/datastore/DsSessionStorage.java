@@ -99,15 +99,18 @@ public final class DsSessionStorage
      *
      * <p>Returns the updated record if the update succeeded.
      *
-     * <p>Returns {@code Optional.empty()} if the update could not be executed, either because
-     * the rules of the passed {@code RecordUpdate} prevented it, or due to a concurrent changes
-     * which have happened to the corresponding Datastore entity.
+     * <p>Returns {@code Optional.empty()} if the update could not be executed, because
+     * the rules of the passed {@code RecordUpdate} prevented it.
      *
      * @param index
      *         index of a record to execute an update for
      * @param update
      *         an update to perform
      * @return a modified record, or {@code Optional.empty()} if the update could not be executed
+     * @throws DatastoreException
+     *         if there is a problem communicating with Datastore, or if the entity could not
+     *         be updated due to a concurrent changes which have happened to the corresponding
+     *         Datastore entity.
      */
     Optional<ShardSessionRecord> updateTransactionally(ShardIndex index, RecordUpdate update) {
         try (TransactionWrapper tx = newTransaction()) {
@@ -168,7 +171,8 @@ public final class DsSessionStorage
 
         worker((m) -> {
             WorkerId worker = m.getWorker();
-            String value = worker.getNodeId().getValue() + '-' + worker.getValue();
+            String value = worker.getNodeId()
+                                 .getValue() + '-' + worker.getValue();
             return StringValue.of(value);
 
         }),
