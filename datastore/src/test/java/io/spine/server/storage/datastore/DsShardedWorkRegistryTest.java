@@ -128,8 +128,8 @@ class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
     }
 
     @Test
-    @DisplayName("complete the shard session (once picked up) and make it available for picking up")
-    void completeSessionAndMakeItAvailable() {
+    @DisplayName("release the shard session (once picked up) and make it available for picking up")
+    void releaseSessionAndMakeItAvailable() {
         PickUpOutcome outcome = registry.pickUp(index, nodeId);
         assertThat(outcome.hasSession()).isTrue();
 
