@@ -31,8 +31,9 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Identifier;
 import io.spine.server.NodeId;
+import io.spine.server.delivery.PickUpOutcome;
+import io.spine.server.delivery.ShardAlreadyPickedUp;
 import io.spine.server.delivery.ShardIndex;
-import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.ShardedWorkRegistry;
 import io.spine.server.delivery.ShardedWorkRegistryTest;
@@ -80,11 +81,11 @@ class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
     @Test
     @DisplayName("pick up the shard and write a corresponding record to the storage")
     void pickUp() {
-        Optional<ShardProcessingSession> session = registry.pickUp(index, nodeId);
+        PickUpOutcome outcome = registry.pickUp(index, nodeId);
         WorkerId expectedWorker = registry.currentWorkerFor(nodeId);
-        assertThat(session).isPresent();
-        assertThat(session.get()
-                          .shardIndex()).isEqualTo(index);
+        assertThat(outcome.hasSession()).isTrue();
+        assertThat(outcome.getSession()
+                          .getIndex()).isEqualTo(index);
 
         ShardSessionRecord record = readSingleRecord(index);
         assertThat(record.getIndex()).isEqualTo(index);
@@ -95,42 +96,54 @@ class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
     @DisplayName("not be able to pick up the shard if it's already picked up")
     void cannotPickUpIfTaken() {
 
-        Optional<ShardProcessingSession> session = registry.pickUp(index, nodeId);
-        assertThat(session).isPresent();
+        PickUpOutcome outcome = registry.pickUp(index, nodeId);
+        assertThat(outcome.hasSession()).isTrue();
+        ShardSessionRecord session = outcome.getSession();
 
-        Optional<ShardProcessingSession> sameIdxSameNode = registry.pickUp(index, nodeId);
-        assertThat(sameIdxSameNode).isEmpty();
+        PickUpOutcome sameIdxSameNode = registry.pickUp(index, nodeId);
+        assertThat(sameIdxSameNode.hasSession()).isFalse();
+        assertThat(sameIdxSameNode.hasAlreadyPicked()).isTrue();
 
-        Optional<ShardProcessingSession> sameIdxAnotherNode = registry.pickUp(index, newNode());
-        assertThat(sameIdxAnotherNode).isEmpty();
+        ShardAlreadyPickedUp alreadyPicked = sameIdxSameNode.getAlreadyPicked();
+        assertThat(alreadyPicked.getWorker()).isEqualTo(session.getWorker());
+
+        PickUpOutcome sameIdxAnotherNode = registry.pickUp(index, newNode());
+        assertThat(sameIdxAnotherNode.hasSession()).isFalse();
+        assertThat(sameIdxAnotherNode.hasAlreadyPicked()).isTrue();
+
+        ShardAlreadyPickedUp anotherAlreadyPicked = sameIdxAnotherNode.getAlreadyPicked();
+        assertThat(anotherAlreadyPicked.getWorker()).isEqualTo(session.getWorker());
 
         ShardIndex anotherIdx = newIndex(24, 100);
-        Optional<ShardProcessingSession> anotherIdxSameNode = registry.pickUp(anotherIdx, nodeId);
-        assertThat(anotherIdxSameNode).isPresent();
+        PickUpOutcome anotherIdxSameNode = registry.pickUp(anotherIdx, nodeId);
+        assertThat(anotherIdxSameNode.hasSession()).isTrue();
+        ShardSessionRecord anotherSession = anotherIdxSameNode.getSession();
 
-        Optional<ShardProcessingSession> anotherIdxAnotherNode =
-                registry.pickUp(anotherIdx, newNode());
-        assertThat(anotherIdxAnotherNode).isEmpty();
+        PickUpOutcome anotherIdxAnotherNode = registry.pickUp(anotherIdx, newNode());
+        assertThat(anotherIdxAnotherNode.hasSession()).isFalse();
+        assertThat(anotherIdxAnotherNode.hasAlreadyPicked()).isTrue();
+
+        ShardAlreadyPickedUp oneMoreAnotherPicked = anotherIdxAnotherNode.getAlreadyPicked();
+        assertThat(oneMoreAnotherPicked.getWorker()).isEqualTo(anotherSession.getWorker());
     }
 
     @Test
-    @DisplayName("complete the shard session (once picked up) and make it available for picking up")
-    void completeSessionAndMakeItAvailable() {
-        Optional<ShardProcessingSession> optional = registry.pickUp(index, nodeId);
-        assertThat(optional).isPresent();
+    @DisplayName("release the shard session (once picked up) and make it available for picking up")
+    void releaseSessionAndMakeItAvailable() {
+        PickUpOutcome outcome = registry.pickUp(index, nodeId);
+        assertThat(outcome.hasSession()).isTrue();
 
         Timestamp whenPickedFirst = readSingleRecord(index).getWhenLastPicked();
 
-        DsShardProcessingSession session = (DsShardProcessingSession) optional.get();
-        session.complete();
+        registry.release(outcome.getSession());
 
         ShardSessionRecord completedRecord = readSingleRecord(index);
         assertThat(completedRecord.hasWorker()).isFalse();
 
         NodeId anotherNode = newNode();
         WorkerId anotherWorker = registry.currentWorkerFor(anotherNode);
-        Optional<ShardProcessingSession> anotherOptional = registry.pickUp(index, anotherNode);
-        assertThat(anotherOptional).isPresent();
+        PickUpOutcome anotherOutcome = registry.pickUp(index, anotherNode);
+        assertThat(anotherOutcome.hasSession()).isTrue();
 
         ShardSessionRecord secondSessionRecord = readSingleRecord(index);
         assertThat(secondSessionRecord.getWorker()).isEqualTo(anotherWorker);
@@ -152,7 +165,8 @@ class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
     }
 
     private ShardSessionRecord readSingleRecord(ShardIndex index) {
-        Optional<ShardSessionRecord> record = registry.storage().read(index);
+        Optional<ShardSessionRecord> record = registry.storage()
+                                                      .read(index);
         assertThat(record).isPresent();
         return record.get();
     }
