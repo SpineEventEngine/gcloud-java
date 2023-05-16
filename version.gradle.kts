@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,6 @@ val cloudDatastoreVersion: String by extra("2.14.2")
 val cloudPubsubV1Version: String by extra("1.105.8")
 val cloudTraceVersion: String by extra("2.14.0")
 
-val spineBaseVersion: String by extra("1.9.0-SNAPSHOT.5")
-val spineCoreVersion: String by extra("1.9.0-SNAPSHOT.11")
-val versionToPublish: String by extra("1.9.0-SNAPSHOT.4")
+val spineBaseVersion: String by extra("1.9.0-SNAPSHOT.6")
+val spineCoreVersion: String by extra("1.9.0-SNAPSHOT.13")
+val versionToPublish: String by extra("1.9.0-SNAPSHOT.5")
