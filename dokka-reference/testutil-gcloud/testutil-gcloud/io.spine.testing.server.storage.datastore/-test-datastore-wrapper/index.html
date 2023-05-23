@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>TestDatastoreWrapper</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>testutil-gcloud</span>
+            </a>
+    </div>
+    <div>
+1.9.0    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":testutil-gcloud:dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="testutil-gcloud::io.spine.testing.server.storage.datastore/TestDatastoreWrapper///PointingToDeclaration//354180764">
+  <div class="breadcrumbs"><a href="../../../index.html">testutil-gcloud</a><span class="delimiter">/</span><a href="../index.html">io.spine.testing.server.storage.datastore</a><span class="delimiter">/</span><span class="current">TestDatastoreWrapper</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Test</span><wbr></wbr><span>Datastore</span><wbr></wbr><span><span>Wrapper</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":testutil-gcloud:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">class </span><a href="index.html">TestDatastoreWrapper</a></div><p class="paragraph">Custom extension of the DatastoreWrapper for the integration testing.</p><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":testutil-gcloud:dokkaHtml/main" data-filterable-set=":testutil-gcloud:dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-test-datastore-storage-factory/index.html"><span>Test</span><wbr></wbr><span>Datastore</span><wbr></wbr><span>Storage</span><wbr></wbr><span><span>Factory</span></span></a></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,FUNCTION,PROPERTY">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1219706995%2FConstructors%2F354180764" anchor-label="TestDatastoreWrapper" id="1219706995%2FConstructors%2F354180764" data-filterable-set=":testutil-gcloud:dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":testutil-gcloud:dokkaHtml/main" data-filterable-set=":testutil-gcloud:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-test-datastore-wrapper.html"><span>Test</span><wbr></wbr><span>Datastore</span><wbr></wbr><span><span>Wrapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1219706995%2FConstructors%2F354180764"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":testutil-gcloud:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>void <a href="-test-datastore-wrapper.html"><span class="token function">TestDatastoreWrapper</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Datastore datastore<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>boolean waitForConsistency</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="980201154%2FFunctions%2F354180764" anchor-label="create" id="980201154%2FFunctions%2F354180764" data-filterable-set=":testutil-gcloud:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":testutil-gcloud:dokkaHtml/main" data-filterable-set=":testutil-gcloud:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create.html"><span><span>create</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="980201154%2FFunctions%2F354180764"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":testutil-gcloud:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="create.html"><span class="token function">create</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Entity entity</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1159811222%2FFunctions%2F354180764" anchor-label="createOrUpdate" id="1159811222%2FFunctions%2F354180764" data-filterable-set=":testutil-gcloud:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":testutil-gcloud:dokkaHtml/main" data-filterable-set=":testutil-gcloud:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-or-update.html"><span>create</span><wbr></wbr><span>Or</span><wbr></wbr><span><span>Update</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1159811222%2FFunctions%2F354180764"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":testutil-gcloud:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="create-or-update.html"><span class="token function">createOrUpdate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Entity entity</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-803181518%2FFunctions%2F354180764" anchor-label="doWaitForConsistency" id="-803181518%2FFunctions%2F354180764" data-filterable-set=":testutil-gcloud:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":testutil-gcloud:dokkaHtml/main" data-filterable-set=":testutil-gcloud:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="do-wait-for-consistency.html"><span>do</span><wbr></wbr><span>Wait</span><wbr></wbr><span>For</span><wbr></wbr><span><span>Consistency</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-803181518%2FFunctions%2F354180764"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":testutil-gcloud:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>void <a href="do-wait-for-consistency.html"><span class="token function">doWaitForConsistency</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-366196990%2FFunctions%2F354180764" anchor-label="dropAllTables" id="-366196990%2FFunctions%2F354180764" data-filterable-set=":testutil-gcloud:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":testutil-gcloud:dokkaHtml/main" data-filterable-set=":testutil-gcloud:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="drop-all-tables.html"><span>drop</span><wbr></wbr><span>All</span><wbr></wbr><span><span>Tables</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-366196990%2FFunctions%2F354180764"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":testutil-gcloud:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="drop-all-tables.html"><span class="token function">dropAllTables</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Deletes all records from the datastore.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1794072166%2FFunctions%2F354180764" anchor-label="dropTable" id="1794072166%2FFunctions%2F354180764" data-filterable-set=":testutil-gcloud:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":testutil-gcloud:dokkaHtml/main" data-filterable-set=":testutil-gcloud:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="drop-table.html"><span>drop</span><wbr></wbr><span><span>Table</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1794072166%2FFunctions%2F354180764"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":testutil-gcloud:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>void <a href="drop-table.html"><span class="token function">dropTable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Kind table</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-71959390%2FFunctions%2F354180764" anchor-label="keyFactory" id="-71959390%2FFunctions%2F354180764" data-filterable-set=":testutil-gcloud:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":testutil-gcloud:dokkaHtml/main" data-filterable-set=":testutil-gcloud:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="key-factory.html"><span>key</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-71959390%2FFunctions%2F354180764"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":testutil-gcloud:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>KeyFactory <a href="key-factory.html"><span class="token function">keyFactory</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Kind kind</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1289903445%2FFunctions%2F354180764" anchor-label="update" id="1289903445%2FFunctions%2F354180764" data-filterable-set=":testutil-gcloud:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":testutil-gcloud:dokkaHtml/main" data-filterable-set=":testutil-gcloud:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update.html"><span><span>update</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1289903445%2FFunctions%2F354180764"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":testutil-gcloud:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="update.html"><span class="token function">update</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Entity entity</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="526215119%2FFunctions%2F354180764" anchor-label="wrap" id="526215119%2FFunctions%2F354180764" data-filterable-set=":testutil-gcloud:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":testutil-gcloud:dokkaHtml/main" data-filterable-set=":testutil-gcloud:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="wrap.html"><span><span>wrap</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="526215119%2FFunctions%2F354180764"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":testutil-gcloud:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">static </span><a href="index.html">TestDatastoreWrapper</a> <a href="wrap.html"><span class="token function">wrap</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Datastore datastore<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>boolean waitForConsistency</span></span><span class="token punctuation">)</span></div><div class="brief ">Wraps a given Datastore.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2023, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>

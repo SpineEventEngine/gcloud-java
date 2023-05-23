@@ -1,0 +1,36 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:io.spine.testing.server.storage.datastore////PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/index.html
+$dokka.location:io.spine.testing.server.storage.datastore/SpyStorageFactory///PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-spy-storage-factory/index.html
+$dokka.location:io.spine.testing.server.storage.datastore/SpyStorageFactory/SpyStorageFactory/#/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-spy-storage-factory/-spy-storage-factory.html
+$dokka.location:io.spine.testing.server.storage.datastore/SpyStorageFactory/createDatastoreWrapper/#boolean/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-spy-storage-factory/create-datastore-wrapper.html
+$dokka.location:io.spine.testing.server.storage.datastore/SpyStorageFactory/datastore/#/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-spy-storage-factory/datastore.html
+$dokka.location:io.spine.testing.server.storage.datastore/SpyStorageFactory/injectWrapper/#DatastoreWrapper/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-spy-storage-factory/inject-wrapper.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreStorageFactory///PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-storage-factory/index.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreStorageFactory/TestDatastoreStorageFactory/#Datastore/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-storage-factory/-test-datastore-storage-factory.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreStorageFactory/basedOn/#Datastore/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-storage-factory/based-on.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreStorageFactory/clear/#/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-storage-factory/clear.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreStorageFactory/createDatastoreWrapper/#boolean/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-storage-factory/create-datastore-wrapper.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreStorageFactory/local/#/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-storage-factory/local.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreStorageFactory/setUp/#/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-storage-factory/set-up.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreStorageFactory/tearDown/#/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-storage-factory/tear-down.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreStorageFactory/wrappers/#/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-storage-factory/wrappers.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreWrapper///PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-wrapper/index.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreWrapper/TestDatastoreWrapper/#Datastore#boolean/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-wrapper/-test-datastore-wrapper.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreWrapper/create/#Entity/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-wrapper/create.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreWrapper/createOrUpdate/#Entity/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-wrapper/create-or-update.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreWrapper/doWaitForConsistency/#/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-wrapper/do-wait-for-consistency.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreWrapper/dropAllTables/#/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-wrapper/drop-all-tables.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreWrapper/dropTable/#Kind/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-wrapper/drop-table.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreWrapper/keyFactory/#Kind/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-wrapper/key-factory.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreWrapper/update/#Entity/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-wrapper/update.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastoreWrapper/wrap/#Datastore#boolean/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastore-wrapper/wrap.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastores///PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastores/index.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastores/defaultLocalProjectId/#/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastores/default-local-project-id.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastores/local/#/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastores/local.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastores/local/#ProjectId#int/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastores/local.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastores/local/#int/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastores/local.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastores/remote/#Resource/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastores/remote.html
+$dokka.location:io.spine.testing.server.storage.datastore/TestDatastores/remote/#java.lang.String/PointingToDeclaration/testutil-gcloud/io.spine.testing.server.storage.datastore/-test-datastores/remote.html
+io.spine.testing.server.storage.datastore
+
