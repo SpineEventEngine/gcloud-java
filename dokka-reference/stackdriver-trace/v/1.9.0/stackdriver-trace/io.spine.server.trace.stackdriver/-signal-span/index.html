@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SignalSpan</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>stackdriver-trace</span>
+            </a>
+    </div>
+    <div>
+1.9.0    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":stackdriver-trace:dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="stackdriver-trace::io.spine.server.trace.stackdriver/SignalSpan///PointingToDeclaration//-211558659">
+  <div class="breadcrumbs"><a href="../../../index.html">stackdriver-trace</a><span class="delimiter">/</span><a href="../index.html">io.spine.server.trace.stackdriver</a><span class="delimiter">/</span><span class="current">SignalSpan</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Signal</span><wbr></wbr><span><span>Span</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">class </span><a href="index.html">SignalSpan</a></div><p class="paragraph">A span based on a signal. </p><p class="paragraph">Signal messages may be processed once or many times by different entities. The processing time is tracked and represented with a span so that each message handler invocation is converted into a single span. </p><p class="paragraph">The exception from the span-per-handler rule is an event applier invocation, which is treated as a part of the respective command handler or event reactor.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,FUNCTION,PROPERTY">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1893447215%2FConstructors%2F-211558659" anchor-label="SignalSpan" id="1893447215%2FConstructors%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-signal-span.html"><span>Signal</span><wbr></wbr><span><span>Span</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1893447215%2FConstructors%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>void <a href="-signal-span.html"><span class="token function">SignalSpan</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>BoundedContextName context<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>Signal&lt;?, ?, ?&gt; signal<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>MessageId receiver<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>EntityTypeName receiverType</span></span><span class="token punctuation">)</span></div><div class="brief ">Creates a new instance of <code class="lang-kotlin">SignalSpan</code>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-1458804270%2FClasslikes%2F-211558659" anchor-label="Builder" id="-1458804270%2FClasslikes%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-builder/index.html"><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1458804270%2FClasslikes%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-builder/index.html">Builder</a></div><div class="brief ">A builder for the <code class="lang-kotlin">SignalSpan</code> instances.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="760892720%2FFunctions%2F-211558659" anchor-label="asTraceSpan" id="760892720%2FFunctions%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="as-trace-span.html"><span>as</span><wbr></wbr><span>Trace</span><wbr></wbr><span><span>Span</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="760892720%2FFunctions%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>Span <a href="as-trace-span.html"><span class="token function">asTraceSpan</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../-project-id/index.html">ProjectId</a> gcpProjectId</span></span><span class="token punctuation">)</span></div><div class="brief ">Creates a Stackdriver Trace Span from this signal span.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1648957536%2FFunctions%2F-211558659" anchor-label="contextName" id="1648957536%2FFunctions%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="context-name.html"><span>context</span><wbr></wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1648957536%2FFunctions%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>BoundedContextName <a href="context-name.html"><span class="token function">contextName</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Obtains the name of the bounded context to which the signal receiver belongs.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-780551579%2FFunctions%2F-211558659" anchor-label="newBuilder" id="-780551579%2FFunctions%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="new-builder.html"><span>new</span><wbr></wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-780551579%2FFunctions%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">static </span><a href="-builder/index.html">SignalSpan.Builder</a> <a href="new-builder.html"><span class="token function">newBuilder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Creates a new instance of <code class="lang-kotlin">Builder</code> for <code class="lang-kotlin">SignalSpan</code> instances.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1433650577%2FFunctions%2F-211558659" anchor-label="receiver" id="1433650577%2FFunctions%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="receiver.html"><span><span>receiver</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1433650577%2FFunctions%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>MessageId <a href="receiver.html"><span class="token function">receiver</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Obtains the signal receiver ID.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1265151928%2FFunctions%2F-211558659" anchor-label="signal" id="1265151928%2FFunctions%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="signal.html"><span><span>signal</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1265151928%2FFunctions%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>Signal&lt;?, ?, ?&gt; <a href="signal.html"><span class="token function">signal</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Obtains the processed signal.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2023, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>

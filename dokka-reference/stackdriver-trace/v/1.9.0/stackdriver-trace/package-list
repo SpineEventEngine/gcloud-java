@@ -1,0 +1,37 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:io.spine.server.trace.stackdriver////PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/index.html
+$dokka.location:io.spine.server.trace.stackdriver/ProjectId///PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-project-id/index.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan.Builder///PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/-builder/index.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan.Builder/build/#/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/-builder/build.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan.Builder/setContext/#BoundedContextName/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/-builder/set-context.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan.Builder/setReceiver/#MessageId/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/-builder/set-receiver.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan.Builder/setReceiverType/#EntityTypeName/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/-builder/set-receiver-type.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan.Builder/setSignal/#Signal<?,?,?>/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/-builder/set-signal.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan///PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/index.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan/SignalSpan/#BoundedContextName#Signal<?,?,?>#MessageId#EntityTypeName/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/-signal-span.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan/asTraceSpan/#io.spine.server.trace.stackdriver.ProjectId/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/as-trace-span.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan/contextName/#/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/context-name.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan/newBuilder/#/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/new-builder.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan/receiver/#/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/receiver.html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan/signal/#/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-signal-span/signal.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracer///PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer/index.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracer/StackdriverTracer/#Signal<?,?,?>#io.spine.server.trace.stackdriver.TraceService#io.spine.server.trace.stackdriver.ProjectId#BoundedContextName/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer/-stackdriver-tracer.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracer/close/#/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer/close.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracer/processedBy/#MessageId#EntityTypeName/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer/processed-by.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory.Builder///PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/-builder/index.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory.Builder/build/#/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/-builder/build.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory.Builder/forbidMultiThreading/#/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/-builder/forbid-multi-threading.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory.Builder/setCallContext/#GrpcCallContext/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/-builder/set-call-context.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory.Builder/setClientContext/#ClientContext/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/-builder/set-client-context.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory.Builder/setGcpProjectId/#java.lang.String/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/-builder/set-gcp-project-id.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory///PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/index.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory/StackdriverTracerFactory/#io.spine.server.trace.stackdriver.TraceService#io.spine.server.trace.stackdriver.ProjectId/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/-stackdriver-tracer-factory.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory/close/#/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/close.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory/newBuilder/#/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/new-builder.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory/stackdriverEndpoint/#/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/stackdriver-endpoint.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory/trace/#ContextSpec#Signal<?,?,?>/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-stackdriver-tracer-factory/trace.html
+$dokka.location:io.spine.server.trace.stackdriver/TraceService///PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-trace-service/index.html
+$dokka.location:io.spine.server.trace.stackdriver/TraceService/writeSpans/#BatchWriteSpansRequest/PointingToDeclaration/stackdriver-trace/io.spine.server.trace.stackdriver/-trace-service/write-spans.html
+io.spine.server.trace.stackdriver
+

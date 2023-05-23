@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>StackdriverTracerFactory</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>stackdriver-trace</span>
+            </a>
+    </div>
+    <div>
+1.9.0    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":stackdriver-trace:dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="stackdriver-trace::io.spine.server.trace.stackdriver/StackdriverTracerFactory///PointingToDeclaration//-211558659">
+  <div class="breadcrumbs"><a href="../../../index.html">stackdriver-trace</a><span class="delimiter">/</span><a href="../index.html">io.spine.server.trace.stackdriver</a><span class="delimiter">/</span><span class="current">StackdriverTracerFactory</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Stackdriver</span><wbr></wbr><span>Tracer</span><wbr></wbr><span><span>Factory</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">class </span><a href="index.html">StackdriverTracerFactory</a></div><p class="paragraph">A TracerFactory based on the Stackdriver Trace. </p><p class="paragraph">This tracing mechanism requires a Google Cloud Project with enabled Cloud Trace (another name for Stackdriver Trace).</p><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><span><span>&lt;a</span></span> <span>href=&quot;https://cloud.</span><wbr></wbr><span>google.</span><wbr></wbr><span><span>com/trace/docs/&quot;&gt;Stackdriver</span></span> <span><span>Trace</span></span> <span><span>docs&lt;/a&gt;</span></span></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,FUNCTION,PROPERTY">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1466851149%2FConstructors%2F-211558659" anchor-label="StackdriverTracerFactory" id="1466851149%2FConstructors%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-stackdriver-tracer-factory.html"><span>Stackdriver</span><wbr></wbr><span>Tracer</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1466851149%2FConstructors%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>void <a href="-stackdriver-tracer-factory.html"><span class="token function">StackdriverTracerFactory</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../-trace-service/index.html">TraceService</a> service<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><a href="../-project-id/index.html">ProjectId</a> gcpProjectId</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-1577087593%2FClasslikes%2F-211558659" anchor-label="Builder" id="-1577087593%2FClasslikes%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-builder/index.html"><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1577087593%2FClasslikes%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-builder/index.html">Builder</a></div><div class="brief ">A builder for the <code class="lang-kotlin">StackdriverTracerFactory</code> instances.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="1813139399%2FFunctions%2F-211558659" anchor-label="close" id="1813139399%2FFunctions%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="close.html"><span><span>close</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1813139399%2FFunctions%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1609122944%2FFunctions%2F-211558659" anchor-label="newBuilder" id="1609122944%2FFunctions%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="new-builder.html"><span>new</span><wbr></wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1609122944%2FFunctions%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">static </span><a href="-builder/index.html">StackdriverTracerFactory.Builder</a> <a href="new-builder.html"><span class="token function">newBuilder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Creates a new instance of <code class="lang-kotlin">Builder</code> for <code class="lang-kotlin">StackdriverTracerFactory</code> instances.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2002255994%2FFunctions%2F-211558659" anchor-label="stackdriverEndpoint" id="2002255994%2FFunctions%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="stackdriver-endpoint.html"><span>stackdriver</span><wbr></wbr><span><span>Endpoint</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2002255994%2FFunctions%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">static </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html">String</a> <a href="stackdriver-endpoint.html"><span class="token function">stackdriverEndpoint</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Obtains the Cloud Stackdriver Trace endpoint for the gRPC calls.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1709291092%2FFunctions%2F-211558659" anchor-label="trace" id="1709291092%2FFunctions%2F-211558659" data-filterable-set=":stackdriver-trace:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":stackdriver-trace:dokkaHtml/main" data-filterable-set=":stackdriver-trace:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="trace.html"><span><span>trace</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1709291092%2FFunctions%2F-211558659"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stackdriver-trace:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>Tracer <a href="trace.html"><span class="token function">trace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>ContextSpec context<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>Signal&lt;?, ?, ?&gt; signalMessage</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2023, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
