@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>DatastoreWrapper</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>datastore</span>
+            </a>
+    </div>
+    <div>
+1.9.0    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":datastore:dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="datastore::io.spine.server.storage.datastore/DatastoreWrapper///PointingToDeclaration//-1862999860">
+  <div class="breadcrumbs"><a href="../../../index.html">datastore</a><span class="delimiter">/</span><a href="../index.html">io.spine.server.storage.datastore</a><span class="delimiter">/</span><span class="current">DatastoreWrapper</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Datastore</span><wbr></wbr><span><span>Wrapper</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">class </span><a href="index.html">DatastoreWrapper</a></div><p class="paragraph">Adapts Datastore API for being used for storages.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,FUNCTION,PROPERTY">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="790627712%2FConstructors%2F-1862999860" anchor-label="DatastoreWrapper" id="790627712%2FConstructors%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-datastore-wrapper.html"><span>Datastore</span><wbr></wbr><span><span>Wrapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="790627712%2FConstructors%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>void <a href="-datastore-wrapper.html"><span class="token function">DatastoreWrapper</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Datastore datastore<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.storage.datastore.tenant/-namespace-supplier/index.html">NamespaceSupplier</a> supplier</span></span><span class="token punctuation">)</span></div><div class="brief ">Creates a new instance of <code class="lang-kotlin">DatastoreWrapper</code>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-153405714%2FFunctions%2F-1862999860" anchor-label="create" id="-153405714%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create.html"><span><span>create</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-153405714%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="create.html"><span class="token function">create</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Entity entity</span></span><span class="token punctuation">)</span></div><div class="brief ">Writes new Entity into the Datastore.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-835240700%2FFunctions%2F-1862999860" anchor-label="createOrUpdate" id="-835240700%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-or-update.html"><span>create</span><wbr></wbr><span>Or</span><wbr></wbr><span><span>Update</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-835240700%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="create-or-update.html"><span class="token function">createOrUpdate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Entity entity</span></span><span class="token punctuation">)</span></div><div class="brief ">Writes an Entity to the Datastore or modifies an existing one.</div><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="create-or-update.html"><span class="token function">createOrUpdate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span>Entity<span class="token operator">&gt;</span> entities</span></span><span class="token punctuation">)</span></div><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="create-or-update.html"><span class="token function">createOrUpdate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Collection.html">Collection</a><span class="token operator">&lt;</span>Entity<span class="token operator">&gt;</span> entities</span></span><span class="token punctuation">)</span></div><div class="brief ">Writes the entities to the Datastore or modifies the existing ones.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="732034582%2FFunctions%2F-1862999860" anchor-label="datastore" id="732034582%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="datastore.html"><span><span>datastore</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="732034582%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>Datastore <a href="datastore.html"><span class="token function">datastore</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="538236691%2FFunctions%2F-1862999860" anchor-label="delete" id="538236691%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete.html"><span><span>delete</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="538236691%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="delete.html"><span class="token function">delete</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span>Key<span class="token operator">&gt;</span> keys</span></span><span class="token punctuation">)</span></div><div class="brief ">Deletes all existing Entities with the given keys.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1558014692%2FFunctions%2F-1862999860" anchor-label="deleteEntities" id="1558014692%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete-entities.html"><span>delete</span><wbr></wbr><span><span>Entities</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1558014692%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>void <a href="delete-entities.html"><span class="token function">deleteEntities</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Collection.html">Collection</a><span class="token operator">&lt;</span>Entity<span class="token operator">&gt;</span> entities</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2007489448%2FFunctions%2F-1862999860" anchor-label="dropTable" id="-2007489448%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="drop-table.html"><span>drop</span><wbr></wbr><span><span>Table</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2007489448%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>void <a href="drop-table.html"><span class="token function">dropTable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../-kind/index.html">Kind</a> table</span></span><span class="token punctuation">)</span></div><div class="brief ">Deletes all existing <span data-unresolved-link="io.spine.server.storage.datastore/Entities///PointingToDeclaration/">Entities</span> of a kind given.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-507187860%2FFunctions%2F-1862999860" anchor-label="keyFactory" id="-507187860%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="key-factory.html"><span>key</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-507187860%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>KeyFactory <a href="key-factory.html"><span class="token function">keyFactory</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../-kind/index.html">Kind</a> kind</span></span><span class="token punctuation">)</span></div><div class="brief ">Retrieves an instance of KeyFactory unique for given Kind of data regarding the current namespace.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="298383282%2FFunctions%2F-1862999860" anchor-label="lookup" id="298383282%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="lookup.html"><span><span>lookup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="298383282%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/List.html">List</a><span class="token operator">&lt;</span>Entity<span class="token operator">&gt;</span> <a href="lookup.html"><span class="token function">lookup</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Collection.html">Collection</a><span class="token operator">&lt;</span>Key<span class="token operator">&gt;</span> keys</span></span><span class="token punctuation">)</span></div><div class="brief ">Retrieves an Entity for each of the given keys.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1956341649%2FFunctions%2F-1862999860" anchor-label="newTransaction" id="-1956341649%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="new-transaction.html"><span>new</span><wbr></wbr><span><span>Transaction</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1956341649%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword"></span><a href="../-transaction-wrapper/index.html">TransactionWrapper</a> <a href="new-transaction.html"><span class="token function">newTransaction</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Starts a new database transaction.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1370186084%2FFunctions%2F-1862999860" anchor-label="read" id="-1370186084%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read.html"><span><span>read</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1370186084%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>Entity <a href="read.html"><span class="token function">read</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Key key</span></span><span class="token punctuation">)</span></div><div class="brief ">Retrieves an Entity with the given key from the Datastore.</div><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span><a href="../-ds-query-iterator/index.html">DsQueryIterator</a><span class="token operator">&lt;</span><a href="read.html">R</a><span class="token operator">&gt;</span> <a href="read.html"><span class="token function">read</span></a><span class="token operator">&lt;</span>R<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>StructuredQuery&lt;R&gt; query</span></span><span class="token punctuation">)</span></div><div class="brief ">Queries the Datastore with the given arguments.</div><div class="symbol monospace block"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Deprecated.html"><span class="token annotation builtin">Deprecated</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div><span class="token keyword">public </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html">Iterator</a><span class="token operator">&lt;</span>Entity<span class="token operator">&gt;</span> <a href="read.html"><span class="token function"><strike>read</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Iterable.html">Iterable</a><span class="token operator">&lt;</span>Key<span class="token operator">&gt;</span> keys</span></span><span class="token punctuation">)</span></div><div class="brief ">Retrieves an Entity for each of the given keys.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="319954392%2FFunctions%2F-1862999860" anchor-label="readAll" id="319954392%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read-all.html"><span>read</span><wbr></wbr><span><span>All</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="319954392%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html">Iterator</a><span class="token operator">&lt;</span><a href="read-all.html">R</a><span class="token operator">&gt;</span> <a href="read-all.html"><span class="token function">readAll</span></a><span class="token operator">&lt;</span>R<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>StructuredQuery&lt;R&gt; query</span></span><span class="token punctuation">)</span></div><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html">Iterator</a><span class="token operator">&lt;</span><a href="read-all.html">R</a><span class="token operator">&gt;</span> <a href="read-all.html"><span class="token function">readAll</span></a><span class="token operator">&lt;</span>R<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>StructuredQuery&lt;R&gt; query<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>int pageSize</span></span><span class="token punctuation">)</span></div><div class="brief ">Queries the Datastore for all entities matching query.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="156296577%2FFunctions%2F-1862999860" anchor-label="update" id="156296577%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update.html"><span><span>update</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="156296577%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="update.html"><span class="token function">update</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Entity entity</span></span><span class="token punctuation">)</span></div><div class="brief ">Modifies an Entity in the Datastore.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2023, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>

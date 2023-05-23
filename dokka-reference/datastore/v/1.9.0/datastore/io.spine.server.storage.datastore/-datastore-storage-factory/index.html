@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>DatastoreStorageFactory</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>datastore</span>
+            </a>
+    </div>
+    <div>
+1.9.0    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":datastore:dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="datastore::io.spine.server.storage.datastore/DatastoreStorageFactory///PointingToDeclaration//-1862999860">
+  <div class="breadcrumbs"><a href="../../../index.html">datastore</a><span class="delimiter">/</span><a href="../index.html">io.spine.server.storage.datastore</a><span class="delimiter">/</span><span class="current">DatastoreStorageFactory</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Datastore</span><wbr></wbr><span>Storage</span><wbr></wbr><span><span>Factory</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">class </span><a href="index.html">DatastoreStorageFactory</a></div><p class="paragraph">Creates Storages based on Datastore. </p><p class="paragraph">As a convenience API, provides an ability to configure the BoundedContextBuilders with the TenantIndex specific to the instance of <code class="lang-kotlin">Datastore</code> configured for this factory</p><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="configure-tenant-index.html"><span>Datastore</span><wbr></wbr><span>Storage</span><wbr></wbr><span><span>Factory</span></span></a></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,FUNCTION,PROPERTY">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="228222158%2FConstructors%2F-1862999860" anchor-label="DatastoreStorageFactory" id="228222158%2FConstructors%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-datastore-storage-factory.html"><span>Datastore</span><wbr></wbr><span>Storage</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="228222158%2FConstructors%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>void <a href="-datastore-storage-factory.html"><span class="token function">DatastoreStorageFactory</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="-builder/index.html">DatastoreStorageFactory.Builder</a> builder</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-128482143%2FClasslikes%2F-1862999860" anchor-label="Builder" id="-128482143%2FClasslikes%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-builder/index.html"><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-128482143%2FClasslikes%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">class </span><a href="-builder/index.html">Builder</a></div><div class="brief ">A builder for the <code class="lang-kotlin">DatastoreStorageFactory</code>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-1859092143%2FFunctions%2F-1862999860" anchor-label="close" id="-1859092143%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="close.html"><span><span>close</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1859092143%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>void <a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Performs no action.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1838696783%2FFunctions%2F-1862999860" anchor-label="columnMapping" id="-1838696783%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="column-mapping.html"><span>column</span><wbr></wbr><span><span>Mapping</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1838696783%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>ColumnMapping&lt;Value&lt;?&gt;&gt; <a href="column-mapping.html"><span class="token function">columnMapping</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1380275830%2FFunctions%2F-1862999860" anchor-label="configureTenantIndex" id="-1380275830%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="configure-tenant-index.html"><span>configure</span><wbr></wbr><span>Tenant</span><wbr></wbr><span><span>Index</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1380275830%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>BoundedContextBuilder <a href="configure-tenant-index.html"><span class="token function">configureTenantIndex</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>BoundedContextBuilder builder</span></span><span class="token punctuation">)</span></div><div class="brief ">Configures the passed BoundedContextBuilder with the TenantIndex built on top of the <code class="lang-kotlin">Datastore</code> specific to this factory instance.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2010355632%2FFunctions%2F-1862999860" anchor-label="createAggregateStorage" id="2010355632%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-aggregate-storage.html"><span>create</span><wbr></wbr><span>Aggregate</span><wbr></wbr><span><span>Storage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2010355632%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>AggregateStorage&lt;I&gt; <a href="create-aggregate-storage.html"><span class="token function">createAggregateStorage</span></a><span class="token operator">&lt;</span>I<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>ContextSpec context<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token keyword">? extends </span>Aggregate&lt;I, ?, ?&gt;<span class="token operator">&gt;</span> cls</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1355442250%2FFunctions%2F-1862999860" anchor-label="createCatchUpStorage" id="1355442250%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-catch-up-storage.html"><span>create</span><wbr></wbr><span>Catch</span><wbr></wbr><span>Up</span><wbr></wbr><span><span>Storage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1355442250%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>CatchUpStorage <a href="create-catch-up-storage.html"><span class="token function">createCatchUpStorage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>boolean multitenant</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="649202817%2FFunctions%2F-1862999860" anchor-label="createDatastoreWrapper" id="649202817%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-datastore-wrapper.html"><span>create</span><wbr></wbr><span>Datastore</span><wbr></wbr><span><span>Wrapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="649202817%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span><a href="../-datastore-wrapper/index.html">DatastoreWrapper</a> <a href="create-datastore-wrapper.html"><span class="token function">createDatastoreWrapper</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>boolean multitenant</span></span><span class="token punctuation">)</span></div><div class="brief ">Creates an instance of <a href="../-datastore-wrapper/index.html">DatastoreWrapper</a> based on the passed <code class="lang-kotlin">ContextSpec</code>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1542808454%2FFunctions%2F-1862999860" anchor-label="createInboxStorage" id="-1542808454%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-inbox-storage.html"><span>create</span><wbr></wbr><span>Inbox</span><wbr></wbr><span><span>Storage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1542808454%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword"></span>InboxStorage <a href="create-inbox-storage.html"><span class="token function">createInboxStorage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>boolean multitenant</span></span><span class="token punctuation">)</span></div><div class="brief ">Creates a Datastore-specific InboxStorage taking into account the support of multi-tenant storage required.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="278716926%2FFunctions%2F-1862999860" anchor-label="createProjectionStorage" id="278716926%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-projection-storage.html"><span>create</span><wbr></wbr><span>Projection</span><wbr></wbr><span><span>Storage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="278716926%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>ProjectionStorage&lt;I&gt; <a href="create-projection-storage.html"><span class="token function">createProjectionStorage</span></a><span class="token operator">&lt;</span>I<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>ContextSpec context<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token keyword">? extends </span>Projection&lt;I, ?, ?&gt;<span class="token operator">&gt;</span> cls</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1815441657%2FFunctions%2F-1862999860" anchor-label="createPropertyStorage" id="1815441657%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-property-storage.html"><span>create</span><wbr></wbr><span>Property</span><wbr></wbr><span><span>Storage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1815441657%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span><a href="../-ds-property-storage/index.html">DsPropertyStorage</a> <a href="create-property-storage.html"><span class="token function">createPropertyStorage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>ContextSpec spec</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1638718495%2FFunctions%2F-1862999860" anchor-label="createRecordStorage" id="1638718495%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-record-storage.html"><span>create</span><wbr></wbr><span>Record</span><wbr></wbr><span><span>Storage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1638718495%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span>RecordStorage&lt;I&gt; <a href="create-record-storage.html"><span class="token function">createRecordStorage</span></a><span class="token operator">&lt;</span>I<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>ContextSpec context<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token keyword">? extends </span>Entity&lt;I, ?&gt;<span class="token operator">&gt;</span> cls</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-903097678%2FFunctions%2F-1862999860" anchor-label="datastore" id="-903097678%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="datastore.html"><span><span>datastore</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-903097678%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>Datastore <a href="datastore.html"><span class="token function">datastore</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Returns the instance of wrapped Datastore.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1164383283%2FFunctions%2F-1862999860" anchor-label="inboxStorageWith" id="1164383283%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="inbox-storage-with.html"><span>inbox</span><wbr></wbr><span>Storage</span><wbr></wbr><span><span>With</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1164383283%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>InboxStorage <a href="inbox-storage-with.html"><span class="token function">inboxStorageWith</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../-datastore-wrapper/index.html">DatastoreWrapper</a> wrapper<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>boolean multitenant</span></span><span class="token punctuation">)</span></div><div class="brief ">Creates a Datastore-specific InboxStorage.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1182693686%2FFunctions%2F-1862999860" anchor-label="newBuilder" id="1182693686%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="new-builder.html"><span>new</span><wbr></wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1182693686%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">static </span><a href="-builder/index.html">DatastoreStorageFactory.Builder</a> <a href="new-builder.html"><span class="token function">newBuilder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Creates new instance of <a href="-builder/index.html">Builder</a>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="991210865%2FFunctions%2F-1862999860" anchor-label="wrappers" id="991210865%2FFunctions%2F-1862999860" data-filterable-set=":datastore:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="wrappers.html"><span><span>wrappers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="991210865%2FFunctions%2F-1862999860"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Iterable.html">Iterable</a><span class="token operator">&lt;</span><a href="../-datastore-wrapper/index.html">DatastoreWrapper</a><span class="token operator">&gt;</span> <a href="wrappers.html"><span class="token function">wrappers</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Returns the currently known initialized <code class="lang-kotlin">DatastoreWrapper</code>s.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2023, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>

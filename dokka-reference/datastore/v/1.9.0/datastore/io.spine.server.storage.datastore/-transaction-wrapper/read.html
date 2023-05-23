@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>read</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>datastore</span>
+            </a>
+    </div>
+    <div>
+1.9.0    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":datastore:dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="member" id="content" pageIds="datastore::io.spine.server.storage.datastore/TransactionWrapper/read/#Key/PointingToDeclaration//-1862999860">
+  <div class="breadcrumbs"><a href="../../../index.html">datastore</a><span class="delimiter">/</span><a href="../index.html">io.spine.server.storage.datastore</a><span class="delimiter">/</span><a href="index.html">TransactionWrapper</a><span class="delimiter">/</span><span class="current">read</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>read</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html">Optional</a><span class="token operator">&lt;</span>Entity<span class="token operator">&gt;</span> <a href="read.html"><span class="token function">read</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Key key</span></span><span class="token punctuation">)</span></div><p class="paragraph">Reads an entity from the Datastore in the transaction.</p><span class="kdoc-tag"><h4 class="">Return</h4><p class="paragraph">the entity with the given key or <code class="lang-kotlin">Optional.empty()</code> if such an entity does not exist</p></span><hr><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword"></span><a href="../-ds-query-iterator/index.html">DsQueryIterator</a><span class="token operator">&lt;</span><a href="read.html">R</a><span class="token operator">&gt;</span> <a href="read.html"><span class="token function">read</span></a><span class="token operator">&lt;</span>R<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>StructuredQuery&lt;R&gt; ancestorQuery</span></span><span class="token punctuation">)</span></div><p class="paragraph">Queries the Datastore with the given arguments within the transaction. </p><p class="paragraph">Datastore only supports ancestor queries within a transaction. A DatastoreException is thrown if the given query is not an ancestor query. </p><p class="paragraph">The Datastore may return a partial result set, so an execution of this method may result in several Datastore queries. </p><p class="paragraph">The limit included in the StructuredQuery, will be a maximum count of objects in the returned iterator. </p><p class="paragraph">The returned <a href="../-ds-query-iterator/index.html">DsQueryIterator</a> allows to <span data-unresolved-link="io.spine.server.storage.datastore/DsQueryIterator/nextPageQuery/#/PointingToDeclaration/">create a query</span> to the next page of results reusing an existing cursor. </p><p class="paragraph">The resulting <code class="lang-kotlin">Iterator</code> is evaluated lazily. A call to <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html#remove()">Iterator.remove()</a> causes an <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/UnsupportedOperationException.html">UnsupportedOperationException</a>.</p><span class="kdoc-tag"><h4 class="">Return</h4><p class="paragraph">results fo the query as a lazily evaluated <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html">Iterator</a></p></span><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>ancestor</span><wbr></wbr><span><span>Query</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Query to execute upon the Datastore</p></div></div></div></div><div class="table-row" data-filterable-current=":datastore:dokkaHtml/main" data-filterable-set=":datastore:dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>&lt;R&gt;</span></span></u></div></span></div><div><div class="title"><p class="paragraph">the type of queried objects</p></div></div></div></div></div></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2023, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
