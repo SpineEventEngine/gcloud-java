@@ -50,7 +50,7 @@ final class NamespaceWithCustomConverterTest {
         var ns = "my.test.namespace.from.tenant.id";
         var tenantId = TenantId.newBuilder()
                 .setValue(ns)
-                .vBuild();
+                .build();
         var multitenant = true;
         var namespace = Namespace.of(tenantId, multitenant, factory);
         var converter = factory.get(multitenant);
@@ -75,7 +75,7 @@ final class NamespaceWithCustomConverterTest {
         var ns = "my.test.namespace.to.tenant.id";
         var tenantId = TenantId.newBuilder()
                 .setValue(ns)
-                .vBuild();
+                .build();
         var namespace = Namespace.of(tenantId, true, factory);
         assertEquals(tenantId, namespace.toTenantId());
     }

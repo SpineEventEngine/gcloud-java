@@ -53,7 +53,7 @@ final class DatastoreTenantsTest extends UtilityClassTest<DatastoreTenants> {
         var customNamespace = "Vmy-namespace";
         var customId = TenantId.newBuilder()
                 .setValue(customNamespace)
-                .vBuild();
+                .build();
         index.keep(customId);
 
         var ids = index.all();

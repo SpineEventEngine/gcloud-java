@@ -79,7 +79,7 @@ final class NamespaceIndexTest {
     private static TenantId newTenantId() {
         return TenantId.newBuilder()
                 .setValue(TestValues.randomString())
-                .vBuild();
+                .build();
     }
 
     @BeforeEach
@@ -174,7 +174,7 @@ final class NamespaceIndexTest {
                 .createRecordStorage(context.spec(), EntityRecordSpec.of(CollegeProjection.class));
         var id = CollegeId.newBuilder()
                 .setValue("Aeronautic Forgery College")
-                .vBuild();
+                .build();
         var record = EntityRecord.newBuilder()
                 .setEntityId(Identifier.pack(id))
                 .setState(pack(College.newBuilder()
@@ -213,7 +213,7 @@ final class NamespaceIndexTest {
                         .map(key -> TenantId.newBuilder()
                                 .setValue(key.getName()
                                              .substring(1))
-                                .vBuild())
+                                .build())
                         .collect(toList());
 
         NamespaceIndex.NamespaceQuery namespaceQuery = keys::iterator;
@@ -231,10 +231,10 @@ final class NamespaceIndexTest {
             // Add new element
             var domain = InternetDomain.newBuilder()
                     .setValue("my.tenant.com")
-                    .vBuild();
+                    .build();
             var newTenantId = TenantId.newBuilder()
                     .setDomain(domain)
-                    .vBuild();
+                    .build();
             namespaceIndex.keep(newTenantId); // sync
 
             // Check new value added

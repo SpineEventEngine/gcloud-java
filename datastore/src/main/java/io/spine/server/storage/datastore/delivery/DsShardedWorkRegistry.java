@@ -106,7 +106,7 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
                 .newBuilder()
                 .setNodeId(node)
                 .setValue(String.valueOf(currentThread))
-                .vBuild();
+                .build();
         return worker;
     }
 

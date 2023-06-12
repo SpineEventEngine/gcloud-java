@@ -246,7 +246,7 @@ public final class Namespace {
      *     {@code
      *     TenantId.newBuilder()
      *             .setValue(namespace.value())
-     *             .vBuild();
+     *             .build();
      *     }
      * </pre>
      *

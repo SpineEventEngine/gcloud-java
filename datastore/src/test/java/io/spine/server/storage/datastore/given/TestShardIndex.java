@@ -53,6 +53,6 @@ public final class TestShardIndex {
         return ShardIndex.newBuilder()
                 .setIndex(shardIndex)
                 .setOfTotal(totalShards)
-                .vBuild();
+                .build();
     }
 }

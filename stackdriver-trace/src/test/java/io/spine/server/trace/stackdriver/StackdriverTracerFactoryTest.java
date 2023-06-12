@@ -239,7 +239,7 @@ class StackdriverTracerFactoryTest {
             var command = CreateProject.newBuilder()
                     .setUuid(newUuid())
                     .setName("TestProject")
-                    .vBuild();
+                    .build();
             var cmd = requests.command()
                               .create(command);
             var tracer = tracerFactory.trace(SPEC, cmd);
@@ -247,10 +247,10 @@ class StackdriverTracerFactoryTest {
                     .setId(Identifier.pack("SampleEntityId"))
                     .setTypeUrl(TypeUrl.of(Empty.class).value())
                     .setVersion(zero())
-                    .vBuild();
+                    .build();
             var entityType = EntityTypeName.newBuilder()
                     .setJavaClassName(StackdriverTracerFactoryTest.class.getCanonicalName())
-                    .vBuild();
+                    .build();
             tracer.processedBy(receiverId, entityType);
             tracer.close();
             tracerFactory.close();

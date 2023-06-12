@@ -144,10 +144,10 @@ final class NamespaceConverters {
         protected TenantId significantStringToTenantId(String namespace) {
             var domain = InternetDomain.newBuilder()
                     .setValue(namespace)
-                    .vBuild();
+                    .build();
             var tenantId = TenantId.newBuilder()
                     .setDomain(domain)
-                    .vBuild();
+                    .build();
             return tenantId;
         }
     }
@@ -170,10 +170,10 @@ final class NamespaceConverters {
         protected TenantId significantStringToTenantId(String namespace) {
             var email = EmailAddress.newBuilder()
                     .setValue(namespace)
-                    .vBuild();
+                    .build();
             var tenantId = TenantId.newBuilder()
                     .setEmail(email)
-                    .vBuild();
+                    .build();
             return tenantId;
         }
     }
@@ -195,7 +195,7 @@ final class NamespaceConverters {
         protected TenantId significantStringToTenantId(String namespace) {
             var tenantId = TenantId.newBuilder()
                     .setValue(namespace)
-                    .vBuild();
+                    .build();
             return tenantId;
         }
     }
@@ -212,7 +212,7 @@ final class NamespaceConverters {
         protected TenantId toTenantId(String namespace) {
             var tenantId = TenantId.newBuilder()
                     .setValue(namespace)
-                    .vBuild();
+                    .build();
             return tenantId;
         }
     }

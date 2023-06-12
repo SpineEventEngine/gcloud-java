@@ -68,7 +68,7 @@ final class SetWorkerIfAbsent implements PrepareForWrite {
                       : previous.toBuilder();
         var updated = builder.setWorker(worker)
                        .setWhenLastPicked(currentTime())
-                       .vBuild();
+                       .build();
 
         return Optional.of(updated);
     }

@@ -115,7 +115,7 @@ final class DsRecordStorageTest extends RecordStorageDelegateTest {
                 .setProjectVersion(expectedVersion)
                 .setDueDate(expectedDueDate)
                 .setStatus(expectedStatus)
-                .vBuild();
+                .build();
         storage().write(id, project);
 
         // Read Datastore Entity

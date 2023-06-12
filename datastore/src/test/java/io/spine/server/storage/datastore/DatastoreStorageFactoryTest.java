@@ -134,7 +134,7 @@ final class DatastoreStorageFactoryTest {
     void namespaceForMultitenant() {
         var tenant = TenantId.newBuilder()
                 .setValue("my-company")
-                .vBuild();
+                .build();
         var namespace = "Vnon-null-or-empty-namespace";
         var options = local().getOptions()
                 .toBuilder()
@@ -157,7 +157,7 @@ final class DatastoreStorageFactoryTest {
     void testDatastoreNamespaceInOptions() {
         var tenant = TenantId.newBuilder()
                 .setValue("your-company")
-                .vBuild();
+                .build();
         var spec = multitenant(testName());
         var datastore = local();
         var factory = factoryFor(datastore);
@@ -231,11 +231,11 @@ final class DatastoreStorageFactoryTest {
                                               TenantId tenant) {
         var id = StgProjectId.newBuilder()
                 .setId(Identifier.newUuid())
-                .vBuild();
+                .build();
         var project = StgProject.newBuilder()
                 .setId(id)
                 .setName("Sample storage project")
-                .vBuild();
+                .build();
         with(tenant).run(
                 () -> storage.write(id, project)
         );

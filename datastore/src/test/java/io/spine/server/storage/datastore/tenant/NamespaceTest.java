@@ -76,7 +76,7 @@ final class NamespaceTest {
         var aGroupValue = "namespace1";
         var aGroupTenantId = TenantId.newBuilder()
                 .setValue(aGroupValue)
-                .vBuild();
+                .build();
         var aGroupNamespaceFromTenantId =
                 Namespace.of(aGroupTenantId, true, NsConverterFactory.defaults());
         var aGroupNamespaceFromString = Namespace.of(aGroupValue);
@@ -85,10 +85,10 @@ final class NamespaceTest {
         var bGroupValue = "namespace2";
         var bgGroupEmail = EmailAddress.newBuilder()
                 .setValue(bGroupValue)
-                .vBuild();
+                .build();
         var bGroupTenantId = TenantId.newBuilder()
                 .setEmail(bgGroupEmail)
-                .vBuild();
+                .build();
         var bGroupNamespaceFromTenantId = Namespace.of(bGroupTenantId, true);
         // Same string but other type
         var cGroupNamespaceFromString = Namespace.of(bGroupValue);
@@ -107,19 +107,19 @@ final class NamespaceTest {
         var randomTenantIdString = "arbitrary-tenant-id";
         var internetDomain = InternetDomain.newBuilder()
                 .setValue(randomTenantIdString)
-                .vBuild();
+                .build();
         var domainId = TenantId.newBuilder()
                 .setDomain(internetDomain)
-                .vBuild();
+                .build();
         var emailAddress = EmailAddress.newBuilder()
                 .setValue(randomTenantIdString)
-                .vBuild();
+                .build();
         var emailId = TenantId.newBuilder()
                 .setEmail(emailAddress)
-                .vBuild();
+                .build();
         var stringId = TenantId.newBuilder()
                 .setValue(randomTenantIdString)
-                .vBuild();
+                .build();
         assertNotEquals(domainId, emailId);
         assertNotEquals(domainId, stringId);
         assertNotEquals(emailId, stringId);
@@ -170,7 +170,7 @@ final class NamespaceTest {
 
         var expectedId = TenantId.newBuilder()
                 .setValue(namespaceString)
-                .vBuild();
+                .build();
         var namespace = Namespace.of(namespaceString);
         var actualId = namespace.toTenantId();
         assertEquals(expectedId, actualId);
