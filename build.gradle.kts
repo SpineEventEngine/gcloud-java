@@ -59,7 +59,11 @@ buildscript {
     }
 
     apply(from = "$rootDir/version.gradle.kts")
+    val spineBaseVersion: String by extra
+    val spineToolBaseVersion: String by extra
+    val spineTimeVersion: String by extra
     val mcJavaVersion: String by extra
+    val validationVersion: String by extra
 
     dependencies {
         classpath("io.spine.tools:spine-mc-java:$mcJavaVersion")
@@ -68,14 +72,26 @@ buildscript {
 
     io.spine.internal.gradle.doForceVersions(configurations)
 
-    @Suppress("LocalVariableName")  // For better readability.
+    @Suppress("LocalVariableName" /* For better readability. */)
     val Kotlin = io.spine.internal.dependency.Kotlin
+    @Suppress("LocalVariableName" /* For better readability. */)
+    val Jackson = io.spine.internal.dependency.Jackson
+
     configurations.all {
         resolutionStrategy {
             force(
                 Kotlin.stdLib,
                 Kotlin.stdLibCommon,
-            )
+                Jackson.databind,
+                Jackson.annotations,
+                Jackson.bom,
+                Jackson.core,
+                "io.spine:spine-base:$spineBaseVersion",
+                "io.spine.tools:spine-tool-base:$spineToolBaseVersion",
+                "io.spine.tools:spine-plugin-base:$spineToolBaseVersion",
+                "io.spine.validation:spine-validation-java-runtime:$validationVersion",
+                "io.spine:spine-time:$spineTimeVersion",
+                )
         }
     }
 }
@@ -107,6 +123,8 @@ spinePublishing {
 }
 
 val spineBaseVersion: String by extra
+val spineToolBaseVersion: String by extra
+val validationVersion: String by extra
 
 allprojects {
     apply(from = "$rootDir/version.gradle.kts")
@@ -122,6 +140,33 @@ allprojects {
     version = extra["versionToPublish"]!!
 
     repositories.applyStandard()
+
+    configurations {
+        forceVersions()
+        excludeProtobufLite()
+        all {
+            resolutionStrategy {
+                force(
+                    ApacheHttp.core,
+                    CommonsCodec.lib,
+                    Grpc.api,
+                    Grpc.auth,
+                    Grpc.core,
+                    Grpc.context,
+                    Grpc.stub,
+                    Grpc.protobuf,
+                    Grpc.protobufLite,
+                    PerfMark.api,
+                    GoogleApis.AuthLibrary.credentials,
+                    GoogleApis.commonProtos,
+                    "io.spine:spine-base:$spineBaseVersion",
+                    "io.spine.validation:spine-validation-java-runtime:$validationVersion",
+                    "io.spine.tools:spine-tool-base:$spineToolBaseVersion",
+                    "io.spine.tools:spine-testlib:$spineBaseVersion"
+                )
+            }
+        }
+    }
 }
 
 subprojects {
@@ -165,31 +210,6 @@ subprojects {
     // which is a transitive dependency of `com.google.cloud:google-cloud-datastore`.
     repositories {
         google()
-    }
-
-    configurations {
-        forceVersions()
-        excludeProtobufLite()
-        all {
-            resolutionStrategy {
-                force(
-                    ApacheHttp.core,
-                    CommonsCodec.lib,
-                    Grpc.api,
-                    Grpc.auth,
-                    Grpc.core,
-                    Grpc.context,
-                    Grpc.stub,
-                    Grpc.protobuf,
-                    Grpc.protobufLite,
-                    PerfMark.api,
-                    GoogleApis.AuthLibrary.credentials,
-                    GoogleApis.commonProtos,
-                    "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine.tools:spine-testlib:$spineBaseVersion"
-                )
-            }
-        }
     }
 
     val spineCoreVersion: String by extra
