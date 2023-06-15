@@ -63,7 +63,7 @@ val grGitVersion = "3.1.1"
  * Please check that this value matches one defined in
  *  [io.spine.internal.dependency.Kotlin.version].
  */
-val kotlinVersion = "1.6.10"
+val kotlinVersion = "1.8.0"
 
 /**
  * The version of Guava used in `buildSrc`.
@@ -81,7 +81,7 @@ val guavaVersion = "31.0.1-jre"
  * @see <a href="https://github.com/tbroyer/gradle-errorprone-plugin/releases">
  *     Error Prone Gradle Plugin Releases</a>
  */
-val errorProneVersion = "2.0.2"
+val errorProneVersion = "3.0.1"
 
 /**
  * The version of Protobuf Gradle Plugin.

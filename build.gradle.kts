@@ -31,6 +31,7 @@ import io.spine.internal.dependency.GoogleApis
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.PerfMark
+import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.javadoc.JavadocConfig
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
@@ -59,23 +60,13 @@ buildscript {
     }
 
     apply(from = "$rootDir/version.gradle.kts")
-    val spineBaseVersion: String by extra
-    val spineToolBaseVersion: String by extra
-    val spineTimeVersion: String by extra
-    val mcJavaVersion: String by extra
-    val validationVersion: String by extra
-
-    dependencies {
-        classpath("io.spine.tools:spine-mc-java:$mcJavaVersion")
-        classpath(execForkPlugin.classpath)
-    }
-
     io.spine.internal.gradle.doForceVersions(configurations)
 
     @Suppress("LocalVariableName" /* For better readability. */)
     val Kotlin = io.spine.internal.dependency.Kotlin
     @Suppress("LocalVariableName" /* For better readability. */)
     val Jackson = io.spine.internal.dependency.Jackson
+    val Spine = io.spine.internal.dependency.Spine.DefaultVersion
 
     configurations.all {
         resolutionStrategy {
@@ -86,13 +77,18 @@ buildscript {
                 Jackson.annotations,
                 Jackson.bom,
                 Jackson.core,
-                "io.spine:spine-base:$spineBaseVersion",
-                "io.spine.tools:spine-tool-base:$spineToolBaseVersion",
-                "io.spine.tools:spine-plugin-base:$spineToolBaseVersion",
-                "io.spine.validation:spine-validation-java-runtime:$validationVersion",
-                "io.spine:spine-time:$spineTimeVersion",
+                "io.spine:spine-base:${Spine.base}",
+                "io.spine.tools:spine-tool-base:${Spine.toolBase}",
+                "io.spine.tools:spine-plugin-base:${Spine.toolBase}",
+                "io.spine.validation:spine-validation-java-runtime:${Spine.validation}",
+                "io.spine:spine-time:${Spine.time}",
                 )
         }
+    }
+
+    dependencies {
+        classpath("io.spine.tools:spine-mc-java:${Spine.mcJava}")
+        classpath(execForkPlugin.classpath)
     }
 }
 
@@ -140,33 +136,6 @@ allprojects {
     version = extra["versionToPublish"]!!
 
     repositories.applyStandard()
-
-    configurations {
-        forceVersions()
-        excludeProtobufLite()
-        all {
-            resolutionStrategy {
-                force(
-                    ApacheHttp.core,
-                    CommonsCodec.lib,
-                    Grpc.api,
-                    Grpc.auth,
-                    Grpc.core,
-                    Grpc.context,
-                    Grpc.stub,
-                    Grpc.protobuf,
-                    Grpc.protobufLite,
-                    PerfMark.api,
-                    GoogleApis.AuthLibrary.credentials,
-                    GoogleApis.commonProtos,
-                    "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine.validation:spine-validation-java-runtime:$validationVersion",
-                    "io.spine.tools:spine-tool-base:$spineToolBaseVersion",
-                    "io.spine.tools:spine-testlib:$spineBaseVersion"
-                )
-            }
-        }
-    }
 }
 
 subprojects {
@@ -210,6 +179,38 @@ subprojects {
     // which is a transitive dependency of `com.google.cloud:google-cloud-datastore`.
     repositories {
         google()
+    }
+
+    val spine = Spine(this)
+    defineDependencies(spine)
+    forceConfigurations(spine)
+
+    configurations {
+        forceVersions()
+        excludeProtobufLite()
+        all {
+            resolutionStrategy {
+                force(
+                    ApacheHttp.core,
+                    CommonsCodec.lib,
+                    Grpc.api,
+                    Grpc.auth,
+                    Grpc.core,
+                    Grpc.context,
+                    Grpc.stub,
+                    Grpc.protobuf,
+                    Grpc.protobufLite,
+                    PerfMark.api,
+                    GoogleApis.AuthLibrary.credentials,
+                    GoogleApis.commonProtos,
+                    JUnit.runner,
+//                    "io.spine:spine-base:$spineBaseVersion",
+//                    "io.spine.validation:spine-validation-java-runtime:$validationVersion",
+//                    "io.spine.tools:spine-tool-base:$spineToolBaseVersion",
+//                    "io.spine.tools:spine-testlib:$spineBaseVersion"
+                )
+            }
+        }
     }
 
     val spineCoreVersion: String by extra
@@ -298,6 +299,66 @@ subprojects {
 
     project.tasks.named("publish") {
         dependsOn("${project.path}:updateGitHubPages")
+    }
+}
+
+/**
+ * The alias for typed extensions functions related to subprojects.
+ */
+typealias Subproject = Project
+
+/**
+ * Defines dependencies of this subproject.
+ */
+fun Subproject.defineDependencies(spine: Spine) {
+    dependencies {
+        ErrorProne.apply {
+            errorprone(core)
+        }
+        // Strangely, Gradle does not see `protoData` via DSL here, so we add using the string.
+        add("protoData", spine.validation.java)
+        implementation(spine.validation.runtime)
+
+        testImplementation(JUnit.runner)
+        testImplementation(spine.testlib)
+    }
+}
+
+/**
+ * Forces dependencies of this project.
+ */
+fun Subproject.forceConfigurations(spine: Spine) {
+    configurations {
+        forceVersions()
+        excludeProtobufLite()
+
+        all {
+            resolutionStrategy {
+                exclude("io.spine", "spine-validate")
+                force(
+                    /* Force the version of gRPC used by the `:client` module over the one
+                       set by `mc-java` in the `:core` module when specifying compiler artifact
+                       for the gRPC plugin.
+                       See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
+                       .configureProtocPlugins()` method which sets the version from resources. */
+                    Grpc.ProtocPlugin.artifact,
+                    JUnit.runner,
+
+                    spine.base,
+                    spine.validation.runtime,
+                    spine.time,
+                    spine.baseTypes,
+                    spine.change,
+                    spine.testlib,
+                    spine.toolBase,
+                    spine.pluginBase,
+
+                    Grpc.core,
+                    Grpc.protobuf,
+                    Grpc.stub
+                )
+            }
+        }
     }
 }
 
