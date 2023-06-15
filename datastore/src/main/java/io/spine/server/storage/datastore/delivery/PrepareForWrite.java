@@ -43,7 +43,7 @@ interface PrepareForWrite {
      * @param previous
      *         the previous record currently residing in the storage, or {@code null}
      *         if there is no such record
-     * @return a instance of the record ready to be written to the storage,
+     * @return an instance of the record ready to be written to the storage,
      *         or {@code Optional.empty()} if no storage update should be performed
      */
     Optional<ShardSessionRecord> prepare(@Nullable ShardSessionRecord previous);
