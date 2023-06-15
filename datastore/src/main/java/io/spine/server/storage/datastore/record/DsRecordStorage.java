@@ -50,10 +50,12 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.transform;
 import static io.spine.server.storage.datastore.record.Entities.builderFromMessage;
+import static io.spine.server.storage.datastore.record.Entities.toMessage;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -101,6 +103,17 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
         var spec = recordSpec();
         var recordIterator = readAllRecords(query);
         var result = transform(recordIterator, spec::idFromRecord);
+        return result;
+    }
+
+    @Override
+    public Optional<R> read(I id) {
+        var key = keyOf(id);
+        var raw = datastore.read(key);
+        var result = raw.map(r -> {
+            R record = toMessage(raw.get(), typeUrl);
+            return record;
+        });
         return result;
     }
 
@@ -211,13 +224,17 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
                 tx.commit();
                 return result;
             } catch (RuntimeException e) {
-                throw newIllegalStateException(e, "" +
-                        "Error executing `ReadOperation` transactionally.");
+                throw exceptionWithMessage(e, "ReadOperation");
             }
         } else {
             var result = operation.perform(datastore);
             return result;
         }
+    }
+
+    private static RuntimeException
+    exceptionWithMessage(RuntimeException e, String operation) throws IllegalStateException {
+        throw newIllegalStateException(e, "Error executing `%s` transactionally.", operation);
     }
 
     private void write(WriteOperation operation) {
@@ -226,8 +243,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
                 operation.perform(tx);
                 tx.commit();
             } catch (RuntimeException e) {
-                throw newIllegalStateException(e, "" +
-                        "Error executing `WriteOperation` transactionally.");
+                throw exceptionWithMessage(e, "WriteOperation");
             }
         } else {
             operation.perform(datastore);
