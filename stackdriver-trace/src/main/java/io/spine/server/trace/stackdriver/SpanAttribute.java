@@ -27,8 +27,8 @@
 package io.spine.server.trace.stackdriver;
 
 import com.google.devtools.cloudtrace.v2.AttributeValue;
-import io.spine.json.Json;
 import io.spine.string.Stringifiers;
+import io.spine.type.Json;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 

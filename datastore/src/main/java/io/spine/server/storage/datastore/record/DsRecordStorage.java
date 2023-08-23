@@ -108,6 +108,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
 
     @Override
     public Optional<R> read(I id) {
+        checkNotClosed();
         var key = keyOf(id);
         var raw = datastore.read(key);
         var result = raw.map(r -> {
@@ -119,6 +120,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
 
     @Override
     public void write(I id, R record) {
+        checkNotClosed();
         writeRecord(RecordWithColumns.of(id, record));
     }
 
@@ -214,7 +216,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
      * Converts a Datastore {@code Entity} to the record of type served by this storage.
      */
     protected final R toRecord(Entity entity) {
-        return Entities.toMessage(entity, typeUrl);
+        return toMessage(entity, typeUrl);
     }
 
     private <V> V read(ReadOperation<V> operation) {

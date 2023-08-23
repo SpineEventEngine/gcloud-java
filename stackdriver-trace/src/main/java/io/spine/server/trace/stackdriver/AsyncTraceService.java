@@ -28,17 +28,18 @@ package io.spine.server.trace.stackdriver;
 
 import com.google.cloud.trace.v2.stub.GrpcTraceServiceStub;
 import com.google.devtools.cloudtrace.v2.BatchWriteSpansRequest;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+import static java.lang.String.format;
 
 /**
  * An async implementation of the {@link TraceService}.
  *
  * <p>Logs when the request is executed successfully.
  */
-final class AsyncTraceService implements TraceService, Logging {
+final class AsyncTraceService implements TraceService, WithLogging {
 
     private final GrpcTraceServiceStub client;
 
@@ -49,9 +50,13 @@ final class AsyncTraceService implements TraceService, Logging {
     @Override
     public void writeSpans(BatchWriteSpansRequest request) {
         client.batchWriteSpansCallable()
-              .futureCall(request)
-              .addListener(() -> _debug().log("Submitted %d spans.", request.getSpansCount()),
-                           directExecutor());
+                .futureCall(request)
+                .addListener(() -> logSpans(request),
+                        directExecutor());
+    }
+
+    private void logSpans(BatchWriteSpansRequest request) {
+        logger().atDebug().log(() -> format("Submitted %d spans.", request.getSpansCount()));
     }
 
     @Override

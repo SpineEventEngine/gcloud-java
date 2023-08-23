@@ -41,7 +41,7 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.InlineMe;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.storage.datastore.record.Entities;
 import io.spine.server.storage.datastore.record.RecordId;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
@@ -58,12 +58,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.toArray;
 import static com.google.common.collect.Streams.stream;
 import static java.lang.Math.min;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 /**
  * Adapts {@link Datastore} API for being used for storages.
  */
-public class DatastoreWrapper extends DatastoreMedium implements Logging {
+public class DatastoreWrapper extends DatastoreMedium implements WithLogging {
 
     private static final int MAX_ENTITIES_PER_WRITE_REQUEST = 500;
 
@@ -197,7 +198,7 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
     /**
      * Queries the Datastore for all entities matching query.
      *
-     * <p>Read is performed in batches until all of the matching entities are fetched, resulting
+     * <p>Read is performed in batches until all the matching entities are fetched, resulting
      * in multiple Datastore queries.
      *
      * <p>The resulting {@code Iterator} is evaluated lazily. A call to
@@ -237,7 +238,6 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
      *         if the provided {@linkplain StructuredQuery#getLimit() query includes a limit} or
      *         the provided {@code batchSize} is 0
      */
-    @SuppressWarnings("UnstableApiUsage")   /* Guava's `Streams.stream` is fine. */
     private <R> Iterator<R>
     readAllPageByPage(StructuredQuery<R> query, @Nullable Integer pageSize) {
         checkArgument(query.getLimit() == null,
@@ -278,8 +278,12 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
                          .setNamespace(namespace.value())
                          .setKind(table.value())
                          .build();
-        _trace().log("Deleting all entities of `%s` kind in `%s` namespace.",
-                     table, namespace.value());
+        logger()
+                .atTrace()
+                .log(() -> format(
+                        "Deleting all entities of `%s` kind in `%s` namespace.",
+                        table, namespace.value())
+                );
         var queryResult = read(query);
         var keys = toIterable(queryResult);
         deleteEntities(toArray(keys, Key.class));
@@ -338,8 +342,11 @@ public class DatastoreWrapper extends DatastoreMedium implements Logging {
                 .newKeyFactory()
                 .setKind(kind.value());
         var namespace = namespace();
-        _trace().log("Retrieving KeyFactory for kind `%s` in `%s` namespace.",
-                     kind, namespace.value());
+        logger().atTrace()
+                .log(() -> format(
+                        "Retrieving KeyFactory for kind `%s` in `%s` namespace.",
+                        kind, namespace.value())
+                );
         keyFactory.setNamespace(namespace.value());
         return keyFactory;
     }

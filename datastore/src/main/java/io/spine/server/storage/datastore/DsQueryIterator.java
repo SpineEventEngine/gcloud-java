@@ -32,7 +32,7 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.UnmodifiableIterator;
 import io.spine.annotation.Internal;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 
 import java.util.NoSuchElementException;
 
@@ -58,7 +58,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         the type of queried objects
  */
 @Internal
-public final class DsQueryIterator<R> extends UnmodifiableIterator<R> implements Logging {
+public final class DsQueryIterator<R> extends UnmodifiableIterator<R> implements WithLogging {
 
     private final StructuredQuery<R> query;
     private final QueryResults<R> currentPage;

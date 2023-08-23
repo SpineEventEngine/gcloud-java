@@ -28,7 +28,7 @@ package io.spine.server.storage.datastore.delivery;
 
 import com.google.cloud.datastore.DatastoreException;
 import com.google.protobuf.Duration;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.ContextSpec;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.AbstractWorkRegistry;
@@ -56,7 +56,7 @@ import static io.spine.server.delivery.PickUpOutcomeMixin.pickedUp;
  * this implementation with Cloud Firestore in Datastore mode, as it enforces serializable isolation
  * for transactions.
  */
-public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Logging {
+public class DsShardedWorkRegistry extends AbstractWorkRegistry implements WithLogging {
 
     private final DsSessionStorage storage;
 

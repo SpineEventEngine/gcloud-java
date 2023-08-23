@@ -31,7 +31,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.ImmutableList;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.storage.datastore.tenant.Namespace;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -41,13 +41,14 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.min;
+import static java.lang.String.format;
 
 /**
  * A low-level Datastore lookup.
  *
  * <p>Uses a given {@link DatastoreReader} to find requested methods.
  */
-final class DsReaderLookup implements Logging {
+final class DsReaderLookup implements WithLogging {
 
     private static final int MAX_KEYS_PER_READ_REQUEST = 1000;
 
@@ -65,9 +66,12 @@ final class DsReaderLookup implements Logging {
                 .setNamespace(namespace.value())
                 .build();
         var iterator = new DsQueryIterator<>(queryWithNamespace, datastore);
-        iterator._trace()
-                .log("Reading the records of `%s` kind in `%s` namespace.",
-                     query.getKind(), namespace.value());
+        iterator.logger()
+                .atTrace()
+                .log(() -> format(
+                        "Reading the records of `%s` kind in `%s` namespace.",
+                        query.getKind(), namespace.value())
+                );
         return iterator;
     }
 
@@ -98,8 +102,9 @@ final class DsReaderLookup implements Logging {
      */
     private List<Entity> readBulk(List<Key> keys) {
         var pageCount = keys.size() / MAX_KEYS_PER_READ_REQUEST + 1;
-        _trace().log("Reading a big bulk of records synchronously. The data is read as %d pages.",
-                     pageCount);
+        logger().atTrace()
+                .log(() -> format(
+                        "Reading a big bulk of records synchronously. The data is read as %d pages.", pageCount));
         var lowerBound = 0;
         var higherBound = MAX_KEYS_PER_READ_REQUEST;
         var keysLeft = keys.size();

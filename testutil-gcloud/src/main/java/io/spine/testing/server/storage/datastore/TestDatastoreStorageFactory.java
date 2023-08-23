@@ -28,7 +28,6 @@ package io.spine.testing.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.flogger.FluentLogger;
 import io.spine.annotation.Internal;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.DatastoreWrapper;
@@ -37,6 +36,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * A test implementation of the {@link DatastoreStorageFactory}.
@@ -45,8 +45,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * clean up {@linkplain #tearDown() methods}.
  */
 public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
-
-    private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
     private final Collection<DatastoreWrapper> allCreatedWrappers = new HashSet<>();
 
@@ -131,9 +129,9 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
             try {
                 datastore.dropAllTables();
             } catch (Throwable e) {
-                logger.atSevere()
-                      .withCause(e)
-                      .log("Unable to drop tables in Datastore `%s`.", datastore);
+                logger().atError()
+                        .withCause(e)
+                        .log(() -> format("Unable to drop tables in Datastore `%s`.", datastore));
                 throw new IllegalStateException(e);
             }
         }

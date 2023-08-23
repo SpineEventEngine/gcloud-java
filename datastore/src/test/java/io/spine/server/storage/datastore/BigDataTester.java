@@ -28,7 +28,7 @@ package io.spine.server.storage.datastore;
 
 import com.google.common.base.Throwables;
 import com.google.protobuf.Message;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageUnderTest;
 
@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * separately.
  *
  * <p>The test suits based on this utility are not expected to check if the read records match
- * those that were written or not. Instead they should just check the time consumed by
+ * those that were written or not. Instead, they should just check the time consumed by
  * the operations and the consistency of the data (i.e. count of the records written and read).
  *
  * @param <I>
@@ -61,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @param <R>
  *         the type of the records served by the {@code RecordStorage} under test
  */
-public final class BigDataTester<I, R extends Message> implements Logging {
+public final class BigDataTester<I, R extends Message> implements WithLogging {
 
     private static final int DEFAULT_BULK_SIZE = 500;
 
@@ -126,7 +126,8 @@ public final class BigDataTester<I, R extends Message> implements Logging {
                         writeTime));
         }
 
-        _debug().log("Writing took %d millis.", writeTime);
+        logger().atDebug()
+                .log(() -> format("Writing took %d millis.", writeTime));
 
         try {
             Thread.sleep(1000);
@@ -147,7 +148,8 @@ public final class BigDataTester<I, R extends Message> implements Logging {
                         readMillisLimit,
                         readTime));
         }
-        _debug().log("Reading took %d millis.", readTime);
+        logger().atDebug()
+                .log(() -> format("Reading took %d millis.", readTime));
 
         assertEquals(records.size(), size(readResults), "Unexpected record count read.");
     }

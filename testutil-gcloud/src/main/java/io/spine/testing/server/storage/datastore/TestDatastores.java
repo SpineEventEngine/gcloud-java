@@ -32,7 +32,7 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.io.Resource;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.storage.datastore.ProjectId;
 
 import java.io.IOException;
@@ -46,7 +46,7 @@ import static java.lang.String.format;
 /**
  * A factory of test {@link Datastore} instances.
  */
-public final class TestDatastores implements Logging {
+public final class TestDatastores implements WithLogging {
 
     /**
      * The default port to which the local Datastore emulator is bound.

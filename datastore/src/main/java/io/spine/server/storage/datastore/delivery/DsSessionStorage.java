@@ -122,6 +122,7 @@ public final class DsSessionStorage
      */
     @Override
     public Optional<ShardSessionRecord> read(ShardIndex index) {
+        checkNotClosed();
         var key = keyOf(index);
         try (var tx = newTransaction()) {
             var result = tx.read(key);
@@ -145,6 +146,7 @@ public final class DsSessionStorage
      */
     @SuppressWarnings("OverlyBroadCatchBlock")  /* Treating all exceptions similarly. */
     public void write(ShardSessionRecord message) {
+        checkNotClosed();
         try (var tx = newTransaction()) {
             var record = appendColumns(message);
             var entity = entityRecordToEntity(record);
