@@ -26,7 +26,8 @@
 
 package io.spine.internal.dependency
 
+// https://github.com/perfmark/perfmark
 object PerfMark {
 
-    const val api = "io.perfmark:perfmark-api:0.23.0"
+    const val api = "io.perfmark:perfmark-api:0.26.0"
 }

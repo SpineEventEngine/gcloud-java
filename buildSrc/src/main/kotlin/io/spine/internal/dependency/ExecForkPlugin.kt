@@ -26,13 +26,10 @@
 
 package io.spine.internal.dependency
 
+// https://github.com/psxpaul/gradle-execfork-plugin
 object ExecForkPlugin {
 
-    const val version = "0.1.16"
+    const val version = "0.2.2"
 
-    // The name of the GitHub repository where the plugin is published using GitHub Packages.
-    const val repository = "gradle-execfork-plugin"
-
-    // The argument to be passed to the `classpath()` clause in `buildscript` for using the plugin.
-    const val classpath = "io.spine.tools:gradle-execfork-plugin:$version"
+    const val id = "com.github.psxpaul.execfork"
 }
