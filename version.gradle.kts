@@ -24,12 +24,4 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.150")
-val spineBaseTypesVersion: String by extra("2.0.0-SNAPSHOT.113")
-val spineToolBaseVersion: String by extra("2.0.0-SNAPSHOT.156")
-val spineTimeVersion: String by extra("2.0.0-SNAPSHOT.121")
-val spineCoreVersion: String by extra("2.0.0-SNAPSHOT.149")
-val mcJavaVersion: String by extra("2.0.0-SNAPSHOT.132")
-val validationVersion: String by extra("2.0.0-SNAPSHOT.80")
-
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.149")
+val versionToPublish: String by extra("2.0.0-SNAPSHOT.155")
