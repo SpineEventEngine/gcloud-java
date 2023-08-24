@@ -123,7 +123,9 @@ final class DsColumnMappingTest {
         @Test
         @DisplayName("generic `Message` as `StringValue`")
         void messageAsStringValue() {
-            StgProjectId id = StgProjectId.newBuilder().setId("ID").build();
+            var id = StgProjectId.newBuilder()
+                    .setId("ID")
+                    .build();
             var project = StgProject.newBuilder()
                     .setId(id)
                     .setName("project-name")
