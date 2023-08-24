@@ -55,7 +55,8 @@ final class AsyncTraceService implements TraceService, WithLogging {
     }
 
     private void logSpans(BatchWriteSpansRequest request) {
-        logger().atDebug().log(() -> format("Submitted %d spans.", request.getSpansCount()));
+        logger().atDebug()
+                .log(() -> format("Submitted %d spans.", request.getSpansCount()));
     }
 
     @Override
