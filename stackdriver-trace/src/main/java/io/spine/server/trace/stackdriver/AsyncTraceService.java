@@ -51,8 +51,7 @@ final class AsyncTraceService implements TraceService, WithLogging {
     public void writeSpans(BatchWriteSpansRequest request) {
         client.batchWriteSpansCallable()
                 .futureCall(request)
-                .addListener(() -> logSpans(request),
-                        directExecutor());
+                .addListener(() -> logSpans(request), directExecutor());
     }
 
     private void logSpans(BatchWriteSpansRequest request) {
