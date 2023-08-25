@@ -40,6 +40,7 @@ import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.io.Resource.file;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Preconditions2.checkPositive;
 
 /**
  * A factory of test {@link Datastore} instances.
@@ -100,7 +101,9 @@ public final class TestDatastores implements WithLogging {
      * which runs with the specified project ID.
      */
     public static Datastore local(ProjectId projectId, int port) {
-        var datastore = Emulator.options(projectId, port).getService();
+        checkNotNull(projectId);
+        checkPositive(port);
+        var datastore = Emulator.at(port, projectId).getService();
         return datastore;
     }
 
