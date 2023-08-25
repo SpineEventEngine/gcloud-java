@@ -27,7 +27,6 @@
 package io.spine.testing.server.storage.datastore;
 
 import com.google.auth.Credentials;
-import com.google.cloud.NoCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
@@ -41,7 +40,6 @@ import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.io.Resource.file;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
 
 /**
  * A factory of test {@link Datastore} instances.
@@ -56,7 +54,6 @@ public final class TestDatastores implements WithLogging {
      */
     @VisibleForTesting
     static final int DEFAULT_EMULATOR_PORT = 8081;
-    private static final String LOCALHOST = "localhost";
 
     /**
      * The default project ID to use when running on a local Datastore emulator.
@@ -103,13 +100,7 @@ public final class TestDatastores implements WithLogging {
      * which runs with the specified project ID.
      */
     public static Datastore local(ProjectId projectId, int port) {
-        var address = format("%s:%d", LOCALHOST, port);
-        var options = DatastoreOptions.newBuilder()
-                .setProjectId(projectId.value())
-                .setHost(address)
-                .setCredentials(NoCredentials.getInstance())
-                .build();
-        var datastore = options.getService();
+        var datastore = Emulator.options(projectId, port).getService();
         return datastore;
     }
 
