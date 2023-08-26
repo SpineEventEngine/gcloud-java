@@ -34,8 +34,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.testing.server.storage.datastore.TestDatastores.DEFAULT_EMULATOR_PORT;
-import static java.lang.String.format;
+import static io.spine.testing.server.storage.datastore.TestDatastores.DEFAULT_LOCAL_PROJECT_ID;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`TestDatastores` utility should")
@@ -46,44 +45,25 @@ class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
     }
 
     @Nested
-    @DisplayName("create a `Datastore` connected to the local Datastore emulator running at")
+    @DisplayName("create a `Datastore` connected to the Docker-based Datastore emulator running with")
     class CreateLocalDatastore {
 
-        private static final String ADDRESS_FORMAT = "localhost:%d";
-
         @Test
-        @DisplayName("the default emulator address")
+        @DisplayName("the default project ID")
         void atDefaultAddress() {
             var datastore = TestDatastores.local();
-            var host = datastore.getOptions()
-                                .getHost();
-            var expectedHost = format(ADDRESS_FORMAT, DEFAULT_EMULATOR_PORT);
-            assertThat(host).isEqualTo(expectedHost);
+            var project = datastore.getOptions().getProjectId();
+            assertThat(project).isEqualTo(DEFAULT_LOCAL_PROJECT_ID.value());
         }
 
         @Test
-        @DisplayName("a custom port")
-        void atCustomPort() {
-            var port = 8080;
-            var datastore = TestDatastores.local(port);
-            var host = datastore.getOptions()
-                                .getHost();
-            var expectedHost = format(ADDRESS_FORMAT, port);
-            assertThat(host).isEqualTo(expectedHost);
-        }
-
-        @Test
-        @DisplayName("a custom port with a custom project ID")
+        @DisplayName("a custom project ID")
         void atCustomPortWithCustomId() {
-            var port = 8080;
             var id = "the-test-project";
             var projectId = ProjectId.of(id);
-            var datastore = TestDatastores.local(projectId, port);
+            var datastore = TestDatastores.local(projectId);
 
             var options = datastore.getOptions();
-            var host = options.getHost();
-            var expectedHost = format(ADDRESS_FORMAT, port);
-            assertThat(host).isEqualTo(expectedHost);
 
             var actualProjectId = options.getProjectId();
             assertThat(actualProjectId).isEqualTo(id);
