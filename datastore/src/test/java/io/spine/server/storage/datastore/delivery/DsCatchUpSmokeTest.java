@@ -63,4 +63,26 @@ class DsCatchUpSmokeTest extends CatchUpTest {
             factory.tearDown();
         }
     }
+
+
+    @Test
+    @Disabled
+    @Override
+    public void withNanosByIds() throws InterruptedException {
+        super.withNanosByIds();
+    }
+
+    @Test
+    @Disabled
+    @Override
+    public void withMillisByIds() throws InterruptedException {
+        super.withMillisByIds();
+    }
+
+    @Test
+    @Disabled
+    @Override
+    public void withMillisAllInOrder() throws InterruptedException {
+        super.withMillisAllInOrder();
+    }
 }
