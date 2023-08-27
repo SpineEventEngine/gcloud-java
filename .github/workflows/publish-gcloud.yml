@@ -1,4 +1,4 @@
-name: Publish (with Google Cloud SDK)
+name: Publish Spine's Google Cloud library
 
 on:
   push:
