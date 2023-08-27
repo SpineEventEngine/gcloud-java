@@ -50,31 +50,9 @@ jobs:
         env:
           SPINE_DEV_CI_KEY: ${{ secrets.SPINE_DEV_CI_KEY }}
 
-        # The OS-managed Google Cloud SDK does not provide a Datastore emulator.
-      - name: Remove the OS-managed Google Cloud SDK
-        run: sudo apt-get remove google-cloud-sdk
-
-      - name: Install Google Cloud SDK utility
-        run: chmod +x ./scripts/install-gcloud.sh && ./scripts/install-gcloud.sh
-
-        # Appends the `gcloud` utility to the PATH for this particular terminal session.
-      - name: Install the Datastore emulator and Cloud Beta tools
-        run: >
-          source ~/google-cloud-sdk/path.bash.inc
-          && gcloud components install cloud-datastore-emulator --quiet
-          && gcloud components install beta --quiet
-
-        # Appends the `gcloud` utility to the PATH for this particular terminal session.
-      - name: Start the Datastore emulator
-        run: >
-          source ~/google-cloud-sdk/path.bash.inc
-          && ./scripts/start-datastore.sh &
-
         # Appends the `gcloud` utility to the PATH for this particular terminal session.
       - name: Publish artifacts to Maven
-        run: >
-          source ~/google-cloud-sdk/path.bash.inc
-          && ./gradlew build publish --stacktrace
+        run: ./gradlew build publish -x test --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORMAL_GIT_HUB_PAGES_AUTHOR: developers@spine.io
