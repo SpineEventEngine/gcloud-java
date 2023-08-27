@@ -7,22 +7,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v3
         with:
           java-version: 11
           distribution: zulu
           cache: gradle
 
-      - name: Pull config
-        run: git submodule update --init --recursive
-
         # This operation is specific to `gcloud-java` repository only.
       - name: Decrypt the credentials for the Spine-Dev service account
-        run: ./config/scripts/decrypt.sh "$SPINE_DEV_KEY" ./.github/keys/spine-dev.json.gpg ./spine-dev.json
+        run: ./config/scripts/decrypt.sh "$SPINE_DEV_CI_KEY" ./.github/keys/spine-dev-framework-ci.json.gpg ./spine-dev.json
         env:
-          SPINE_DEV_KEY: ${{ secrets.SPINE_DEV_KEY }}
+          SPINE_DEV_CI_KEY: ${{ secrets.SPINE_DEV_CI_KEY }}
 
         # The OS-managed Google Cloud SDK does not provide a Datastore emulator.
       - name: Remove the OS-managed Google Cloud SDK
@@ -50,7 +49,7 @@ jobs:
           && ./gradlew build --stacktrace
 
       - name: Upload code coverage report
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           verbose: true

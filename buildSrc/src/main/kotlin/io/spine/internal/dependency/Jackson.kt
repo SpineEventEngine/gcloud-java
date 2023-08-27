@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,31 @@
 
 package io.spine.internal.dependency
 
-@Suppress("unused")
+// https://github.com/FasterXML/jackson/wiki/Jackson-Releases
+@Suppress("unused", "ConstPropertyName")
 object Jackson {
-    private const val version = "2.13.2"
-    private const val databindVersion = "2.13.2.2"
+    const val version = "2.15.2"
+    private const val databindVersion = "2.15.2"
+
+    private const val coreGroup = "com.fasterxml.jackson.core"
+    private const val dataformatGroup = "com.fasterxml.jackson.dataformat"
+    private const val moduleGroup = "com.fasterxml.jackson.module"
+
     // https://github.com/FasterXML/jackson-core
-    const val core = "com.fasterxml.jackson.core:jackson-core:${version}"
+    const val core = "$coreGroup:jackson-core:${version}"
     // https://github.com/FasterXML/jackson-databind
-    const val databind = "com.fasterxml.jackson.core:jackson-databind:${databindVersion}"
+    const val databind = "$coreGroup:jackson-databind:${databindVersion}"
+    // https://github.com/FasterXML/jackson-annotations
+    const val annotations = "$coreGroup:jackson-annotations:${version}"
+
     // https://github.com/FasterXML/jackson-dataformat-xml/releases
-    const val dataformatXml = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${version}"
+    const val dataformatXml = "$dataformatGroup:jackson-dataformat-xml:${version}"
     // https://github.com/FasterXML/jackson-dataformats-text/releases
-    const val dataformatYaml = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${version}"
+    const val dataformatYaml = "$dataformatGroup:jackson-dataformat-yaml:${version}"
+
     // https://github.com/FasterXML/jackson-module-kotlin/releases
-    const val moduleKotlin = "com.fasterxml.jackson.module:jackson-module-kotlin:${version}"
+    const val moduleKotlin = "$moduleGroup:jackson-module-kotlin:${version}"
+
+    // https://github.com/FasterXML/jackson-bom
+    const val bom = "com.fasterxml.jackson:jackson-bom:${version}"
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,11 @@ package io.spine.internal.markup
 import java.io.File
 
 /**
- * Shortcuts for the Markdown syntax.
- */
-
-/**
  * A virtual document written in Markdown.
  *
  * After it's finished, end-users would typically write it to a [real file][writeToFile].
  */
-@SuppressWarnings("detekt.complexity.TooManyFunctions")     /* By design. */
+@Suppress("TooManyFunctions")
 class MarkdownDocument {
 
     private val builder: StringBuilder = StringBuilder()

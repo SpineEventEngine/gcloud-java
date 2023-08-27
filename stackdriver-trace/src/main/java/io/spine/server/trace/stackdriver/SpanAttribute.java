@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@
 package io.spine.server.trace.stackdriver;
 
 import com.google.devtools.cloudtrace.v2.AttributeValue;
-import io.spine.json.Json;
 import io.spine.string.Stringifiers;
+import io.spine.type.Json;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 

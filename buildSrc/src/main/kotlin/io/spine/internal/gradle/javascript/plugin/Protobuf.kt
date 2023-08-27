@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,8 @@
 
 package io.spine.internal.gradle.javascript.plugin
 
-import com.google.protobuf.gradle.builtins
-import com.google.protobuf.gradle.generateProtoTasks
+import com.google.protobuf.gradle.ProtobufExtension
 import com.google.protobuf.gradle.id
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
 import com.google.protobuf.gradle.remove
 import io.spine.internal.dependency.Protobuf
 
@@ -50,7 +47,8 @@ fun JsPlugins.protobuf() {
         apply(Protobuf.GradlePlugin.id)
     }
 
-    project.protobuf {
+    val protobufExt = project.extensions.getByType(ProtobufExtension::class.java)
+    protobufExt.apply {
 
         generatedFilesBaseDir = projectDir.path
 

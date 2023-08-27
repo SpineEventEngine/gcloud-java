@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
 import io.spine.server.delivery.InboxStorage;
@@ -80,7 +80,7 @@ import static io.spine.server.storage.datastore.config.TxSetting.enabled;
  *
  * @see DatastoreStorageFactory#configureTenantIndex(BoundedContextBuilder)
  */
-public class DatastoreStorageFactory implements StorageFactory, Logging {
+public class DatastoreStorageFactory implements StorageFactory, WithLogging {
 
     private final Datastore datastore;
 

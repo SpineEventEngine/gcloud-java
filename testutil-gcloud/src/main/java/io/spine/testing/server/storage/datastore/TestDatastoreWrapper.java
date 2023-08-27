@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,10 +163,12 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
 
     private void waitForConsistency() {
         if (!waitForConsistency) {
-            _debug().log("Wait for consistency is not required.");
+            logger().atDebug()
+                    .log(() -> "Waiting for consistency is not required.");
             return;
         }
-        _debug().log("Waiting for data consistency to establish.");
+        logger().atDebug()
+                .log(() -> "Waiting for data consistency to establish.");
 
         doWaitForConsistency();
     }
@@ -182,7 +184,8 @@ public class TestDatastoreWrapper extends DatastoreWrapper {
      * Deletes all records from the datastore.
      */
     public void dropAllTables() {
-        _debug().log("Dropping all tables...");
+        logger().atDebug()
+                .log(() -> "Dropping all tables...");
         for (var kind : kindsCache) {
             dropTable(kind);
         }

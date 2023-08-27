@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,29 +42,22 @@ import java.nio.file.WatchService
  * After the first usage, the instances of this type delegate all calls to the internally
  * created instance of [Path] created with [createTempDirectory].
  */
+@Suppress("TooManyFunctions")
 class LazyTempPath(private val prefix: String) : Path {
 
-    private lateinit var tempPath: Path
+    private val delegate: Path by lazy { createTempDirectory(prefix) }
 
-    private val delegate: Path
-        get() {
-            if (!::tempPath.isInitialized) {
-                tempPath = createTempDirectory(prefix)
-            }
-            return tempPath
-        }
-
-    override fun compareTo(other: Path?): Int = delegate.compareTo(other)
+    override fun compareTo(other: Path): Int = delegate.compareTo(other)
 
     override fun iterator(): MutableIterator<Path> = delegate.iterator()
 
     override fun register(
-        watcher: WatchService?,
-        events: Array<out WatchEvent.Kind<*>>?,
+        watcher: WatchService,
+        events: Array<out WatchEvent.Kind<*>>,
         vararg modifiers: WatchEvent.Modifier?
     ): WatchKey = delegate.register(watcher, events, *modifiers)
 
-    override fun register(watcher: WatchService?, vararg events: WatchEvent.Kind<*>?): WatchKey =
+    override fun register(watcher: WatchService, vararg events: WatchEvent.Kind<*>?): WatchKey =
         delegate.register(watcher, *events)
 
     override fun getFileSystem(): FileSystem = delegate.fileSystem
@@ -111,4 +104,6 @@ class LazyTempPath(private val prefix: String) : Path {
     override fun toRealPath(vararg options: LinkOption?): Path = delegate.toRealPath(*options)
 
     override fun toFile(): File = delegate.toFile()
+
+    override fun toString(): String = delegate.toString()
 }

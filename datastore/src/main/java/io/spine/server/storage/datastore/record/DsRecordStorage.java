@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,12 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.transform;
 import static io.spine.server.storage.datastore.record.Entities.builderFromMessage;
+import static io.spine.server.storage.datastore.record.Entities.toMessage;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -105,7 +107,20 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
     }
 
     @Override
+    public Optional<R> read(I id) {
+        checkNotClosed();
+        var key = keyOf(id);
+        var raw = datastore.read(key);
+        var result = raw.map(r -> {
+            R record = toMessage(raw.get(), typeUrl);
+            return record;
+        });
+        return result;
+    }
+
+    @Override
     public void write(I id, R record) {
+        checkNotClosed();
         writeRecord(RecordWithColumns.of(id, record));
     }
 
@@ -201,7 +216,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
      * Converts a Datastore {@code Entity} to the record of type served by this storage.
      */
     protected final R toRecord(Entity entity) {
-        return Entities.toMessage(entity, typeUrl);
+        return toMessage(entity, typeUrl);
     }
 
     private <V> V read(ReadOperation<V> operation) {
@@ -211,13 +226,17 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
                 tx.commit();
                 return result;
             } catch (RuntimeException e) {
-                throw newIllegalStateException(e, "" +
-                        "Error executing `ReadOperation` transactionally.");
+                throw exceptionWithMessage(e, "ReadOperation");
             }
         } else {
             var result = operation.perform(datastore);
             return result;
         }
+    }
+
+    private static RuntimeException
+    exceptionWithMessage(RuntimeException e, String operation) throws IllegalStateException {
+        throw newIllegalStateException(e, "Error executing `%s` transactionally.", operation);
     }
 
     private void write(WriteOperation operation) {
@@ -226,8 +245,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
                 operation.perform(tx);
                 tx.commit();
             } catch (RuntimeException e) {
-                throw newIllegalStateException(e, "" +
-                        "Error executing `WriteOperation` transactionally.");
+                throw exceptionWithMessage(e, "WriteOperation");
             }
         } else {
             operation.perform(datastore);

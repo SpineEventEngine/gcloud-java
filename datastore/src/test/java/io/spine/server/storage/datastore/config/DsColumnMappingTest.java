@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import io.spine.core.Version;
 import io.spine.string.Stringifiers;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProject.Status;
+import io.spine.test.storage.StgProjectId;
 import io.spine.testing.TestValues;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,6 +49,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Time.currentTime;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @DisplayName("`DsColumnMapping` should")
@@ -121,7 +123,11 @@ final class DsColumnMappingTest {
         @Test
         @DisplayName("generic `Message` as `StringValue`")
         void messageAsStringValue() {
+            var id = StgProjectId.newBuilder()
+                    .setId("ID")
+                    .build();
             var project = StgProject.newBuilder()
+                    .setId(id)
                     .setName("project-name")
                     .build();
             var messageAsString = Stringifiers.toString(project);
@@ -131,7 +137,7 @@ final class DsColumnMappingTest {
         @Test
         @DisplayName("`Timestamp` as `TimestampValue`")
         void timestampAsTimestampValue() {
-            var timestamp = Time.currentTime();
+            var timestamp = currentTime();
             assertConverts(timestamp, TimestampValue.of(
                     ofTimeSecondsAndNanos(timestamp.getSeconds(), timestamp.getNanos())
             ));
@@ -143,6 +149,7 @@ final class DsColumnMappingTest {
             var number = 42;
             var version = Version.newBuilder()
                     .setNumber(number)
+                    .setTimestamp(currentTime())
                     .build();
             assertConverts(version, LongValue.of(number));
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ interface PrepareForWrite {
      * @param previous
      *         the previous record currently residing in the storage, or {@code null}
      *         if there is no such record
-     * @return a instance of the record ready to be written to the storage,
+     * @return an instance of the record ready to be written to the storage,
      *         or {@code Optional.empty()} if no storage update should be performed
      */
     Optional<ShardSessionRecord> prepare(@Nullable ShardSessionRecord previous);

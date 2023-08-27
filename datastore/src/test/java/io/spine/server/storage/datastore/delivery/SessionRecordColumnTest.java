@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ class SessionRecordColumnTest {
             var worker = initialWorker
                     .toBuilder()
                     .setNodeId(node)
-                    .vBuild();
+                    .build();
             var value = columnValueFor(worker);
             assertThat(value).isNotEqualTo(initialValue);
         }
@@ -81,7 +81,7 @@ class SessionRecordColumnTest {
             return NodeId
                     .newBuilder()
                     .setValue(newUuid())
-                    .vBuild();
+                    .build();
         }
 
         private WorkerId newWorkerId(NodeId node) {
@@ -89,7 +89,7 @@ class SessionRecordColumnTest {
                     .newBuilder()
                     .setNodeId(node)
                     .setValue(newUuid())
-                    .vBuild();
+                    .build();
         }
 
         @SuppressWarnings("ConstantConditions" /* We are not using a "material" record here. */)
@@ -98,7 +98,7 @@ class SessionRecordColumnTest {
                     .newBuilder()
                     .setIndex(newIndex(1, 15))
                     .setWorker(worker)
-                    .vBuild();
+                    .build();
             return SessionRecordColumn.worker.valueIn(session);
         }
     }

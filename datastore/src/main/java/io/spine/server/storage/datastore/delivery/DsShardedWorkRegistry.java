@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,14 @@
 
 package io.spine.server.storage.datastore.delivery;
 
+import com.google.cloud.datastore.DatastoreException;
 import com.google.protobuf.Duration;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.ContextSpec;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.AbstractWorkRegistry;
+import io.spine.server.delivery.PickUpOutcome;
 import io.spine.server.delivery.ShardIndex;
-import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.WorkerId;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
@@ -41,6 +42,8 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.delivery.PickUpOutcomeMixin.alreadyPicked;
+import static io.spine.server.delivery.PickUpOutcomeMixin.pickedUp;
 
 /**
  * A {@link io.spine.server.delivery.ShardedWorkRegistry} based on the Google Datastore storage.
@@ -53,7 +56,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * this implementation with Cloud Firestore in Datastore mode, as it enforces serializable isolation
  * for transactions.
  */
-public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Logging {
+public class DsShardedWorkRegistry extends AbstractWorkRegistry implements WithLogging {
 
     private final DsSessionStorage storage;
 
@@ -84,14 +87,27 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
      * the one started earlier wins.
      */
     @Override
-    public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId node) {
+    public synchronized PickUpOutcome pickUp(ShardIndex index, NodeId node)
+            throws DatastoreException {
         checkNotNull(index);
         checkNotNull(node);
         var worker = currentWorkerFor(node);
         var operation = new SetWorkerIfAbsent(index, worker);
-        var record = storage().updateTransactionally(index, operation);
-        var session = record.map(this::asSession);
-        return session;
+
+        var updateResult = storage().updateTransactionally(index, operation);
+        if (updateResult.isSuccessful()) {
+            var updatedRecord = updateResult.value();
+            return pickedUp(updatedRecord);
+        } else {
+            var preExistingRecord = updateResult.value();
+            return alreadyPicked(preExistingRecord.getWorker(),
+                                 preExistingRecord.getWhenLastPicked());
+        }
+    }
+
+    @Override
+    public void release(ShardSessionRecord session) {
+        clearNode(session);
     }
 
     /**
@@ -102,11 +118,10 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
     @Override
     protected WorkerId currentWorkerFor(NodeId node) {
         var currentThread = Thread.currentThread().getId();
-        var worker = WorkerId
-                .newBuilder()
+        var worker = WorkerId.newBuilder()
                 .setNodeId(node)
                 .setValue(String.valueOf(currentThread))
-                .vBuild();
+                .build();
         return worker;
     }
 
@@ -134,11 +149,6 @@ public class DsShardedWorkRegistry extends AbstractWorkRegistry implements Loggi
     protected Optional<ShardSessionRecord> find(ShardIndex index) {
         var read = storage().read(index);
         return read;
-    }
-
-    @Override
-    protected ShardProcessingSession asSession(ShardSessionRecord record) {
-        return new DsShardProcessingSession(record, () -> clearNode(record));
     }
 
     /**

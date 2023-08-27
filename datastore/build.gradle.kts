@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.github.psxpaul.task.ExecFork
 import io.spine.internal.dependency.GoogleCloud
+import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.publish.IncrementGuard
-import io.spine.tools.gradle.exec.ExecFork
 
 plugins {
-    id("io.spine.execfork")
+    id("com.github.psxpaul.execfork") version "0.2.2"
 }
 
 apply<IncrementGuard>()
-
-val spineCoreVersion: String by extra
-val spineBaseVersion: String by extra
-val spineBaseTypesVersion: String by extra
 
 dependencies {
     // Google Cloud Datastore
@@ -44,11 +41,13 @@ dependencies {
         exclude(group = "com.google.protobuf")
         exclude(group = "com.google.guava")
     }
-    api("io.spine:spine-base:$spineBaseVersion")
-    api("io.spine:spine-base-types:$spineBaseTypesVersion")
+    api(Spine.base)
+    api(Spine.baseTypes)
+
+    api(Spine.Logging.lib)
 
     testImplementation(project(":testutil-gcloud"))
-    testImplementation("io.spine:spine-server:$spineCoreVersion")
+    testImplementation(Spine.server)
 }
 
 val startDatastore by tasks.registering(ExecFork::class) {
@@ -66,8 +65,8 @@ val startDatastore by tasks.registering(ExecFork::class) {
     //
     waitForPort = 8081
 
-    standardOutput = "$buildDir/ds-emulator/stdout.log"
-    errorOutput = "$buildDir/ds-emulator/stderr.log"
+    standardOutput.set(File("$buildDir/ds-emulator/stdout.log"))
+    errorOutput.set(File("$buildDir/ds-emulator/stderr.log"))
 
     // Suppress a console warning for JRE < 9
     killDescendants = false

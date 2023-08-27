@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ open class CheckVersionIncrement : DefaultTask() {
     val version: String = project.version as String
 
     @TaskAction
-    private fun fetchAndCheck() {
+    fun fetchAndCheck() {
         val artifact = "${project.artifactPath()}/${MavenMetadata.FILE_NAME}"
         checkInRepo(repository.snapshots, artifact)
 
@@ -119,7 +119,7 @@ private data class MavenMetadata(var versioning: Versioning = Versioning()) {
             return try {
                 val metadata = mapper.readValue(url, MavenMetadata::class.java)
                 metadata
-            } catch (e: FileNotFoundException) {
+            } catch (ignored: FileNotFoundException) {
                 null
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,8 @@ class AuthorEmail(val value: String) {
          */
         fun fromVar() : AuthorEmail {
             val envValue = System.getenv(environmentVariable)
-            if (envValue.isNullOrEmpty()) {
-                throw IllegalStateException(
-                    "Unable to obtain an author from `${environmentVariable}`."
-                )
+            check(envValue != null && envValue.isNotBlank()) {
+                "Unable to obtain an author from `${environmentVariable}`."
             }
             return AuthorEmail(envValue)
         }

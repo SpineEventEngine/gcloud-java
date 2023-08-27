@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,10 +62,8 @@ import io.spine.internal.gradle.publish.testJar
 @Suppress("unused")
 fun Project.exposeTestConfiguration() {
 
-    if (pluginManager.hasPlugin("java").not()) {
-        throw IllegalStateException(
-            "Can't expose the test configuration because `java` plugin has not been applied."
-        )
+    check(pluginManager.hasPlugin("java")) {
+        "Can't expose the test configuration because `java` plugin has not been applied."
     }
 
     configurations.create("testArtifacts") {

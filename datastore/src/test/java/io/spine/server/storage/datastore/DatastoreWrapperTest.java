@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -319,19 +319,19 @@ final class DatastoreWrapperTest {
         ensureNamespace(tenantId3Prefixed, datastore);
         var emailAddress2 = EmailAddress.newBuilder()
                 .setValue(tenantId2)
-                .vBuild();
+                .build();
         var internetDomain3 = InternetDomain.newBuilder()
                 .setValue(tenantId3)
-                .vBuild();
+                .build();
         var id1 = TenantId.newBuilder()
                 .setValue(tenantId1)
-                .vBuild();
+                .build();
         var id2 = TenantId.newBuilder()
                 .setEmail(emailAddress2)
-                .vBuild();
+                .build();
         var id3 = TenantId.newBuilder()
                 .setDomain(internetDomain3)
-                .vBuild();
+                .build();
         checkTenantIdInKey(tenantId1Prefixed, id1, wrapper);
         checkTenantIdInKey(tenantId2Prefixed, id2, wrapper);
         checkTenantIdInKey(tenantId3Prefixed, id3, wrapper);
@@ -378,7 +378,7 @@ final class DatastoreWrapperTest {
         var wrapper = wrap(localDatastore(), multitenant());
         var tenantId = TenantId.newBuilder()
                 .setValue("Luke_I_am_your_tenant.")
-                .vBuild();
+                .build();
         var key = "noooooo";
         var entityKey = new TenantAwareFunction0<Key>(tenantId) {
             @Override

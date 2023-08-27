@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,7 +239,7 @@ class StackdriverTracerFactoryTest {
             var command = CreateProject.newBuilder()
                     .setUuid(newUuid())
                     .setName("TestProject")
-                    .vBuild();
+                    .build();
             var cmd = requests.command()
                               .create(command);
             var tracer = tracerFactory.trace(SPEC, cmd);
@@ -247,10 +247,10 @@ class StackdriverTracerFactoryTest {
                     .setId(Identifier.pack("SampleEntityId"))
                     .setTypeUrl(TypeUrl.of(Empty.class).value())
                     .setVersion(zero())
-                    .vBuild();
+                    .build();
             var entityType = EntityTypeName.newBuilder()
                     .setJavaClassName(StackdriverTracerFactoryTest.class.getCanonicalName())
-                    .vBuild();
+                    .build();
             tracer.processedBy(receiverId, entityType);
             tracer.close();
             tracerFactory.close();
