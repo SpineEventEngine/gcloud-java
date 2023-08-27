@@ -31,7 +31,7 @@ dependencies {
     implementation("io.spine.gcloud:spine-datastore:1.9.0")
 
     // Pub/Sub messaging support library.
-    implementation("io.spine.gcloud:spine-pubsub:1.790")
+    implementation("io.spine.gcloud:spine-pubsub:1.9.0")
 
     // Stackdriver Trace support library.
     implementation("io.spine.gcloud:spine-stackdriver-trace:1.9.0")
