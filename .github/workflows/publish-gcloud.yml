@@ -48,7 +48,6 @@ jobs:
         env:
           SPINE_DEV_CI_KEY: ${{ secrets.SPINE_DEV_CI_KEY }}
 
-        # Appends the `gcloud` utility to the PATH for this particular terminal session.
       - name: Publish artifacts to Maven
         run: ./gradlew build publish -x test --stacktrace
         env:
