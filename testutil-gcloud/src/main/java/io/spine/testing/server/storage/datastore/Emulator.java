@@ -21,7 +21,6 @@ final class Emulator {
     private static final DockerImageName IMAGE =
             DockerImageName.parse("gcr.io/google.com/cloudsdktool/google-cloud-cli:441.0.0-emulators");
 
-
     /**
      * Currently running emulators, per project ID with which each of them is running.
      */
