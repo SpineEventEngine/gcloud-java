@@ -64,7 +64,6 @@ class DsCatchUpSmokeTest extends CatchUpTest {
         }
     }
 
-
     @Test
     @Disabled
     @Override
