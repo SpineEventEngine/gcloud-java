@@ -45,11 +45,9 @@ final class Emulator {
      *                  and not correspond to any real GCP project
      * @param port      port in a Docker container machine, through which the emulator is going to be accessed
      */
-    @SuppressWarnings("UseOfSystemOutOrSystemErr")
     static synchronized DatastoreOptions at(ProjectId projectId, int port) {
         var emulator = containers.get(projectId);
         if (emulator == null) {
-            System.out.println("---- Starting a new Datastore Emulator via Docker...");
             emulator = new EmulatorContainer(IMAGE, projectId, port);
             emulator.startAndServe();
             containers.put(projectId, emulator);
