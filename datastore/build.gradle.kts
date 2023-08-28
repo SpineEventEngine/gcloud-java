@@ -24,14 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.github.psxpaul.task.ExecFork
 import io.spine.internal.dependency.GoogleCloud
 import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.publish.IncrementGuard
-
-plugins {
-    id("com.github.psxpaul.execfork") version "0.2.2"
-}
 
 apply<IncrementGuard>()
 
@@ -48,32 +43,6 @@ dependencies {
 
     testImplementation(project(":testutil-gcloud"))
     testImplementation(Spine.server)
-}
-
-val startDatastore by tasks.registering(ExecFork::class) {
-    description = "Starts local in-memory datastore."
-    group = "Build Setup"
-    shouldRunAfter(tasks.assemble)
-
-    val runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
-    val extension = if (runsOnWindows) "bat" else "sh"
-    executable = "$rootDir/scripts/start-datastore.$extension"
-
-    // Default port for the emulator is 8081.
-    //
-    // See: https://cloud.google.com/sdk/gcloud/reference/beta/emulators/datastore/start
-    //
-    waitForPort = 8081
-
-    standardOutput.set(File("$buildDir/ds-emulator/stdout.log"))
-    errorOutput.set(File("$buildDir/ds-emulator/stderr.log"))
-
-    // Suppress a console warning for JRE < 9
-    killDescendants = false
-}
-
-tasks.withType<Test>().configureEach {
-    dependsOn(startDatastore)
 }
 
 tasks {

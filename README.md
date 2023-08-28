@@ -28,16 +28,16 @@ Gradle:
 
 dependencies {
     // Datastore Storage support library.
-    implementation("io.spine.gcloud:spine-datastore:1.7.0")
+    implementation("io.spine.gcloud:spine-datastore:1.9.0")
 
     // Pub/Sub messaging support library.
-    implementation("io.spine.gcloud:spine-pubsub:1.7.0")
+    implementation("io.spine.gcloud:spine-pubsub:1.9.0")
 
     // Stackdriver Trace support library.
-    implementation("io.spine.gcloud:spine-stackdriver-trace:1.7.0")
+    implementation("io.spine.gcloud:spine-stackdriver-trace:1.9.0")
 
     // Datastore-related test utilities (if needed).
-    implementation("io.spine.gcloud:testutil-gcloud:1.7.0")
+    testImplementation("io.spine.gcloud:testutil-gcloud:1.9.0")
 }
 ```
 
@@ -89,31 +89,25 @@ This section describes testing the `gcloud-java` library itself.
 
 ##### Preconditions
 
-To run the task successfully, you must have `gcloud` tool properly installed and configured: 
- - [install][gcloud-install] `gcloud` of the last version;
- - login under a Google account when initializing the `gcloud`;
- - to run tests you should select `spine-dev` Google Cloud Console project;
- - skip Google App Engine setup if not required.
+The library utilizes Testcontainers in order 
+to run a [local Datastore emulator](https://java.testcontainers.org/modules/gcloud/#datastore).
 
-[gcloud-install]: https://cloud.google.com/sdk/docs/downloads-interactive
+Therefore, a local Docker is required up and running, in order to launch tests. 
 
 ##### Running the tests
 
-*Datastore*
+*Datastore and `testutil-gcloud`*
 
-To start a local emulator and run test against it, run `./gradlew check`.
+To start a local Docker-based emulator and run test against it, run `./gradlew check`.
 
-To start an emulator without running tests `./gradlew startDatastore`.
+Emulator container is re-used across tests. After test run is completed, the emulator container 
+shuts down automatically.
 
-To stop the Datastore emulator, just terminate the emulator process (e.g. `kill -9 $(lsof -i:8080)` 
-or just close the terminal window on Windows).
+Some tests also verify a connection to a remote Datastore instance. In order to run those,
+the corresponding credential file called `spine-dev.json` should be placed under
+`<project root>/datastore/src/test/resources/` and `<project root>/testutil-gcloud/src/test/resources/`.
 
-The launched emulator will run at `localhost:8080` and will not have any persistence.
-To change the configuration see `./scripts/start-datastore.*` scripts.
-
-The datastore is cleaned up after each test.
-See test classes under `./datastore/src/test/java/...` and 
-`io.spine.server.storage.datastore.TestDatastoreStorageFactory#clear`.
+Gradle build script is arranged to do that automatically upon running on CI.
 
 *Stackdriver-Trace*
 
@@ -121,4 +115,4 @@ The test are launched in a scope of Gradle `test` phase. However, they rely on a
 credentials file located at `<project root>/stackdriver-trace/src/test/resources/spine-dev.json`.
 
 To run the tests, obtain the service account file for your environment and make it available 
-to the test code in the specified location.
+to the test code in the specified locations.

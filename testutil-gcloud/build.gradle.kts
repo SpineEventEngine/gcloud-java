@@ -1,3 +1,6 @@
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Testcontainers
+
 /*
  * Copyright 2023, TeamDev. All rights reserved.
  *
@@ -25,6 +28,11 @@
  */
 
 dependencies {
+    JUnit.api.forEach {
+        implementation(it)
+    }
+    implementation(Testcontainers.lib)
+    implementation(Testcontainers.gcloud)
     implementation(project(":datastore"))
 }
 

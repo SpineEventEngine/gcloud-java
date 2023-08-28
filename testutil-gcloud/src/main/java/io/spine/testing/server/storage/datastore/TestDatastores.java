@@ -27,7 +27,6 @@
 package io.spine.testing.server.storage.datastore;
 
 import com.google.auth.Credentials;
-import com.google.cloud.NoCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.common.annotations.VisibleForTesting;
@@ -41,7 +40,6 @@ import static com.google.auth.oauth2.ServiceAccountCredentials.fromStream;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.io.Resource.file;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
 
 /**
  * A factory of test {@link Datastore} instances.
@@ -54,14 +52,13 @@ public final class TestDatastores implements WithLogging {
      * <p>See<a href="https://cloud.google.com/sdk/gcloud/reference/beta/emulators/datastore/start">
      * {@code gcloud} docs</a>.
      */
-    @VisibleForTesting
-    static final int DEFAULT_EMULATOR_PORT = 8081;
-    private static final String LOCALHOST = "localhost";
+    private static final int DEFAULT_EMULATOR_PORT = 8081;
 
     /**
      * The default project ID to use when running on a local Datastore emulator.
      */
-    private static final ProjectId DEFAULT_LOCAL_PROJECT_ID = ProjectId.of("test-project");
+    @VisibleForTesting
+    static final ProjectId DEFAULT_LOCAL_PROJECT_ID = ProjectId.of("test-project");
 
     /**
      * Prevents instantiation of this utility class.
@@ -70,45 +67,26 @@ public final class TestDatastores implements WithLogging {
     }
 
     /**
-     * Creates a {@link Datastore} connected to the local Datastore emulator at
-     * {@link #DEFAULT_EMULATOR_PORT}.
+     * Creates a {@link Datastore} connected to the Docker-based Datastore emulator.
      *
      * <p>The {@linkplain #DEFAULT_LOCAL_PROJECT_ID default project ID} will be used. For most
      * tests, it's okay to use this ID even if some other project ID was passed to the emulator via
      * the {@code --project} switch.
      *
      * <p>If, for some reason, you need to specify a custom project ID, please use
-     * {@link #local(ProjectId, int)}.
+     * {@link #local(ProjectId) local(ProjectId)}.
      */
     public static Datastore local() {
-        return local(DEFAULT_EMULATOR_PORT);
+        return local(DEFAULT_LOCAL_PROJECT_ID);
     }
 
     /**
-     * Creates a {@link Datastore} connected to the local Datastore emulator at the specified port.
-     *
-     * <p>The {@linkplain #DEFAULT_LOCAL_PROJECT_ID default project ID} will be used. For most
-     * tests, it's okay to use this ID even if some other project ID was passed to the emulator via
-     * the {@code --project} switch.
-     *
-     * <p>If, for some reason, you need to specify a custom project ID, please use
-     * {@link #local(ProjectId, int)}.
-     */
-    public static Datastore local(int port) {
-        return local(DEFAULT_LOCAL_PROJECT_ID, port);
-    }
-
-    /**
-     * Creates a {@link Datastore} connected to the local Datastore emulator at the specified port
+     * Creates a {@link Datastore} connected to the Docker-based Datastore emulator
      * which runs with the specified project ID.
      */
-    public static Datastore local(ProjectId projectId, int port) {
-        var address = format("%s:%d", LOCALHOST, port);
-        var options = DatastoreOptions.newBuilder()
-                .setProjectId(projectId.value())
-                .setHost(address)
-                .setCredentials(NoCredentials.getInstance())
-                .build();
+    public static Datastore local(ProjectId projectId) {
+        checkNotNull(projectId);
+        var options = Emulator.at(projectId, DEFAULT_EMULATOR_PORT);
         var datastore = options.getService();
         return datastore;
     }
