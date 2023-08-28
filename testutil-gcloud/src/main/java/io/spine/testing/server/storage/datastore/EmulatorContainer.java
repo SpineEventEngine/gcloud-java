@@ -16,7 +16,7 @@ import static java.util.Objects.requireNonNull;
  *
  * <p>The container is started in its "full consistency" mode.
  */
-class EmulatorContainer extends DatastoreEmulatorContainer {
+final class EmulatorContainer extends DatastoreEmulatorContainer {
 
     /**
      * A template of BASH command to execute upon Docker container start.
