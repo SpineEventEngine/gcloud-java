@@ -28,6 +28,8 @@ package io.spine.server.storage.datastore.tenant.given;
 
 import io.spine.server.projection.Projection;
 import io.spine.test.datastore.College;
+import io.spine.test.datastore.CollegeId;
 
-public final class TestProjection extends Projection<String, College, College.Builder> {
+public final class CollegeProjection
+        extends Projection<CollegeId, College, College.Builder> {
 }

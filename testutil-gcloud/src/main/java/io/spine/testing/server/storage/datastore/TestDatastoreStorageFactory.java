@@ -27,9 +27,11 @@
 package io.spine.testing.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Value;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import io.spine.annotation.Internal;
+import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.DsColumnMapping;
@@ -52,10 +54,14 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     private final Collection<DatastoreWrapper> allCreatedWrappers = new HashSet<>();
 
     protected TestDatastoreStorageFactory(Datastore datastore) {
+        this(datastore, new DsColumnMapping());
+    }
+
+    protected TestDatastoreStorageFactory(Datastore datastore, ColumnMapping<Value<?>> mapping) {
         super(DatastoreStorageFactory
                       .newBuilder()
                       .setDatastore(datastore)
-                      .setColumnMapping(new DsColumnMapping())
+                      .setColumnMapping(mapping)
         );
     }
 
@@ -69,6 +75,15 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     /**
+     * Creates a new instance which works with a local Datastore emulator.
+     *
+     * <p>A shortcut for {@code basedOn(TestDatastores.local())}.
+     */
+    public static TestDatastoreStorageFactory local(ColumnMapping<?> mapping) {
+        return basedOn(TestDatastores.local(), mapping);
+    }
+
+    /**
      * Creates a new factory instance which wraps the given Datastore.
      */
     public static TestDatastoreStorageFactory basedOn(Datastore datastore) {
@@ -76,9 +91,18 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         return new TestDatastoreStorageFactory(datastore);
     }
 
+    /**
+     * Creates a new factory instance which wraps the given Datastore.
+     */
+    private static TestDatastoreStorageFactory
+    basedOn(Datastore datastore, ColumnMapping<?> mapping) {
+        checkNotNull(datastore);
+        return new TestDatastoreStorageFactory(datastore);
+    }
+
     @Internal
     @Override
-    protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
+    public DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
         TestDatastoreWrapper wrapper = TestDatastoreWrapper.wrap(datastore(), false);
         allCreatedWrappers.add(wrapper);
         return wrapper;
