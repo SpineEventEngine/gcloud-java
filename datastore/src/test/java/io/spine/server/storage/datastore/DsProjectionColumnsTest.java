@@ -160,6 +160,7 @@ final class DsProjectionColumnsTest {
             builder.put(Timestamp.class, ofNullableTimestamp());
         }
 
+        @SuppressWarnings("UnnecessaryLambda")
         private static ColumnTypeMapping<Timestamp, Value<?>> ofNullableTimestamp() {
             return timestamp -> {
                 if (timestamp.equals(Timestamp.getDefaultInstance())) {
