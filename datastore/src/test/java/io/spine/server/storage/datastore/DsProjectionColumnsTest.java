@@ -67,9 +67,9 @@ final class DsProjectionColumnsTest {
     private static final TestDatastoreStorageFactory datastoreFactory = local(new CustomMapping());
 
     @Test
-    @DisplayName("store Proto's `Timestamp` fields with the respect " +
-            "of Datastore's support of `Timestamps`")
-    void storeTimestamps() {
+    @DisplayName("allow clearing the column values, if `null` is returned as Datastore `Value<..>`" +
+            "via custom column mapping")
+    void clearTimestampColumns() {
         ContextSpec spec = singleTenantSpec();
         Class<CollegeProjection> projectionCls = CollegeProjection.class;
         ProjectionStorage<CollegeId> storage =
@@ -154,10 +154,11 @@ final class DsProjectionColumnsTest {
     private static final class CustomMapping extends DsColumnMapping {
 
         @Override
-        protected void setupCustomMapping(
-                ImmutableMap.Builder<Class<?>, ColumnTypeMapping<?, ? extends Value<?>>> builder) {
-            super.setupCustomMapping(builder);
+        protected void
+        setupCustomMapping(ImmutableMap.Builder<Class<?>,
+                                        ColumnTypeMapping<?, ? extends Value<?>>> builder) {
             builder.put(Timestamp.class, ofNullableTimestamp());
+            builder.put(Version.class, ofVersion());
         }
 
         @SuppressWarnings("UnnecessaryLambda")

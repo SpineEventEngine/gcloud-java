@@ -79,7 +79,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      *
      * <p>A shortcut for {@code basedOn(TestDatastores.local())}.
      */
-    public static TestDatastoreStorageFactory local(ColumnMapping<?> mapping) {
+    public static TestDatastoreStorageFactory local(ColumnMapping<Value<?>> mapping) {
         return basedOn(TestDatastores.local(), mapping);
     }
 
@@ -95,9 +95,9 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
      * Creates a new factory instance which wraps the given Datastore.
      */
     private static TestDatastoreStorageFactory
-    basedOn(Datastore datastore, ColumnMapping<?> mapping) {
+    basedOn(Datastore datastore, ColumnMapping<Value<?>> mapping) {
         checkNotNull(datastore);
-        return new TestDatastoreStorageFactory(datastore);
+        return new TestDatastoreStorageFactory(datastore, mapping);
     }
 
     @Internal

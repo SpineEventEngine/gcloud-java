@@ -120,16 +120,16 @@ public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
         return o -> NullValue.of();
     }
 
-    @SuppressWarnings({"ProtoTimestampGetSecondsGetNano", "UnnecessaryLambda"})
+    @SuppressWarnings({"ProtoTimestampGetSecondsGetNano", "UnnecessaryLambda", "WeakerAccess"})
     // This behavior is intended.
-    private static ColumnTypeMapping<Timestamp, TimestampValue> ofTimestamp() {
+    protected static ColumnTypeMapping<Timestamp, TimestampValue> ofTimestamp() {
         return timestamp -> TimestampValue.of(
                 ofTimeSecondsAndNanos(timestamp.getSeconds(), timestamp.getNanos())
         );
     }
 
     @SuppressWarnings("UnnecessaryLambda")
-    private static ColumnTypeMapping<Version, LongValue> ofVersion() {
+    protected static ColumnTypeMapping<Version, LongValue> ofVersion() {
         return version -> LongValue.of(version.getNumber());
     }
 }
