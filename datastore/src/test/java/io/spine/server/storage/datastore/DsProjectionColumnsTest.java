@@ -26,38 +26,28 @@
 
 package io.spine.server.storage.datastore;
 
-import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.NullValue;
-import com.google.cloud.datastore.TimestampValue;
-import com.google.cloud.datastore.Value;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Durations;
-import com.google.protobuf.util.Timestamps;
-import io.spine.base.Time;
 import io.spine.core.Version;
-import io.spine.core.Versions;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.ContextSpec;
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.given.Given;
-import io.spine.server.entity.storage.ColumnTypeMapping;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.storage.datastore.tenant.given.CollegeProjection;
+import io.spine.server.storage.datastore.given.DsProjectionColumnsTestEnv.CustomMapping;
 import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.storage.datastore.RecordId.ofEntityId;
+import static io.spine.server.storage.datastore.given.DsProjectionColumnsTestEnv.COLLEGE_CLS;
+import static io.spine.server.storage.datastore.given.DsProjectionColumnsTestEnv.COLLEGE_KIND;
+import static io.spine.server.storage.datastore.given.DsProjectionColumnsTestEnv.clearAdmission;
+import static io.spine.server.storage.datastore.given.DsProjectionColumnsTestEnv.futureFromNow;
+import static io.spine.server.storage.datastore.given.DsProjectionColumnsTestEnv.newCollege;
+import static io.spine.server.storage.datastore.given.DsProjectionColumnsTestEnv.newId;
+import static io.spine.server.storage.datastore.given.DsProjectionColumnsTestEnv.someVersion;
+import static io.spine.server.storage.datastore.given.DsProjectionColumnsTestEnv.writeAndReadDeadline;
 import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
 
@@ -67,110 +57,31 @@ final class DsProjectionColumnsTest {
     private static final TestDatastoreStorageFactory datastoreFactory = local(new CustomMapping());
 
     @Test
-    @DisplayName("allow clearing the column values, if `null` is returned as Datastore `Value<..>`" +
-            "via custom column mapping")
+    @DisplayName(
+            "allow clearing the column values if they get Proto's default values, " +
+            "by having a custom column mapping " +
+            "returning Datastore's `null` for respective values")
     void clearTimestampColumns() {
         ContextSpec spec = singleTenantSpec();
-        Class<CollegeProjection> projectionCls = CollegeProjection.class;
         ProjectionStorage<CollegeId> storage =
-                datastoreFactory.createProjectionStorage(spec, projectionCls);
-        CollegeId id = CollegeId.newBuilder()
-                                .setValue(newUuid())
-                                .vBuild();
+                datastoreFactory.createProjectionStorage(spec, COLLEGE_CLS);
         DatastoreWrapper datastore = datastoreFactory.createDatastoreWrapper(false);
+        
+        CollegeId id = newId();
+        Key key = datastore.keyFor(COLLEGE_KIND, ofEntityId(id));
+        Version version = someVersion();
 
-        Kind collegeKind = Kind.of(TypeUrl.from(College.getDescriptor()));
-        Key key = datastore.keyFor(collegeKind, ofEntityId(id));
+        Timestamp admissionDeadline = futureFromNow();
+        College college = newCollege(id, admissionDeadline);
 
-        Timestamp admissionDeadline = Timestamps.add(Time.currentTime(), Durations.fromDays(100));
-        College college =
-                College.newBuilder()
-                       .setId(id)
-                       .setName("Alma")
-                       .setStudentCount(42)
-                       .setAdmissionDeadline(admissionDeadline)
-                       .setPassingGrade(4.2)
-                       .setStateSponsored(false)
-                       .setCreated(Time.currentTime())
-                       .addAllSubjects(
-                               ImmutableList.of("English Literature", "Engineering", "Psychology"))
-                       .vBuild();
-        Version version = Versions.newVersion(42, Time.currentTime());
-        EntityRecord record = EntityRecord
-                .newBuilder()
-                .setState(AnyPacker.pack(college))
-                .setVersion(version)
-                .vBuild();
-        CollegeProjection projection =
-                Given.projectionOfClass(CollegeProjection.class)
-                     .withId(id)
-                     .withState(college)
-                     .withVersion(version.getNumber())
-                     .build();
-        EntityRecordWithColumns recordWithCols =
-                EntityRecordWithColumns.create(record, projection, storage);
-        storage.write(id, recordWithCols);
-        Entity response = datastore.read(key);
-
-        com.google.cloud.Timestamp storedDeadline = readAdmissionDeadline(response);
+        com.google.cloud.Timestamp storedDeadline =
+                writeAndReadDeadline(college, version, storage, datastore, key);
         assertThat(storedDeadline).isNotNull();
 
-        // ------
-
-        College collegeNoAdmission = college.toBuilder()
-                                  .clearAdmissionDeadline()
-                                  .vBuild();
-        CollegeProjection projectionNoAdmission =
-                Given.projectionOfClass(CollegeProjection.class)
-                     .withId(id)
-                     .withState(collegeNoAdmission)
-                     .withVersion(version.getNumber())
-                     .build();
-        EntityRecord recordNoAdmission = EntityRecord
-                .newBuilder()
-                .setState(AnyPacker.pack(collegeNoAdmission))
-                .setVersion(version)
-                .vBuild();
-        EntityRecordWithColumns recordWithColsNoAdmission =
-                EntityRecordWithColumns.create(recordNoAdmission, projectionNoAdmission, storage);
-        storage.write(id, recordWithColsNoAdmission);
-
-        Entity responseWithNoAdmission = datastore.read(key);
+        College collegeNoAdmission = clearAdmission(college);
         com.google.cloud.Timestamp presumablyEmptyDeadline =
-                readAdmissionDeadline(responseWithNoAdmission);
+                writeAndReadDeadline(collegeNoAdmission, version, storage, datastore, key);
         assertThat(presumablyEmptyDeadline)
                 .isNull();
-    }
-
-    private static com.google.cloud.Timestamp readAdmissionDeadline(Entity response) {
-        com.google.cloud.Timestamp storedTimestamp = response.getTimestamp(
-                College.Column.admissionDeadline()
-                              .name()
-                              .value());
-        return storedTimestamp;
-    }
-
-
-    private static final class CustomMapping extends DsColumnMapping {
-
-        @Override
-        protected void
-        setupCustomMapping(ImmutableMap.Builder<Class<?>,
-                                        ColumnTypeMapping<?, ? extends Value<?>>> builder) {
-            builder.put(Timestamp.class, ofNullableTimestamp());
-            builder.put(Version.class, ofVersion());
-        }
-
-        @SuppressWarnings("UnnecessaryLambda")
-        private static ColumnTypeMapping<Timestamp, Value<?>> ofNullableTimestamp() {
-            return timestamp -> {
-                if (timestamp.equals(Timestamp.getDefaultInstance())) {
-                    return NullValue.of();
-                }
-                return TimestampValue.of(
-                        ofTimeSecondsAndNanos(timestamp.getSeconds(), timestamp.getNanos())
-                );
-            };
-        }
     }
 }
