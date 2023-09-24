@@ -156,11 +156,8 @@ public final class DsProjectionColumnsTestEnv {
     public static final class CustomMapping extends DsColumnMapping {
 
         @Override
-        protected void
-        setupCustomMapping(ImmutableMap.Builder<Class<?>,
-                ColumnTypeMapping<?, ? extends Value<?>>> builder) {
-            builder.put(Timestamp.class, ofNullableTimestamp())
-                   .put(Version.class, ofVersion());
+        protected ImmutableMap<Class<?>, ColumnTypeMapping<?, ? extends Value<?>>> customMapping() {
+            return ImmutableMap.of(Timestamp.class, ofNullableTimestamp());
         }
 
         @SuppressWarnings("UnnecessaryLambda")
