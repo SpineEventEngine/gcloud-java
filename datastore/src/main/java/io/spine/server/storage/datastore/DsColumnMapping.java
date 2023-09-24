@@ -39,10 +39,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.SPI;
 import io.spine.core.Version;
 import io.spine.server.entity.storage.AbstractColumnMapping;
+import io.spine.server.entity.storage.ColumnMapping;
 import io.spine.server.entity.storage.ColumnTypeMapping;
 import io.spine.string.Stringifiers;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 
@@ -52,16 +57,57 @@ import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
  * <p>All column values are stored as Datastore {@link Value}-s.
  *
  * <p>Users of the storage can extend this class to specify their own column mapping for the
- * selected types.
+ * selected types. See {@link DsColumnMapping#customMapping() DsColumnMapping.customMapping()}.
+ *
+ * @see DatastoreStorageFactory.Builder#setColumnMapping(ColumnMapping)
  */
 public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
 
+    private static final Map<Class<?>, ColumnTypeMapping<?, ? extends Value<?>>> defaults
+            = ImmutableMap.of(Timestamp.class, ofTimestamp(),
+                              Version.class, ofVersion());
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Merges the default column mapping rules with those provided by SPI users.
+     * In case there are duplicate mappings for some column type, the value provided
+     * by SPI users is used.
+     *
+     * @apiNote This method is made {@code final}, as it is designed
+     *         to use {@code ImmutableMap.Builder}, which does not allow to override values.
+     *         Therefore, it is not possible for SPI users to provide their own mapping rules
+     *         for types such as {@code Timestamp}, for which this class already has
+     *         a default mapping. SPI users should override
+     *         {@link #customMapping() DsColumnMapping.customMapping()} instead.
+     */
     @Override
-    protected void
+    protected final void
     setupCustomMapping(
             ImmutableMap.Builder<Class<?>, ColumnTypeMapping<?, ? extends Value<?>>> builder) {
-        builder.put(Timestamp.class, ofTimestamp());
-        builder.put(Version.class, ofVersion());
+        Map<Class<?>, ColumnTypeMapping<?, ? extends Value<?>>> merged = new HashMap<>();
+        ImmutableMap<Class<?>, ColumnTypeMapping<?, ? extends Value<?>>> custom = customMapping();
+        merged.putAll(defaults);
+        merged.putAll(custom);
+        builder.putAll(merged);
+    }
+
+    /**
+     * Returns the custom column mapping rules.
+     *
+     * <p>This method is designed for SPI users in order to be able to re-define
+     * and-or append their custom mapping. As by default, {@code DsColumnMapping}
+     * provides rules for {@link Timestamp} and {@link Version}, SPI users may
+     * choose to either override these defaults by returning their own mapping for these types,
+     * or supply even more mapping rules.
+     *
+     * <p>By default, this method returns an empty map.
+     *
+     * @return custom column mappings, per Java class of column
+     */
+    @SPI
+    protected ImmutableMap<Class<?>, ColumnTypeMapping<?, ? extends Value<?>>> customMapping() {
+        return ImmutableMap.of();
     }
 
     @Override
@@ -120,15 +166,23 @@ public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
         return o -> NullValue.of();
     }
 
-    @SuppressWarnings({"ProtoTimestampGetSecondsGetNano", "UnnecessaryLambda", "WeakerAccess"})
-    // This behavior is intended.
+    /**
+     * Returns the default mapping from {@link Timestamp} to {@link TimestampValue}.
+     */
+    @SuppressWarnings({"ProtoTimestampGetSecondsGetNano" /* In order to create exact value. */,
+            "UnnecessaryLambda" /* For brevity.*/,
+            "WeakerAccess" /* To allow access for SPI users. */})
     protected static ColumnTypeMapping<Timestamp, TimestampValue> ofTimestamp() {
         return timestamp -> TimestampValue.of(
                 ofTimeSecondsAndNanos(timestamp.getSeconds(), timestamp.getNanos())
         );
     }
 
-    @SuppressWarnings("UnnecessaryLambda")
+    /**
+     * Returns the default mapping from {@link Version} to {@link LongValue}.
+     */
+    @SuppressWarnings({"UnnecessaryLambda" /* For brevity.*/,
+            "WeakerAccess" /* To allow access for SPI users. */})
     protected static ColumnTypeMapping<Version, LongValue> ofVersion() {
         return version -> LongValue.of(version.getNumber());
     }
