@@ -39,7 +39,6 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.base.Time;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.given.Given;
 import io.spine.server.entity.storage.ColumnTypeMapping;
@@ -55,6 +54,7 @@ import io.spine.type.TypeUrl;
 
 import static com.google.cloud.Timestamp.ofTimeSecondsAndNanos;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * A test environment for {@link DsProjectionColumnsTest}.
@@ -97,15 +97,15 @@ public final class DsProjectionColumnsTestEnv {
                        .setStateSponsored(false)
                        .setCreated(Time.currentTime())
                        .addAllSubjects(
-                               ImmutableList.of("English Literature", "Engineering", "Psychology"))
+                               ImmutableList.of("English Literature", "Engineering","Psychology"))
                        .vBuild();
         return college;
     }
 
-    private static EntityRecord toEntityRecord(College collegeNoAdmission, Version version) {
+    private static EntityRecord toEntityRecord(College college, Version version) {
         EntityRecord recordNoAdmission = EntityRecord
                 .newBuilder()
-                .setState(AnyPacker.pack(collegeNoAdmission))
+                .setState(pack(college))
                 .setVersion(version)
                 .vBuild();
         return recordNoAdmission;
