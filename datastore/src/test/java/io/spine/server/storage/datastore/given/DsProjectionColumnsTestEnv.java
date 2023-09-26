@@ -65,7 +65,7 @@ public final class DsProjectionColumnsTestEnv {
     public static final Kind COLLEGE_KIND = Kind.of(TypeUrl.from(College.getDescriptor()));
 
     /**
-     * Prevent this test environment from instantiation.
+     * Prevents this test environment from instantiation.
      */
     private DsProjectionColumnsTestEnv() {
     }
