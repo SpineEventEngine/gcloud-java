@@ -160,7 +160,7 @@ public final class DsProjectionColumnsTestEnv {
             return ImmutableMap.of(Timestamp.class, ofNullableTimestamp());
         }
 
-        @SuppressWarnings("UnnecessaryLambda")
+        @SuppressWarnings("UnnecessaryLambda" /* For brevity */)
         private static ColumnTypeMapping<Timestamp, Value<?>> ofNullableTimestamp() {
             return timestamp -> {
                 if (timestamp.equals(Timestamp.getDefaultInstance())) {
