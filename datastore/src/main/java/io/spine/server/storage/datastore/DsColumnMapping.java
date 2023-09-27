@@ -182,7 +182,8 @@ public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
     /**
      * Returns the default mapping from {@link Version} to {@link LongValue}.
      */
-    @SuppressWarnings({"UnnecessaryLambda" /* For brevity.*/,
+    @SuppressWarnings({
+            "UnnecessaryLambda" /* For brevity.*/,
             "WeakerAccess" /* To allow access for SPI users. */})
     protected static ColumnTypeMapping<Version, LongValue> ofVersion() {
         return version -> LongValue.of(version.getNumber());
