@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.datastore.tenant.given;
+package io.spine.server.storage.datastore.given;
 
 import io.spine.server.projection.Projection;
 import io.spine.test.datastore.College;
