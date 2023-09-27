@@ -24,9 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@CheckReturnValue
+/**
+ * Describes the test environment for tests against
+ * {@link io.spine.server.storage.datastore.record.DsRecordStorage DsRecordStorage}
+ * and those storage types which delegate their operations to {@code DsRecordStorage}.
+ */
 @ParametersAreNonnullByDefault
-package io.spine.server.storage.datastore.tenant.given;
+@CheckReturnValue
+package io.spine.server.storage.datastore.record.given;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

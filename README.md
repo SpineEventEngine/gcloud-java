@@ -28,16 +28,16 @@ Gradle:
 
 dependencies {
     // Datastore Storage support library.
-    implementation("io.spine.gcloud:spine-datastore:1.9.0")
+    implementation("io.spine.gcloud:spine-datastore:1.9.1")
 
     // Pub/Sub messaging support library.
-    implementation("io.spine.gcloud:spine-pubsub:1.9.0")
+    implementation("io.spine.gcloud:spine-pubsub:1.9.1")
 
     // Stackdriver Trace support library.
-    implementation("io.spine.gcloud:spine-stackdriver-trace:1.9.0")
+    implementation("io.spine.gcloud:spine-stackdriver-trace:1.9.1")
 
     // Datastore-related test utilities (if needed).
-    testImplementation("io.spine.gcloud:testutil-gcloud:1.9.0")
+    testImplementation("io.spine.gcloud:testutil-gcloud:1.9.1")
 }
 ```
 

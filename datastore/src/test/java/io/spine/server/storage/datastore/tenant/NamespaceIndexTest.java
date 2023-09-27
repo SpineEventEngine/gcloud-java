@@ -39,7 +39,7 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
-import io.spine.server.storage.datastore.tenant.given.CollegeProjection;
+import io.spine.server.storage.datastore.given.CollegeProjection;
 import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
 import io.spine.testing.TestValues;
@@ -53,7 +53,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.truth.Truth.assertThat;

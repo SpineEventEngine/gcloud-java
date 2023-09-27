@@ -27,8 +27,10 @@
 package io.spine.testing.server.storage.datastore;
 
 import com.google.cloud.datastore.Datastore;
+import com.google.cloud.datastore.Value;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.server.storage.ColumnMapping;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 
@@ -56,6 +58,14 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
         super(builder);
     }
 
+    protected TestDatastoreStorageFactory(Datastore datastore, ColumnMapping<Value<?>> mapping) {
+        super(DatastoreStorageFactory
+                      .newBuilder()
+                      .setDatastore(datastore)
+                      .setColumnMapping(mapping)
+        );
+    }
+
     /**
      * Creates a new instance which works with a local Datastore emulator.
      *
@@ -66,11 +76,31 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     /**
+     * Creates a new instance which works with a local Datastore emulator.
+     *
+     * <p>A shortcut for {@code basedOn(TestDatastores.local())}.
+     */
+    public static TestDatastoreStorageFactory local(ColumnMapping<Value<?>> mapping) {
+        return basedOn(TestDatastores.local(), mapping);
+    }
+
+    /**
      * Creates a new factory instance which wraps the given Datastore.
      */
+    @SuppressWarnings("WeakerAccess" /* Open for Spine users. */)
     public static TestDatastoreStorageFactory basedOn(Datastore datastore) {
         checkNotNull(datastore);
         return new TestDatastoreStorageFactory(datastore);
+    }
+
+    /**
+     * Creates a new factory instance which wraps the given Datastore,
+     * and uses the given column mapping.
+     */
+    private static TestDatastoreStorageFactory
+    basedOn(Datastore datastore, ColumnMapping<Value<?>> mapping) {
+        checkNotNull(datastore);
+        return new TestDatastoreStorageFactory(datastore, mapping);
     }
 
     /**
