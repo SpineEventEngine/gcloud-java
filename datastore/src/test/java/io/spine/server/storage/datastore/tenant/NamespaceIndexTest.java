@@ -41,8 +41,9 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
-import io.spine.server.storage.datastore.tenant.given.TestProjection;
+import io.spine.server.storage.datastore.tenant.given.CollegeProjection;
 import io.spine.test.datastore.College;
+import io.spine.test.datastore.CollegeId;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.AfterEach;
@@ -174,14 +175,16 @@ class NamespaceIndexTest {
                          .use(storageFactory);
         storageFactory.configureTenantIndex(contextBuilder);
         BoundedContext context = contextBuilder.build();
-        RecordStorage<String> storage = storageFactory
-                .createRecordStorage(context.spec(), TestProjection.class);
-        String id = "ABC";
+        RecordStorage<CollegeId> storage = storageFactory
+                .createRecordStorage(context.spec(), CollegeProjection.class);
+        CollegeId id = CollegeId.newBuilder()
+                                 .setValue("ABC")
+                                 .vBuild();
         EntityRecord record = EntityRecord
                 .newBuilder()
                 .setEntityId(Identifier.pack(id))
                 .setState(pack(College.newBuilder()
-                                      .setName(id)
+                                      .setName(id.getValue())
                                       .build()))
                 .build();
         TenantId tenantId = TenantId

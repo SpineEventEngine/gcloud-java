@@ -57,7 +57,7 @@ public final class SpyStorageFactory extends TestDatastoreStorageFactory {
     }
 
     @Override
-    protected DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
+    public DatastoreWrapper createDatastoreWrapper(boolean multitenant) {
         return injectedWrapper;
     }
 
