@@ -169,7 +169,8 @@ public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
     /**
      * Returns the default mapping from {@link Timestamp} to {@link TimestampValue}.
      */
-    @SuppressWarnings({"ProtoTimestampGetSecondsGetNano" /* In order to create exact value. */,
+    @SuppressWarnings({
+            "ProtoTimestampGetSecondsGetNano" /* In order to create exact value. */,
             "UnnecessaryLambda" /* For brevity.*/,
             "WeakerAccess" /* To allow access for SPI users. */})
     protected static ColumnTypeMapping<Timestamp, TimestampValue> ofTimestamp() {
