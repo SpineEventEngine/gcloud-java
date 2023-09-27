@@ -57,16 +57,15 @@ final class DsProjectionColumnsTest {
     private static final TestDatastoreStorageFactory datastoreFactory = local(new CustomMapping());
 
     @Test
-    @DisplayName(
-            "allow clearing the column values if they get Proto's default values, " +
-            "by having a custom column mapping " +
-            "returning Datastore's `null` for respective values")
+    @DisplayName("allow clearing the column values " +
+            "if the column mapping used returns Datastore-specific `null`" +
+            "for their values")
     void clearTimestampColumns() {
         ContextSpec spec = singleTenantSpec();
         ProjectionStorage<CollegeId> storage =
                 datastoreFactory.createProjectionStorage(spec, COLLEGE_CLS);
         DatastoreWrapper datastore = datastoreFactory.createDatastoreWrapper(false);
-        
+
         CollegeId id = newId();
         Key key = datastore.keyFor(COLLEGE_KIND, ofEntityId(id));
         Version version = someVersion();
