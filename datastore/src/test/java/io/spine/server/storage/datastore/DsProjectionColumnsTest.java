@@ -58,7 +58,7 @@ final class DsProjectionColumnsTest {
 
     @Test
     @DisplayName("allow clearing the column values " +
-            "if the column mapping used returns Datastore-specific `null`" +
+            "if the column mapping used returns Datastore-specific `null` " +
             "for their values")
     void clearTimestampColumns() {
         ContextSpec spec = singleTenantSpec();
