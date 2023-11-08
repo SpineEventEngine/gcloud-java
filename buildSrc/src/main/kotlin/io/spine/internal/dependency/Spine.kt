@@ -45,7 +45,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/base">spine-base</a>
          */
-        const val base = "2.0.0-SNAPSHOT.187"
+        const val base = "2.0.0-SNAPSHOT.192"
 
         /**
          * The version of [Spine.reflect].
@@ -59,7 +59,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/logging">spine-logging</a>
          */
-        const val logging = "2.0.0-SNAPSHOT.206"
+        const val logging = "2.0.0-SNAPSHOT.233"
 
         /**
          * The version of [Spine.testlib].
@@ -75,35 +75,35 @@ object Spine {
          * @see [Spine.CoreJava.server]
          * @see <a href="https://github.com/SpineEventEngine/core-java">core-java</a>
          */
-        const val core = "2.0.0-SNAPSHOT.157"
+        const val core = "2.0.0-SNAPSHOT.173"
 
         /**
          * The version of [Spine.modelCompiler].
          *
          * @see <a href="https://github.com/SpineEventEngine/model-compiler">spine-model-compiler</a>
          */
-        const val mc = "2.0.0-SNAPSHOT.132"
+        const val mc = "2.0.0-SNAPSHOT.133"
 
         /**
          * The version of [McJava].
          *
          * @see <a href="https://github.com/SpineEventEngine/mc-java">spine-mc-java</a>
          */
-        const val mcJava = "2.0.0-SNAPSHOT.168"
+        const val mcJava = "2.0.0-SNAPSHOT.172"
 
         /**
          * The version of [Spine.baseTypes].
          *
          * @see <a href="https://github.com/SpineEventEngine/base-types">spine-base-types</a>
          */
-        const val baseTypes = "2.0.0-SNAPSHOT.124"
+        const val baseTypes = "2.0.0-SNAPSHOT.125"
 
         /**
          * The version of [Spine.time].
          *
          * @see <a href="https://github.com/SpineEventEngine/time">spine-time</a>
          */
-        const val time = "2.0.0-SNAPSHOT.133"
+        const val time = "2.0.0-SNAPSHOT.135"
 
         /**
          * The version of [Spine.change].
@@ -121,8 +121,10 @@ object Spine {
 
         /**
          * The version of [Spine.toolBase].
+         *
+         * @see <a href="https://github.com/SpineEventEngine/tool-base">spine-tool-base</a>
          */
-        const val toolBase = "2.0.0-SNAPSHOT.180"
+        const val toolBase = "2.0.0-SNAPSHOT.186"
 
         /**
          * The version of [Spine.javadocTools].
@@ -162,23 +164,43 @@ object Spine {
     object Logging {
         const val version = ArtifactVersion.logging
         const val lib = "$group:spine-logging:$version"
-        const val backend = "$group:spine-logging-backend:$version"
-        const val context = "$group:spine-logging-context:$version"
-        const val floggerApi = "$group:spine-flogger-api:$version"
-        const val floggerGrpcContext = "$group:spine-flogger-grpc-context:$version"
-        const val smokeTest = "$group:spine-logging-smoke-test:$version"
-    }
 
+        const val log4j2Backend = "$group:spine-logging-log4j2-backend:$version"
+        const val stdContext = "$group:spine-logging-std-context:$version"
+        const val grpcContext = "$group:spine-logging-grpc-context:$version"
+        const val smokeTest = "$group:spine-logging-smoke-test:$version"
+
+        // Transitive dependencies.
+        // Make `public` and use them to force a version in a particular repository, if needed.
+        internal const val julBackend = "$group:spine-logging-jul-backend:$version"
+        internal const val middleware = "$group:spine-logging-middleware:$version"
+        internal const val platformGenerator = "$group:spine-logging-platform-generator:$version"
+        internal const val jvmDefaultPlatform = "$group:spine-logging-jvm-default-platform:$version"
+
+        @Deprecated(
+            message = "Please use `Logging.lib` instead.",
+            replaceWith = ReplaceWith("lib")
+        )
+        const val floggerApi = "$group:spine-flogger-api:$version"
+
+        @Deprecated(
+            message = "Please use `grpcContext` instead.",
+            replaceWith = ReplaceWith("grpcContext")
+        )
+        const val floggerGrpcContext = "$group:spine-flogger-grpc-context:$version"
+    }
 
     /**
      * Dependencies on Spine Model Compiler for Java.
      *
      * See [mc-java](https://github.com/SpineEventEngine/mc-java).
      */
+    @Suppress("MemberVisibilityCanBePrivate") // `pluginLib()` is used by subprojects.
     object McJava {
         const val version = ArtifactVersion.mcJava
         const val pluginId = "io.spine.mc-java"
-        const val pluginLib = "$toolsGroup:spine-mc-java-plugins:${version}:all"
+        val pluginLib = pluginLib(version)
+        fun pluginLib(version: String): String = "$toolsGroup:spine-mc-java-plugins:$version:all"
     }
 
     @Deprecated("Please use `javadocFilter` instead.", ReplaceWith("javadocFilter"))
@@ -198,7 +220,6 @@ object Spine {
         const val core = "$group:spine-core:$version"
         const val client = "$group:spine-client:$version"
         const val server = "$group:spine-server:$version"
-        const val serverTests = "$server:test"
         const val testUtilServer = "$toolsGroup:spine-testutil-server:$version"
     }
 }

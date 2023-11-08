@@ -37,15 +37,7 @@ package io.spine.internal.dependency
  */
 @Suppress("unused", "ConstPropertyName")
 object Guava {
-    private const val version = "32.1.2-jre"
-    private const val group = "com.google.guava"
-
-    const val lib     = "${group}:guava:${version}"
-    const val testLib = "${group}:guava-testlib:${version}"
-
-    object ListenableFuture {
-        private const val version = "9999.0-empty-to-avoid-conflict-with-guava"
-
-        const val lib = "${group}:listenablefuture:${version}"
-    }
+    private const val version = "32.1.3-jre"
+    const val lib     = "com.google.guava:guava:${version}"
+    const val testLib = "com.google.guava:guava-testlib:${version}"
 }
