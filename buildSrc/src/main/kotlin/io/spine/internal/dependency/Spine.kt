@@ -220,6 +220,7 @@ object Spine {
         const val core = "$group:spine-core:$version"
         const val client = "$group:spine-client:$version"
         const val server = "$group:spine-server:$version"
+        const val serverTests = "$server:test"
         const val testUtilServer = "$toolsGroup:spine-testutil-server:$version"
     }
 }
