@@ -170,10 +170,12 @@ object Spine {
         const val grpcContext = "$group:spine-logging-grpc-context:$version"
         const val smokeTest = "$group:spine-logging-smoke-test:$version"
 
+        // A transitive dependency which needs to be forced in this library.
+        const val middleware = "$group:spine-logging-middleware:$version"
+
         // Transitive dependencies.
         // Make `public` and use them to force a version in a particular repository, if needed.
         internal const val julBackend = "$group:spine-logging-jul-backend:$version"
-        internal const val middleware = "$group:spine-logging-middleware:$version"
         internal const val platformGenerator = "$group:spine-logging-platform-generator:$version"
         internal const val jvmDefaultPlatform = "$group:spine-logging-jvm-default-platform:$version"
 

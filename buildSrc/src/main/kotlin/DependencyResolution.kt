@@ -80,7 +80,7 @@ fun NamedDomainObjectContainer<Configuration>.forceVersions() {
 }
 
 private fun ResolutionStrategy.forceProductionDependencies() {
-    @Suppress("DEPRECATION") // Force SLF4J version.
+    @Suppress("DEPRECATION") // Force SLF4J and Kotlin JDK7 versions.
     force(
         AnimalSniffer.lib,
         AutoCommon.lib,
@@ -96,6 +96,7 @@ private fun ResolutionStrategy.forceProductionDependencies() {
         Kotlin.stdLib,
         Kotlin.stdLibCommon,
         Kotlin.stdLibJdk8,
+        Kotlin.stdLibJdk7,
         Protobuf.GradlePlugin.lib,
         Protobuf.libs,
         Slf4J.lib
@@ -150,7 +151,7 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
 fun NamedDomainObjectContainer<Configuration>.excludeProtobufLite() {
 
     fun excludeProtoLite(configurationName: String) {
-        named(configurationName).get().exclude(
+        findByName(configurationName)?.exclude(
             mapOf(
                 "group" to "com.google.protobuf",
                 "module" to "protobuf-lite"
