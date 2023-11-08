@@ -30,7 +30,6 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Key;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.Truth8;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
@@ -55,11 +54,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.storage.datastore.given.DatastoreStorageFactoryTestEnv.factoryFor;
 import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
 import static io.spine.server.storage.datastore.given.TestRecordSpec.projectDetailsSpec;
-import static io.spine.server.storage.datastore.given.TestRecordSpec.stgProjectSpec;
+import static io.spine.server.storage.given.GivenStorageProject.messageSpec;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.server.storage.datastore.TestDatastores.defaultLocalProjectId;
@@ -85,7 +85,7 @@ final class DatastoreStorageFactoryTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void testNulls() {
         new NullPointerTester().setDefault(ContextSpec.class, singleTenantSpec())
-                               .setDefault(RecordSpec.class, stgProjectSpec())
+                               .setDefault(RecordSpec.class, messageSpec())
                                .testAllPublicInstanceMethods(factory);
     }
 
@@ -144,7 +144,7 @@ final class DatastoreStorageFactoryTest {
         var datastore = options.getService();
         var factory = factoryFor(datastore);
         var storage =
-                factory.createRecordStorage(spec, stgProjectSpec());
+                factory.createRecordStorage(spec, messageSpec());
         var key = writeForTenant(storage, tenant)
                 .setNamespace(namespace + ".V" + tenant.getValue())
                 .build();
@@ -162,7 +162,7 @@ final class DatastoreStorageFactoryTest {
         var datastore = local();
         var factory = factoryFor(datastore);
         var storage =
-                factory.createRecordStorage(spec, stgProjectSpec());
+                factory.createRecordStorage(spec, messageSpec());
         var key = writeForTenant(storage, tenant)
                 .setNamespace('V' + tenant.getValue())
                 .build();
@@ -175,11 +175,11 @@ final class DatastoreStorageFactoryTest {
     void testProduceBcBuilder() {
         DatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
         var builder = BoundedContext.multitenant(testName());
-        Truth8.assertThat(builder.tenantIndex())
+        assertThat(builder.tenantIndex())
               .isEmpty();
         var updatedIndex = factory.configureTenantIndex(builder)
                                   .tenantIndex();
-        Truth8.assertThat(updatedIndex)
+        assertThat(updatedIndex)
               .isPresent();
         assertThat(updatedIndex.get()).isInstanceOf(TestNamespaceIndex.getType());
     }
@@ -194,14 +194,14 @@ final class DatastoreStorageFactoryTest {
             var spec = ContextSpec.singleTenant(testName());
             var customStorage =
                     InMemoryStorageFactory.newInstance()
-                                          .createRecordStorage(spec, stgProjectSpec());
+                                          .createRecordStorage(spec, messageSpec());
             var factory = DatastoreStorageFactory.newBuilder()
                     .setDatastore(TestDatastores.local())
                     .useRecordStorage(StgProjectId.class, StgProject.class,
                                       configuration -> customStorage)
                     .build();
             var actualStorage =
-                    factory.createRecordStorage(spec, stgProjectSpec());
+                    factory.createRecordStorage(spec, messageSpec());
             assertThat(actualStorage).isEqualTo(customStorage);
         }
 

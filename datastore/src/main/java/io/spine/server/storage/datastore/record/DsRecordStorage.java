@@ -102,7 +102,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
     protected Iterator<I> index(RecordQuery<I, R> query) {
         var spec = recordSpec();
         var recordIterator = readAllRecords(query);
-        var result = transform(recordIterator, spec::idFromRecord);
+        var result = transform(recordIterator, spec::idValueIn);
         return result;
     }
 

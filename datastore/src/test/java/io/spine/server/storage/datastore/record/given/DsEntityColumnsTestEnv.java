@@ -33,7 +33,6 @@ import com.google.cloud.datastore.TimestampValue;
 import com.google.cloud.datastore.Value;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
@@ -43,7 +42,6 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.ColumnTypeMapping;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.Kind;
@@ -80,8 +78,7 @@ public final class DsEntityColumnsTestEnv {
                          DatastoreWrapper datastore,
                          Key key) {
         var record = toEntityRecord(college, version);
-        var recordWithCols = EntityRecordWithColumns.create(record, COLLEGE_CLS);
-        storage.write(recordWithCols);
+        storage.write(college.getId(), record);
         var response = datastore.read(key);
         checkArgument(response.isPresent());
         var storedDeadline = readAdmissionDeadline(response.get());

@@ -37,7 +37,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityRecordSpec;
+import io.spine.server.entity.storage.SpecScanner;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.given.CollegeProjection;
 import io.spine.test.datastore.College;
@@ -89,7 +89,7 @@ final class NamespaceIndexTest {
     }
 
     @AfterEach
-    void closeContext() throws Exception {
+    void closeContext() {
         context.close();
     }
 
@@ -170,7 +170,7 @@ final class NamespaceIndexTest {
         storageFactory.configureTenantIndex(contextBuilder);
         var context = contextBuilder.build();
         var storage = storageFactory
-                .createRecordStorage(context.spec(), EntityRecordSpec.of(CollegeProjection.class));
+                .createRecordStorage(context.spec(), SpecScanner.scan(CollegeProjection.class));
         var id = CollegeId.newBuilder()
                 .setValue("Aeronautic Forgery College")
                 .build();

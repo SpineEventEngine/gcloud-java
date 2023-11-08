@@ -27,8 +27,10 @@
 package io.spine.server.storage.datastore.given;
 
 import com.google.cloud.datastore.Datastore;
-import io.spine.server.entity.storage.EntityRecordSpec;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.SpecScanner;
 import io.spine.server.projection.Projection;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
@@ -62,16 +64,16 @@ public final class DatastoreStorageFactoryTestEnv {
     public static class TestEntity
             extends Projection<StgProjectId, StgProject, StgProject.Builder> {
 
-        public static EntityRecordSpec<StgProjectId, StgProject, TestEntity> spec() {
-            return EntityRecordSpec.of(TestEntity.class);
+        public static RecordSpec<StgProjectId, EntityRecord> spec() {
+            return SpecScanner.scan(TestEntity.class);
         }
     }
 
     public static class DifferentTestEntity
             extends Projection<CollegeId, College, College.Builder> {
 
-        public static EntityRecordSpec<CollegeId, College, DifferentTestEntity> spec() {
-            return EntityRecordSpec.of(DifferentTestEntity.class);
+        public static RecordSpec<CollegeId, EntityRecord> spec() {
+            return SpecScanner.scan(DifferentTestEntity.class);
         }
     }
 }

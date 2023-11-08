@@ -158,7 +158,7 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
 
     @Override
     public <I, R extends Message> RecordStorage<I, R>
-    createRecordStorage(ContextSpec context, RecordSpec<I, R, ?> spec) {
+    createRecordStorage(ContextSpec context, RecordSpec<I, R> spec) {
         checkNotNull(context);
         checkNotNull(spec);
         var config = configurationWith(context, spec);
@@ -170,7 +170,7 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
     }
 
     private <I, R extends Message>
-    StorageConfiguration<I, R> configurationWith(ContextSpec context, RecordSpec<I, R, ?> spec) {
+    StorageConfiguration<I, R> configurationWith(ContextSpec context, RecordSpec<I, R> spec) {
         var wrapper = wrapperFor(context);
         var recordType = spec.sourceType();
         var behavior = txSettings.find(recordType);

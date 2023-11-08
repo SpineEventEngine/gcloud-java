@@ -26,7 +26,6 @@
 
 package io.spine.server.storage.datastore.record;
 
-import io.spine.core.Versions;
 import io.spine.environment.Tests;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.storage.RecordStorageDelegateTest;
@@ -44,10 +43,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
-import static io.spine.server.storage.given.StgColumn.due_date;
-import static io.spine.server.storage.given.StgColumn.project_version;
-import static io.spine.server.storage.given.StgColumn.status;
+import static io.spine.server.storage.given.GivenStorageProject.StgProjectColumns.due_date;
+import static io.spine.server.storage.given.GivenStorageProject.StgProjectColumns.name;
+import static io.spine.server.storage.given.GivenStorageProject.StgProjectColumns.status;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("`DsRecordStorage` should")
@@ -107,12 +107,12 @@ final class DsRecordStorageTest extends RecordStorageDelegateTest {
     void testPersistColumns() {
         var id = newId();
         var project = newStorageRecord(id);
-        var expectedVersion = Versions.newVersion(42, currentTime());
         var expectedDueDate = currentTime();
         var expectedStatus = StgProject.Status.STARTED;
+        var expectedName = newUuid();
         project = project
                 .toBuilder()
-                .setProjectVersion(expectedVersion)
+                .setName(expectedName)
                 .setDueDate(expectedDueDate)
                 .setStatus(expectedStatus)
                 .build();
@@ -135,9 +135,9 @@ final class DsRecordStorageTest extends RecordStorageDelegateTest {
         assertEquals(expectedStatus.name(),
                      datastoreEntity.getString(status.name()
                                                      .value()));
-        assertEquals(expectedVersion.getNumber(),
-                     datastoreEntity.getLong(project_version.name()
-                                                            .value()));
+        assertEquals(expectedName,
+                     datastoreEntity.getString(name.name()
+                                                   .value()));
         var actualDueDate =
                 datastoreEntity.getTimestamp(due_date.name()
                                                      .value());
