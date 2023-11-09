@@ -32,6 +32,7 @@ dependencies {
     api(GoogleCloud.trace)
     testImplementation(GoogleApis.AuthLibrary.oAuth2Http)
     testImplementation(Grpc.auth)
+    testImplementation(Grpc.inProcess)
 }
 
 tasks {

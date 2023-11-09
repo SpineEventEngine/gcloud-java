@@ -32,7 +32,7 @@ import com.google.rpc.Code;
 import io.spine.server.ContextSpec;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardSessionRecord;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.datastore.DatastoreStorageFactory;
 import io.spine.server.storage.datastore.config.StorageConfiguration;
@@ -64,7 +64,7 @@ public final class DsSessionStorage
         extends DsRecordStorage<ShardIndex, ShardSessionRecord> {
 
     private static final boolean multitenant = false;
-    private final MessageRecordSpec<ShardIndex, ShardSessionRecord> spec;
+    private final RecordSpec<ShardIndex, ShardSessionRecord> spec;
 
     /**
      * Creates a new instance of this storage.
@@ -104,9 +104,9 @@ public final class DsSessionStorage
         return result;
     }
 
-    private static MessageRecordSpec<ShardIndex, ShardSessionRecord> messageSpec() {
+    private static RecordSpec<ShardIndex, ShardSessionRecord> messageSpec() {
         @SuppressWarnings("ConstantConditions")     /* Protobuf getters never return `nulls`. */
-                var spec = new MessageRecordSpec<>(
+                var spec = new RecordSpec<>(
                 ShardIndex.class,
                 ShardSessionRecord.class,
                 ShardSessionRecord::getIndex,

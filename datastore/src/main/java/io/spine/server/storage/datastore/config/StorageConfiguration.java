@@ -86,7 +86,7 @@ public final class StorageConfiguration<I, R extends Message> {
      */
     public Class<R> storedType() {
         return recordSpec.recordSpec()
-                         .storedType();
+                         .recordType();
     }
 
     /**

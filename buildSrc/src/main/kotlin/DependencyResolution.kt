@@ -31,11 +31,11 @@ import io.spine.internal.dependency.AutoService
 import io.spine.internal.dependency.AutoValue
 import io.spine.internal.dependency.CheckerFramework
 import io.spine.internal.dependency.CommonsCli
+import io.spine.internal.dependency.CommonsCodec
 import io.spine.internal.dependency.CommonsLogging
 import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.FindBugs
-import io.spine.internal.dependency.Flogger
 import io.spine.internal.dependency.Gson
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Hamcrest
@@ -80,7 +80,7 @@ fun NamedDomainObjectContainer<Configuration>.forceVersions() {
 }
 
 private fun ResolutionStrategy.forceProductionDependencies() {
-    @Suppress("DEPRECATION") // Force SLF4J version.
+    @Suppress("DEPRECATION") // Force SLF4J and Kotlin JDK7 versions.
     force(
         AnimalSniffer.lib,
         AutoCommon.lib,
@@ -90,13 +90,13 @@ private fun ResolutionStrategy.forceProductionDependencies() {
         ErrorProne.annotations,
         ErrorProne.core,
         FindBugs.annotations,
-        Flogger.Runtime.systemBackend,
-        Flogger.lib,
+        Gson.lib,
         Guava.lib,
         Kotlin.reflect,
         Kotlin.stdLib,
         Kotlin.stdLibCommon,
         Kotlin.stdLibJdk8,
+        Kotlin.stdLibJdk7,
         Protobuf.GradlePlugin.lib,
         Protobuf.libs,
         Slf4J.lib
@@ -124,6 +124,7 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
         Asm.lib,
         AutoValue.annotations,
         CommonsCli.lib,
+        CommonsCodec.lib,
         CommonsLogging.lib,
         Gson.lib,
         Hamcrest.core,
@@ -150,7 +151,7 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
 fun NamedDomainObjectContainer<Configuration>.excludeProtobufLite() {
 
     fun excludeProtoLite(configurationName: String) {
-        named(configurationName).get().exclude(
+        findByName(configurationName)?.exclude(
             mapOf(
                 "group" to "com.google.protobuf",
                 "module" to "protobuf-lite"

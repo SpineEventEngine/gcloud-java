@@ -68,7 +68,7 @@ public final class CustomStorages
      * @return a callback to create a custom storage wrapped into {@code Optional},
      *         or {@code Optional.empty()} in case none was found
      */
-    public <I, R extends Message> Optional<CreateStorage<I, R>> find(RecordSpec<I, R, ?> spec) {
+    public <I, R extends Message> Optional<CreateStorage<I, R>> find(RecordSpec<I, R> spec) {
         var domainType = spec.sourceType();
         var optional = findValue(domainType);
         Optional<CreateStorage<I, R>> result =
@@ -117,7 +117,7 @@ public final class CustomStorages
          * this builder.
          */
         @Override
-        public final CustomStorages build() {
+        public CustomStorages build() {
             return new CustomStorages(this);
         }
     }

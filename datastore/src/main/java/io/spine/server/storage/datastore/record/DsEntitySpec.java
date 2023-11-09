@@ -52,7 +52,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class DsEntitySpec<I, R extends Message> {
 
-    private final RecordSpec<I, R, ?> recordSpec;
+    private final RecordSpec<I, R> recordSpec;
     private final RecordLayout<I, R> layout;
 
     /**
@@ -63,7 +63,7 @@ public final class DsEntitySpec<I, R extends Message> {
      * @param layout
      *         ancestor-children structure to use for Datastore Entities
      */
-    public DsEntitySpec(RecordSpec<I, R, ?> recordSpec, RecordLayout<I, R> layout) {
+    public DsEntitySpec(RecordSpec<I, R> recordSpec, RecordLayout<I, R> layout) {
         this.recordSpec = checkNotNull(recordSpec);
         this.layout = checkNotNull(layout);
     }
@@ -75,14 +75,14 @@ public final class DsEntitySpec<I, R extends Message> {
      * @param recordSpec
      *         specification telling which fields of Protobuf message to store in Datastore Entity
      */
-    public DsEntitySpec(RecordSpec<I, R, ?> recordSpec) {
+    public DsEntitySpec(RecordSpec<I, R> recordSpec) {
         this(recordSpec, new FlatLayout<>(recordSpec.sourceType()));
     }
 
     /**
      * Returns the storage specification for the persisted Protobuf message.
      */
-    public RecordSpec<I, R, ?> recordSpec() {
+    public RecordSpec<I, R> recordSpec() {
         return recordSpec;
     }
 
