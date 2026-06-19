@@ -17,57 +17,76 @@
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.1.1.
-     * **Project URL:** [https://github.com/googleapis/api-common-java](https://github.com/googleapis/api-common-java)
-     * **License:** [BSD](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.7.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax-httpjson. **Version** : 0.92.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax-grpc. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api-client. **Name** : google-api-client. **Version** : 1.32.2.
+1.  **Group** : com.google.api. **Name** : gax-httpjson. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+
+1.  **Group** : com.google.api-client. **Name** : google-api-client. **Version** : 2.7.2.
      * **Project URL:** [https://developers.google.com/api-client-library/java/](https://developers.google.com/api-client-library/java/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-v1. **Version** : 0.93.1.
+1.  **Group** : com.google.api.grpc. **Name** : grpc-google-cloud-datastore-admin-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-admin-v1](https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-admin-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : grpc-google-cloud-datastore-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-admin-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-admin-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-admin-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-v1. **Version** : 0.122.2.
      * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.7.0.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-common-protos](https://github.com/googleapis/java-iam/proto-google-common-protos)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-iam-v1. **Version** : 1.1.7.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-iam-v1](https://github.com/googleapis/java-iam/proto-google-iam-v1)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-iam-v1. **Version** : 1.55.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.auto.value. **Name** : auto-value-annotations. **Version** : 1.11.1.
      * **Project URL:** [https://github.com/google/auto/tree/main/value](https://github.com/google/auto/tree/main/value)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-core. **Version** : 2.3.3.
-     * **Project URL:** [https://github.com/googleapis/java-core](https://github.com/googleapis/java-core)
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core. **Version** : 2.59.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-core-http. **Version** : 2.3.3.
-     * **Project URL:** [https://github.com/googleapis/java-core](https://github.com/googleapis/java-core)
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core-grpc. **Version** : 2.59.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-datastore. **Version** : 2.2.1.
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core-http. **Version** : 2.59.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.cloud. **Name** : google-cloud-datastore. **Version** : 2.31.2.
      * **Project URL:** [https://github.com/googleapis/java-datastore](https://github.com/googleapis/java-datastore)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud.datastore. **Name** : datastore-v1-proto-client. **Version** : 2.2.1.
+1.  **Group** : com.google.cloud.datastore. **Name** : datastore-v1-proto-client. **Version** : 2.31.2.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.code.findbugs. **Name** : jsr305. **Version** : 3.0.2.
@@ -93,31 +112,37 @@
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 1.47.1.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-apache-v2. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-apache-v2. **Version** : 1.47.1.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-appengine. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-appengine. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-jackson2. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-jackson2. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-protobuf. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-protobuf. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.j2objc. **Name** : j2objc-annotations. **Version** : 3.1.
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.oauth-client. **Name** : google-oauth-client. **Version** : 1.32.1.
+1.  **Group** : com.google.oauth-client. **Name** : google-oauth-client. **Version** : 1.39.0.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -133,15 +158,23 @@
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
+1.  **Group** : com.google.re2j. **Name** : re2j. **Version** : 1.8.
+     * **Project URL:** [http://github.com/google/re2j](http://github.com/google/re2j)
+     * **License:** [Go License](https://golang.org/LICENSE)
+
 1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.22.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : commons-logging. **Name** : commons-logging. **Version** : 1.3.6.
-     * **Project URL:** [https://commons.apache.org/proper/commons-logging/](https://commons.apache.org/proper/commons-logging/)
-     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+1.  **Group** : io.grpc. **Name** : grpc-alts. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.grpc. **Name** : grpc-api. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-auth. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -157,12 +190,24 @@
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
+1.  **Group** : io.grpc. **Name** : grpc-googleapis. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-grpclb. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
 1.  **Group** : io.grpc. **Name** : grpc-inprocess. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.grpc. **Name** : grpc-kotlin-stub. **Version** : 1.5.0.
      * **Project URL:** [https://github.com/grpc/grpc-kotlin](https://github.com/grpc/grpc-kotlin)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-netty-shaded. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.grpc. **Name** : grpc-protobuf. **Version** : 1.81.0.
@@ -173,16 +218,56 @@
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
+1.  **Group** : io.grpc. **Name** : grpc-services. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
 1.  **Group** : io.grpc. **Name** : grpc-stub. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.28.0.
+1.  **Group** : io.grpc. **Name** : grpc-util. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-xds. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.28.0.
+1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-api. **Version** : 1.42.1.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-context. **Version** : 1.42.1.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-extension-incubator. **Version** : 1.35.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-grpc-1.6. **Version** : 2.1.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-instrumentation-api. **Version** : 2.1.0.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-instrumentation-api-incubator. **Version** : 2.1.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.semconv. **Name** : opentelemetry-semconv. **Version** : 1.29.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/semantic-conventions-java](https://github.com/open-telemetry/semantic-conventions-java)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.perfmark. **Name** : perfmark-api. **Version** : 0.26.0.
@@ -193,8 +278,8 @@
      * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
-1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.13.
-     * **Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
+1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.14.
+     * **Project URL:** [http://hc.apache.org/httpcomponents-client-ga](http://hc.apache.org/httpcomponents-client-ga)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apache.httpcomponents. **Name** : httpcore. **Version** : 4.4.14.
@@ -208,6 +293,10 @@
 1.  **Group** : org.codehaus.mojo. **Name** : animal-sniffer-annotations. **Version** : 1.27.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [MIT license](https://spdx.org/licenses/MIT.txt)
+
+1.  **Group** : org.conscrypt. **Name** : conscrypt-openjdk-uber. **Version** : 2.5.2.
+     * **Project URL:** [https://conscrypt.org/](https://conscrypt.org/)
+     * **License:** [Apache 2](https://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : org.jetbrains. **Name** : annotations. **Version** : 26.1.0.
      * **Project URL:** [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
@@ -257,9 +346,9 @@
      * **Project URL:** [http://jspecify.org/](http://jspecify.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.5.2.
+1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.7.0.
      * **Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **License:** [BSD 3-clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
+     * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/main/LICENSE.txt)
 
 ## Compile, tests, and tooling
 1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.22.0.
@@ -353,38 +442,56 @@
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.1.1.
-     * **Project URL:** [https://github.com/googleapis/api-common-java](https://github.com/googleapis/api-common-java)
-     * **License:** [BSD](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.7.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax-httpjson. **Version** : 0.92.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax-grpc. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api-client. **Name** : google-api-client. **Version** : 1.32.2.
+1.  **Group** : com.google.api. **Name** : gax-httpjson. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+
+1.  **Group** : com.google.api-client. **Name** : google-api-client. **Version** : 2.7.2.
      * **Project URL:** [https://developers.google.com/api-client-library/java/](https://developers.google.com/api-client-library/java/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-v1. **Version** : 0.93.1.
+1.  **Group** : com.google.api.grpc. **Name** : grpc-google-cloud-datastore-admin-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-admin-v1](https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-admin-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : grpc-google-cloud-datastore-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-admin-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-admin-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-admin-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-v1. **Version** : 0.122.2.
      * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.7.0.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-common-protos](https://github.com/googleapis/java-iam/proto-google-common-protos)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-iam-v1. **Version** : 1.1.7.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-iam-v1](https://github.com/googleapis/java-iam/proto-google-iam-v1)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-iam-v1. **Version** : 1.55.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.auto. **Name** : auto-common. **Version** : 1.2.2.
@@ -399,19 +506,20 @@
      * **Project URL:** [https://github.com/google/auto/tree/main/value](https://github.com/google/auto/tree/main/value)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-core. **Version** : 2.3.3.
-     * **Project URL:** [https://github.com/googleapis/java-core](https://github.com/googleapis/java-core)
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core. **Version** : 2.59.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-core-http. **Version** : 2.3.3.
-     * **Project URL:** [https://github.com/googleapis/java-core](https://github.com/googleapis/java-core)
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core-grpc. **Version** : 2.59.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-datastore. **Version** : 2.2.1.
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core-http. **Version** : 2.59.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.cloud. **Name** : google-cloud-datastore. **Version** : 2.31.2.
      * **Project URL:** [https://github.com/googleapis/java-datastore](https://github.com/googleapis/java-datastore)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud.datastore. **Name** : datastore-v1-proto-client. **Version** : 2.2.1.
+1.  **Group** : com.google.cloud.datastore. **Name** : datastore-v1-proto-client. **Version** : 2.31.2.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.code.findbugs. **Name** : jsr305. **Version** : 3.0.2.
@@ -487,31 +595,37 @@
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 1.47.1.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-apache-v2. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-apache-v2. **Version** : 1.47.1.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-appengine. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-appengine. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-jackson2. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-jackson2. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-protobuf. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-protobuf. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.j2objc. **Name** : j2objc-annotations. **Version** : 3.1.
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.oauth-client. **Name** : google-oauth-client. **Version** : 1.32.1.
+1.  **Group** : com.google.oauth-client. **Name** : google-oauth-client. **Version** : 1.39.0.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -535,6 +649,10 @@
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.re2j. **Name** : re2j. **Version** : 1.8.
+     * **Project URL:** [http://github.com/google/re2j](http://github.com/google/re2j)
+     * **License:** [Go License](https://golang.org/LICENSE)
 
 1.  **Group** : com.google.truth. **Name** : truth. **Version** : 1.4.5.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -588,10 +706,6 @@
      * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : commons-logging. **Name** : commons-logging. **Version** : 1.3.6.
-     * **Project URL:** [https://commons.apache.org/proper/commons-logging/](https://commons.apache.org/proper/commons-logging/)
-     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : dev.zacsweers.autoservice. **Name** : auto-service-ksp. **Version** : 1.2.0.
      * **Project URL:** [https://github.com/ZacSweers/auto-service-ksp](https://github.com/ZacSweers/auto-service-ksp)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -607,7 +721,15 @@
 1.  **Group** : io.github.java-diff-utils. **Name** : java-diff-utils. **Version** : 4.17.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : io.grpc. **Name** : grpc-alts. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
 1.  **Group** : io.grpc. **Name** : grpc-api. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-auth. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -623,12 +745,24 @@
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
+1.  **Group** : io.grpc. **Name** : grpc-googleapis. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-grpclb. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
 1.  **Group** : io.grpc. **Name** : grpc-inprocess. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.grpc. **Name** : grpc-kotlin-stub. **Version** : 1.5.0.
      * **Project URL:** [https://github.com/grpc/grpc-kotlin](https://github.com/grpc/grpc-kotlin)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-netty-shaded. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.grpc. **Name** : grpc-protobuf. **Version** : 1.81.0.
@@ -639,7 +773,19 @@
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
+1.  **Group** : io.grpc. **Name** : grpc-services. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
 1.  **Group** : io.grpc. **Name** : grpc-stub. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-util. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-xds. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -667,12 +813,40 @@
      * **Project URL:** [https://github.com/kotest/kotest](https://github.com/kotest/kotest)
      * **License:** [Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.28.0.
+1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.28.0.
+1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-api. **Version** : 1.42.1.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-context. **Version** : 1.42.1.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-extension-incubator. **Version** : 1.35.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-grpc-1.6. **Version** : 2.1.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-instrumentation-api. **Version** : 2.1.0.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-instrumentation-api-incubator. **Version** : 2.1.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.semconv. **Name** : opentelemetry-semconv. **Version** : 1.29.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/semantic-conventions-java](https://github.com/open-telemetry/semantic-conventions-java)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.perfmark. **Name** : perfmark-api. **Version** : 0.26.0.
@@ -733,8 +907,8 @@
      * **Project URL:** [https://commons.apache.org/proper/commons-lang/](https://commons.apache.org/proper/commons-lang/)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.13.
-     * **Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
+1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.14.
+     * **Project URL:** [http://hc.apache.org/httpcomponents-client-ga](http://hc.apache.org/httpcomponents-client-ga)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apache.httpcomponents. **Name** : httpcore. **Version** : 4.4.14.
@@ -771,6 +945,10 @@
      * **Project URL:** [http://github.com/FasterXML/stax2-api](http://github.com/FasterXML/stax2-api)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The BSD 2-Clause License](http://www.opensource.org/licenses/bsd-license.php)
+
+1.  **Group** : org.conscrypt. **Name** : conscrypt-openjdk-uber. **Version** : 2.5.2.
+     * **Project URL:** [https://conscrypt.org/](https://conscrypt.org/)
+     * **License:** [Apache 2](https://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : org.freemarker. **Name** : freemarker. **Version** : 2.3.32.
      * **Project URL:** [https://freemarker.apache.org/](https://freemarker.apache.org/)
@@ -1082,9 +1260,9 @@
      * **Project URL:** [https://java.testcontainers.org](https://java.testcontainers.org)
      * **License:** [MIT](http://opensource.org/licenses/MIT)
 
-1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.5.2.
+1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.7.0.
      * **Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **License:** [BSD 3-clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
+     * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/main/LICENSE.txt)
 
 1.  **Group** : org.xmlresolver. **Name** : xmlresolver. **Version** : 5.1.2.
      * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
@@ -1101,7 +1279,7 @@
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 21:16:08 WEST 2026** using 
+This report was generated on **Fri Jun 19 21:57:41 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -1115,16 +1293,16 @@ This report was generated on **Fri Jun 19 21:16:08 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.1.1.
-     * **Project URL:** [https://github.com/googleapis/api-common-java](https://github.com/googleapis/api-common-java)
-     * **License:** [BSD](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
 1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-pubsub-v1. **Version** : 1.97.0.
      * **Project URL:** [https://github.com/googleapis/java-pubsub/proto-google-cloud-pubsub-v1](https://github.com/googleapis/java-pubsub/proto-google-cloud-pubsub-v1)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.7.0.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-common-protos](https://github.com/googleapis/java-iam/proto-google-common-protos)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.auto.value. **Name** : auto-value-annotations. **Version** : 1.11.1.
@@ -1350,16 +1528,16 @@ This report was generated on **Fri Jun 19 21:16:08 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.1.1.
-     * **Project URL:** [https://github.com/googleapis/api-common-java](https://github.com/googleapis/api-common-java)
-     * **License:** [BSD](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
 1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-pubsub-v1. **Version** : 1.97.0.
      * **Project URL:** [https://github.com/googleapis/java-pubsub/proto-google-cloud-pubsub-v1](https://github.com/googleapis/java-pubsub/proto-google-cloud-pubsub-v1)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.7.0.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-common-protos](https://github.com/googleapis/java-iam/proto-google-common-protos)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.auto. **Name** : auto-common. **Version** : 1.2.2.
@@ -1988,7 +2166,7 @@ This report was generated on **Fri Jun 19 21:16:08 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using 
+This report was generated on **Fri Jun 19 21:57:41 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -2002,42 +2180,48 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.1.1.
-     * **Project URL:** [https://github.com/googleapis/api-common-java](https://github.com/googleapis/api-common-java)
-     * **License:** [BSD](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.7.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.81.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax-grpc. **Version** : 2.7.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax-grpc. **Version** : 2.81.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-trace-v1. **Version** : 2.1.0.
-     * **Project URL:** [https://github.com/googleapis/java-core/proto-google-cloud-trace-v1](https://github.com/googleapis/java-core/proto-google-cloud-trace-v1)
+1.  **Group** : com.google.api. **Name** : gax-httpjson. **Version** : 2.81.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-trace-v1. **Version** : 2.93.0.
+     * **Project URL:** [https://github.com/googleapis/google-cloud-java](https://github.com/googleapis/google-cloud-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-trace-v2. **Version** : 2.1.0.
-     * **Project URL:** [https://github.com/googleapis/java-core/proto-google-cloud-trace-v2](https://github.com/googleapis/java-core/proto-google-cloud-trace-v2)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-trace-v2. **Version** : 2.93.0.
+     * **Project URL:** [https://github.com/googleapis/google-cloud-java](https://github.com/googleapis/google-cloud-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.7.0.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-common-protos](https://github.com/googleapis/java-iam/proto-google-common-protos)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.auto.value. **Name** : auto-value-annotations. **Version** : 1.11.1.
      * **Project URL:** [https://github.com/google/auto/tree/main/value](https://github.com/google/auto/tree/main/value)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-trace. **Version** : 2.1.0.
-     * **Project URL:** [https://github.com/googleapis/java-trace](https://github.com/googleapis/java-trace)
+1.  **Group** : com.google.cloud. **Name** : google-cloud-trace. **Version** : 2.93.0.
+     * **Project URL:** [https://github.com/googleapis/google-cloud-java](https://github.com/googleapis/google-cloud-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.code.findbugs. **Name** : jsr305. **Version** : 3.0.2.
@@ -2063,11 +2247,13 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 2.1.0.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 2.1.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.j2objc. **Name** : j2objc-annotations. **Version** : 3.1.
@@ -2086,16 +2272,12 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.re2j. **Name** : re2j. **Version** : 1.5.
+1.  **Group** : com.google.re2j. **Name** : re2j. **Version** : 1.8.
      * **Project URL:** [http://github.com/google/re2j](http://github.com/google/re2j)
      * **License:** [Go License](https://golang.org/LICENSE)
 
 1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.22.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-logging. **Name** : commons-logging. **Version** : 1.3.6.
-     * **Project URL:** [https://commons.apache.org/proper/commons-logging/](https://commons.apache.org/proper/commons-logging/)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.grpc. **Name** : grpc-alts. **Version** : 1.81.0.
@@ -2122,7 +2304,7 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.grpc. **Name** : grpc-grpclb. **Version** : 1.81.0.
+1.  **Group** : io.grpc. **Name** : grpc-googleapis. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -2162,16 +2344,12 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.28.0.
+1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.28.0.
+1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
-     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : io.opencensus. **Name** : opencensus-proto. **Version** : 0.2.0.
-     * **Project URL:** [https://github.com/census-instrumentation/opencensus-proto](https://github.com/census-instrumentation/opencensus-proto)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.perfmark. **Name** : perfmark-api. **Version** : 0.26.0.
@@ -2182,31 +2360,19 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
-1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.13.
-     * **Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
+1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.14.
+     * **Project URL:** [http://hc.apache.org/httpcomponents-client-ga](http://hc.apache.org/httpcomponents-client-ga)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apache.httpcomponents. **Name** : httpcore. **Version** : 4.4.14.
      * **Project URL:** [http://hc.apache.org/httpcomponents-core-ga](http://hc.apache.org/httpcomponents-core-ga)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.bouncycastle. **Name** : bcpkix-jdk15on. **Version** : 1.67.
-     * **Project URL:** [http://www.bouncycastle.org/java.html](http://www.bouncycastle.org/java.html)
-     * **License:** [Bouncy Castle Licence](http://www.bouncycastle.org/licence.html)
-
-1.  **Group** : org.bouncycastle. **Name** : bcprov-jdk15on. **Version** : 1.67.
-     * **Project URL:** [http://www.bouncycastle.org/java.html](http://www.bouncycastle.org/java.html)
-     * **License:** [Bouncy Castle Licence](http://www.bouncycastle.org/licence.html)
-
-1.  **Group** : org.checkerframework. **Name** : checker-qual. **Version** : 4.2.0.
-     * **Project URL:** [https://checkerframework.org/](https://checkerframework.org/)
-     * **License:** [The MIT License](https://opensource.org/licenses/MIT)
-
 1.  **Group** : org.codehaus.mojo. **Name** : animal-sniffer-annotations. **Version** : 1.27.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [MIT license](https://spdx.org/licenses/MIT.txt)
 
-1.  **Group** : org.conscrypt. **Name** : conscrypt-openjdk-uber. **Version** : 2.5.1.
+1.  **Group** : org.conscrypt. **Name** : conscrypt-openjdk-uber. **Version** : 2.5.2.
      * **Project URL:** [https://conscrypt.org/](https://conscrypt.org/)
      * **License:** [Apache 2](https://www.apache.org/licenses/LICENSE-2.0)
 
@@ -2258,9 +2424,9 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [http://jspecify.org/](http://jspecify.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.5.2.
+1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.7.0.
      * **Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **License:** [BSD 3-clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
+     * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/main/LICENSE.txt)
 
 ## Compile, tests, and tooling
 1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.22.0.
@@ -2342,34 +2508,40 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.1.1.
-     * **Project URL:** [https://github.com/googleapis/api-common-java](https://github.com/googleapis/api-common-java)
-     * **License:** [BSD](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.7.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.81.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax-grpc. **Version** : 2.7.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax-grpc. **Version** : 2.81.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-trace-v1. **Version** : 2.1.0.
-     * **Project URL:** [https://github.com/googleapis/java-core/proto-google-cloud-trace-v1](https://github.com/googleapis/java-core/proto-google-cloud-trace-v1)
+1.  **Group** : com.google.api. **Name** : gax-httpjson. **Version** : 2.81.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-trace-v1. **Version** : 2.93.0.
+     * **Project URL:** [https://github.com/googleapis/google-cloud-java](https://github.com/googleapis/google-cloud-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-trace-v2. **Version** : 2.1.0.
-     * **Project URL:** [https://github.com/googleapis/java-core/proto-google-cloud-trace-v2](https://github.com/googleapis/java-core/proto-google-cloud-trace-v2)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-trace-v2. **Version** : 2.93.0.
+     * **Project URL:** [https://github.com/googleapis/google-cloud-java](https://github.com/googleapis/google-cloud-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.7.0.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-common-protos](https://github.com/googleapis/java-iam/proto-google-common-protos)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.auto. **Name** : auto-common. **Version** : 1.2.2.
@@ -2384,8 +2556,8 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/google/auto/tree/main/value](https://github.com/google/auto/tree/main/value)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-trace. **Version** : 2.1.0.
-     * **Project URL:** [https://github.com/googleapis/java-trace](https://github.com/googleapis/java-trace)
+1.  **Group** : com.google.cloud. **Name** : google-cloud-trace. **Version** : 2.93.0.
+     * **Project URL:** [https://github.com/googleapis/google-cloud-java](https://github.com/googleapis/google-cloud-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.code.findbugs. **Name** : jsr305. **Version** : 3.0.2.
@@ -2461,11 +2633,13 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 2.1.0.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 2.1.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.j2objc. **Name** : j2objc-annotations. **Version** : 3.1.
@@ -2493,7 +2667,7 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.re2j. **Name** : re2j. **Version** : 1.5.
+1.  **Group** : com.google.re2j. **Name** : re2j. **Version** : 1.8.
      * **Project URL:** [http://github.com/google/re2j](http://github.com/google/re2j)
      * **License:** [Go License](https://golang.org/LICENSE)
 
@@ -2549,10 +2723,6 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : commons-logging. **Name** : commons-logging. **Version** : 1.3.6.
-     * **Project URL:** [https://commons.apache.org/proper/commons-logging/](https://commons.apache.org/proper/commons-logging/)
-     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : dev.zacsweers.autoservice. **Name** : auto-service-ksp. **Version** : 1.2.0.
      * **Project URL:** [https://github.com/ZacSweers/auto-service-ksp](https://github.com/ZacSweers/auto-service-ksp)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2592,7 +2762,7 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.grpc. **Name** : grpc-grpclb. **Version** : 1.81.0.
+1.  **Group** : io.grpc. **Name** : grpc-googleapis. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -2656,16 +2826,12 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/kotest/kotest](https://github.com/kotest/kotest)
      * **License:** [Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.28.0.
+1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.28.0.
+1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
-     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : io.opencensus. **Name** : opencensus-proto. **Version** : 0.2.0.
-     * **Project URL:** [https://github.com/census-instrumentation/opencensus-proto](https://github.com/census-instrumentation/opencensus-proto)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.perfmark. **Name** : perfmark-api. **Version** : 0.26.0.
@@ -2717,8 +2883,8 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://commons.apache.org/proper/commons-lang/](https://commons.apache.org/proper/commons-lang/)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.13.
-     * **Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
+1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.14.
+     * **Project URL:** [http://hc.apache.org/httpcomponents-client-ga](http://hc.apache.org/httpcomponents-client-ga)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apache.httpcomponents. **Name** : httpcore. **Version** : 4.4.14.
@@ -2738,14 +2904,6 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/apiguardian-team/apiguardian](https://github.com/apiguardian-team/apiguardian)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.bouncycastle. **Name** : bcpkix-jdk15on. **Version** : 1.67.
-     * **Project URL:** [http://www.bouncycastle.org/java.html](http://www.bouncycastle.org/java.html)
-     * **License:** [Bouncy Castle Licence](http://www.bouncycastle.org/licence.html)
-
-1.  **Group** : org.bouncycastle. **Name** : bcprov-jdk15on. **Version** : 1.67.
-     * **Project URL:** [http://www.bouncycastle.org/java.html](http://www.bouncycastle.org/java.html)
-     * **License:** [Bouncy Castle Licence](http://www.bouncycastle.org/licence.html)
-
 1.  **Group** : org.checkerframework. **Name** : checker-compat-qual. **Version** : 2.5.3.
      * **Project URL:** [https://checkerframework.org](https://checkerframework.org)
      * **License:** [GNU General Public License, version 2 (GPL2), with the classpath exception](http://www.gnu.org/software/classpath/license.html)
@@ -2764,7 +2922,7 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The BSD 2-Clause License](http://www.opensource.org/licenses/bsd-license.php)
 
-1.  **Group** : org.conscrypt. **Name** : conscrypt-openjdk-uber. **Version** : 2.5.1.
+1.  **Group** : org.conscrypt. **Name** : conscrypt-openjdk-uber. **Version** : 2.5.2.
      * **Project URL:** [https://conscrypt.org/](https://conscrypt.org/)
      * **License:** [Apache 2](https://www.apache.org/licenses/LICENSE-2.0)
 
@@ -3062,9 +3220,9 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **License:** [MIT](https://opensource.org/license/mit)
 
-1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.5.2.
+1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.7.0.
      * **Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **License:** [BSD 3-clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
+     * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/main/LICENSE.txt)
 
 1.  **Group** : org.xmlresolver. **Name** : xmlresolver. **Version** : 5.1.2.
      * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
@@ -3081,7 +3239,7 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using 
+This report was generated on **Fri Jun 19 21:57:42 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -3121,57 +3279,76 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.1.1.
-     * **Project URL:** [https://github.com/googleapis/api-common-java](https://github.com/googleapis/api-common-java)
-     * **License:** [BSD](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.7.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax-httpjson. **Version** : 0.92.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax-grpc. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api-client. **Name** : google-api-client. **Version** : 1.32.2.
+1.  **Group** : com.google.api. **Name** : gax-httpjson. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+
+1.  **Group** : com.google.api-client. **Name** : google-api-client. **Version** : 2.7.2.
      * **Project URL:** [https://developers.google.com/api-client-library/java/](https://developers.google.com/api-client-library/java/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-v1. **Version** : 0.93.1.
+1.  **Group** : com.google.api.grpc. **Name** : grpc-google-cloud-datastore-admin-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-admin-v1](https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-admin-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : grpc-google-cloud-datastore-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-admin-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-admin-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-admin-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-v1. **Version** : 0.122.2.
      * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.7.0.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-common-protos](https://github.com/googleapis/java-iam/proto-google-common-protos)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-iam-v1. **Version** : 1.1.7.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-iam-v1](https://github.com/googleapis/java-iam/proto-google-iam-v1)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-iam-v1. **Version** : 1.55.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.auto.value. **Name** : auto-value-annotations. **Version** : 1.11.1.
      * **Project URL:** [https://github.com/google/auto/tree/main/value](https://github.com/google/auto/tree/main/value)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-core. **Version** : 2.3.3.
-     * **Project URL:** [https://github.com/googleapis/java-core](https://github.com/googleapis/java-core)
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core. **Version** : 2.59.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-core-http. **Version** : 2.3.3.
-     * **Project URL:** [https://github.com/googleapis/java-core](https://github.com/googleapis/java-core)
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core-grpc. **Version** : 2.59.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-datastore. **Version** : 2.2.1.
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core-http. **Version** : 2.59.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.cloud. **Name** : google-cloud-datastore. **Version** : 2.31.2.
      * **Project URL:** [https://github.com/googleapis/java-datastore](https://github.com/googleapis/java-datastore)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud.datastore. **Name** : datastore-v1-proto-client. **Version** : 2.2.1.
+1.  **Group** : com.google.cloud.datastore. **Name** : datastore-v1-proto-client. **Version** : 2.31.2.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.code.findbugs. **Name** : jsr305. **Version** : 3.0.2.
@@ -3197,31 +3374,37 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 1.47.1.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-apache-v2. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-apache-v2. **Version** : 1.47.1.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-appengine. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-appengine. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-jackson2. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-jackson2. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-protobuf. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-protobuf. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.j2objc. **Name** : j2objc-annotations. **Version** : 3.1.
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.oauth-client. **Name** : google-oauth-client. **Version** : 1.32.1.
+1.  **Group** : com.google.oauth-client. **Name** : google-oauth-client. **Version** : 1.39.0.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3237,15 +3420,23 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
+1.  **Group** : com.google.re2j. **Name** : re2j. **Version** : 1.8.
+     * **Project URL:** [http://github.com/google/re2j](http://github.com/google/re2j)
+     * **License:** [Go License](https://golang.org/LICENSE)
+
 1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.22.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : commons-logging. **Name** : commons-logging. **Version** : 1.3.6.
-     * **Project URL:** [https://commons.apache.org/proper/commons-logging/](https://commons.apache.org/proper/commons-logging/)
-     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+1.  **Group** : io.grpc. **Name** : grpc-alts. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.grpc. **Name** : grpc-api. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-auth. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -3261,12 +3452,24 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
+1.  **Group** : io.grpc. **Name** : grpc-googleapis. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-grpclb. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
 1.  **Group** : io.grpc. **Name** : grpc-inprocess. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.grpc. **Name** : grpc-kotlin-stub. **Version** : 1.5.0.
      * **Project URL:** [https://github.com/grpc/grpc-kotlin](https://github.com/grpc/grpc-kotlin)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-netty-shaded. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.grpc. **Name** : grpc-protobuf. **Version** : 1.81.0.
@@ -3277,16 +3480,56 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
+1.  **Group** : io.grpc. **Name** : grpc-services. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
 1.  **Group** : io.grpc. **Name** : grpc-stub. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.28.0.
+1.  **Group** : io.grpc. **Name** : grpc-util. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-xds. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.28.0.
+1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-api. **Version** : 1.42.1.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-context. **Version** : 1.42.1.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-extension-incubator. **Version** : 1.35.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-grpc-1.6. **Version** : 2.1.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-instrumentation-api. **Version** : 2.1.0.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-instrumentation-api-incubator. **Version** : 2.1.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.semconv. **Name** : opentelemetry-semconv. **Version** : 1.29.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/semantic-conventions-java](https://github.com/open-telemetry/semantic-conventions-java)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.perfmark. **Name** : perfmark-api. **Version** : 0.26.0.
@@ -3310,8 +3553,8 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://commons.apache.org/proper/commons-compress/](https://commons.apache.org/proper/commons-compress/)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.13.
-     * **Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
+1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.14.
+     * **Project URL:** [http://hc.apache.org/httpcomponents-client-ga](http://hc.apache.org/httpcomponents-client-ga)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apache.httpcomponents. **Name** : httpcore. **Version** : 4.4.14.
@@ -3325,6 +3568,10 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
 1.  **Group** : org.codehaus.mojo. **Name** : animal-sniffer-annotations. **Version** : 1.27.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [MIT license](https://spdx.org/licenses/MIT.txt)
+
+1.  **Group** : org.conscrypt. **Name** : conscrypt-openjdk-uber. **Version** : 2.5.2.
+     * **Project URL:** [https://conscrypt.org/](https://conscrypt.org/)
+     * **License:** [Apache 2](https://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : org.hamcrest. **Name** : hamcrest. **Version** : 3.0.
      * **Project URL:** [http://hamcrest.org/JavaHamcrest/](http://hamcrest.org/JavaHamcrest/)
@@ -3426,9 +3673,9 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://java.testcontainers.org](https://java.testcontainers.org)
      * **License:** [MIT](http://opensource.org/licenses/MIT)
 
-1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.5.2.
+1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.7.0.
      * **Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **License:** [BSD 3-clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
+     * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/main/LICENSE.txt)
 
 ## Compile, tests, and tooling
 1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.22.0.
@@ -3522,38 +3769,56 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.1.1.
-     * **Project URL:** [https://github.com/googleapis/api-common-java](https://github.com/googleapis/api-common-java)
-     * **License:** [BSD](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.7.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api. **Name** : gax-httpjson. **Version** : 0.92.1.
-     * **Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **License:** [BSD](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+1.  **Group** : com.google.api. **Name** : gax-grpc. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
 
-1.  **Group** : com.google.api-client. **Name** : google-api-client. **Version** : 1.32.2.
+1.  **Group** : com.google.api. **Name** : gax-httpjson. **Version** : 2.69.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [BSD-3-Clause](https://github.com/googleapis/gax-java/blob/master/LICENSE)
+
+1.  **Group** : com.google.api-client. **Name** : google-api-client. **Version** : 2.7.2.
      * **Project URL:** [https://developers.google.com/api-client-library/java/](https://developers.google.com/api-client-library/java/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-v1. **Version** : 0.93.1.
+1.  **Group** : com.google.api.grpc. **Name** : grpc-google-cloud-datastore-admin-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-admin-v1](https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-admin-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : grpc-google-cloud-datastore-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/grpc-google-cloud-datastore-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-admin-v1. **Version** : 2.31.2.
+     * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-admin-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-admin-v1)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-datastore-v1. **Version** : 0.122.2.
      * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.7.0.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-common-protos](https://github.com/googleapis/java-iam/proto-google-common-protos)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-iam-v1. **Version** : 1.1.7.
-     * **Project URL:** [https://github.com/googleapis/java-iam/proto-google-iam-v1](https://github.com/googleapis/java-iam/proto-google-iam-v1)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-iam-v1. **Version** : 1.55.0.
+     * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-credentials. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.3.0.
+1.  **Group** : com.google.auth. **Name** : google-auth-library-oauth2-http. **Version** : 1.47.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD New license](http://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.auto. **Name** : auto-common. **Version** : 1.2.2.
@@ -3568,19 +3833,20 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/google/auto/tree/main/value](https://github.com/google/auto/tree/main/value)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-core. **Version** : 2.3.3.
-     * **Project URL:** [https://github.com/googleapis/java-core](https://github.com/googleapis/java-core)
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core. **Version** : 2.59.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-core-http. **Version** : 2.3.3.
-     * **Project URL:** [https://github.com/googleapis/java-core](https://github.com/googleapis/java-core)
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core-grpc. **Version** : 2.59.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud. **Name** : google-cloud-datastore. **Version** : 2.2.1.
+1.  **Group** : com.google.cloud. **Name** : google-cloud-core-http. **Version** : 2.59.0.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.cloud. **Name** : google-cloud-datastore. **Version** : 2.31.2.
      * **Project URL:** [https://github.com/googleapis/java-datastore](https://github.com/googleapis/java-datastore)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.cloud.datastore. **Name** : datastore-v1-proto-client. **Version** : 2.2.1.
+1.  **Group** : com.google.cloud.datastore. **Name** : datastore-v1-proto-client. **Version** : 2.31.2.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.code.findbugs. **Name** : jsr305. **Version** : 3.0.2.
@@ -3656,31 +3922,37 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client. **Version** : 1.47.1.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-apache-v2. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-apache-v2. **Version** : 1.47.1.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-appengine. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-appengine. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-gson. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-jackson2. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-jackson2. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.http-client. **Name** : google-http-client-protobuf. **Version** : 1.40.1.
+1.  **Group** : com.google.http-client. **Name** : google-http-client-protobuf. **Version** : 1.47.1.
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.j2objc. **Name** : j2objc-annotations. **Version** : 3.1.
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.oauth-client. **Name** : google-oauth-client. **Version** : 1.32.1.
+1.  **Group** : com.google.oauth-client. **Name** : google-oauth-client. **Version** : 1.39.0.
      * **Project URL:** [https://www.google.com/](https://www.google.com/)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3704,6 +3976,10 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.re2j. **Name** : re2j. **Version** : 1.8.
+     * **Project URL:** [http://github.com/google/re2j](http://github.com/google/re2j)
+     * **License:** [Go License](https://golang.org/LICENSE)
 
 1.  **Group** : com.google.truth. **Name** : truth. **Version** : 1.4.5.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3757,10 +4033,6 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : commons-logging. **Name** : commons-logging. **Version** : 1.3.6.
-     * **Project URL:** [https://commons.apache.org/proper/commons-logging/](https://commons.apache.org/proper/commons-logging/)
-     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : dev.zacsweers.autoservice. **Name** : auto-service-ksp. **Version** : 1.2.0.
      * **Project URL:** [https://github.com/ZacSweers/auto-service-ksp](https://github.com/ZacSweers/auto-service-ksp)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3776,7 +4048,15 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
 1.  **Group** : io.github.java-diff-utils. **Name** : java-diff-utils. **Version** : 4.17.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : io.grpc. **Name** : grpc-alts. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
 1.  **Group** : io.grpc. **Name** : grpc-api. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-auth. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -3792,12 +4072,24 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
+1.  **Group** : io.grpc. **Name** : grpc-googleapis. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-grpclb. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
 1.  **Group** : io.grpc. **Name** : grpc-inprocess. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.grpc. **Name** : grpc-kotlin-stub. **Version** : 1.5.0.
      * **Project URL:** [https://github.com/grpc/grpc-kotlin](https://github.com/grpc/grpc-kotlin)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-netty-shaded. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.grpc. **Name** : grpc-protobuf. **Version** : 1.81.0.
@@ -3808,7 +4100,19 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
+1.  **Group** : io.grpc. **Name** : grpc-services. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
 1.  **Group** : io.grpc. **Name** : grpc-stub. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-util. **Version** : 1.81.0.
+     * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
+     * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : io.grpc. **Name** : grpc-xds. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -3836,12 +4140,40 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://github.com/kotest/kotest](https://github.com/kotest/kotest)
      * **License:** [Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.28.0.
+1.  **Group** : io.opencensus. **Name** : opencensus-api. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.28.0.
+1.  **Group** : io.opencensus. **Name** : opencensus-contrib-http-util. **Version** : 0.31.1.
      * **Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-api. **Version** : 1.42.1.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-context. **Version** : 1.42.1.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry. **Name** : opentelemetry-extension-incubator. **Version** : 1.35.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-grpc-1.6. **Version** : 2.1.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-instrumentation-api. **Version** : 2.1.0.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.instrumentation. **Name** : opentelemetry-instrumentation-api-incubator. **Version** : 2.1.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+     * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : io.opentelemetry.semconv. **Name** : opentelemetry-semconv. **Version** : 1.29.0-alpha.
+     * **Project URL:** [https://github.com/open-telemetry/semantic-conventions-java](https://github.com/open-telemetry/semantic-conventions-java)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.perfmark. **Name** : perfmark-api. **Version** : 0.26.0.
@@ -3902,8 +4234,8 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://commons.apache.org/proper/commons-lang/](https://commons.apache.org/proper/commons-lang/)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.13.
-     * **Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
+1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.14.
+     * **Project URL:** [http://hc.apache.org/httpcomponents-client-ga](http://hc.apache.org/httpcomponents-client-ga)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apache.httpcomponents. **Name** : httpcore. **Version** : 4.4.14.
@@ -3940,6 +4272,10 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [http://github.com/FasterXML/stax2-api](http://github.com/FasterXML/stax2-api)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The BSD 2-Clause License](http://www.opensource.org/licenses/bsd-license.php)
+
+1.  **Group** : org.conscrypt. **Name** : conscrypt-openjdk-uber. **Version** : 2.5.2.
+     * **Project URL:** [https://conscrypt.org/](https://conscrypt.org/)
+     * **License:** [Apache 2](https://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : org.freemarker. **Name** : freemarker. **Version** : 2.3.32.
      * **Project URL:** [https://freemarker.apache.org/](https://freemarker.apache.org/)
@@ -4251,9 +4587,9 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
      * **Project URL:** [https://java.testcontainers.org](https://java.testcontainers.org)
      * **License:** [MIT](http://opensource.org/licenses/MIT)
 
-1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.5.2.
+1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.7.0.
      * **Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **License:** [BSD 3-clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
+     * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/main/LICENSE.txt)
 
 1.  **Group** : org.xmlresolver. **Name** : xmlresolver. **Version** : 5.1.2.
      * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
@@ -4270,6 +4606,6 @@ This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 21:16:10 WEST 2026** using 
+This report was generated on **Fri Jun 19 21:57:43 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
