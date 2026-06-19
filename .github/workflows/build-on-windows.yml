@@ -1,0 +1,37 @@
+name: Windows CI
+
+on: pull_request
+
+jobs:
+  build:
+    runs-on: windows-latest
+    name: Build on Windows
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: zulu
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      # See: https://github.com/al-cheb/configure-pagefile-action
+      - name: Configure Pagefile
+        uses: al-cheb/configure-pagefile-action@v1.3
+
+      - name: Build project and run tests
+        shell: cmd
+        run: gradlew.bat build --stacktrace
+
+      # See: https://github.com/marketplace/actions/junit-report-action
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4.0.3
+        if: always() # always run even if the previous step fails
+        with:
+          report_paths: '**/build/test-results/**/TEST-*.xml'
+          require_tests: true

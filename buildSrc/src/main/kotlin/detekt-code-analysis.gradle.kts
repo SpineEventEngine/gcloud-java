@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,7 +29,7 @@ import io.gitlab.arturbosch.detekt.Detekt
 /**
  * This script-plugin sets up Kotlin code analyzing with Detekt.
  *
- * After applying, Detekt is configured to use `${rootDir}/config/quality/detekt-config.yml` file.
+ * After applying, Detekt is configured to use `${rootDir}/buildSrc/quality/detekt-config.yml` file.
  * Projects can append their own config files to override some parts of the default one or drop
  * it at all in a favor of their own one.
  *
@@ -69,7 +69,7 @@ plugins {
 
 detekt {
     buildUponDefaultConfig = true
-    config.from(files("${rootDir}/config/quality/detekt-config.yml"))
+    config.from(files("${rootDir}/buildSrc/quality/detekt-config.yml"))
 }
 
 tasks {

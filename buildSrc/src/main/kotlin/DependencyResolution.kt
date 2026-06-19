@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,40 +24,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.AnimalSniffer
-import io.spine.internal.dependency.Asm
-import io.spine.internal.dependency.AutoCommon
-import io.spine.internal.dependency.AutoService
-import io.spine.internal.dependency.AutoValue
-import io.spine.internal.dependency.CheckerFramework
-import io.spine.internal.dependency.CommonsCli
-import io.spine.internal.dependency.CommonsCodec
-import io.spine.internal.dependency.CommonsLogging
-import io.spine.internal.dependency.Dokka
-import io.spine.internal.dependency.ErrorProne
-import io.spine.internal.dependency.FindBugs
-import io.spine.internal.dependency.Gson
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.Hamcrest
-import io.spine.internal.dependency.J2ObjC
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Jackson
-import io.spine.internal.dependency.JavaDiffUtils
-import io.spine.internal.dependency.Kotest
-import io.spine.internal.dependency.Kotlin
-import io.spine.internal.dependency.Okio
-import io.spine.internal.dependency.OpenTest4J
-import io.spine.internal.dependency.Plexus
-import io.spine.internal.dependency.Protobuf
-import io.spine.internal.dependency.Slf4J
-import io.spine.internal.dependency.Truth
+import io.spine.dependency.build.AnimalSniffer
+import io.spine.dependency.build.CheckerFramework
+import io.spine.dependency.build.Dokka
+import io.spine.dependency.build.ErrorProne
+import io.spine.dependency.build.FindBugs
+import io.spine.dependency.build.JSpecify
+import io.spine.dependency.lib.Asm
+import io.spine.dependency.lib.AutoCommon
+import io.spine.dependency.lib.AutoService
+import io.spine.dependency.lib.AutoValue
+import io.spine.dependency.lib.CommonsCli
+import io.spine.dependency.lib.CommonsCodec
+import io.spine.dependency.lib.CommonsLogging
+import io.spine.dependency.lib.Gson
+import io.spine.dependency.lib.Guava
+import io.spine.dependency.lib.J2ObjC
+import io.spine.dependency.lib.JavaDiffUtils
+import io.spine.dependency.lib.Kotlin
+import io.spine.dependency.lib.Okio
+import io.spine.dependency.lib.Plexus
+import io.spine.dependency.lib.Protobuf
+import io.spine.dependency.lib.Slf4J
+import io.spine.dependency.local.Base
+import io.spine.dependency.local.Spine
+import io.spine.dependency.test.Hamcrest
+import io.spine.dependency.test.Kotest
+import io.spine.dependency.test.OpenTest4J
+import io.spine.dependency.test.Truth
 import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.ResolutionStrategy
+import org.gradle.kotlin.dsl.exclude
 
 /**
- * The function to be used in `buildscript` when a fully-qualified call must be made.
+ * The function to be used in `buildscript` when a fully qualified call must be made.
  */
 @Suppress("unused")
 fun doForceVersions(configurations: ConfigurationContainer) {
@@ -80,7 +84,10 @@ fun NamedDomainObjectContainer<Configuration>.forceVersions() {
 }
 
 private fun ResolutionStrategy.forceProductionDependencies() {
-    @Suppress("DEPRECATION") // Force SLF4J and Kotlin JDK7 versions.
+    @Suppress("DEPRECATION") // Force versions of SLF4J and Kotlin libs.
+    Protobuf.libs.forEach {
+        force(it)
+    }
     force(
         AnimalSniffer.lib,
         AutoCommon.lib,
@@ -92,11 +99,7 @@ private fun ResolutionStrategy.forceProductionDependencies() {
         FindBugs.annotations,
         Gson.lib,
         Guava.lib,
-        Kotlin.reflect,
-        Kotlin.stdLib,
-        Kotlin.stdLibCommon,
-        Kotlin.stdLibJdk8,
-        Kotlin.stdLibJdk7,
+        JSpecify.annotations,
         Protobuf.GradlePlugin.lib,
         Protobuf.libs,
         Slf4J.lib
@@ -106,11 +109,6 @@ private fun ResolutionStrategy.forceProductionDependencies() {
 private fun ResolutionStrategy.forceTestDependencies() {
     force(
         Guava.testLib,
-        JUnit.api,
-        JUnit.bom,
-        JUnit.Platform.commons,
-        JUnit.Platform.launcher,
-        JUnit.legacy,
         Truth.libs,
         Kotest.assertions,
     )
@@ -122,6 +120,10 @@ private fun ResolutionStrategy.forceTestDependencies() {
 private fun ResolutionStrategy.forceTransitiveDependencies() {
     force(
         Asm.lib,
+        Asm.tree,
+        Asm.analysis,
+        Asm.util,
+        Asm.commons,
         AutoValue.annotations,
         CommonsCli.lib,
         CommonsCodec.lib,
@@ -129,16 +131,6 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
         Gson.lib,
         Hamcrest.core,
         J2ObjC.annotations,
-        JUnit.Platform.engine,
-        JUnit.Platform.suiteApi,
-        JUnit.runner,
-        Jackson.annotations,
-        Jackson.bom,
-        Jackson.core,
-        Jackson.databind,
-        Jackson.dataformatXml,
-        Jackson.dataformatYaml,
-        Jackson.moduleKotlin,
         JavaDiffUtils.lib,
         Kotlin.jetbrainsAnnotations,
         Okio.lib,
@@ -151,7 +143,7 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
 fun NamedDomainObjectContainer<Configuration>.excludeProtobufLite() {
 
     fun excludeProtoLite(configurationName: String) {
-        findByName(configurationName)?.exclude(
+        named(configurationName).get().exclude(
             mapOf(
                 "group" to "com.google.protobuf",
                 "module" to "protobuf-lite"
@@ -161,4 +153,39 @@ fun NamedDomainObjectContainer<Configuration>.excludeProtobufLite() {
 
     excludeProtoLite("runtimeOnly")
     excludeProtoLite("testRuntimeOnly")
+}
+
+/**
+ * Excludes `spine-base` from the dependencies.
+ */
+@Suppress("unused")
+fun ModuleDependency.excludeSpineBase() {
+    exclude(group = Spine.group, module = "spine-base")
+}
+
+/**
+ * Forces the version of [Spine.base] in the given project.
+ */
+@Suppress("unused")
+fun Project.forceSpineBase() {
+    configurations.all {
+        resolutionStrategy {
+            force(Base.lib)
+        }
+    }
+}
+
+/**
+ * Forces configurations containing `"proto"` in their names (disregarding the case) to
+ * use [Spine.baseForBuildScript].
+ */
+@Suppress("unused")
+fun Project.forceBaseInProtoTasks() {
+    configurations.configureEach {
+        if (name.lowercase().contains("proto")) {
+            resolutionStrategy {
+                force(Base.libForBuildScript)
+            }
+        }
+    }
 }
