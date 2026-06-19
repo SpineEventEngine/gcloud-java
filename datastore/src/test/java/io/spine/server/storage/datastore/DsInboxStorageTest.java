@@ -29,6 +29,7 @@ package io.spine.server.storage.datastore;
 import io.spine.environment.Tests;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.InboxStorageTest;
+import io.spine.testing.server.storage.datastore.EnabledIfDockerAvailable;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.DisplayName;
 import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
 
 @DisplayName("Datastore-backed `InboxStorage` should")
+@EnabledIfDockerAvailable
 final class DsInboxStorageTest extends InboxStorageTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory = local();

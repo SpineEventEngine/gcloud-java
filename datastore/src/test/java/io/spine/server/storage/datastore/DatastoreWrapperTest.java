@@ -39,6 +39,7 @@ import io.spine.server.storage.datastore.record.RecordId;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.testing.SlowTest;
+import io.spine.testing.server.storage.datastore.EnabledIfDockerAvailable;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -73,6 +74,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @DisplayName("`DatastoreWrapper` should")
+@EnabledIfDockerAvailable
 final class DatastoreWrapperTest {
 
     private static final Kind GENERIC_ENTITY_KIND = Kind.of("my.entity");

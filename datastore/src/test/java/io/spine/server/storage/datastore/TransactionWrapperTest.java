@@ -39,6 +39,7 @@ import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import io.spine.testing.SlowTest;
+import io.spine.testing.server.storage.datastore.EnabledIfDockerAvailable;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
@@ -63,6 +64,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`TransactionWrapper` should")
 @SuppressWarnings("ClassWithTooManyMethods")    /* It's fine for a test. */
+@EnabledIfDockerAvailable
 class TransactionWrapperTest {
 
     private static final Kind TEST_KIND = Kind.of(TypeUrl.of(Empty.class));

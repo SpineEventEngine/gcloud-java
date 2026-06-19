@@ -34,6 +34,7 @@ import io.spine.server.storage.datastore.Kind;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
 import io.spine.testing.SlowTest;
+import io.spine.testing.server.storage.datastore.EnabledIfDockerAvailable;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
@@ -51,6 +52,7 @@ import static io.spine.server.storage.given.GivenStorageProject.StgProjectColumn
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("`DsRecordStorage` should")
+@EnabledIfDockerAvailable
 final class DsRecordStorageTest extends RecordStorageDelegateTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory =

@@ -43,6 +43,7 @@ import io.spine.server.storage.datastore.given.CollegeProjection;
 import io.spine.test.datastore.College;
 import io.spine.test.datastore.CollegeId;
 import io.spine.testing.TestValues;
+import io.spine.testing.server.storage.datastore.EnabledIfDockerAvailable;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,6 +69,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("`NamespaceIndex` should")
+@EnabledIfDockerAvailable
 final class NamespaceIndexTest {
 
     private static final NsConverterFactory converterFactory = NsConverterFactory.defaults();

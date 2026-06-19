@@ -3,10 +3,13 @@ package io.spine.testing.server.storage.datastore;
 
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.server.storage.datastore.ProjectId;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Manages a Docker-powered Datastore Emulator.
@@ -14,7 +17,7 @@ import java.util.Map;
  * @implNote This class acts as a JVM-level singleton, operating in {@code static} context,
  * to make the state shared across all launched JUnit tests. For each project ID,
  * a new container is launched. Once the Java process, from which the container was started, dies,
- * corresponding Docker container is automatically stopped.
+ * the corresponding Docker container is automatically stopped.
  */
 final class Emulator {
 
@@ -45,6 +48,11 @@ final class Emulator {
      * @param port      port in a Docker container machine, through which the emulator is going to be accessed
      */
     static synchronized DatastoreOptions at(ProjectId projectId, int port) {
+        assumeTrue(
+                DockerClientFactory.instance().isDockerAvailable(),
+                "Skipping the test: no Docker environment is available" +
+                        " to run the Datastore Emulator."
+        );
         var emulator = containers.get(projectId);
         if (emulator == null) {
             emulator = new EmulatorContainer(IMAGE, projectId, port);
