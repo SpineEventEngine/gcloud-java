@@ -35,7 +35,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Function;
 

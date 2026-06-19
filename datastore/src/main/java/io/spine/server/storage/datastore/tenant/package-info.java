@@ -29,7 +29,7 @@
  *
  * @see io.spine.server.storage.datastore.tenant.DatastoreTenants
  */
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.storage.datastore.tenant;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

@@ -36,7 +36,7 @@ import com.google.common.collect.Iterators;
 import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.tenant.TenantIndex;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.HashSet;

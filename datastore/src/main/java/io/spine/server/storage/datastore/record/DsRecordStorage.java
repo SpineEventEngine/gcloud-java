@@ -47,7 +47,7 @@ import io.spine.server.storage.datastore.query.DsLookup;
 import io.spine.server.storage.datastore.query.FilterAdapter;
 import io.spine.server.storage.datastore.query.PreparedQuery;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.NonNull;
+org.jspecify.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -150,7 +150,7 @@ public class DsRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
         return result.iterator();
     }
 
-    @NonNull
+    @NotNull
     private PreparedQuery<I, R> lookupWith(RecordQuery<I, R> query) {
         return DsLookup.onTopOf(datastore, columnFilterAdapter, dsSpec)
                        .with(query);

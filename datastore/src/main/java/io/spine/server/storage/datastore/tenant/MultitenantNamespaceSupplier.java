@@ -29,7 +29,7 @@ package io.spine.server.storage.datastore.tenant;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Objects.requireNonNull;

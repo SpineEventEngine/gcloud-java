@@ -28,7 +28,7 @@
  * Test environment classes for the {@code io.spine.server.storage.datastore} package.
  */
 
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.storage.datastore.given;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

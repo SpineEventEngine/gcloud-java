@@ -30,7 +30,7 @@ import com.google.cloud.datastore.Key;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import io.spine.core.TenantId;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.regex.Pattern;

@@ -27,7 +27,7 @@
 package io.spine.server.storage.datastore.delivery;
 
 import io.spine.server.delivery.ShardSessionRecord;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

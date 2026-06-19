@@ -26,7 +26,7 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 

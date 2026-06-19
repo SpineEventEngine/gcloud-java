@@ -36,7 +36,7 @@ import io.spine.query.RecordQuery;
 import io.spine.query.SortBy;
 import io.spine.server.storage.datastore.record.DsEntitySpec;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link RecordQuery} prepared for optimal execution in terms of Datastore
