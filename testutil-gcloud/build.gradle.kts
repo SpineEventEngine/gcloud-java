@@ -1,5 +1,5 @@
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Testcontainers
+import io.spine.dependency.test.JUnit
+import io.spine.dependency.test.Testcontainers
 
 /*
  * Copyright 2023, TeamDev. All rights reserved.
@@ -28,7 +28,7 @@ import io.spine.internal.dependency.Testcontainers
  */
 
 dependencies {
-    JUnit.api.forEach {
+    JUnit.Jupiter.modules.forEach {
         implementation(it)
     }
     implementation(Testcontainers.lib)

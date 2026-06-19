@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.GoogleCloud
+import io.spine.dependency.lib.GoogleCloud
 
 dependencies {
     // Google Cloud Pubsub protos

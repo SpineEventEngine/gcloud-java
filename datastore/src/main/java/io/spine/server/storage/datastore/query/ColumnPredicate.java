@@ -32,7 +32,7 @@ import com.google.protobuf.Message;
 import io.spine.query.QueryPredicate;
 import io.spine.query.Subject;
 import io.spine.query.SubjectParameter;
-import import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;
 

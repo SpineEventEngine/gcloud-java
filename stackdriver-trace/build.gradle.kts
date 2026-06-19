@@ -24,9 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.GoogleApis
-import io.spine.internal.dependency.GoogleCloud
-import io.spine.internal.dependency.Grpc
+import io.spine.dependency.lib.GoogleApis
+import io.spine.dependency.lib.GoogleCloud
+import io.spine.dependency.lib.Grpc
 
 dependencies {
     api(GoogleCloud.trace)

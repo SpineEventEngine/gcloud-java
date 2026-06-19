@@ -26,27 +26,46 @@
 
 @file:Suppress("RemoveRedundantQualifierName")
 
-import Build_gradle.Subproject
-import io.spine.internal.dependency.*
-import io.spine.internal.gradle.VersionWriter
-import io.spine.internal.gradle.checkstyle.CheckStyleConfig
-import io.spine.internal.gradle.github.pages.updateGitHubPages
-import io.spine.internal.gradle.javac.configureErrorProne
-import io.spine.internal.gradle.javac.configureJavac
-import io.spine.internal.gradle.javadoc.JavadocConfig
-import io.spine.internal.gradle.kotlin.applyJvmToolchain
-import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
-import io.spine.internal.gradle.publish.IncrementGuard
-import io.spine.internal.gradle.publish.PublishingRepos
-import io.spine.internal.gradle.publish.spinePublishing
-import io.spine.internal.gradle.report.coverage.JacocoConfig
-import io.spine.internal.gradle.report.license.LicenseReporter
-import io.spine.internal.gradle.report.pom.PomGenerator
-import io.spine.internal.gradle.standardToSpineSdk
-import io.spine.internal.gradle.testing.configureLogging
-import io.spine.internal.gradle.testing.registerTestTasks
+import io.spine.dependency.boms.BomsPlugin
+import io.spine.dependency.build.ErrorProne
+import io.spine.dependency.kotlinx.Coroutines
+import io.spine.dependency.lib.ApacheHttp
+import io.spine.dependency.lib.CommonsCodec
+import io.spine.dependency.lib.GoogleApis
+import io.spine.dependency.lib.Grpc
+import io.spine.dependency.lib.Guava
+import io.spine.dependency.lib.Jackson
+import io.spine.dependency.lib.Kotlin
+import io.spine.dependency.lib.PerfMark
+import io.spine.dependency.local.Base
+import io.spine.dependency.local.BaseTypes
+import io.spine.dependency.local.Change
+import io.spine.dependency.local.Compiler
+import io.spine.dependency.local.CoreJvm
+import io.spine.dependency.local.Logging
+import io.spine.dependency.local.Reflect
+import io.spine.dependency.local.TestLib
+import io.spine.dependency.local.Time
+import io.spine.dependency.local.ToolBase
+import io.spine.dependency.local.Validation
+import io.spine.dependency.test.JUnit
+import io.spine.gradle.checkstyle.CheckStyleConfig
+import io.spine.gradle.github.pages.updateGitHubPages
+import io.spine.gradle.javac.configureErrorProne
+import io.spine.gradle.javac.configureJavac
+import io.spine.gradle.javadoc.JavadocConfig
+import io.spine.gradle.kotlin.applyJvmToolchain
+import io.spine.gradle.kotlin.setFreeCompilerArgs
+import io.spine.gradle.publish.IncrementGuard
+import io.spine.gradle.publish.PublishingRepos
+import io.spine.gradle.publish.spinePublishing
+import io.spine.gradle.report.coverage.KoverConfig
+import io.spine.gradle.report.license.LicenseReporter
+import io.spine.gradle.report.pom.PomGenerator
+import io.spine.gradle.repo.standardToSpineSdk
+import io.spine.gradle.testing.configureLogging
+import io.spine.gradle.testing.registerTestTasks
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     standardSpineSdkRepositories()
@@ -54,22 +73,49 @@ buildscript {
     doForceVersions(configurations)
     configurations {
         all {
+            exclude(group = "io.spine", module = "spine-flogger-api")
+            exclude(group = "io.spine", module = "spine-logging-backend")
             resolutionStrategy {
-                val spine = io.spine.internal.dependency.Spine
+                val jackson = io.spine.dependency.lib.Jackson
+                val logging = io.spine.dependency.local.Logging
+                val cfg = this@all
+                val rs = this@resolutionStrategy
+                jackson.forceArtifacts(project, cfg, rs)
+                io.spine.dependency.lib.Jackson.DataType.forceArtifacts(project, cfg, rs)
+                io.spine.dependency.lib.Grpc.forceArtifacts(project, cfg, rs)
                 force(
-                    spine.base,
-                    spine.toolBase,
-                    spine.server,
-                    io.spine.internal.dependency.Spine.Logging.lib,
-                    io.spine.internal.dependency.Validation.runtime,
-                    io.spine.internal.dependency.Grpc.api,
+                    jackson.annotations,
+                    jackson.bom,
+                    io.spine.dependency.lib.Grpc.bom,
+                    io.spine.dependency.lib.Guava.lib,
+                    io.spine.dependency.lib.Kotlin.bom,
+                    io.spine.dependency.local.Base.annotations,
+                    io.spine.dependency.local.Base.lib,
+                    io.spine.dependency.local.Base.environment,
+                    io.spine.dependency.local.Base.format,
+                    io.spine.dependency.local.Reflect.lib,
+                    io.spine.dependency.local.Time.lib,
+                    io.spine.dependency.local.Time.javaExtensions,
+                    io.spine.dependency.local.Compiler.api,
+                    io.spine.dependency.local.Compiler.pluginLib,
+                    io.spine.dependency.local.Compiler.gradleApi,
+                    io.spine.dependency.local.Compiler.params,
+                    io.spine.dependency.local.ToolBase.lib,
+                    io.spine.dependency.local.CoreJvm.server,
+                    logging.lib,
+                    logging.libJvm,
+                    logging.grpcContext,
+                    io.spine.dependency.local.Validation.runtime,
                 )
             }
         }
     }
 
     dependencies {
-        classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
+        classpath(enforcedPlatform(io.spine.dependency.lib.Grpc.bom))
+        classpath(enforcedPlatform(io.spine.dependency.kotlinx.Coroutines.bom))
+        classpath(io.spine.dependency.local.Compiler.pluginLib)
+        classpath(io.spine.dependency.local.CoreJvmCompiler.pluginLib)
     }
 }
 
@@ -82,10 +128,7 @@ plugins {
     errorprone
     `gradle-doctor`
 }
-
-object BuildSettings {
-    const val JAVA_VERSION = 11
-}
+apply<BomsPlugin>()
 
 repositories.standardToSpineSdk()
 
@@ -98,7 +141,6 @@ spinePublishing {
     )
     destinations = with(PublishingRepos) {
         setOf(
-            cloudRepo,
             cloudArtifactRegistry,
             gitHub("gcloud-java")
         )
@@ -115,15 +157,14 @@ allprojects {
     apply(from = "$rootDir/version.gradle.kts")
     group = "io.spine.gcloud"
     version = extra["versionToPublish"]!!
-
-    forceConfigurations()
 }
 
 subprojects {
     repositories.standardToSpineSdk()
     applyPlugins()
+    forceConfigurations()
 
-    val javaVersion = JavaLanguageVersion.of(BuildSettings.JAVA_VERSION)
+    val javaVersion = BuildSettings.javaVersion
     setupJava(javaVersion)
     setupKotlin(javaVersion)
 
@@ -137,19 +178,14 @@ subprojects {
 }
 
 
-JacocoConfig.applyTo(project)
+KoverConfig.applyTo(project)
 PomGenerator.applyTo(project)
 LicenseReporter.mergeAllReports(project)
 
 /**
- * The alias for typed extensions functions related to subprojects.
- */
-typealias Subproject = Project
-
-/**
  * Applies plugins common to all modules to this subproject.
  */
-fun Subproject.applyPlugins() {
+fun Project.applyPlugins() {
     apply {
         plugin("java-library")
         plugin("jacoco")
@@ -159,12 +195,12 @@ fun Subproject.applyPlugins() {
         plugin("pmd")
         plugin("maven-publish")
         plugin("pmd-settings")
-        plugin("dokka-for-java")
-        plugin("io.spine.mc-java")
+        plugin("dokka-setup")
+        plugin("io.spine.core-jvm")
     }
 
     apply<IncrementGuard>()
-    apply<VersionWriter>()
+    apply<BomsPlugin>()
 
     LicenseReporter.generateReportIn(project)
     JavadocConfig.applyTo(project)
@@ -174,7 +210,7 @@ fun Subproject.applyPlugins() {
 /**
  * Configures Java tasks in this project.
  */
-fun Subproject.setupJava(javaVersion: JavaLanguageVersion) {
+fun Project.setupJava(javaVersion: JavaLanguageVersion) {
     java {
         toolchain.languageVersion.set(javaVersion)
     }
@@ -192,13 +228,12 @@ fun Subproject.setupJava(javaVersion: JavaLanguageVersion) {
 /**
  * Configures Kotlin tasks in this project.
  */
-fun Subproject.setupKotlin(javaVersion: JavaLanguageVersion) {
+fun Project.setupKotlin(javaVersion: JavaLanguageVersion) {
     kotlin {
         applyJvmToolchain(javaVersion.asInt())
         explicitApi()
-
-        tasks.withType<KotlinCompile>().configureEach {
-            kotlinOptions.jvmTarget = javaVersion.toString()
+        compilerOptions {
+            jvmTarget.set(BuildSettings.jvmTarget)
             setFreeCompilerArgs()
         }
     }
@@ -207,7 +242,7 @@ fun Subproject.setupKotlin(javaVersion: JavaLanguageVersion) {
 /**
  * Configures test tasks in this project.
  */
-fun Subproject.setupTestTasks() {
+fun Project.setupTestTasks() {
     tasks {
         registerTestTasks()
         test {
@@ -232,22 +267,19 @@ fun Subproject.setupTestTasks() {
 /**
  * Defines dependencies of this subproject.
  */
-fun Subproject.defineDependencies() {
+fun Project.defineDependencies() {
     dependencies {
         ErrorProne.apply {
             errorprone(core)
         }
-        implementation(Spine.server)
+        implementation(CoreJvm.server)
 
-        // Strangely, Gradle does not see `protoData` via DSL here, so we add using the string.
-        add("protoData", Validation.java)
         implementation(Validation.runtime)
 
-        testImplementation(JUnit.runner)
-        testImplementation(Spine.testlib)
+        testImplementation(JUnit.Jupiter.engine)
+        testImplementation(TestLib.lib)
 
-        testImplementation(Spine.CoreJava.testUtilServer)
-        testImplementation(Spine.CoreJava.serverTests)
+        testImplementation(CoreJvm.serverTestLib)
     }
 }
 
@@ -258,7 +290,7 @@ fun Subproject.defineDependencies() {
  * @param generatedDir
  *          the name of the root directory with the generated code
  */
-fun Subproject.applyGeneratedDirectories(generatedDir: String) {
+fun Project.applyGeneratedDirectories(generatedDir: String) {
     val generatedMain = "$generatedDir/main"
     val generatedJava = "$generatedMain/java"
     val generatedKotlin = "$generatedMain/kotlin"
@@ -317,43 +349,56 @@ fun Subproject.applyGeneratedDirectories(generatedDir: String) {
 /**
  * Forces dependencies of this project.
  */
-fun Subproject.forceConfigurations() {
+fun Project.forceConfigurations() {
     configurations {
         forceVersions()
         excludeProtobufLite()
 
         all {
             resolutionStrategy {
+                /* The gRPC artifacts are version-less and get their versions from the
+                   gRPC BOM. We force the whole set via `forceArtifacts()` and pin the BOM
+                   to keep a single gRPC version across modules and the compiler plugins. */
+                Grpc.forceArtifacts(project, this@all, this@resolutionStrategy)
+                Jackson.forceArtifacts(project, this@all, this@resolutionStrategy)
+                Jackson.DataType.forceArtifacts(project, this@all, this@resolutionStrategy)
+                Jackson.DataFormat.forceArtifacts(project, this@all, this@resolutionStrategy)
                 exclude("io.spine", "spine-validate")
                 force(
-                    /* Force the version of gRPC used by the `:client` module over the one
-                       set by `mc-java` in the `:core` module when specifying compiler artifact
-                       for the gRPC plugin.
-                       See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
-                       .configureProtocPlugins()` method which sets the version from resources. */
+                    Kotlin.bom,
+                    Coroutines.bom,
+                    Jackson.annotations,
+                    Jackson.bom,
                     Grpc.ProtocPlugin.artifact,
-                    Grpc.api,
-                    JUnit.runner,
+                    Grpc.bom,
                     Guava.lib,
+                    // The `proto-google-cloud-*` libraries bring an older `failureaccess`
+                    // than the one used by the forced Guava version above.
+                    "com.google.guava:failureaccess:1.0.3",
 
-                    Spine.base,
+                    Base.lib,
+                    Base.annotations,
+                    Base.environment,
+                    Base.format,
+                    Reflect.lib,
                     Validation.runtime,
-                    Spine.time,
-                    Spine.Logging.lib,
-                    Spine.Logging.middleware,
-                    Spine.baseTypes,
-                    Spine.change,
-                    Spine.testlib,
-                    Spine.toolBase,
-                    Spine.pluginBase,
+                    Time.lib,
+                    Time.javaExtensions,
+                    Logging.lib,
+                    Logging.libJvm,
+                    Logging.middleware,
+                    Logging.grpcContext,
+                    BaseTypes.lib,
+                    Change.lib,
+                    TestLib.lib,
+                    ToolBase.lib,
+                    ToolBase.pluginBase,
+                    CoreJvm.server,
+                    Compiler.api,
+                    Compiler.pluginLib,
+                    Compiler.gradleApi,
+                    Compiler.params,
 
-                    Grpc.api,
-                    Grpc.auth,
-                    Grpc.core,
-                    Grpc.context,
-                    Grpc.stub,
-                    Grpc.protobuf,
-                    Grpc.protobufLite,
                     GoogleApis.AuthLibrary.credentials,
                     GoogleApis.commonProtos,
 
@@ -369,9 +414,8 @@ fun Subproject.forceConfigurations() {
 /**
  * Configures publishing for this subproject.
  */
-fun Subproject.setupPublishing() {
-    updateGitHubPages(project.version.toString()) {
-        allowInternalJavadoc.set(true)
+fun Project.setupPublishing() {
+    updateGitHubPages {
         rootFolder.set(rootDir)
     }
 
