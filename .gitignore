@@ -108,4 +108,4 @@ pubspec.lock
 
 package-lock.json
 /.java-version
-/buildSrc/.kotlin/**
+**/.kotlin/
