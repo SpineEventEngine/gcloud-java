@@ -107,3 +107,4 @@ pubspec.lock
 **/spine-dev*.json
 
 package-lock.json
+/.java-version
