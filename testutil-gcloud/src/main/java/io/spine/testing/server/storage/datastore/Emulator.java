@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 final class Emulator {
 
     private static final DockerImageName IMAGE =
-            DockerImageName.parse("gcr.io/google.com/cloudsdktool/google-cloud-cli:441.0.0-emulators");
+            DockerImageName.parse("gcr.io/google.com/cloudsdktool/google-cloud-cli:573.0.0-emulators");
 
     /**
      * Currently running emulators, per project ID with which each of them is running.
