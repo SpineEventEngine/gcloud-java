@@ -1070,6 +1070,10 @@
      * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **License:** [MIT](https://opensource.org/license/mit)
 
+1.  **Group** : org.slf4j. **Name** : slf4j-simple. **Version** : 2.0.18.
+     * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
+     * **License:** [MIT](https://opensource.org/license/mit)
+
 1.  **Group** : org.testcontainers. **Name** : gcloud. **Version** : 1.19.0.
      * **Project URL:** [https://java.testcontainers.org](https://java.testcontainers.org)
      * **License:** [MIT](http://opensource.org/licenses/MIT)
@@ -1097,7 +1101,7 @@
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 21:05:49 WEST 2026** using 
+This report was generated on **Fri Jun 19 21:16:08 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -1961,6 +1965,14 @@ This report was generated on **Fri Jun 19 21:05:49 WEST 2026** using
      * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **License:** [MIT License](http://www.opensource.org/licenses/mit-license.php)
 
+1.  **Group** : org.slf4j. **Name** : slf4j-api. **Version** : 2.0.18.
+     * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
+     * **License:** [MIT](https://opensource.org/license/mit)
+
+1.  **Group** : org.slf4j. **Name** : slf4j-simple. **Version** : 2.0.18.
+     * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
+     * **License:** [MIT](https://opensource.org/license/mit)
+
 1.  **Group** : org.xmlresolver. **Name** : xmlresolver. **Version** : 5.1.2.
      * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
      * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
@@ -1976,7 +1988,7 @@ This report was generated on **Fri Jun 19 21:05:49 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 21:05:50 WEST 2026** using 
+This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -3042,6 +3054,14 @@ This report was generated on **Fri Jun 19 21:05:50 WEST 2026** using
      * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **License:** [MIT License](http://www.opensource.org/licenses/mit-license.php)
 
+1.  **Group** : org.slf4j. **Name** : slf4j-api. **Version** : 2.0.18.
+     * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
+     * **License:** [MIT](https://opensource.org/license/mit)
+
+1.  **Group** : org.slf4j. **Name** : slf4j-simple. **Version** : 2.0.18.
+     * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
+     * **License:** [MIT](https://opensource.org/license/mit)
+
 1.  **Group** : org.threeten. **Name** : threetenbp. **Version** : 1.5.2.
      * **Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
      * **License:** [BSD 3-clause](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
@@ -3061,7 +3081,7 @@ This report was generated on **Fri Jun 19 21:05:50 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 21:05:50 WEST 2026** using 
+This report was generated on **Fri Jun 19 21:16:09 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -4219,6 +4239,10 @@ This report was generated on **Fri Jun 19 21:05:50 WEST 2026** using
      * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **License:** [MIT](https://opensource.org/license/mit)
 
+1.  **Group** : org.slf4j. **Name** : slf4j-simple. **Version** : 2.0.18.
+     * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
+     * **License:** [MIT](https://opensource.org/license/mit)
+
 1.  **Group** : org.testcontainers. **Name** : gcloud. **Version** : 1.19.0.
      * **Project URL:** [https://java.testcontainers.org](https://java.testcontainers.org)
      * **License:** [MIT](http://opensource.org/licenses/MIT)
@@ -4246,6 +4270,6 @@ This report was generated on **Fri Jun 19 21:05:50 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 21:05:51 WEST 2026** using 
+This report was generated on **Fri Jun 19 21:16:10 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).

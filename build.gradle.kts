@@ -37,6 +37,7 @@ import io.spine.dependency.lib.Guava
 import io.spine.dependency.lib.Jackson
 import io.spine.dependency.lib.Kotlin
 import io.spine.dependency.lib.PerfMark
+import io.spine.dependency.lib.Slf4J
 import io.spine.dependency.local.Base
 import io.spine.dependency.local.BaseTypes
 import io.spine.dependency.local.Change
@@ -281,6 +282,10 @@ fun Project.defineDependencies() {
         // Gradle's auto-provisioned launcher is not pinned to the forced JUnit 6
         // platform here, which otherwise fails with "Failed to load JUnit Platform".
         testRuntimeOnly(JUnit.Platform.launcher)
+        // Testcontainers logs through SLF4J. Provide a runtime SLF4J binding so the
+        // container logs are emitted (and the "No SLF4J providers were found" warning
+        // does not appear) when running the Datastore Emulator-based tests.
+        testRuntimeOnly(Slf4J.simple)
         testImplementation(TestLib.lib)
 
         testImplementation(CoreJvm.serverTestLib)
