@@ -250,11 +250,6 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>org.jacoco</groupId>
-    <artifactId>org.jacoco.ant</artifactId>
-    <version>0.8.14</version>
-  </dependency>
-  <dependency>
-    <groupId>org.jacoco</groupId>
     <artifactId>org.jacoco.report</artifactId>
     <version>0.8.15</version>
   </dependency>
@@ -290,22 +285,12 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
-    <artifactId>abi-tools</artifactId>
-    <version>2.3.21</version>
-  </dependency>
-  <dependency>
-    <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-build-tools-compat</artifactId>
     <version>2.3.21</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-build-tools-impl</artifactId>
-    <version>2.3.21</version>
-  </dependency>
-  <dependency>
-    <groupId>org.jetbrains.kotlin</groupId>
-    <artifactId>kotlin-klib-commonizer-embeddable</artifactId>
     <version>2.3.21</version>
   </dependency>
   <dependency>
