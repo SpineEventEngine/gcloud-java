@@ -85,7 +85,7 @@ public final class Kind extends StringTypeValue {
      */
     public static Kind of(TypeUrl typeUrl) {
         checkNotNull(typeUrl);
-        return new Kind(typeUrl.toTypeName()
+        return new Kind(typeUrl.typeName()
                                .value());
     }
 

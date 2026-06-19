@@ -112,6 +112,17 @@ final class NamespaceIndex implements TenantIndex {
     }
 
     /**
+     * Always returns {@code true}.
+     *
+     * <p>This index holds no closeable resources of its own, and its {@link #close()}
+     * performs no action, so it is always considered open.
+     */
+    @Override
+    public boolean isOpen() {
+        return true;
+    }
+
+    /**
      * Preforms no action.
      */
     @Override

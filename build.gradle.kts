@@ -126,7 +126,7 @@ plugins {
     idea
     protobuf
     errorprone
-    `gradle-doctor`
+    //`gradle-doctor`
 }
 apply<BomsPlugin>()
 
@@ -280,6 +280,15 @@ fun Project.defineDependencies() {
         testImplementation(TestLib.lib)
 
         testImplementation(CoreJvm.serverTestLib)
+        // Provides the generated test proto types and reusable test base classes
+        // previously taken from the `spine-server` test (`:test`) classifier artifact.
+        // The test fixtures are published under the `io.spine:server-test-fixtures`
+        // capability, so we request that variant explicitly.
+        testImplementation(CoreJvm.server) {
+            capabilities {
+                requireCapability("io.spine:server-test-fixtures")
+            }
+        }
     }
 }
 
@@ -363,10 +372,21 @@ fun Project.forceConfigurations() {
                 Jackson.forceArtifacts(project, this@all, this@resolutionStrategy)
                 Jackson.DataType.forceArtifacts(project, this@all, this@resolutionStrategy)
                 Jackson.DataFormat.forceArtifacts(project, this@all, this@resolutionStrategy)
+                // The `google-cloud-*` libraries pull additional gRPC artifacts
+                // (`grpc-alts`, `grpc-xds`, `grpc-grpclb`, `grpc-services`, etc.) at an
+                // older version. Align the `io.grpc` group with the version defined by the
+                // gRPC BOM forced above. The `grpc-kotlin-*` artifacts are versioned
+                // independently (see `GrpcKotlin`), so they are left untouched.
+                eachDependency {
+                    if (requested.group == "io.grpc" && !requested.name.contains("kotlin")) {
+                        useVersion(Grpc.version)
+                    }
+                }
                 exclude("io.spine", "spine-validate")
                 force(
                     Kotlin.bom,
                     Coroutines.bom,
+                    JUnit.bom,
                     Jackson.annotations,
                     Jackson.bom,
                     Grpc.ProtocPlugin.artifact,

@@ -51,7 +51,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     private final Collection<DatastoreWrapper> allCreatedWrappers = new HashSet<>();
 
     protected TestDatastoreStorageFactory(Datastore datastore) {
-        super(DatastoreStorageFactory.newBuilderWithDefaults(datastore));
+        super(newBuilderWithDefaults(datastore));
     }
 
     protected TestDatastoreStorageFactory(DatastoreStorageFactory.Builder builder) {
@@ -59,8 +59,7 @@ public class TestDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     protected TestDatastoreStorageFactory(Datastore datastore, ColumnMapping<Value<?>> mapping) {
-        super(DatastoreStorageFactory
-                      .newBuilder()
+        super(newBuilder()
                       .setDatastore(datastore)
                       .setColumnMapping(mapping)
         );

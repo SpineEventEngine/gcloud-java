@@ -37,6 +37,7 @@ import io.spine.server.trace.TracerFactory;
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A {@link TracerFactory} based on the Stackdriver Trace.
@@ -52,6 +53,7 @@ public class StackdriverTracerFactory implements TracerFactory {
 
     private final TraceService service;
     private final ProjectId gcpProjectId;
+    private boolean open = true;
 
     private StackdriverTracerFactory(Builder builder) {
         this(builder.buildService(), builder.gcpProjectId);
@@ -79,8 +81,18 @@ public class StackdriverTracerFactory implements TracerFactory {
     }
 
     @Override
-    public void close() throws Exception {
-        service.close();
+    public boolean isOpen() {
+        return open;
+    }
+
+    @Override
+    public void close() {
+        try {
+            service.close();
+        } catch (Exception e) {
+            throw newIllegalStateException(e, "Unable to close the Stackdriver trace service.");
+        }
+        open = false;
     }
 
     /**

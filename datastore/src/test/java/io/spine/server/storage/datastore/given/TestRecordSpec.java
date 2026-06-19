@@ -26,9 +26,9 @@
 
 package io.spine.server.storage.datastore.given;
 
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.SpecScanner;
-import io.spine.server.projection.Projection;
 import io.spine.server.storage.RecordSpec;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
@@ -46,13 +46,13 @@ public final class TestRecordSpec {
 
     /**
      * Creates a new {@code EntityRecordSpec} describing how instances of {@link ProjectDetails}
-     * projection are stored.
+     * aggregate are stored.
      */
     public static RecordSpec<StgProjectId, EntityRecord> projectDetailsSpec() {
         return SpecScanner.scan(ProjectDetails.class);
     }
 
     private static class ProjectDetails
-            extends Projection<StgProjectId, StgProject, StgProject.Builder> {
+            extends Aggregate<StgProjectId, StgProject, StgProject.Builder> {
     }
 }

@@ -54,7 +54,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.storage.datastore.given.DatastoreStorageFactoryTestEnv.factoryFor;
 import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
@@ -175,13 +174,13 @@ final class DatastoreStorageFactoryTest {
     void testProduceBcBuilder() {
         DatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
         var builder = BoundedContext.multitenant(testName());
-        assertThat(builder.tenantIndex())
-              .isEmpty();
+        assertThat(builder.hasTenantIndex())
+              .isFalse();
         var updatedIndex = factory.configureTenantIndex(builder)
-                                  .tenantIndex();
+                                  .getTenantIndex();
         assertThat(updatedIndex)
-              .isPresent();
-        assertThat(updatedIndex.get()).isInstanceOf(TestNamespaceIndex.getType());
+              .isNotNull();
+        assertThat(updatedIndex).isInstanceOf(TestNamespaceIndex.getType());
     }
 
     @Nested

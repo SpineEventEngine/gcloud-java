@@ -155,7 +155,7 @@ public final class Entities {
         var messageClass = (Class<M>) type.toJavaClass();
         checkState(messageClass != null,
                    "Not found class for type url \"%s\". Try to rebuild the project.",
-                   type.toTypeName()
+                   type.typeName()
                        .value());
         var message = Internal.getDefaultInstance(messageClass);
         return message;

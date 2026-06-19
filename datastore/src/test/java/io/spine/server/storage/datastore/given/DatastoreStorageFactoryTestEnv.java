@@ -27,6 +27,7 @@
 package io.spine.server.storage.datastore.given;
 
 import com.google.cloud.datastore.Datastore;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.SpecScanner;
 import io.spine.server.projection.Projection;
@@ -62,7 +63,7 @@ public final class DatastoreStorageFactoryTestEnv {
     }
 
     public static class TestEntity
-            extends Projection<StgProjectId, StgProject, StgProject.Builder> {
+            extends Aggregate<StgProjectId, StgProject, StgProject.Builder> {
 
         public static RecordSpec<StgProjectId, EntityRecord> spec() {
             return SpecScanner.scan(TestEntity.class);

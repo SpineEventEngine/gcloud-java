@@ -146,6 +146,7 @@ public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
     }
 
     @Override
+    @SuppressWarnings("EnumOrdinal") /* The ordinal is used to store enum values in the database. */
     protected ColumnTypeMapping<Enum<?>, LongValue> ofEnum() {
         return anEnum -> LongValue.of(anEnum.ordinal());
     }

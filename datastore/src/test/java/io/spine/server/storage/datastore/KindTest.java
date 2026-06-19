@@ -94,7 +94,7 @@ final class KindTest {
         var type = TypeUrl.from(descriptor);
         var kind = Kind.of(type);
         assertEquals(descriptor.getFullName(), kind.value());
-        assertEquals(type.toTypeName()
+        assertEquals(type.typeName()
                          .value(), kind.value());
     }
 

@@ -103,10 +103,7 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     private boolean checkAnd(Entity entity,
                              ImmutableList<SubjectParameter<?, ?, ?>> params,
                              ImmutableList<QueryPredicate<R>> children) {
-        if (checkAndParams(entity, params)) {
-            return false;
-        }
-        return !checkAndChildren(entity, children);
+        return !checkAndParams(entity, params) && !checkAndChildren(entity, children);
     }
 
     private boolean checkAndChildren(Entity entity, ImmutableList<QueryPredicate<R>> children) {
@@ -135,10 +132,7 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
         if (checkOrParams(entity, params)) {
             return true;
         }
-        if (checkOrChildren(entity, children)) {
-            return true;
-        }
-        return params.isEmpty();
+        return checkOrChildren(entity, children) || params.isEmpty();
     }
 
     private boolean checkOrChildren(Entity entity, ImmutableList<QueryPredicate<R>> children) {
