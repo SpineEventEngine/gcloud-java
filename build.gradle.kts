@@ -277,6 +277,10 @@ fun Project.defineDependencies() {
         implementation(Validation.runtime)
 
         testImplementation(JUnit.Jupiter.engine)
+        // Put the JUnit Platform launcher on the test runtime classpath explicitly.
+        // Gradle's auto-provisioned launcher is not pinned to the forced JUnit 6
+        // platform here, which otherwise fails with "Failed to load JUnit Platform".
+        testRuntimeOnly(JUnit.Platform.launcher)
         testImplementation(TestLib.lib)
 
         testImplementation(CoreJvm.serverTestLib)

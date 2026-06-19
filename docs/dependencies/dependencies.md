@@ -1022,6 +1022,10 @@
      * **Project URL:** [https://junit.org/](https://junit.org/)
      * **License:** [Eclipse Public License v2.0](https://www.eclipse.org/legal/epl-v20.html)
 
+1.  **Group** : org.junit.platform. **Name** : junit-platform-launcher. **Version** : 6.1.0.
+     * **Project URL:** [https://junit.org/](https://junit.org/)
+     * **License:** [Eclipse Public License v2.0](https://www.eclipse.org/legal/epl-v20.html)
+
 1.  **Group** : org.opentest4j. **Name** : opentest4j. **Version** : 1.3.0.
      * **Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **License:** [The Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1093,7 +1097,7 @@
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 19:36:01 WEST 2026** using 
+This report was generated on **Fri Jun 19 19:45:12 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -1917,6 +1921,10 @@ This report was generated on **Fri Jun 19 19:36:01 WEST 2026** using
      * **Project URL:** [https://junit.org/](https://junit.org/)
      * **License:** [Eclipse Public License v2.0](https://www.eclipse.org/legal/epl-v20.html)
 
+1.  **Group** : org.junit.platform. **Name** : junit-platform-launcher. **Version** : 6.1.0.
+     * **Project URL:** [https://junit.org/](https://junit.org/)
+     * **License:** [Eclipse Public License v2.0](https://www.eclipse.org/legal/epl-v20.html)
+
 1.  **Group** : org.opentest4j. **Name** : opentest4j. **Version** : 1.3.0.
      * **Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **License:** [The Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1968,7 +1976,7 @@ This report was generated on **Fri Jun 19 19:36:01 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 19:36:02 WEST 2026** using 
+This report was generated on **Fri Jun 19 19:45:13 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -2994,6 +3002,10 @@ This report was generated on **Fri Jun 19 19:36:02 WEST 2026** using
      * **Project URL:** [https://junit.org/](https://junit.org/)
      * **License:** [Eclipse Public License v2.0](https://www.eclipse.org/legal/epl-v20.html)
 
+1.  **Group** : org.junit.platform. **Name** : junit-platform-launcher. **Version** : 6.1.0.
+     * **Project URL:** [https://junit.org/](https://junit.org/)
+     * **License:** [Eclipse Public License v2.0](https://www.eclipse.org/legal/epl-v20.html)
+
 1.  **Group** : org.opentest4j. **Name** : opentest4j. **Version** : 1.3.0.
      * **Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **License:** [The Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3049,7 +3061,7 @@ This report was generated on **Fri Jun 19 19:36:02 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 19:36:02 WEST 2026** using 
+This report was generated on **Fri Jun 19 19:45:14 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -4159,6 +4171,10 @@ This report was generated on **Fri Jun 19 19:36:02 WEST 2026** using
      * **Project URL:** [https://junit.org/](https://junit.org/)
      * **License:** [Eclipse Public License v2.0](https://www.eclipse.org/legal/epl-v20.html)
 
+1.  **Group** : org.junit.platform. **Name** : junit-platform-launcher. **Version** : 6.1.0.
+     * **Project URL:** [https://junit.org/](https://junit.org/)
+     * **License:** [Eclipse Public License v2.0](https://www.eclipse.org/legal/epl-v20.html)
+
 1.  **Group** : org.opentest4j. **Name** : opentest4j. **Version** : 1.3.0.
      * **Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **License:** [The Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -4230,6 +4246,6 @@ This report was generated on **Fri Jun 19 19:36:02 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Jun 19 19:36:03 WEST 2026** using 
+This report was generated on **Fri Jun 19 19:45:15 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
