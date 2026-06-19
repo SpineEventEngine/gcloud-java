@@ -14,10 +14,10 @@ Support for Spine-based Java apps running at Google Cloud.
 
 ### Java Version
 
-Starting version `2.0.0-SNAPSHOT.63`, the artifacts of this library are being built with Java 11
-compilation target. Therefore, the consumer applications have to use Java 11 or higher.
+Starting version `2.0.0-SNAPSHOT.180`, the artifacts of this library are being built with a Java 17
+compilation target. Therefore, consumer applications have to use Java 17 or higher.
 
-Previous versions were build with Java 8.
+Versions starting from `2.0.0-SNAPSHOT.63` were built with Java 11, and earlier versions with Java 8.
 
 ### Artifacts
 
@@ -57,7 +57,7 @@ In order to run the application built on top of `gcloud-java`, Datastore instanc
 preliminary configuration. In particular, the indexes for the Spine internal record types should 
 be set. Please notice a special index configuration for your custom `Aggregate` types.
 
-The configuration file is located at `./datastore/config/index.yaml`. 
+The configuration file is located at `./datastore/src/test/config/index.yaml`.
 
 Please see the [Google Cloud Platform documentation][datastore-index] for the details.
 
