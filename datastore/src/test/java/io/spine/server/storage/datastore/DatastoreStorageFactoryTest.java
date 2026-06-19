@@ -26,6 +26,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.NoCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Key;
@@ -73,6 +74,7 @@ final class DatastoreStorageFactoryTest {
     private static final DatastoreOptions DUMMY_OPTIONS =
             DatastoreOptions.newBuilder()
                     .setProjectId("dummy-dataset")
+                    .setCredentials(NoCredentials.getInstance())
                     .build();
 
     private static final Datastore datastore = DUMMY_OPTIONS.getService();
