@@ -429,7 +429,9 @@ fun Project.forceConfigurations() {
                     Compiler.params,
 
                     GoogleApis.AuthLibrary.credentials,
+                    GoogleApis.AuthLibrary.oAuth2Http,
                     GoogleApis.commonProtos,
+                    GoogleApis.common,
 
                     ApacheHttp.core,
                     CommonsCodec.lib,
