@@ -1,5 +1,5 @@
 /*
- * Copyright 2026, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,35 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.local
-
-// For backward compatibility.
-@Suppress("unused")
-@Deprecated("Use `CoreJvm` instead.", ReplaceWith("CoreJvm"))
-typealias CoreJava = CoreJvm
+package io.spine.dependency.build
 
 /**
- * Dependencies on `core-jvm` modules.
- *
- * See [`SpineEventEngine/core-jvm`](https://github.com/SpineEventEngine/core-jvm/).
+ * The FindBugs project has been dead since 2017. It has a successor called SpotBugs,
+ * but we don't use it. We use ErrorProne for static analysis instead.
+ * The only reason for having this dependency is the annotations for null-checking
+ * introduced by JSR-305. These annotations are troublesome,
+ * but no alternatives are known for some of them so far.
+ * Please see [this issue](https://github.com/SpineEventEngine/base/issues/108) for more details.
  */
-@Suppress("ConstPropertyName", "unused")
-object CoreJvm {
-    const val group = Spine.group
-    const val version = "2.0.0-SNAPSHOT.376"
-
-    const val coreArtifact = "spine-core"
-    const val clientArtifact = "spine-client"
-    const val serverArtifact = "spine-server"
-
-    const val core = "$group:$coreArtifact:$version"
-    const val client = "$group:$clientArtifact:$version"
-    const val server = "$group:$serverArtifact:$version"
-
-    @Deprecated("Use `serverTestLib` instead.", ReplaceWith("serverTestLib"))
-    const val testUtilServer = "${Spine.toolsGroup}:server-testlib:$version"
-
-    const val coreTestLib = "${Spine.toolsGroup}:core-testlib:$version"
-    const val clientTestLib = "${Spine.toolsGroup}:client-testlib:$version"
-    const val serverTestLib = "${Spine.toolsGroup}:server-testlib:$version"
+@Suppress("unused", "ConstPropertyName")
+object FindBugs {
+    private const val version = "3.0.2"
+    const val annotations = "com.google.code.findbugs:jsr305:$version"
 }

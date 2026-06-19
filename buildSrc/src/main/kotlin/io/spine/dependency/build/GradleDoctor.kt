@@ -24,35 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.local
-
-// For backward compatibility.
-@Suppress("unused")
-@Deprecated("Use `CoreJvm` instead.", ReplaceWith("CoreJvm"))
-typealias CoreJava = CoreJvm
+package io.spine.dependency.build
 
 /**
- * Dependencies on `core-jvm` modules.
+ * Helps optimize Gradle Builds by ensuring recommendations at build time.
  *
- * See [`SpineEventEngine/core-jvm`](https://github.com/SpineEventEngine/core-jvm/).
+ * See [plugin site](https://runningcode.github.io/gradle-doctor) for features and usage.
  */
-@Suppress("ConstPropertyName", "unused")
-object CoreJvm {
-    const val group = Spine.group
-    const val version = "2.0.0-SNAPSHOT.376"
-
-    const val coreArtifact = "spine-core"
-    const val clientArtifact = "spine-client"
-    const val serverArtifact = "spine-server"
-
-    const val core = "$group:$coreArtifact:$version"
-    const val client = "$group:$clientArtifact:$version"
-    const val server = "$group:$serverArtifact:$version"
-
-    @Deprecated("Use `serverTestLib` instead.", ReplaceWith("serverTestLib"))
-    const val testUtilServer = "${Spine.toolsGroup}:server-testlib:$version"
-
-    const val coreTestLib = "${Spine.toolsGroup}:core-testlib:$version"
-    const val clientTestLib = "${Spine.toolsGroup}:client-testlib:$version"
-    const val serverTestLib = "${Spine.toolsGroup}:server-testlib:$version"
+@Suppress("unused", "ConstPropertyName")
+object GradleDoctor {
+    const val version = "0.12.1"
+    const val pluginId = "com.osacky.doctor"
 }

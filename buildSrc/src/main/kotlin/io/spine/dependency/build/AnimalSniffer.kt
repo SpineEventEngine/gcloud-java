@@ -24,35 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.local
+package io.spine.dependency.build
 
-// For backward compatibility.
-@Suppress("unused")
-@Deprecated("Use `CoreJvm` instead.", ReplaceWith("CoreJvm"))
-typealias CoreJava = CoreJvm
-
-/**
- * Dependencies on `core-jvm` modules.
- *
- * See [`SpineEventEngine/core-jvm`](https://github.com/SpineEventEngine/core-jvm/).
- */
-@Suppress("ConstPropertyName", "unused")
-object CoreJvm {
-    const val group = Spine.group
-    const val version = "2.0.0-SNAPSHOT.376"
-
-    const val coreArtifact = "spine-core"
-    const val clientArtifact = "spine-client"
-    const val serverArtifact = "spine-server"
-
-    const val core = "$group:$coreArtifact:$version"
-    const val client = "$group:$clientArtifact:$version"
-    const val server = "$group:$serverArtifact:$version"
-
-    @Deprecated("Use `serverTestLib` instead.", ReplaceWith("serverTestLib"))
-    const val testUtilServer = "${Spine.toolsGroup}:server-testlib:$version"
-
-    const val coreTestLib = "${Spine.toolsGroup}:core-testlib:$version"
-    const val clientTestLib = "${Spine.toolsGroup}:client-testlib:$version"
-    const val serverTestLib = "${Spine.toolsGroup}:server-testlib:$version"
+// https://www.mojohaus.org/animal-sniffer/animal-sniffer-maven-plugin/
+@Suppress("unused", "ConstPropertyName")
+object AnimalSniffer {
+    private const val version = "1.27"
+    const val lib = "org.codehaus.mojo:animal-sniffer-annotations:$version"
 }

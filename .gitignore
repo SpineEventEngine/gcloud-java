@@ -1,11 +1,11 @@
 #
-# Copyright 2023, TeamDev. All rights reserved.
+# Copyright 2025, TeamDev. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+# https://www.apache.org/licenses/LICENSE-2.0
 #
 # Redistribution and use in source and/or binary forms, with or without
 # modification, must retain the above copyright notice and the following
@@ -31,6 +31,19 @@
 #
 # Therefore, instructions below are superset of instructions required for all the projects.
 
+# Temporary output of AI agents.
+.output
+
+# `jenv` local configuration.
+.java-version
+
+# Internal tool directories.
+.fleet/
+.junie/memory/
+
+# Kotlin temp directories.
+**/.kotlin/
+
 # IntelliJ IDEA modules and interim config files.
 *.iml
 .idea/*.xml
@@ -46,14 +59,31 @@
 !.idea/codeStyles/
 !.idea/copyright/
 
+# Ignore IDEA config files under `tests`
+/tests/.idea/**
+
 # Gradle interim configs
 **/.gradle/**
 
+# Temp directory for Gradle TestKit runners
+**/.gradle-test-kit/**
+
+# Integration test log files
+/tests/_out/**
+
 # Generated source code
 **/generated/**
+**/*.pb.dart
+**/*.pbenum.dart
+**/*.pbserver.dart
+**/*.pbjson.dart
+
+# Generated source code with custom path under `tests`
+/tests/**/proto-gen/**
 
 # Gradle build files
 **/build/**
+!**/src/**/build/**
 
 # Build files produced by the IDE
 **/out/**
@@ -72,9 +102,6 @@ gradle-app.setting
 
 # Spine internal directory for storing intermediate artifacts
 **/.spine/**
-
-# Spine model compiler auto-generated resources
-/tools/gradle-plugins/model-compiler/src/main/resources/spine-protoc.gradle
 
 # Login details to Maven repository.
 # Each workstation should have developer's login defined in this file.
@@ -100,12 +127,32 @@ hs_err_pid*
 .packages
 pubspec.lock
 
-# Credentials to the test Datastore environment.
-# They are stored in the encrypted file and are decrypted on the CI server only.
+# Ignore the `tmp` directory used for building dependant repositories.
+/tmp
 
-# This file extracted form credentials.tar
-**/spine-dev*.json
+.gradle-test-kit/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Claude working files
+/.claude/worktrees/
+
+# Auto-downloaded Lychee binary used by the `check-links` skill.
+/.agents/skills/check-links/.cache/
+
+# Lychee link-checker cache (created by the `check-links` skill and
+# the `Check Links` workflow when run locally).
+.lycheecache
+
+# Hugo docs preview site build artifacts (used by the `check-links`
+# skill and the `Check Links` workflow in repos that contain a
+# `docs/_preview` Hugo site).
+docs/_preview/node_modules/
+docs/_preview/public/
+docs/_preview/resources/
 
 package-lock.json
 /.java-version
-**/.kotlin/
+

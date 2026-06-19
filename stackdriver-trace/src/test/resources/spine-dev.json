@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "spine-dev",
+  "private_key_id": "62685282c0b935f8d0da00c092676f3b53fac4ea",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCVbPX2V4GvsSdR\nb5CXaMslCJECLwzlYNxn3mq+weBIBJXZNmYXH5hEJi55OrS3eIP/gADBeGhKBkUj\ndZUIqDgjkubhORiqY9Nj4PdnCbWN+87ZzvOyt756YKZAvnbuIhZm1hcQEpL+NSBG\nXnEiHSRG9rlzgLyUSSVLtbGFN3MAOxaTAv8+z6XcwfTic0kHTsn4yIZj/ZRvRiAj\nHXzEkl8vjs7uvF0bW3WwYCMYyjPnfAI+nLCryVDzNWFW3WN2pqtwmrUYxAznrgC4\nDBGORXfXAeBY85DBFdVS8Bcme1Ggp68aiTUDArmhec07gL9aHhjK4NeXhztGc/ap\nFFMZgSPJAgMBAAECggEARclt1m9oEjYatt30GcLHnbQyhWKUE0z5o0ktcYn6xafe\nlGPjqkkHREzQx62zWTzf6SRPNgyWKHxlLfpscG6gSX0Cd43DB1E4GR2obmcKdBV2\ntiMBjiZiv6UEAJjz0qP48m5qtwb1v+Pv/u18yQHzP3Fbi6ZEbLz8vi9NiXosK562\naoMG0zGlnuhyFkhO0c/mWgml2ohCGtIFLhnfbFCcKF/QQAruq/wt9YkLWNfRBFn/\npjH0PJdBX5kOqOWbuDVbdwx/boqmhyQ3upksqVxJ5gigOWEVAwIed+QxKbaKHAlw\ncG2pSbtW7aLtOka4HG6RnqSjEDl3ZmPQLyIYHSxgAQKBgQDEyD+tIfeCtvrUiuUS\nIV8+CVokw+qnhWJeZYqu0wRi+LdUkz5K/cFwrQJYMsmfzAUQ8DFz9dYVdE8e9cbL\njBGhcPYj2k2E5VmnlQEGbefSfoGlr23pklngk3yY3rhaOdiFrH9MM4fKmiVai9Q4\n49kF4TP/Wt8SBLgsfsIiA/3IwQKBgQDCZHHP/IXDdfPyuDio9opPOyyKzqjVVdlR\nmOoTnNhz6LlLye9tl2wJJbMpwwxn+nPUzQAXycsaYnEuJ+kwfaSIFpfvGBsWyAcC\nS/wg6we0lPeLm3W95eA1kUK05ZswhY71BfESO7Pvn2b1UbLLfMVsuutTLZBpOXoH\nTAZjaC1VCQKBgAHHDUwzEllL7dgdqRQQ2RtmWjoayvPYcJsJr8cEgPWj6YQKEHX8\n9NJfvbWuP8QBw8nzYX76qYRoGI7fCXytNzuOGasZPboFmFm7LtcwBvgPzHwCqauC\ndu1gZ6+501B9VUdf14aIsKFT4yJ+QNyCsmMrNZ0I5Rr0j/VW78n+3zwBAoGANGKX\nHSKC9ZqKxAULF9Vgjlt29G0eqGb7KncX1XM2DX5QuPDROepNbeWf84ghhr/CiT05\nYi+6MQEIWRTeTXf+Z8IW7ZLEcg4zfVX2uvQ7XlmqoA+j2inhku3zWQZrHNdRIAya\n23wFUHTXbRK4KQgVt+hjVEX6HbEkhmThb9Z6KOkCgYBwjhP+1bVNGWbAzk6u/Yip\nKG4Aw/X+iO3NgfjDqlNdZ8KKeCDxzgu51ZYtXOV8I40MjjglBLYotn+qLNSZJan2\nZo3HYSDNpGYc8McKVBWlp3o58vMyPcuaZoU77q9rZJKd0BUhhLcZgl49VJAjt6PE\nL3kQVY19vuyRF/8xniUEBA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "datastore-testing@spine-dev.iam.gserviceaccount.com",
+  "client_id": "100921095971929020068",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/datastore-testing%40spine-dev.iam.gserviceaccount.com"
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2026, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,35 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.local
-
-// For backward compatibility.
-@Suppress("unused")
-@Deprecated("Use `CoreJvm` instead.", ReplaceWith("CoreJvm"))
-typealias CoreJava = CoreJvm
+package io.spine.dependency.build
 
 /**
- * Dependencies on `core-jvm` modules.
+ * Dependencies on Checkstyle Java linter.
  *
- * See [`SpineEventEngine/core-jvm`](https://github.com/SpineEventEngine/core-jvm/).
+ * @see <a href="https://checkstyle.sourceforge.io/">Checkstyle</a>
+ * @see [io.spine.gradle.checkstyle.CheckStyleConfig]
  */
-@Suppress("ConstPropertyName", "unused")
-object CoreJvm {
-    const val group = Spine.group
-    const val version = "2.0.0-SNAPSHOT.376"
-
-    const val coreArtifact = "spine-core"
-    const val clientArtifact = "spine-client"
-    const val serverArtifact = "spine-server"
-
-    const val core = "$group:$coreArtifact:$version"
-    const val client = "$group:$clientArtifact:$version"
-    const val server = "$group:$serverArtifact:$version"
-
-    @Deprecated("Use `serverTestLib` instead.", ReplaceWith("serverTestLib"))
-    const val testUtilServer = "${Spine.toolsGroup}:server-testlib:$version"
-
-    const val coreTestLib = "${Spine.toolsGroup}:core-testlib:$version"
-    const val clientTestLib = "${Spine.toolsGroup}:client-testlib:$version"
-    const val serverTestLib = "${Spine.toolsGroup}:server-testlib:$version"
+@Suppress("unused", "ConstPropertyName")
+object CheckStyle {
+    /**
+     * The version to be used in the project.
+     *
+     * `10.12.1` is the last version in `10.12.0`, which does not introduce
+     * capability conflict over `google-collections` with Guava.
+     *
+     * @see <a href="https://checkstyle.sourceforge.io/releasenotes.html">Checkstyle</a>
+     */
+    const val version = "10.12.1"
 }

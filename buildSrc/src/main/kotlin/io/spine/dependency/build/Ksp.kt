@@ -24,35 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.local
+package io.spine.dependency.build
 
-// For backward compatibility.
-@Suppress("unused")
-@Deprecated("Use `CoreJvm` instead.", ReplaceWith("CoreJvm"))
-typealias CoreJava = CoreJvm
+import io.spine.dependency.Dependency
 
 /**
- * Dependencies on `core-jvm` modules.
+ * Kotlin Symbol Processing API.
  *
- * See [`SpineEventEngine/core-jvm`](https://github.com/SpineEventEngine/core-jvm/).
+ * @see <a href="https://github.com/google/ksp">KSP GitHub repository</a>
  */
-@Suppress("ConstPropertyName", "unused")
-object CoreJvm {
-    const val group = Spine.group
-    const val version = "2.0.0-SNAPSHOT.376"
+@Suppress("unused")
+object Ksp : Dependency() {
+    override val version = "2.3.9"
+    val dogfoodingVersion = version
+    override val group = "com.google.devtools.ksp"
 
-    const val coreArtifact = "spine-core"
-    const val clientArtifact = "spine-client"
-    const val serverArtifact = "spine-server"
+    const val id = "com.google.devtools.ksp"
+    const val gradlePluginArtifactName = "com.google.devtools.ksp.gradle.plugin"
 
-    const val core = "$group:$coreArtifact:$version"
-    const val client = "$group:$clientArtifact:$version"
-    const val server = "$group:$serverArtifact:$version"
+    val symbolProcessingApi = "$group:symbol-processing-api"
+    val symbolProcessing = "$group:symbol-processing"
+    val symbolProcessingAaEmb = "$group:symbol-processing-aa-embeddable"
+    val symbolProcessingCommonDeps = "$group:symbol-processing-common-deps"
+    val gradlePlugin = "$group:symbol-processing-gradle-plugin"
 
-    @Deprecated("Use `serverTestLib` instead.", ReplaceWith("serverTestLib"))
-    const val testUtilServer = "${Spine.toolsGroup}:server-testlib:$version"
-
-    const val coreTestLib = "${Spine.toolsGroup}:core-testlib:$version"
-    const val clientTestLib = "${Spine.toolsGroup}:client-testlib:$version"
-    const val serverTestLib = "${Spine.toolsGroup}:server-testlib:$version"
+    override val modules = listOf(
+        symbolProcessingApi,
+        symbolProcessing,
+        symbolProcessingAaEmb,
+        symbolProcessingCommonDeps,
+        gradlePlugin,
+    )
 }
