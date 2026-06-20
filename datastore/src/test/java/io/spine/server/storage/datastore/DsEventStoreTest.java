@@ -29,7 +29,6 @@ package io.spine.server.storage.datastore;
 import io.spine.environment.Tests;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.store.DefaultEventStoreTest;
-import io.spine.testing.server.storage.datastore.EnabledIfDockerAvailable;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,7 +37,6 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * Tests of Datastore-backed {@link io.spine.server.event.EventStore EventStore}.
  */
-@EnabledIfDockerAvailable
 class DsEventStoreTest extends DefaultEventStoreTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory =

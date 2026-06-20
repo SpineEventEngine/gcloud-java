@@ -27,7 +27,6 @@
 package io.spine.server.storage.datastore.record;
 
 import io.spine.server.storage.datastore.record.given.DsEntityColumnsTestEnv.CustomMapping;
-import io.spine.testing.server.storage.datastore.EnabledIfDockerAvailable;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,7 +45,6 @@ import static io.spine.server.storage.datastore.record.given.DsEntityColumnsTest
 import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
 
 @DisplayName("When dealing with `Entity` columns, `DsEntityRecordStorage` should")
-@EnabledIfDockerAvailable
 final class DsEntityColumnsTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory = local(new CustomMapping());

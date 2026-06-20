@@ -31,7 +31,6 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxStorageTest;
 import io.spine.server.storage.datastore.delivery.InboxStorageLayout;
-import io.spine.testing.server.storage.datastore.EnabledIfDockerAvailable;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.AfterAll;
@@ -43,7 +42,6 @@ import org.junit.jupiter.api.BeforeAll;
  *
  * @see InboxStorageLayout for more details on ancestor-child relations used for this test suite
  */
-@EnabledIfDockerAvailable
 final class TransactionalInboxStorageTest extends InboxStorageTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory = withTransactionalInbox();

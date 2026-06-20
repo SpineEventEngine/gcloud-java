@@ -29,7 +29,6 @@ package io.spine.server.storage.datastore.record;
 import io.spine.environment.Tests;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.AggregateHistoryTruncationTest;
-import io.spine.testing.server.storage.datastore.EnabledIfDockerAvailable;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -39,7 +38,6 @@ import org.junit.jupiter.api.DisplayName;
 import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
 
 @DisplayName("Datastore-backed `AggregateStorage` after truncation should")
-@EnabledIfDockerAvailable
 final class DsAggregateStorageTruncationTest extends AggregateHistoryTruncationTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory = local();

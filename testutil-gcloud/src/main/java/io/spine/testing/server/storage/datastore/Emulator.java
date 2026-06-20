@@ -1,6 +1,5 @@
 package io.spine.testing.server.storage.datastore;
 
-
 import com.google.cloud.datastore.DatastoreOptions;
 import io.spine.server.storage.datastore.ProjectId;
 import org.testcontainers.DockerClientFactory;
@@ -8,8 +7,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Manages a Docker-powered Datastore Emulator.
@@ -48,11 +45,13 @@ final class Emulator {
      * @param port      port in a Docker container machine, through which the emulator is going to be accessed
      */
     static synchronized DatastoreOptions at(ProjectId projectId, int port) {
-        assumeTrue(
-                DockerClientFactory.instance().isDockerAvailable(),
-                "Skipping the test: no Docker environment is available" +
-                        " to run the Datastore Emulator."
-        );
+        if (!DockerClientFactory.instance().isDockerAvailable()) {
+            throw new IllegalStateException(
+                    "No Docker environment is available to run the Datastore Emulator." +
+                            " These tests require Docker; without it they verify nothing." +
+                            " Install Docker (or start the Docker daemon) and run the build again."
+            );
+        }
         var emulator = containers.get(projectId);
         if (emulator == null) {
             emulator = new EmulatorContainer(IMAGE, projectId, port);

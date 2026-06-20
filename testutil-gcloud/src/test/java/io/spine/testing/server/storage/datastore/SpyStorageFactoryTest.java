@@ -35,7 +35,6 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`SpyStorageFactory` should")
-@EnabledIfDockerAvailable
 class SpyStorageFactoryTest {
 
     @Test

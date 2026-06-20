@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -66,7 +66,10 @@ import io.spine.gradle.report.pom.PomGenerator
 import io.spine.gradle.repo.standardToSpineSdk
 import io.spine.gradle.testing.configureLogging
 import io.spine.gradle.testing.registerTestTasks
+import java.io.ByteArrayOutputStream
+import javax.inject.Inject
 import org.gradle.jvm.tasks.Jar
+import org.gradle.process.ExecOperations
 
 buildscript {
     standardSpineSdkRepositories()
@@ -119,7 +122,6 @@ buildscript {
         classpath(io.spine.dependency.local.CoreJvmCompiler.pluginLib)
     }
 }
-
 
 plugins {
     `java-library`
@@ -177,7 +179,6 @@ subprojects {
     setupPublishing()
     configureTaskDependencies()
 }
-
 
 KoverConfig.applyTo(project)
 PomGenerator.applyTo(project)
@@ -241,14 +242,112 @@ fun Project.setupKotlin(javaVersion: JavaLanguageVersion) {
 }
 
 /**
+ * Names of the modules whose tests run against the Docker-based Datastore Emulator.
+ *
+ * For these modules a missing Docker environment is a build failure rather than a
+ * reason to skip tests: without the emulator the suites verify nothing, so a "passed"
+ * run would be misleading. See [CheckDockerAvailable].
+ *
+ * Declared as a function rather than a top-level `val` so that it is safe to call from
+ * the `subprojects {}` configuration, which runs before a top-level property initializer
+ * further down the script would have executed.
+ */
+fun dockerDependentModules() = setOf("datastore", "testutil-gcloud")
+
+/**
+ * Fails the build unless a Docker environment is available for launching the
+ * Datastore Emulator used by tests.
+ *
+ * Wired as a dependency of the `Test` tasks in [dockerDependentModules] so that an
+ * environment without Docker cannot produce a misleading "tests passed" result.
+ */
+abstract class CheckDockerAvailable : DefaultTask() {
+
+    /** The name of the gated module, used in the failure message. */
+    @get:Input
+    abstract val moduleName: Property<String>
+
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    @TaskAction
+    fun check() {
+        if (dockerAvailable()) {
+            return
+        }
+        val module = moduleName.get()
+        throw GradleException(
+            """
+            No Docker environment is available, but the tests of `:$module` require one.
+
+            These tests exercise the Datastore Emulator running inside a Docker container.
+            Without Docker they verify nothing, so the build fails here instead of passing
+            silently. Install Docker (or start the Docker daemon) and run the build again.
+
+            To build the rest of the project without these tests, exclude them explicitly:
+
+                ./gradlew build -x :$module:test
+            """.trimIndent()
+        )
+    }
+
+    /**
+     * Returns `true` if `docker info` reports a reachable Docker daemon.
+     *
+     * Any failure to even start the `docker` executable (for example, it is not
+     * installed) is treated as "no Docker available".
+     */
+    private fun dockerAvailable(): Boolean = try {
+        val sink = ByteArrayOutputStream()
+        val result = execOperations.exec {
+            commandLine(dockerInfoCommand())
+            standardOutput = sink
+            errorOutput = sink
+            isIgnoreExitValue = true
+        }
+        result.exitValue == 0
+    } catch (e: Exception) {
+        false
+    }
+
+    /**
+     * The command that probes the Docker daemon, resolved for the current OS.
+     *
+     * On Windows the check is routed through `cmd /c` so that the `docker`
+     * executable is resolved via `PATH`/`PATHEXT` (i.e. `docker.exe` provided by
+     * Docker Desktop); a bare program name is not reliably resolved otherwise. On
+     * other systems `docker` is invoked directly.
+     */
+    private fun dockerInfoCommand(): List<String> {
+        val onWindows = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
+        return if (onWindows) {
+            listOf("cmd", "/c", "docker", "info")
+        } else {
+            listOf("docker", "info")
+        }
+    }
+}
+
+/**
  * Configures test tasks in this project.
  */
 fun Project.setupTestTasks() {
+    val gatedModule = name.takeIf { it in dockerDependentModules() }
+    val dockerGate = gatedModule?.let { module ->
+        tasks.register<CheckDockerAvailable>("checkDockerAvailable") {
+            moduleName.set(module)
+        }
+    }
     tasks {
         registerTestTasks()
         test {
             useJUnitPlatform { includeEngines("junit-jupiter") }
             configureLogging()
+        }
+        dockerGate?.let { gate ->
+            withType<Test>().configureEach {
+                dependsOn(gate)
+            }
         }
 
         val copyCredentials by registering(Copy::class) {
