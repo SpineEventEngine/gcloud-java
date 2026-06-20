@@ -152,7 +152,6 @@ spinePublishing {
 
 allprojects {
     apply {
-        plugin("jacoco")
         plugin("idea")
         plugin("project-report")
     }
@@ -190,7 +189,9 @@ LicenseReporter.mergeAllReports(project)
 fun Project.applyPlugins() {
     apply {
         plugin("java-library")
-        plugin("jacoco")
+        // Coverage via Kover (JaCoCo engine through `useJacoco(...)`), aggregated
+        // at the root by `KoverConfig`. Matches `io.spine.dependency.test.Kover.id`.
+        plugin("org.jetbrains.kotlinx.kover")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
         plugin("kotlin")

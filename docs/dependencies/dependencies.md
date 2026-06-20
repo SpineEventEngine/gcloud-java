@@ -966,16 +966,13 @@
      * **Project URL:** [http://hamcrest.org/JavaHamcrest/](http://hamcrest.org/JavaHamcrest/)
      * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.agent. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.agent. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.ant. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.core. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.core. **Version** : 0.8.14.
-     * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
-
-1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
 1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
@@ -1279,7 +1276,7 @@
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Jun 20 19:39:55 WEST 2026** using 
+This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -1873,16 +1870,13 @@ This report was generated on **Sat Jun 20 19:39:55 WEST 2026** using
      * **Project URL:** [http://hamcrest.org/JavaHamcrest/](http://hamcrest.org/JavaHamcrest/)
      * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.agent. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.agent. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.ant. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.core. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.core. **Version** : 0.8.14.
-     * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
-
-1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
 1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
@@ -2166,7 +2160,7 @@ This report was generated on **Sat Jun 20 19:39:55 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Jun 20 19:39:54 WEST 2026** using 
+This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -2942,16 +2936,13 @@ This report was generated on **Sat Jun 20 19:39:54 WEST 2026** using
      * **Project URL:** [http://hamcrest.org/JavaHamcrest/](http://hamcrest.org/JavaHamcrest/)
      * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.agent. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.agent. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.ant. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.core. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.core. **Version** : 0.8.14.
-     * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
-
-1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
 1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
@@ -3239,7 +3230,7 @@ This report was generated on **Sat Jun 20 19:39:54 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Jun 20 19:39:54 WEST 2026** using 
+This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -4293,16 +4284,13 @@ This report was generated on **Sat Jun 20 19:39:54 WEST 2026** using
      * **Project URL:** [http://hamcrest.org/JavaHamcrest/](http://hamcrest.org/JavaHamcrest/)
      * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.agent. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.agent. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.ant. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.core. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
-1.  **Group** : org.jacoco. **Name** : org.jacoco.core. **Version** : 0.8.14.
-     * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
-
-1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.14.
+1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.15.
      * **License:** [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/)
 
 1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
@@ -4606,6 +4594,6 @@ This report was generated on **Sat Jun 20 19:39:54 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Jun 20 19:39:55 WEST 2026** using 
+This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
