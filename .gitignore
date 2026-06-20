@@ -111,6 +111,12 @@ cloudrepo.properties
 deploy_key_rsa
 gcs-auth-key.json
 
+# Original GCP service-account key files, named as downloaded from the
+# Cloud Console (`<project-id>-<key-id>.json`). The credential used by tests
+# is the renamed `spine-dev.json`; these original-named copies must never be
+# committed.
+spine-dev-*.json
+
 # Log files
 *.log
 
