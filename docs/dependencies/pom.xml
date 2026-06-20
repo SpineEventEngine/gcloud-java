@@ -116,13 +116,13 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.testcontainers</groupId>
     <artifactId>gcloud</artifactId>
-    <version>1.19.0</version>
+    <version>1.21.4</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>org.testcontainers</groupId>
     <artifactId>testcontainers</artifactId>
-    <version>1.19.0</version>
+    <version>1.21.4</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
