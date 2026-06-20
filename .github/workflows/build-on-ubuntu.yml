@@ -1,4 +1,4 @@
-name: Ubuntu CI
+name: Ubuntu CI with Google Cloud SDK
 
 on: push
 
@@ -29,6 +29,12 @@ jobs:
         uses: pierotofy/set-swap-space@v1.0
         with:
           swap-size-gb: 8
+
+        # This operation is specific to `gcloud-java` repository only.
+      - name: Decrypt the credentials for the Spine-Dev service account
+        run: ./config/scripts/decrypt.sh "$SPINE_DEV_CI_KEY" ./.github/keys/spine-dev-framework-ci.json.gpg ./spine-dev.json
+        env:
+          SPINE_DEV_CI_KEY: ${{ secrets.SPINE_DEV_CI_KEY }}
 
       - name: Build project, run tests
         shell: bash
