@@ -26,6 +26,7 @@
 
 package io.spine.server.storage.datastore.record
 
+import com.google.cloud.datastore.DoubleValue
 import com.google.cloud.datastore.Entity
 import com.google.cloud.datastore.Key
 import com.google.cloud.datastore.KeyValue
@@ -128,5 +129,27 @@ internal class DsEntityComparatorSpec {
         shouldThrow<IllegalStateException> {
             byIdAscending().compare(a, b)
         }
+    }
+
+    @Test
+    fun `order entities by a boolean column value`() {
+        val internalColumn = StgProject.Column.internal().name().value()
+        val byInternalAscending = DsEntityComparator.implementing(
+            StgProject.query().sortAscendingBy(StgProject.Column.internal()).build().sorting()
+        )
+        val falseValued = Entity.newBuilder(key("a")).set(internalColumn, false).build()
+        val trueValued = Entity.newBuilder(key("b")).set(internalColumn, true).build()
+
+        byInternalAscending.compare(falseValued, trueValued).shouldBeNegative()
+    }
+
+    @Test
+    fun `order entities by a double column value`() {
+        // Datastore entities are schemaless: a column may hold any value type, and the
+        // comparator dispatches on the stored type — here, a `DoubleValue`.
+        val a = Entity.newBuilder(key("a")).set(idColumn, DoubleValue.of(1.5)).build()
+        val b = Entity.newBuilder(key("b")).set(idColumn, DoubleValue.of(2.5)).build()
+
+        byIdAscending().compare(a, b).shouldBeNegative()
     }
 }
