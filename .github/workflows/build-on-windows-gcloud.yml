@@ -1,3 +1,8 @@
+# This repo-specific workflow replaces the generic `build-on-windows.yml` that the
+# `config` submodule distributes; it excludes the Datastore-emulator suites that
+# cannot run on GitHub's Windows runners. The directive below tells
+# `config/migrate` not to copy the generic workflow into this repository.
+# config:replaces build-on-windows.yml
 name: Windows CI (gcloud-java)
 
 on: pull_request
