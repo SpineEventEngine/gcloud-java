@@ -115,7 +115,8 @@ gcs-auth-key.json
 # Cloud Console (`<project-id>-<key-id>.json`). The credential used by tests
 # is the renamed `spine-dev.json`; these original-named copies must never be
 # committed.
-spine-dev-*.json
+**/spine-dev-*.json
+**/spine-dev.json
 
 # Log files
 *.log
@@ -161,5 +162,3 @@ docs/_preview/resources/
 
 package-lock.json
 /.java-version
-
-**/spine-dev.json
