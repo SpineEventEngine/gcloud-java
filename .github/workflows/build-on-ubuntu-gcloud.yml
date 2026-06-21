@@ -5,7 +5,7 @@
 # config:replaces build-on-ubuntu.yml
 name: Ubuntu CI with Google Cloud SDK
 
-on: pull_request
+on: push
 
 jobs:
   build:
