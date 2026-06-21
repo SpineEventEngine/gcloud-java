@@ -57,7 +57,8 @@ In order to run the application built on top of `gcloud-java`, Datastore instanc
 preliminary configuration. In particular, the indexes for the Spine internal record types should 
 be set. Please notice a special index configuration for your custom `Aggregate` types.
 
-The configuration file is located at `./datastore/src/test/config/index.yaml`.
+Please see the `datastore/config` folder the configuration files.
+The configuration file for tests is located at `./datastore/src/test/config/index.yaml`.
 
 Please see the [Google Cloud Platform documentation][datastore-index] for the details.
 
