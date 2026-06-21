@@ -162,3 +162,4 @@ docs/_preview/resources/
 package-lock.json
 /.java-version
 
+/datastore/src/test/resources/spine-dev.json
