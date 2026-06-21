@@ -29,6 +29,15 @@ jobs:
       - name: Configure Pagefile
         uses: al-cheb/configure-pagefile-action@v1.3
 
+      # This operation is specific to this repository.
+      # This is required for the integration tests that authenticate to GCP
+      # to run tests against the Datastore Emulator.
+      - name: Decrypt the credentials for the Spine-Dev service account
+        shell: bash
+        run: bash ./config/scripts/decrypt.sh "$SPINE_DEV_CI_KEY" ./.github/keys/spine-dev-framework-ci.json.gpg ./spine-dev.json
+        env:
+          SPINE_DEV_CI_KEY: ${{ secrets.SPINE_DEV_CI_KEY }}
+
       # The Datastore Emulator runs in a Linux Docker container via Testcontainers.
       # GitHub-hosted Windows runners cannot launch Linux containers, so the emulator-backed
       # suites of `:datastore` and `:testutil-gcloud` are excluded here and run on the Ubuntu
