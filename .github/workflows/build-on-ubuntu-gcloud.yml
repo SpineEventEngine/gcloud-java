@@ -35,7 +35,9 @@ jobs:
         with:
           swap-size-gb: 8
 
-        # This operation is specific to `gcloud-java` repository only.
+      # This operation is specific to this repository.
+      # This is required for the integration tests that authenticate to GCP
+      # to run tests against the Datastore Emulator.
       - name: Decrypt the credentials for the Spine-Dev service account
         run: ./config/scripts/decrypt.sh "$SPINE_DEV_CI_KEY" ./.github/keys/spine-dev-framework-ci.json.gpg ./spine-dev.json
         env:
