@@ -5,7 +5,16 @@
 # config:replaces build-on-ubuntu.yml
 name: Ubuntu CI with Google Cloud SDK
 
-on: push
+# Triggers:
+#   * push to `master` — refreshes the Codecov baseline. `Publish` runs
+#     `publish -x test` and uploads no coverage, so this build is the only
+#     source of master coverage that `target: auto` in `.codecov.yml` compares
+#     pull requests against.
+#   * pull_request — gates a change on its merge result, not the branch tip.
+on:
+  push:
+    branches: [master]
+  pull_request:
 
 jobs:
   build:
