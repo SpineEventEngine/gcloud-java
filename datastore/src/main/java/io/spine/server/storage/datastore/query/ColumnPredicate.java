@@ -79,24 +79,19 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
         return result;
     }
 
+    @SuppressWarnings("UnnecessaryDefault") // We want safety net here.
     private boolean testPredicate(QueryPredicate<R> predicate, Entity entity) {
         var operator = predicate.operator();
         var parameters = predicate.allParams();
         var children = predicate.children();
 
-        boolean match;
-        switch (operator) {
-            case AND:
-                match = checkAnd(entity, parameters, children);
-                break;
-            case OR:
-                match = checkOr(entity, parameters, children);
-                break;
-            default:
-                throw newIllegalArgumentException(
-                        "Unknown logical operator `%s`.", operator
-                );
-        }
+        var match = switch (operator) {
+            case AND -> checkAnd(entity, parameters, children);
+            case OR -> checkOr(entity, parameters, children);
+            default -> throw newIllegalArgumentException(
+                    "Unknown logical operator `%s`.", operator
+            );
+        };
         return !match;
     }
 
@@ -129,10 +124,9 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     private boolean checkOr(Entity entity,
                             ImmutableList<SubjectParameter<?, ?, ?>> params,
                             ImmutableList<QueryPredicate<R>> children) {
-        if (checkOrParams(entity, params)) {
-            return true;
-        }
-        return checkOrChildren(entity, children) || params.isEmpty();
+        return checkOrParams(entity, params)
+                || checkOrChildren(entity, children)
+                || params.isEmpty();
     }
 
     private boolean checkOrChildren(Entity entity, ImmutableList<QueryPredicate<R>> children) {
