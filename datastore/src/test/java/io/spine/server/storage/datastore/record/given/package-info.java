@@ -29,10 +29,10 @@
  * {@link io.spine.server.storage.datastore.record.DsRecordStorage DsRecordStorage}
  * and those storage types which delegate their operations to {@code DsRecordStorage}.
  */
-@ParametersAreNonnullByDefault
+@NullMarked
 @CheckReturnValue
 package io.spine.server.storage.datastore.record.given;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

@@ -54,7 +54,6 @@ import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.hasAnces
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.storage.datastore.given.DatastoreWrapperTestEnv.localDatastore;
 import static java.util.concurrent.Executors.newFixedThreadPool;

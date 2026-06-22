@@ -1,33 +1,79 @@
-name: Build under Ubuntu (with Google Cloud SDK)
+# This repo-specific workflow replaces the generic `build-on-ubuntu.yml` that the
+# `config` submodule distributes; it adds the Spine-Dev credential-decrypt step
+# required by `gcloud-java`. The directive below tells `config/migrate` not to
+# copy the generic workflow into this repository (see `config`'s README).
+# config:replaces build-on-ubuntu.yml
+name: Ubuntu CI with Google Cloud SDK
 
-on: pull_request
+# Triggers:
+#   * push to `master` — refreshes the Codecov baseline. `Publish` runs
+#     `publish -x test` and uploads no coverage, so this build is the only
+#     source of master coverage that `target: auto` in `.codecov.yml` compares
+#     pull requests against.
+#   * pull_request — gates a change on its merge result, not the branch tip.
+on:
+  push:
+    branches: [master]
+  pull_request:
 
 jobs:
   build:
+    name: Build on Ubuntu
     runs-on: ubuntu-latest
+    concurrency:  # Avoid canceling in-progress runs for the same branch.
+      group: ubuntu-ci-${{ github.ref }}
+      cancel-in-progress: false
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v5
         with:
-          java-version: 11
+          java-version: 17
           distribution: zulu
-          cache: gradle
 
-        # This operation is specific to `gcloud-java` repository only.
+      - uses: gradle/actions/setup-gradle@v6
+
+      # Mirrors the pagefile step in build-on-windows.yml. The Linux runner
+      # ships with effectively no swap, so a memory peak becomes an instant
+      # OOM kill; this gives the kernel somewhere to fall back to.
+      - name: Add swap space
+        uses: pierotofy/set-swap-space@v1.0
+        with:
+          swap-size-gb: 8
+
+      # This operation is specific to this repository.
+      # This is required for the integration tests that authenticate to GCP
+      # to run tests against the Datastore Emulator.
       - name: Decrypt the credentials for the Spine-Dev service account
         run: ./config/scripts/decrypt.sh "$SPINE_DEV_CI_KEY" ./.github/keys/spine-dev-framework-ci.json.gpg ./spine-dev.json
         env:
           SPINE_DEV_CI_KEY: ${{ secrets.SPINE_DEV_CI_KEY }}
 
-      - name: Build project and run tests
+      - name: Build project, run tests
+        shell: bash
         run: ./gradlew build --stacktrace
 
-      - name: Upload code coverage report
-        uses: codecov/codecov-action@v3
+      # `build` does not run Dokka — its tasks are gated to the publishing
+      # graph — so `dokkaGenerate` is appended to surface documentation
+      # warnings on each push, before merge, instead of only in the post-merge
+      # `Publish` job. `failOnWarning` is enabled in the Dokka setup.
+      - name: Check documentation
+        run: ./gradlew dokkaGenerate --stacktrace
+
+      # See: https://github.com/marketplace/actions/junit-report-action
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4.0.3
+        if: always() # always run even if the previous step fails
         with:
-          fail_ci_if_error: false
+          report_paths: '**/build/test-results/**/TEST-*.xml'
+          require_tests: true # will fail workflow if test reports not found
+
+      - name: Upload code coverage report
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
           verbose: true

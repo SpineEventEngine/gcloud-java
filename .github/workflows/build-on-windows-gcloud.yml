@@ -1,0 +1,56 @@
+# This repo-specific workflow replaces the generic `build-on-windows.yml` that the
+# `config` submodule distributes; it excludes the Datastore-emulator suites that
+# cannot run on GitHub's Windows runners. The directive below tells
+# `config/migrate` not to copy the generic workflow into this repository.
+# config:replaces build-on-windows.yml
+name: Windows CI (gcloud-java)
+
+on: pull_request
+
+jobs:
+  build:
+    runs-on: windows-latest
+    name: Build on Windows
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: zulu
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      # See: https://github.com/al-cheb/configure-pagefile-action
+      - name: Configure Pagefile
+        uses: al-cheb/configure-pagefile-action@v1.3
+
+      # This operation is specific to this repository.
+      # This is required for the integration tests that authenticate to GCP
+      # to run tests against the Datastore Emulator.
+      - name: Decrypt the credentials for the Spine-Dev service account
+        shell: bash
+        run: bash ./config/scripts/decrypt.sh "$SPINE_DEV_CI_KEY" ./.github/keys/spine-dev-framework-ci.json.gpg ./spine-dev.json
+        env:
+          SPINE_DEV_CI_KEY: ${{ secrets.SPINE_DEV_CI_KEY }}
+
+      # The Datastore Emulator runs in a Linux Docker container via Testcontainers.
+      # GitHub-hosted Windows runners cannot launch Linux containers, so the emulator-backed
+      # suites of `:datastore` and `:testutil-gcloud` are excluded here and run on the Ubuntu
+      # runner instead. Windows developers run them locally with Docker Desktop (Linux
+      # containers). This job remains a compilation check plus the non-Docker test suites.
+      - name: Build project and run tests
+        shell: cmd
+        run: gradlew.bat build --stacktrace -x :datastore:test -x :testutil-gcloud:test
+
+      # See: https://github.com/marketplace/actions/junit-report-action
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4.0.3
+        if: always() # always run even if the previous step fails
+        with:
+          report_paths: '**/build/test-results/**/TEST-*.xml'
+          require_tests: true

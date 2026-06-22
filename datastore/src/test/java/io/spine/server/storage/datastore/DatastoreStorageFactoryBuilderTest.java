@@ -26,6 +26,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.NoCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Value;
@@ -108,7 +109,8 @@ final class DatastoreStorageFactoryBuilderTest {
         @BeforeEach
         void setUp() {
             builder = DatastoreOptions.newBuilder()
-                    .setProjectId(defaultLocalProjectId().value());
+                    .setProjectId(defaultLocalProjectId().value())
+                    .setCredentials(NoCredentials.getInstance());
         }
 
         @Test

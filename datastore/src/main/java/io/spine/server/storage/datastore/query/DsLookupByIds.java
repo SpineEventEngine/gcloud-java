@@ -34,7 +34,7 @@ import com.google.protobuf.Message;
 import io.spine.query.RecordQuery;
 import io.spine.server.storage.datastore.DatastoreMedium;
 import io.spine.server.storage.datastore.record.DsEntitySpec;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;

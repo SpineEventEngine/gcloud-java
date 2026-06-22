@@ -45,7 +45,7 @@ import io.spine.logging.WithLogging;
 import io.spine.server.storage.datastore.record.Entities;
 import io.spine.server.storage.datastore.record.RecordId;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;

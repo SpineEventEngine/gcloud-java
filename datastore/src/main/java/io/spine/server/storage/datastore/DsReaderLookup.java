@@ -33,7 +33,7 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.ImmutableList;
 import io.spine.logging.WithLogging;
 import io.spine.server.storage.datastore.tenant.Namespace;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;

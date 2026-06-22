@@ -39,7 +39,7 @@ import io.spine.server.storage.datastore.config.StorageConfiguration;
 import io.spine.server.storage.datastore.config.TxSetting;
 import io.spine.server.storage.datastore.record.DsEntitySpec;
 import io.spine.server.storage.datastore.record.DsRecordStorage;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;

@@ -41,7 +41,7 @@ enum SpanAttribute {
         @Override
         AttributeValue value(SignalSpan signalSpan) {
             var fullName = signalSpan.contextName().getValue();
-            return SpanAttribute.stringValue(fullName);
+            return stringValue(fullName);
         }
     },
     Tenant {
@@ -49,7 +49,7 @@ enum SpanAttribute {
         AttributeValue value(SignalSpan signalSpan) {
             var tenantId = signalSpan.signal().tenant();
             var tenantString = Json.toCompactJson(tenantId);
-            return SpanAttribute.stringValue(tenantString);
+            return stringValue(tenantString);
         }
     },
     EntityID {
@@ -57,14 +57,14 @@ enum SpanAttribute {
         AttributeValue value(SignalSpan signalSpan) {
             var id = unpack(signalSpan.receiver().getId());
             var printedId = Stringifiers.toString(id);
-            return SpanAttribute.stringValue(printedId);
+            return stringValue(printedId);
         }
     },
     SignalID {
         @Override
         AttributeValue value(SignalSpan signalSpan) {
             var printedId = signalSpan.signal().id().value();
-            return SpanAttribute.stringValue(printedId);
+            return stringValue(printedId);
         }
     },
     EntityType {
@@ -72,7 +72,7 @@ enum SpanAttribute {
         AttributeValue value(SignalSpan signalSpan) {
             var entityType = signalSpan.receiver()
                                        .getTypeUrl();
-            return SpanAttribute.stringValue(entityType);
+            return stringValue(entityType);
         }
     },
     SignalType {
@@ -81,7 +81,7 @@ enum SpanAttribute {
             var signalType = signalSpan.signal()
                                        .enclosedTypeUrl()
                                        .value();
-            return SpanAttribute.stringValue(signalType);
+            return stringValue(signalType);
         }
     };
 

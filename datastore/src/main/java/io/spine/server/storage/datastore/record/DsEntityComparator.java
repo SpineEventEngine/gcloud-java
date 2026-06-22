@@ -34,7 +34,7 @@ import com.google.protobuf.Message;
 import io.spine.client.OrderBy;
 import io.spine.query.Direction;
 import io.spine.query.SortBy;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.Comparator;

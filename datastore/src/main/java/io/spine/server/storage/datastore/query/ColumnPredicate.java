@@ -32,7 +32,7 @@ import com.google.protobuf.Message;
 import io.spine.query.QueryPredicate;
 import io.spine.query.Subject;
 import io.spine.query.SubjectParameter;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;
 
@@ -79,34 +79,26 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
         return result;
     }
 
+    @SuppressWarnings("UnnecessaryDefault") // We want safety net here.
     private boolean testPredicate(QueryPredicate<R> predicate, Entity entity) {
         var operator = predicate.operator();
         var parameters = predicate.allParams();
         var children = predicate.children();
 
-        boolean match;
-        switch (operator) {
-            case AND:
-                match = checkAnd(entity, parameters, children);
-                break;
-            case OR:
-                match = checkOr(entity, parameters, children);
-                break;
-            default:
-                throw newIllegalArgumentException(
-                        "Unknown logical operator `%s`.", operator
-                );
-        }
+        var match = switch (operator) {
+            case AND -> checkAnd(entity, parameters, children);
+            case OR -> checkOr(entity, parameters, children);
+            default -> throw newIllegalArgumentException(
+                    "Unknown logical operator `%s`.", operator
+            );
+        };
         return !match;
     }
 
     private boolean checkAnd(Entity entity,
                              ImmutableList<SubjectParameter<?, ?, ?>> params,
                              ImmutableList<QueryPredicate<R>> children) {
-        if (checkAndParams(entity, params)) {
-            return false;
-        }
-        return !checkAndChildren(entity, children);
+        return !checkAndParams(entity, params) && !checkAndChildren(entity, children);
     }
 
     private boolean checkAndChildren(Entity entity, ImmutableList<QueryPredicate<R>> children) {
@@ -132,13 +124,9 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     private boolean checkOr(Entity entity,
                             ImmutableList<SubjectParameter<?, ?, ?>> params,
                             ImmutableList<QueryPredicate<R>> children) {
-        if (checkOrParams(entity, params)) {
-            return true;
-        }
-        if (checkOrChildren(entity, children)) {
-            return true;
-        }
-        return params.isEmpty();
+        return checkOrParams(entity, params)
+                || checkOrChildren(entity, children)
+                || params.isEmpty();
     }
 
     private boolean checkOrChildren(Entity entity, ImmutableList<QueryPredicate<R>> children) {

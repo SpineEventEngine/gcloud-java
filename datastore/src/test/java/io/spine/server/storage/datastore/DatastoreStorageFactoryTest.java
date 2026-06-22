@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,6 +26,7 @@
 
 package io.spine.server.storage.datastore;
 
+import com.google.cloud.NoCredentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Key;
@@ -46,6 +47,7 @@ import io.spine.server.storage.datastore.tenant.TestNamespaceIndex;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
+import io.spine.test.storage.StgTask;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import io.spine.type.TypeName;
@@ -54,11 +56,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.storage.datastore.given.DatastoreStorageFactoryTestEnv.factoryFor;
 import static io.spine.server.storage.datastore.given.TestEnvironment.singleTenantSpec;
-import static io.spine.server.storage.datastore.given.TestRecordSpec.projectDetailsSpec;
+import static io.spine.server.storage.datastore.given.TestRecordSpec.taskSpec;
 import static io.spine.server.storage.given.GivenStorageProject.messageSpec;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -74,6 +75,7 @@ final class DatastoreStorageFactoryTest {
     private static final DatastoreOptions DUMMY_OPTIONS =
             DatastoreOptions.newBuilder()
                     .setProjectId("dummy-dataset")
+                    .setCredentials(NoCredentials.getInstance())
                     .build();
 
     private static final Datastore datastore = DUMMY_OPTIONS.getService();
@@ -175,13 +177,13 @@ final class DatastoreStorageFactoryTest {
     void testProduceBcBuilder() {
         DatastoreStorageFactory factory = TestDatastoreStorageFactory.local();
         var builder = BoundedContext.multitenant(testName());
-        assertThat(builder.tenantIndex())
-              .isEmpty();
+        assertThat(builder.hasTenantIndex())
+              .isFalse();
         var updatedIndex = factory.configureTenantIndex(builder)
-                                  .tenantIndex();
+                                  .getTenantIndex();
         assertThat(updatedIndex)
-              .isPresent();
-        assertThat(updatedIndex.get()).isInstanceOf(TestNamespaceIndex.getType());
+              .isNotNull();
+        assertThat(updatedIndex).isInstanceOf(TestNamespaceIndex.getType());
     }
 
     @Nested
@@ -211,14 +213,14 @@ final class DatastoreStorageFactoryTest {
             var spec = ContextSpec.singleTenant(testName());
             var customEntityStorage =
                     InMemoryStorageFactory.newInstance()
-                                          .createRecordStorage(spec, projectDetailsSpec());
+                                          .createRecordStorage(spec, taskSpec());
             var factory = DatastoreStorageFactory.newBuilder()
                     .setDatastore(TestDatastores.local())
-                    .useEntityStorage(StgProject.class,
+                    .useEntityStorage(StgTask.class,
                                       configuration -> customEntityStorage)
                     .build();
             var actualStorage =
-                    factory.createRecordStorage(spec, projectDetailsSpec());
+                    factory.createRecordStorage(spec, taskSpec());
             assertThat(actualStorage).isEqualTo(customEntityStorage);
         }
     }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,77 +24,60 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import BuildSettings.javaVersion
-import io.spine.internal.dependency.CheckerFramework
-import io.spine.internal.dependency.Dokka
-import io.spine.internal.dependency.ErrorProne
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.JavaX
-import io.spine.internal.dependency.Kotest
-import io.spine.internal.dependency.Protobuf
-import io.spine.internal.dependency.Spine
-import io.spine.internal.gradle.checkstyle.CheckStyleConfig
-import io.spine.internal.gradle.github.pages.updateGitHubPages
-import io.spine.internal.gradle.javac.configureErrorProne
-import io.spine.internal.gradle.javac.configureJavac
-import io.spine.internal.gradle.javadoc.JavadocConfig
-import io.spine.internal.gradle.kotlin.applyJvmToolchain
-import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
-import io.spine.internal.gradle.report.license.LicenseReporter
-import io.spine.internal.gradle.testing.configureLogging
-import io.spine.internal.gradle.testing.registerTestTasks
-import org.gradle.api.Project
-import org.gradle.api.tasks.Delete
-import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.getValue
-import org.gradle.kotlin.dsl.idea
-import org.gradle.kotlin.dsl.invoke
-import org.gradle.kotlin.dsl.`java-library`
-import org.gradle.kotlin.dsl.kotlin
-import org.gradle.kotlin.dsl.provideDelegate
-import org.gradle.kotlin.dsl.registering
-import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import io.spine.dependency.boms.BomsPlugin
+import io.spine.dependency.build.CheckerFramework
+import io.spine.dependency.build.Dokka
+import io.spine.dependency.build.ErrorProne
+import io.spine.dependency.build.JSpecify
+import io.spine.dependency.lib.Guava
+import io.spine.dependency.lib.Jackson
+import io.spine.dependency.lib.Kotlin
+import io.spine.dependency.lib.Protobuf
+import io.spine.dependency.local.Reflect
+import io.spine.dependency.test.Jacoco
+import io.spine.gradle.SpineTaskGroup
+import io.spine.gradle.checkstyle.CheckStyleConfig
+import io.spine.gradle.github.pages.updateGitHubPages
+import io.spine.gradle.javac.configureErrorProne
+import io.spine.gradle.javac.configureJavac
+import io.spine.gradle.javadoc.JavadocConfig
+import io.spine.gradle.kotlin.setFreeCompilerArgs
+import io.spine.gradle.report.license.LicenseReporter
 
 plugins {
     `java-library`
-    idea
     id("net.ltgt.errorprone")
     id("pmd-settings")
     id("project-report")
-    id("dokka-for-java")
     kotlin("jvm")
-    id("io.kotest")
-    id("org.jetbrains.kotlinx.kover")
     id("detekt-code-analysis")
-    id("dokka-for-kotlin")
+    id("dokka-setup")
+    id("org.jetbrains.kotlinx.kover")
+    id("module-testing")
 }
-
+apply<BomsPlugin>()
 LicenseReporter.generateReportIn(project)
 JavadocConfig.applyTo(project)
 CheckStyleConfig.applyTo(project)
 
 project.run {
-    configureJava(javaVersion)
-    configureKotlin(javaVersion)
+    configureJava()
+    configureKotlin()
     addDependencies()
     forceConfigurations()
 
     val generatedDir = "$projectDir/generated"
     setTaskDependencies(generatedDir)
-    setupTests()
 
     configureGitHubPages()
 }
 
 typealias Module = Project
 
-fun Module.configureJava(javaVersion: JavaLanguageVersion) {
+fun Module.configureJava() {
     java {
-        toolchain.languageVersion.set(javaVersion)
+        sourceCompatibility = BuildSettings.javaVersionCompat
+        targetCompatibility = BuildSettings.javaVersionCompat
     }
 
     tasks {
@@ -105,27 +88,22 @@ fun Module.configureJava(javaVersion: JavaLanguageVersion) {
     }
 }
 
-fun Module.configureKotlin(javaVersion: JavaLanguageVersion) {
+fun Module.configureKotlin() {
     kotlin {
-        applyJvmToolchain(javaVersion.asInt())
         explicitApi()
-    }
-
-    tasks {
-        withType<KotlinCompile>().configureEach {
-            kotlinOptions.jvmTarget = javaVersion.toString()
+        compilerOptions {
+            jvmTarget.set(BuildSettings.jvmTarget)
             setFreeCompilerArgs()
         }
     }
 
     kover {
-        useJacoco()
-    }
-
-    koverReport {
-        defaults {
-            xml {
-                onCheck = true
+        useJacoco(version = Jacoco.version)
+        reports {
+            total {
+                xml {
+                    onCheck = true
+                }
             }
         }
     }
@@ -145,21 +123,8 @@ fun Module.addDependencies() = dependencies {
     api(Guava.lib)
 
     compileOnlyApi(CheckerFramework.annotations)
-    compileOnlyApi(JavaX.annotations)
+    api(JSpecify.annotations)
     ErrorProne.annotations.forEach { compileOnlyApi(it) }
-
-    implementation(Spine.Logging.lib)
-
-    testImplementation(Guava.testLib)
-    testImplementation(JUnit.runner)
-    testImplementation(JUnit.pioneer)
-    JUnit.api.forEach { testImplementation(it) }
-
-    testImplementation(Spine.testlib)
-    testImplementation(Kotest.frameworkEngine)
-    testImplementation(Kotest.datatest)
-    testImplementation(Kotest.runnerJUnit5Jvm)
-    testImplementation(JUnit.runner)
 }
 
 fun Module.forceConfigurations() {
@@ -168,24 +133,17 @@ fun Module.forceConfigurations() {
         excludeProtobufLite()
         all {
             resolutionStrategy {
+                val cfg = this@all
+                val rs = this@resolutionStrategy
+                Jackson.forceArtifacts(project, cfg, rs)
+                Jackson.DataFormat.forceArtifacts(project, cfg, rs)
                 force(
-                    JUnit.bom,
-                    JUnit.runner,
-                    Dokka.BasePlugin.lib
+                    Jackson.annotations,
+                    Kotlin.bom,
+                    Dokka.BasePlugin.lib,
+                    Reflect.lib,
                 )
             }
-        }
-    }
-}
-
-fun Module.setupTests() {
-    tasks {
-        registerTestTasks()
-        test.configure {
-            useJUnitPlatform {
-                includeEngines("junit-jupiter")
-            }
-            configureLogging()
         }
     }
 }
@@ -193,6 +151,8 @@ fun Module.setupTests() {
 fun Module.setTaskDependencies(generatedDir: String) {
     tasks {
         val cleanGenerated by registering(Delete::class) {
+            group = SpineTaskGroup.name
+            description = "Deletes the directory with generated sources"
             delete(generatedDir)
         }
         clean.configure {
@@ -204,13 +164,13 @@ fun Module.setTaskDependencies(generatedDir: String) {
             publish?.dependsOn("${project.path}:updateGitHubPages")
         }
     }
-    configureTaskDependencies()
+    afterEvaluate {
+        configureTaskDependencies()
+    }
 }
 
 fun Module.configureGitHubPages() {
-    val docletVersion = project.version.toString()
-    updateGitHubPages(docletVersion) {
-        allowInternalJavadoc.set(true)
+    updateGitHubPages {
         rootFolder.set(rootDir)
     }
 }

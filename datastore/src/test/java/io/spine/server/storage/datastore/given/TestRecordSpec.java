@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,11 +30,11 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.SpecScanner;
 import io.spine.server.projection.Projection;
 import io.spine.server.storage.RecordSpec;
-import io.spine.test.storage.StgProject;
-import io.spine.test.storage.StgProjectId;
+import io.spine.test.storage.StgTask;
+import io.spine.test.storage.StgTaskId;
 
 /**
- * Provides {@link MessageRecordSpec}s for tests.
+ * Provides {@link RecordSpec}s for tests.
  */
 public final class TestRecordSpec {
 
@@ -45,14 +45,14 @@ public final class TestRecordSpec {
     }
 
     /**
-     * Creates a new {@code EntityRecordSpec} describing how instances of {@link ProjectDetails}
+     * Creates a new {@code RecordSpec} describing how instances of the {@link TaskView}
      * projection are stored.
      */
-    public static RecordSpec<StgProjectId, EntityRecord> projectDetailsSpec() {
-        return SpecScanner.scan(ProjectDetails.class);
+    public static RecordSpec<StgTaskId, EntityRecord> taskSpec() {
+        return SpecScanner.scan(TaskView.class);
     }
 
-    private static class ProjectDetails
-            extends Projection<StgProjectId, StgProject, StgProject.Builder> {
+    private static class TaskView
+            extends Projection<StgTaskId, StgTask, StgTask.Builder> {
     }
 }

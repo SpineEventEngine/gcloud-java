@@ -26,9 +26,10 @@
 
 package io.spine.server.trace.stackdriver;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Utf8;
 import com.google.devtools.cloudtrace.v2.TruncatableString;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * Utilities for working with {@link TruncatableString}.
@@ -55,7 +56,7 @@ final class Truncate {
         if (fullLength <= length) {
             return stringOf(value, 0);
         } else {
-            var utf8 = Charsets.UTF_8;
+            var utf8 = StandardCharsets.UTF_8;
             var utf8Bytes = value.getBytes(utf8);
             var utf8String = new String(utf8Bytes, 0, length, utf8);
             return stringOf(utf8String, fullLength - length);

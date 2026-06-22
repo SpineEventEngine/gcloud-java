@@ -102,7 +102,7 @@ public class SignalSpan {
 
     private String displayName() {
         var signalType = signal.enclosedTypeUrl()
-                               .toTypeName();
+                               .typeName();
         var className = ClassName.of(receiverType.getJavaClassName());
         return format("%s handles %s", className.toSimple(), signalType.simpleName());
     }

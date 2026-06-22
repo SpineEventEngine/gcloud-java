@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,15 +24,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.File
-import org.gradle.kotlin.dsl.getValue
-import org.gradle.kotlin.dsl.getting
-import org.gradle.kotlin.dsl.jacoco
-import org.gradle.testing.jacoco.tasks.JacocoReport
+import io.spine.gradle.buildDirectory
+
+// DEPRECATED: this script plugin distributes vanilla JaCoCo.
+// New code should apply `jvm-module`, which configures Kover via
+// `useJacoco(version = Jacoco.version)` and writes JaCoCo-format XML at
+// `build/reports/kover/report.xml`. The `raise-coverage` skill migrates
+// existing consumers automatically. Kept so older consumer repos continue to
+// build; will be removed in a future release.
+// See: .agents/skills/raise-coverage/references/migrate-to-kover.md
 
 plugins {
     jacoco
 }
+
+logger.warn(
+    "'jacoco-kotlin-jvm' is deprecated; use 'jvm-module' which applies Kover. " +
+        "See .agents/skills/raise-coverage/references/migrate-to-kover.md."
+)
 
 /**
  * Configures [JacocoReport] task to run in a Kotlin Multiplatform project for
@@ -53,9 +62,10 @@ private val about = ""
 /**
  * Configure Jacoco task with custom input from this Kotlin Multiplatform project.
  */
+@Suppress("unused")
 val jacocoTestReport: JacocoReport by tasks.getting(JacocoReport::class) {
 
-    val classFiles = File("${buildDir}/classes/kotlin/jvm/")
+    val classFiles = File("$buildDirectory/classes/kotlin/jvm/")
         .walkBottomUp()
         .toSet()
     classDirectories.setFrom(classFiles)
@@ -66,5 +76,5 @@ val jacocoTestReport: JacocoReport by tasks.getting(JacocoReport::class) {
     )
     sourceDirectories.setFrom(files(coverageSourceDirs))
 
-    executionData.setFrom(files("${buildDir}/jacoco/jvmTest.exec"))
+    executionData.setFrom(files("$buildDirectory/jacoco/jvmTest.exec"))
 }

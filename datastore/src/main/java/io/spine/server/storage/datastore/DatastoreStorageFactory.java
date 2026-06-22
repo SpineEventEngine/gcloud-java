@@ -216,6 +216,17 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
     }
 
     /**
+     * Always returns {@code true}.
+     *
+     * <p>This factory holds no closeable resources of its own, and its {@link #close()}
+     * performs no action, so the factory is always considered open.
+     */
+    @Override
+    public boolean isOpen() {
+        return true;
+    }
+
+    /**
      * Performs no action.
      */
     @Override

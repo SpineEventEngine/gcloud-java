@@ -27,7 +27,7 @@
 package io.spine.server.storage.datastore.query;
 
 import com.google.cloud.datastore.Entity;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

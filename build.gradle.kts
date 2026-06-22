@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,27 +26,51 @@
 
 @file:Suppress("RemoveRedundantQualifierName")
 
-import Build_gradle.Subproject
-import io.spine.internal.dependency.*
-import io.spine.internal.gradle.VersionWriter
-import io.spine.internal.gradle.checkstyle.CheckStyleConfig
-import io.spine.internal.gradle.github.pages.updateGitHubPages
-import io.spine.internal.gradle.javac.configureErrorProne
-import io.spine.internal.gradle.javac.configureJavac
-import io.spine.internal.gradle.javadoc.JavadocConfig
-import io.spine.internal.gradle.kotlin.applyJvmToolchain
-import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
-import io.spine.internal.gradle.publish.IncrementGuard
-import io.spine.internal.gradle.publish.PublishingRepos
-import io.spine.internal.gradle.publish.spinePublishing
-import io.spine.internal.gradle.report.coverage.JacocoConfig
-import io.spine.internal.gradle.report.license.LicenseReporter
-import io.spine.internal.gradle.report.pom.PomGenerator
-import io.spine.internal.gradle.standardToSpineSdk
-import io.spine.internal.gradle.testing.configureLogging
-import io.spine.internal.gradle.testing.registerTestTasks
+import io.spine.dependency.boms.BomsPlugin
+import io.spine.dependency.build.ErrorProne
+import io.spine.dependency.kotlinx.Coroutines
+import io.spine.dependency.lib.ApacheHttp
+import io.spine.dependency.lib.CommonsCodec
+import io.spine.dependency.lib.GoogleApis
+import io.spine.dependency.lib.Grpc
+import io.spine.dependency.lib.Guava
+import io.spine.dependency.lib.Jackson
+import io.spine.dependency.lib.Kotlin
+import io.spine.dependency.lib.PerfMark
+import io.spine.dependency.lib.Slf4J
+import io.spine.dependency.local.Base
+import io.spine.dependency.local.BaseTypes
+import io.spine.dependency.local.Change
+import io.spine.dependency.local.Compiler
+import io.spine.dependency.local.CoreJvm
+import io.spine.dependency.local.Logging
+import io.spine.dependency.local.Reflect
+import io.spine.dependency.local.TestLib
+import io.spine.dependency.local.Time
+import io.spine.dependency.local.ToolBase
+import io.spine.dependency.local.Validation
+import io.spine.dependency.test.JUnit
+import io.spine.gradle.checkstyle.CheckStyleConfig
+import io.spine.gradle.github.pages.updateGitHubPages
+import io.spine.gradle.javac.configureErrorProne
+import io.spine.gradle.javac.configureJavac
+import io.spine.gradle.javadoc.JavadocConfig
+import io.spine.gradle.kotlin.applyJvmToolchain
+import io.spine.gradle.kotlin.setFreeCompilerArgs
+import io.spine.gradle.publish.IncrementGuard
+import io.spine.gradle.publish.PublishingRepos
+import io.spine.gradle.publish.spinePublishing
+import io.spine.gradle.report.coverage.KoverConfig
+import io.spine.gradle.report.license.LicenseReporter
+import io.spine.gradle.report.pom.PomGenerator
+import io.spine.gradle.repo.standardToSpineSdk
+import io.spine.gradle.testing.configureLogging
+import io.spine.gradle.testing.registerTestTasks
+import java.io.ByteArrayOutputStream
+import java.io.File
+import javax.inject.Inject
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.process.ExecOperations
 
 buildscript {
     standardSpineSdkRepositories()
@@ -54,25 +78,51 @@ buildscript {
     doForceVersions(configurations)
     configurations {
         all {
+            exclude(group = "io.spine", module = "spine-flogger-api")
+            exclude(group = "io.spine", module = "spine-logging-backend")
             resolutionStrategy {
-                val spine = io.spine.internal.dependency.Spine
+                val jackson = io.spine.dependency.lib.Jackson
+                val logging = io.spine.dependency.local.Logging
+                val cfg = this@all
+                val rs = this@resolutionStrategy
+                jackson.forceArtifacts(project, cfg, rs)
+                io.spine.dependency.lib.Jackson.DataType.forceArtifacts(project, cfg, rs)
+                io.spine.dependency.lib.Grpc.forceArtifacts(project, cfg, rs)
                 force(
-                    spine.base,
-                    spine.toolBase,
-                    spine.server,
-                    io.spine.internal.dependency.Spine.Logging.lib,
-                    io.spine.internal.dependency.Validation.runtime,
-                    io.spine.internal.dependency.Grpc.api,
+                    jackson.annotations,
+                    jackson.bom,
+                    io.spine.dependency.lib.Grpc.bom,
+                    io.spine.dependency.lib.Guava.lib,
+                    io.spine.dependency.lib.Kotlin.bom,
+                    io.spine.dependency.local.Base.annotations,
+                    io.spine.dependency.local.Base.lib,
+                    io.spine.dependency.local.Base.environment,
+                    io.spine.dependency.local.Base.format,
+                    io.spine.dependency.local.Reflect.lib,
+                    io.spine.dependency.local.Time.lib,
+                    io.spine.dependency.local.Time.javaExtensions,
+                    io.spine.dependency.local.Compiler.api,
+                    io.spine.dependency.local.Compiler.pluginLib,
+                    io.spine.dependency.local.Compiler.gradleApi,
+                    io.spine.dependency.local.Compiler.params,
+                    io.spine.dependency.local.ToolBase.lib,
+                    io.spine.dependency.local.CoreJvm.server,
+                    logging.lib,
+                    logging.libJvm,
+                    logging.grpcContext,
+                    io.spine.dependency.local.Validation.runtime,
                 )
             }
         }
     }
 
     dependencies {
-        classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
+        classpath(enforcedPlatform(io.spine.dependency.lib.Grpc.bom))
+        classpath(enforcedPlatform(io.spine.dependency.kotlinx.Coroutines.bom))
+        classpath(io.spine.dependency.local.Compiler.pluginLib)
+        classpath(io.spine.dependency.local.CoreJvmCompiler.pluginLib)
     }
 }
-
 
 plugins {
     `java-library`
@@ -80,12 +130,9 @@ plugins {
     idea
     protobuf
     errorprone
-    `gradle-doctor`
+    //`gradle-doctor`
 }
-
-object BuildSettings {
-    const val JAVA_VERSION = 11
-}
+apply<BomsPlugin>()
 
 repositories.standardToSpineSdk()
 
@@ -98,7 +145,6 @@ spinePublishing {
     )
     destinations = with(PublishingRepos) {
         setOf(
-            cloudRepo,
             cloudArtifactRegistry,
             gitHub("gcloud-java")
         )
@@ -107,7 +153,6 @@ spinePublishing {
 
 allprojects {
     apply {
-        plugin("jacoco")
         plugin("idea")
         plugin("project-report")
     }
@@ -115,15 +160,14 @@ allprojects {
     apply(from = "$rootDir/version.gradle.kts")
     group = "io.spine.gcloud"
     version = extra["versionToPublish"]!!
-
-    forceConfigurations()
 }
 
 subprojects {
     repositories.standardToSpineSdk()
     applyPlugins()
+    forceConfigurations()
 
-    val javaVersion = JavaLanguageVersion.of(BuildSettings.JAVA_VERSION)
+    val javaVersion = BuildSettings.javaVersion
     setupJava(javaVersion)
     setupKotlin(javaVersion)
 
@@ -136,35 +180,31 @@ subprojects {
     configureTaskDependencies()
 }
 
-
-JacocoConfig.applyTo(project)
+KoverConfig.applyTo(project)
 PomGenerator.applyTo(project)
 LicenseReporter.mergeAllReports(project)
 
 /**
- * The alias for typed extensions functions related to subprojects.
- */
-typealias Subproject = Project
-
-/**
  * Applies plugins common to all modules to this subproject.
  */
-fun Subproject.applyPlugins() {
+fun Project.applyPlugins() {
     apply {
         plugin("java-library")
-        plugin("jacoco")
+        // Coverage via Kover (JaCoCo engine through `useJacoco(...)`), aggregated
+        // at the root by `KoverConfig`. Matches `io.spine.dependency.test.Kover.id`.
+        plugin("org.jetbrains.kotlinx.kover")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
         plugin("kotlin")
         plugin("pmd")
         plugin("maven-publish")
         plugin("pmd-settings")
-        plugin("dokka-for-java")
-        plugin("io.spine.mc-java")
+        plugin("dokka-setup")
+        plugin("io.spine.core-jvm")
     }
 
     apply<IncrementGuard>()
-    apply<VersionWriter>()
+    apply<BomsPlugin>()
 
     LicenseReporter.generateReportIn(project)
     JavadocConfig.applyTo(project)
@@ -174,7 +214,7 @@ fun Subproject.applyPlugins() {
 /**
  * Configures Java tasks in this project.
  */
-fun Subproject.setupJava(javaVersion: JavaLanguageVersion) {
+fun Project.setupJava(javaVersion: JavaLanguageVersion) {
     java {
         toolchain.languageVersion.set(javaVersion)
     }
@@ -192,27 +232,197 @@ fun Subproject.setupJava(javaVersion: JavaLanguageVersion) {
 /**
  * Configures Kotlin tasks in this project.
  */
-fun Subproject.setupKotlin(javaVersion: JavaLanguageVersion) {
+fun Project.setupKotlin(javaVersion: JavaLanguageVersion) {
     kotlin {
         applyJvmToolchain(javaVersion.asInt())
         explicitApi()
-
-        tasks.withType<KotlinCompile>().configureEach {
-            kotlinOptions.jvmTarget = javaVersion.toString()
+        compilerOptions {
+            jvmTarget.set(BuildSettings.jvmTarget)
             setFreeCompilerArgs()
         }
     }
 }
 
 /**
+ * Names of the modules whose tests run against the Docker-based Datastore Emulator.
+ *
+ * For these modules a missing Docker environment is a build failure rather than a
+ * reason to skip tests: without the emulator the suites verify nothing, so a "passed"
+ * run would be misleading. See [CheckDockerAvailable].
+ *
+ * Declared as a function rather than a top-level `val` so that it is safe to call from
+ * the `subprojects {}` configuration, which runs before a top-level property initializer
+ * further down the script would have executed.
+ */
+fun dockerDependentModules() = setOf("datastore", "testutil-gcloud")
+
+/**
+ * Fails the build unless a Docker environment is available for launching the
+ * Datastore Emulator used by tests.
+ *
+ * Wired as a dependency of the `Test` tasks in [dockerDependentModules] so that an
+ * environment without Docker cannot produce a misleading "tests passed" result.
+ */
+abstract class CheckDockerAvailable : DefaultTask() {
+
+    /** The name of the gated module, used in the failure message. */
+    @get:Input
+    abstract val moduleName: Property<String>
+
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    @TaskAction
+    fun check() {
+        if (dockerAvailable()) {
+            return
+        }
+        val module = moduleName.get()
+        throw GradleException(
+            """
+            No Docker environment is available, but the tests of `:$module` require one.
+
+            These tests exercise the Datastore Emulator running inside a Docker container.
+            Without Docker they verify nothing, so the build fails here instead of passing
+            silently. Install Docker (or start the Docker daemon) and run the build again.
+
+            To build the rest of the project without these tests, exclude them explicitly:
+
+                ./gradlew build -x :$module:test
+            """.trimIndent()
+        )
+    }
+
+    /**
+     * Returns `true` if `docker info` reports a reachable Docker daemon.
+     *
+     * Any failure to even start the `docker` executable (for example, it is not
+     * installed) is treated as "no Docker available".
+     */
+    private fun dockerAvailable(): Boolean = try {
+        val sink = ByteArrayOutputStream()
+        val result = execOperations.exec {
+            commandLine(dockerInfoCommand())
+            standardOutput = sink
+            errorOutput = sink
+            isIgnoreExitValue = true
+        }
+        result.exitValue == 0
+    } catch (_: Exception) {
+        false
+    }
+
+    /**
+     * The command that probes the Docker daemon, resolved for the current OS.
+     *
+     * On Windows the check is routed through `cmd /c` so that the `docker`
+     * executable is resolved via `PATH`/`PATHEXT` (i.e. `docker.exe` provided by
+     * Docker Desktop); a bare program name is not reliably resolved otherwise. On
+     * other systems `docker` is invoked directly.
+     */
+    private fun dockerInfoCommand(): List<String> {
+        val onWindows = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
+        return if (onWindows) {
+            listOf("cmd", "/c", "docker", "info")
+        } else {
+            listOf("docker", "info")
+        }
+    }
+}
+
+/**
+ * Names of the modules whose tests can additionally run against a *remote* Google Cloud
+ * backend — the Datastore service and Stackdriver Trace — authenticating with the
+ * `spine-dev.json` service-account credential that `copyCredentials` places in their test
+ * resources.
+ *
+ * Unlike [dockerDependentModules], a missing credential is reported as a warning rather
+ * than a build failure: the remote suites are written to be skipped when the file is
+ * absent (see `README.md`), so a local build without it is legitimate. See
+ * [CheckCredentialsAvailable].
+ *
+ * Declared as a function for the same reason as [dockerDependentModules].
+ */
+fun credentialDependentModules() = setOf("datastore", "testutil-gcloud", "stackdriver-trace")
+
+/**
+ * Warns when the `spine-dev.json` credential is missing from the project root.
+ *
+ * The `copyCredentials` task copies that file into a module's test resources only when it
+ * exists; when it does not, the `Copy` task is skipped as `NO-SOURCE` without any output,
+ * and the remote Google Cloud tests stop running with no trace in the build log. Wired as
+ * a dependency of the `Test` tasks in [credentialDependentModules], this gate restores a
+ * visible signal.
+ *
+ * It only warns — see [credentialDependentModules] for why a missing credential is not a
+ * build failure.
+ */
+abstract class CheckCredentialsAvailable : DefaultTask() {
+
+    /** The name of the module whose remote tests use the credential. */
+    @get:Input
+    abstract val moduleName: Property<String>
+
+    /** The absolute path of the `spine-dev.json` credential expected at the project root. */
+    @get:Input
+    abstract val credentialsPath: Property<String>
+
+    @TaskAction
+    fun check() {
+        if (File(credentialsPath.get()).exists()) {
+            return
+        }
+        val module = moduleName.get()
+        logger.warn(
+            """
+
+            WARNING: `spine-dev.json` was not found at the project root.
+
+            The remote Google Cloud tests of `:$module` authenticate with this
+            service-account credential. Without it, `copyCredentials` copies nothing and
+            those tests are skipped or fail — so the build can pass while verifying less
+            than it appears to.
+
+            Provide the file at the project root to run them; CI decrypts it automatically
+            via `config/scripts/decrypt.sh`. See `README.md`.
+            """.trimIndent()
+        )
+    }
+}
+
+/**
  * Configures test tasks in this project.
  */
-fun Subproject.setupTestTasks() {
+fun Project.setupTestTasks() {
+    val gatedModule = name.takeIf { it in dockerDependentModules() }
+    val dockerGate = gatedModule?.let { module ->
+        tasks.register<CheckDockerAvailable>("checkDockerAvailable") {
+            moduleName.set(module)
+        }
+    }
+    val credentialModule = name.takeIf { it in credentialDependentModules() }
+    val credentialsGate = credentialModule?.let { module ->
+        val credentialsFile = "$rootDir/spine-dev.json"
+        tasks.register<CheckCredentialsAvailable>("checkCredentialsAvailable") {
+            moduleName.set(module)
+            credentialsPath.set(credentialsFile)
+        }
+    }
     tasks {
         registerTestTasks()
         test {
             useJUnitPlatform { includeEngines("junit-jupiter") }
             configureLogging()
+        }
+        dockerGate?.let { gate ->
+            withType<Test>().configureEach {
+                dependsOn(gate)
+            }
+        }
+        credentialsGate?.let { gate ->
+            withType<Test>().configureEach {
+                dependsOn(gate)
+            }
         }
 
         val copyCredentials by registering(Copy::class) {
@@ -232,22 +442,36 @@ fun Subproject.setupTestTasks() {
 /**
  * Defines dependencies of this subproject.
  */
-fun Subproject.defineDependencies() {
+fun Project.defineDependencies() {
     dependencies {
         ErrorProne.apply {
             errorprone(core)
         }
-        implementation(Spine.server)
+        implementation(CoreJvm.server)
 
-        // Strangely, Gradle does not see `protoData` via DSL here, so we add using the string.
-        add("protoData", Validation.java)
         implementation(Validation.runtime)
 
-        testImplementation(JUnit.runner)
-        testImplementation(Spine.testlib)
+        testImplementation(JUnit.Jupiter.engine)
+        // Put the JUnit Platform launcher on the test runtime classpath explicitly.
+        // Gradle's auto-provisioned launcher is not pinned to the forced JUnit 6
+        // platform here, which otherwise fails with "Failed to load JUnit Platform".
+        testRuntimeOnly(JUnit.Platform.launcher)
+        // Testcontainers logs through SLF4J. Provide a runtime SLF4J binding so the
+        // container logs are emitted (and the "No SLF4J providers were found" warning
+        // does not appear) when running the Datastore Emulator-based tests.
+        testRuntimeOnly(Slf4J.simple)
+        testImplementation(TestLib.lib)
 
-        testImplementation(Spine.CoreJava.testUtilServer)
-        testImplementation(Spine.CoreJava.serverTests)
+        testImplementation(CoreJvm.serverTestLib)
+        // Provides the generated test proto types and reusable test base classes
+        // previously taken from the `spine-server` test (`:test`) classifier artifact.
+        // The test fixtures are published under the `io.spine:server-test-fixtures`
+        // capability, so we request that variant explicitly.
+        testImplementation(CoreJvm.server) {
+            capabilities {
+                requireCapability("io.spine:server-test-fixtures")
+            }
+        }
     }
 }
 
@@ -258,7 +482,7 @@ fun Subproject.defineDependencies() {
  * @param generatedDir
  *          the name of the root directory with the generated code
  */
-fun Subproject.applyGeneratedDirectories(generatedDir: String) {
+fun Project.applyGeneratedDirectories(generatedDir: String) {
     val generatedMain = "$generatedDir/main"
     val generatedJava = "$generatedMain/java"
     val generatedKotlin = "$generatedMain/kotlin"
@@ -317,45 +541,71 @@ fun Subproject.applyGeneratedDirectories(generatedDir: String) {
 /**
  * Forces dependencies of this project.
  */
-fun Subproject.forceConfigurations() {
+fun Project.forceConfigurations() {
     configurations {
         forceVersions()
         excludeProtobufLite()
 
         all {
             resolutionStrategy {
+                /* The gRPC artifacts are version-less and get their versions from the
+                   gRPC BOM. We force the whole set via `forceArtifacts()` and pin the BOM
+                   to keep a single gRPC version across modules and the compiler plugins. */
+                Grpc.forceArtifacts(project, this@all, this@resolutionStrategy)
+                Jackson.forceArtifacts(project, this@all, this@resolutionStrategy)
+                Jackson.DataType.forceArtifacts(project, this@all, this@resolutionStrategy)
+                Jackson.DataFormat.forceArtifacts(project, this@all, this@resolutionStrategy)
+                // The `google-cloud-*` libraries pull additional gRPC artifacts
+                // (`grpc-alts`, `grpc-xds`, `grpc-grpclb`, `grpc-services`, etc.) at an
+                // older version. Align the `io.grpc` group with the version defined by the
+                // gRPC BOM forced above. The `grpc-kotlin-*` artifacts are versioned
+                // independently (see `GrpcKotlin`), so they are left untouched.
+                eachDependency {
+                    if (requested.group == "io.grpc" && !requested.name.contains("kotlin")) {
+                        useVersion(Grpc.version)
+                    }
+                }
                 exclude("io.spine", "spine-validate")
                 force(
-                    /* Force the version of gRPC used by the `:client` module over the one
-                       set by `mc-java` in the `:core` module when specifying compiler artifact
-                       for the gRPC plugin.
-                       See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
-                       .configureProtocPlugins()` method which sets the version from resources. */
+                    Kotlin.bom,
+                    Coroutines.bom,
+                    JUnit.bom,
+                    Jackson.annotations,
+                    Jackson.bom,
                     Grpc.ProtocPlugin.artifact,
-                    Grpc.api,
-                    JUnit.runner,
+                    Grpc.bom,
                     Guava.lib,
+                    // The `proto-google-cloud-*` libraries bring an older `failureaccess`
+                    // than the one used by the forced Guava version above.
+                    "com.google.guava:failureaccess:1.0.3",
 
-                    Spine.base,
+                    Base.lib,
+                    Base.annotations,
+                    Base.environment,
+                    Base.format,
+                    Reflect.lib,
                     Validation.runtime,
-                    Spine.time,
-                    Spine.Logging.lib,
-                    Spine.Logging.middleware,
-                    Spine.baseTypes,
-                    Spine.change,
-                    Spine.testlib,
-                    Spine.toolBase,
-                    Spine.pluginBase,
+                    Time.lib,
+                    Time.javaExtensions,
+                    Logging.lib,
+                    Logging.libJvm,
+                    Logging.middleware,
+                    Logging.grpcContext,
+                    BaseTypes.lib,
+                    Change.lib,
+                    TestLib.lib,
+                    ToolBase.lib,
+                    ToolBase.pluginBase,
+                    CoreJvm.server,
+                    Compiler.api,
+                    Compiler.pluginLib,
+                    Compiler.gradleApi,
+                    Compiler.params,
 
-                    Grpc.api,
-                    Grpc.auth,
-                    Grpc.core,
-                    Grpc.context,
-                    Grpc.stub,
-                    Grpc.protobuf,
-                    Grpc.protobufLite,
                     GoogleApis.AuthLibrary.credentials,
+                    GoogleApis.AuthLibrary.oAuth2Http,
                     GoogleApis.commonProtos,
+                    GoogleApis.common,
 
                     ApacheHttp.core,
                     CommonsCodec.lib,
@@ -369,9 +619,8 @@ fun Subproject.forceConfigurations() {
 /**
  * Configures publishing for this subproject.
  */
-fun Subproject.setupPublishing() {
-    updateGitHubPages(project.version.toString()) {
-        allowInternalJavadoc.set(true)
+fun Project.setupPublishing() {
+    updateGitHubPages {
         rootFolder.set(rootDir)
     }
 

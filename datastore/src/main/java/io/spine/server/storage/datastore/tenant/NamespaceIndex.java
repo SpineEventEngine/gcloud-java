@@ -36,7 +36,7 @@ import com.google.common.collect.Iterators;
 import io.spine.core.TenantId;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.server.tenant.TenantIndex;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.HashSet;
@@ -109,6 +109,17 @@ final class NamespaceIndex implements TenantIndex {
             }
             return result;
         }
+    }
+
+    /**
+     * Always returns {@code true}.
+     *
+     * <p>This index holds no closeable resources of its own, and its {@link #close()}
+     * performs no action, so it is always considered open.
+     */
+    @Override
+    public boolean isOpen() {
+        return true;
     }
 
     /**

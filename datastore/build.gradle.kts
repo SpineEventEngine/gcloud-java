@@ -24,9 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.GoogleCloud
-import io.spine.internal.dependency.Spine
-import io.spine.internal.gradle.publish.IncrementGuard
+import io.spine.dependency.lib.GoogleCloud
+import io.spine.dependency.local.Base
+import io.spine.dependency.local.BaseTypes
+import io.spine.dependency.local.CoreJvm
+import io.spine.dependency.local.Logging
+import io.spine.gradle.publish.IncrementGuard
 
 apply<IncrementGuard>()
 
@@ -36,13 +39,13 @@ dependencies {
         exclude(group = "com.google.protobuf")
         exclude(group = "com.google.guava")
     }
-    api(Spine.base)
-    api(Spine.baseTypes)
+    api(Base.lib)
+    api(BaseTypes.lib)
 
-    api(Spine.Logging.lib)
+    api(Logging.lib)
 
     testImplementation(project(":testutil-gcloud"))
-    testImplementation(Spine.server)
+    testImplementation(CoreJvm.server)
 }
 
 tasks {
