@@ -1,0 +1,5 @@
+$dokka.format:javadoc-v1
+$dokka.linkExtension:html
+$dokka.location:io.spine.server.trace.stackdriver/SignalSpan.Builder///PointingToDeclaration/io/spine/server/trace/stackdriver/SignalSpan.Builder.html
+$dokka.location:io.spine.server.trace.stackdriver/StackdriverTracerFactory.Builder///PointingToDeclaration/io/spine/server/trace/stackdriver/StackdriverTracerFactory.Builder.html
+io.spine.server.trace.stackdriver
