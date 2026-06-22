@@ -17,7 +17,7 @@
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.64.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
@@ -53,7 +53,7 @@
      * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.72.0.
      * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -442,7 +442,7 @@
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.64.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
@@ -478,7 +478,7 @@
      * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.72.0.
      * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1276,7 +1276,7 @@
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using 
+This report was generated on **Mon Jun 22 18:34:35 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -1290,15 +1290,15 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.64.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-pubsub-v1. **Version** : 1.97.0.
-     * **Project URL:** [https://github.com/googleapis/java-pubsub/proto-google-cloud-pubsub-v1](https://github.com/googleapis/java-pubsub/proto-google-cloud-pubsub-v1)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-pubsub-v1. **Version** : 1.151.0.
+     * **Project URL:** [https://github.com/googleapis/google-cloud-java](https://github.com/googleapis/google-cloud-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.72.0.
      * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1388,10 +1388,6 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
 1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
      * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-
-1.  **Group** : org.checkerframework. **Name** : checker-qual. **Version** : 4.2.0.
-     * **Project URL:** [https://checkerframework.org/](https://checkerframework.org/)
-     * **License:** [The MIT License](https://opensource.org/licenses/MIT)
 
 1.  **Group** : org.codehaus.mojo. **Name** : animal-sniffer-annotations. **Version** : 1.27.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1525,15 +1521,15 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.64.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-pubsub-v1. **Version** : 1.97.0.
-     * **Project URL:** [https://github.com/googleapis/java-pubsub/proto-google-cloud-pubsub-v1](https://github.com/googleapis/java-pubsub/proto-google-cloud-pubsub-v1)
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-cloud-pubsub-v1. **Version** : 1.151.0.
+     * **Project URL:** [https://github.com/googleapis/google-cloud-java](https://github.com/googleapis/google-cloud-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.72.0.
      * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2160,7 +2156,7 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using 
+This report was generated on **Mon Jun 22 18:34:35 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -2174,7 +2170,7 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.64.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
@@ -2198,7 +2194,7 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
      * **Project URL:** [https://github.com/googleapis/google-cloud-java](https://github.com/googleapis/google-cloud-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.72.0.
      * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2502,7 +2498,7 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.64.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
@@ -2526,7 +2522,7 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
      * **Project URL:** [https://github.com/googleapis/google-cloud-java](https://github.com/googleapis/google-cloud-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.72.0.
      * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3230,7 +3226,7 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using 
+This report was generated on **Mon Jun 22 18:34:35 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
@@ -3270,7 +3266,7 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.64.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
@@ -3306,7 +3302,7 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
      * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.72.0.
      * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3760,7 +3756,7 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
      * **Project URL:** [http://source.android.com/](http://source.android.com/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.63.0.
+1.  **Group** : com.google.api. **Name** : api-common. **Version** : 2.64.0.
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [BSD-3-Clause](https://github.com/googleapis/api-common-java/blob/main/LICENSE)
 
@@ -3796,7 +3792,7 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
      * **Project URL:** [https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1](https://github.com/googleapis/java-datastore/proto-google-cloud-datastore-v1)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.71.0.
+1.  **Group** : com.google.api.grpc. **Name** : proto-google-common-protos. **Version** : 2.72.0.
      * **Project URL:** [https://github.com/googleapis/sdk-platform-java](https://github.com/googleapis/sdk-platform-java)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4594,6 +4590,6 @@ This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Jun 20 21:31:57 WEST 2026** using 
+This report was generated on **Mon Jun 22 18:34:35 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
