@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ object GoogleCloud {
     // https://github.com/googleapis/google-cloud-java/tree/main/sdk-platform-java/java-core
     const val core = "com.google.cloud:google-cloud-core:2.71.0"
 
-    // https://github.com/googleapis/java-pubsub/tree/main/proto-google-cloud-pubsub-v1
-    const val pubSubGrpcApi = "com.google.api.grpc:proto-google-cloud-pubsub-v1:1.97.0"
+    // https://github.com/googleapis/google-cloud-java/tree/main/java-pubsub/proto-google-cloud-pubsub-v1
+    const val pubSubGrpcApi = "com.google.api.grpc:proto-google-cloud-pubsub-v1:1.151.0"
 
     // https://github.com/googleapis/google-cloud-java/tree/main/java-trace
     const val trace = "com.google.cloud:google-cloud-trace:2.93.0"

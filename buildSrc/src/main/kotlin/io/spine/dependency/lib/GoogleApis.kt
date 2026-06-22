@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ object GoogleApis {
     const val client = "com.google.api-client:google-api-client:1.32.2"
 
     // https://github.com/googleapis/api-common-java
-    const val common = "com.google.api:api-common:2.63.0"
+    const val common = "com.google.api:api-common:2.64.0"
 
     // https://github.com/googleapis/java-common-protos
-    const val commonProtos = "com.google.api.grpc:proto-google-common-protos:2.71.0"
+    const val commonProtos = "com.google.api.grpc:proto-google-common-protos:2.72.0"
 
     // https://github.com/googleapis/gax-java
     const val gax = "com.google.api:gax:2.80.0"
