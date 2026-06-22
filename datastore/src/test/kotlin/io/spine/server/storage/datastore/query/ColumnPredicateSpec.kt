@@ -171,11 +171,12 @@ internal class ColumnPredicateSpec {
         }
 
         @Test
-        fun `match any entity for an OR predicate that declares no own parameters`() {
+        fun `reject an entity that satisfies none of the alternative groups`() {
             // A composite `either` yields an `OR` node whose own parameter list is empty
-            // (the parameters live in its child `AND` groups). `checkOr()` treats such a
-            // node as a match regardless of the children. This documents the existing
-            // fallback; issue #195 only corrects the result inversion, not this behavior.
+            // (the parameters live in its child `AND` groups), so the disjunction must be
+            // driven by those children. The entity is a near miss: it matches the
+            // `idString` of the second group but not its `internal` value, so the `AND`
+            // within that group rejects it. With no group satisfied, the result is `false`.
             val predicate = predicateFor(
                 StgProject.query()
                     .either(
@@ -185,7 +186,55 @@ internal class ColumnPredicateSpec {
                     .build()
             )
 
-            predicate.test(entity(id = "999", internal = true)) shouldBe true
+            predicate.test(entity(id = "7", internal = true)) shouldBe false
+        }
+
+        @Test
+        fun `match any entity for a disjunction with no alternatives`() {
+            // A disjunction with neither own parameters nor children imposes no
+            // constraint, mirroring the in-memory `RecordQueryMatcher`.
+            val predicate = predicateFor(StgProject.query().either().build())
+
+            predicate.test(entity(id = "anything")) shouldBe true
+        }
+
+        /**
+         * A [ColumnPredicate] over a mixed disjunction:
+         * `idString == "42" OR (idString == "7" AND internal == false)`.
+         *
+         * The single-parameter branch becomes an own parameter of the `OR` node, while the
+         * two-parameter branch becomes a child `AND`, so the node carries both. The premise
+         * is asserted here so the tests below cannot silently degrade if the query model ever
+         * lowers `either(...)` differently.
+         */
+        private fun mixedDisjunction() = StgProject.query()
+            .either(
+                { it.idString().`is`("42") },
+                { it.idString().`is`("7").internal().`is`(false) }
+            )
+            .build()
+            .also {
+                val root = it.subject().predicate()
+                check(root.allParams().size == 1 && root.children().size == 1) {
+                    "Not a mixed disjunction: ${root.allParams().size} params," +
+                        " ${root.children().size} children."
+                }
+            }
+            .let { predicateFor(it) }
+
+        @Test
+        fun `match an entity via the own parameter`() {
+            mixedDisjunction().test(entity(id = "42")) shouldBe true
+        }
+
+        @Test
+        fun `match an entity via the child group`() {
+            mixedDisjunction().test(entity(id = "7", internal = false)) shouldBe true
+        }
+
+        @Test
+        fun `reject an entity matching neither the parameter nor the group`() {
+            mixedDisjunction().test(entity(id = "999", internal = true)) shouldBe false
         }
     }
 

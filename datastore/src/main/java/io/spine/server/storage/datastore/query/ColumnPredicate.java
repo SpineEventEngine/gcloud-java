@@ -123,9 +123,15 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     private boolean checkOr(Entity entity,
                             ImmutableList<SubjectParameter<?, ?, ?>> params,
                             ImmutableList<QueryPredicate<R>> children) {
-        return checkOrParams(entity, params)
-                || checkOrChildren(entity, children)
-                || params.isEmpty();
+        // A disjunction matches if any of its parameters or child predicates matches.
+        // An empty disjunction (no parameters and no children) imposes no constraint and
+        // therefore matches. The `children` must be taken into account here: an `OR` node
+        // with no own parameters but with child predicates (e.g. a composite `either(...)`)
+        // is still driven by those children. By design, this is intended to behave like the
+        // in-memory `RecordQueryMatcher` so that a query selects the same records either way.
+        return (params.isEmpty() && children.isEmpty())
+                || checkOrParams(entity, params)
+                || checkOrChildren(entity, children);
     }
 
     private boolean checkOrChildren(Entity entity, ImmutableList<QueryPredicate<R>> children) {
