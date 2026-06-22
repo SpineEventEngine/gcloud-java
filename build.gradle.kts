@@ -67,6 +67,7 @@ import io.spine.gradle.repo.standardToSpineSdk
 import io.spine.gradle.testing.configureLogging
 import io.spine.gradle.testing.registerTestTasks
 import java.io.ByteArrayOutputStream
+import java.io.File
 import javax.inject.Inject
 import org.gradle.jvm.tasks.Jar
 import org.gradle.process.ExecOperations
@@ -330,6 +331,66 @@ abstract class CheckDockerAvailable : DefaultTask() {
 }
 
 /**
+ * Names of the modules whose tests can additionally run against a *remote* Google Cloud
+ * backend — the Datastore service and Stackdriver Trace — authenticating with the
+ * `spine-dev.json` service-account credential that `copyCredentials` places in their test
+ * resources.
+ *
+ * Unlike [dockerDependentModules], a missing credential is reported as a warning rather
+ * than a build failure: the remote suites are written to be skipped when the file is
+ * absent (see `README.md`), so a local build without it is legitimate. See
+ * [CheckCredentialsAvailable].
+ *
+ * Declared as a function for the same reason as [dockerDependentModules].
+ */
+fun credentialDependentModules() = setOf("datastore", "testutil-gcloud", "stackdriver-trace")
+
+/**
+ * Warns when the `spine-dev.json` credential is missing from the project root.
+ *
+ * The `copyCredentials` task copies that file into a module's test resources only when it
+ * exists; when it does not, the `Copy` task is skipped as `NO-SOURCE` without any output,
+ * and the remote Google Cloud tests stop running with no trace in the build log. Wired as
+ * a dependency of the `Test` tasks in [credentialDependentModules], this gate restores a
+ * visible signal.
+ *
+ * It only warns — see [credentialDependentModules] for why a missing credential is not a
+ * build failure.
+ */
+abstract class CheckCredentialsAvailable : DefaultTask() {
+
+    /** The name of the module whose remote tests use the credential. */
+    @get:Input
+    abstract val moduleName: Property<String>
+
+    /** The absolute path of the `spine-dev.json` credential expected at the project root. */
+    @get:Input
+    abstract val credentialsPath: Property<String>
+
+    @TaskAction
+    fun check() {
+        if (File(credentialsPath.get()).exists()) {
+            return
+        }
+        val module = moduleName.get()
+        logger.warn(
+            """
+
+            WARNING: `spine-dev.json` was not found at the project root.
+
+            The remote Google Cloud tests of `:$module` authenticate with this
+            service-account credential. Without it, `copyCredentials` copies nothing and
+            those tests are skipped or fail — so the build can pass while verifying less
+            than it appears to.
+
+            Provide the file at the project root to run them; CI decrypts it automatically
+            via `config/scripts/decrypt.sh`. See `README.md`.
+            """.trimIndent()
+        )
+    }
+}
+
+/**
  * Configures test tasks in this project.
  */
 fun Project.setupTestTasks() {
@@ -339,6 +400,14 @@ fun Project.setupTestTasks() {
             moduleName.set(module)
         }
     }
+    val credentialModule = name.takeIf { it in credentialDependentModules() }
+    val credentialsGate = credentialModule?.let { module ->
+        val credentialsFile = "$rootDir/spine-dev.json"
+        tasks.register<CheckCredentialsAvailable>("checkCredentialsAvailable") {
+            moduleName.set(module)
+            credentialsPath.set(credentialsFile)
+        }
+    }
     tasks {
         registerTestTasks()
         test {
@@ -346,6 +415,11 @@ fun Project.setupTestTasks() {
             configureLogging()
         }
         dockerGate?.let { gate ->
+            withType<Test>().configureEach {
+                dependsOn(gate)
+            }
+        }
+        credentialsGate?.let { gate ->
             withType<Test>().configureEach {
                 dependsOn(gate)
             }
