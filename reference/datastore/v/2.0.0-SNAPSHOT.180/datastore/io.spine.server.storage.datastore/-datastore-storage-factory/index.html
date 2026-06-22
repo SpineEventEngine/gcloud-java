@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>DatastoreStorageFactory</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+        <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer="defer"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+            <a class="library-name--link" href="../../../index.html" tabindex="1">
+                    datastore
+            </a>
+        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle"
+                type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+2.0.0-SNAPSHOT.180        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true"
+                        data-filter=":datastore/main">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox"
+                        data-role="dropdown-toggle"
+                        aria-controls="platform-tags-listbox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-label="Toggle source sets"
+                ></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":datastore/main"
+                                       data-filter=":datastore/main"/>
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button"
+                    type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config='{"defaultSize": 280, "minSize": 200, "maxSize": 400}'>
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list"
+                    data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    datastore
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="datastore::io.spine.server.storage.datastore/DatastoreStorageFactory///PointingToDeclaration//-919872027">
+  <div class="breadcrumbs"><a href="../../../index.html">datastore</a><span class="delimiter">/</span><a href="../index.html">io.spine.server.storage.datastore</a><span class="delimiter">/</span><span class="current">DatastoreStorageFactory</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Datastore</span><wbr></wbr><span>Storage</span><wbr></wbr><span><span>Factory</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">DatastoreStorageFactory</a> : <span data-unresolved-link="io.spine.server.storage/StorageFactory///PointingToDeclaration/">StorageFactory</span>, <span data-unresolved-link="io.spine.logging/WithLogging///PointingToDeclaration/">WithLogging</span></div><p class="paragraph">Creates <span data-unresolved-link="io.spine.server.storage/Storage///PointingToDeclaration/">Storage</span>s based on <span data-unresolved-link="com.google.cloud.datastore/Datastore///PointingToDeclaration/">Datastore</span>. </p><p class="paragraph">As a convenience API, provides an ability to configure the <span data-unresolved-link="io.spine.server/BoundedContextBuilder///PointingToDeclaration/">BoundedContextBuilder</span>s with the <span data-unresolved-link="io.spine.server.tenant/TenantIndex///PointingToDeclaration/">TenantIndex</span> specific to the instance of <code class="lang-java">Datastore</code> configured for this factory. </p><p class="paragraph">As per design intention of <span data-unresolved-link="io.spine.server.storage/StorageFactory///PointingToDeclaration/">StorageFactory</span>, by default all storages created by this factory delegate the execution to instances of a pre-configured <a href="../../io.spine.server.storage.datastore.record/-ds-record-storage/index.html">DsRecordStorage</a>.</p><h4 class="tableheader">See also</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="configure-tenant-index.html"><span>Datastore</span><wbr></wbr><span>Storage</span><wbr></wbr><span><span>Factory</span></span></a></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="228222158%2FConstructors%2F-919872027" anchor-label="DatastoreStorageFactory" id="228222158%2FConstructors%2F-919872027" data-filterable-set=":datastore/main"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-datastore-storage-factory.html"><span>Datastore</span><wbr></wbr><span>Storage</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="228222158%2FConstructors%2F-919872027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">builder<span class="token operator">: </span><a href="-builder/index.html">DatastoreStorageFactory.Builder</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-128482143%2FClasslikes%2F-919872027" anchor-label="Builder" id="-128482143%2FClasslikes%2F-919872027" data-filterable-set=":datastore/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-builder/index.html"><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-128482143%2FClasslikes%2F-919872027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-builder/index.html">Builder</a></div><div class="brief ">A builder for the <code class="lang-java">DatastoreStorageFactory</code>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1859092143%2FFunctions%2F-919872027" anchor-label="close" id="-1859092143%2FFunctions%2F-919872027" data-filterable-set=":datastore/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="close.html"><span><span>close</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1859092143%2FFunctions%2F-919872027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Performs no action.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1838696783%2FFunctions%2F-919872027" anchor-label="columnMapping" id="-1838696783%2FFunctions%2F-919872027" data-filterable-set=":datastore/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="column-mapping.html"><span>column</span><wbr></wbr><span><span>Mapping</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1838696783%2FFunctions%2F-919872027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="column-mapping.html"><span class="token function">columnMapping</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="io.spine.server.storage/ColumnMapping///PointingToDeclaration/">ColumnMapping</span><span class="token operator">&lt;</span><span data-unresolved-link="com.google.cloud.datastore/Value///PointingToDeclaration/">Value</span><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief ">Returns the column mapping set for this factory.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="110929282%2FFunctions%2F-919872027" anchor-label="configureTenantIndex" id="110929282%2FFunctions%2F-919872027" data-filterable-set=":datastore/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="configure-tenant-index.html"><span>configure</span><wbr></wbr><span>Tenant</span><wbr></wbr><span><span>Index</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="110929282%2FFunctions%2F-919872027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="com.google.errorprone.annotations/CanIgnoreReturnValue///PointingToDeclaration/"><span class="token annotation builtin">CanIgnoreReturnValue</span></span></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="configure-tenant-index.html"><span class="token function">configureTenantIndex</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">builder<span class="token operator">: </span><span data-unresolved-link="io.spine.server/BoundedContextBuilder///PointingToDeclaration/">BoundedContextBuilder</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="io.spine.server/BoundedContextBuilder///PointingToDeclaration/">BoundedContextBuilder</span></div><div class="brief ">Configures the passed <span data-unresolved-link="io.spine.server/BoundedContextBuilder///PointingToDeclaration/">BoundedContextBuilder</span> with the <span data-unresolved-link="io.spine.server.tenant/TenantIndex///PointingToDeclaration/">TenantIndex</span> built on top of the <code class="lang-java">Datastore</code> specific to this factory instance.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1407156068%2FFunctions%2F-919872027" anchor-label="createRecordStorage" id="1407156068%2FFunctions%2F-919872027" data-filterable-set=":datastore/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-record-storage.html"><span>create</span><wbr></wbr><span>Record</span><wbr></wbr><span><span>Storage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1407156068%2FFunctions%2F-919872027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="create-record-storage.html">I</a><span class="token punctuation">, </span><a href="create-record-storage.html">R</a><span class="token operator"> : </span><span data-unresolved-link="com.google.protobuf/Message///PointingToDeclaration/">Message</span><span class="token operator">?</span><span class="token operator">&gt; </span><a href="create-record-storage.html"><span class="token function">createRecordStorage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><span data-unresolved-link="io.spine.server/ContextSpec///PointingToDeclaration/">ContextSpec</span><span class="token punctuation">, </span></span><span class="parameter ">spec<span class="token operator">: </span><span data-unresolved-link="io.spine.server.storage/RecordSpec///PointingToDeclaration/">RecordSpec</span><span class="token operator">&lt;</span><a href="create-record-storage.html">I</a><span class="token punctuation">, </span><a href="create-record-storage.html">R</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="io.spine.server.storage/RecordStorage///PointingToDeclaration/">RecordStorage</span><span class="token operator">&lt;</span><a href="create-record-storage.html">I</a><span class="token punctuation">, </span><a href="create-record-storage.html">R</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-903097678%2FFunctions%2F-919872027" anchor-label="datastore" id="-903097678%2FFunctions%2F-919872027" data-filterable-set=":datastore/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="datastore.html"><span><span>datastore</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-903097678%2FFunctions%2F-919872027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="datastore.html"><span class="token function">datastore</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.google.cloud.datastore/Datastore///PointingToDeclaration/">Datastore</span></div><div class="brief ">Returns the instance of wrapped <span data-unresolved-link="com.google.cloud.datastore/Datastore///PointingToDeclaration/">Datastore</span>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1857678493%2FFunctions%2F-919872027" anchor-label="isOpen" id="1857678493%2FFunctions%2F-919872027" data-filterable-set=":datastore/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-open.html"><span>is</span><wbr></wbr><span><span>Open</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1857678493%2FFunctions%2F-919872027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="is-open.html"><span class="token function">isOpen</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief ">Always returns <code class="lang-java">true</code>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1182693686%2FFunctions%2F-919872027" anchor-label="newBuilder" id="1182693686%2FFunctions%2F-919872027" data-filterable-set=":datastore/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="new-builder.html"><span>new</span><wbr></wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1182693686%2FFunctions%2F-919872027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="new-builder.html"><span class="token function">newBuilder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-builder/index.html">DatastoreStorageFactory.Builder</a></div><div class="brief ">Creates new instance of <code class="lang-java">Builder</code>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1930695743%2FFunctions%2F-919872027" anchor-label="newBuilderWithDefaults" id="1930695743%2FFunctions%2F-919872027" data-filterable-set=":datastore/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="new-builder-with-defaults.html"><span>new</span><wbr></wbr><span>Builder</span><wbr></wbr><span>With</span><wbr></wbr><span><span>Defaults</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1930695743%2FFunctions%2F-919872027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="new-builder-with-defaults.html"><span class="token function">newBuilderWithDefaults</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">datastore<span class="token operator">: </span><span data-unresolved-link="com.google.cloud.datastore/Datastore///PointingToDeclaration/">Datastore</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-builder/index.html">DatastoreStorageFactory.Builder</a></div><div class="brief ">Creates a new instance of <code class="lang-java">Builder</code>, passing the <code class="lang-java">Datastore</code> to it, and configuring the <code class="lang-java">Builder</code> instance with some default settings, such as <a href="../../io.spine.server.storage.datastore.config/-ds-column-mapping/index.html">column mapping</a> and <span data-unresolved-link="io.spine.server.storage.datastore.tenant/NsConverterFactory/defaults/#/PointingToDeclaration/">namespace converter factory</span>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="991210865%2FFunctions%2F-919872027" anchor-label="wrappers" id="991210865%2FFunctions%2F-919872027" data-filterable-set=":datastore/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":datastore/main" data-filterable-set=":datastore/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="wrappers.html"><span><span>wrappers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="991210865%2FFunctions%2F-919872027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":datastore/main"><div class="symbol monospace"><span class="token keyword">protected </span><span class="token keyword">open </span><span class="token keyword">fun </span><a href="wrappers.html"><span class="token function">wrappers</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Iterable.html">Iterable</a><span class="token operator">&lt;</span><a href="../-datastore-wrapper/index.html">DatastoreWrapper</a><span class="token operator">&gt;</span></div><div class="brief ">Returns the currently known initialized <code class="lang-java">DatastoreWrapper</code>s.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>Copyright 2026, TeamDev</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
