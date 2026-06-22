@@ -26,7 +26,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.api.grpc</groupId>
     <artifactId>proto-google-cloud-pubsub-v1</artifactId>
-    <version>1.97.0</version>
+    <version>1.151.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
