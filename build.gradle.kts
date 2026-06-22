@@ -308,7 +308,7 @@ abstract class CheckDockerAvailable : DefaultTask() {
             isIgnoreExitValue = true
         }
         result.exitValue == 0
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 
