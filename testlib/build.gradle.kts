@@ -2,13 +2,13 @@ import io.spine.dependency.test.JUnit
 import io.spine.dependency.test.Testcontainers
 
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,6 +26,12 @@ import io.spine.dependency.test.Testcontainers
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+// This module produces a testing-utility artifact, so it is published under the
+// `io.spine.tools` group rather than the production `io.spine.gcloud` group.
+// Together with `toolArtifactPrefix = "gcloud-"` in the root `spinePublishing`
+// block, this yields the published coordinates `io.spine.tools:gcloud-testlib`.
+group = "io.spine.tools"
 
 dependencies {
     JUnit.Jupiter.modules.forEach {

@@ -24,20 +24,18 @@ Versions starting from `2.0.0-SNAPSHOT.63` were built with Java 11, and earlier 
 Gradle:
 
 ```kotlin
-// Compatible with Java 8:
-
 dependencies {
     // Datastore Storage support library.
-    implementation("io.spine.gcloud:spine-datastore:1.9.1")
+    implementation("io.spine.gcloud:spine-datastore:$version")
 
     // Pub/Sub messaging support library.
-    implementation("io.spine.gcloud:spine-pubsub:1.9.1")
+    implementation("io.spine.gcloud:spine-pubsub:$version")
 
     // Stackdriver Trace support library.
-    implementation("io.spine.gcloud:spine-stackdriver-trace:1.9.1")
+    implementation("io.spine.gcloud:spine-stackdriver-trace:$version")
 
     // Datastore-related test utilities (if needed).
-    testImplementation("io.spine.gcloud:testutil-gcloud:1.9.1")
+    testImplementation("io.spine.tools:gcloud-testlib:$version")
 }
 ```
 
@@ -97,7 +95,7 @@ Therefore, a local Docker is required up and running, in order to launch tests.
 
 ##### Running the tests
 
-*Datastore and `testutil-gcloud`*
+*Datastore and `testlib`*
 
 To start a local Docker-based emulator and run test against it, run `./gradlew check`.
 
@@ -106,7 +104,7 @@ shuts down automatically.
 
 Some tests also verify a connection to a remote Datastore instance. In order to run those,
 the corresponding credential file called `spine-dev.json` should be placed under
-`<project root>/datastore/src/test/resources/` and `<project root>/testutil-gcloud/src/test/resources/`.
+`<project root>/datastore/src/test/resources/` and `<project root>/testlib/src/test/resources/`.
 
 Gradle build script is arranged to do that automatically upon running on CI.
 

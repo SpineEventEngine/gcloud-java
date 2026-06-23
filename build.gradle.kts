@@ -140,13 +140,19 @@ spinePublishing {
     modules = setOf(
         "datastore",
         "stackdriver-trace",
-        "testutil-gcloud",
+        "testlib",
         "pubsub"
     )
+    // The `testlib` module is published under the `io.spine.tools` group (set in
+    // its own build file). For tool-group modules `spinePublishing` uses
+    // `toolArtifactPrefix` instead of the default `spine-` prefix, producing the
+    // artifact ID `gcloud-testlib`. No other module belongs to `io.spine.tools`,
+    // so this prefix affects `testlib` only.
+    toolArtifactPrefix = "gcloud-"
     destinations = with(PublishingRepos) {
         setOf(
             cloudArtifactRegistry,
-            gitHub("gcloud-java")
+            gitHub("gcloud-jvm")
         )
     }
 }
@@ -254,7 +260,7 @@ fun Project.setupKotlin(javaVersion: JavaLanguageVersion) {
  * the `subprojects {}` configuration, which runs before a top-level property initializer
  * further down the script would have executed.
  */
-fun dockerDependentModules() = setOf("datastore", "testutil-gcloud")
+fun dockerDependentModules() = setOf("datastore", "testlib")
 
 /**
  * Fails the build unless a Docker environment is available for launching the
@@ -343,7 +349,7 @@ abstract class CheckDockerAvailable : DefaultTask() {
  *
  * Declared as a function for the same reason as [dockerDependentModules].
  */
-fun credentialDependentModules() = setOf("datastore", "testutil-gcloud", "stackdriver-trace")
+fun credentialDependentModules() = setOf("datastore", "testlib", "stackdriver-trace")
 
 /**
  * Warns when the `spine-dev.json` credential is missing from the project root.

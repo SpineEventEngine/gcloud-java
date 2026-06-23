@@ -1,6 +1,6 @@
 # This repo-specific workflow replaces the generic `build-on-ubuntu.yml` that the
 # `config` submodule distributes; it adds the Spine-Dev credential-decrypt step
-# required by `gcloud-java`. The directive below tells `config/migrate` not to
+# required by `gcloud-jvm`. The directive below tells `config/migrate` not to
 # copy the generic workflow into this repository (see `config`'s README).
 # config:replaces build-on-ubuntu.yml
 name: Ubuntu CI with Google Cloud SDK
