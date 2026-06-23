@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
-#
-# Copyright 2023, TeamDev. All rights reserved.
+# Copyright 2026, TeamDev. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+# https://www.apache.org/licenses/LICENSE-2.0
 #
 # Redistribution and use in source and/or binary forms, with or without
 # modification, must retain the above copyright notice and the following
@@ -24,16 +23,15 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
 
-# Downloads the Travis build results from Google Cloud Storage and opens the directory with them.
-# The report is downloaded to `test-reports` directory.
-#
-# First argument is the remote branch name and the second argument is the build number to download.
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+gcs_properties="$script_dir/../gcs.properties"
+bucket="$(sed -n 's/^artifacts\.bucket=//p' "$gcs_properties")"
+folder="$(sed -n 's/^artifacts\.folder=//p' "$gcs_properties")"
 
-BUILD_NAME="$2-$1"
+BUILD_NAME="$2-$1" # Args: $1 = remote branch name, $2 = build number.
 
-gsutil cp -r "gs://spine-dev.appspot.com/gcloud-java/builds/$BUILD_NAME/test-reports.zip" "test-reports/$BUILD_NAME/report.zip" 
+gsutil cp -r "gs://$bucket/$folder/$BUILD_NAME/test-reports.zip" "test-reports/$BUILD_NAME/report.zip"
 unzip -aoq "test-reports/$BUILD_NAME/report.zip" -d "test-reports/$BUILD_NAME/"
 rm "test-reports/$BUILD_NAME/report.zip"
 open "test-reports/$BUILD_NAME"

@@ -10,14 +10,19 @@ the Datastore in your tests, please perform the following steps:
 
 3. Run `gcloud init` to initialize the SDK.
 
-4. Run `gcloud components install gcd-emulator` to install datastore emulator.
+4. Run `gcloud components install cloud-datastore-emulator` to install the
+   Datastore emulator.
 
-5. Make sure running `gcloud beta emulators datastore env-init` displays:
+5. Start the emulator with `gcloud beta emulators datastore start`. Leave it
+   running in this terminal.
+
+6. In a separate terminal, run `gcloud beta emulators datastore env-init` to
+   print the connection variables. It displays:
 
 ```
 export DATASTORE_DATASET=spine
-export DATASTORE_HOST=http://localhost:8080
-export DATASTORE_EMULATOR_HOST=localhost:8080
+export DATASTORE_HOST=http://localhost:8081
+export DATASTORE_EMULATOR_HOST=localhost:8081
 export DATASTORE_PROJECT_ID=spine
 ```
 
