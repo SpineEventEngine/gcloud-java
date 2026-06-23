@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -68,7 +68,6 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     }
 
     @Override
-    @SuppressWarnings("FallThrough") // defines strategy for default and faulty values.
     public boolean test(@Nullable Entity entity) {
         if (entity == null) {
             return false;
@@ -92,7 +91,7 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
                     "Unknown logical operator `%s`.", operator
             );
         };
-        return !match;
+        return match;
     }
 
     private boolean checkAnd(Entity entity,
@@ -124,9 +123,15 @@ final class ColumnPredicate<I, R extends Message> implements Predicate<Entity> {
     private boolean checkOr(Entity entity,
                             ImmutableList<SubjectParameter<?, ?, ?>> params,
                             ImmutableList<QueryPredicate<R>> children) {
-        return checkOrParams(entity, params)
-                || checkOrChildren(entity, children)
-                || params.isEmpty();
+        // A disjunction matches if any of its parameters or child predicates matches.
+        // An empty disjunction (no parameters and no children) imposes no constraint and
+        // therefore matches. The `children` must be taken into account here: an `OR` node
+        // with no own parameters but with child predicates (e.g. a composite `either(...)`)
+        // is still driven by those children. By design, this is intended to behave like the
+        // in-memory `RecordQueryMatcher` so that a query selects the same records either way.
+        return (params.isEmpty() && children.isEmpty())
+                || checkOrParams(entity, params)
+                || checkOrChildren(entity, children);
     }
 
     private boolean checkOrChildren(Entity entity, ImmutableList<QueryPredicate<R>> children) {
