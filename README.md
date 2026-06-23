@@ -1,13 +1,13 @@
-# gcloud-java
+# gcloud-jvm
 
 [![codecov][codecov-badge]][codecov]
 [![Ubuntu build][ubuntu-build-badge]][gh-actions]
 
 
-[codecov]: https://codecov.io/gh/SpineEventEngine/gcloud-java
-[codecov-badge]: https://codecov.io/gh/SpineEventEngine/gcloud-java/branch/master/graph/badge.svg
-[gh-actions]: https://github.com/SpineEventEngine/gcloud-java/actions
-[ubuntu-build-badge]: https://github.com/SpineEventEngine/gcloud-java/actions/workflows/build-on-ubuntu-gcloud.yml/badge.svg
+[codecov]: https://codecov.io/gh/SpineEventEngine/gcloud-jvm
+[codecov-badge]: https://codecov.io/gh/SpineEventEngine/gcloud-jvm/branch/master/graph/badge.svg
+[gh-actions]: https://github.com/SpineEventEngine/gcloud-jvm/actions
+[ubuntu-build-badge]: https://github.com/SpineEventEngine/gcloud-jvm/actions/workflows/build-on-ubuntu-gcloud.yml/badge.svg
 
  
 Support for Spine-based Java apps running at Google Cloud.
@@ -44,16 +44,16 @@ dependencies {
 These artifacts should be used as a part of the Spine server application.
  
 For the details on setting up the server environment please refer to
-[Spine Bootstrap Gradle plugin][bootstrap] and [Spine `core` modules][core-java] documentation. 
+[Spine Bootstrap Gradle plugin][bootstrap] and [Spine `core` modules][core-jvm] documentation. 
 
 [bootstrap]: https://github.com/SpineEventEngine/bootstrap/
-[core-java]: https://github.com/SpineEventEngine/core-java/
+[core-jvm]: https://github.com/SpineEventEngine/core-jvm/
 
 ### Configuring Datastore
 
 #### Datastore indexes
 
-In order to run the application built on top of `gcloud-java`, Datastore instance requires some 
+To run the application built on top of `gcloud-jvm`, Datastore instance requires some 
 preliminary configuration. In particular, the indexes for the Spine internal record types should 
 be set. Please notice a special index configuration for your custom `Aggregate` types.
 
@@ -86,7 +86,7 @@ an internal Exception. To prevent this, you should create an index for your `Cus
 
 ### Testing
 
-This section describes testing the `gcloud-java` library itself.
+This section describes testing the `gcloud-jvm` library itself.
 
 ##### Preconditions
 
