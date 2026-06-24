@@ -56,7 +56,7 @@ import io.spine.server.storage.datastore.record.DsRecordStorage;
 import io.spine.server.storage.datastore.tenant.DatastoreTenants;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
-import io.spine.server.storage.datastore.tenant.NsConverterFactory;
+import io.spine.server.storage.datastore.tenant.NamespaceConverterFactory;
 import io.spine.server.storage.datastore.tenant.PrefixedNsConverterFactory;
 import io.spine.server.tenant.TenantIndex;
 
@@ -113,7 +113,7 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
     /**
      * A factory of {@link io.spine.server.storage.datastore.tenant.Namespace} converters.
      */
-    private final NsConverterFactory converterFactory;
+    private final NamespaceConverterFactory converterFactory;
 
     /**
      * The settings of transactional behavior, per each stored record type.
@@ -195,10 +195,10 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
     }
 
     /**
-     * Returns the {@link NsConverterFactory} configured for this factory.
+     * Returns the {@link NamespaceConverterFactory} configured for this factory.
      */
     @VisibleForTesting
-    NsConverterFactory nsConverterFactory() {
+    NamespaceConverterFactory namespaceConverterFactory() {
         return converterFactory;
     }
 
@@ -212,7 +212,7 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
         }
     }
 
-    private NsConverterFactory converterFactory() {
+    private NamespaceConverterFactory converterFactory() {
         var defaultNamespace = namespaceFromOptions();
         return defaultNamespace.isEmpty()
                ? converterFactory
@@ -314,7 +314,7 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
      * Creates a new instance of {@code Builder}, passing the {@code Datastore} to it, and
      * configuring the {@code Builder} instance with some default settings, such as
      * {@linkplain DsColumnMapping column mapping} and
-     * {@linkplain NsConverterFactory#defaults() namespace converter factory}.
+     * {@linkplain NamespaceConverterFactory#defaults() namespace converter factory}.
      */
     @VisibleForTesting
     public static Builder newBuilderWithDefaults(Datastore datastore) {
@@ -337,7 +337,7 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
         private Datastore datastore;
         private ColumnMapping<Value<?>> columnMapping;
         private NamespaceConverter namespaceConverter;
-        private NsConverterFactory converterFactory;
+        private NamespaceConverterFactory converterFactory;
         private final TxSettings.Builder txSettings = TxSettings.newBuilder();
         private final RecordLayouts.Builder layouts = RecordLayouts.newBuilder();
         private final CustomStorages.Builder customStorages = CustomStorages.newBuilder();
@@ -385,17 +385,17 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
          * <p>Setting this parameter is reasonable (but not required) only if the storage is
          * multitenant. Otherwise, the converter is not consulted.
          *
-         * <p>This is a shorthand for supplying an {@link NsConverterFactory} that returns the
+         * <p>This is a shorthand for supplying an {@link NamespaceConverterFactory} that returns the
          * same converter regardless of the multi-tenancy setting. To vary the converter by
-         * multi-tenancy, use {@link #setConverterFactory(NsConverterFactory)} instead. The two
+         * multi-tenancy, use {@link #setConverterFactory(NamespaceConverterFactory)} instead. The two
          * methods are mutually exclusive.
          *
          * @param converter
          *         a custom converter for the Tenant IDs
          * @return this instance of {@code Builder}
          * @throws IllegalStateException
-         *         if an {@link NsConverterFactory} has already been set via
-         *         {@link #setConverterFactory(NsConverterFactory)}
+         *         if an {@link NamespaceConverterFactory} has already been set via
+         *         {@link #setConverterFactory(NamespaceConverterFactory)}
          */
         @CanIgnoreReturnValue
         public Builder setNamespaceConverter(NamespaceConverter converter) {
@@ -406,7 +406,7 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
         }
 
         /**
-         * Sets an {@link NsConverterFactory} producing the {@link NamespaceConverter}s used to
+         * Sets an {@link NamespaceConverterFactory} producing the {@link NamespaceConverter}s used to
          * convert the Datastore namespaces and the {@link io.spine.core.TenantId Tenant IDs}
          * back and forth.
          *
@@ -416,7 +416,7 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
          * for multitenant storages.
          *
          * <p>If neither this method nor {@link #setNamespaceConverter(NamespaceConverter)} is
-         * called, the {@linkplain NsConverterFactory#defaults() default} factory is used.
+         * called, the {@linkplain NamespaceConverterFactory#defaults() default} factory is used.
          *
          * @param converterFactory
          *         a custom factory of the Tenant ID converters
@@ -426,7 +426,7 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
          *         {@link #setNamespaceConverter(NamespaceConverter)}
          */
         @CanIgnoreReturnValue
-        public Builder setConverterFactory(NsConverterFactory converterFactory) {
+        public Builder setConverterFactory(NamespaceConverterFactory converterFactory) {
             checkNotNull(converterFactory);
             checkState(namespaceConverter == null, CONVERTER_OPTIONS_CONFLICT);
             this.converterFactory = converterFactory;
@@ -549,21 +549,21 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
         }
 
         /**
-         * Returns the {@link NsConverterFactory} to use, derived from the configured options.
+         * Returns the {@link NamespaceConverterFactory} to use, derived from the configured options.
          *
-         * <p>A {@linkplain #setConverterFactory(NsConverterFactory) factory set directly} takes
+         * <p>A {@linkplain #setConverterFactory(NamespaceConverterFactory) factory set directly} takes
          * precedence; otherwise a {@linkplain #setNamespaceConverter(NamespaceConverter) namespace
          * converter}, if set, is wrapped into a factory; otherwise the
-         * {@linkplain NsConverterFactory#defaults() default} factory is used.
+         * {@linkplain NamespaceConverterFactory#defaults() default} factory is used.
          */
-        private NsConverterFactory effectiveConverterFactory() {
+        private NamespaceConverterFactory effectiveConverterFactory() {
             if (converterFactory != null) {
                 return converterFactory;
             }
             if (namespaceConverter != null) {
                 return multitenant -> namespaceConverter;
             }
-            return NsConverterFactory.defaults();
+            return NamespaceConverterFactory.defaults();
         }
 
         private void setupMapping() {

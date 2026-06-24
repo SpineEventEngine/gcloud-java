@@ -39,13 +39,13 @@ import static java.util.Objects.requireNonNull;
  */
 final class MultitenantNamespaceSupplier extends NamespaceSupplier {
 
-    private final NsConverterFactory converterFactory;
+    private final NamespaceConverterFactory converterFactory;
 
-    static NamespaceSupplier withConvertersBy(NsConverterFactory converterFactory) {
+    static NamespaceSupplier withConvertersBy(NamespaceConverterFactory converterFactory) {
         return new MultitenantNamespaceSupplier(converterFactory);
     }
 
-    private MultitenantNamespaceSupplier(NsConverterFactory converterFactory) {
+    private MultitenantNamespaceSupplier(NamespaceConverterFactory converterFactory) {
         super();
         this.converterFactory = checkNotNull(converterFactory);
     }

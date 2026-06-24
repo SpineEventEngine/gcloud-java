@@ -42,7 +42,7 @@ final class NamespaceWithCustomConverterTest {
 
     private static final ProjectId PROJECT_ID = ProjectId.of("arbitraryproject");
     @SuppressWarnings("UnnecessaryLambda")
-    private static final NsConverterFactory factory = multitenant -> new CustomNamespaceConverter();
+    private static final NamespaceConverterFactory factory = multitenant -> new CustomNamespaceConverter();
 
     @Test
     @DisplayName("construct from `TenantId`")

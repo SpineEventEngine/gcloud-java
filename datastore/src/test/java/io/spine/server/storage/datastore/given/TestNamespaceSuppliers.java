@@ -27,7 +27,7 @@
 package io.spine.server.storage.datastore.given;
 
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
-import io.spine.server.storage.datastore.tenant.NsConverterFactory;
+import io.spine.server.storage.datastore.tenant.NamespaceConverterFactory;
 
 /**
  * Factory of {@code NamespaceSupplier}s to use in tests.
@@ -48,6 +48,6 @@ public final class TestNamespaceSuppliers {
      * Creates a multi-tenant {@code NamespaceSupplier}.
      */
     public static NamespaceSupplier multitenant() {
-        return NamespaceSupplier.multitenant(NsConverterFactory.defaults());
+        return NamespaceSupplier.multitenant(NamespaceConverterFactory.defaults());
     }
 }

@@ -46,7 +46,7 @@ final class DatastoreTenantsTest extends UtilityClassTest<DatastoreTenants> {
     @DisplayName("create tenant index")
     void testCreateIndex() {
         var index =
-                DatastoreTenants.index(TestDatastores.local(), NsConverterFactory.defaults());
+                DatastoreTenants.index(TestDatastores.local(), NamespaceConverterFactory.defaults());
         assertNotNull(index);
         assertThat(index).isInstanceOf(NamespaceIndex.class);
 

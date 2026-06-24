@@ -78,7 +78,7 @@ final class NamespaceTest {
                 .setValue(aGroupValue)
                 .build();
         var aGroupNamespaceFromTenantId =
-                Namespace.of(aGroupTenantId, true, NsConverterFactory.defaults());
+                Namespace.of(aGroupTenantId, true, NamespaceConverterFactory.defaults());
         var aGroupNamespaceFromString = Namespace.of(aGroupValue);
         var duplicateAGroupNamespaceFromString = Namespace.of(aGroupValue);
 

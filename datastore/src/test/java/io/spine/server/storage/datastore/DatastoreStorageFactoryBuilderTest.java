@@ -38,7 +38,7 @@ import io.spine.server.storage.datastore.config.FlatLayout;
 import io.spine.server.storage.datastore.config.RecordLayout;
 import io.spine.server.storage.datastore.given.TestColumnMapping;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
-import io.spine.server.storage.datastore.tenant.NsConverterFactory;
+import io.spine.server.storage.datastore.tenant.NamespaceConverterFactory;
 import io.spine.test.storage.StgProject;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.BeforeEach;
@@ -107,12 +107,12 @@ final class DatastoreStorageFactoryBuilderTest {
     @Test
     @DisplayName("use the namespace converter factory set explicitly")
     void testCustomConverterFactory() {
-        var converterFactory = NsConverterFactory.defaults();
+        var converterFactory = NamespaceConverterFactory.defaults();
         var factory = DatastoreStorageFactory.newBuilder()
                 .setDatastore(datastore())
                 .setConverterFactory(converterFactory)
                 .build();
-        assertThat(factory.nsConverterFactory()).isSameInstanceAs(converterFactory);
+        assertThat(factory.namespaceConverterFactory()).isSameInstanceAs(converterFactory);
     }
 
     @Test
@@ -122,11 +122,11 @@ final class DatastoreStorageFactoryBuilderTest {
                 .setDatastore(datastore())
                 .setNamespaceConverter(new NoOpNamespaceConverter());
         assertThrows(IllegalStateException.class,
-                     () -> withConverter.setConverterFactory(NsConverterFactory.defaults()));
+                     () -> withConverter.setConverterFactory(NamespaceConverterFactory.defaults()));
 
         var withFactory = DatastoreStorageFactory.newBuilder()
                 .setDatastore(datastore())
-                .setConverterFactory(NsConverterFactory.defaults());
+                .setConverterFactory(NamespaceConverterFactory.defaults());
         assertThrows(IllegalStateException.class,
                      () -> withFactory.setNamespaceConverter(new NoOpNamespaceConverter()));
     }

@@ -36,7 +36,7 @@ import io.spine.annotation.SPI;
  * multi-tenant environments.
  *
  * <p>Supply a custom implementation to
- * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#setConverterFactory(NsConverterFactory)
+ * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#setConverterFactory(NamespaceConverterFactory)
  * DatastoreStorageFactory.newBuilder().setConverterFactory(...)} to override the
  * {@linkplain #defaults() default} namespace conversion. If the same converter suffices
  * regardless of multi-tenancy, prefer the simpler
@@ -45,7 +45,7 @@ import io.spine.annotation.SPI;
  */
 @FunctionalInterface
 @SPI
-public interface NsConverterFactory {
+public interface NamespaceConverterFactory {
 
     /**
      * Creates a new instance of {@code NamespaceConverter} taking the passed multi-tenancy setting
@@ -59,13 +59,13 @@ public interface NsConverterFactory {
     NamespaceConverter get(boolean multitenant);
 
     /**
-     * Creates an instance of the {@code NsConverterFactory} with the framework default
+     * Creates an instance of the {@code NamespaceConverterFactory} with the framework default
      * conversion implementation.
      *
-     * @return a new instance of {@code NsConverterFactory} with the default converter
+     * @return a new instance of {@code NamespaceConverterFactory} with the default converter
      *         implementations used
      */
-    static NsConverterFactory defaults() {
+    static NamespaceConverterFactory defaults() {
         return DefaultNamespaceConverter::new;
     }
 }
