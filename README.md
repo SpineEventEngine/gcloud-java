@@ -97,8 +97,6 @@ Therefore, a local Docker is required up and running, in order to launch tests.
 
 ##### Running the tests
 
-*Datastore and `testlib`*
-
 To start a local Docker-based emulator and run test against it, run `./gradlew check`.
 
 Emulator container is re-used across tests. After test run is completed, the emulator container 
@@ -109,11 +107,3 @@ the corresponding credential file called `spine-dev.json` should be placed under
 `<project root>/datastore/src/test/resources/` and `<project root>/testlib/src/test/resources/`.
 
 Gradle build script is arranged to do that automatically upon running on CI.
-
-*Stackdriver-Trace*
-
-The test are launched in a scope of Gradle `test` phase. However, they rely on a Google Cloud 
-credentials file located at `<project root>/stackdriver-trace/src/test/resources/spine-dev.json`.
-
-To run the tests, obtain the service account file for your environment and make it available 
-to the test code in the specified locations.

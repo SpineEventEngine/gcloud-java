@@ -139,7 +139,6 @@ repositories.standardToSpineSdk()
 spinePublishing {
     modules = setOf(
         "datastore",
-        "stackdriver-trace",
         "testlib",
         "pubsub"
     )
@@ -338,9 +337,8 @@ abstract class CheckDockerAvailable : DefaultTask() {
 
 /**
  * Names of the modules whose tests can additionally run against a *remote* Google Cloud
- * backend — the Datastore service and Stackdriver Trace — authenticating with the
- * `spine-dev.json` service-account credential that `copyCredentials` places in their test
- * resources.
+ * backend — the Datastore service — authenticating with the `spine-dev.json`
+ * service-account credential that `copyCredentials` places in their test resources.
  *
  * Unlike [dockerDependentModules], a missing credential is reported as a warning rather
  * than a build failure: the remote suites are written to be skipped when the file is
@@ -349,7 +347,7 @@ abstract class CheckDockerAvailable : DefaultTask() {
  *
  * Declared as a function for the same reason as [dockerDependentModules].
  */
-fun credentialDependentModules() = setOf("datastore", "testlib", "stackdriver-trace")
+fun credentialDependentModules() = setOf("datastore", "testlib")
 
 /**
  * Warns when the `spine-dev.json` credential is missing from the project root.

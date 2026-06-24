@@ -2,7 +2,7 @@
 
 Spine records the handling of every signal (a command or an event) by an entity as a
 distributed trace. Until now, `gcloud-jvm` reported these traces to Google Cloud Trace
-through the [`stackdriver-trace`](../stackdriver-trace) module. That module is being
+through the `stackdriver-trace` module. That module is being
 **retired**: Google now recommends [OpenTelemetry][otel] over the Stackdriver client
 libraries, and `core-jvm` ships an OpenTelemetry-based replacement — the
 [`server-otel`][server-otel] module, introduced in [core-jvm#1633][pr].
