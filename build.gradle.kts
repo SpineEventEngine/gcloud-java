@@ -442,6 +442,19 @@ fun Project.setupTestTasks() {
     val dockerGate = gatedModule?.let { module ->
         tasks.register<CheckDockerAvailable>("checkDockerAvailable") {
             moduleName.set(module)
+            // Enforce the Docker requirement only when the module's `test` task is actually
+            // scheduled. The gate is a dependency of every `Test` task — including `fastTest`
+            // and `slowTest` — but the Windows CI job builds with `-x :<module>:test` (the
+            // Linux-container Datastore Emulator cannot run there) without excluding those
+            // siblings, so the gate would otherwise still run on Windows. There its
+            // `docker info` probe is meaningless and flaky — when it reports no daemon the gate
+            // fails a job that never runs the emulator tests. Skipping it when `:test` is not in
+            // the graph keeps the protection on the normal `test`/`build` path intact.
+            val testTaskPath = "${project.path}:test"
+            val taskGraph = project.gradle.taskGraph
+            onlyIf("the gated `:test` task is scheduled to run") {
+                taskGraph.hasTask(testTaskPath)
+            }
         }
     }
     val credentialModule = name.takeIf { it in credentialDependentModules() }
