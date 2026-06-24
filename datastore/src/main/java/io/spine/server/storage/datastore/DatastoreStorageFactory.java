@@ -57,7 +57,7 @@ import io.spine.server.storage.datastore.tenant.DatastoreTenants;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceSupplier;
 import io.spine.server.storage.datastore.tenant.NamespaceConverterFactory;
-import io.spine.server.storage.datastore.tenant.PrefixedNsConverterFactory;
+import io.spine.server.storage.datastore.tenant.PrefixedNamespaceConverterFactory;
 import io.spine.server.tenant.TenantIndex;
 
 import java.util.Map;
@@ -216,7 +216,7 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
         var defaultNamespace = namespaceFromOptions();
         return defaultNamespace.isEmpty()
                ? converterFactory
-               : new PrefixedNsConverterFactory(defaultNamespace, converterFactory);
+               : new PrefixedNamespaceConverterFactory(defaultNamespace, converterFactory);
     }
 
     private String namespaceFromOptions() {

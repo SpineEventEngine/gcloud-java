@@ -40,14 +40,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * the tenant ID string representation. The two parts are separated with a {@code .} (dot) symbol.
  */
 @Internal
-public final class PrefixedNsConverterFactory implements NamespaceConverterFactory {
+public final class PrefixedNamespaceConverterFactory implements NamespaceConverterFactory {
 
     private static final String SEPARATOR = ".";
 
     private final String namespacePrefix;
     private final NamespaceConverterFactory delegate;
 
-    public PrefixedNsConverterFactory(String namespacePrefix, NamespaceConverterFactory delegate) {
+    public PrefixedNamespaceConverterFactory(String namespacePrefix, NamespaceConverterFactory delegate) {
         this.namespacePrefix = checkNotNull(namespacePrefix);
         this.delegate = checkNotNull(delegate);
     }
