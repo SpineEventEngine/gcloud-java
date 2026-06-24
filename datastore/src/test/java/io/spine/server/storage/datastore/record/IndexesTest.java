@@ -31,11 +31,13 @@ import com.google.common.testing.NullPointerTester.Visibility;
 import io.spine.server.storage.datastore.DatastoreWrapper;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.testing.UtilityClassTest;
+import io.spine.testing.server.storage.datastore.EmulatorTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreWrapper;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("`Indexes` should")
+@EmulatorTest
 final class IndexesTest extends UtilityClassTest<Indexes> {
 
     IndexesTest() {

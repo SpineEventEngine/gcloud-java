@@ -35,6 +35,7 @@ import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.ShardedWorkRegistry;
 import io.spine.server.delivery.ShardedWorkRegistryTest;
 import io.spine.server.delivery.WorkerId;
+import io.spine.testing.server.storage.datastore.EmulatorTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +52,7 @@ import static io.spine.server.storage.datastore.given.TestShardIndex.newIndex;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @DisplayName("`DsShardedWorkRegistry` should")
+@EmulatorTest
 final class DsShardedWorkRegistryTest extends ShardedWorkRegistryTest {
 
     private static final ShardIndex index = newIndex(1, 15);

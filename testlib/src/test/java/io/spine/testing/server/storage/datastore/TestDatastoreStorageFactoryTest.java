@@ -35,6 +35,7 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.server.storage.datastore.given.AnEntity.withKeyCreatedBy;
 
 @DisplayName("`TestDatastoreStorageFactory` should")
+@EmulatorTest
 class TestDatastoreStorageFactoryTest {
 
     @Test

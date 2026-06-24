@@ -38,6 +38,7 @@ import static io.spine.testing.server.storage.datastore.TestDatastores.DEFAULT_L
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`TestDatastores` utility should")
+@EmulatorTest
 class TestDatastoresTest extends UtilityClassTest<TestDatastores> {
 
     TestDatastoresTest() {

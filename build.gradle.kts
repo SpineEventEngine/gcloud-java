@@ -307,6 +307,10 @@ fun dockerDependentModules() = setOf("datastore", "testlib")
  *
  * Wired as a dependency of the `Test` tasks in [dockerDependentModules] so that an
  * environment without Docker cannot produce a misleading "tests passed" result.
+ *
+ * The sole exemption is the Windows CI runner, which sets `WINDOWS_CI_NO_DOCKER` because it
+ * cannot launch the Linux emulator container. There the gate passes, and the emulator tests
+ * are skipped by `EmulatorCondition` in `:testlib`, which reads the same variable.
  */
 abstract class CheckDockerAvailable : DefaultTask() {
 
@@ -317,8 +321,27 @@ abstract class CheckDockerAvailable : DefaultTask() {
     @get:Inject
     abstract val execOperations: ExecOperations
 
+    private companion object {
+
+        /**
+         * The environment variable the Windows CI job sets to signal that the runner cannot
+         * launch the Docker-based Datastore Emulator.
+         *
+         * Kept in sync with `EmulatorCondition` in `:testlib`, which reads the same variable.
+         */
+        const val WINDOWS_CI_NO_DOCKER = "WINDOWS_CI_NO_DOCKER"
+    }
+
     @TaskAction
     fun check() {
+        if (windowsCiWithoutDocker()) {
+            logger.lifecycle(
+                "Skipping the Docker requirement for `:${moduleName.get()}`: " +
+                    "`$WINDOWS_CI_NO_DOCKER` is set, so the Datastore Emulator tests are " +
+                    "skipped on this runner."
+            )
+            return
+        }
         if (dockerAvailable()) {
             return
         }
@@ -331,12 +354,22 @@ abstract class CheckDockerAvailable : DefaultTask() {
             Without Docker they verify nothing, so the build fails here instead of passing
             silently. Install Docker (or start the Docker daemon) and run the build again.
 
-            To build the rest of the project without these tests, exclude them explicitly:
-
-                ./gradlew build -x :$module:test
+            The only exemption is the Windows CI runner, which sets `$WINDOWS_CI_NO_DOCKER`
+            (it cannot launch the Linux emulator container); there this gate passes and the
+            emulator tests are skipped by `EmulatorCondition` in `:testlib`.
             """.trimIndent()
         )
     }
+
+    /**
+     * Tells whether the Windows CI runner signalled, via the `WINDOWS_CI_NO_DOCKER`
+     * environment variable, that the Docker-based Datastore Emulator is unavailable there.
+     *
+     * Kept in sync with `EmulatorCondition` in `:testlib`, which reads the same variable to
+     * skip the emulator tests on that runner.
+     */
+    private fun windowsCiWithoutDocker(): Boolean =
+        System.getenv(WINDOWS_CI_NO_DOCKER).toBoolean()
 
     /**
      * Returns `true` if `docker info` reports a reachable Docker daemon.
@@ -442,19 +475,6 @@ fun Project.setupTestTasks() {
     val dockerGate = gatedModule?.let { module ->
         tasks.register<CheckDockerAvailable>("checkDockerAvailable") {
             moduleName.set(module)
-            // Enforce the Docker requirement only when the module's `test` task is actually
-            // scheduled. The gate is a dependency of every `Test` task — including `fastTest`
-            // and `slowTest` — but the Windows CI job builds with `-x :<module>:test` (the
-            // Linux-container Datastore Emulator cannot run there) without excluding those
-            // siblings, so the gate would otherwise still run on Windows. There its
-            // `docker info` probe is meaningless and flaky — when it reports no daemon the gate
-            // fails a job that never runs the emulator tests. Skipping it when `:test` is not in
-            // the graph keeps the protection on the normal `test`/`build` path intact.
-            val testTaskPath = "${project.path}:test"
-            val taskGraph = project.gradle.taskGraph
-            onlyIf("the gated `:test` task is scheduled to run") {
-                taskGraph.hasTask(testTaskPath)
-            }
         }
     }
     val credentialModule = name.takeIf { it in credentialDependentModules() }

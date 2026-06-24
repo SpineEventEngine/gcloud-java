@@ -29,6 +29,7 @@ package io.spine.server.storage.datastore;
 import com.google.cloud.datastore.Datastore;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import io.spine.testing.server.storage.datastore.EmulatorTest;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.server.storage.datastore.TestDatastores.local;
 
 @DisplayName("`ProjectId` should")
+@EmulatorTest
 final class ProjectIdTest {
 
     @Test

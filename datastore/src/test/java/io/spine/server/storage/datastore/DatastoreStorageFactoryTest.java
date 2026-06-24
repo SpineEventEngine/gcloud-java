@@ -48,6 +48,7 @@ import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
 import io.spine.test.storage.StgTask;
+import io.spine.testing.server.storage.datastore.EmulatorTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import io.spine.type.TypeName;
@@ -70,6 +71,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`DatastoreStorageFactory` should")
+@EmulatorTest
 final class DatastoreStorageFactoryTest {
 
     private static final DatastoreOptions DUMMY_OPTIONS =
