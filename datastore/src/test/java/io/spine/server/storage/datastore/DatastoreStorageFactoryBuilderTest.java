@@ -133,6 +133,23 @@ final class DatastoreStorageFactoryBuilderTest {
                      () -> withFactory.setNamespaceConverter(new NoOpNamespaceConverter()));
     }
 
+    @Test
+    @DisplayName("wrap a namespace converter and freeze it at build time")
+    void testNamespaceConverterFrozen() {
+        var first = new NoOpNamespaceConverter();
+        var builder = DatastoreStorageFactory.newBuilder()
+                .setDatastore(datastore())
+                .setNamespaceConverter(first);
+        var factory = builder.build();
+
+        // Reuse and reconfigure the builder after the factory was already built.
+        builder.setNamespaceConverter(new NoOpNamespaceConverter());
+
+        var produced = factory.namespaceConverterFactory()
+                              .get(true);
+        assertThat(produced).isSameInstanceAs(first);
+    }
+
     @Nested
     class Namespaces {
 

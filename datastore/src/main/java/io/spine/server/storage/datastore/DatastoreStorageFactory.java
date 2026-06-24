@@ -561,7 +561,10 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
                 return converterFactory;
             }
             if (namespaceConverter != null) {
-                return multitenant -> namespaceConverter;
+                // Capture the converter in a local so the returned factory freezes the value
+                // at build time, even if this `Builder` is later reused and reconfigured.
+                var converter = namespaceConverter;
+                return multitenant -> converter;
             }
             return NamespaceConverterFactory.defaults();
         }
