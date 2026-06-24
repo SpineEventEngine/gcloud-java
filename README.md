@@ -44,7 +44,6 @@ These artifacts should be used as a part of the Spine server application.
 For the details on setting up the server environment please refer to
 [Spine `core` modules][core-jvm] documentation. 
 
-[bootstrap]: https://github.com/SpineEventEngine/bootstrap/
 [core-jvm]: https://github.com/SpineEventEngine/core-jvm/
 
 ### Tracing
