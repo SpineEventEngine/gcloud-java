@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,13 +26,25 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 
 /**
- * An interface of the factories of {@link NamespaceConverter}s.
+ * A factory of {@link NamespaceConverter}s.
+ *
+ * <p>Unlike a standalone {@link NamespaceConverter}, a factory is given the multi-tenancy
+ * setting of the storage and may produce a different converter for single-tenant and
+ * multi-tenant environments.
+ *
+ * <p>Supply a custom implementation to
+ * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#setConverterFactory(NsConverterFactory)
+ * DatastoreStorageFactory.newBuilder().setConverterFactory(...)} to override the
+ * {@linkplain #defaults() default} namespace conversion. If the same converter suffices
+ * regardless of multi-tenancy, prefer the simpler
+ * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#setNamespaceConverter(NamespaceConverter)
+ * setNamespaceConverter(NamespaceConverter)} instead.
  */
 @FunctionalInterface
-@Internal
+@SPI
 public interface NsConverterFactory {
 
     /**

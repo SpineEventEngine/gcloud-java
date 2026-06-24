@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -63,6 +63,7 @@ import io.spine.server.tenant.TenantIndex;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.server.storage.datastore.DatastoreWrapper.wrap;
@@ -132,7 +133,7 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
     protected DatastoreStorageFactory(Builder builder) {
         this.columnMapping = builder.columnMapping;
         this.datastore = builder.datastore;
-        this.converterFactory = builder.converterFactory;
+        this.converterFactory = builder.effectiveConverterFactory();
         this.txSettings = builder.txSettings.build();
         this.customStorages = builder.customStorages.build();
         this.recordLayouts = builder.layouts.build();
@@ -191,6 +192,14 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
      */
     public final ColumnMapping<Value<?>> columnMapping() {
         return columnMapping;
+    }
+
+    /**
+     * Returns the {@link NsConverterFactory} configured for this factory.
+     */
+    @VisibleForTesting
+    NsConverterFactory nsConverterFactory() {
+        return converterFactory;
     }
 
     private NamespaceSupplier createNamespaceSupplier(boolean multitenant) {
@@ -321,6 +330,10 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
      */
     public static class Builder {
 
+        private static final String CONVERTER_OPTIONS_CONFLICT =
+                "`setNamespaceConverter` and `setConverterFactory` are mutually exclusive; " +
+                        "only one of them may be called.";
+
         private Datastore datastore;
         private ColumnMapping<Value<?>> columnMapping;
         private NamespaceConverter namespaceConverter;
@@ -370,15 +383,53 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
          * the {@link io.spine.core.TenantId Tenant IDs} back and forth.
          *
          * <p>Setting this parameter is reasonable (but not required) only if the storage is
-         * multitenant. Otherwise, an exception will be thrown on {@linkplain #build() build}.
+         * multitenant. Otherwise, the converter is not consulted.
+         *
+         * <p>This is a shorthand for supplying an {@link NsConverterFactory} that returns the
+         * same converter regardless of the multi-tenancy setting. To vary the converter by
+         * multi-tenancy, use {@link #setConverterFactory(NsConverterFactory)} instead. The two
+         * methods are mutually exclusive.
          *
          * @param converter
          *         a custom converter for the Tenant IDs
          * @return this instance of {@code Builder}
+         * @throws IllegalStateException
+         *         if an {@link NsConverterFactory} has already been set via
+         *         {@link #setConverterFactory(NsConverterFactory)}
          */
         @CanIgnoreReturnValue
         public Builder setNamespaceConverter(NamespaceConverter converter) {
-            this.namespaceConverter = checkNotNull(converter);
+            checkNotNull(converter);
+            checkState(converterFactory == null, CONVERTER_OPTIONS_CONFLICT);
+            this.namespaceConverter = converter;
+            return this;
+        }
+
+        /**
+         * Sets an {@link NsConverterFactory} producing the {@link NamespaceConverter}s used to
+         * convert the Datastore namespaces and the {@link io.spine.core.TenantId Tenant IDs}
+         * back and forth.
+         *
+         * <p>Unlike {@link #setNamespaceConverter(NamespaceConverter)}, the factory is given the
+         * multi-tenancy setting of the storage and may produce a different converter for
+         * single-tenant and multi-tenant environments. The produced converter is consulted only
+         * for multitenant storages.
+         *
+         * <p>If neither this method nor {@link #setNamespaceConverter(NamespaceConverter)} is
+         * called, the {@linkplain NsConverterFactory#defaults() default} factory is used.
+         *
+         * @param converterFactory
+         *         a custom factory of the Tenant ID converters
+         * @return this instance of {@code Builder}
+         * @throws IllegalStateException
+         *         if a {@link NamespaceConverter} has already been set via
+         *         {@link #setNamespaceConverter(NamespaceConverter)}
+         */
+        @CanIgnoreReturnValue
+        public Builder setConverterFactory(NsConverterFactory converterFactory) {
+            checkNotNull(converterFactory);
+            checkState(namespaceConverter == null, CONVERTER_OPTIONS_CONFLICT);
+            this.converterFactory = converterFactory;
             return this;
         }
 
@@ -494,16 +545,25 @@ public class DatastoreStorageFactory implements StorageFactory, WithLogging {
         @CanIgnoreReturnValue
         private Builder withDefaults() {
             setupMapping();
-            setupNsConverter();
             return this;
         }
 
-        private void setupNsConverter() {
-            if (namespaceConverter == null) {
-                converterFactory = NsConverterFactory.defaults();
-            } else {
-                converterFactory = multitenant -> namespaceConverter;
+        /**
+         * Returns the {@link NsConverterFactory} to use, derived from the configured options.
+         *
+         * <p>A {@linkplain #setConverterFactory(NsConverterFactory) factory set directly} takes
+         * precedence; otherwise a {@linkplain #setNamespaceConverter(NamespaceConverter) namespace
+         * converter}, if set, is wrapped into a factory; otherwise the
+         * {@linkplain NsConverterFactory#defaults() default} factory is used.
+         */
+        private NsConverterFactory effectiveConverterFactory() {
+            if (converterFactory != null) {
+                return converterFactory;
             }
+            if (namespaceConverter != null) {
+                return multitenant -> namespaceConverter;
+            }
+            return NsConverterFactory.defaults();
         }
 
         private void setupMapping() {

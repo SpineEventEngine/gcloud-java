@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,11 +31,14 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Value;
 import com.google.common.testing.NullPointerTester;
+import io.spine.core.TenantId;
 import io.spine.server.storage.ColumnMapping;
 import io.spine.server.storage.datastore.config.DsColumnMapping;
 import io.spine.server.storage.datastore.config.FlatLayout;
 import io.spine.server.storage.datastore.config.RecordLayout;
 import io.spine.server.storage.datastore.given.TestColumnMapping;
+import io.spine.server.storage.datastore.tenant.NamespaceConverter;
+import io.spine.server.storage.datastore.tenant.NsConverterFactory;
 import io.spine.test.storage.StgProject;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,6 +104,33 @@ final class DatastoreStorageFactoryBuilderTest {
         assertThat(value).isEqualTo(TestColumnMapping.STRING_MAPPING_RESULT);
     }
 
+    @Test
+    @DisplayName("use the namespace converter factory set explicitly")
+    void testCustomConverterFactory() {
+        var converterFactory = NsConverterFactory.defaults();
+        var factory = DatastoreStorageFactory.newBuilder()
+                .setDatastore(datastore())
+                .setConverterFactory(converterFactory)
+                .build();
+        assertThat(factory.nsConverterFactory()).isSameInstanceAs(converterFactory);
+    }
+
+    @Test
+    @DisplayName("reject setting both a namespace converter and a converter factory")
+    void testRejectBothConverterOptions() {
+        var withConverter = DatastoreStorageFactory.newBuilder()
+                .setDatastore(datastore())
+                .setNamespaceConverter(new NoOpNamespaceConverter());
+        assertThrows(IllegalStateException.class,
+                     () -> withConverter.setConverterFactory(NsConverterFactory.defaults()));
+
+        var withFactory = DatastoreStorageFactory.newBuilder()
+                .setDatastore(datastore())
+                .setConverterFactory(NsConverterFactory.defaults());
+        assertThrows(IllegalStateException.class,
+                     () -> withFactory.setNamespaceConverter(new NoOpNamespaceConverter()));
+    }
+
     @Nested
     class Namespaces {
 
@@ -142,5 +172,24 @@ final class DatastoreStorageFactoryBuilderTest {
 
     private static Datastore datastore() {
         return TestDatastores.local();
+    }
+
+    /**
+     * A minimal {@link NamespaceConverter} used only to exercise the builder validation;
+     * its conversion methods are never invoked by these tests.
+     */
+    private static final class NoOpNamespaceConverter extends NamespaceConverter {
+
+        @Override
+        protected String toString(TenantId tenantId) {
+            return tenantId.getValue();
+        }
+
+        @Override
+        protected TenantId toTenantId(String namespace) {
+            return TenantId.newBuilder()
+                    .setValue(namespace)
+                    .build();
+        }
     }
 }
