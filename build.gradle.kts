@@ -139,7 +139,6 @@ repositories.standardToSpineSdk()
 spinePublishing {
     modules = setOf(
         "datastore",
-        "stackdriver-trace",
         "testlib",
         "pubsub"
     )
@@ -180,10 +179,10 @@ subprojects {
     defineDependencies()
 
     val generated = "$projectDir/generated"
-    applyGeneratedDirectories(generated)
     setupTestTasks()
     setupPublishing()
     configureTaskDependencies()
+    excludeProtoDescriptorsFromBuildCache()
 }
 
 KoverConfig.applyTo(project)
@@ -215,6 +214,46 @@ fun Project.applyPlugins() {
     LicenseReporter.generateReportIn(project)
     JavadocConfig.applyTo(project)
     CheckStyleConfig.applyTo(project)
+}
+
+/**
+ * Opts the Protobuf descriptor-generating tasks out of the Gradle build cache.
+ *
+ * Spine builds the runtime type registry ([io.spine.type.KnownTypes]) from a Protobuf
+ * descriptor set that the `generate*Proto` tasks write to a **version-named** file — e.g.
+ * `build/descriptors/test/io.spine.gcloud_spine-datastore_<version>_test.desc`, referenced
+ * from `desc.ref`. The Gradle build-cache key for those tasks is derived from the `.proto`
+ * inputs and the compiler, but not from the project version. With `org.gradle.caching`
+ * enabled — and the cache persisted across CI runs — a build that follows a version bump
+ * gets a cache hit and restores a descriptor produced for a different version, so the
+ * runtime cannot load the expected descriptor and every Protobuf type fails to resolve:
+ *
+ * ```
+ * io.spine.type.UnknownTypeException: No Java class found for the Protobuf message of type: `...`
+ * ```
+ *
+ * Confirmed by reproduction — the affected test passes under `--no-build-cache`. Opting
+ * these tasks out of the build cache makes them run for the current version; the local
+ * up-to-date checks still apply, so the cost is negligible. Mirrors the
+ * `outputs.cacheIf { false }` opt-out already used for TestKit coverage.
+ *
+ * Temporary workaround — remove once the upstream fix lands. Tracked in gcloud-jvm issue #200;
+ * root cause: SpineEventEngine/tool-base#183
+ * (https://github.com/SpineEventEngine/tool-base/issues/183).
+ */
+fun Project.excludeProtoDescriptorsFromBuildCache() {
+    val descriptorTasks = setOf(
+        "generateProto",
+        "generateTestProto",
+        "generateTestFixturesProto",
+    )
+    tasks.matching { it.name in descriptorTasks }.configureEach {
+        outputs.cacheIf(
+            "Protobuf descriptor sets are version-named, but the build-cache key omits the " +
+                "project version; a cache hit can restore a descriptor for a stale version, " +
+                "breaking the `KnownTypes` registry."
+        ) { false }
+    }
 }
 
 /**
@@ -338,9 +377,8 @@ abstract class CheckDockerAvailable : DefaultTask() {
 
 /**
  * Names of the modules whose tests can additionally run against a *remote* Google Cloud
- * backend — the Datastore service and Stackdriver Trace — authenticating with the
- * `spine-dev.json` service-account credential that `copyCredentials` places in their test
- * resources.
+ * backend — the Datastore service — authenticating with the `spine-dev.json`
+ * service-account credential that `copyCredentials` places in their test resources.
  *
  * Unlike [dockerDependentModules], a missing credential is reported as a warning rather
  * than a build failure: the remote suites are written to be skipped when the file is
@@ -349,7 +387,7 @@ abstract class CheckDockerAvailable : DefaultTask() {
  *
  * Declared as a function for the same reason as [dockerDependentModules].
  */
-fun credentialDependentModules() = setOf("datastore", "testlib", "stackdriver-trace")
+fun credentialDependentModules() = setOf("datastore", "testlib")
 
 /**
  * Warns when the `spine-dev.json` credential is missing from the project root.
@@ -404,6 +442,19 @@ fun Project.setupTestTasks() {
     val dockerGate = gatedModule?.let { module ->
         tasks.register<CheckDockerAvailable>("checkDockerAvailable") {
             moduleName.set(module)
+            // Enforce the Docker requirement only when the module's `test` task is actually
+            // scheduled. The gate is a dependency of every `Test` task — including `fastTest`
+            // and `slowTest` — but the Windows CI job builds with `-x :<module>:test` (the
+            // Linux-container Datastore Emulator cannot run there) without excluding those
+            // siblings, so the gate would otherwise still run on Windows. There its
+            // `docker info` probe is meaningless and flaky — when it reports no daemon the gate
+            // fails a job that never runs the emulator tests. Skipping it when `:test` is not in
+            // the graph keeps the protection on the normal `test`/`build` path intact.
+            val testTaskPath = "${project.path}:test"
+            val taskGraph = project.gradle.taskGraph
+            onlyIf("the gated `:test` task is scheduled to run") {
+                taskGraph.hasTask(testTaskPath)
+            }
         }
     }
     val credentialModule = name.takeIf { it in credentialDependentModules() }
@@ -477,69 +528,6 @@ fun Project.defineDependencies() {
             capabilities {
                 requireCapability("io.spine:server-test-fixtures")
             }
-        }
-    }
-}
-
-/**
- * Adds directories with the generated source code to source sets of the project and
- * to IntelliJ IDEA module settings.
- *
- * @param generatedDir
- *          the name of the root directory with the generated code
- */
-fun Project.applyGeneratedDirectories(generatedDir: String) {
-    val generatedMain = "$generatedDir/main"
-    val generatedJava = "$generatedMain/java"
-    val generatedKotlin = "$generatedMain/kotlin"
-    val generatedGrpc = "$generatedMain/grpc"
-    val generatedSpine = "$generatedMain/spine"
-
-    val generatedTest = "$generatedDir/test"
-    val generatedTestJava = "$generatedTest/java"
-    val generatedTestKotlin = "$generatedTest/kotlin"
-    val generatedTestGrpc = "$generatedTest/grpc"
-    val generatedTestSpine = "$generatedTest/spine"
-
-    sourceSets {
-        main {
-            java.srcDirs(
-                generatedJava,
-                generatedGrpc,
-                generatedSpine,
-            )
-            kotlin.srcDirs(
-                generatedKotlin,
-            )
-        }
-        test {
-            java.srcDirs(
-                generatedTestJava,
-                generatedTestGrpc,
-                generatedTestSpine,
-            )
-            kotlin.srcDirs(
-                generatedTestKotlin,
-            )
-        }
-    }
-
-    idea {
-        module {
-            generatedSourceDirs.addAll(files(
-                generatedJava,
-                generatedKotlin,
-                generatedGrpc,
-                generatedSpine,
-            ))
-            testSources.from(
-                generatedTestJava,
-                generatedTestKotlin,
-                generatedTestGrpc,
-                generatedTestSpine,
-            )
-            isDownloadJavadoc = true
-            isDownloadSources = true
         }
     }
 }

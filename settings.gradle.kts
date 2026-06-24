@@ -28,7 +28,6 @@ rootProject.name = "gcloud-jvm"
 
 include(
     "datastore",
-    "stackdriver-trace",
     "testlib",
     "pubsub",
 )

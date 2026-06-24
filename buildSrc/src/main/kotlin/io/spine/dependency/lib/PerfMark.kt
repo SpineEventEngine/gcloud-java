@@ -29,6 +29,6 @@ package io.spine.dependency.lib
 // https://github.com/perfmark/perfmark
 @Suppress("unused", "ConstPropertyName")
 object PerfMark {
-    private const val version = "0.26.0"
+    private const val version = "0.27.0"
     const val api = "io.perfmark:perfmark-api:$version"
 }
