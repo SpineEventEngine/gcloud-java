@@ -31,9 +31,6 @@ dependencies {
     // Pub/Sub messaging support library.
     implementation("io.spine.gcloud:spine-pubsub:$version")
 
-    // Stackdriver Trace support library.
-    implementation("io.spine.gcloud:spine-stackdriver-trace:$version")
-
     // Datastore-related test utilities (if needed).
     testImplementation("io.spine.tools:gcloud-testlib:$version")
 }
@@ -46,6 +43,11 @@ For the details on setting up the server environment please refer to
 
 [bootstrap]: https://github.com/SpineEventEngine/bootstrap/
 [core-jvm]: https://github.com/SpineEventEngine/core-jvm/
+
+### Tracing
+
+Distributed tracing is provided through OpenTelemetry. See
+[Enabling OpenTelemetry tracing on Google Cloud](docs/opentelemetry.md) for setup.
 
 ### Configuring Datastore
 
