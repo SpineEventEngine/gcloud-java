@@ -42,7 +42,8 @@ jobs:
       # GitHub-hosted Windows runners cannot launch Linux containers, so the emulator-backed
       # suites of `:datastore` and `:testlib` are excluded here and run on the Ubuntu
       # runner instead. Windows developers run them locally with Docker Desktop (Linux
-      # containers). This job remains a compilation check plus the non-Docker test suites.
+      # containers). No non-Docker test suites remain, so this job is a Windows compilation
+      # check; the test report below therefore does not require test results.
       - name: Build project and run tests
         shell: cmd
         run: gradlew.bat build --stacktrace -x :datastore:test -x :testlib:test
@@ -53,4 +54,4 @@ jobs:
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/build/test-results/**/TEST-*.xml'
-          require_tests: true
+          require_tests: false

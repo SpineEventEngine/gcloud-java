@@ -101,8 +101,8 @@ Therefore, a local Docker is required up and running to launch tests.
 
 To start a local Docker-based emulator and run test against it, run `./gradlew check`.
 
-Emulator container is re-used across tests. After the test run is completed, the emulator container 
-shuts down automatically.
+The emulator container is reused across tests and shuts down automatically after the test run
+completes.
 
 Some tests also verify a connection to a remote Datastore instance. In order to run those,
 the corresponding credential file called `spine-dev.json` should be placed under

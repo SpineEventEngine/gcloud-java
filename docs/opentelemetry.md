@@ -169,9 +169,12 @@ service:
 ```
 
 The `googlecloud` exporter ships with the
-[`contrib` Collector distribution][collector-contrib]; the Collector host authenticates
-through ADC. See Google's [OTLP ingestion guide][gcp-otlp] for routing through the Telemetry
-API (`telemetry.googleapis.com`) instead, which Google recommends for high trace volumes.
+[`contrib` Collector distribution][collector-contrib] and authenticates through ADC. It sends
+traces through the **Cloud Trace API**, so the Collector's principal needs
+`roles/cloudtrace.agent` and that API enabled (`gcloud services enable cloudtrace.googleapis.com`).
+To route through the **Telemetry API** (`telemetry.googleapis.com`) instead — the modern path
+recommended above, using `roles/telemetry.tracesWriter` — configure the Collector with an OTLP
+exporter aimed at that endpoint; see Google's [OTLP ingestion guide][gcp-otlp].
 
 ### Option B — Direct in-process export (no Collector)
 
