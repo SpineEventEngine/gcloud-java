@@ -1,13 +1,16 @@
 # gcloud-jvm
 
 [![codecov][codecov-badge]][codecov]
-[![Ubuntu build][ubuntu-build-badge]][gh-actions]
+[![Ubuntu build][ubuntu-build-badge]][gh-actions] &nbsp;
+[![license][license-badge]][license]
 
 
 [codecov]: https://codecov.io/gh/SpineEventEngine/gcloud-jvm
 [codecov-badge]: https://codecov.io/gh/SpineEventEngine/gcloud-jvm/branch/master/graph/badge.svg
 [gh-actions]: https://github.com/SpineEventEngine/gcloud-jvm/actions
 [ubuntu-build-badge]: https://github.com/SpineEventEngine/gcloud-jvm/actions/workflows/build-on-ubuntu-gcloud.yml/badge.svg
+[license]: http://www.apache.org/licenses/LICENSE-2.0
+[license-badge]: https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat
 
  
 Support for Spine-based Java apps running at Google Cloud.
@@ -39,7 +42,7 @@ dependencies {
 These artifacts should be used as a part of the Spine server application.
  
 For the details on setting up the server environment please refer to
-[Spine Bootstrap Gradle plugin][bootstrap] and [Spine `core` modules][core-jvm] documentation. 
+[Spine `core` modules][core-jvm] documentation. 
 
 [bootstrap]: https://github.com/SpineEventEngine/bootstrap/
 [core-jvm]: https://github.com/SpineEventEngine/core-jvm/
@@ -88,18 +91,18 @@ an internal Exception. To prevent this, you should create an index for your `Cus
 
 This section describes testing the `gcloud-jvm` library itself.
 
-##### Preconditions
+#### Preconditions
 
 The library utilizes Testcontainers in order 
 to run a [local Datastore emulator](https://java.testcontainers.org/modules/gcloud/#datastore).
 
-Therefore, a local Docker is required up and running, in order to launch tests. 
+Therefore, a local Docker is required up and running to launch tests. 
 
-##### Running the tests
+#### Running the tests
 
 To start a local Docker-based emulator and run test against it, run `./gradlew check`.
 
-Emulator container is re-used across tests. After test run is completed, the emulator container 
+Emulator container is re-used across tests. After the test run is completed, the emulator container 
 shuts down automatically.
 
 Some tests also verify a connection to a remote Datastore instance. In order to run those,
