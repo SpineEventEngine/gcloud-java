@@ -3,7 +3,7 @@
 # cannot run on GitHub's Windows runners. The directive below tells
 # `config/migrate` not to copy the generic workflow into this repository.
 # config:replaces build-on-windows.yml
-name: Windows CI (gcloud-java)
+name: Windows CI (gcloud-jvm)
 
 on: pull_request
 
@@ -40,12 +40,12 @@ jobs:
 
       # The Datastore Emulator runs in a Linux Docker container via Testcontainers.
       # GitHub-hosted Windows runners cannot launch Linux containers, so the emulator-backed
-      # suites of `:datastore` and `:testutil-gcloud` are excluded here and run on the Ubuntu
+      # suites of `:datastore` and `:testlib` are excluded here and run on the Ubuntu
       # runner instead. Windows developers run them locally with Docker Desktop (Linux
       # containers). This job remains a compilation check plus the non-Docker test suites.
       - name: Build project and run tests
         shell: cmd
-        run: gradlew.bat build --stacktrace -x :datastore:test -x :testutil-gcloud:test
+        run: gradlew.bat build --stacktrace -x :datastore:test -x :testlib:test
 
       # See: https://github.com/marketplace/actions/junit-report-action
       - name: Publish Test Report

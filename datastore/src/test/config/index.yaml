@@ -1,4 +1,4 @@
-# The Google Datastore indexes required to run the Spine `gcloud-java` unit tests in the remote
+# The Google Datastore indexes required to run the Spine `gcloud-jvm` unit tests in the remote
 # test environment in the Datastore instance running in the native mode.
 
 indexes:

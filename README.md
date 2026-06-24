@@ -1,13 +1,13 @@
-# gcloud-java
+# gcloud-jvm
 
 [![codecov][codecov-badge]][codecov]
 [![Ubuntu build][ubuntu-build-badge]][gh-actions]
 
 
-[codecov]: https://codecov.io/gh/SpineEventEngine/gcloud-java
-[codecov-badge]: https://codecov.io/gh/SpineEventEngine/gcloud-java/branch/master/graph/badge.svg
-[gh-actions]: https://github.com/SpineEventEngine/gcloud-java/actions
-[ubuntu-build-badge]: https://github.com/SpineEventEngine/gcloud-java/actions/workflows/build-on-ubuntu-gcloud.yml/badge.svg
+[codecov]: https://codecov.io/gh/SpineEventEngine/gcloud-jvm
+[codecov-badge]: https://codecov.io/gh/SpineEventEngine/gcloud-jvm/branch/master/graph/badge.svg
+[gh-actions]: https://github.com/SpineEventEngine/gcloud-jvm/actions
+[ubuntu-build-badge]: https://github.com/SpineEventEngine/gcloud-jvm/actions/workflows/build-on-ubuntu-gcloud.yml/badge.svg
 
  
 Support for Spine-based Java apps running at Google Cloud.
@@ -24,36 +24,34 @@ Versions starting from `2.0.0-SNAPSHOT.63` were built with Java 11, and earlier 
 Gradle:
 
 ```kotlin
-// Compatible with Java 8:
-
 dependencies {
     // Datastore Storage support library.
-    implementation("io.spine.gcloud:spine-datastore:1.9.1")
+    implementation("io.spine.gcloud:spine-datastore:$version")
 
     // Pub/Sub messaging support library.
-    implementation("io.spine.gcloud:spine-pubsub:1.9.1")
+    implementation("io.spine.gcloud:spine-pubsub:$version")
 
     // Stackdriver Trace support library.
-    implementation("io.spine.gcloud:spine-stackdriver-trace:1.9.1")
+    implementation("io.spine.gcloud:spine-stackdriver-trace:$version")
 
     // Datastore-related test utilities (if needed).
-    testImplementation("io.spine.gcloud:testutil-gcloud:1.9.1")
+    testImplementation("io.spine.tools:gcloud-testlib:$version")
 }
 ```
 
 These artifacts should be used as a part of the Spine server application.
  
 For the details on setting up the server environment please refer to
-[Spine Bootstrap Gradle plugin][bootstrap] and [Spine `core` modules][core-java] documentation. 
+[Spine Bootstrap Gradle plugin][bootstrap] and [Spine `core` modules][core-jvm] documentation. 
 
 [bootstrap]: https://github.com/SpineEventEngine/bootstrap/
-[core-java]: https://github.com/SpineEventEngine/core-java/
+[core-jvm]: https://github.com/SpineEventEngine/core-jvm/
 
 ### Configuring Datastore
 
 #### Datastore indexes
 
-In order to run the application built on top of `gcloud-java`, Datastore instance requires some 
+To run the application built on top of `gcloud-jvm`, Datastore instance requires some 
 preliminary configuration. In particular, the indexes for the Spine internal record types should 
 be set. Please notice a special index configuration for your custom `Aggregate` types.
 
@@ -86,7 +84,7 @@ an internal Exception. To prevent this, you should create an index for your `Cus
 
 ### Testing
 
-This section describes testing the `gcloud-java` library itself.
+This section describes testing the `gcloud-jvm` library itself.
 
 ##### Preconditions
 
@@ -97,7 +95,7 @@ Therefore, a local Docker is required up and running, in order to launch tests.
 
 ##### Running the tests
 
-*Datastore and `testutil-gcloud`*
+*Datastore and `testlib`*
 
 To start a local Docker-based emulator and run test against it, run `./gradlew check`.
 
@@ -106,7 +104,7 @@ shuts down automatically.
 
 Some tests also verify a connection to a remote Datastore instance. In order to run those,
 the corresponding credential file called `spine-dev.json` should be placed under
-`<project root>/datastore/src/test/resources/` and `<project root>/testutil-gcloud/src/test/resources/`.
+`<project root>/datastore/src/test/resources/` and `<project root>/testlib/src/test/resources/`.
 
 Gradle build script is arranged to do that automatically upon running on CI.
 

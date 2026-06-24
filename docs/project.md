@@ -1,8 +1,8 @@
-# Project: gcloud-java
+# Project: gcloud-jvm
 
 ## Overview
 
-`gcloud-java` provides Google Cloud integrations for Spine-based server
+`gcloud-jvm` provides Google Cloud integrations for Spine-based server
 applications. It adapts the storage and tracing extension points of the Spine
 SDK (notably [`core-jvm`][core-jvm]) to Google Cloud services — persisting
 application state in Cloud Datastore, reporting traces to Cloud Trace, and
@@ -11,8 +11,9 @@ application running on the Google Cloud Platform; they are not used on their own
 
 ## Architecture
 
-Role: **library** (multi-module Gradle build) publishing artifacts under the
-`io.spine.gcloud` group. The modules are:
+Role: **library** (multi-module Gradle build). The production modules publish
+artifacts under the `io.spine.gcloud` group; the `testlib` test-utility module
+publishes under the `io.spine.tools` group as `gcloud-testlib`. The modules are:
 
 - `datastore` — a Cloud Datastore-backed implementation of the Spine server
   storage SPI. `DatastoreStorageFactory` and `DatastoreWrapper` provide record,
@@ -21,7 +22,7 @@ Role: **library** (multi-module Gradle build) publishing artifacts under the
 - `stackdriver-trace` — a Spine `TracerFactory` that reports signal-handling
   spans to Google Cloud Trace.
 - `pubsub` — the Cloud Pub/Sub gRPC API and message types.
-- `testutil-gcloud` — test utilities for the modules above, including a
+- `testlib` — test utilities for the modules above, including a
   Testcontainers-based Datastore Emulator (`TestDatastores`,
   `TestDatastoreStorageFactory`) used by the storage tests.
 
