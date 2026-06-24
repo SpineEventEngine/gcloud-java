@@ -1,13 +1,16 @@
 # gcloud-jvm
 
 [![codecov][codecov-badge]][codecov]
-[![Ubuntu build][ubuntu-build-badge]][gh-actions]
+[![Ubuntu build][ubuntu-build-badge]][gh-actions] &nbsp;
+[![license][license-badge]][license]
 
 
 [codecov]: https://codecov.io/gh/SpineEventEngine/gcloud-jvm
 [codecov-badge]: https://codecov.io/gh/SpineEventEngine/gcloud-jvm/branch/master/graph/badge.svg
 [gh-actions]: https://github.com/SpineEventEngine/gcloud-jvm/actions
 [ubuntu-build-badge]: https://github.com/SpineEventEngine/gcloud-jvm/actions/workflows/build-on-ubuntu-gcloud.yml/badge.svg
+[license]: http://www.apache.org/licenses/LICENSE-2.0
+[license-badge]: https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat
 
  
 Support for Spine-based Java apps running at Google Cloud.
@@ -31,9 +34,6 @@ dependencies {
     // Pub/Sub messaging support library.
     implementation("io.spine.gcloud:spine-pubsub:$version")
 
-    // Stackdriver Trace support library.
-    implementation("io.spine.gcloud:spine-stackdriver-trace:$version")
-
     // Datastore-related test utilities (if needed).
     testImplementation("io.spine.tools:gcloud-testlib:$version")
 }
@@ -42,10 +42,14 @@ dependencies {
 These artifacts should be used as a part of the Spine server application.
  
 For the details on setting up the server environment please refer to
-[Spine Bootstrap Gradle plugin][bootstrap] and [Spine `core` modules][core-jvm] documentation. 
+[Spine `core` modules][core-jvm] documentation. 
 
-[bootstrap]: https://github.com/SpineEventEngine/bootstrap/
 [core-jvm]: https://github.com/SpineEventEngine/core-jvm/
+
+### Tracing
+
+Distributed tracing is provided through OpenTelemetry. See
+[Enabling OpenTelemetry tracing on Google Cloud](docs/opentelemetry.md) for setup.
 
 ### Configuring Datastore
 
@@ -86,32 +90,22 @@ an internal Exception. To prevent this, you should create an index for your `Cus
 
 This section describes testing the `gcloud-jvm` library itself.
 
-##### Preconditions
+#### Preconditions
 
 The library utilizes Testcontainers in order 
 to run a [local Datastore emulator](https://java.testcontainers.org/modules/gcloud/#datastore).
 
-Therefore, a local Docker is required up and running, in order to launch tests. 
+Therefore, a local Docker is required up and running to launch tests. 
 
-##### Running the tests
-
-*Datastore and `testlib`*
+#### Running the tests
 
 To start a local Docker-based emulator and run test against it, run `./gradlew check`.
 
-Emulator container is re-used across tests. After test run is completed, the emulator container 
-shuts down automatically.
+The emulator container is reused across tests and shuts down automatically after the test run
+completes.
 
 Some tests also verify a connection to a remote Datastore instance. In order to run those,
 the corresponding credential file called `spine-dev.json` should be placed under
 `<project root>/datastore/src/test/resources/` and `<project root>/testlib/src/test/resources/`.
 
 Gradle build script is arranged to do that automatically upon running on CI.
-
-*Stackdriver-Trace*
-
-The test are launched in a scope of Gradle `test` phase. However, they rely on a Google Cloud 
-credentials file located at `<project root>/stackdriver-trace/src/test/resources/spine-dev.json`.
-
-To run the tests, obtain the service account file for your environment and make it available 
-to the test code in the specified locations.

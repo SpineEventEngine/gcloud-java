@@ -38,18 +38,21 @@ jobs:
         env:
           SPINE_DEV_CI_KEY: ${{ secrets.SPINE_DEV_CI_KEY }}
 
-      # The Datastore Emulator runs in a Linux Docker container via Testcontainers.
-      # GitHub-hosted Windows runners cannot launch Linux containers, so the emulator-backed
-      # suites of `:datastore` and `:testlib` are excluded here and run on the Ubuntu
-      # runner instead. Windows developers run them locally with Docker Desktop (Linux
-      # containers). This job remains a compilation check plus the non-Docker test suites.
+      # GitHub-hosted Windows runners cannot launch the Linux Docker container that hosts the
+      # Datastore Emulator. `WINDOWS_CI_NO_DOCKER` signals this: the `checkDockerAvailable`
+      # gate then passes without probing Docker, and the emulator tests (annotated
+      # `@EmulatorTest`) are skipped by `EmulatorCondition`. The remaining non-emulator unit
+      # tests still run, so this job is a Windows compilation + unit-test check. Docker stays
+      # mandatory everywhere else (developer machines on any OS and the Ubuntu CI runner).
       - name: Build project and run tests
         shell: cmd
-        run: gradlew.bat build --stacktrace -x :datastore:test -x :testlib:test
+        run: gradlew.bat build --stacktrace
+        env:
+          WINDOWS_CI_NO_DOCKER: "true"
 
       # See: https://github.com/marketplace/actions/junit-report-action
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v4.0.3
+        uses: mikepenz/action-junit-report@v6.4.2
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/build/test-results/**/TEST-*.xml'

@@ -139,7 +139,6 @@ repositories.standardToSpineSdk()
 spinePublishing {
     modules = setOf(
         "datastore",
-        "stackdriver-trace",
         "testlib",
         "pubsub"
     )
@@ -180,10 +179,10 @@ subprojects {
     defineDependencies()
 
     val generated = "$projectDir/generated"
-    applyGeneratedDirectories(generated)
     setupTestTasks()
     setupPublishing()
     configureTaskDependencies()
+    excludeProtoDescriptorsFromBuildCache()
 }
 
 KoverConfig.applyTo(project)
@@ -215,6 +214,46 @@ fun Project.applyPlugins() {
     LicenseReporter.generateReportIn(project)
     JavadocConfig.applyTo(project)
     CheckStyleConfig.applyTo(project)
+}
+
+/**
+ * Opts the Protobuf descriptor-generating tasks out of the Gradle build cache.
+ *
+ * Spine builds the runtime type registry ([io.spine.type.KnownTypes]) from a Protobuf
+ * descriptor set that the `generate*Proto` tasks write to a **version-named** file — e.g.
+ * `build/descriptors/test/io.spine.gcloud_spine-datastore_<version>_test.desc`, referenced
+ * from `desc.ref`. The Gradle build-cache key for those tasks is derived from the `.proto`
+ * inputs and the compiler, but not from the project version. With `org.gradle.caching`
+ * enabled — and the cache persisted across CI runs — a build that follows a version bump
+ * gets a cache hit and restores a descriptor produced for a different version, so the
+ * runtime cannot load the expected descriptor and every Protobuf type fails to resolve:
+ *
+ * ```
+ * io.spine.type.UnknownTypeException: No Java class found for the Protobuf message of type: `...`
+ * ```
+ *
+ * Confirmed by reproduction — the affected test passes under `--no-build-cache`. Opting
+ * these tasks out of the build cache makes them run for the current version; the local
+ * up-to-date checks still apply, so the cost is negligible. Mirrors the
+ * `outputs.cacheIf { false }` opt-out already used for TestKit coverage.
+ *
+ * Temporary workaround — remove once the upstream fix lands. Tracked in gcloud-jvm issue #200;
+ * root cause: SpineEventEngine/tool-base#183
+ * (https://github.com/SpineEventEngine/tool-base/issues/183).
+ */
+fun Project.excludeProtoDescriptorsFromBuildCache() {
+    val descriptorTasks = setOf(
+        "generateProto",
+        "generateTestProto",
+        "generateTestFixturesProto",
+    )
+    tasks.matching { it.name in descriptorTasks }.configureEach {
+        outputs.cacheIf(
+            "Protobuf descriptor sets are version-named, but the build-cache key omits the " +
+                "project version; a cache hit can restore a descriptor for a stale version, " +
+                "breaking the `KnownTypes` registry."
+        ) { false }
+    }
 }
 
 /**
@@ -268,6 +307,10 @@ fun dockerDependentModules() = setOf("datastore", "testlib")
  *
  * Wired as a dependency of the `Test` tasks in [dockerDependentModules] so that an
  * environment without Docker cannot produce a misleading "tests passed" result.
+ *
+ * The sole exemption is the Windows CI runner, which sets `WINDOWS_CI_NO_DOCKER` because it
+ * cannot launch the Linux emulator container. There the gate passes, and the emulator tests
+ * are skipped by `EmulatorCondition` in `:testlib`, which reads the same variable.
  */
 abstract class CheckDockerAvailable : DefaultTask() {
 
@@ -278,8 +321,27 @@ abstract class CheckDockerAvailable : DefaultTask() {
     @get:Inject
     abstract val execOperations: ExecOperations
 
+    private companion object {
+
+        /**
+         * The environment variable the Windows CI job sets to signal that the runner cannot
+         * launch the Docker-based Datastore Emulator.
+         *
+         * Kept in sync with `EmulatorCondition` in `:testlib`, which reads the same variable.
+         */
+        const val WINDOWS_CI_NO_DOCKER = "WINDOWS_CI_NO_DOCKER"
+    }
+
     @TaskAction
     fun check() {
+        if (windowsCiWithoutDocker()) {
+            logger.lifecycle(
+                "Skipping the Docker requirement for `:${moduleName.get()}`: " +
+                    "`$WINDOWS_CI_NO_DOCKER` is set, so the Datastore Emulator tests are " +
+                    "skipped on this runner."
+            )
+            return
+        }
         if (dockerAvailable()) {
             return
         }
@@ -292,12 +354,22 @@ abstract class CheckDockerAvailable : DefaultTask() {
             Without Docker they verify nothing, so the build fails here instead of passing
             silently. Install Docker (or start the Docker daemon) and run the build again.
 
-            To build the rest of the project without these tests, exclude them explicitly:
-
-                ./gradlew build -x :$module:test
+            The only exemption is the Windows CI runner, which sets `$WINDOWS_CI_NO_DOCKER`
+            (it cannot launch the Linux emulator container); there this gate passes and the
+            emulator tests are skipped by `EmulatorCondition` in `:testlib`.
             """.trimIndent()
         )
     }
+
+    /**
+     * Tells whether the Windows CI runner signalled, via the `WINDOWS_CI_NO_DOCKER`
+     * environment variable, that the Docker-based Datastore Emulator is unavailable there.
+     *
+     * Kept in sync with `EmulatorCondition` in `:testlib`, which reads the same variable to
+     * skip the emulator tests on that runner.
+     */
+    private fun windowsCiWithoutDocker(): Boolean =
+        System.getenv(WINDOWS_CI_NO_DOCKER).toBoolean()
 
     /**
      * Returns `true` if `docker info` reports a reachable Docker daemon.
@@ -338,9 +410,8 @@ abstract class CheckDockerAvailable : DefaultTask() {
 
 /**
  * Names of the modules whose tests can additionally run against a *remote* Google Cloud
- * backend — the Datastore service and Stackdriver Trace — authenticating with the
- * `spine-dev.json` service-account credential that `copyCredentials` places in their test
- * resources.
+ * backend — the Datastore service — authenticating with the `spine-dev.json`
+ * service-account credential that `copyCredentials` places in their test resources.
  *
  * Unlike [dockerDependentModules], a missing credential is reported as a warning rather
  * than a build failure: the remote suites are written to be skipped when the file is
@@ -349,7 +420,7 @@ abstract class CheckDockerAvailable : DefaultTask() {
  *
  * Declared as a function for the same reason as [dockerDependentModules].
  */
-fun credentialDependentModules() = setOf("datastore", "testlib", "stackdriver-trace")
+fun credentialDependentModules() = setOf("datastore", "testlib")
 
 /**
  * Warns when the `spine-dev.json` credential is missing from the project root.
@@ -477,69 +548,6 @@ fun Project.defineDependencies() {
             capabilities {
                 requireCapability("io.spine:server-test-fixtures")
             }
-        }
-    }
-}
-
-/**
- * Adds directories with the generated source code to source sets of the project and
- * to IntelliJ IDEA module settings.
- *
- * @param generatedDir
- *          the name of the root directory with the generated code
- */
-fun Project.applyGeneratedDirectories(generatedDir: String) {
-    val generatedMain = "$generatedDir/main"
-    val generatedJava = "$generatedMain/java"
-    val generatedKotlin = "$generatedMain/kotlin"
-    val generatedGrpc = "$generatedMain/grpc"
-    val generatedSpine = "$generatedMain/spine"
-
-    val generatedTest = "$generatedDir/test"
-    val generatedTestJava = "$generatedTest/java"
-    val generatedTestKotlin = "$generatedTest/kotlin"
-    val generatedTestGrpc = "$generatedTest/grpc"
-    val generatedTestSpine = "$generatedTest/spine"
-
-    sourceSets {
-        main {
-            java.srcDirs(
-                generatedJava,
-                generatedGrpc,
-                generatedSpine,
-            )
-            kotlin.srcDirs(
-                generatedKotlin,
-            )
-        }
-        test {
-            java.srcDirs(
-                generatedTestJava,
-                generatedTestGrpc,
-                generatedTestSpine,
-            )
-            kotlin.srcDirs(
-                generatedTestKotlin,
-            )
-        }
-    }
-
-    idea {
-        module {
-            generatedSourceDirs.addAll(files(
-                generatedJava,
-                generatedKotlin,
-                generatedGrpc,
-                generatedSpine,
-            ))
-            testSources.from(
-                generatedTestJava,
-                generatedTestKotlin,
-                generatedTestGrpc,
-                generatedTestSpine,
-            )
-            isDownloadJavadoc = true
-            isDownloadSources = true
         }
     }
 }

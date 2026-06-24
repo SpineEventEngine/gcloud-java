@@ -31,6 +31,7 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.server.storage.datastore.Kind;
 import io.spine.test.storage.StgProject;
 import io.spine.testing.UtilityClassTest;
+import io.spine.testing.server.storage.datastore.EmulatorTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("`Entities` should")
+@EmulatorTest
 final class EntitiesTest extends UtilityClassTest<Entities> {
 
     EntitiesTest() {

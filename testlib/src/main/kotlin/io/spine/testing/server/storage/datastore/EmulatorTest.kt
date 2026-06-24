@@ -24,11 +24,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.lib
+package io.spine.testing.server.storage.datastore
 
-// https://github.com/perfmark/perfmark
-@Suppress("unused", "ConstPropertyName")
-object PerfMark {
-    private const val version = "0.27.0"
-    const val api = "io.perfmark:perfmark-api:$version"
-}
+import org.junit.jupiter.api.extension.ExtendWith
+
+/**
+ * Marks a test class that exercises the Docker-based Datastore Emulator.
+ *
+ * Such a test is skipped on the **Windows CI** runner, which cannot launch the Linux
+ * container that hosts the emulator. That runner signals the limitation by setting the
+ * [EmulatorCondition.WINDOWS_CI_NO_DOCKER] environment variable; [EmulatorCondition] reads it
+ * and disables the annotated class cleanly — before its `static` initializers (which often
+ * open a Datastore connection) would run.
+ *
+ * In every other environment — developer machines on any OS and the Ubuntu CI runner — Docker
+ * is **mandatory**. Its absence there is a build failure raised by the `checkDockerAvailable`
+ * Gradle task, not a silent skip, so a green build never hides un-exercised emulator tests.
+ *
+ * Apply this to every test class that touches the emulator (directly, through a base class, or
+ * via a `static` factory field).
+ */
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@MustBeDocumented
+@ExtendWith(EmulatorCondition::class)
+public annotation class EmulatorTest

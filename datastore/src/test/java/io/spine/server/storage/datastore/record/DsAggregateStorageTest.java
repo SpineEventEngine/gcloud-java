@@ -29,6 +29,7 @@ package io.spine.server.storage.datastore.record;
 import io.spine.environment.Tests;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.AggregateStorageTest;
+import io.spine.testing.server.storage.datastore.EmulatorTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.DisplayName;
 import static io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory.local;
 
 @DisplayName("Datastore-backed `AggregateStorage` should")
+@EmulatorTest
 final class DsAggregateStorageTest extends AggregateStorageTest {
 
     private static final TestDatastoreStorageFactory datastoreFactory = local();
