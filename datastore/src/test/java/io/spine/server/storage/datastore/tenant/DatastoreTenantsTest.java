@@ -28,6 +28,7 @@ package io.spine.server.storage.datastore.tenant;
 
 import io.spine.core.TenantId;
 import io.spine.testing.UtilityClassTest;
+import io.spine.testing.server.storage.datastore.EmulatorTest;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("`DatastoreTenants` should")
+@EmulatorTest
 final class DatastoreTenantsTest extends UtilityClassTest<DatastoreTenants> {
 
     DatastoreTenantsTest() {

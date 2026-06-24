@@ -31,6 +31,7 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.DeliveryTest;
 import io.spine.testing.SlowTest;
 import io.spine.testing.logging.mute.MuteLogging;
+import io.spine.testing.server.storage.datastore.EmulatorTest;
 import io.spine.testing.server.storage.datastore.TestDatastoreStorageFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +48,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Datastore-backed `Delivery` should ")
 @SlowTest
 @MuteLogging
+@EmulatorTest
 final class DsDeliverySmokeTest extends DeliveryTest {
 
     private TestDatastoreStorageFactory factory;

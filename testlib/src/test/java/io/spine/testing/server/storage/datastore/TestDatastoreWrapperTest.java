@@ -36,6 +36,7 @@ import static io.spine.testing.server.storage.datastore.given.ATestDatastoreWrap
 import static io.spine.testing.server.storage.datastore.given.AnEntity.withKeyCreatedBy;
 
 @DisplayName("`TestDatastoreWrapper` should")
+@EmulatorTest
 class TestDatastoreWrapperTest {
 
     @Test

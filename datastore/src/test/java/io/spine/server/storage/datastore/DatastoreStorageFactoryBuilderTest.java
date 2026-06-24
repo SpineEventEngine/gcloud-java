@@ -40,6 +40,7 @@ import io.spine.server.storage.datastore.given.TestColumnMapping;
 import io.spine.server.storage.datastore.tenant.NamespaceConverter;
 import io.spine.server.storage.datastore.tenant.NamespaceConverterFactory;
 import io.spine.test.storage.StgProject;
+import io.spine.testing.server.storage.datastore.EmulatorTest;
 import io.spine.testing.server.storage.datastore.TestDatastores;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -57,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`DatastoreStorageFactory.Builder` should")
+@EmulatorTest
 final class DatastoreStorageFactoryBuilderTest {
 
     @Test

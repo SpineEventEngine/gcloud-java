@@ -33,6 +33,7 @@ import io.spine.core.TenantId;
 import io.spine.net.EmailAddress;
 import io.spine.net.InternetDomain;
 import io.spine.server.storage.datastore.ProjectId;
+import io.spine.testing.server.storage.datastore.EmulatorTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -45,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`Namespace` should")
+@EmulatorTest
 final class NamespaceTest {
 
     @Test
