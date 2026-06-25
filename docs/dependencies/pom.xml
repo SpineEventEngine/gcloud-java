@@ -138,6 +138,12 @@ all modules and does not describe the project structure per-subproject.
     <scope>test</scope>
   </dependency>
   <dependency>
+    <groupId>org.junit</groupId>
+    <artifactId>junit-bom</artifactId>
+    <version>6.1.0</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
     <groupId>org.junit.platform</groupId>
     <artifactId>junit-platform-launcher</artifactId>
     <scope>test</scope>
@@ -162,6 +168,11 @@ all modules and does not describe the project structure per-subproject.
     <groupId>com.google.protobuf</groupId>
     <artifactId>protoc</artifactId>
     <version>4.35.0</version>
+  </dependency>
+  <dependency>
+    <groupId>com.puppycrawl.tools</groupId>
+    <artifactId>checkstyle</artifactId>
+    <version>10.12.1</version>
   </dependency>
   <dependency>
     <groupId>dev.zacsweers.autoservice</groupId>
@@ -197,6 +208,16 @@ all modules and does not describe the project structure per-subproject.
     <groupId>io.spine.tools</groupId>
     <artifactId>validation-java-bundle</artifactId>
     <version>2.0.0-SNAPSHOT.446</version>
+  </dependency>
+  <dependency>
+    <groupId>net.sourceforge.pmd</groupId>
+    <artifactId>pmd-ant</artifactId>
+    <version>7.25.0</version>
+  </dependency>
+  <dependency>
+    <groupId>net.sourceforge.pmd</groupId>
+    <artifactId>pmd-java</artifactId>
+    <version>7.25.0</version>
   </dependency>
   <dependency>
     <groupId>org.jacoco</groupId>
@@ -240,12 +261,22 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
+    <artifactId>abi-tools</artifactId>
+    <version>2.3.21</version>
+  </dependency>
+  <dependency>
+    <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-build-tools-compat</artifactId>
     <version>2.3.21</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-build-tools-impl</artifactId>
+    <version>2.3.21</version>
+  </dependency>
+  <dependency>
+    <groupId>org.jetbrains.kotlin</groupId>
+    <artifactId>kotlin-klib-commonizer-embeddable</artifactId>
     <version>2.3.21</version>
   </dependency>
   <dependency>
