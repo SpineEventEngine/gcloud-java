@@ -26,8 +26,15 @@
 
 package io.spine.gradle.publish
 
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
+import io.spine.gradle.publish.IncrementGuard.Companion.localPublishPlanned
+import io.spine.gradle.publish.IncrementGuard.Companion.mustVerify
 import io.spine.gradle.publish.IncrementGuard.Companion.shouldCheckVersion
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.publish.maven.tasks.PublishToMavenLocal
+import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -76,4 +83,103 @@ class IncrementGuardTest {
             shouldCheckVersion(null, null) shouldBe false
         }
     }
+
+    @Nested
+    inner class `actually run the check` {
+
+        @Test
+        fun `on a CI pull request to a protected branch`() {
+            mustVerify(ciPullRequest = true, onCi = true, localPublish = false) shouldBe true
+        }
+
+        @Test
+        fun `on a local build that publishes to Maven Local`() {
+            mustVerify(ciPullRequest = false, onCi = false, localPublish = true) shouldBe true
+        }
+    }
+
+    @Nested
+    inner class `skip the check` {
+
+        @Test
+        fun `on a local build that does not publish`() {
+            mustVerify(ciPullRequest = false, onCi = false, localPublish = false) shouldBe false
+        }
+
+        @Test
+        fun `on a CI build that publishes to Maven Local outside a protected-branch PR`() {
+            // E.g. a push to `master` or a tag build running integration tests: the
+            // version is already published, so re-verifying it would fail the build.
+            mustVerify(ciPullRequest = false, onCi = true, localPublish = true) shouldBe false
+        }
+    }
+
+    @Nested
+    inner class `detect a Maven Local publish` {
+
+        @Test
+        fun `for the task's own project`() {
+            val project = guardedProject()
+            val publish = project.tasks
+                .register("publishFooPublicationToMavenLocal", PublishToMavenLocal::class.java)
+                .get()
+
+            localPublishPlanned(listOf(publish), project) shouldBe true
+        }
+
+        @Test
+        fun `but not when only a sibling project publishes`() {
+            val root = ProjectBuilder.builder().build()
+            val lib = ProjectBuilder.builder().withParent(root).withName("lib").build()
+            val app = ProjectBuilder.builder().withParent(root).withName("app").build()
+            app.pluginManager.apply("maven-publish")
+            val appPublish = app.tasks
+                .register("publishFooPublicationToMavenLocal", PublishToMavenLocal::class.java)
+                .get()
+
+            localPublishPlanned(listOf(appPublish), lib) shouldBe false
+        }
+    }
+
+    @Nested
+    inner class `make 'checkVersionIncrement' a dependency of` {
+
+        @Test
+        fun `the 'check' task`() {
+            val project = guardedProject()
+            val check = project.tasks.getByName("check")
+
+            check.dependencyNames() shouldContain IncrementGuard.taskName
+        }
+
+        @Test
+        fun `every Maven Local publishing task`() {
+            val project = guardedProject()
+            val localPublish = project.tasks.register(
+                "publishFooPublicationToMavenLocal",
+                PublishToMavenLocal::class.java
+            ).get()
+
+            localPublish.dependencyNames() shouldContain IncrementGuard.taskName
+        }
+    }
 }
+
+/**
+ * Creates a project with the `base` plugin (for the `check` task), the
+ * `maven-publish` plugin (for [PublishToMavenLocal] tasks), and [IncrementGuard]
+ * applied.
+ */
+private fun guardedProject(): Project {
+    val project = ProjectBuilder.builder().build()
+    project.pluginManager.apply("base")
+    project.pluginManager.apply("maven-publish")
+    project.pluginManager.apply(IncrementGuard::class.java)
+    return project
+}
+
+/**
+ * Obtains the names of the tasks this task directly depends on.
+ */
+private fun Task.dependencyNames(): Set<String> =
+    taskDependencies.getDependencies(this).map { it.name }.toSet()
