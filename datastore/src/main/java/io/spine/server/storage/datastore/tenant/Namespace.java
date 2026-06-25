@@ -129,7 +129,7 @@ public final class Namespace {
      *         the converter factory to use
      * @return new instance of {@code Namespace}
      */
-    static Namespace of(TenantId id, boolean multitenant, NsConverterFactory converterFactory) {
+    static Namespace of(TenantId id, boolean multitenant, NamespaceConverterFactory converterFactory) {
         checkNotNull(id);
         checkNotNull(converterFactory);
 
@@ -141,8 +141,8 @@ public final class Namespace {
     /**
      * Creates new instance of {@code Namespace} from the given {@link TenantId}.
      *
-     * <p>Similar to {@link #of(TenantId, boolean, NsConverterFactory)}, but the
-     * {@link NsConverterFactory#defaults() the default} converter factory is used.
+     * <p>Similar to {@link #of(TenantId, boolean, NamespaceConverterFactory)}, but the
+     * {@link NamespaceConverterFactory#defaults() the default} converter factory is used.
      *
      * @param id
      *         the {@link TenantId} to create the {@code Namespace} from
@@ -151,7 +151,7 @@ public final class Namespace {
      * @return new instance of {@code Namespace}
      */
     static Namespace of(TenantId id, boolean multitenant) {
-        return of(id, multitenant, NsConverterFactory.defaults());
+        return of(id, multitenant, NamespaceConverterFactory.defaults());
     }
 
     /**
@@ -168,7 +168,7 @@ public final class Namespace {
      */
     static @Nullable Namespace fromNameOf(Key key,
                                           boolean multitenant,
-                                          NsConverterFactory converterFactory) {
+                                          NamespaceConverterFactory converterFactory) {
         checkNotNull(key);
         checkNotNull(converterFactory);
 
@@ -185,7 +185,7 @@ public final class Namespace {
     /**
      * Creates new instance of {@code Namespace} from the name of the given {@link Key}.
      *
-     * <p>Uses the {@link NsConverterFactory#defaults() default} converter factory.
+     * <p>Uses the {@link NamespaceConverterFactory#defaults() default} converter factory.
      *
      * @param key
      *         the {@link Key} to get a {@code Namespace} from
@@ -193,10 +193,10 @@ public final class Namespace {
      *         whether the storage is multi-tenant
      * @return a {@code Namespace} of the given Key name or {@code null} if the name is
      *         {@code null} or empty
-     * @see #fromNameOf(Key, boolean, NsConverterFactory)
+     * @see #fromNameOf(Key, boolean, NamespaceConverterFactory)
      */
     static @Nullable Namespace fromNameOf(Key key, boolean multitenant) {
-        return fromNameOf(key, multitenant, NsConverterFactory.defaults());
+        return fromNameOf(key, multitenant, NamespaceConverterFactory.defaults());
     }
 
     /**
@@ -237,7 +237,7 @@ public final class Namespace {
      * Converts this object to a {@link TenantId}.
      *
      * <p>If current instance was created with
-     * {@link Namespace#of(TenantId, boolean, NsConverterFactory)}, then the result will be
+     * {@link Namespace#of(TenantId, boolean, NamespaceConverterFactory)}, then the result will be
      * {@code equal} to that {@link TenantId}.
      *
      * <p>If current instance was created with {@link Namespace#of(String)},

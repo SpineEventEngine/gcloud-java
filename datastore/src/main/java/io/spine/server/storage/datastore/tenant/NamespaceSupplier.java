@@ -74,7 +74,7 @@ public abstract class NamespaceSupplier implements Supplier<Namespace> {
      *         the namespace converter to use
      * @return an instance of {@code NamespaceSupplier} configured for the multi-tenant environment
      */
-    public static NamespaceSupplier multitenant(NsConverterFactory converterFactory) {
+    public static NamespaceSupplier multitenant(NamespaceConverterFactory converterFactory) {
         return MultitenantNamespaceSupplier.withConvertersBy(converterFactory);
     }
 

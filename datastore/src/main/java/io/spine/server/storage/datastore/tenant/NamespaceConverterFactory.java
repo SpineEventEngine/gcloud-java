@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,14 +26,26 @@
 
 package io.spine.server.storage.datastore.tenant;
 
-import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 
 /**
- * An interface of the factories of {@link NamespaceConverter}s.
+ * A factory of {@link NamespaceConverter}s.
+ *
+ * <p>Unlike a standalone {@link NamespaceConverter}, a factory is given the multi-tenancy
+ * setting of the storage and may produce a different converter for single-tenant and
+ * multi-tenant environments.
+ *
+ * <p>Supply a custom implementation to
+ * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#setConverterFactory(NamespaceConverterFactory)
+ * DatastoreStorageFactory.newBuilder().setConverterFactory(...)} to override the
+ * {@linkplain #defaults() default} namespace conversion. If the same converter suffices
+ * regardless of multi-tenancy, prefer the simpler
+ * {@link io.spine.server.storage.datastore.DatastoreStorageFactory.Builder#setNamespaceConverter(NamespaceConverter)
+ * setNamespaceConverter(NamespaceConverter)} instead.
  */
 @FunctionalInterface
-@Internal
-public interface NsConverterFactory {
+@SPI
+public interface NamespaceConverterFactory {
 
     /**
      * Creates a new instance of {@code NamespaceConverter} taking the passed multi-tenancy setting
@@ -47,13 +59,13 @@ public interface NsConverterFactory {
     NamespaceConverter get(boolean multitenant);
 
     /**
-     * Creates an instance of the {@code NsConverterFactory} with the framework default
+     * Creates an instance of the {@code NamespaceConverterFactory} with the framework default
      * conversion implementation.
      *
-     * @return a new instance of {@code NsConverterFactory} with the default converter
+     * @return a new instance of {@code NamespaceConverterFactory} with the default converter
      *         implementations used
      */
-    static NsConverterFactory defaults() {
+    static NamespaceConverterFactory defaults() {
         return DefaultNamespaceConverter::new;
     }
 }

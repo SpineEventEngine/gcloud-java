@@ -72,7 +72,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @EmulatorTest
 final class NamespaceIndexTest {
 
-    private static final NsConverterFactory converterFactory = NsConverterFactory.defaults();
+    private static final NamespaceConverterFactory converterFactory = NamespaceConverterFactory.defaults();
 
     private NamespaceIndex namespaceIndex;
     private BoundedContext context;

@@ -32,14 +32,14 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.storage.datastore.tenant.NamespaceConverter.NOT_A_TENANT;
 
-@DisplayName("PrefixedNsConverterFactory should")
-final class PrefixedNsConverterFactoryTest {
+@DisplayName("PrefixedNamespaceConverterFactory should")
+final class PrefixedNamespaceConverterFactoryTest {
 
     @Test
     @DisplayName("ignore namespaces which do not start from the prefix")
     void ignoreNonMatching() {
         var prefix = "in";
-        var factory = new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
+        var factory = new PrefixedNamespaceConverterFactory(prefix, NamespaceConverterFactory.defaults());
         var converter = factory.get(true);
         var matchingTenant = converter.convert(prefix + ".Vstring");
         assertThat(matchingTenant.getValue()).isEqualTo("string");
@@ -52,7 +52,7 @@ final class PrefixedNsConverterFactoryTest {
     @DisplayName("ignore namespaces which contain only the prefix")
     void ignoreSolePrefix() {
         var prefix = "pro";
-        var factory = new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
+        var factory = new PrefixedNamespaceConverterFactory(prefix, NamespaceConverterFactory.defaults());
         var converter = factory.get(true);
         var nonMatchingTenant = converter.convert(prefix);
         assertThat(nonMatchingTenant).isSameInstanceAs(NOT_A_TENANT);
@@ -62,7 +62,7 @@ final class PrefixedNsConverterFactoryTest {
     @DisplayName("ignore namespaces a longer prefix")
     void ignoreLongerPrefix() {
         var prefix = "pre";
-        var factory = new PrefixedNsConverterFactory(prefix, NsConverterFactory.defaults());
+        var factory = new PrefixedNamespaceConverterFactory(prefix, NamespaceConverterFactory.defaults());
         var converter = factory.get(true);
         var nonMatchingTenant = converter.convert("pre-processing");
         assertThat(nonMatchingTenant).isSameInstanceAs(NOT_A_TENANT);
