@@ -182,7 +182,6 @@ subprojects {
     setupTestTasks()
     setupPublishing()
     configureTaskDependencies()
-    excludeProtoDescriptorsFromBuildCache()
 }
 
 KoverConfig.applyTo(project)
@@ -214,46 +213,6 @@ fun Project.applyPlugins() {
     LicenseReporter.generateReportIn(project)
     JavadocConfig.applyTo(project)
     CheckStyleConfig.applyTo(project)
-}
-
-/**
- * Opts the Protobuf descriptor-generating tasks out of the Gradle build cache.
- *
- * Spine builds the runtime type registry ([io.spine.type.KnownTypes]) from a Protobuf
- * descriptor set that the `generate*Proto` tasks write to a **version-named** file — e.g.
- * `build/descriptors/test/io.spine.gcloud_spine-datastore_<version>_test.desc`, referenced
- * from `desc.ref`. The Gradle build-cache key for those tasks is derived from the `.proto`
- * inputs and the compiler, but not from the project version. With `org.gradle.caching`
- * enabled — and the cache persisted across CI runs — a build that follows a version bump
- * gets a cache hit and restores a descriptor produced for a different version, so the
- * runtime cannot load the expected descriptor and every Protobuf type fails to resolve:
- *
- * ```
- * io.spine.type.UnknownTypeException: No Java class found for the Protobuf message of type: `...`
- * ```
- *
- * Confirmed by reproduction — the affected test passes under `--no-build-cache`. Opting
- * these tasks out of the build cache makes them run for the current version; the local
- * up-to-date checks still apply, so the cost is negligible. Mirrors the
- * `outputs.cacheIf { false }` opt-out already used for TestKit coverage.
- *
- * Temporary workaround — remove once the upstream fix lands. Tracked in gcloud-jvm issue #200;
- * root cause: SpineEventEngine/tool-base#183
- * (https://github.com/SpineEventEngine/tool-base/issues/183).
- */
-fun Project.excludeProtoDescriptorsFromBuildCache() {
-    val descriptorTasks = setOf(
-        "generateProto",
-        "generateTestProto",
-        "generateTestFixturesProto",
-    )
-    tasks.matching { it.name in descriptorTasks }.configureEach {
-        outputs.cacheIf(
-            "Protobuf descriptor sets are version-named, but the build-cache key omits the " +
-                "project version; a cache hit can restore a descriptor for a stale version, " +
-                "breaking the `KnownTypes` registry."
-        ) { false }
-    }
 }
 
 /**
