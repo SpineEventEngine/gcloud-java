@@ -29,9 +29,9 @@ package io.spine.dependency.test
 // https://github.com/testcontainers/testcontainers-java
 @Suppress("unused", "ConstPropertyName")
 object Testcontainers {
-    private const val version = "1.21.4"
+    private const val version = "2.0.5"
     private const val group = "org.testcontainers"
     const val lib = "$group:testcontainers:$version"
-    const val junitJupiter = "$group:junit-jupiter:$version"
-    const val gcloud = "$group:gcloud:$version"
+    const val junitJupiter = "$group:testcontainers-junit-jupiter:$version"
+    const val gcloud = "$group:testcontainers-gcloud:$version"
 }
