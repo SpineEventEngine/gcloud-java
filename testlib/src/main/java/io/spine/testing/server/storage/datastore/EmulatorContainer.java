@@ -6,7 +6,7 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.storage.datastore.ProjectId;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.testcontainers.containers.DatastoreEmulatorContainer;
+import org.testcontainers.gcloud.DatastoreEmulatorContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import static java.util.Objects.requireNonNull;

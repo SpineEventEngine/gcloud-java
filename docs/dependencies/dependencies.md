@@ -1,6 +1,6 @@
 
 
-# Dependencies of `io.spine.gcloud:spine-datastore:2.0.0-SNAPSHOT.213`
+# Dependencies of `io.spine.gcloud:spine-datastore:2.0.0-SNAPSHOT.214`
 
 ## Runtime
 1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.22.0.
@@ -418,15 +418,15 @@
      * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.github.docker-java. **Name** : docker-java-api. **Version** : 3.4.2.
+1.  **Group** : com.github.docker-java. **Name** : docker-java-api. **Version** : 3.7.1.
      * **Project URL:** [https://github.com/docker-java/docker-java](https://github.com/docker-java/docker-java)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.github.docker-java. **Name** : docker-java-transport. **Version** : 3.4.2.
+1.  **Group** : com.github.docker-java. **Name** : docker-java-transport. **Version** : 3.7.1.
      * **Project URL:** [https://github.com/docker-java/docker-java](https://github.com/docker-java/docker-java)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.github.docker-java. **Name** : docker-java-transport-zerodep. **Version** : 3.4.2.
+1.  **Group** : com.github.docker-java. **Name** : docker-java-transport-zerodep. **Version** : 3.7.1.
      * **Project URL:** [https://github.com/docker-java/docker-java](https://github.com/docker-java/docker-java)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -706,6 +706,10 @@
      * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : commons-io. **Name** : commons-io. **Version** : 2.20.0.
+     * **Project URL:** [https://commons.apache.org/proper/commons-io/](https://commons.apache.org/proper/commons-io/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : dev.zacsweers.autoservice. **Name** : auto-service-ksp. **Version** : 1.2.0.
      * **Project URL:** [https://github.com/ZacSweers/auto-service-ksp](https://github.com/ZacSweers/auto-service-ksp)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -869,7 +873,7 @@
      * **Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : net.java.dev.jna. **Name** : jna. **Version** : 5.13.0.
+1.  **Group** : net.java.dev.jna. **Name** : jna. **Version** : 5.18.1.
      * **Project URL:** [https://github.com/java-native-access/jna](https://github.com/java-native-access/jna)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [LGPL-2.1-or-later](https://www.gnu.org/licenses/old-licenses/lgpl-2.1)
@@ -899,8 +903,12 @@
      * **Project URL:** [https://www.antlr.org/](https://www.antlr.org/)
      * **License:** [BSD-3-Clause](https://www.antlr.org/license.html)
 
-1.  **Group** : org.apache.commons. **Name** : commons-compress. **Version** : 1.24.0.
+1.  **Group** : org.apache.commons. **Name** : commons-compress. **Version** : 1.28.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-compress/](https://commons.apache.org/proper/commons-compress/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : org.apache.commons. **Name** : commons-lang3. **Version** : 3.18.0.
+     * **Project URL:** [https://commons.apache.org/proper/commons-lang/](https://commons.apache.org/proper/commons-lang/)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apache.commons. **Name** : commons-lang3. **Version** : 3.20.0.
@@ -1249,11 +1257,11 @@
      * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **License:** [MIT](https://opensource.org/license/mit)
 
-1.  **Group** : org.testcontainers. **Name** : gcloud. **Version** : 1.21.4.
+1.  **Group** : org.testcontainers. **Name** : testcontainers. **Version** : 2.0.5.
      * **Project URL:** [https://java.testcontainers.org](https://java.testcontainers.org)
      * **License:** [MIT](http://opensource.org/licenses/MIT)
 
-1.  **Group** : org.testcontainers. **Name** : testcontainers. **Version** : 1.21.4.
+1.  **Group** : org.testcontainers. **Name** : testcontainers-gcloud. **Version** : 2.0.5.
      * **Project URL:** [https://java.testcontainers.org](https://java.testcontainers.org)
      * **License:** [MIT](http://opensource.org/licenses/MIT)
 
@@ -1276,14 +1284,14 @@
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Thu Jun 25 20:51:14 WEST 2026** using 
+This report was generated on **Sat Jun 27 21:50:21 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.gcloud:spine-pubsub:2.0.0-SNAPSHOT.213`
+# Dependencies of `io.spine.gcloud:spine-pubsub:2.0.0-SNAPSHOT.214`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -2156,14 +2164,14 @@ This report was generated on **Thu Jun 25 20:51:14 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using 
+This report was generated on **Sat Jun 27 21:50:21 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:gcloud-testlib:2.0.0-SNAPSHOT.213`
+# Dependencies of `io.spine.tools:gcloud-testlib:2.0.0-SNAPSHOT.214`
 
 ## Runtime
 1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.22.0.
@@ -2180,15 +2188,15 @@ This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.github.docker-java. **Name** : docker-java-api. **Version** : 3.4.2.
+1.  **Group** : com.github.docker-java. **Name** : docker-java-api. **Version** : 3.7.1.
      * **Project URL:** [https://github.com/docker-java/docker-java](https://github.com/docker-java/docker-java)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.github.docker-java. **Name** : docker-java-transport. **Version** : 3.4.2.
+1.  **Group** : com.github.docker-java. **Name** : docker-java-transport. **Version** : 3.7.1.
      * **Project URL:** [https://github.com/docker-java/docker-java](https://github.com/docker-java/docker-java)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.github.docker-java. **Name** : docker-java-transport-zerodep. **Version** : 3.4.2.
+1.  **Group** : com.github.docker-java. **Name** : docker-java-transport-zerodep. **Version** : 3.7.1.
      * **Project URL:** [https://github.com/docker-java/docker-java](https://github.com/docker-java/docker-java)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2345,6 +2353,10 @@ This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using
      * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : commons-io. **Name** : commons-io. **Version** : 2.20.0.
+     * **Project URL:** [https://commons.apache.org/proper/commons-io/](https://commons.apache.org/proper/commons-io/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : io.grpc. **Name** : grpc-alts. **Version** : 1.81.0.
      * **Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
@@ -2457,17 +2469,17 @@ This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using
      * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
-1.  **Group** : junit. **Name** : junit. **Version** : 4.13.2.
-     * **Project URL:** [http://junit.org](http://junit.org)
-     * **License:** [Eclipse Public License 1.0](http://www.eclipse.org/legal/epl-v10.html)
-
-1.  **Group** : net.java.dev.jna. **Name** : jna. **Version** : 5.13.0.
+1.  **Group** : net.java.dev.jna. **Name** : jna. **Version** : 5.18.1.
      * **Project URL:** [https://github.com/java-native-access/jna](https://github.com/java-native-access/jna)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [LGPL-2.1-or-later](https://www.gnu.org/licenses/old-licenses/lgpl-2.1)
 
-1.  **Group** : org.apache.commons. **Name** : commons-compress. **Version** : 1.24.0.
+1.  **Group** : org.apache.commons. **Name** : commons-compress. **Version** : 1.28.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-compress/](https://commons.apache.org/proper/commons-compress/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : org.apache.commons. **Name** : commons-lang3. **Version** : 3.18.0.
+     * **Project URL:** [https://commons.apache.org/proper/commons-lang/](https://commons.apache.org/proper/commons-lang/)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apache.httpcomponents. **Name** : httpclient. **Version** : 4.5.14.
@@ -2489,14 +2501,6 @@ This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using
 1.  **Group** : org.conscrypt. **Name** : conscrypt-openjdk-uber. **Version** : 2.5.2.
      * **Project URL:** [https://conscrypt.org/](https://conscrypt.org/)
      * **License:** [Apache 2](https://www.apache.org/licenses/LICENSE-2.0)
-
-1.  **Group** : org.hamcrest. **Name** : hamcrest. **Version** : 3.0.
-     * **Project URL:** [http://hamcrest.org/JavaHamcrest/](http://hamcrest.org/JavaHamcrest/)
-     * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE)
-
-1.  **Group** : org.hamcrest. **Name** : hamcrest-core. **Version** : 3.0.
-     * **Project URL:** [http://hamcrest.org/JavaHamcrest/](http://hamcrest.org/JavaHamcrest/)
-     * **License:** [BSD-3-Clause](https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE)
 
 1.  **Group** : org.jetbrains. **Name** : annotations. **Version** : 26.1.0.
      * **Project URL:** [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
@@ -2582,11 +2586,11 @@ This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using
      * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **License:** [MIT](https://opensource.org/license/mit)
 
-1.  **Group** : org.testcontainers. **Name** : gcloud. **Version** : 1.21.4.
+1.  **Group** : org.testcontainers. **Name** : testcontainers. **Version** : 2.0.5.
      * **Project URL:** [https://java.testcontainers.org](https://java.testcontainers.org)
      * **License:** [MIT](http://opensource.org/licenses/MIT)
 
-1.  **Group** : org.testcontainers. **Name** : testcontainers. **Version** : 1.21.4.
+1.  **Group** : org.testcontainers. **Name** : testcontainers-gcloud. **Version** : 2.0.5.
      * **Project URL:** [https://java.testcontainers.org](https://java.testcontainers.org)
      * **License:** [MIT](http://opensource.org/licenses/MIT)
 
@@ -2662,15 +2666,15 @@ This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using
      * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.github.docker-java. **Name** : docker-java-api. **Version** : 3.4.2.
+1.  **Group** : com.github.docker-java. **Name** : docker-java-api. **Version** : 3.7.1.
      * **Project URL:** [https://github.com/docker-java/docker-java](https://github.com/docker-java/docker-java)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.github.docker-java. **Name** : docker-java-transport. **Version** : 3.4.2.
+1.  **Group** : com.github.docker-java. **Name** : docker-java-transport. **Version** : 3.7.1.
      * **Project URL:** [https://github.com/docker-java/docker-java](https://github.com/docker-java/docker-java)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.github.docker-java. **Name** : docker-java-transport-zerodep. **Version** : 3.4.2.
+1.  **Group** : com.github.docker-java. **Name** : docker-java-transport-zerodep. **Version** : 3.7.1.
      * **Project URL:** [https://github.com/docker-java/docker-java](https://github.com/docker-java/docker-java)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2950,6 +2954,10 @@ This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using
      * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : commons-io. **Name** : commons-io. **Version** : 2.20.0.
+     * **Project URL:** [https://commons.apache.org/proper/commons-io/](https://commons.apache.org/proper/commons-io/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : dev.zacsweers.autoservice. **Name** : auto-service-ksp. **Version** : 1.2.0.
      * **Project URL:** [https://github.com/ZacSweers/auto-service-ksp](https://github.com/ZacSweers/auto-service-ksp)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3113,7 +3121,7 @@ This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using
      * **Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : net.java.dev.jna. **Name** : jna. **Version** : 5.13.0.
+1.  **Group** : net.java.dev.jna. **Name** : jna. **Version** : 5.18.1.
      * **Project URL:** [https://github.com/java-native-access/jna](https://github.com/java-native-access/jna)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [LGPL-2.1-or-later](https://www.gnu.org/licenses/old-licenses/lgpl-2.1)
@@ -3143,8 +3151,12 @@ This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using
      * **Project URL:** [https://www.antlr.org/](https://www.antlr.org/)
      * **License:** [BSD-3-Clause](https://www.antlr.org/license.html)
 
-1.  **Group** : org.apache.commons. **Name** : commons-compress. **Version** : 1.24.0.
+1.  **Group** : org.apache.commons. **Name** : commons-compress. **Version** : 1.28.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-compress/](https://commons.apache.org/proper/commons-compress/)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : org.apache.commons. **Name** : commons-lang3. **Version** : 3.18.0.
+     * **Project URL:** [https://commons.apache.org/proper/commons-lang/](https://commons.apache.org/proper/commons-lang/)
      * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apache.commons. **Name** : commons-lang3. **Version** : 3.20.0.
@@ -3493,11 +3505,11 @@ This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using
      * **Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **License:** [MIT](https://opensource.org/license/mit)
 
-1.  **Group** : org.testcontainers. **Name** : gcloud. **Version** : 1.21.4.
+1.  **Group** : org.testcontainers. **Name** : testcontainers. **Version** : 2.0.5.
      * **Project URL:** [https://java.testcontainers.org](https://java.testcontainers.org)
      * **License:** [MIT](http://opensource.org/licenses/MIT)
 
-1.  **Group** : org.testcontainers. **Name** : testcontainers. **Version** : 1.21.4.
+1.  **Group** : org.testcontainers. **Name** : testcontainers-gcloud. **Version** : 2.0.5.
      * **Project URL:** [https://java.testcontainers.org](https://java.testcontainers.org)
      * **License:** [MIT](http://opensource.org/licenses/MIT)
 
@@ -3520,6 +3532,6 @@ This report was generated on **Thu Jun 25 20:51:13 WEST 2026** using
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Thu Jun 25 20:51:14 WEST 2026** using 
+This report was generated on **Sat Jun 27 21:50:21 WEST 2026** using 
 [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under 
 [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
