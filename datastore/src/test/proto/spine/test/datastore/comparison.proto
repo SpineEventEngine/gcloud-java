@@ -1,0 +1,154 @@
+/*
+ * Copyright 2026, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+syntax = "proto3";
+
+package spine.test.datastore.comparison;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.datastore.comparison";
+option java_outer_classname = "ComparisonProto";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/wrappers.proto";
+
+// A single-field comparable message: ordered by `meters`.
+//
+// Used both as a stored column type and as a nested comparison field.
+//
+message Distance {
+    option (compare_by) = {
+        field: "meters"
+    };
+
+    int64 meters = 1;
+}
+
+// A multi-field comparable message: ordered by `points`, then `name`.
+//
+message Score {
+    option (compare_by) = {
+        field: "points"
+        field: "name"
+    };
+
+    int32 points = 1;
+    string name = 2;
+}
+
+// A comparable message whose fields are themselves comparable messages.
+//
+message Ranking {
+    option (compare_by) = {
+        field: "distance"
+        field: "score"
+    };
+
+    Distance distance = 1;
+    Score score = 2;
+}
+
+// A comparable message with the reversed (descending) ordering.
+//
+message Countdown {
+    option (compare_by) = {
+        descending: true
+        field: "value"
+    };
+
+    int32 value = 1;
+}
+
+// A comparable message ordered by types that rely on `ComparatorRegistry`
+// (`Timestamp` and `Duration` do not implement `Comparable`).
+//
+message Interval {
+    option (compare_by) = {
+        field: "start"
+        field: "length"
+    };
+
+    google.protobuf.Timestamp start = 1;
+    google.protobuf.Duration length = 2;
+}
+
+enum Tier {
+    TIER_UNKNOWN = 0;
+    BRONZE = 1;
+    SILVER = 2;
+    GOLD = 3;
+}
+
+// A comparable message exercising the remaining scalar field kinds:
+// a `double`, a `bool`, an `enum`, and a well-known wrapper.
+//
+message Assorted {
+    option (compare_by) = {
+        field: "ratio"
+        field: "flag"
+        field: "tier"
+        field: "amount"
+    };
+
+    double ratio = 1;
+    bool flag = 2;
+    Tier tier = 3;
+    google.protobuf.Int64Value amount = 4;
+}
+
+// A comparable message ordered by a nested scalar reached through a dotted path.
+//
+message Waypoint {
+    option (compare_by) = {
+        field: "point.meters"
+    };
+
+    Distance point = 1;
+}
+
+message MeasurementId {
+    string value = 1 [(required) = true];
+}
+
+// A record carrying columns of comparable types, used to verify querying and
+// filtering against the Datastore emulator.
+//
+message Measurement {
+    MeasurementId id = 1 [(required) = true];
+
+    // A `ComparatorRegistry`-backed type with an existing dedicated mapping.
+    google.protobuf.Timestamp taken_at = 2;
+
+    // A `ComparatorRegistry`-backed type mapped to an order-preserving `long`.
+    google.protobuf.Duration span = 3;
+
+    // A custom `(compare_by)` message, encoded to an order-preserving key.
+    Distance distance = 4;
+}

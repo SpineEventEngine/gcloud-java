@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2026, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,8 +37,10 @@ import com.google.cloud.datastore.TimestampValue;
 import com.google.cloud.datastore.Value;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Durations;
 import io.spine.annotation.SPI;
 import io.spine.core.Version;
 import io.spine.server.storage.AbstractColumnMapping;
@@ -62,6 +64,7 @@ public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
 
     private static final Map<Class<?>, ColumnTypeMapping<?, ? extends Value<?>>> defaults
             = ImmutableMap.of(Timestamp.class, ofTimestamp(),
+                              Duration.class, ofDuration(),
                               Version.class, ofVersion());
 
     /**
@@ -151,9 +154,21 @@ public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
         return anEnum -> LongValue.of(anEnum.ordinal());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>A message marked with the {@code (compare_by)} option is stored as an
+     * {@linkplain CompareByEncoder order-preserving string key}, so that it can be used in
+     * ordering comparison ({@code >}/{@code <}/{@code >=}/{@code <=}) queries. Any other message
+     * is stored using its {@link Stringifiers#toString(Object) string} form, which is suitable
+     * for equality but not for ordering.
+     */
     @Override
     protected ColumnTypeMapping<Message, StringValue> ofMessage() {
         return msg -> {
+            if (CompareByEncoder.isComparable(msg.getDescriptorForType())) {
+                return StringValue.of(CompareByEncoder.encode(msg));
+            }
             var str = Stringifiers.toString(msg);
             return StringValue.of(str);
         };
@@ -185,5 +200,22 @@ public class DsColumnMapping extends AbstractColumnMapping<Value<?>> {
             "WeakerAccess" /* To allow access for SPI users. */})
     protected static ColumnTypeMapping<Version, LongValue> ofVersion() {
         return version -> LongValue.of(version.getNumber());
+    }
+
+    /**
+     * Returns the default mapping from {@link Duration} to {@link LongValue}.
+     *
+     * <p>The duration is stored as its total number of nanoseconds, which preserves ordering
+     * for use in comparison queries. {@code Duration} does not implement {@link Comparable};
+     * this mapping reproduces the ordering of the {@code Comparator} registered for it in
+     * {@link io.spine.compare.ComparatorRegistry ComparatorRegistry}. Durations beyond about
+     * ±292 years do not fit into a {@code long} and are rejected by
+     * {@link Durations#toNanos(Duration)}.
+     */
+    @SuppressWarnings({
+            "UnnecessaryLambda" /* For brevity.*/,
+            "WeakerAccess" /* To allow access for SPI users. */})
+    protected static ColumnTypeMapping<Duration, LongValue> ofDuration() {
+        return duration -> LongValue.of(Durations.toNanos(duration));
     }
 }

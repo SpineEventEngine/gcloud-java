@@ -24,35 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.local
+package io.spine.server.storage.datastore.given;
 
-// For backward compatibility.
-@Suppress("unused")
-@Deprecated("Use `CoreJvm` instead.", ReplaceWith("CoreJvm"))
-typealias CoreJava = CoreJvm
+import io.spine.server.ContextSpec;
+import io.spine.server.storage.RecordSpec;
+import io.spine.server.storage.RecordStorageUnderTest;
+import io.spine.server.storage.StorageFactory;
+import io.spine.test.datastore.comparison.Measurement;
+import io.spine.test.datastore.comparison.MeasurementId;
 
 /**
- * Dependencies on `core-jvm` modules.
- *
- * See [`SpineEventEngine/core-jvm`](https://github.com/SpineEventEngine/core-jvm/).
+ * A storage of {@link Measurement} records with {@linkplain MeasurementColumns comparable columns},
+ * used to verify ordering comparison queries against a real storage engine.
  */
-@Suppress("ConstPropertyName", "unused")
-object CoreJvm {
-    const val group = Spine.group
-    const val version = "2.0.0-SNAPSHOT.383"
+public final class MeasurementStorage
+        extends RecordStorageUnderTest<MeasurementId, Measurement> {
 
-    const val coreArtifact = "spine-core"
-    const val clientArtifact = "spine-client"
-    const val serverArtifact = "spine-server"
+    public MeasurementStorage(ContextSpec context, StorageFactory factory) {
+        super(context, factory.createRecordStorage(context, spec()));
+    }
 
-    const val core = "$group:$coreArtifact:$version"
-    const val client = "$group:$clientArtifact:$version"
-    const val server = "$group:$serverArtifact:$version"
-
-    @Deprecated("Use `serverTestLib` instead.", ReplaceWith("serverTestLib"))
-    const val testUtilServer = "${Spine.toolsGroup}:server-testlib:$version"
-
-    const val coreTestLib = "${Spine.toolsGroup}:core-testlib:$version"
-    const val clientTestLib = "${Spine.toolsGroup}:client-testlib:$version"
-    const val serverTestLib = "${Spine.toolsGroup}:server-testlib:$version"
+    private static RecordSpec<MeasurementId, Measurement> spec() {
+        @SuppressWarnings("ConstantConditions")  // Proto getters return non-`null` values.
+        var spec = new RecordSpec<>(MeasurementId.class, Measurement.class,
+                                    Measurement::getId, MeasurementColumns.definitions());
+        return spec;
+    }
 }
