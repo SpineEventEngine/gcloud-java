@@ -24,43 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.jetbrains.dokka.gradle.tasks.DokkaBaseTask
+package io.spine.dependency.storage
 
-plugins {
-    id("org.jetbrains.dokka") // Cannot use `Dokka` dependency object here yet.
-    id("org.jetbrains.dokka-javadoc")
-}
-
-dependencies {
-    useDokkaWithSpineExtensions()
-}
-
-tasks.withType<DokkaBaseTask>().configureEach {
-    onlyIf {
-        isInPublishingGraph()
-    }
-}
-
-// The Dokka Javadoc format does not support Kotlin Multiplatform source sets, so its
-// publication task fails for KMP modules ("No source set found for <module>/jvmMain").
-// KMP modules publish HTML documentation, so skip the Javadoc publication for them.
-plugins.withId("org.jetbrains.kotlin.multiplatform") {
-    tasks.matching { it.name == "dokkaGeneratePublicationJavadoc" }.configureEach {
-        enabled = false
-    }
-}
-
-afterEvaluate {
-    dokka {
-        configureForKotlin(
-            project,
-            DocumentationSettings.SourceLink.url(project)
-        )
-    }
-    val kspKotlin = tasks.findByName("kspKotlin")
-    kspKotlin?.let {
-        tasks.withType<DokkaBaseTask>().configureEach {
-            dependsOn(kspKotlin)
-        }
-    }
+/**
+ * The H2 Database Engine — a fast, in-memory/embedded SQL database used for exercising
+ * the JDBC storage in tests.
+ *
+ * @see <a href="https://github.com/h2database/h2database">H2 Database Engine at GitHub</a>
+ * @see <a href="https://h2database.com/">H2 Database Engine site</a>
+ */
+@Suppress("unused", "ConstPropertyName")
+object H2 {
+    private const val version = "2.4.240"
+    const val lib = "com.h2database:h2:$version"
 }

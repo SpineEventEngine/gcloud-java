@@ -24,43 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.jetbrains.dokka.gradle.tasks.DokkaBaseTask
+package io.spine.dependency.storage
 
-plugins {
-    id("org.jetbrains.dokka") // Cannot use `Dokka` dependency object here yet.
-    id("org.jetbrains.dokka-javadoc")
-}
-
-dependencies {
-    useDokkaWithSpineExtensions()
-}
-
-tasks.withType<DokkaBaseTask>().configureEach {
-    onlyIf {
-        isInPublishingGraph()
-    }
-}
-
-// The Dokka Javadoc format does not support Kotlin Multiplatform source sets, so its
-// publication task fails for KMP modules ("No source set found for <module>/jvmMain").
-// KMP modules publish HTML documentation, so skip the Javadoc publication for them.
-plugins.withId("org.jetbrains.kotlin.multiplatform") {
-    tasks.matching { it.name == "dokkaGeneratePublicationJavadoc" }.configureEach {
-        enabled = false
-    }
-}
-
-afterEvaluate {
-    dokka {
-        configureForKotlin(
-            project,
-            DocumentationSettings.SourceLink.url(project)
-        )
-    }
-    val kspKotlin = tasks.findByName("kspKotlin")
-    kspKotlin?.let {
-        tasks.withType<DokkaBaseTask>().configureEach {
-            dependsOn(kspKotlin)
-        }
-    }
+/**
+ * MySQL Connector/J — the official JDBC driver for MySQL.
+ *
+ * Used by the MySQL-based storage tests. Note the modern `com.mysql:mysql-connector-j`
+ * coordinates, which superseded the legacy `mysql:mysql-connector-java` artifact.
+ *
+ * @see <a href="https://github.com/mysql/mysql-connector-j">MySQL Connector/J at GitHub</a>
+ */
+@Suppress("unused", "ConstPropertyName")
+object MySql {
+    private const val version = "9.7.0"
+    const val connector = "com.mysql:mysql-connector-j:$version"
 }

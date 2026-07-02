@@ -24,43 +24,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.jetbrains.dokka.gradle.tasks.DokkaBaseTask
+package io.spine.gradle.fs
 
-plugins {
-    id("org.jetbrains.dokka") // Cannot use `Dokka` dependency object here yet.
-    id("org.jetbrains.dokka-javadoc")
-}
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
-dependencies {
-    useDokkaWithSpineExtensions()
-}
+@DisplayName("`LazyTempPath` should")
+class LazyTempPathSpec {
 
-tasks.withType<DokkaBaseTask>().configureEach {
-    onlyIf {
-        isInPublishingGraph()
+    @Test
+    fun `create the directory on the first use`() {
+        val directory = LazyTempPath("created").toFile()
+
+        directory.exists() shouldBe true
+        directory.isDirectory shouldBe true
+    }
+
+    @Test
+    fun `create the directory under the system temporary directory`() {
+        val path = LazyTempPath("under-tmp").toString()
+
+        path shouldContain systemTempDir()
+    }
+
+    @Test
+    fun `create the directory under a folder named after its package`() {
+        val path = LazyTempPath("under-base").toString()
+
+        path shouldContain LazyTempPath::class.java.packageName
+    }
+
+    @Test
+    fun `place all instances under the same base directory`() {
+        val first = LazyTempPath("first").toFile()
+        val second = LazyTempPath("second").toFile()
+
+        first.parentFile shouldBe second.parentFile
+        first.parentFile.toString() shouldBe SpineTempDir.path.toString()
     }
 }
 
-// The Dokka Javadoc format does not support Kotlin Multiplatform source sets, so its
-// publication task fails for KMP modules ("No source set found for <module>/jvmMain").
-// KMP modules publish HTML documentation, so skip the Javadoc publication for them.
-plugins.withId("org.jetbrains.kotlin.multiplatform") {
-    tasks.matching { it.name == "dokkaGeneratePublicationJavadoc" }.configureEach {
-        enabled = false
-    }
-}
-
-afterEvaluate {
-    dokka {
-        configureForKotlin(
-            project,
-            DocumentationSettings.SourceLink.url(project)
-        )
-    }
-    val kspKotlin = tasks.findByName("kspKotlin")
-    kspKotlin?.let {
-        tasks.withType<DokkaBaseTask>().configureEach {
-            dependsOn(kspKotlin)
-        }
-    }
-}
+private fun systemTempDir(): String = System.getProperty("java.io.tmpdir")

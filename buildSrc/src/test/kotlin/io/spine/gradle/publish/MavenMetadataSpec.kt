@@ -24,43 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.jetbrains.dokka.gradle.tasks.DokkaBaseTask
+package io.spine.gradle.publish
 
-plugins {
-    id("org.jetbrains.dokka") // Cannot use `Dokka` dependency object here yet.
-    id("org.jetbrains.dokka-javadoc")
-}
+import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import io.kotest.matchers.collections.shouldContainExactly
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
-dependencies {
-    useDokkaWithSpineExtensions()
-}
+@DisplayName("`MavenMetadata` should")
+internal class MavenMetadataSpec {
 
-tasks.withType<DokkaBaseTask>().configureEach {
-    onlyIf {
-        isInPublishingGraph()
-    }
-}
+    /**
+     * Round-trips through the same [XmlMapper] used in production, asserting the version list
+     * survives. This guards the `var` properties of [MavenMetadata] and [Versioning]: a `val`
+     * (or `internal`-mangled setter) would leave the list empty after deserialization, silently
+     * disabling the "already published" check.
+     */
+    @Test
+    fun `survive a Jackson round-trip, keeping its versions`() {
+        val versions = listOf("2.0.0-SNAPSHOT.79", "2.0.0-SNAPSHOT.80", "2.0.0-SNAPSHOT.81")
+        val mapper = XmlMapper()
 
-// The Dokka Javadoc format does not support Kotlin Multiplatform source sets, so its
-// publication task fails for KMP modules ("No source set found for <module>/jvmMain").
-// KMP modules publish HTML documentation, so skip the Javadoc publication for them.
-plugins.withId("org.jetbrains.kotlin.multiplatform") {
-    tasks.matching { it.name == "dokkaGeneratePublicationJavadoc" }.configureEach {
-        enabled = false
-    }
-}
+        val xml = mapper.writeValueAsString(MavenMetadata(Versioning(versions)))
+        val parsed = mapper.readValue(xml, MavenMetadata::class.java)
 
-afterEvaluate {
-    dokka {
-        configureForKotlin(
-            project,
-            DocumentationSettings.SourceLink.url(project)
-        )
-    }
-    val kspKotlin = tasks.findByName("kspKotlin")
-    kspKotlin?.let {
-        tasks.withType<DokkaBaseTask>().configureEach {
-            dependsOn(kspKotlin)
-        }
+        parsed.versioning.versions shouldContainExactly versions
     }
 }
